@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -120,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             // Create Pii enabled string builder
             StringBuilder builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" + Environment.NewLine +
-                                                          "Authority Provided? - " + (Authority != null) + Environment.NewLine);
+                                                      "Authority Provided? - " + (Authority != null) + Environment.NewLine);
             builder.AppendLine("Client Id - " + ClientId);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
@@ -140,10 +139,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RequestContext.Logger.InfoPii(builder.ToString());
 
             // Create no Pii enabled string builder
-            builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" + Environment.NewLine);
+            builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" + Environment.NewLine +
+                                        "Authority Provided? - " + (Authority != null) + Environment.NewLine);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
+            builder.AppendLine("User provided? - " + (User != null));
+            dict = MsalHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
+            builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
             builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
