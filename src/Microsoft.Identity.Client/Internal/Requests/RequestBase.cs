@@ -72,9 +72,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 TokenCache != null, this.GetType().Name));
 
             // Log does not contain Pii
-            authenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}",
-                TokenCache != null, this.GetType().Name));
+            var msg = string.Format(CultureInfo.InvariantCulture,
+                "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}", TokenCache != null, this.GetType().Name);
+
+            if (authenticationRequestParameters.Authority != null &&
+                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.Host))
+            {
+                msg += string.Format(CultureInfo.CurrentCulture, "\n\tAuthority Host: {0}",
+                    authenticationRequestParameters.Authority.Host);
+            }
+            authenticationRequestParameters.RequestContext.Logger.Info(msg);
 
             AuthenticationRequestParameters = authenticationRequestParameters;
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
@@ -172,7 +179,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private AccessTokenCacheItem SaveTokenResponseToCache()
         {
             // developer passed in user object.
-            AuthenticationRequestParameters.RequestContext.Logger.Info("checking client info returned from the server..");
+            string msg = "checking client info returned from the server..";
+            AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
+            AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+
             ClientInfo fromServer = null;
 
             if (!AuthenticationRequestParameters.IsClientCredentialRequest)
@@ -207,7 +217,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (StoreToCache)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
+                msg = "Saving Token Response to cache..";
+                AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
+                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+
                 return TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
             }
 
@@ -279,8 +292,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "ScopeSet was missing from the token response, so using developer provided scopes in the result");
+                const string msg = "ScopeSet was missing from the token response, so using developer provided scopes in the result";
+                AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
+                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+
             }
         }
 
@@ -288,9 +303,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (result.AccessToken != null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    "=== Token Acquisition finished successfully. An access token was retuned with Expiration Time: {0} ===",
-                    result.ExpiresOn));
+                var msg = string.Format(CultureInfo.InvariantCulture, "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} ===",
+                    result.ExpiresOn);
+                AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
+                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
             }
         }
     }
