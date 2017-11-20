@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static bool DefaultLoggingEnabled { get; set; } = false;
 
-        internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
+        internal static void ExecuteCallback(LogLevel level, string message, bool containsPii)
         {
             lock (LockObj)
             {
