@@ -240,12 +240,22 @@ namespace Microsoft.Identity.Client
                 os = MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.OS];
             }
 
-
             string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}]{5} {6}",
                 MsalIdHelper.GetMsalVersion(),
                 MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.Product],
                 os, DateTime.UtcNow, correlationId, Component, logMessage);
 
+            if (PiiLoggingEnabled && containsPii)
+            {
+                const string piiLogMsg = " True";
+                log = string.Format(log + piiLogMsg);
+            }
+            else
+            {
+                const string noPiiLogMsg = " False";
+                log = string.Format(log + noPiiLogMsg);
+            }
+            
             if (DefaultLoggingEnabled)
             {
                 PlatformPlugin.LogMessage(logLevel, log);

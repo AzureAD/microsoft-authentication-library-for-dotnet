@@ -131,9 +131,10 @@ namespace Microsoft.Identity.Client.Internal.Instance
             }
             catch (Exception exc)
             {
-                string msg = string.Format("On-Premise ADFS enrollment server endpoint lookup failed. Error - " + exc.Message);
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
+                const string msg = "On-Premise ADFS enrollment server endpoint lookup failed. Error - ";
+                string noPiiMsg = exc.GetPiiScrubbedDetails();
+                requestContext.Logger.Info(msg + noPiiMsg);
+                requestContext.Logger.InfoPii(msg + exc);
             }
 
             return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
