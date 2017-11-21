@@ -47,6 +47,11 @@ namespace XFormsApp.Droid
 {
     class SecondPageRenderer : PageRenderer
     {
+        public SecondPageRenderer(Context context) : base(context)
+        {
+                
+        }
+
         protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
             base.OnElementChanged(e);
