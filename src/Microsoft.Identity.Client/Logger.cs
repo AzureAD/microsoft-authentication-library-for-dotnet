@@ -248,12 +248,12 @@ namespace Microsoft.Identity.Client
             if (PiiLoggingEnabled && containsPii)
             {
                 const string piiLogMsg = " True";
-                log = string.Format(log + piiLogMsg);
+                log = log + piiLogMsg;
             }
             else
             {
                 const string noPiiLogMsg = " False";
-                log = string.Format(log + noPiiLogMsg);
+                log = log + noPiiLogMsg;
             }
             
             if (DefaultLoggingEnabled)
