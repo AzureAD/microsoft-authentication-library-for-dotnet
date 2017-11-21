@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Android.Support.V4" Version="25.4.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Compat" Version="25.4.0.2" />
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
