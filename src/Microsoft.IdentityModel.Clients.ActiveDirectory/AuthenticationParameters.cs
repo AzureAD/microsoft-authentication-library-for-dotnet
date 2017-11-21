@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
-                    CallState.Default.Logger.Error(null, serviceEx);
+                    CallState.Default.Logger.ErrorPii(null, serviceEx);
                     throw serviceEx;
                 }
 

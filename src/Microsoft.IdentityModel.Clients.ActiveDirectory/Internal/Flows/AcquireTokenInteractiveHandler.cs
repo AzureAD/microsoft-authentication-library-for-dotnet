@@ -90,7 +90,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             {
                 this.LoadFromCache = false;
 
-                CallState.Logger.Verbose(CallState, "Claims present. Skip cache lookup.");
+                var msg = "Claims present. Skip cache lookup.";
+                CallState.Logger.Verbose(CallState, msg);
+                CallState.Logger.VerbosePii(CallState, msg);
 
                 this.claims = claims;
             }

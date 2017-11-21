@@ -73,6 +73,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 
         public string Authority { get; private set; }
 
+        public string GetAuthorityHost()
+        {
+            return !string.IsNullOrWhiteSpace(Authority) ? new Uri(this.Authority).Host : null;
+        }
+
         public AuthorityType AuthorityType { get; private set; }
 
         public bool ValidateAuthority { get; private set; }

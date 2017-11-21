@@ -239,7 +239,7 @@ namespace Test.ADAL.NET.Integration
                 new UserCredential(TestConstants.DefaultDisplayableId)));
 
             // Check inner exception
-            Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
@@ -450,7 +450,7 @@ namespace Test.ADAL.NET.Integration
 
             // Check exception message
             Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: See inner exception for detail.", result.Message);
-            Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
@@ -507,7 +507,7 @@ namespace Test.ADAL.NET.Integration
 
             // Check exception message
             Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: See inner exception for detail.", result.Message);
-            Assert.AreEqual(" Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);

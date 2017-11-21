@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
@@ -9,14 +10,28 @@ namespace WinFormsAutomationApp
     public partial class MainForm : Form
     {
         private delegate Task<string> Command(Dictionary<string, string> input);
-        LoggerCallbackImpl loggerCallback = new LoggerCallbackImpl();
+
+        private readonly StringBuilder _logCollector = new StringBuilder();
+
+
+        public string GetAdalLogs()
+        {
+            return _logCollector.ToString();
+        }
+
         private Command _commandToRun = null;
 
         public MainForm()
         {
             DeleteCache.CleanCookies();
             InitializeComponent();
-            LoggerCallbackHandler.Callback = loggerCallback;
+
+            void LogCallback(LogLevel level, string message, bool containsPii)
+            {
+                _logCollector.AppendLine(message);
+            }
+
+            LoggerCallbackHandler.LogCallback = LogCallback;
         }
 
         private void acquireToken_Click(object sender, EventArgs e)
@@ -30,7 +45,7 @@ namespace WinFormsAutomationApp
              string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            resultLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = GetAdalLogs();
         }
 
         private void resultDone_Click(object sender, EventArgs e)
@@ -63,7 +78,7 @@ namespace WinFormsAutomationApp
             string output = await AuthenticationHelper.ReadCache(); ;
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            resultLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = GetAdalLogs();
         }
 
         private async void clearCache_Click(object sender, EventArgs e)
@@ -71,7 +86,7 @@ namespace WinFormsAutomationApp
             string output = await AuthenticationHelper.ClearCache(null);
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
-            resultLogs.Text = loggerCallback.GetAdalLogs();
+            resultLogs.Text = GetAdalLogs();
         }
 
         private void acquireTokenDeviceProfile_Click(object sender, EventArgs e)

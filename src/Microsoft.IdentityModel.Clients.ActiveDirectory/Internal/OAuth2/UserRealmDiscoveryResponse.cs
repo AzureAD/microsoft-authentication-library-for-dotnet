@@ -58,7 +58,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
             string userRealmEndpoint = userRealmUri;
             userRealmEndpoint += (userName + "?api-version=1.0");
 
-            callState.Logger.Information(callState, "Sending request to userrealm endpoint.");
+            var msg = "Sending request to userrealm endpoint.";
+            callState.Logger.Information(callState, msg);
+            callState.Logger.InformationPii(callState, msg);
 
             var client = new AdalHttpClient(userRealmEndpoint, callState) { Client = { Accept = "application/json" } };
             return await client.GetResponseAsync<UserRealmDiscoveryResponse>().ConfigureAwait(false);

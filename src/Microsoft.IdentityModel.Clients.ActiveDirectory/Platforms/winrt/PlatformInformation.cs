@@ -94,7 +94,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
                 // This is the case where we can advise customers to add extra query parameter if they want.
 
-                callState.Logger.Information(callState, "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
+                var msg =
+                    "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.";
+                callState.Logger.Information(callState, msg);
+                callState.Logger.InformationPii(callState, msg);
+
                 return false;
             }
 
@@ -104,7 +108,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch (UnauthorizedAccessException)
             {
-                callState.Logger.Information(callState, "Cannot try Windows Integrated Authentication due to lack of Enterprise capability.");
+                var msg = "Cannot try Windows Integrated Authentication due to lack of Enterprise capability.";
+                callState.Logger.Information(callState, msg);
+                callState.Logger.InformationPii(callState, msg);
+
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
@@ -164,7 +171,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (redirectUri == null)
             {
                 redirectUri = Constant.SsoPlaceHolderUri;
-                callState.Logger.Verbose(callState, "ms-app redirect Uri is used");
+
+                var msg = "ms-app redirect Uri is used";
+                callState.Logger.Verbose(callState, msg);
+                callState.Logger.VerbosePii(callState, msg);
             }
 
             return redirectUri;

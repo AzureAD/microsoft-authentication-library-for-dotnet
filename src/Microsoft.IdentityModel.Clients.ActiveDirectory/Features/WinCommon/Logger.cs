@@ -39,68 +39,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         internal static AdalEventSource AdalEventSource { get; private set; }
 
-        internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void DefaultLog(LogLevel logLevel, string message)
         {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
 #if NETSTANDARD1_3
 
-                Console.WriteLine(log);
+            Console.WriteLine(message);
 #else
-                AdalEventSource.Error(log);
+            AdalEventSource.Error(message);
 #endif
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
-        }
-
-        internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
-#if NETSTANDARD1_3
-
-                Console.WriteLine(log);
-#else
-                AdalEventSource.Verbose(log);
-#endif
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
-        }
-
-        internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
-#if NETSTANDARD1_3
-
-                Console.WriteLine(log);
-#else
-                AdalEventSource.Information(log);
-#endif
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
-        }
-
-        internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
-#if NETSTANDARD1_3
-
-                Console.WriteLine(log);
-#else
-                AdalEventSource.Warning(log);
-#endif
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
     }
 }

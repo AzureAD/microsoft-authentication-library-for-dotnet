@@ -34,48 +34,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class Logger : LoggerBase
     {
-        internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void DefaultLog(LogLevel logLevel, string message)
         {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
-            if (LoggerCallbackHandler.UseDefaultLogging)
+            switch (logLevel)
             {
-                Log.Error(null, log);
+                case LogLevel.Verbose:
+                    Log.Verbose(null, message);
+                    break;
+                case LogLevel.Information:
+                    Log.Info(null, message);
+                    break;
+                case LogLevel.Warning:
+                    Log.Warn(null, message);
+                    break;
+                case LogLevel.Error:
+                    Log.Error(null, message);
+                    break;
             }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, log);
-        }
-
-        internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
-                Log.Verbose(null, log);
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, log);
-        }
-
-        internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
-                Log.Info(null, log);
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, log);
-        }
-
-        internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string log = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            if (LoggerCallbackHandler.UseDefaultLogging)
-            {
-                Log.Warn(null, log);
-            }
-
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, log);
         }
     }
 }

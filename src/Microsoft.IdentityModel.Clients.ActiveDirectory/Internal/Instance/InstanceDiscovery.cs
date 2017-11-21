@@ -75,6 +75,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             "login.microsoftonline.com" // Microsoft Azure Worldwide
         });
 
+        internal static bool IsWhitelisted(string authorityHost)
+        {
+            return WhitelistedAuthorities.Contains(authorityHost);
+        }
+
         // The following cache could be private, but we keep it public so that internal unit test can take a peek into it.
         // Keys are host strings.
         public static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =

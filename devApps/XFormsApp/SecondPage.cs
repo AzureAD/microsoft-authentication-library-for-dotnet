@@ -33,28 +33,19 @@ using Xamarin.Forms.PlatformConfiguration;
 
 namespace XFormsApp
 {
-
-    class AdalCallback : IAdalLogCallback
+    public class SecondPage : ContentPage
     {
-        StringBuilder logs = new StringBuilder();
-
-        public void Log(LogLevel level, string message)
-        {
-            logs.AppendLine(message);
-        }
+        private readonly StringBuilder _logs = new StringBuilder();
 
         public string DrainLogs()
         {
-            string output = logs.ToString();
-            logs.Clear();
+            string output = _logs.ToString();
+            _logs.Clear();
             return output;
         }
-    }
 
-    public class SecondPage : ContentPage
-    {
         private Label result;
-        private AdalCallback callback = new AdalCallback();
+
         public SecondPage()
         {
             var acquireTokenButton = new Button
@@ -124,7 +115,12 @@ namespace XFormsApp
                 }
             };
 
-            LoggerCallbackHandler.Callback = callback;
+            void LogCallback(LogLevel level, string message, bool containsPii)
+            {
+                _logs.AppendLine(message);
+            }
+
+            LoggerCallbackHandler.LogCallback = LogCallback;
         }
 
         private async void acquireTokenSilentButton_Clicked(object sender, EventArgs e)
@@ -147,7 +143,7 @@ namespace XFormsApp
                 {
                     this.result.Text += "Result : " + output;
 
-                    this.result.Text += "Logs : " + callback.DrainLogs();
+                    this.result.Text += "Logs : " + DrainLogs();
                 });
             }
 
@@ -179,7 +175,7 @@ namespace XFormsApp
                 {
                     this.result.Text += "Result : " + output;
 
-                    this.result.Text += "Logs : " + callback.DrainLogs();
+                    this.result.Text += "Logs : " + DrainLogs();
                 });
             }
 
@@ -210,7 +206,7 @@ namespace XFormsApp
                 {
                     this.result.Text += "Result : " + output;
 
-                    this.result.Text += "Logs : " + callback.DrainLogs();
+                    this.result.Text += "Logs : " + DrainLogs();
                 });
             }
         }

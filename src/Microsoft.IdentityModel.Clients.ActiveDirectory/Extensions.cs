@@ -26,26 +26,48 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    /// <summary>
-    /// The exception type thrown when a claims challenge error occurs during token acquisition.
-    /// </summary>
-    public class AdalClaimChallengeException : AdalServiceException
+    internal static class Extensions
     {
-        /// <summary>
-        /// Claims challenge returned from the STS. This value should be passed back to the API caller.
-        /// </summary>
-        public string Claims { get; internal set; }
-
-        /// <summary>
-        /// Initializes a new instance of the exception class for handling claims.
-        /// </summary>
-        public AdalClaimChallengeException(string errorCode, string message, Exception innerException, string claims)
-            : base(errorCode, message, null, innerException)
+        internal static string GetPiiScrubbedDetails(this Exception ex)
         {
-            Claims = claims;
+            string res = null;
+            if (ex != null)
+            {
+                var sb = new StringBuilder();
+
+                sb.Append(string.Format(CultureInfo.CurrentCulture, "Exception type: {0}", ex.GetType()));
+
+                if (ex is AdalException)
+                {
+                    var adalException = (AdalException) ex;
+                    sb.Append(string.Format(CultureInfo.CurrentCulture, ", ErrorCode: {0}", adalException.ErrorCode));
+                }
+
+                if (ex is AdalServiceException)
+                {
+                    var adalServiceException  = (AdalServiceException) ex; 
+                    sb.Append(string.Format(CultureInfo.CurrentCulture, ", StatusCode: {0}", adalServiceException.StatusCode));
+                }
+
+                if (ex.InnerException != null)
+                {
+                    sb.Append(" ---> " + GetPiiScrubbedDetails(ex.InnerException) + Environment.NewLine +
+                              "--- End of inner exception stack trace ---");
+                }
+                if (ex.StackTrace != null)
+                {
+                    sb.Append(Environment.NewLine + ex.StackTrace);
+                }
+
+                res = sb.ToString();
+            }
+
+            return res;
         }
     }
 }

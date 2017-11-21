@@ -84,13 +84,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 if (string.IsNullOrWhiteSpace(this.userCredential.UserName))
                 {
                     this.userCredential.UserName = await platformInformation.GetUserPrincipalNameAsync().ConfigureAwait(false);
+                    string msg;
                     if (string.IsNullOrWhiteSpace(userCredential.UserName))
                     {
-                        CallState.Logger.Information(this.CallState, "Could not find UPN for logged in user");
+                        msg = "Could not find UPN for logged in user";
+                        CallState.Logger.Information(this.CallState, msg);
+                        CallState.Logger.InformationPii(this.CallState, msg);
+
                         throw new AdalException(AdalError.UnknownUser);
                     }
 
-                    CallState.Logger.Verbose(this.CallState, string.Format(CultureInfo.CurrentCulture, " Logged in user with hash '{0}' detected", CryptographyHelper.CreateSha256Hash(userCredential.UserName)));
+                    msg = "Logged in user detected";
+                    CallState.Logger.Verbose(CallState, msg);
+
+                    var piiMsg = msg + string.Format(CultureInfo.CurrentCulture, " with user name '{0}'",
+                                     userCredential.UserName);
+                    CallState.Logger.VerbosePii(CallState, piiMsg);
                 }
 
                 this.DisplayableId = userCredential.UserName;
@@ -107,7 +116,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             if (this.PerformUserRealmDiscovery())
             {
                 UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, this.CallState).ConfigureAwait(false);
-                CallState.Logger.Information(this.CallState, string.Format(CultureInfo.CurrentCulture, " User with hash '{0}' detected as '{1}'", CryptographyHelper.CreateSha256Hash(this.userCredential.UserName), userRealmResponse.AccountType));
+
+                CallState.Logger.InformationPii(CallState, string.Format(CultureInfo.CurrentCulture,
+                    " User with user name '{0}' detected as '{1}'", userCredential.UserName,
+                    userRealmResponse.AccountType));
 
                 if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
                 {
@@ -117,10 +129,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     }
                     
                     WsTrustAddress wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, this.CallState).ConfigureAwait(false);
-                    CallState.Logger.Information(this.CallState, string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'", wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
+                    CallState.Logger.InformationPii(CallState,
+                        string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'",
+                            wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
                     WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, this.CallState, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
-                    CallState.Logger.Information(this.CallState, string.Format(CultureInfo.CurrentCulture, " Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
+
+                    var msg = string.Format(CultureInfo.CurrentCulture,
+                        " Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
+                    CallState.Logger.Information(this.CallState, msg);
+                    CallState.Logger.InformationPii(this.CallState, msg);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     this.userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);

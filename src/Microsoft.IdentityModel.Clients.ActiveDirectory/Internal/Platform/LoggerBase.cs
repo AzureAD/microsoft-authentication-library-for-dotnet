@@ -27,18 +27,40 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal abstract class LoggerBase
     {
-        internal abstract void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+        internal abstract void DefaultLog(LogLevel logLevel, string message);
 
-        internal abstract void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+        private void Log(CallState callState, LogLevel logLevel, string message, bool containsPii,
+            [CallerFilePath] string callerFilePath = "")
+        {
+            if (!LoggerCallbackHandler.PiiLoggingEnabled && containsPii)
+            {
+                return;
+            }
 
-        internal abstract void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+            var formattedMessage = FormatLogMessage(callState, GetCallerFilename(callerFilePath), message);
 
-        internal abstract void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "");
+            if (LoggerCallbackHandler.UseDefaultLogging && !containsPii)
+            {
+                DefaultLog(logLevel, formattedMessage);
+            }
+
+            if (LoggerCallbackHandler.LogCallback != null)
+            {
+                LoggerCallbackHandler.ExecuteCallback(logLevel, formattedMessage, containsPii);
+            }
+            else if (!containsPii)
+            {
+                // execute obsolete IAdalLogCallback only if LogCallback is not set and message does not contain Pii
+                LoggerCallbackHandler.ExecuteObsoleteCallback(logLevel, formattedMessage);
+            }
+        }
 
         internal static string GetCallerFilename(string callerFilePath)
         {
@@ -47,9 +69,54 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         internal string CorrelationId { get; set; } = string.Empty;
 
-        internal string PrepareLogMessage(CallState callState, string classOrComponent, string message)
+        internal string FormatLogMessage(CallState callState, string classOrComponent, string message)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0:O}: {1} - {2}: {3}", DateTime.UtcNow, CorrelationId, classOrComponent, message);
+        }
+
+        internal void Verbose(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Verbose, message, false);
+        }
+
+        internal void VerbosePii(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Verbose, message, true);
+        }
+
+        internal void Information(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Information, message, false);
+        }
+
+        internal void InformationPii(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Information, message, true);
+        }
+
+        internal void Warning(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Warning, message, false);
+        }
+
+        internal void WarningPii(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Warning, message, true);
+        }
+
+        internal void Error(CallState callState, Exception ex)
+        {
+            Log(callState, LogLevel.Error, ex.GetPiiScrubbedDetails(), false);
+        }
+
+        internal void ErrorPii(CallState callState, Exception ex)
+        {
+            Log(callState, LogLevel.Error, ex.ToString(), true);
+        }
+
+        internal void Error(CallState callState, string message)
+        {
+            Log(callState, LogLevel.Error, message, false);
         }
     }
 }

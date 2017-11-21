@@ -76,7 +76,7 @@ namespace Test.ADAL.NET.Unit
             context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
            
             // Check inner exception
-            Assert.AreEqual(" Response status code does not indicate success: 400 (BadRequest).", result.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 400 (BadRequest).", result.InnerException.Message);
             Assert.AreEqual(responseContent + ": Unknown error", result.InnerException.InnerException.Message);
         }
 

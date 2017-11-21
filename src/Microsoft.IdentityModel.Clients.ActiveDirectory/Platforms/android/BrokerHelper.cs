@@ -81,9 +81,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             {
                 await Task.Run(() => AcquireToken(brokerPayload)).ConfigureAwait(false);
             }
-            catch (Exception exc)
+            catch (Exception ex)
             {
-                CallState.Logger.Error(null, exc);
+                CallState.Logger.Error(null, ex);
+                CallState.Logger.ErrorPii(null, ex);
                 throw;
             }
             await readyForResponse.WaitAsync().ConfigureAwait(false);
@@ -120,7 +121,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (mBrokerProxy.VerifyUser(request.LoginHint,
                 request.UserId))
             {
-                CallState.Logger.Verbose(null, "It switched to broker for context: " + mContext.PackageName);
+                var msg = "It switched to broker for context: " + mContext.PackageName;
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
+
                 request.BrokerAccountName = request.LoginHint;
 
                 // Don't send background request, if prompt flag is always or
@@ -128,17 +132,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 bool hasAccountNameOrUserId = !string.IsNullOrEmpty(request.BrokerAccountName) || !string.IsNullOrEmpty(request.UserId);
                 if (string.IsNullOrEmpty(request.Claims) && hasAccountNameOrUserId)
                 {
-                    CallState.Logger.Verbose(null, "User is specified for background token request");
+                    msg = "User is specified for background token request";
+                    CallState.Logger.Verbose(null, msg);
+                    CallState.Logger.VerbosePii(null, msg);
+
                     resultEx = mBrokerProxy.GetAuthTokenInBackground(request, platformParams.CallerActivity);
                 }
                 else
                 {
-                    CallState.Logger.Verbose(null, "User is not specified for background token request");
+                    msg = "User is not specified for background token request";
+                    CallState.Logger.Verbose(null, msg);
+                    CallState.Logger.VerbosePii(null, msg);
                 }
 
                 if (resultEx != null && resultEx.Result != null && !string.IsNullOrEmpty(resultEx.Result.AccessToken))
                 {
-                    CallState.Logger.Verbose(null, "Token is returned from background call ");
+                    msg = "Token is returned from background call";
+                    CallState.Logger.Verbose(null, msg);
+                    CallState.Logger.VerbosePii(null, msg);
+
                     readyForResponse.Release();
                     return;
                 }
@@ -148,14 +160,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 // Initial request to authenticator needs to launch activity to
                 // record calling uid for the account. This happens for Prompt auto
                 // or always behavior.
-                CallState.Logger.Verbose(null, "Token is not returned from backgroud call");
+                msg = "Token is not returned from backgroud call";
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
 
                 // Only happens with callback since silent call does not show UI
-                CallState.Logger.Verbose(null, "Launch activity for Authenticator");
-                CallState.Logger.Verbose(null, "Starting Authentication Activity");
+                msg = "Launch activity for Authenticator";
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
+
+                msg = "Starting Authentication Activity";
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
+
                 if (resultEx == null)
                 {
-                    CallState.Logger.Verbose(null, "Initial request to authenticator");
+                    msg = "Initial request to authenticator";
+                    CallState.Logger.Verbose(null, msg);
+                    CallState.Logger.VerbosePii(null, msg);
                     // Log the initial request but not force a prompt
                 }
 
@@ -172,14 +194,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 {
                     try
                     {
-                        CallState.Logger.Verbose(null, "Calling activity pid:" + Android.OS.Process.MyPid()
-                                                            + " tid:" + Android.OS.Process.MyTid() + "uid:"
-                                                            + Android.OS.Process.MyUid());
+                        msg = "Calling activity pid:" + Android.OS.Process.MyPid()
+                              + " tid:" + Android.OS.Process.MyTid() + "uid:"
+                              + Android.OS.Process.MyUid();
+                        CallState.Logger.Verbose(null, msg);
+                        CallState.Logger.VerbosePii(null, msg);
+
                         platformParams.CallerActivity.StartActivityForResult(brokerIntent, 1001);
                     }
                     catch (ActivityNotFoundException e)
                     {
                         CallState.Logger.Error(null, e);
+                        CallState.Logger.ErrorPii(null, e);
                     }
                 }
             }

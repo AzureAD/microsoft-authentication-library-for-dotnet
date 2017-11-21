@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -57,8 +58,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     }
 
     /// <summary>
-    /// Callback for capturing ADAL logs to custom logging schemes.
+    /// Callback delegate that allows the developer to consume logs handle them in a custom manner.
     /// </summary>
+    /// <param name="level">Log level of the message</param>
+    /// <param name="message">Pre-formatted log message</param>
+    /// <param name="containsPii">Indicates if the log message contains PII. If Logger.PiiLoggingEnabled is set to 
+    /// false then this value is always false.</param>
+    public delegate void LogCallback(LogLevel level, string message, bool containsPii);
+
+    /// <summary>
+    /// Obsolete Callback for capturing ADAL logs to custom logging schemes.
+    /// Will be called only if LogCallback delegate is not set 
+    /// and only for messages with no Pii
+    /// </summary>
+    [Obsolete("Use LogCallback delegate instead")]
     public interface IAdalLogCallback
     {
         /// <summary>
@@ -76,7 +89,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         private static readonly object LockObj = new object();
 
-        private static IAdalLogCallback _localCallback;
+        /// <summary>
+        /// Flag to enable/disable logging of PII data. PII logs are never written to default outputs like Console, Logcat or NSLog.
+        /// Default is set to false.
+        /// </summary>
+        public static bool PiiLoggingEnabled { get; set; } = false;
 
         /// <summary>
         /// Flag to control whether default logging should be performed in addition to calling
@@ -84,10 +101,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public static bool UseDefaultLogging = true;
 
+#pragma warning disable 0618
+        private static IAdalLogCallback _localCallback;
+
         /// <summary>
-        /// Callback implementation
+        /// Obsolete Callback implementation
+        /// Will be called only if LogCallback is not set 
+        /// and only for messages with no Pii
         /// </summary>
         public static IAdalLogCallback Callback
+#pragma warning restore 0618
         {
             set
             {
@@ -100,11 +123,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             internal get { return _localCallback; }
         }
 
-        internal static void ExecuteCallback(LogLevel level, string message)
+        internal static void ExecuteObsoleteCallback(LogLevel level, string message)
         {
             lock (LockObj)
             {
                 _localCallback?.Log(level, message);
+            }
+        }
+
+        private static volatile LogCallback _logCallback;
+
+        /// <summary>
+        /// Instance of LogCallback delegate
+        /// that can be provided by the developer to consume and publish logs in a custom manner.
+        /// If set, Callback - instance of obsolete IAdalLogCallback will be ignored 
+        /// </summary>
+        public static LogCallback LogCallback
+        {
+            set
+            {
+                lock (LockObj)
+                {
+                    _logCallback = value;
+                }
+            }
+            internal get { return _logCallback; }
+        }
+
+        internal static void ExecuteCallback(LogLevel level, string message, bool containsPii)
+        {
+            lock (LockObj)
+            {
+                _logCallback?.Invoke(level, message, containsPii);
             }
         }
     }

@@ -104,15 +104,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         private bool VerifyManifestPermission(string permission)
         {
-
             if (Permission.Granted !=
                 Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
-                CallState.Logger.Information(null,
-                    string.Format(CultureInfo.InvariantCulture, AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
+                var msg = string.Format(CultureInfo.InvariantCulture,
+                    AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission);
+                CallState.Logger.Information(null, msg);
+                CallState.Logger.InformationPii(null, msg);
+
                 return false;
             }
-
             return true;
         }
 
@@ -123,7 +124,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             {
                 Exception exception = new AdalException(
                     "calling this from your main thread can lead to deadlock");
-                CallState.Logger.Error(null, exception);
+
+                CallState.Logger.Error(null, exception.ToString());
+                CallState.Logger.ErrorPii(null, exception);
+
                 if (mContext.ApplicationInfo.TargetSdkVersion >= BuildVersionCodes.Froyo)
                 {
                     throw exception;
@@ -193,6 +197,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 catch (Exception e)
                 {
                     CallState.Logger.Error(null, e);
+                    CallState.Logger.ErrorPii(null, e);
                 }
             }
 
@@ -203,6 +208,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 // blocking call to get token from cache or refresh request in
                 // background at Authenticator
                 IAccountManagerFuture result = null;
+                string msg;
                 try
                 {
                     // It does not expect activity to be launched.
@@ -216,7 +222,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                               */, new Handler(callerActivity.MainLooper));
 
                     // Making blocking request here
-                    CallState.Logger.Verbose(null, "Received result from Authenticator");
+                    msg = "Received result from Authenticator";
+                    CallState.Logger.Verbose(null, msg);
+                    CallState.Logger.VerbosePii(null, msg);
+
                     Bundle bundleResult = (Bundle) result.GetResult(10000, TimeUnit.Milliseconds);
                     // Authenticator should throw OperationCanceledException if
                     // token is not available
@@ -225,10 +234,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 catch (OperationCanceledException e)
                 {
                     CallState.Logger.Error(null, e);
+                    CallState.Logger.ErrorPii(null, e);
                 }
                 catch (AuthenticatorException e)
                 {
                     CallState.Logger.Error(null, e);
+                    CallState.Logger.ErrorPii(null, e);
                 }
                 catch (Exception e)
                 {
@@ -237,14 +248,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                                                 ADALError.BROKER_AUTHENTICATOR_IO_EXCEPTION);*/
 
                     CallState.Logger.Error(null, e);
+                    CallState.Logger.ErrorPii(null, e);
                 }
+                msg = "Returning result from Authenticator";
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
 
-                CallState.Logger.Verbose(null, "Returning result from Authenticator");
                 return authResult;
             }
             else
             {
-                CallState.Logger.Verbose(null, "Target account is not found");
+                var msg = "Target account is not found";
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
             }
 
             return null;
@@ -254,7 +270,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         {
             if (bundleResult == null)
             {
-                throw new AdalException("bundleResult");
+                throw new AdalException("bundleResult in broker response is null");
             }
 
             int errCode = bundleResult.GetInt(AccountManager.KeyErrorCode);
@@ -354,11 +370,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             catch (OperationCanceledException e)
             {
                 CallState.Logger.Error(null, e);
+                CallState.Logger.ErrorPii(null, e);
             }
             catch (Exception e)
             {
                 // Authenticator gets problem from webrequest or file read/write
-                CallState.Logger.Error(null, new AdalException("Authenticator cancels the request", e));
+                var ex = new AdalException("Authenticator cancels the request", e);
+                CallState.Logger.Error(null, ex);
+                CallState.Logger.ErrorPii(null, ex);
             }
 
             return intent;
@@ -398,11 +417,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch (PackageManager.NameNotFoundException)
             {
-                CallState.Logger.Information(null, "Calling App's package does not exist in PackageManager");
+                var msg = "Calling App's package does not exist in PackageManager";
+                CallState.Logger.Information(null, msg);
+                CallState.Logger.InformationPii(null, msg);
             }
             catch (NoSuchAlgorithmException)
             {
-                CallState.Logger.Information(null, "Digest SHA algorithm does not exists");
+                var msg = "Digest SHA algorithm does not exists";
+                CallState.Logger.Information(null, msg);
+                CallState.Logger.InformationPii(null, msg);
             }
 
             return null;
@@ -487,7 +510,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     // add accounts through Adal.
                     if (HasSupportToAddUserThroughBroker(packageName))
                     {
-                        CallState.Logger.Verbose(null, "Broker supports to add user through app");
+                        var msg = "Broker supports to add user through app";
+                        CallState.Logger.Verbose(null, msg);
+                        CallState.Logger.VerbosePii(null, msg);
+
                         return true;
                     }
                     else if (accountList != null && accountList.Length > 0)
@@ -521,10 +547,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 catch (Exception e)
                 {
                     CallState.Logger.Error(null, e);
+                    CallState.Logger.ErrorPii(null, e);
                 }
 
-                CallState.Logger.Verbose(null,
-                    "It could not check the uniqueid from broker. It is not using broker");
+                var msg = "It could not check the uniqueid from broker. It is not using broker";
+                CallState.Logger.Verbose(null, msg);
+                CallState.Logger.VerbosePii(null, msg);
+
                 return false;
             }
 
@@ -685,7 +714,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     IAccountManagerFuture result = mAcctManager.UpdateCredentials(
                         accountList[i], BrokerConstants.AuthtokenType, bundle,
                         null, null, null);
-                    CallState.Logger.Verbose(null, "Waiting for the result");
+
+                    var msg = "Waiting for the result";
+                    CallState.Logger.Verbose(null, msg);
+                    CallState.Logger.VerbosePii(null, msg);
+
                     Bundle userInfoBundle = (Bundle) result.Result;
 
                     users[i] = new UserInfo

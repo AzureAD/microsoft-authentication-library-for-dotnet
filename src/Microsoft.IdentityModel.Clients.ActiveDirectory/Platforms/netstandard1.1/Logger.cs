@@ -25,35 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class Logger : LoggerBase
     {
-        internal override void Error(CallState callState, Exception ex, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        internal override void DefaultLog(LogLevel logLevel, string message)
         {
-            string message = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), ex.ToString());
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Error, message);
-        }
-
-        internal override void Verbose(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string updatedMessage = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Verbose, updatedMessage);
-        }
-
-        internal override void Information(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string updatedMessage = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Information, updatedMessage);
-        }
-
-        internal override void Warning(CallState callState, string message, [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
-        {
-            string updatedMessage = PrepareLogMessage(callState, GetCallerFilename(callerFilePath), message);
-            LoggerCallbackHandler.ExecuteCallback(LogLevel.Warning, updatedMessage);
+            // no default logging for netstandard 1.1 platform
         }
     }
 }

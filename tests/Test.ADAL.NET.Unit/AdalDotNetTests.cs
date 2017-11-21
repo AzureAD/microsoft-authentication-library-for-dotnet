@@ -499,7 +499,7 @@ namespace Test.ADAL.NET.Unit
             // cache look up
             var ex = AssertException.TaskThrows<AdalServiceException>(() =>
                 context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
-            Assert.AreEqual(" Response status code does not indicate success: 504 (GatewayTimeout).", ex.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 504 (GatewayTimeout).", ex.InnerException.Message);
 
             // Null resource -> error
             var exc = AssertException.TaskThrows<ArgumentNullException>(() =>
@@ -561,7 +561,7 @@ namespace Test.ADAL.NET.Unit
             // cache look up
             var ex = AssertException.TaskThrows<AdalServiceException>(() =>
                 context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
-            Assert.AreEqual(" Response status code does not indicate success: 408 (RequestTimeout).", ex.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 408 (RequestTimeout).", ex.InnerException.Message);
 
 
             // Null resource -> error
@@ -624,7 +624,7 @@ namespace Test.ADAL.NET.Unit
             // cache look up
             var ex = AssertException.TaskThrows<AdalServiceException>(() =>
                 context.AcquireTokenAsync(TestConstants.DefaultResource, credential));
-            Assert.AreEqual(" Response status code does not indicate success: 504 (GatewayTimeout).", ex.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 504 (GatewayTimeout).", ex.InnerException.Message);
 
             // Null resource -> error
             var exc = AssertException.TaskThrows<ArgumentNullException>(() =>
