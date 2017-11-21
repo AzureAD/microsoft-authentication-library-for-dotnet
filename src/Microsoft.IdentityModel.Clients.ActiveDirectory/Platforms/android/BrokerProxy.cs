@@ -445,7 +445,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             if (!string.IsNullOrEmpty(request.RedirectUri) && !string.Equals(computedRedirectUri, request.RedirectUri))
             {
-                throw new ArgumentException("redirect uri for broker invocation should be set to" + computedRedirectUri);
+                throw new ArgumentException("redirect uri for broker invocation should be set to " + computedRedirectUri);
             }
 
             brokerOptions.PutString(BrokerConstants.AccountRedirect, request.RedirectUri);
