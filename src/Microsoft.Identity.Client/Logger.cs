@@ -247,15 +247,15 @@ namespace Microsoft.Identity.Client
 
             if (PiiLoggingEnabled && containsPii)
             {
-                const string piiLogMsg = " True";
-                log = log + piiLogMsg;
+                const string piiLogMsg = "(True) ";
+                log = piiLogMsg + log;
             }
             else
             {
-                const string noPiiLogMsg = " False";
-                log = log + noPiiLogMsg;
+                const string noPiiLogMsg = "(False) ";
+                log = noPiiLogMsg + log;
             }
-            
+
             if (DefaultLoggingEnabled)
             {
                 PlatformPlugin.LogMessage(logLevel, log);
