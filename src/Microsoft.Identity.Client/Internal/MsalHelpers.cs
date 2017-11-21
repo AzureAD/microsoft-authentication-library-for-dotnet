@@ -232,8 +232,10 @@ namespace Microsoft.Identity.Client.Internal
 
                     if (response.ContainsKey(key))
                     {
-                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
-                            "Key/value pair list contains redundant key '{0}'.", key));
+                        var msg = string.Format(CultureInfo.InvariantCulture,
+                            "Key/value pair list contains redundant key '{0}'.", key);
+                        requestContext?.Logger.Warning(msg);
+                        requestContext?.Logger.WarningPii(msg);
                     }
 
                     response[key] = value;

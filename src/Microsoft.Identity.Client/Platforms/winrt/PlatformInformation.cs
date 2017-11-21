@@ -78,7 +78,10 @@ namespace Microsoft.Identity.Client
                 // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
                 // This is the case where we can advise customers to add extra query parameter if they want.
 
-                requestContext.Logger.Info("Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.");
+                const string msg =
+                    "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.";
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
                 return false;
             }
 
@@ -89,7 +92,9 @@ namespace Microsoft.Identity.Client
             catch (UnauthorizedAccessException ae)
             {
                 requestContext.Logger.Warning(ae.Message);
-                requestContext.Logger.Info("Cannot try Windows Integrated Auth due to lack of Enterprise capability.");
+                const string msg = "Cannot try Windows Integrated Auth due to lack of Enterprise capability.";
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
                 return true;
@@ -143,6 +148,7 @@ namespace Microsoft.Identity.Client
                 catch (Exception ex)
                 {
                     requestContext.Logger.Warning(ex.Message);
+                    requestContext.Logger.WarningPii(ex.Message);
                     return "Unknown";
                 }
             }

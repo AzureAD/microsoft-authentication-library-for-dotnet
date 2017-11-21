@@ -42,8 +42,6 @@ namespace Test.MSAL.NET.Unit
         [ClassInitialize()]
         public static void ClassInit(TestContext context)
         {
-            //_callback = Substitute.For<ILoggerCallback>();
-            //Logger.Callback = _callback;
             _callback = Substitute.For<LogCallback>();
             Logger.LogCallback = _callback;
         }
@@ -67,7 +65,7 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = Logger.LogLevel.Error;
 
             _callback.When(x => x(Logger.LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Error(new Exception("test message"));
+            logger.Error("test message");
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(Logger.LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -266,6 +264,31 @@ namespace Test.MSAL.NET.Unit
             _callback.When(x => x(Logger.LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             logger.VerbosePii("test message");
             Assert.AreEqual(4, counter);
+        }
+
+        [TestMethod()]
+        [TestCategory("LoggerTests")]
+        public void ScrubPiiExceptionsTest()
+        {
+            Exception ex = new Exception("test message");
+            var result = ex.GetPiiScrubbedDetails();
+            Assert.AreEqual("Exception type: System.Exception", result);
+
+            result = ((Exception) null).GetPiiScrubbedDetails();
+            Assert.AreEqual(null, result);
+
+            Exception innerException = new Exception("test message", new Exception("inner message"));
+            result = innerException.GetPiiScrubbedDetails();
+            Assert.AreEqual("Exception type: System.Exception---> Exception type: System.Exception\r\n=== End of inner exception stack trace ===",
+                result);
+
+            MsalException msalException = new MsalException("Msal Exception");
+            result = msalException.GetPiiScrubbedDetails();
+            Assert.AreEqual("Exception type: Microsoft.Identity.Client.MsalException, ErrorCode: Msal Exception", result);
+
+            MsalServiceException msalServiceException = new MsalServiceException("ErrorCode", "Msal Service Exception");
+            result = msalServiceException.GetPiiScrubbedDetails();
+            Assert.AreEqual("Exception type: Microsoft.Identity.Client.MsalServiceException, ErrorCode: ErrorCode, StatusCode: 0", result);
         }
     }
 }

@@ -162,11 +162,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 apiEvent.ApiErrorCode = ex.ErrorCode;
                 AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
+                AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                 throw;
             }
             catch (Exception ex)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
+                AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                 throw;
             }
             finally

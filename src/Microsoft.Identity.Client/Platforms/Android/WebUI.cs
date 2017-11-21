@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
+                requestContext.Logger.ErrorPii(ex);
                 throw new MsalClientException(MsalClientException.AuthenticationUiFailedError, "AuthenticationActivity failed to start", ex);
             }
 
@@ -81,7 +82,9 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                requestContext.Logger.Info("No pending request for response from web ui.");
+                const string msg = "No pending request for response from web ui.";
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
             }
         }
     }
