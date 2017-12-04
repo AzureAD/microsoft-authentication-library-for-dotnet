@@ -97,12 +97,12 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
 
         public string TenantId
         {
-            set => this[TenantIdKey] = (value != null) ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
+            set => this[TenantIdKey] = value != null && Logger.PiiLoggingEnabled ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
         }
 
         public string UserId
         {
-            set => this[UserIdKey] = value != null ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
+            set => this[UserIdKey] = value != null && Logger.PiiLoggingEnabled ? CryptographyHelper.CreateBase64UrlEncodedSha256Hash(value) : null;
         }
 
         public bool WasSuccessful

@@ -143,7 +143,10 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
         {
-            requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - " + _resolved);
+            var msg = "Resolving authority endpoints... Already resolved? - " + _resolved;
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
+
             if (!_resolved)
             {
                 var authorityUri = new Uri(CanonicalAuthority);
@@ -151,10 +154,16 @@ namespace Microsoft.Identity.Client.Internal.Instance
                 string path = authorityUri.AbsolutePath.Substring(1);
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
                 IsTenantless = TenantlessTenantNames.Contains(tenant.ToLowerInvariant());
-                requestContext.Logger.Info("Is Authority tenantless? - " + IsTenantless);
+                // create log message
+                msg = "Is Authority tenantless? - " + IsTenantless;
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
+
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
                 {
-                    requestContext.Logger.Info("Authority found in validated authority cache");
+                    msg = "Authority found in validated authority cache";
+                    requestContext.Logger.Info(msg);
+                    requestContext.Logger.InfoPii(msg);
                     Authority authority = ValidatedAuthorities[CanonicalAuthority];
                     AuthorityType = authority.AuthorityType;
                     CanonicalAuthority = authority.CanonicalAuthority;

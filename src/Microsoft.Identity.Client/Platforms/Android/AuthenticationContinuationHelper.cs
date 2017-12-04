@@ -48,7 +48,9 @@ namespace Microsoft.Identity.Client
         {
             RequestContext requestContext = new RequestContext(Guid.Empty, null);
 
-            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
+            var msg = string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int) resultCode);
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
             AuthorizationResult authorizationResult = null;
 
             switch ((int) resultCode)
