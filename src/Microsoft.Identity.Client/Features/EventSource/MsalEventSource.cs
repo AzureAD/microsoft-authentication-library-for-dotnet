@@ -27,7 +27,7 @@
 
 using System.Diagnostics.Tracing;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.EventsSource
 {
     [EventSource(Name = "Microsoft.Identity.Client")]
     internal class MsalEventSource : EventSource

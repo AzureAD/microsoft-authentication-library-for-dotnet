@@ -27,7 +27,7 @@
 
 using System.ComponentModel;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.WebUIs
 {
     /// <summary>
     /// </summary>

@@ -25,11 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
 using System;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Internal.Jwt
 {
     internal class JsonWebTokenConstants
     {
