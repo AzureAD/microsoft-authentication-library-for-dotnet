@@ -160,6 +160,13 @@ namespace Test.ADAL.NET.Unit
             RunAuthenticationParametersNegative("Bearer authorization_uri=abc=de");
         }
 
+        [TestMethod]
+        [Description("Test for Adal version creation with Regex")]
+        public void AdalVersionRegexTest()
+        {
+            string adalVersion = AdalIdHelper.GetAdalVersion();
+            Assert.AreEqual("0.0.0.0", adalVersion);
+        }
 
         [TestMethod]
         [Description("Test for ParseKeyValueList method in EncodingHelper")]
@@ -244,14 +251,14 @@ namespace Test.ADAL.NET.Unit
         private static TokenResponse CreateTokenResponse()
         {
             return new TokenResponse
-                               {
-                                   AccessToken = "access_token",
-                                   RefreshToken = "refresh_token",
-                                   CorrelationId = Guid.NewGuid().ToString(),
-                                   Resource = "my-resource",
-                                   TokenType = "Bearer",
-                                   ExpiresIn = 3899
-                               };
+            {
+                AccessToken = "access_token",
+                RefreshToken = "refresh_token",
+                CorrelationId = Guid.NewGuid().ToString(),
+                Resource = "my-resource",
+                TokenType = "Bearer",
+                ExpiresIn = 3899
+            };
         }
 
         [TestMethod]

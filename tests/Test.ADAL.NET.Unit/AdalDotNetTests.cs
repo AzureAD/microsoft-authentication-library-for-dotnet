@@ -53,7 +53,7 @@ namespace Test.ADAL.NET.Unit
     [DeploymentItem("valid_cert.pfx")]
     public class AdalDotNetTests
     {
-        private PlatformParameters platformParameters;
+        private PlatformParameters _platformParameters;
 
         [TestInitialize]
         public void Initialize()
@@ -61,7 +61,7 @@ namespace Test.ADAL.NET.Unit
             HttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
-            platformParameters = new PlatformParameters(PromptBehavior.Auto);
+            _platformParameters = new PlatformParameters(PromptBehavior.Auto);
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@ namespace Test.ADAL.NET.Unit
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters);
+                        TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.IsTrue(context.Authenticator.Authority.EndsWith("/some-tenant-id/"));
             Assert.AreEqual(result.AccessToken, "some-access-token");
@@ -108,7 +108,7 @@ namespace Test.ADAL.NET.Unit
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters);
+                        TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.IsTrue(context.Authenticator.Authority.EndsWith("/some-tenant-id/"));
             Assert.AreEqual(result.AccessToken, "some-access-token");
@@ -138,7 +138,7 @@ namespace Test.ADAL.NET.Unit
             });
             context.ExtendedLifeTimeEnabled = true;
             AuthenticationResult result =
-            await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, platformParameters);
+            await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
             Assert.AreEqual(HttpMessageHandlerFactory.MockHandlersCount(), 0);
@@ -653,13 +653,13 @@ namespace Test.ADAL.NET.Unit
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters);
+                        TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AccessToken, "some-access-token");
 
             var exc = AssertException.TaskThrows<ArgumentException>(() =>
                 context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                    TestConstants.DefaultRedirectUri, platformParameters, null));
+                    TestConstants.DefaultRedirectUri, _platformParameters, null));
             Assert.IsTrue(exc.Message.StartsWith(AdalErrorMessage.SpecifyAnyUser));
 
 
@@ -667,7 +667,7 @@ namespace Test.ADAL.NET.Unit
             result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters, UserIdentifier.AnyUser);
+                        TestConstants.DefaultRedirectUri, _platformParameters, UserIdentifier.AnyUser);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AccessToken, "some-access-token");
 
@@ -699,7 +699,7 @@ namespace Test.ADAL.NET.Unit
             result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters,
+                        TestConstants.DefaultRedirectUri, _platformParameters,
                         new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId));
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AccessToken, "some-access-token");
@@ -720,7 +720,7 @@ namespace Test.ADAL.NET.Unit
             context = new AuthenticationContext("https://login.microsoft0nline.com/common");
             var adalEx = AssertException.TaskThrows<AdalException>(() =>
                 context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                    TestConstants.DefaultRedirectUri, platformParameters));
+                    TestConstants.DefaultRedirectUri, _platformParameters));
 
             Assert.AreEqual(adalEx.ErrorCode, AdalError.AuthorityNotInValidList);
         }
@@ -764,7 +764,7 @@ namespace Test.ADAL.NET.Unit
 
             var exc = AssertException.TaskThrows<AdalServiceException>(() =>
                 context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters));
+                        TestConstants.DefaultRedirectUri, _platformParameters));
 
             Assert.AreEqual(exc.ErrorCode, AdalError.AuthenticationCanceled);
 
@@ -788,7 +788,7 @@ namespace Test.ADAL.NET.Unit
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters);
+                        TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.AreEqual(result.AccessToken, "some-access-token");
             Assert.IsNotNull(result.UserInfo);
@@ -830,7 +830,7 @@ namespace Test.ADAL.NET.Unit
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, platformParameters);
+                        TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
             Assert.AreEqual(result.AccessToken, "some-access-token");
@@ -1340,7 +1340,7 @@ namespace Test.ADAL.NET.Unit
             try
             {
                 AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                              TestConstants.DefaultRedirectUri, platformParameters);
+                                              TestConstants.DefaultRedirectUri, _platformParameters);
                 Assert.Fail();
             }
             catch (Exception ex)

@@ -44,6 +44,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 
         private bool updatedFromTemplate;
 
+        private static readonly Regex TenantNameRegex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
         private void Init(string authority, bool validateAuthority)
         {
             this.Authority = CanonicalizeUri(authority);
@@ -181,8 +183,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 
         private void ReplaceTenantlessTenant(string tenantId)
         {
-            var regex = new Regex(Regex.Escape(TenantlessTenantName), RegexOptions.IgnoreCase);
-            this.Authority = regex.Replace(this.Authority, tenantId, 1);
+            this.Authority = TenantNameRegex.Replace(this.Authority, tenantId, 1);
         }
     }
 }
