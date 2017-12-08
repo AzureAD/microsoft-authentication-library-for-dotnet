@@ -4,7 +4,7 @@
         <title>Active Directory Authentication Library</title>
         <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
         <version>0.0.1-LOCALBUILD</version>
-        <authors>Microsoft Corporation</authors>
+        <authors>Microsoft</authors>
         <licenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</licenseUrl>
         <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
@@ -13,7 +13,7 @@
         <language>en-US</language>
         <owners>Microsoft Open Technologies</owners>
         <tags>Active Directory Authentication Library, ADAL, Active Directory, Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store, Xamarin iOS, Xamarin Android</tags>
-        <copyright>(C) Microsoft Open Technologies. All rights reserved.</copyright>
+        <copyright>© Microsoft Corporation. All rights reserved.</copyright>
 
     <dependencies>
 		<group targetFramework="netstandard1.4">
