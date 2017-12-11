@@ -35,22 +35,23 @@ namespace AdalDesktopTestApp
     class Program
     {
         public static IPlatformParameters Parameters { get; set; }
+        private static readonly AppLogger AppLogger = new AppLogger();
 
         [STAThread]
         static void Main(string[] args)
         {
+            LoggerCallbackHandler.LogCallback = AppLogger.Log;
             while (true)
             {
                 // display menu
                 // clear display
                 Console.Clear();
 
-                Console.WriteLine("\n\t1. Acquire Token\n\t2. Acquire Token Conditional Access Policy\n\t0. Exit App");
+                Console.WriteLine("\n\t1. Acquire Token\n\t2. Acquire Token with Pii logging enabled\n\t" +
+                                  "3. Acquire Token Conditional Access Policy\n\t0. Exit App");
                 Console.WriteLine("\n\tEnter your Selection: ");
 
-                int selection;
-
-                int.TryParse(Console.ReadLine(), out selection);
+                int.TryParse(Console.ReadLine(), out var selection);
 
                 switch (selection)
                 {
@@ -65,7 +66,19 @@ namespace AdalDesktopTestApp
                             Console.WriteLine(ae.InnerException.StackTrace);
                         }
                         break;
-                    case 2: // acquire token with claims
+                    case 2: // acquire token with pii logging enabled
+                        try
+                        {
+                            LoggerCallbackHandler.PiiLoggingEnabled = true;
+                            AcquireTokenAsync().Wait();
+                        }
+                        catch (AggregateException ae)
+                        {
+                            Console.WriteLine(ae.InnerException.Message);
+                            Console.WriteLine(ae.InnerException.StackTrace);
+                        }
+                        break;
+                    case 3: // acquire token with claims
                         try
                         {
                             AcquireTokenWithClaimsAsync().Wait();
@@ -93,7 +106,18 @@ namespace AdalDesktopTestApp
             var result = await context.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>", new UserCredential("<USER>"));
 
             string token = result.AccessToken;
-            Console.WriteLine(token + "\n");
+            string logMessage = "\n\n" + "Pii Logging Enabled: " +
+                                LoggerCallbackHandler.PiiLoggingEnabled + "\n\n" +
+                                AppLogger.GetAdalLogs();
+
+            if (!LoggerCallbackHandler.PiiLoggingEnabled)
+            {
+                Console.WriteLine(token + "\n\n" + "====ADAL Logs====" + logMessage);
+            }
+            else
+            {
+                Console.WriteLine(token + "\n\n" + "====ADAL Logs Pii Enabled====" + logMessage);
+            }
         }
 
         private static async Task AcquireTokenWithClaimsAsync()
