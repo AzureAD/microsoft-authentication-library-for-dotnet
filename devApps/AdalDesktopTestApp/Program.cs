@@ -58,6 +58,7 @@ namespace AdalDesktopTestApp
                     case 1: // acquire token
                         try
                         {
+                            LoggerCallbackHandler.PiiLoggingEnabled = false;
                             AcquireTokenAsync().Wait();
                         }
                         catch (AggregateException ae)
