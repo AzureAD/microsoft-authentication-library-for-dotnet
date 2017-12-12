@@ -34,7 +34,7 @@ using Microsoft.Identity.Client.Internal;
 using Windows.Networking.Connectivity;
 using Windows.ApplicationModel.Core;
 
-namespace Microsoft.Identity.Client.Internal.WebUIs
+namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class WebUI : IWebUI
     {

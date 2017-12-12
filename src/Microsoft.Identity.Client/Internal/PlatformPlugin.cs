@@ -61,8 +61,8 @@ namespace Microsoft.Identity.Client.Internal
         {
 #if !FACADE
             InjectDependecies(
-                (IWebUIFactory) new Microsoft.Identity.Client.Internal.WebUIs.WebUIFactory(),
-                (ILogger) new Microsoft.Identity.Client.Internal.EventsSource.PlatformLogger(),
+                (IWebUIFactory) new UI.WebUIFactory(),
+                (ILogger) new EventsSource.PlatformLogger(),
                 (PlatformInformationBase) new PlatformInformation(new RequestContext(Guid.Empty, null)));
 #endif
         }

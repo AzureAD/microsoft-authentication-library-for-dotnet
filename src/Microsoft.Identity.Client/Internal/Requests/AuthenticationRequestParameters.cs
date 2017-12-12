@@ -85,16 +85,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     if (ClientCredential.Assertion == null || ClientCredential.ValidTo != 0)
                     {
                         bool assertionNearExpiry = (ClientCredential.ValidTo <=
-                                                    Microsoft.Identity.Client.Internal.Jwt.JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
-                                                                                TimeSpan.FromMinutes(
-                                                                                    Constants
-                                                                                        .ExpirationMarginInMinutes)));
+                                                    Jwt.JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
+                                                                                    TimeSpan.FromMinutes(
+                                                                                    Constants 
+                                                                                    .ExpirationMarginInMinutes)));
                         if (assertionNearExpiry)
                         {
                             const string msg = "Client Assertion does not exist or near expiry.";
                             RequestContext.Logger.Info(msg);
                             RequestContext.Logger.InfoPii(msg);
-                            Microsoft.Identity.Client.Internal.Jwt.JsonWebToken jwtToken = new Microsoft.Identity.Client.Internal.Jwt.JsonWebToken(ClientId,
+                            Jwt.JsonWebToken jwtToken = new Jwt.JsonWebToken(ClientId,
                                 Authority.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
