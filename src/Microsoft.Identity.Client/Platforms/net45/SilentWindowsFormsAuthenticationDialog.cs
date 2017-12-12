@@ -32,7 +32,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal.WebUIs
+namespace Microsoft.Identity.Client.Internal.UI
 {
     /// <summary>
     /// </summary>

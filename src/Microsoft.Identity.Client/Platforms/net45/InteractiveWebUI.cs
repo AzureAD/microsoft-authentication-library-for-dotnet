@@ -27,7 +27,7 @@
 
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.Internal.WebUIs
+namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class InteractiveWebUI : WebUI
     {

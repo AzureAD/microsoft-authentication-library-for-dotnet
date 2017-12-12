@@ -28,7 +28,7 @@
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 
-namespace Microsoft.Identity.Client.Internal.WebUIs
+namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class WebUIFactory : IWebUIFactory
     {
