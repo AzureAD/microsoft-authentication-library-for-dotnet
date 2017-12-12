@@ -9,7 +9,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
-    <Authors>Microsoft Corp.</Authors>
+    <Authors>Microsoft</Authors>
     <PackageTitle>Microsoft Authentication Library</PackageTitle>
     <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
     <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>

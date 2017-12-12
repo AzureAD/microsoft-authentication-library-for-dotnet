@@ -70,10 +70,13 @@ namespace Microsoft.Identity.Client
             }
 
             RequestContext requestContext = new RequestContext(Guid.Empty, null);
-            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+
+            var msg = string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
-                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
+                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion());
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
         }
 
         /// <summary>
@@ -136,7 +139,9 @@ namespace Microsoft.Identity.Client
                 RequestContext requestContext = new RequestContext(Guid.Empty, null);
                 if (UserTokenCache == null)
                 {
-                    requestContext.Logger.Info("Token cache is null or empty. Returning empty list of users.");
+                    const string msg = "Token cache is null or empty. Returning empty list of users.";
+                    requestContext.Logger.Info(msg);
+                    requestContext.Logger.InfoPii(msg);
                     return Enumerable.Empty<User>();
                 }
 

@@ -88,10 +88,11 @@ namespace Microsoft.Identity.Client.Internal.Http
                     return response;
                 }
 
-                requestContext.Logger.Info(
-                     string.Format(CultureInfo.InvariantCulture,
-                         "Response status code does not indicate success: {0} ({1}).",
-                         (int)response.StatusCode, response.StatusCode));
+                var msg = string.Format(CultureInfo.InvariantCulture,
+                    "Response status code does not indicate success: {0} ({1}).",
+                    (int) response.StatusCode, response.StatusCode);
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
 
                 if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
                 {
@@ -101,6 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Http
             catch (TaskCanceledException exception)
             {
                 requestContext.Logger.Error(exception);
+                requestContext.Logger.ErrorPii(exception);
                 isRetryable = true;
                 toThrow = exception;
             }
@@ -109,12 +111,16 @@ namespace Microsoft.Identity.Client.Internal.Http
             {
                 if (retry)
                 {
-                    requestContext.Logger.Info("Retrying one more time..");
+                    const string msg = "Retrying one more time..";
+                    requestContext.Logger.Info(msg);
+                    requestContext.Logger.InfoPii(msg);
                     await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                     return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, requestContext, false);
                 }
 
-                requestContext.Logger.Info("Request retry failed.");
+                const string message = "Request retry failed.";
+                requestContext.Logger.Info(message);
+                requestContext.Logger.InfoPii(message);
                 if (toThrow != null)
                 {
                     throw new MsalServiceException(MsalServiceException.RequestTimeout, "Request to the endpoint timed out.", toThrow);

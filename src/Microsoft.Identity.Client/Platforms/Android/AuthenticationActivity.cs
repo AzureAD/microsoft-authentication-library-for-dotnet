@@ -243,6 +243,7 @@ namespace Microsoft.Identity.Client
                 catch (PackageManager.NameNotFoundException exc)
                 {
                     RequestContext.Logger.Error(exc);
+                    RequestContext.Logger.ErrorPii(exc);
                     // swallow this exception. If the package does not exist then exception will be thrown.
                 }
             }
