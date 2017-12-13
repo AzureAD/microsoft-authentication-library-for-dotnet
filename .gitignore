@@ -221,3 +221,4 @@ _Pvt_Extensions
 *.nuget.targets
 project.lock.json
 *.project.lock.json
+/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
