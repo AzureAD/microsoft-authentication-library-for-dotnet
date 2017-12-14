@@ -53,10 +53,10 @@
     <Compile Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\Properties\AssemblyInfo.cs">
       <Link>AssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="TypeForwardToDeclarations.cs"/>
+    <Compile Include="TypeForwardToDeclarations.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.6" PrivateAssets="All" />
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.1.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System" />
