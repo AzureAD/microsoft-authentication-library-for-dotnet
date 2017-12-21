@@ -33,6 +33,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
@@ -233,7 +234,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new CallState(new Guid()));
+            new RequestContext(new Guid()));
             ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -265,7 +266,7 @@ namespace Test.ADAL.NET.Integration
                 UniqueId = TestConstants.DefaultUniqueId,
                 DisplayableId = TestConstants.DefaultDisplayableId
             },
-            new CallState(new Guid()));
+            new RequestContext(new Guid()));
             Assert.AreEqual("some-access-token", entry.Result.AccessToken);
 
             // There should be one cached entry.

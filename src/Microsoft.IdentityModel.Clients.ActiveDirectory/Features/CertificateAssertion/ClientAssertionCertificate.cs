@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
@@ -98,8 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <returns>Signed message as a byte array</returns>
         public byte[] Sign(string message)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            return helper.SignWithCertificate(message, this.Certificate);
+            return SigningHelper.SignWithCertificate(message, this.Certificate);
         }
 
         /// <summary>

@@ -82,8 +82,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 this.Resource = resultEx.ResourceInResponse;
 
                 var msg = "Resource value in the token response was used for storing tokens in the cache";
-                CallState.Logger.Verbose(this.CallState, msg);
-                CallState.Logger.VerbosePii(this.CallState, msg);
+                RequestContext.Logger.Verbose(msg);
+                RequestContext.Logger.VerbosePii(msg);
             }
 
             // If resource is not passed as an argument and is not returned by STS either, 

@@ -28,6 +28,7 @@
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
@@ -53,16 +54,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
         [DataMember(Name = "cloud_audience_urn")]
         public string CloudAudienceUrn { get; set; }
              
-        internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userName, CallState callState)
+        internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userName, RequestContext requestContext)
         {
             string userRealmEndpoint = userRealmUri;
             userRealmEndpoint += (userName + "?api-version=1.0");
 
             var msg = "Sending request to userrealm endpoint.";
-            callState.Logger.Information(callState, msg);
-            callState.Logger.InformationPii(callState, msg);
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
 
-            var client = new AdalHttpClient(userRealmEndpoint, callState) { Client = { Accept = "application/json" } };
+            var client = new AdalHttpClient(userRealmEndpoint, requestContext) { Client = { Accept = "application/json" } };
             return await client.GetResponseAsync<UserRealmDiscoveryResponse>().ConfigureAwait(false);
         }
     }

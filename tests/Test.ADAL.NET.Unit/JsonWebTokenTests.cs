@@ -38,6 +38,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
@@ -144,8 +145,7 @@ namespace Test.ADAL.NET.Unit
 
         public byte[] Sign(string message)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            return helper.SignWithCertificate(message, this.Certificate);
+            return SigningHelper.SignWithCertificate(message, this.Certificate);
         }
 
         public X509Certificate2 Certificate { get; }

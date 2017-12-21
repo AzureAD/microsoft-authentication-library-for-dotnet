@@ -32,9 +32,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -66,8 +68,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             DefaultShared = new TokenCache
             {
-                BeforeAccess = TokenCachePlugin.BeforeAccess,
-                AfterAccess = TokenCachePlugin.AfterAccess
+                BeforeAccess = StorageDelegates.BeforeAccess,
+                AfterAccess = StorageDelegates.AfterAccess
             };
         }
 
@@ -160,8 +162,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     BinaryWriter writer = new BinaryWriter(stream);
                     writer.Write(SchemaVersion);
-                    CallState.Default.Logger.Information(null,
-                        string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
+                    CoreLoggerBase.Default.Info(string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
                             this.tokenCacheDictionary.Count));
                     writer.Write(this.tokenCacheDictionary.Count);
                     foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> kvp in this.tokenCacheDictionary)
@@ -204,8 +205,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     int schemaVersion = reader.ReadInt32();
                     if (schemaVersion != SchemaVersion)
                     {
-                        CallState.Default.Logger.Warning(null,
-                            "The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
+                        CoreLoggerBase.Default.Warning("The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
                         return;
                     }
 
@@ -224,8 +224,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         this.tokenCacheDictionary.Add(key, resultEx);
                     }
 
-                    CallState.Default.Logger.Information(null,
-                        string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
+                    CoreLoggerBase.Default.Info(string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
                 }
             }
         }
@@ -279,11 +278,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (toRemoveKey != null)
                 {
                     this.tokenCacheDictionary.Remove(toRemoveKey);
-                    CallState.Default.Logger.Information(null, "One item removed successfully");
+                    CoreLoggerBase.Default.Info("One item removed successfully");
                 }
                 else
                 {
-                    CallState.Default.Logger.Information(null, "Item not Present in the Cache");
+                    CoreLoggerBase.Default.Info("Item not Present in the Cache");
                 }
 
                 this.HasStateChanged = true;
@@ -302,10 +301,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs {TokenCache = this};
                 this.OnBeforeAccess(args);
                 this.OnBeforeWrite(args);
-                CallState.Default.Logger.Information(null,
-                    String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed", this.Count));
+                CoreLoggerBase.Default.Info(String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed", this.Count));
                 this.tokenCacheDictionary.Clear();
-                CallState.Default.Logger.Information(null, "Successfully Cleared Cache");
+                CoreLoggerBase.Default.Info("Successfully Cleared Cache");
                 this.HasStateChanged = true;
                 this.OnAfterAccess(args);
             }
@@ -344,14 +342,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
         }
 
-        internal async Task<AuthenticationResultEx> LoadFromCache(CacheQueryData cacheQueryData, CallState callState)
+        internal async Task<AuthenticationResultEx> LoadFromCache(CacheQueryData cacheQueryData, RequestContext requestContext)
         {
             AuthenticationResultEx resultEx = null;
-            var aliasedHosts = await GetOrderedAliases(cacheQueryData.Authority, false, callState).ConfigureAwait(false);
+            var aliasedHosts = await GetOrderedAliases(cacheQueryData.Authority, false, requestContext).ConfigureAwait(false);
             foreach (var aliasedHost in aliasedHosts)
             {
                 cacheQueryData.Authority = ReplaceHost(cacheQueryData.Authority, aliasedHost);
-                resultEx = LoadFromCacheCommon(cacheQueryData, callState);
+                resultEx = LoadFromCacheCommon(cacheQueryData, requestContext);
                 if (resultEx?.Result != null)
                 {
                     break;
@@ -381,25 +379,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return string.Format(CultureInfo.InvariantCulture, "https://{0}{1}", newHost, new Uri(oldUri).AbsolutePath);
         }
 
-        internal static async Task<List<string>> GetOrderedAliases(string authority, bool validateAuthority, CallState callState)
+        internal static async Task<List<string>> GetOrderedAliases(string authority, bool validateAuthority, RequestContext requestContext)
         {
-            var metadata = await InstanceDiscovery.GetMetadataEntry(new Uri(authority), validateAuthority, callState).ConfigureAwait(false);
+            var metadata = await InstanceDiscovery.GetMetadataEntry(new Uri(authority), validateAuthority, requestContext).ConfigureAwait(false);
             var aliasedAuthorities = new List<string>(new string[] {metadata.PreferredCache, GetHost(authority)});
             aliasedAuthorities.AddRange(metadata.Aliases ?? Enumerable.Empty<string>());
             return aliasedAuthorities;
         }
 
-        internal AuthenticationResultEx LoadFromCacheCommon(CacheQueryData cacheQueryData, CallState callState)
+        internal AuthenticationResultEx LoadFromCacheCommon(CacheQueryData cacheQueryData, RequestContext requestContext)
         {
             lock (cacheLock)
             {
                 var msg = "Looking up cache for a token...";
-                callState.Logger.Verbose(callState, msg);
-                callState.Logger.VerbosePii(callState, msg);
+                requestContext.Logger.Verbose(msg);
+                requestContext.Logger.VerbosePii(msg);
 
                 AuthenticationResultEx resultEx = null;
                 KeyValuePair<TokenCacheKey, AuthenticationResultEx>? kvp =
-                    this.LoadSingleItemFromCache(cacheQueryData, callState);
+                    this.LoadSingleItemFromCache(cacheQueryData, requestContext);
 
                 if (kvp.HasValue)
                 {
@@ -418,21 +416,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         resultEx.Result.AccessToken = null;
 
                         msg = "Cross Tenant refresh token was found in the cache";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
                     }
                     else if (tokenNearExpiry && !cacheQueryData.ExtendedLifeTimeEnabled)
                     {
                         resultEx.Result.AccessToken = null;
 
                         msg = "An expired or near expiry token was found in the cache";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
                     }
                     else if (!cacheKey.ResourceEquals(cacheQueryData.Resource))
                     {
-                        callState.Logger.InformationPii(callState,
-                            string.Format(CultureInfo.CurrentCulture,
+                        requestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture,
                                 "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'",
                                 cacheKey.Resource, cacheQueryData.Resource));
                         var newResultEx = new AuthenticationResultEx
@@ -453,23 +450,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
                         msg =
                             "The extendedLifeTime is enabled and a stale AT with extendedLifeTimeEnabled is returned.";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
                     }
                     else if (tokenExtendedLifeTimeExpired)
                     {
                         resultEx.Result.AccessToken = null;
 
                         msg = "The AT has expired its ExtendedLifeTime";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
                     }
                     else
                     {
                         msg = string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires",
                             (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes);
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
                     }
 
                     if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
@@ -477,8 +474,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         this.tokenCacheDictionary.Remove(cacheKey);
 
                         msg = "An old item was removed from the cache";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
 
                         this.HasStateChanged = true;
                         resultEx = null;
@@ -489,15 +486,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         resultEx.Result.Authority = cacheKey.Authority;
 
                         msg = "A matching item (access token or refresh token or both) was found in the cache";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
                     }
                 }
                 else
                 {
                     msg = "No matching token was found in the cache";
-                    callState.Logger.Information(callState, msg);
-                    callState.Logger.InformationPii(callState, msg);
+                    requestContext.Logger.Info(msg);
+                    requestContext.Logger.InfoPii(msg);
                 }
 
                 return resultEx;
@@ -505,20 +502,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         internal async Task StoreToCache(AuthenticationResultEx result, string authority, string resource, string clientId,
-            TokenSubjectType subjectType, CallState callState)
+            TokenSubjectType subjectType, RequestContext requestContext)
         {
-            var metadata = await InstanceDiscovery.GetMetadataEntry(new Uri(authority), false, callState).ConfigureAwait(false);
-            StoreToCacheCommon(result, ReplaceHost(authority, metadata.PreferredCache), resource, clientId, subjectType, callState);
+            var metadata = await InstanceDiscovery.GetMetadataEntry(new Uri(authority), false, requestContext).ConfigureAwait(false);
+            StoreToCacheCommon(result, ReplaceHost(authority, metadata.PreferredCache), resource, clientId, subjectType, requestContext);
         }
 
         internal void StoreToCacheCommon(AuthenticationResultEx result, string authority, string resource, string clientId,
-            TokenSubjectType subjectType, CallState callState)
+            TokenSubjectType subjectType, RequestContext requestContext)
         {
             lock (cacheLock)
             {
                 var msg = "Storing token in the cache...";
-                callState.Logger.Verbose(callState, msg);
-                callState.Logger.VerbosePii(callState, msg);
+                requestContext.Logger.Verbose(msg);
+                requestContext.Logger.VerbosePii(msg);
 
                 string uniqueId = (result.Result.UserInfo != null) ? result.Result.UserInfo.UniqueId : null;
                 string displayableId = (result.Result.UserInfo != null) ? result.Result.UserInfo.DisplayableId : null;
@@ -536,8 +533,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 this.tokenCacheDictionary[tokenCacheKey] = result;
 
                 msg = "An item was stored in the cache";
-                callState.Logger.Verbose(callState, msg);
-                callState.Logger.VerbosePii(callState, msg);
+                requestContext.Logger.Verbose(msg);
+                requestContext.Logger.VerbosePii(msg);
 
                 this.UpdateCachedMrrtRefreshTokens(result, clientId, subjectType);
 
@@ -568,7 +565,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         private KeyValuePair<TokenCacheKey, AuthenticationResultEx>? LoadSingleItemFromCache(
-            CacheQueryData cacheQueryData, CallState callState)
+            CacheQueryData cacheQueryData, RequestContext requestContext)
         {
             lock (cacheLock)
             {
@@ -586,8 +583,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 {
                     case 1:
                         var msg = "An item matching the requested resource was found in the cache";
-                        callState.Logger.Information(callState, msg);
-                        callState.Logger.InformationPii(callState, msg);
+                        requestContext.Logger.Info(msg);
+                        requestContext.Logger.InfoPii(msg);
 
                         returnValue = resourceSpecificItems.First();
                         break;
@@ -602,8 +599,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             returnValue = mrrtItems.First();
                             msg =
                                 "A Multi Resource Refresh Token for a different resource was found which can be used";
-                            callState.Logger.Information(callState, msg);
-                            callState.Logger.InformationPii(callState, msg);
+                            requestContext.Logger.Info(msg);
+                            requestContext.Logger.InfoPii(msg);
                         }
                     }
                         break;

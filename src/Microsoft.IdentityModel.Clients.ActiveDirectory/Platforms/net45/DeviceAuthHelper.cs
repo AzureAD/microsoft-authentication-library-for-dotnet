@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             X509Certificate2 certificate = FindCertificate(challengeData);
             DeviceAuthJWTResponse response = new DeviceAuthJWTResponse(challengeData["SubmitUrl"],
                 challengeData["nonce"], Convert.ToBase64String(certificate.GetRawCertData()));
-            CngKey key = CryptographyHelper.GetCngPrivateKey(certificate);
+            CngKey key = SigningHelper.GetCngPrivateKey(certificate);
             byte[] sig = null;
             using (RSACng rsa = new RSACng(key))
             {

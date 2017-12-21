@@ -28,66 +28,54 @@
 using Android.App;
 using Android.Content;
 using System;
+using Microsoft.Identity.Core;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
+namespace Microsoft.Identity.Core.Cache
 {
     [Android.Runtime.Preserve(AllMembers = true)]
-    internal class TokenCachePlugin
+    internal class LegacyCachePersistance
     {
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
         private const string SharedPreferencesKey = "cache";
         
-        public static void BeforeAccess(TokenCacheNotificationArgs args)
+        public static byte[] LoadCache()
         {
-            if (args.TokenCache.Count > 0)
-            {
-                // We assume that the cache has not changed since last write
-                return;
-            }
-
             try
             {
                 ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
                 string stateString = preferences.GetString(SharedPreferencesKey, null);
                 if (stateString != null)
                 {
-                    byte[] state = Convert.FromBase64String(stateString);
-                    args.TokenCache.Deserialize(state);
+                    return Convert.FromBase64String(stateString);
                 }
             }
             catch (Exception ex)
             {
-                CallState.Default.Logger.Warning(null, "Failed to load cache: ");
-                CallState.Default.Logger.ErrorPii(null, ex);
+                CoreLoggerBase.Default.Warning("Failed to load cache: " + ex.Message);
+                CoreLoggerBase.Default.ErrorPii(ex);
                 // Ignore as the cache seems to be corrupt
             }
+
+            return null;
         }
-        
-        public static void AfterAccess(TokenCacheNotificationArgs args)
+
+        public static void WriteCache(byte[] serializedCache)
         {
-            if (args.TokenCache.HasStateChanged)
-            {
                 try
                 {
                     ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
                     ISharedPreferencesEditor editor = preferences.Edit();
                     editor.Remove(SharedPreferencesKey);
-
-                    if (args.TokenCache.Count > 0)
-                    {
-                        byte[] state = args.TokenCache.Serialize();
-                        string stateString = Convert.ToBase64String(state);
+                        string stateString = Convert.ToBase64String(serializedCache);
                         editor.PutString(SharedPreferencesKey, stateString);
-                    }
+                    
 
                     editor.Apply();
-                    args.TokenCache.HasStateChanged = false;
                 }
                 catch (Exception ex)
-                {
-                    CallState.Default.Logger.Warning(null, "Failed to save cache: ");
-                    CallState.Default.Logger.ErrorPii(null, ex);
-                }
+            {
+                CoreLoggerBase.Default.Warning("Failed to save cache: " + ex.Message);
+                CoreLoggerBase.Default.ErrorPii(ex);
             }
         }
     }

@@ -26,15 +26,27 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core
 {
     internal class CryptographyHelper
     {
         public static string CreateSha256Hash(string input)
         {
-            return null;
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return null;
+            }
+
+            using (var sha256 = SHA256.Create())
+            {
+                var inputBytes = Encoding.UTF8.GetBytes(input);
+                var outputBytes = sha256.ComputeHash(inputBytes);
+                return Convert.ToBase64String(outputBytes);
+            }
         }
     }
 }

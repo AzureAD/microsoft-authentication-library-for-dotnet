@@ -52,6 +52,7 @@
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
     <Compile Remove="Resources\**\*.*" />
+    <None Remove="Platforms\net45\SigningHelper.cs" />
     <EmbeddedResource Include="Properties\Microsoft.IdentityModel.Clients.ActiveDirectory.rd.xml" />
   </ItemGroup>
   <ItemGroup>

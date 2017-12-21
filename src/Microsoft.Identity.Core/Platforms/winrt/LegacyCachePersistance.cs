@@ -32,11 +32,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation.Collections;
 using Windows.Storage;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
+namespace Microsoft.Identity.Core.Cache
 {
-    internal static class TokenCachePlugin
+    internal class LegacyCachePersistance
     {
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
@@ -45,46 +44,39 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
         private const string CacheValueLength = "CacheValueLength";
         private const int MaxCompositeValueLength = 1024;
 
-        public static void BeforeAccess(TokenCacheNotificationArgs args)
+        public static byte[] LoadCache()
         {
-            if (args != null && args.TokenCache != null)
-            {
-                try
-                {
-                    var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                    byte[] state = GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                    if (state != null)
+                    try
                     {
-                        args.TokenCache.Deserialize(state);
+                        var localSettings = ApplicationData.Current.LocalSettings;
+                        localSettings.CreateContainer(LocalSettingsContainerName,
+                            ApplicationDataCreateDisposition.Always);
+                        return GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
                     }
-                }
-                catch (Exception ex)
-                {
-                    CallState.Default.Logger.Warning(null, "Failed to load cache: ");
-                    CallState.Default.Logger.ErrorPii(null, ex);
-                    // Ignore as the cache seems to be corrupt
-                }
-            }
+                    catch (Exception ex)
+                    {
+                        CoreLoggerBase.Default.Warning("Failed to load cache: " + ex.Message);
+                        CoreLoggerBase.Default.ErrorPii(ex);
+                        // Ignore as the cache seems to be corrupt
+                    }
+
+            return null;
         }
-        
-        public static void AfterAccess(TokenCacheNotificationArgs args)
+
+        public static void WriteCache(byte[] serializedCache)
         {
-            if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
-            {
                 try
                 {
                     var localSettings = ApplicationData.Current.LocalSettings;
                     localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, args.TokenCache.Serialize());
-                    args.TokenCache.HasStateChanged = false;
+                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, serializedCache);
+                    
                 }
                 catch (Exception ex)
                 {
-                    CallState.Default.Logger.Warning(null, "Failed to save cache: ");
-                    CallState.Default.Logger.ErrorPii(null, ex);
+                    CoreLoggerBase.Default.Warning("Failed to save cache: " + ex.Message);
+                    CoreLoggerBase.Default.ErrorPii(ex);
                 }
-            }
         }
 
         internal static void SetCacheValue(IPropertySet containerValues, byte[] value)

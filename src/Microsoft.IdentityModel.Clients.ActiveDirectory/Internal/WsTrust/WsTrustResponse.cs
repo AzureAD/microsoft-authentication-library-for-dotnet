@@ -30,6 +30,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
 {
@@ -47,7 +48,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
             return CreateFromResponseDocument(responseDocument, version);
         }
 
-        public static string ReadErrorResponse(XDocument responseDocument, CallState callState)
+        public static string ReadErrorResponse(XDocument responseDocument, RequestContext requestContext)
         {
             string errorMessage = null;
 

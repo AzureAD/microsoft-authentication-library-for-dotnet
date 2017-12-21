@@ -26,23 +26,33 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Win32.SafeHandles;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Permissions;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
+namespace Microsoft.Identity.Core
 {
-    internal class TokenCachePlugin
+    internal class CryptographyHelper
     {
-        public static void BeforeAccess(TokenCacheNotificationArgs args)
+        public static string CreateSha256Hash(string input)
         {
-            // Default implementation, do nothing
-        }
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
 
-        public static void AfterAccess(TokenCacheNotificationArgs args)
-        {
-            // Default implementation, do nothing
+            using (SHA256Cng sha = new SHA256Cng())
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
+            }
         }
     }
 }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
@@ -148,8 +149,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("LoggerCallbackTests")]
         public void ObsoleteAdalLogCallbackTest()
         {
-            var logger = new Logger();
-            var state = new CallState(Guid.NewGuid());
+            var logger = new Logger(Guid.NewGuid());
 
             var obsoleteCallback = new TestObsoleteAdalLogCallback();
             LoggerCallbackHandler.Callback = obsoleteCallback;
@@ -158,33 +158,33 @@ namespace Test.ADAL.NET.Unit
 
             LoggerCallbackHandler.PiiLoggingEnabled = true;
 
-            logger.ErrorPii(state, new Exception(Message));
-            logger.InformationPii(state, Message);
-            logger.VerbosePii(state, Message);
-            logger.WarningPii(state, Message);
+            logger.ErrorPii(new Exception(Message));
+            logger.InfoPii(Message);
+            logger.VerbosePii(Message);
+            logger.WarningPii(Message);
 
             // make sure no Pii are logged with ObsoleteAdalLogCallback
             Assert.AreEqual(0, obsoleteCallback.AllCallsCount);
 
-            logger.Error(state, new Exception(Message));
+            logger.Error(new Exception(Message));
             Assert.AreEqual(1, obsoleteCallback.ErrorLogCount);
             Assert.AreEqual(0, obsoleteCallback.WarningLogCount);
             Assert.AreEqual(0, obsoleteCallback.InfoLogCount);
             Assert.AreEqual(0, obsoleteCallback.VerboseLogCount);
 
-            logger.Information(state, Message);
+            logger.Info(Message);
             Assert.AreEqual(1, obsoleteCallback.ErrorLogCount);
             Assert.AreEqual(0, obsoleteCallback.WarningLogCount);
             Assert.AreEqual(1, obsoleteCallback.InfoLogCount);
             Assert.AreEqual(0, obsoleteCallback.VerboseLogCount);
 
-            logger.Verbose(state, Message);
+            logger.Verbose(Message);
             Assert.AreEqual(1, obsoleteCallback.ErrorLogCount);
             Assert.AreEqual(0, obsoleteCallback.WarningLogCount);
             Assert.AreEqual(1, obsoleteCallback.InfoLogCount);
             Assert.AreEqual(1, obsoleteCallback.VerboseLogCount);
 
-            logger.Warning(state, Message);
+            logger.Warning(Message);
             Assert.AreEqual(1, obsoleteCallback.ErrorLogCount);
             Assert.AreEqual(1, obsoleteCallback.WarningLogCount);
             Assert.AreEqual(1, obsoleteCallback.InfoLogCount);
@@ -196,8 +196,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("LoggerCallbackTests")]
         public void LogCallbackTest()
         {
-            var logger = new Logger();
-            var state = new CallState(Guid.NewGuid());
+            var logger = new Logger(Guid.NewGuid());
 
             var obsoleteCallback = new TestObsoleteAdalLogCallback();
             LoggerCallbackHandler.Callback = obsoleteCallback;
@@ -206,25 +205,25 @@ namespace Test.ADAL.NET.Unit
 
             LoggerCallbackHandler.PiiLoggingEnabled = true;
 
-            logger.Error(state, new Exception(Message));
+            logger.Error(new Exception(Message));
             Assert.AreEqual(1, _errorLogCount);
             Assert.AreEqual(0, _warningLogCount);
             Assert.AreEqual(0, _infoLogCount);
             Assert.AreEqual(0, _verboseLogCount);
 
-            logger.Information(state, Message);
+            logger.Info(Message);
             Assert.AreEqual(1, _errorLogCount);
             Assert.AreEqual(0, _warningLogCount);
             Assert.AreEqual(1, _infoLogCount);
             Assert.AreEqual(0, _verboseLogCount);
 
-            logger.Verbose(state, Message);
+            logger.Verbose(Message);
             Assert.AreEqual(1, _errorLogCount);
             Assert.AreEqual(0, _warningLogCount);
             Assert.AreEqual(1, _infoLogCount);
             Assert.AreEqual(1, _verboseLogCount);
 
-            logger.Warning(state, Message);
+            logger.Warning(Message);
             Assert.AreEqual(1, _errorLogCount);
             Assert.AreEqual(1, _warningLogCount);
             Assert.AreEqual(1, _infoLogCount);
@@ -244,8 +243,7 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("LoggerCallbackTests")]
         public void PiiLogCallbackTest()
         {
-            var logger = new Logger();
-            var state = new CallState(Guid.NewGuid());
+            var logger = new Logger(Guid.NewGuid());
 
             var obsoleteCallback = new TestObsoleteAdalLogCallback();
             LoggerCallbackHandler.Callback = obsoleteCallback;
@@ -254,25 +252,25 @@ namespace Test.ADAL.NET.Unit
 
             LoggerCallbackHandler.PiiLoggingEnabled = true;
 
-            logger.ErrorPii(state, new Exception(Message));
+            logger.ErrorPii(new Exception(Message));
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(0, _piiWarningLogCount);
             Assert.AreEqual(0, _piiInfoLogCount);
             Assert.AreEqual(0, _piiVerboseLogCount);
 
-            logger.InformationPii(state, Message);
+            logger.InfoPii(Message);
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(0, _piiWarningLogCount);
             Assert.AreEqual(1, _piiInfoLogCount);
             Assert.AreEqual(0, _piiVerboseLogCount);
 
-            logger.VerbosePii(state, Message);
+            logger.VerbosePii(Message);
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(0, _piiWarningLogCount);
             Assert.AreEqual(1, _piiInfoLogCount);
             Assert.AreEqual(1, _piiVerboseLogCount);
 
-            logger.WarningPii(state, Message);
+            logger.WarningPii(Message);
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(1, _piiWarningLogCount);
             Assert.AreEqual(1, _piiInfoLogCount);
@@ -292,47 +290,44 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("LoggerCallbackTests")]
         public void NullCallbackTest()
         {
-            var logger = new Logger();
-            var state = new CallState(Guid.NewGuid());
+            var logger = new Logger(Guid.NewGuid());
 
             LoggerCallbackHandler.Callback = null;
             LoggerCallbackHandler.LogCallback = null;
 
-            logger.Error(state, new Exception(Message));
-            logger.Information(state, Message);
-            logger.Verbose(state, Message);
-            logger.Warning(state, Message);
+            logger.Error(new Exception(Message));
+            logger.Info(Message);
+            logger.Verbose(Message);
+            logger.Warning(Message);
 
-            logger.ErrorPii(state, new Exception(Message));
-            logger.InformationPii(state, Message);
-            logger.VerbosePii(state, Message);
-            logger.WarningPii(state, Message);
+            logger.ErrorPii(new Exception(Message));
+            logger.InfoPii(Message);
+            logger.VerbosePii(Message);
+            logger.WarningPii(Message);
         }
 
         [TestMethod]
         [TestCategory("LoggerCallbackTests")]
         public void DefaultLog_UseDefaultLoggingIsTrue_Logged()
         {
-            var logger = Substitute.ForPartsOf<Logger>();
+            var logger = Substitute.ForPartsOf<Logger>(Guid.Empty);
 
             var defaultLogCounter = 0;
             logger.When(x => x.DefaultLog(Arg.Any<LogLevel>(), Arg.Any<string>())).Do(x => defaultLogCounter++);
-
-            var state = new CallState(Guid.NewGuid());
-
+            
             LoggerCallbackHandler.PiiLoggingEnabled = true;
             LoggerCallbackHandler.UseDefaultLogging = true;
 
-            logger.Verbose(state, Message);
+            logger.Verbose(Message);
             Assert.AreEqual(1, defaultLogCounter);
 
-            logger.Information(state, Message);
+            logger.Info(Message);
             Assert.AreEqual(2, defaultLogCounter);
 
-            logger.Warning(state, Message);
+            logger.Warning(Message);
             Assert.AreEqual(3, defaultLogCounter);
 
-            logger.Error(state, new Exception(Message));
+            logger.Error(new Exception(Message));
             Assert.AreEqual(4, defaultLogCounter);
         }
 
@@ -340,26 +335,24 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("LoggerCallbackTests")]
         public void DefaultLog_UseDefaultLoggingIsFalse_NotLogged()
         {
-            var logger = Substitute.ForPartsOf<Logger>();
+            var logger = Substitute.ForPartsOf<Logger>(Guid.Empty);
 
             var defaultLogCounter = 0;
             logger.When(x => x.DefaultLog(Arg.Any<LogLevel>(), Arg.Any<string>())).Do(x => defaultLogCounter++);
-
-            var state = new CallState(Guid.NewGuid());
-
+            
             LoggerCallbackHandler.PiiLoggingEnabled = true;
             LoggerCallbackHandler.UseDefaultLogging = false;
 
-            logger.Verbose(state, Message);
+            logger.Verbose(Message);
             Assert.AreEqual(0, defaultLogCounter);
 
-            logger.Information(state, Message);
+            logger.Info(Message);
             Assert.AreEqual(0, defaultLogCounter);
 
-            logger.Warning(state, Message);
+            logger.Warning(Message);
             Assert.AreEqual(0, defaultLogCounter);
 
-            logger.Error(state, new Exception(Message));
+            logger.Error(new Exception(Message));
             Assert.AreEqual(0, defaultLogCounter);
         }
 
@@ -367,20 +360,18 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("LoggerCallbackTests")]
         public void DefaultLog_UseDefaultLoggingIsTrueContainsPii_PiiNotLogged()
         {
-            var logger = Substitute.ForPartsOf<Logger>();
+            var logger = Substitute.ForPartsOf<Logger>(Guid.Empty);
 
             var piiCounter = 0;
             logger.When(x => x.DefaultLog(Arg.Any<LogLevel>(), Arg.Any<string>())).Do(x => piiCounter++);
-
-            var state = new CallState(Guid.NewGuid());
-
+            
             LoggerCallbackHandler.PiiLoggingEnabled = true;
             LoggerCallbackHandler.UseDefaultLogging = true;
 
-            logger.VerbosePii(state, Message);
-            logger.InformationPii(state, Message);
-            logger.WarningPii(state, Message);
-            logger.ErrorPii(state, new Exception(Message));
+            logger.VerbosePii(Message);
+            logger.InfoPii(Message);
+            logger.WarningPii(Message);
+            logger.ErrorPii(new Exception(Message));
 
             Assert.AreEqual(0, piiCounter);
         }

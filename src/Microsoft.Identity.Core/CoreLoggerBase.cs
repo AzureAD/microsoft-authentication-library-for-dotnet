@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,23 +26,26 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
-
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Core
 {
-    internal class CallState
+    internal abstract class CoreLoggerBase : ILogger
     {
-        public CallState(Guid correlationId)
-        {
-            this.CorrelationId = correlationId;
-            Logger = new Logger() {CorrelationId = correlationId.ToString()};
-        }
+        public static ILogger Default = null;
 
-        public Guid CorrelationId { get; set; }
-
-        public Logger Logger { get; internal set; }
-
-        public static CallState Default => new CallState(Guid.Empty);
+        public abstract void Error(string message);
+        public abstract void ErrorPii(string message);
+        public abstract void Warning(string message);
+        public abstract void WarningPii(string message);
+        public abstract void Info(string message);
+        public abstract void InfoPii(string message);
+        public abstract void Verbose(string message);
+        public abstract void VerbosePii(string message);
+        public abstract void Error(Exception ex);
+        public abstract void ErrorPii(Exception ex);
     }
 }

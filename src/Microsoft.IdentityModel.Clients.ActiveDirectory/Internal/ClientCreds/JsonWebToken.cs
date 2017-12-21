@@ -32,6 +32,8 @@ using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using System.Reflection;
+using Microsoft.Identity.Core;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
 {
@@ -218,7 +220,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
                 //Check to see if credential is our implementation or developer provided.
                 if (credential.GetType().ToString() != "Microsoft.IdentityModel.Clients.ActiveDirectory.ClientAssertionCertificate")
                 {
-                    CallState.Default.Logger.Warning(null, "The implementation of IClientAssertionCertificate is developer provided and it should be replaced with library provided implmentation.");
+                    CoreLoggerBase.Default.Warning("The implementation of IClientAssertionCertificate is developer provided and it should be replaced with library provided implementation.");
                     return;
                 }
 

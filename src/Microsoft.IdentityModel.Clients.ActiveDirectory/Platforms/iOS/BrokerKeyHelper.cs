@@ -31,6 +31,7 @@ using System.Security.Cryptography;
 using Foundation;
 using Security;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -77,7 +78,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 var result = SecKeyChain.Add(record);
                 if (result != SecStatusCode.Success)
                 {
-                    CallState.Default.Logger.Warning(null, "Failed to save broker key: " + result);
+                    CoreLoggerBase.Default.Warning("Failed to save broker key: " + result);
                 }
 
                 brokerKey = byteData.ToArray();

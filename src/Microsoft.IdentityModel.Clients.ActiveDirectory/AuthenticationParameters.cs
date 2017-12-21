@@ -31,6 +31,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
@@ -102,7 +103,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 var ex = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat,
                     nameof(authenticateHeader));
-                CallState.Default.Logger.Error(null, ex);
+                CoreLoggerBase.Default.Error(ex);
                 throw ex;
             }
 
@@ -118,7 +119,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 var newEx = new ArgumentException(AdalErrorMessage.InvalidAuthenticateHeaderFormat,
                     nameof(authenticateHeader), ex);
-                CallState.Default.Logger.Error(null, newEx);
+                CoreLoggerBase.Default.Error(newEx);
                 throw newEx;
             }
 
@@ -147,7 +148,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 using (await request.GetResponseAsync().ConfigureAwait(false))
                 {
                     var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                    CallState.Default.Logger.Error(null, ex);
+                    CoreLoggerBase.Default.Error(ex);
                     throw ex;
                 }
             }
@@ -157,7 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
-                    CallState.Default.Logger.ErrorPii(null, serviceEx);
+                    CoreLoggerBase.Default.ErrorPii(serviceEx);
                     throw serviceEx;
                 }
 
@@ -184,14 +185,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else
                 {
                     var ex = new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
-                    CallState.Default.Logger.Error(null, ex);
+                    CoreLoggerBase.Default.Error(ex);
                     throw ex;
                 }
             }
             else
             {
                 var ex = new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
-                CallState.Default.Logger.Error(null, ex);
+                CoreLoggerBase.Default.Error(ex);
                 throw ex;
             }
 

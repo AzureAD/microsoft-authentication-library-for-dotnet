@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,23 +26,25 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
-{
-    internal class TokenCachePlugin
-    {
-        public static void BeforeAccess(TokenCacheNotificationArgs args)
-        {
-            // Default implementation, do nothing
-        }
+[assembly: AssemblyProduct("Microsoft Identity Core")]
+[assembly: AssemblyDescription("")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCulture("")]
+[assembly: AssemblyCompany("Microsoft Corporation")]
+[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyMetadata("Serviceable", "True")]
 
-        public static void AfterAccess(TokenCacheNotificationArgs args)
-        {
-            // Default implementation, do nothing
-        }
-    }
-}
+[assembly: AssemblyFileVersion("1.0.0.0")]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+[assembly: ComVisible(false)]
+[assembly: CLSCompliant(true)]
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+[assembly: Guid("ff47962a-d498-4c63-b7e9-4db3653ad7db")]

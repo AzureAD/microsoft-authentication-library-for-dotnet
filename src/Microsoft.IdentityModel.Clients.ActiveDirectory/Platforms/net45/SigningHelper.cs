@@ -26,38 +26,27 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IdentityModel.Tokens;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Microsoft.Win32.SafeHandles;
+using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Permissions;
-using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native;
+using Microsoft.Win32.SafeHandles;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
-    internal class CryptographyHelper
+    internal static class SigningHelper
     {
-        public static string CreateSha256Hash(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return null;
-            }
-
-            using (SHA256Cng sha = new SHA256Cng())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
-
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        public static byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)
             {
@@ -121,7 +110,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 {
                     ProviderType = PROV_RSA_AES,
                     KeyContainerName = rsaProvider.CspKeyContainerInfo.KeyContainerName,
-                    KeyNumber = (int) rsaProvider.CspKeyContainerInfo.KeyNumber
+                    KeyNumber = (int)rsaProvider.CspKeyContainerInfo.KeyNumber
                 };
 
                 if (rsaProvider.CspKeyContainerInfo.MachineKeyStore)
@@ -175,7 +164,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         }
 
         /// <summary>
-        ///     Get a <see cref="SafeCertContextHandle" /> for the X509 certificate.  The caller of this
+        ///     Get a <see cref="System.Security.Cryptography.X509Certificates.SafeCertContextHandle" /> for the X509 certificate.  The caller of this
         ///     method owns the returned safe handle, and should dispose of it when they no longer need it.
         ///     This handle can be used independently of the lifetime of the original X509 certificate.
         /// </summary>

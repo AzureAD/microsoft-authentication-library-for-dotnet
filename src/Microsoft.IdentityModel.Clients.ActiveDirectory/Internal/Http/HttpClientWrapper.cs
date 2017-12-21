@@ -34,6 +34,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
@@ -45,14 +46,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         private int _timeoutInMilliSeconds = 30000;
         private readonly long _maxResponseSizeInBytes = 1048576;
 
-        public HttpClientWrapper(string uri, CallState callState)
+        public HttpClientWrapper(string uri, RequestContext requestContext)
         {
             this.uri = uri;
             this.Headers = new Dictionary<string, string>();
-            this.CallState = callState;
+            this.RequestContext = requestContext;
         }
 
-        protected CallState CallState { get; set; }
+        protected RequestContext RequestContext { get; set; }
 
         public IRequestParameters BodyParameters { get; set; }
 
@@ -89,10 +90,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     requestMessage.Headers.Add(kvp.Key, kvp.Value);
                 }
 
-                bool addCorrelationId = (this.CallState != null && this.CallState.CorrelationId != Guid.Empty);
+                bool addCorrelationId = (this.RequestContext != null && this.RequestContext.CorrelationId != Guid.Empty);
                 if (addCorrelationId)
                 {
-                    requestMessage.Headers.Add(OAuthHeader.CorrelationId, this.CallState.CorrelationId.ToString());
+                    requestMessage.Headers.Add(OAuthHeader.CorrelationId, this.RequestContext.CorrelationId.ToString());
                     requestMessage.Headers.Add(OAuthHeader.RequestCorrelationIdInResponse, "true");
                 }
 
@@ -171,16 +172,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     {
                         var msg = string.Format(CultureInfo.CurrentCulture,
                             "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
-                        CallState.Logger.Warning(CallState, msg);
-                        CallState.Logger.WarningPii(CallState, msg);
+                        RequestContext.Logger.Warning(msg);
+                        RequestContext.Logger.WarningPii(msg);
                     }
-                    else if (correlationIdInResponse != this.CallState.CorrelationId)
+                    else if (correlationIdInResponse != this.RequestContext.CorrelationId)
                     {
                         var msg = string.Format(CultureInfo.CurrentCulture,
                             "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
-                            correlationIdHeader, CallState.CorrelationId);
-                        CallState.Logger.Warning(this.CallState, msg);
-                        CallState.Logger.WarningPii(this.CallState, msg);
+                            correlationIdHeader, RequestContext.CorrelationId);
+                        RequestContext.Logger.Warning(msg);
+                        RequestContext.Logger.WarningPii(msg);
                     }
 
                     break;

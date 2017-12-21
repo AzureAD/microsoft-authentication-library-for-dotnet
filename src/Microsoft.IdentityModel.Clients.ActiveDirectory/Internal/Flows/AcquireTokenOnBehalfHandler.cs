@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
@@ -51,8 +52,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             var msg = string.Format(CultureInfo.InvariantCulture,
                 "Username provided in user assertion - " + string.IsNullOrEmpty(DisplayableId));
-            CallState.Logger.Verbose(CallState, msg);
-            CallState.Logger.VerbosePii(CallState, msg);
+            RequestContext.Logger.Verbose(msg);
+            RequestContext.Logger.VerbosePii(msg);
 
             this.SupportADFS = true;
         }

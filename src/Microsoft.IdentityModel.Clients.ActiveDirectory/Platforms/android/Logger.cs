@@ -34,6 +34,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class Logger : LoggerBase
     {
+        public Logger(Guid correlationId) : base(correlationId)
+        {
+        }
+
+        static Logger()
+        {
+            Default = new Logger(Guid.Empty);
+        }
+
         internal override void DefaultLog(LogLevel logLevel, string message)
         {
             switch (logLevel)

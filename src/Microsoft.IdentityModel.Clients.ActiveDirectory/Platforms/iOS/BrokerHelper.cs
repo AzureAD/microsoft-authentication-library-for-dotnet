@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using CoreFoundation;
 using Foundation;
 using UIKit;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
@@ -44,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         private static SemaphoreSlim brokerResponseReady = null;
         private static NSUrl brokerResponse = null;
 
-        public CallState CallState { get; set; }
+        public RequestContext RequestContext { get; set; }
         public IPlatformParameters PlatformParameters { get; set; }
 
         public bool CanInvokeBroker

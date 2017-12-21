@@ -32,6 +32,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Webkit;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
@@ -59,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = 
                     userAgent + BrokerConstants.ClientTlsNotSupported;
-            CallState.Default.Logger.Verbose(null, "UserAgent:" + webSettings.UserAgentString);
+            CoreLoggerBase.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
 
             webSettings.JavaScriptEnabled = true;
 
@@ -115,7 +116,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    CallState.Default.Logger.Verbose(null, "It is browser launch request");
+                    CoreLoggerBase.Default.Verbose("It is browser launch request");
                     OpenLinkInBrowser(url, ((Activity)view.Context));
                     view.StopLoading();
                     ((Activity)view.Context).Finish();
@@ -124,7 +125,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
                 if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    CallState.Default.Logger.Verbose(null, "It is an azure authenticator install request");
+                    CoreLoggerBase.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
                     this.Finish(view, url);
                     return true;

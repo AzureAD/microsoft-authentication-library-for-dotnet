@@ -33,8 +33,10 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
 {
@@ -187,8 +189,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
             // the value to 0.
             if (ExtendedExpiresIn < ExpiresIn)
             {
-                CallState.Default.Logger.Information(null,
-                    string.Format(CultureInfo.InvariantCulture,
+                CoreLoggerBase.Default.Info(string.Format(CultureInfo.InvariantCulture,
                         "ExtendedExpiresIn({0}) is less than ExpiresIn({1}). Set ExpiresIn as ExtendedExpiresIn",
                         this.ExtendedExpiresIn, this.ExpiresIn));
                 ExtendedExpiresIn = ExpiresIn;

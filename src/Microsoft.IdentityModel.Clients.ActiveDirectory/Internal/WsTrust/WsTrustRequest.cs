@@ -35,6 +35,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
@@ -73,9 +74,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
 
         private const string defaultAppliesTo = "urn:federation:MicrosoftOnline";
 
-        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, CallState callState, string cloudAudience)
+        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, RequestContext requestContext, string cloudAudience)
         {
-            IHttpClient request = new HttpClientWrapper(wsTrustAddress.Uri.AbsoluteUri, callState);
+            IHttpClient request = new HttpClientWrapper(wsTrustAddress.Uri.AbsoluteUri, requestContext);
             request.ContentType = "application/soap+xml";
             if (credential.UserAuthType == UserAuthType.IntegratedAuth)
             {
@@ -112,7 +113,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
                     using (Stream stream = EncodingHelper.GenerateStreamFromString(ex.WebResponse.ResponseString))
                     {
                         XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(stream);
-                        errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, callState);
+                        errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, requestContext);
                     }
                 }
                 catch (AdalException)

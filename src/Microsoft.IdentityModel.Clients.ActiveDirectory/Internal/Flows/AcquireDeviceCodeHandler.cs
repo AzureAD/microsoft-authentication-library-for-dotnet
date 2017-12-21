@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
@@ -42,13 +43,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private readonly Authenticator authenticator;
         private readonly ClientKey clientKey;
         private readonly string resource;
-        private readonly CallState callState;
+        private readonly RequestContext requestContext;
         private readonly string extraQueryParameters;
 
         public AcquireDeviceCodeHandler(Authenticator authenticator, string resource, string clientId, string extraQueryParameters)
         {
             this.authenticator = authenticator;
-            this.callState = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
+            this.requestContext = AcquireTokenHandlerBase.CreateCallState(this.authenticator.CorrelationId);
             this.clientKey = new ClientKey(clientId);
             this.resource = resource;
             this.extraQueryParameters = extraQueryParameters;
@@ -58,9 +59,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             var deviceCodeRequestParameters = new DictionaryRequestParameters(this.resource, this.clientKey);
 
-            if (this.callState != null && this.callState.CorrelationId != Guid.Empty)
+            if (this.requestContext != null && this.requestContext.CorrelationId != Guid.Empty)
             {
-                deviceCodeRequestParameters[OAuthParameter.CorrelationId] = this.callState.CorrelationId.ToString();
+                deviceCodeRequestParameters[OAuthParameter.CorrelationId] = this.requestContext.CorrelationId.ToString();
             }
             
                 IDictionary<string, string> adalIdParameters = AdalIdHelper.GetAdalIdParameters();
@@ -72,7 +73,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
             {
                 // Checks for extraQueryParameters duplicating standard parameters
-                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(extraQueryParameters, '&', false, this.callState);
+                Dictionary<string, string> kvps = EncodingHelper.ParseKeyValueList(extraQueryParameters, '&', false, this.requestContext);
                 foreach (KeyValuePair<string, string> kvp in kvps)
                 {
                     if (deviceCodeRequestParameters.ContainsKey(kvp.Key))
@@ -89,9 +90,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         internal async Task<DeviceCodeResult> RunHandlerAsync()
         {
-            await this.authenticator.UpdateFromTemplateAsync(this.callState).ConfigureAwait(false);
+            await this.authenticator.UpdateFromTemplateAsync(this.requestContext).ConfigureAwait(false);
             this.ValidateAuthorityType();
-            AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.callState);
+            AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.requestContext);
             DeviceCodeResponse response = await client.GetResponseAsync<DeviceCodeResponse>().ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(response.Error))

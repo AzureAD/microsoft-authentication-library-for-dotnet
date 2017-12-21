@@ -42,6 +42,7 @@ using Android.Content.PM;
 using Android.Util;
 using Java.Security;
 using Java.Util.Concurrent;
+using Microsoft.Identity.Core;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using Permission = Android.Content.PM.Permission;
 using Signature = Android.Content.PM.Signature;
@@ -56,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         private readonly string mBrokerTag;
         public const string DATA_USER_INFO = "com.microsoft.workaccount.user.info";
 
-        public CallState CallState { get; set; }
+        public RequestContext RequestContext { get; set; }
 
         public BrokerProxy()
         {
@@ -109,8 +110,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             {
                 var msg = string.Format(CultureInfo.InvariantCulture,
                     AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission);
-                CallState.Logger.Information(null, msg);
-                CallState.Logger.InformationPii(null, msg);
+                RequestContext.Logger.Info(msg);
+                RequestContext.Logger.InfoPii(msg);
 
                 return false;
             }
@@ -125,8 +126,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 Exception exception = new AdalException(
                     "calling this from your main thread can lead to deadlock");
 
-                CallState.Logger.Error(null, exception.ToString());
-                CallState.Logger.ErrorPii(null, exception);
+                RequestContext.Logger.Error(exception.ToString());
+                RequestContext.Logger.ErrorPii(exception);
 
                 if (mContext.ApplicationInfo.TargetSdkVersion >= BuildVersionCodes.Froyo)
                 {
@@ -196,8 +197,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
                 catch (Exception e)
                 {
-                    CallState.Logger.Error(null, e);
-                    CallState.Logger.ErrorPii(null, e);
+                    RequestContext.Logger.Error(e);
+                    RequestContext.Logger.ErrorPii(e);
                 }
             }
 
@@ -223,8 +224,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
                     // Making blocking request here
                     msg = "Received result from Authenticator";
-                    CallState.Logger.Verbose(null, msg);
-                    CallState.Logger.VerbosePii(null, msg);
+                    RequestContext.Logger.Verbose(msg);
+                    RequestContext.Logger.VerbosePii(msg);
 
                     Bundle bundleResult = (Bundle) result.GetResult(10000, TimeUnit.Milliseconds);
                     // Authenticator should throw OperationCanceledException if
@@ -233,13 +234,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
                 catch (OperationCanceledException e)
                 {
-                    CallState.Logger.Error(null, e);
-                    CallState.Logger.ErrorPii(null, e);
+                    RequestContext.Logger.Error(e);
+                    RequestContext.Logger.ErrorPii(e);
                 }
                 catch (AuthenticatorException e)
                 {
-                    CallState.Logger.Error(null, e);
-                    CallState.Logger.ErrorPii(null, e);
+                    RequestContext.Logger.Error(e);
+                    RequestContext.Logger.ErrorPii(e);
                 }
                 catch (Exception e)
                 {
@@ -247,20 +248,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     /*                    Logger.e(TAG, "Authenticator cancels the request", "",
                                                 ADALError.BROKER_AUTHENTICATOR_IO_EXCEPTION);*/
 
-                    CallState.Logger.Error(null, e);
-                    CallState.Logger.ErrorPii(null, e);
+                    RequestContext.Logger.Error(e);
+                    RequestContext.Logger.ErrorPii(e);
                 }
                 msg = "Returning result from Authenticator";
-                CallState.Logger.Verbose(null, msg);
-                CallState.Logger.VerbosePii(null, msg);
+                RequestContext.Logger.Verbose(msg);
+                RequestContext.Logger.VerbosePii(msg);
 
                 return authResult;
             }
             else
             {
                 var msg = "Target account is not found";
-                CallState.Logger.Verbose(null, msg);
-                CallState.Logger.VerbosePii(null, msg);
+                RequestContext.Logger.Verbose(msg);
+                RequestContext.Logger.VerbosePii(msg);
             }
 
             return null;
@@ -369,15 +370,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch (OperationCanceledException e)
             {
-                CallState.Logger.Error(null, e);
-                CallState.Logger.ErrorPii(null, e);
+                RequestContext.Logger.Error(e);
+                RequestContext.Logger.ErrorPii(e);
             }
             catch (Exception e)
             {
                 // Authenticator gets problem from webrequest or file read/write
                 var ex = new AdalException("Authenticator cancels the request", e);
-                CallState.Logger.Error(null, ex);
-                CallState.Logger.ErrorPii(null, ex);
+                RequestContext.Logger.Error(ex);
+                RequestContext.Logger.ErrorPii(ex);
             }
 
             return intent;
@@ -418,14 +419,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             catch (PackageManager.NameNotFoundException)
             {
                 var msg = "Calling App's package does not exist in PackageManager";
-                CallState.Logger.Information(null, msg);
-                CallState.Logger.InformationPii(null, msg);
+                RequestContext.Logger.Info(msg);
+                RequestContext.Logger.InfoPii(msg);
             }
             catch (NoSuchAlgorithmException)
             {
                 var msg = "Digest SHA algorithm does not exists";
-                CallState.Logger.Information(null, msg);
-                CallState.Logger.InformationPii(null, msg);
+                RequestContext.Logger.Info(msg);
+                RequestContext.Logger.InfoPii(msg);
             }
 
             return null;
@@ -511,8 +512,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     if (HasSupportToAddUserThroughBroker(packageName))
                     {
                         var msg = "Broker supports to add user through app";
-                        CallState.Logger.Verbose(null, msg);
-                        CallState.Logger.VerbosePii(null, msg);
+                        RequestContext.Logger.Verbose(msg);
+                        RequestContext.Logger.VerbosePii(msg);
 
                         return true;
                     }
@@ -546,13 +547,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
                 catch (Exception e)
                 {
-                    CallState.Logger.Error(null, e);
-                    CallState.Logger.ErrorPii(null, e);
+                    RequestContext.Logger.Error(e);
+                    RequestContext.Logger.ErrorPii(e);
                 }
 
                 var msg = "It could not check the uniqueid from broker. It is not using broker";
-                CallState.Logger.Verbose(null, msg);
-                CallState.Logger.VerbosePii(null, msg);
+                RequestContext.Logger.Verbose(msg);
+                RequestContext.Logger.VerbosePii(msg);
 
                 return false;
             }
@@ -716,8 +717,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                         null, null, null);
 
                     var msg = "Waiting for the result";
-                    CallState.Logger.Verbose(null, msg);
-                    CallState.Logger.VerbosePii(null, msg);
+                    RequestContext.Logger.Verbose(msg);
+                    RequestContext.Logger.VerbosePii(msg);
 
                     Bundle userInfoBundle = (Bundle) result.Result;
 

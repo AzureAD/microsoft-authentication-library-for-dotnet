@@ -29,6 +29,7 @@ using System;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 {
@@ -65,12 +66,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
             Init(authority, validateAuthority);
         }
 
-        public async Task UpdateAuthority(string authority, CallState callState)
+        public async Task UpdateAuthority(string authority, RequestContext requestContext)
         {
             Init(authority, this.ValidateAuthority);
 
             updatedFromTemplate = false;
-            await UpdateFromTemplateAsync(callState).ConfigureAwait(false);
+            await UpdateFromTemplateAsync(requestContext).ConfigureAwait(false);
         }
 
         public string Authority { get; private set; }
@@ -98,7 +99,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 
         public Guid CorrelationId { get; set; }
 
-        public async Task UpdateFromTemplateAsync(CallState callState)
+        public async Task UpdateFromTemplateAsync(RequestContext requestContext)
         {
             if (!this.updatedFromTemplate)
             {
@@ -108,7 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
                 string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
                 if (this.AuthorityType == AuthorityType.AAD)
                 {
-                    var metadata = await InstanceDiscovery.GetMetadataEntry(authorityUri, this.ValidateAuthority, callState);
+                    var metadata = await InstanceDiscovery.GetMetadataEntry(authorityUri, this.ValidateAuthority, requestContext);
                     host = metadata.PreferredNetwork;
                     // All the endpoints will use this updated host, and it affects future network calls, as desired.
                     // The Authority remains its original host, and will be used in TokenCache later.

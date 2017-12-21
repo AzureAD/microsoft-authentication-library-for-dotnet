@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
@@ -95,7 +96,7 @@ namespace Test.ADAL.NET.Unit
                     },
                 },
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                new CallState(new Guid()));
+                new RequestContext(new Guid()));
             }
             ResetInstanceDiscovery();
 
@@ -156,7 +157,7 @@ namespace Test.ADAL.NET.Unit
                     },
                 },
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                new CallState(new Guid()));
+                new RequestContext(new Guid()));
             }
             ResetInstanceDiscovery();
 
@@ -340,7 +341,7 @@ namespace Test.ADAL.NET.Unit
                     UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
                 },
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                new CallState(new Guid()));
+                new RequestContext(new Guid()));
             }
             ResetInstanceDiscovery();
 
@@ -454,7 +455,7 @@ namespace Test.ADAL.NET.Unit
                     UserAssertionHash = CryptographyHelper.CreateSha256Hash(cachenoise + accessToken)
                 },
                 TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                new CallState(new Guid()));
+                new RequestContext(new Guid()));
             }
             ResetInstanceDiscovery();
 
@@ -510,7 +511,7 @@ namespace Test.ADAL.NET.Unit
                 //cache entry has no user assertion hash
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new CallState(new Guid()));
+            new RequestContext(new Guid()));
             ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
@@ -567,7 +568,7 @@ namespace Test.ADAL.NET.Unit
                 //cache entry has no user assertion hash
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new CallState(new Guid()));
+            new RequestContext(new Guid()));
             ResetInstanceDiscovery();
 
             ClientCredential clientCredential = new ClientCredential(TestConstants.DefaultClientId,
@@ -743,7 +744,7 @@ namespace Test.ADAL.NET.Unit
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new CallState(new Guid()));
+            new RequestContext(new Guid()));
             ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -854,7 +855,7 @@ namespace Test.ADAL.NET.Unit
                 UserAssertionHash = CryptographyHelper.CreateSha256Hash(accessToken + "different")
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new CallState(new Guid()));
+            new RequestContext(new Guid()));
             ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))

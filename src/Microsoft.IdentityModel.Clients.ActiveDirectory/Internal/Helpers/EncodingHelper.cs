@@ -31,6 +31,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 {
@@ -107,12 +108,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
         /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
         /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
         /// <param name="lowercaseKeys">True to make all resulting keys lower-case</param>
-        /// <param name="callState">call state to pass correlation id and logger instance</param>
+        /// <param name="requestContext">call state to pass correlation id and logger instance</param>
         /// <returns>Dictionary of string key-value pairs</returns>
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
-            CallState callState)
+            RequestContext requestContext)
         {
-            return ParseKeyValueList(input, delimiter, urlDecode, lowercaseKeys, callState, strict: false);
+            return ParseKeyValueList(input, delimiter, urlDecode, lowercaseKeys, requestContext, strict: false);
         }
 
         /// <summary>
@@ -122,13 +123,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
         /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
         /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
         /// <param name="lowercaseKeys">True to make all resulting keys lower-case</param>
-        /// <param name="callState">call state to pass correlation id and logger instance</param>
+        /// <param name="requestContext">call state to pass correlation id and logger instance</param>
         /// <exception cref="ArgumentException">Thrown if a malformed key-value pair is present in <paramref name="input"/></exception>
         /// <returns>Dictionary of string key-value pairs</returns>
         public static Dictionary<string, string> ParseKeyValueListStrict(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
-            CallState callState)
+            RequestContext requestContext)
         {
-            return ParseKeyValueList(input, delimiter, urlDecode, lowercaseKeys, callState, strict: true);
+            return ParseKeyValueList(input, delimiter, urlDecode, lowercaseKeys, requestContext, strict: true);
         }
 
         /// <summary>
@@ -138,12 +139,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
         /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
         /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
         /// <param name="lowercaseKeys">True to make all resulting keys lower-case</param>
-        /// <param name="callState">call state to pass correlation id and logger instance</param>
+        /// <param name="requestContext">call state to pass correlation id and logger instance</param>
         /// <param name="strict">Throw <see cref="ArgumentException"/> when the input string contains a malformed key-value pair</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="strict"/> is true and a malformed key-value pair is present in <paramref name="input"/></exception>
         /// <returns>Dictionary of string key-value pairs</returns>
         private static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, bool lowercaseKeys,
-            CallState callState, bool strict)
+            RequestContext requestContext, bool strict)
         {
             var response = new Dictionary<string, string>();
 
@@ -172,12 +173,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 
                     value = value.Trim().Trim(new[] { '\"' }).Trim();
 
-                    if (response.ContainsKey(key) && callState != null)
+                    if (response.ContainsKey(key) && requestContext != null)
                     {
                         var msg = string.Format(CultureInfo.CurrentCulture,
                             "Key/value pair list contains redundant key '{0}'.", key);
-                        callState.Logger.Warning(callState, msg);
-                        callState.Logger.WarningPii(callState, msg);
+                        requestContext.Logger.Warning(msg);
+                        requestContext.Logger.WarningPii(msg);
                     }
 
                     response[key] = value;
@@ -197,12 +198,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
         /// <param name="input">Delimited string of key-value pairs</param>
         /// <param name="delimiter">Character used as a delimiter between key-value pairs</param>
         /// <param name="urlDecode">True to perform URL decoding of both the keys and values</param>
-        /// <param name="callState">call state to pass correlation id and logger instance</param>
+        /// <param name="requestContext">call state to pass correlation id and logger instance</param>
         /// <remarks>Keys are forced to lower-cased</remarks>
         /// <returns>Dictionary of string key-value pairs</returns>
-        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, CallState callState)
+        public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, RequestContext requestContext)
         {
-            return ParseKeyValueList(input, delimiter, urlDecode, true, callState, strict: false);
+            return ParseKeyValueList(input, delimiter, urlDecode, true, requestContext, strict: false);
         }
 
         /// <summary>

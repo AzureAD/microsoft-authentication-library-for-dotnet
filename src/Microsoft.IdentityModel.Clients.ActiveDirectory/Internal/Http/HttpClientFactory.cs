@@ -26,15 +26,16 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
 {
     internal class HttpClientFactory : IHttpClientFactory
     {
-        public IHttpClient Create(string uri, CallState callState)
+        public IHttpClient Create(string uri, RequestContext requestContext)
         {
-            return new HttpClientWrapper(uri, callState);
+            return new HttpClientWrapper(uri, requestContext);
         }
     }
 }

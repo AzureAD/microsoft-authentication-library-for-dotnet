@@ -59,8 +59,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             if (ResultEx == null)
             {
                 var msg = "No token matching arguments found in the cache";
-                CallState.Logger.Verbose(CallState, msg);
-                CallState.Logger.VerbosePii(CallState, msg);
+                RequestContext.Logger.Verbose(msg);
+                RequestContext.Logger.VerbosePii(msg);
 
                 throw new AdalSilentTokenAcquisitionException();
             }

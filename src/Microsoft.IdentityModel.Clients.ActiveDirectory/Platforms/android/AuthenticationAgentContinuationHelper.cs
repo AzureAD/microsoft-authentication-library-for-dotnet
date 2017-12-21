@@ -29,6 +29,7 @@ using System;
 using System.Globalization;
 using Android.App;
 using Android.Content;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
-            CallState.Default.Logger.Information(null, string.Format(CultureInfo.InvariantCulture,"Received Activity Result({0})", (int)resultCode));
+            CoreLoggerBase.Default.Info(string.Format(CultureInfo.InvariantCulture,"Received Activity Result({0})", (int)resultCode));
             switch ((int)resultCode)
             {
                 case (int)Result.Ok:

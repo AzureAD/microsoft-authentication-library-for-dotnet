@@ -109,8 +109,19 @@
     <Compile Include="*.cs" />
     <Compile Include="Properties\**\*.cs" />
     <Compile Include="Internal\**\*.cs" />
-    <Compile Include="Platforms\winrt\**\*.cs" />
+    <Compile Include="Platforms\winrt\BrokerHelper.cs" />
+    <Compile Include="Platforms\winrt\DeviceAuthHelper.cs" />
+    <Compile Include="Platforms\winrt\PlatformInformation.cs" />
+    <Compile Include="Platforms\winrt\PlatformParameters.cs" />
+    <Compile Include="Platforms\winrt\WebUI.cs" />
+    <Compile Include="Platforms\winrt\WebUIFactory.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Identity.Core\Microsoft.Identity.Core.VS2015.csproj">
+      <Project>{72f03823-45dc-4f77-bdcb-29e880bf1ac8}</Project>
+      <Name>Microsoft.Identity.Core.VS2015</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>

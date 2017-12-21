@@ -29,22 +29,14 @@ using Foundation;
 using Security;
 using System;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
+namespace Microsoft.Identity.Core.Cache
 {
-    internal class TokenCachePlugin
+    internal class LegacyCachePersistance
     {
         const string NAME = "ADAL.PCL.iOS";
-
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
-        public static void BeforeAccess(TokenCacheNotificationArgs args)
-        {
-            if (args.TokenCache.Count > 0)
-            {
-                // We assume that the cache has not changed since last write
-                return;
-            }
-
+        public static byte[] LoadCache() { 
             try
             {
                 SecStatusCode res;
@@ -62,25 +54,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
                 var match = SecKeyChain.QueryAsRecord(rec, out res);
                 if (res == SecStatusCode.Success && match != null && match.ValueData != null)
                 {
-                    byte[] dataBytes = match.ValueData.ToArray();
-                    if (dataBytes != null)
-                    {
-                        args.TokenCache.Deserialize(dataBytes);
-                    }
+                    return match.ValueData.ToArray();
+                    
                 }
             }
             catch (Exception ex)
             {
-                CallState.Default.Logger.Warning(null, "Failed to load cache: ");
-                CallState.Default.Logger.ErrorPii(null, ex);
+                CoreLoggerBase.Default.Warning("Failed to load cache: " + ex.Message);
+                CoreLoggerBase.Default.ErrorPii(ex);
                 // Ignore as the cache seems to be corrupt
             }
+
+            return null;
         }
-        
-        public static void AfterAccess(TokenCacheNotificationArgs args)
+
+        public static void WriteCache(byte[] serializedCache)
         {
-            if (args.TokenCache.HasStateChanged)
-            {
                 try
                 {
                     var s = new SecRecord(SecKind.GenericPassword)
@@ -97,27 +86,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
                     var err = SecKeyChain.Remove(s);
                     if (err != SecStatusCode.Success)
                     {
-                        CallState.Default.Logger.Warning(null, "Failed to remove cache record: " + err);
+                        CoreLoggerBase.Default.Warning("Failed to remove cache record: " + err);
                     }
 
-                    if (args.TokenCache.Count > 0)
+                    if (serializedCache!=null && serializedCache.Length > 0)
                     {
-                        s.ValueData = NSData.FromArray(args.TokenCache.Serialize());
+                        s.ValueData = NSData.FromArray(serializedCache);
                         err = SecKeyChain.Add(s);
                         if (err != SecStatusCode.Success)
                         {
-                            CallState.Default.Logger.Warning(null, "Failed to save cache record: " + err);
+                            CoreLoggerBase.Default.Warning("Failed to save cache record: " + err);
                         }
                     }
-
-                    args.TokenCache.HasStateChanged = false;
                 }
                 catch (Exception ex)
                 {
-                    CallState.Default.Logger.Warning(null, "Failed to save cache: ");
-                    CallState.Default.Logger.ErrorPii(null, ex);
+                    CoreLoggerBase.Default.Warning("Failed to save cache: " + ex.Message);
+                    CoreLoggerBase.Default.ErrorPii(ex);
                 }
-            }
         }
     }
 }

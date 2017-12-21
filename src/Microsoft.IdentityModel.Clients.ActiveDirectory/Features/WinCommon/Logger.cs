@@ -32,9 +32,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class Logger : LoggerBase
     {
+        public Logger(Guid correlationId) : base(correlationId)
+        {
+        }
+
         static Logger()
         {
             AdalEventSource = new AdalEventSource();
+            Default = new Logger(Guid.Empty);
         }
 
         internal static AdalEventSource AdalEventSource { get; private set; }

@@ -32,6 +32,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
@@ -66,18 +67,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
 
-        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, CallState callState)
+        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, RequestContext requestContext)
         {
-            XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, callState).ConfigureAwait(false);
-            return ExtractWsTrustAddressFromMex(mexDocument, userAuthType, callState);
+            XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, requestContext).ConfigureAwait(false);
+            return ExtractWsTrustAddressFromMex(mexDocument, userAuthType, requestContext);
         }
 
-        internal static async Task<XDocument> FetchMexAsync(string federationMetadataUrl, CallState callState)
+        internal static async Task<XDocument> FetchMexAsync(string federationMetadataUrl, RequestContext requestContext)
         {
             XDocument mexDocument;
             try
             {
-                IHttpClient request = new HttpClientWrapper(federationMetadataUrl, callState);
+                IHttpClient request = new HttpClientWrapper(federationMetadataUrl, requestContext);
                 using (var response = await request.GetResponseAsync().ConfigureAwait(false))
                 {
                     mexDocument = XDocument.Load(EncodingHelper.GenerateStreamFromString(response.ResponseString), LoadOptions.None);
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
             return mexDocument;
         }
 
-        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, CallState callState)
+        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, RequestContext requestContext)
         {
             WsTrustAddress address = null;
             MexPolicy policy = null;

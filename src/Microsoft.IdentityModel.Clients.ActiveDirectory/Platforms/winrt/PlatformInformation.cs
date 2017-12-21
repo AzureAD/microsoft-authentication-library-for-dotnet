@@ -35,6 +35,7 @@ using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Windows.Storage;
 using Windows.System.UserProfile;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
@@ -87,7 +88,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return deviceInformation.SystemProductName;
         }
 
-        public override async Task<bool> IsUserLocalAsync(CallState callState)
+        public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             if (!UserInformation.NameAccessAllowed)
             {
@@ -96,8 +97,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
                 var msg =
                     "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.";
-                callState.Logger.Information(callState, msg);
-                callState.Logger.InformationPii(callState, msg);
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
 
                 return false;
             }
@@ -109,8 +110,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             catch (UnauthorizedAccessException)
             {
                 var msg = "Cannot try Windows Integrated Authentication due to lack of Enterprise capability.";
-                callState.Logger.Information(callState, msg);
-                callState.Logger.InformationPii(callState, msg);
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
 
                 // This mostly means Enterprise capability is missing, so WIA cannot be used and
                 // we return true to add form auth parameter in the caller.
@@ -166,21 +167,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                    promptBehavior != PromptBehavior.SelectAccount;
         }
 
-        public override Uri ValidateRedirectUri(Uri redirectUri, CallState callState)
+        public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
                 redirectUri = Constant.SsoPlaceHolderUri;
 
                 var msg = "ms-app redirect Uri is used";
-                callState.Logger.Verbose(callState, msg);
-                callState.Logger.VerbosePii(callState, msg);
+                requestContext.Logger.Verbose(msg);
+                requestContext.Logger.VerbosePii(msg);
             }
 
             return redirectUri;
         }
 
-        public override string GetRedirectUriAsString(Uri redirectUri, CallState callState)
+        public override string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
         {
             return ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ?
                 WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString :

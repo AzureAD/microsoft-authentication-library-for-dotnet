@@ -33,6 +33,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
@@ -253,14 +254,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (!this.webBrowser.IsDisposed && this.webBrowser.IsBusy)
             {
-                CallState.Default.Logger.Verbose(null,
-                    string.Format(CultureInfo.CurrentCulture,
+                CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
                         " WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                         this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                         this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
                 this.webBrowser.Stop();
-                CallState.Default.Logger.Verbose(null,
-                    string.Format(CultureInfo.CurrentCulture,
+                CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
                         " WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                         this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                         this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));

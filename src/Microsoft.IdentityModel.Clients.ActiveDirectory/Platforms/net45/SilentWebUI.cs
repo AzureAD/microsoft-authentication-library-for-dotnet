@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
 using System;
 using System.Threading;
 using System.Windows.Forms;
@@ -95,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int)navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    CallState.Default.Logger.Information(null, "Silent login thread did not complete on time.");
+                    CoreLoggerBase.Default.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.

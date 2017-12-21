@@ -38,6 +38,7 @@ using Android.Content.PM;
 using Java.Security;
 using Java.IO;
 using Android.Util;
+using Microsoft.Identity.Core;
 
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
@@ -57,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -86,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             else
             {
-                CallState.Default.Logger.Information(null, "No pending request for response from web ui.");
+                CoreLoggerBase.Default.Info("No pending request for response from web ui.");
             }
         }
     }

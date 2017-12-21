@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -46,10 +47,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, callState);
+            Authenticate(authorizationUri, redirectUri, requestContext);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
             this.parameters = null;
@@ -62,7 +63,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             returnedUriReady.Release();
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             try
             {

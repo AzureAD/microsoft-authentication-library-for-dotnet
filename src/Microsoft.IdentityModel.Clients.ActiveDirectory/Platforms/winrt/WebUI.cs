@@ -30,6 +30,7 @@ using System.Globalization;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -49,7 +50,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             this.useCorporateNetwork = ((PlatformParameters)parameters).UseCorporateNetwork;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, CallState callState)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
             if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
@@ -102,12 +103,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 throw new AdalException(AdalError.AuthenticationUiFailed, ex);
             }
 
-            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, callState);
+            AuthorizationResult result = ProcessAuthorizationResult(webAuthenticationResult, requestContext);
 
             return result;
         }
 
-        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult, CallState callState)
+        private static AuthorizationResult ProcessAuthorizationResult(WebAuthenticationResult webAuthenticationResult, RequestContext requestContext)
         {
             AuthorizationResult result;
             switch (webAuthenticationResult.ResponseStatus)

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -32,7 +33,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class BrokerHelper
     {
-        public CallState CallState { get; set; }
+        public RequestContext RequestContext { get; set; }
+
         public IPlatformParameters PlatformParameters { get; set; }
 
         public bool CanInvokeBroker { get { return false; } }

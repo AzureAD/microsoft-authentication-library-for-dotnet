@@ -30,12 +30,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class BrokerHelper
     {
-        public CallState CallState { get; set; }
+        public RequestContext RequestContext { get; set; }
         public IPlatformParameters PlatformParameters { get; set; }
 
         public bool CanInvokeBroker { get { return false; } }

@@ -29,14 +29,21 @@ using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
-    internal abstract class LoggerBase
+    internal abstract class LoggerBase : CoreLoggerBase
     {
         internal abstract void DefaultLog(LogLevel logLevel, string message);
+        private readonly Guid _correlationId;
 
-        private void Log(CallState callState, LogLevel logLevel, string message, bool containsPii,
+        protected LoggerBase(Guid correlationId)
+        {
+            _correlationId = correlationId;
+        }
+
+        private void Log(LogLevel logLevel, string message, bool containsPii,
             [CallerFilePath] string callerFilePath = "")
         {
             if (!LoggerCallbackHandler.PiiLoggingEnabled && containsPii)
@@ -44,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 return;
             }
 
-            var formattedMessage = FormatLogMessage(callState, GetCallerFilename(callerFilePath), message);
+            var formattedMessage = FormatLogMessage(GetCallerFilename(callerFilePath), message);
 
             if (LoggerCallbackHandler.UseDefaultLogging && !containsPii)
             {
@@ -67,56 +74,59 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return callerFilePath.Substring(callerFilePath.LastIndexOf("\\", StringComparison.Ordinal) + 1);
         }
 
-        internal string CorrelationId { get; set; } = string.Empty;
-
-        internal string FormatLogMessage(CallState callState, string classOrComponent, string message)
+        internal string FormatLogMessage(string classOrComponent, string message)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0:O}: {1} - {2}: {3}", DateTime.UtcNow, CorrelationId, classOrComponent, message);
+            return string.Format(CultureInfo.InvariantCulture, "{0:O}: {1} - {2}: {3}", DateTime.UtcNow, _correlationId, classOrComponent, message);
         }
 
-        internal void Verbose(CallState callState, string message)
+        public override void InfoPii(string message)
         {
-            Log(callState, LogLevel.Verbose, message, false);
+            Log(LogLevel.Information, message, true);
         }
 
-        internal void VerbosePii(CallState callState, string message)
+        public override void Verbose(string message)
         {
-            Log(callState, LogLevel.Verbose, message, true);
+            Log(LogLevel.Verbose, message, false);
         }
 
-        internal void Information(CallState callState, string message)
+        public override void VerbosePii(string message)
         {
-            Log(callState, LogLevel.Information, message, false);
+            Log(LogLevel.Verbose, message, true);
         }
 
-        internal void InformationPii(CallState callState, string message)
+        public override void ErrorPii(string message)
         {
-            Log(callState, LogLevel.Information, message, true);
+            Log(LogLevel.Error, message, true);
         }
 
-        internal void Warning(CallState callState, string message)
+        public override void Warning(string message)
         {
-            Log(callState, LogLevel.Warning, message, false);
+            Log(LogLevel.Warning, message, false);
         }
 
-        internal void WarningPii(CallState callState, string message)
+        public override void WarningPii(string message)
         {
-            Log(callState, LogLevel.Warning, message, true);
+            Log(LogLevel.Warning, message, true);
         }
 
-        internal void Error(CallState callState, Exception ex)
+        public override void Info(string message)
         {
-            Log(callState, LogLevel.Error, ex.GetPiiScrubbedDetails(), false);
+            Log(LogLevel.Information, message, false);
         }
 
-        internal void ErrorPii(CallState callState, Exception ex)
+        public override void Error(Exception ex)
         {
-            Log(callState, LogLevel.Error, ex.ToString(), true);
+            Log(LogLevel.Error, ex.GetPiiScrubbedDetails(), false);
         }
 
-        internal void Error(CallState callState, string message)
+        public override void ErrorPii(Exception ex)
         {
-            Log(callState, LogLevel.Error, message, false);
+            ErrorPii(ex.ToString());
+        }
+
+        public override void Error(string message)
+        {
+            Log(LogLevel.Error, message, false);
         }
     }
 }
