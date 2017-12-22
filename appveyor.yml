@@ -1,9 +1,10 @@
 clone_folder: c:\AADDotNetLib
 
+#retry installation
 install:
-- ps: .\InstallAndroidSDK.ps1
+ - appveyor-retry powershell .\InstallAndroidSDK.ps1
 
-image: Visual Studio 2017
+image: Previous Visual Studio 2017
 
 configuration: Release
 
