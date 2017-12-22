@@ -33,6 +33,7 @@ using Android.Accounts;
 using Android.App;
 using Android.Content;
 using Java.IO;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
@@ -95,9 +96,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         public void AcquireToken(IDictionary<string, string> brokerPayload)
         {
 
-            if (brokerPayload.ContainsKey("broker_install_url"))
+            if (brokerPayload.ContainsKey(BrokerParameter.BrokerInstallUrl))
             {
-                string url = brokerPayload["broker_install_url"];
+                string url = brokerPayload[BrokerParameter.BrokerInstallUrl];
                 Uri uri = new Uri(url);
                 string query = uri.Query;
                 if (query.StartsWith("?"))
@@ -182,7 +183,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     // Log the initial request but not force a prompt
                 }
 
-                if (brokerPayload.ContainsKey("silent_broker_flow"))
+                if (brokerPayload.ContainsKey(BrokerParameter.SilentBrokerFlow))
                 {
                     throw new AdalSilentTokenAcquisitionException();
                 }

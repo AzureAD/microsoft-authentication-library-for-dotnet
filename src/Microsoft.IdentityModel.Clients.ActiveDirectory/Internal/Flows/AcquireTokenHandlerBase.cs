@@ -45,12 +45,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         protected const string NullResource = "null_resource_as_optional";
         protected static readonly Task CompletedTask = Task.FromResult(false);
         private readonly TokenCache tokenCache;
-        protected readonly IDictionary<string, string> brokerParameters;
+        internal readonly IDictionary<string, string> brokerParameters;
         protected CacheQueryData CacheQueryData = new CacheQueryData();
         protected readonly BrokerHelper brokerHelper = new BrokerHelper();
         private AdalHttpClient client = null;
         protected PlatformInformation platformInformation = new PlatformInformation();
-        protected readonly RequestContext RequestContext;
+        internal readonly RequestContext RequestContext;
 
         protected AcquireTokenHandlerBase(RequestData requestData)
         {
@@ -107,11 +107,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.SupportADFS = false;
 
             this.brokerParameters = new Dictionary<string, string>();
-            brokerParameters["authority"] = requestData.Authenticator.Authority;
-            brokerParameters["resource"] = requestData.Resource;
-            brokerParameters["client_id"] = requestData.ClientKey.ClientId;
-            brokerParameters["correlation_id"] = RequestContext.CorrelationId.ToString();
-            brokerParameters["client_version"] = AdalIdHelper.GetAdalVersion();
+            brokerParameters[BrokerParameter.Authority] = requestData.Authenticator.Authority;
+            brokerParameters[BrokerParameter.Resource] = requestData.Resource;
+            brokerParameters[BrokerParameter.ClientId] = requestData.ClientKey.ClientId;
+            brokerParameters[BrokerParameter.CorrelationId] = RequestContext.CorrelationId.ToString();
+            brokerParameters[BrokerParameter.ClientVersion] = AdalIdHelper.GetAdalVersion();
             this.ResultEx = null;
 
             CacheQueryData.ExtendedLifeTimeEnabled = requestData.ExtendedLifeTimeEnabled;

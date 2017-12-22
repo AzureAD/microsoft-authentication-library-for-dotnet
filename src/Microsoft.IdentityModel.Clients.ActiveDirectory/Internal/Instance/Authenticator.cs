@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
 
         private void Init(string authority, bool validateAuthority)
         {
-            this.Authority = CanonicalizeUri(authority);
+            this.Authority = EnsureUrlEndsWithForwardSlash(authority);
 
             this.AuthorityType = DetectAuthorityType(this.Authority);
 
@@ -121,7 +121,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
                 this.AuthorizationUri = InstanceDiscovery.FormatAuthorizeEndpoint(host, tenant);
                 this.DeviceCodeUri = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/devicecode", host, tenant);
                 this.TokenUri = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/token", host, tenant);
-                this.UserRealmUri = CanonicalizeUri(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm", host));
+                this.UserRealmUri = EnsureUrlEndsWithForwardSlash(string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm", host));
                 this.IsTenantless = (string.Compare(tenant, TenantlessTenantName, StringComparison.OrdinalIgnoreCase) == 0);
                 this.SelfSignedJwtAudience = this.TokenUri;
                 this.updatedFromTemplate = true;
@@ -167,7 +167,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
             return authorityType;
         }
 
-        private static string CanonicalizeUri(string uri)
+        internal static string EnsureUrlEndsWithForwardSlash(string uri)
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {

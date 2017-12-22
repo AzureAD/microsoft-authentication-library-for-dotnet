@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private const string AnyUserId = "AnyUser";
 
         private static readonly UserIdentifier AnyUserSingleton =
-            new UserIdentifier(AnyUserId, UserIdentifierType.UniqueId);
+            new UserIdentifier(AnyUserId, UserIdentifierType.OptionalDisplayableId);
 
         /// <summary>
         /// 

@@ -53,7 +53,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         private readonly string claims;
 
-        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters, UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
+        public AcquireTokenInteractiveHandler(RequestData requestData, Uri redirectUri, IPlatformParameters parameters,
+            UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
             : base(requestData)
         {
             this.redirectUri = platformInformation.ValidateRedirectUri(redirectUri, RequestContext);
@@ -101,20 +102,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 this.LoadFromCache = (requestData.TokenCache != null && parameters != null && platformInformation.GetCacheLoadPolicy(parameters));
             }
 
-            this.brokerParameters["force"] = "NO";
+            this.brokerParameters[BrokerParameter.Force] = "NO";
             if (userId != UserIdentifier.AnyUser)
             {
-                this.brokerParameters["username"] = userId.Id;
+                this.brokerParameters[BrokerParameter.Username] = userId.Id;
             }
             else
             {
-                this.brokerParameters["username"] = string.Empty;
+                this.brokerParameters[BrokerParameter.Username] = string.Empty;
             }
-            this.brokerParameters["username_type"] = userId.Type.ToString();
+            this.brokerParameters[BrokerParameter.UsernameType] = userId.Type.ToString();
 
-            this.brokerParameters["redirect_uri"] = this.redirectUri.AbsoluteUri;
-            this.brokerParameters["extra_qp"] = extraQueryParameters;
-            this.brokerParameters["claims"] = claims;
+            this.brokerParameters[BrokerParameter.RedirectUri] = this.redirectUri.AbsoluteUri;
+            this.brokerParameters[BrokerParameter.ExtraQp] = extraQueryParameters;
+            this.brokerParameters[BrokerParameter.Claims] = claims;
             brokerHelper.PlatformParameters = authorizationParameters;
         }
 
@@ -275,7 +276,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 && !string.IsNullOrEmpty(this.authorizationResult.Code)
                 && this.authorizationResult.Code.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
             {
-                this.brokerParameters["broker_install_url"] = this.authorizationResult.Code;
+                this.brokerParameters[BrokerParameter.BrokerInstallUrl] = this.authorizationResult.Code;
                 return true;
             }
 
