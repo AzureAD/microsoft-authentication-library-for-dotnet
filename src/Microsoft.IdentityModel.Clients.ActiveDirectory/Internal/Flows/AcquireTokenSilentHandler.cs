@@ -27,6 +27,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
@@ -54,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.brokerParameters[BrokerParameter.SilentBrokerFlow] = null; //add key
         }
 
-        protected override Task<AuthenticationResultEx> SendTokenRequestAsync()
+        protected override Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             if (ResultEx == null)
             {

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
@@ -60,11 +61,11 @@ namespace Test.ADAL.NET.Integration
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id",
                 "displayable@id.com");
-            cache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            cache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "something-invalid",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "some-access-token", DateTimeOffset.UtcNow)
+                Result = new AdalResult("Bearer", "some-access-token", DateTimeOffset.UtcNow)
             };
 
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, cache);
@@ -99,11 +100,11 @@ namespace Test.ADAL.NET.Integration
             TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "existing-access-token",
+                Result = new AdalResult("Bearer", "existing-access-token",
                     DateTimeOffset.UtcNow + TimeSpan.FromMinutes(100))
             };
 
@@ -156,11 +157,11 @@ namespace Test.ADAL.NET.Integration
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
 
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some_rt",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "existing-access-token",
+                Result = new AdalResult("Bearer", "existing-access-token",
                     DateTimeOffset.UtcNow)
             };
 

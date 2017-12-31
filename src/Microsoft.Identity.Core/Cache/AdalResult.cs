@@ -30,18 +30,16 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
-using Microsoft.Identity.Core.Cache;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Core.Cache
 {
     /// <summary>
     /// Contains the results of one token acquisition operation. 
     /// </summary>
     [DataContract]
-    public sealed class AuthenticationResult
+    public sealed class AdalResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
-        private readonly AdalResult _adalResult;
 
         /// <summary>
         /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
@@ -49,71 +47,84 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="accessTokenType">Type of the Access Token returned</param>
         /// <param name="accessToken">The Access Token requested</param>
         /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
-        internal AuthenticationResult(AdalResult adalResult)
+        internal AdalResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn)
         {
-            if (adalResult == null)
-            {
-                throw new ArgumentNullException(nameof(adalResult));
-            }
+            this.AccessTokenType = accessTokenType;
+            this.AccessToken = accessToken;
+            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            this.ExtendedExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+        }
 
-            _adalResult = adalResult;
-            UserInfo = new UserInfo(_adalResult.UserInfo);
+        /// <summary>
+        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
+        /// </summary>
+        /// <param name="accessTokenType">Type of the Access Token returned</param>
+        /// <param name="accessToken">The Access Token requested</param>
+        /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        /// <param name="extendedExpiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
+        internal AdalResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn,
+            DateTimeOffset extendedExpiresOn)
+        {
+            this.AccessTokenType = accessTokenType;
+            this.AccessToken = accessToken;
+            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            this.ExtendedExpiresOn = DateTime.SpecifyKind(extendedExpiresOn.DateTime, DateTimeKind.Utc);
         }
 
         /// <summary>
         /// Gets the type of the Access Token returned. 
         /// </summary>
         [DataMember]
-        public string AccessTokenType => _adalResult.AccessTokenType;
+        public string AccessTokenType { get; private set; }
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
         [DataMember]
-        public string AccessToken => _adalResult.AccessToken;
+        public string AccessToken { get; internal set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid.
         /// This value is calculated based on current UTC time measured locally and the value expiresIn received from the service.
         /// </summary>
         [DataMember]
-        public DateTimeOffset ExpiresOn => _adalResult.ExpiresOn;
+        public DateTimeOffset ExpiresOn { get; internal set; }
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the AccessToken property ceases to be valid in ADAL's extended LifeTime.
         /// This value is calculated based on current UTC time measured locally and the value ext_expiresIn received from the service.
         /// </summary>
         [DataMember]
-        internal DateTimeOffset ExtendedExpiresOn => _adalResult.ExtendedExpiresOn;
+        internal DateTimeOffset ExtendedExpiresOn { get; set; }
 
         /// <summary>
         /// Gives information to the developer whether token returned is during normal or extended lifetime.
         /// </summary>
         [DataMember]
-        public bool ExtendedLifeTimeToken => _adalResult.ExtendedLifeTimeToken;
+        public bool ExtendedLifeTimeToken { get; internal set; }
 
         /// <summary>
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is not returned by the service.
         /// </summary>
         [DataMember]
-        public string TenantId => _adalResult.TenantId;
+        public string TenantId { get; internal set; }
 
         /// <summary>
         /// Gets user information including user Id. Some elements in UserInfo might be null if not returned by the service.
         /// </summary>
         [DataMember]
-        public UserInfo UserInfo { get; internal set; }
+        public AdalUserInfo UserInfo { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
         [DataMember]
-        public string IdToken => _adalResult.IdToken;
+        public string IdToken { get; internal set; }
 
         /// <summary>
         /// Gets the authority that has issued the token.
         /// </summary>
-        public string Authority => _adalResult.Authority;
+        public string Authority { get; internal set; }
 
         /// <summary>
         /// Creates authorization header from authentication result.
@@ -124,13 +135,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return Oauth2AuthorizationHeader + this.AccessToken;
         }
 
-        internal void UpdateTenantAndUserInfo(string tenantId, string idToken, UserInfo userInfo)
+        internal void UpdateTenantAndUserInfo(string tenantId, string idToken, AdalUserInfo userInfo)
         {
-            _adalResult.TenantId = tenantId;
-            _adalResult.IdToken = idToken;
+            this.TenantId = tenantId;
+            this.IdToken = idToken;
             if (userInfo != null)
             {
-                this.UserInfo = new UserInfo(userInfo);
+                this.UserInfo = new AdalUserInfo(userInfo);
             }
         }
     }

@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Json;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Newtonsoft.Json;
@@ -108,10 +109,10 @@ namespace WinFormsAutomationApp
             Task<string> myTask = Task.Run(async () =>
             {
                 TokenCache.DefaultShared.ReadItems();
-                List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
+                List<KeyValuePair<TokenCacheKey, AdalResultWrapper>> CacheItems = QueryCache(input["authority"],
                     input["client_id"], input["user_identifier"]);
 
-                foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> item in CacheItems)
+                foreach (KeyValuePair<TokenCacheKey, AdalResultWrapper> item in CacheItems)
                 {
                     // if resource was passed to cache lookup, then only expire token for that resource.
                     // otherwise expire all matching access tokens.
@@ -140,10 +141,10 @@ namespace WinFormsAutomationApp
                 try
                 {
                     TokenCache.DefaultShared.ReadItems();
-                    List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> CacheItems = QueryCache(input["authority"],
+                    List<KeyValuePair<TokenCacheKey, AdalResultWrapper>> CacheItems = QueryCache(input["authority"],
                     input["client_id"], input["user_identifier"]);
 
-                    foreach (KeyValuePair<TokenCacheKey, AuthenticationResultEx> item in CacheItems)
+                    foreach (KeyValuePair<TokenCacheKey, AdalResultWrapper> item in CacheItems)
                     {
                         var updated = item;
                         updated.Value.RefreshToken = "bad_refresh_token";
@@ -372,7 +373,7 @@ namespace WinFormsAutomationApp
             });
         }
 
-        private static async Task UpdateCache(KeyValuePair<TokenCacheKey, AuthenticationResultEx> item, KeyValuePair<TokenCacheKey, AuthenticationResultEx> updated)
+        private static async Task UpdateCache(KeyValuePair<TokenCacheKey, AdalResultWrapper> item, KeyValuePair<TokenCacheKey, AdalResultWrapper> updated)
         {
             NotifyBeforeAccessCache(item.Key.Resource, item.Key.ClientId, item.Value.Result.UserInfo.UniqueId, item.Value.Result.UserInfo.DisplayableId);
             TokenCache.DefaultShared.tokenCacheDictionary[updated.Key] = updated.Value;
@@ -382,7 +383,7 @@ namespace WinFormsAutomationApp
             NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
         }
 
-        private static List<KeyValuePair<TokenCacheKey, AuthenticationResultEx>> QueryCache(string authority,
+        private static List<KeyValuePair<TokenCacheKey, AdalResultWrapper>> QueryCache(string authority,
             string clientId, string displayableId)
         {
             return TokenCache.DefaultShared.tokenCacheDictionary.Where(

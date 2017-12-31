@@ -27,50 +27,37 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Core.Cache;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Core.Cache
 {
     /// <summary>
     /// Contains information of a single user. This information is used for token cache lookup. Also if created with userId, userId is sent to the service when login_hint is accepted.
     /// </summary>
     [DataContract]
-    public sealed class UserInfo
+    public sealed class AdalUserInfo
     {
         /// <summary>
         /// Create user information for token cache lookup
         /// </summary>
-        public UserInfo()
-        {
-        }
-
-        /// <summary>
-        /// Create user information for token cache lookup
-        /// </summary>
-        internal UserInfo(AdalUserInfo adalUserInfo) : this(adalUserInfo?.UniqueId, adalUserInfo?.DisplayableId,
-            adalUserInfo?.GivenName, adalUserInfo?.FamilyName, adalUserInfo?.IdentityProvider,
-            adalUserInfo?.PasswordChangeUrl, adalUserInfo?.PasswordExpiresOn)
+        public AdalUserInfo()
         {
         }
 
         /// <summary>
         /// Create user information copied from another UserInfo object
         /// </summary>
-        public UserInfo(UserInfo other) : this(other?.UniqueId, other?.DisplayableId, other?.GivenName,
-            other?.FamilyName, other?.IdentityProvider, other?.PasswordChangeUrl, other?.PasswordExpiresOn)
+        public AdalUserInfo(AdalUserInfo other)
         {
-        }
-
-        private UserInfo(string uniqueId, string displayableId, string givenName, string familyName,
-            string identityProvider, Uri passwordChangeUrl, DateTimeOffset? passwordExpiresOn)
-        {
-            this.UniqueId = uniqueId;
-            this.DisplayableId = displayableId;
-            this.GivenName = givenName;
-            this.FamilyName = familyName;
-            this.IdentityProvider = identityProvider;
-            this.PasswordChangeUrl = passwordChangeUrl;
-            this.PasswordExpiresOn = passwordExpiresOn;
+            if (other != null)
+            {
+                this.UniqueId = other.UniqueId;
+                this.DisplayableId = other.DisplayableId;
+                this.GivenName = other.GivenName;
+                this.FamilyName = other.FamilyName;
+                this.IdentityProvider = other.IdentityProvider;
+                this.PasswordChangeUrl = other.PasswordChangeUrl;
+                this.PasswordExpiresOn = other.PasswordExpiresOn;
+            }
         }
 
         /// <summary>

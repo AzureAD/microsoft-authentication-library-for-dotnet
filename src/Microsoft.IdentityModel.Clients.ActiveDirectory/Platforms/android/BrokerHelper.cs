@@ -35,6 +35,7 @@ using Android.Content;
 using Java.IO;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
@@ -44,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     internal class BrokerHelper
     {
         private static SemaphoreSlim readyForResponse = null;
-        private static AuthenticationResultEx resultEx = null;
+        private static AdalResultWrapper resultEx = null;
 
         private readonly BrokerProxy mBrokerProxy = new BrokerProxy(Application.Context);
 
@@ -73,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         }
 
 
-        public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public async Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             mBrokerProxy.RequestContext = RequestContext;
 
@@ -221,7 +222,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         {
             if (resultCode != BrokerResponseCode.ResponseReceived)
             {
-                resultEx = new AuthenticationResultEx
+                resultEx = new AdalResultWrapper
                 {
                     Exception =
                         new AdalException(data.GetStringExtra(BrokerConstants.ResponseErrorCode),

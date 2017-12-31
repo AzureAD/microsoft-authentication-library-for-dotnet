@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
@@ -125,7 +126,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected ClientKey ClientKey { get; private set; }
 
-        protected AuthenticationResultEx ResultEx { get; set; }
+        protected AdalResultWrapper ResultEx { get; set; }
 
         protected TokenSubjectType TokenSubjectType { get; private set; }
 
@@ -142,7 +143,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         public async Task<AuthenticationResult> RunAsync()
         {
             bool notifiedBeforeAccessCache = false;
-            AuthenticationResultEx extendedLifetimeResultEx = null;
+            AdalResultWrapper extendedLifetimeResultEx = null;
 
             try
             {
@@ -202,7 +203,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 }
 
                 await this.PostRunAsync(ResultEx.Result).ConfigureAwait(false);
-                return ResultEx.Result;
+                return new AuthenticationResult(ResultEx.Result);
             }
             catch (Exception ex)
             {
@@ -215,7 +216,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     RequestContext.Logger.Info(msg);
                     RequestContext.Logger.InfoPii(msg);
 
-                    return extendedLifetimeResultEx.Result;
+                    return new AuthenticationResult(extendedLifetimeResultEx.Result);
                 }
                 throw;
             }
@@ -271,10 +272,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             return new RequestContext(correlationId, new Logger(correlationId));
         }
 
-        protected virtual Task PostRunAsync(AuthenticationResult result)
+        protected virtual Task PostRunAsync(AdalResult result)
         {
             LogReturnedToken(result);
-
             return CompletedTask;
         }
 
@@ -298,7 +298,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
         }
 
-        protected virtual async Task PostTokenRequest(AuthenticationResultEx resultEx)
+        protected virtual async Task PostTokenRequest(AdalResultWrapper resultEx)
         {
             // if broker returned Authority update Authentiator
             if(!string.IsNullOrEmpty(resultEx.Result.Authority))
@@ -313,21 +313,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);
 
-        protected virtual async Task<AuthenticationResultEx> SendTokenRequestAsync()
+        protected virtual async Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
 
-        protected async Task<AuthenticationResultEx> SendTokenRequestByRefreshTokenAsync(string refreshToken)
+        protected async Task<AdalResultWrapper> SendTokenRequestByRefreshTokenAsync(string refreshToken)
         {
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
 
-            AuthenticationResultEx result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
+            AdalResultWrapper result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 
             if (result.RefreshToken == null)
             {
@@ -341,9 +341,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             return result;
         }
 
-        private async Task<AuthenticationResultEx> RefreshAccessTokenAsync(AuthenticationResultEx result)
+        private async Task<AdalResultWrapper> RefreshAccessTokenAsync(AdalResultWrapper result)
         {
-            AuthenticationResultEx newResultEx = null;
+            AdalResultWrapper newResultEx = null;
 
             if (this.Resource != null)
             {
@@ -377,14 +377,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                             serviceException.ServiceErrorCodes,
                             serviceException);
                     }
-                    newResultEx = new AuthenticationResultEx {Exception = ex};
+                    newResultEx = new AdalResultWrapper {Exception = ex};
                 }
             }
 
             return newResultEx;
         }
 
-        private async Task<AuthenticationResultEx> SendHttpMessageAsync(IRequestParameters requestParameters)
+        private async Task<AdalResultWrapper> SendHttpMessageAsync(IRequestParameters requestParameters)
         {
             client = new AdalHttpClient(this.Authenticator.TokenUri, RequestContext)
                 {Client = {BodyParameters = requestParameters}};
@@ -416,7 +416,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             });
         }
 
-        private void LogReturnedToken(AuthenticationResult result)
+        private void LogReturnedToken(AdalResult result)
         {
             if (result.AccessToken != null)
             {

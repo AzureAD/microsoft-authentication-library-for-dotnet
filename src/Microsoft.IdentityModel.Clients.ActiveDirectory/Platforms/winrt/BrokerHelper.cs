@@ -31,6 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -41,7 +42,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public bool CanInvokeBroker { get { return false; } }
 
-        public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             throw new NotImplementedException();
         }

@@ -43,6 +43,7 @@ using Android.Util;
 using Java.Security;
 using Java.Util.Concurrent;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using OperationCanceledException = Android.Accounts.OperationCanceledException;
 using Permission = Android.Content.PM.Permission;
 using Signature = Android.Content.PM.Signature;
@@ -170,9 +171,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return null;
         }
 
-        public AuthenticationResultEx GetAuthTokenInBackground(AuthenticationRequest request, Activity callerActivity)
+        public AdalResultWrapper GetAuthTokenInBackground(AuthenticationRequest request, Activity callerActivity)
         {
-            AuthenticationResultEx authResult = null;
+            AdalResultWrapper authResult = null;
             VerifyNotOnMainThread();
 
             // if there is not any user added to account, it returns empty
@@ -267,7 +268,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return null;
         }
 
-        private AuthenticationResultEx GetResultFromBrokerResponse(Bundle bundleResult)
+        private AdalResultWrapper GetResultFromBrokerResponse(Bundle bundleResult)
         {
             if (bundleResult == null)
             {
@@ -291,18 +292,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
 
                 // IDtoken is not present in the current broker user model
-                UserInfo userinfo = GetUserInfoFromBrokerResult(bundleResult);
-                AuthenticationResult result =
-                    new AuthenticationResult("Bearer", bundleResult.GetString(AccountManager.KeyAuthtoken),
+                AdalUserInfo adalUserinfo = GetUserInfoFromBrokerResult(bundleResult);
+                AdalResult result =
+                    new AdalResult("Bearer", bundleResult.GetString(AccountManager.KeyAuthtoken),
                         ConvertFromTimeT(bundleResult.GetLong("account.expiredate", 0)))
                     {
-                        UserInfo = userinfo
+                        UserInfo = adalUserinfo
                     };
 
                 result.UpdateTenantAndUserInfo(bundleResult.GetString(BrokerConstants.AccountUserInfoTenantId), null,
-                    userinfo);
+                    adalUserinfo);
 
-                return new AuthenticationResultEx
+                return new AdalResultWrapper
                 {
                     Result = result,
                     RefreshToken = null,
@@ -318,7 +319,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         }
 
 
-        internal static UserInfo GetUserInfoFromBrokerResult(Bundle bundle)
+        internal static AdalUserInfo GetUserInfoFromBrokerResult(Bundle bundle)
         {
             // Broker has one user and related to ADFS WPJ user. It does not return
             // idtoken
@@ -331,7 +332,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 .GetString(BrokerConstants.AccountUserInfoIdentityProvider);
             string displayableId = bundle
                 .GetString(BrokerConstants.AccountUserInfoUserIdDisplayable);
-            return new UserInfo
+            return new AdalUserInfo
             {
                 UniqueId = userid,
                 GivenName = givenName,

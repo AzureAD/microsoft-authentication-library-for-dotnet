@@ -38,6 +38,7 @@ using UIKit;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -73,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
         }
 
-        public async Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public async Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             if (brokerPayload.ContainsKey(BrokerParameter.SilentBrokerFlow))
             {
@@ -123,7 +124,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return ProcessBrokerResponse();
         }
 
-        private AuthenticationResultEx ProcessBrokerResponse()
+        private AdalResultWrapper ProcessBrokerResponse()
         {
             string[] keyValuePairs = brokerResponse.Query.Split('&');
 
@@ -141,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return ResultFromBrokerResponse(responseDictionary);
         }
 
-        private AuthenticationResultEx ResultFromBrokerResponse(IDictionary<string, string> responseDictionary)
+        private AdalResultWrapper ResultFromBrokerResponse(IDictionary<string, string> responseDictionary)
         {
             TokenResponse response;
 

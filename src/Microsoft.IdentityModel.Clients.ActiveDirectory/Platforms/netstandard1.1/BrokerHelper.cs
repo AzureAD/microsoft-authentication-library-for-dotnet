@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             get { return false; } 
         }
 
-        public Task<AuthenticationResultEx> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             throw new NotImplementedException();
         }

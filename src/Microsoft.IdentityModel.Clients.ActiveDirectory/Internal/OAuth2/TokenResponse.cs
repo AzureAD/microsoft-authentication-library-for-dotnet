@@ -34,6 +34,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
@@ -186,7 +187,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
             return tokenResponse;
         }
 
-        public AuthenticationResultEx GetResult()
+        public AdalResultWrapper GetResult()
         {
             // extendedExpiresOn can be less than expiresOn if
             // the server did not return extendedExpiresOn in the
@@ -204,13 +205,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
                 DateTime.UtcNow + TimeSpan.FromSeconds(this.ExtendedExpiresIn));
         }
 
-        public AuthenticationResultEx GetResult(DateTimeOffset expiresOn, DateTimeOffset extendedExpiresOn)
+        public AdalResultWrapper GetResult(DateTimeOffset expiresOn, DateTimeOffset extendedExpiresOn)
         {
-            AuthenticationResultEx resultEx;
+            AdalResultWrapper resultEx;
 
             if (this.AccessToken != null)
             {
-                var result = new AuthenticationResult(this.TokenType, this.AccessToken, expiresOn, extendedExpiresOn);
+                var result = new AdalResult(this.TokenType, this.AccessToken, expiresOn, extendedExpiresOn);
 
                 IdToken idToken = IdToken.Parse(this.IdTokenString);
                 if (idToken != null)
@@ -253,7 +254,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
                     }
 
                     result.UpdateTenantAndUserInfo(tenantId, this.IdTokenString,
-                        new UserInfo
+                        new AdalUserInfo
                         {
                             UniqueId = uniqueId,
                             DisplayableId = displayableId,
@@ -267,7 +268,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
                     result.Authority = Authority;
                 }
 
-                resultEx = new AuthenticationResultEx
+                resultEx = new AdalResultWrapper
                 {
                     Result = result,
                     RefreshToken = this.RefreshToken,

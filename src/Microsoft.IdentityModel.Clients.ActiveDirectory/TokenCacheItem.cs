@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -35,91 +36,79 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class TokenCacheItem
     {
+        private readonly TokenCacheKey _key;
+        private readonly AdalResult _result;
+
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal TokenCacheItem(TokenCacheKey key, AuthenticationResult result)
+        internal TokenCacheItem(TokenCacheKey key, AdalResult result)
         {
-            this.Authority = key.Authority;
-            this.Resource = key.Resource;
-            this.ClientId = key.ClientId;
-            this.TokenSubjectType = key.TokenSubjectType;
-            this.UniqueId = key.UniqueId;
-            this.DisplayableId = key.DisplayableId;
-            this.TenantId = result.TenantId;
-            this.ExpiresOn = result.ExpiresOn;
-            this.AccessToken = result.AccessToken;
-            this.IdToken = result.IdToken;
-
-            if (result.UserInfo != null)
-            {
-                this.FamilyName = result.UserInfo.FamilyName;
-                this.GivenName = result.UserInfo.GivenName;
-                this.IdentityProvider = result.UserInfo.IdentityProvider;
-            }
+            _key = key;
+            _result = result;
         }
 
         /// <summary>
         /// Gets the Authority.
         /// </summary>
-        public string Authority { get; private set; }
+        public string Authority => _key.Authority;
 
         /// <summary>
         /// Gets the ClientId.
         /// </summary>
-        public string ClientId { get; internal set; }
+        public string ClientId => _key.ClientId;
 
         /// <summary>
         /// Gets the Expiration.
         /// </summary>
-        public DateTimeOffset ExpiresOn { get; internal set; }
+        public DateTimeOffset ExpiresOn => _result.ExpiresOn;
 
         /// <summary>
         /// Gets the FamilyName.
         /// </summary>
-        public string FamilyName { get; internal set; }
+        public string FamilyName => _result.UserInfo?.FamilyName;
 
         /// <summary>
         /// Gets the GivenName.
         /// </summary>
-        public string GivenName { get; internal set; }
+        public string GivenName => _result.UserInfo?.GivenName;
 
         /// <summary>
         /// Gets the IdentityProviderName.
         /// </summary>
-        public string IdentityProvider { get; internal set; }
+        public string IdentityProvider => _result.UserInfo?.IdentityProvider;
 
         /// <summary>
         /// Gets the Resource.
         /// </summary>
-        public string Resource { get; internal set; }
+        public string Resource => _key.Resource;
 
         /// <summary>
         /// Gets the TenantId.
         /// </summary>
-        public string TenantId { get; internal set; }
+        public string TenantId => _result.TenantId;
 
         /// <summary>
         /// Gets the user's unique Id.
         /// </summary>
-        public string UniqueId { get; internal set; }
+        public string UniqueId => _key.UniqueId;
 
         /// <summary>
         /// Gets the user's displayable Id.
         /// </summary>
-        public string DisplayableId { get; internal set; }
+        public string DisplayableId => _key.DisplayableId;
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        public string AccessToken { get; internal set; }
+        public string AccessToken => _result.AccessToken;
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public string IdToken { get; internal set; }
+        public string IdToken => _result.IdToken;
 
-        internal TokenSubjectType TokenSubjectType { get; set; }
+        internal TokenSubjectType TokenSubjectType => _key.TokenSubjectType;
 
         internal bool Match(TokenCacheKey key)
         {

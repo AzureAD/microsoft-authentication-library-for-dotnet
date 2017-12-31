@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
 {
@@ -53,8 +54,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
     /// </summary>
     internal sealed class TokenCacheKey
     {
-        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, UserInfo userInfo)
-            : this(authority, resource, clientId, tokenSubjectType, (userInfo != null) ? userInfo.UniqueId : null, (userInfo != null) ? userInfo.DisplayableId : null)
+        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
+            : this(authority, resource, clientId, tokenSubjectType, (adalUserInfo != null) ? adalUserInfo.UniqueId : null, (adalUserInfo != null) ? adalUserInfo.DisplayableId : null)
         {
         }
 

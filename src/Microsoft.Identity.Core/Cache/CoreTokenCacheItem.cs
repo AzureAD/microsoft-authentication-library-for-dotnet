@@ -25,30 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.Cache
 {
-    internal class BrokerHelper
+    /// <summary>
+    /// This class is intended to wrap ADAL's AdalResultWrapper and MSAL's TokenCacheItem.
+    /// 2 libraries have funamentally different representation and storage concept of the data.
+    /// Instead of creating multiple levels of translation, it would be simpler to have this class that holds both ADAL and MSAL cache representation objects.
+    /// Translation of data should be done in core.
+    /// </summary>
+    internal class CoreTokenCacheItem
     {
-        public RequestContext RequestContext { get; set; }
+        public AdalResultWrapper AdalResultWrapper { get; set; }
 
-        public IPlatformParameters PlatformParameters { get; set; }
-
-        public bool CanInvokeBroker {
-            get { return false; } 
-        }
-
-        public Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
-        {
-            throw new NotImplementedException();
-        }
-        
+        //MSAL cache items should be added here.
     }
 }

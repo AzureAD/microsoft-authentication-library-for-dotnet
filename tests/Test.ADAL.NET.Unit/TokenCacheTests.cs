@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
@@ -93,7 +94,7 @@ namespace Test.ADAL.Common.Unit
                 "====== Verifying that the only existing value (with user) is retrieved when requested with user and NOT without...");
             Log.Comment("Retrieving with user...");
             var valueInCache = cache.tokenCacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
+            VerifyAdalResultWrappersAreEqual(value, valueInCache);
             Log.Comment("Retrieving without user...");
             cache.tokenCacheDictionary.TryGetValue(userlessKey, out valueInCache);
             Assert.IsNull(valueInCache);
@@ -106,10 +107,10 @@ namespace Test.ADAL.Common.Unit
                 "====== Verifying that correct values are retrieved when requested with and without user (when two entries exist)...");
             Log.Comment("Retrieving without user...");
             valueInCache = cache.tokenCacheDictionary[userlessKey];
-            VerifyAuthenticationResultExsAreEqual(userlessValue, valueInCache);
+            VerifyAdalResultWrappersAreEqual(userlessValue, valueInCache);
             Log.Comment("Retrieving with user...");
             valueInCache = cache.tokenCacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
+            VerifyAdalResultWrappersAreEqual(value, valueInCache);
 
             Log.Comment("====== Verifying that correct entry is deleted when the key with user is passed...");
             RemoveFromDictionary(cache, key);
@@ -127,7 +128,7 @@ namespace Test.ADAL.Common.Unit
             AddToDictionary(cache, userlessKey, userlessValue);
             AddToDictionary(cache, key2, value2);
             valueInCache = cache.tokenCacheDictionary[key2];
-            VerifyAuthenticationResultExsAreEqual(value2, valueInCache);
+            VerifyAdalResultWrappersAreEqual(value2, valueInCache);
             RemoveFromDictionary(cache, key2);
             VerifyCacheItems(cache, 1, userlessKey);
 
@@ -139,7 +140,7 @@ namespace Test.ADAL.Common.Unit
             Assert.IsNull(valueInCache);
             Log.Comment("Retrieving without user...");
             valueInCache = cache.tokenCacheDictionary[userlessKey];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
+            VerifyAdalResultWrappersAreEqual(value, valueInCache);
 
             Log.Comment("====== Verifying that entry cannot be retrieved with incorrect key...");
             cache.Clear();
@@ -152,7 +153,7 @@ namespace Test.ADAL.Common.Unit
             Assert.IsNull(valueInCache);
             Log.Comment("Retrieving with correct user...");
             valueInCache = cache.tokenCacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(value, valueInCache);
+            VerifyAdalResultWrappersAreEqual(value, valueInCache);
 
             Log.Comment("====== Verifying that removing items from an empty cache will not throw...");
             Log.Comment("Clearing cache...");
@@ -216,16 +217,16 @@ namespace Test.ADAL.Common.Unit
 
             var parameters = new PlatformParameters(PromptBehavior.Auto);
             var authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userIdUpper);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
         }
 
 #if TEST_ADAL_NET
@@ -241,7 +242,7 @@ namespace Test.ADAL.Common.Unit
             string displayableId = Guid.NewGuid().ToString();
             Uri redirectUri = new Uri("https://www.GetJwt.com");
 
-            var authenticationResult = CreateCacheValue(uniqueId, displayableId);
+            AdalResultWrapper authenticationResult = CreateCacheValue(uniqueId, displayableId);
             authority = authority + tenantId + "/";
             UserCredential credential = new UserCredential(displayableId);
             AuthenticationContext tempContext = new AuthenticationContext(authority, false);
@@ -255,7 +256,7 @@ namespace Test.ADAL.Common.Unit
             AuthenticationContext acWithLocalCache = new AuthenticationContext(authority, false, localCache);
             AuthenticationResult authenticationResultFromCache =
                 await acWithLocalCache.AcquireTokenAsync(resource, clientId, credential);
-            AreAuthenticationResultsEqual(authenticationResult.Result, authenticationResultFromCache);
+            AreAuthenticationResultsEqual(new AuthenticationResult(authenticationResult.Result), authenticationResultFromCache);
 
             // Duplicate throws error
             authenticationResult.Result.UserInfo.UniqueId = null;
@@ -294,7 +295,7 @@ namespace Test.ADAL.Common.Unit
 
             authenticationResultFromCache =
                 await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
             // @resource && @clientId && userId
             acWithLocalCache = new AuthenticationContext(authority, false, localCache);
@@ -312,14 +313,14 @@ namespace Test.ADAL.Common.Unit
             var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
 
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
             authenticationResultFromCache =
                 await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userIdUpper);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId);
-            VerifyAuthenticationResultsAreEqual(cacheValue.Result, authenticationResultFromCache);
+            VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
         }
 #endif
 
@@ -331,7 +332,7 @@ namespace Test.ADAL.Common.Unit
 
             TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.User, null, "user1");
-            AuthenticationResultEx value = CreateCacheValue(null, "user1");
+            AdalResultWrapper value = CreateCacheValue(null, "user1");
         }
 
         internal static async Task TokenCacheOperationsTest()
@@ -350,7 +351,7 @@ namespace Test.ADAL.Common.Unit
             Assert.AreNotEqual(key, key3);
 
             var value = CreateCacheValue(null, "user1");
-            AuthenticationResultEx value2;
+            AdalResultWrapper value2;
             do
             {
                 value2 = CreateCacheValue(null, "user2");
@@ -360,13 +361,13 @@ namespace Test.ADAL.Common.Unit
             AddToDictionary(tokenCache, key, value);
             Assert.AreEqual(1, cacheDictionary.Count);
             var valueInCache = cacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(valueInCache, value);
-            VerifyAuthenticationResultExsAreNotEqual(valueInCache, value2);
+            VerifyAdalResultWrappersAreEqual(valueInCache, value);
+            VerifyAdalResultWrappersAreNotEqual(valueInCache, value2);
             cacheDictionary[key] = value2;
             Assert.AreEqual(1, cacheDictionary.Count);
             valueInCache = cacheDictionary[key];
-            VerifyAuthenticationResultExsAreEqual(valueInCache, value2);
-            VerifyAuthenticationResultExsAreNotEqual(valueInCache, value);
+            VerifyAdalResultWrappersAreEqual(valueInCache, value2);
+            VerifyAdalResultWrappersAreNotEqual(valueInCache, value);
 
             // Duplicate key -> should fail to add again
             AssertException.Throws<ArgumentException>(() =>
@@ -385,7 +386,7 @@ namespace Test.ADAL.Common.Unit
                 SubjectType = TokenSubjectType.User
             };
 
-            AuthenticationResultEx resultEx = await tokenCache.LoadFromCache(data, new RequestContext(Guid.Empty)).ConfigureAwait(false);
+            AdalResultWrapper resultEx = await tokenCache.LoadFromCache(data, new RequestContext(Guid.Empty)).ConfigureAwait(false);
             Assert.IsNotNull(resultEx);
 
 
@@ -434,10 +435,10 @@ namespace Test.ADAL.Common.Unit
             Assert.IsTrue(cacheDictionary.ContainsKey(key2));
             Assert.IsFalse(cacheDictionary.ContainsKey(key3));
 
-            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key, value)));
-            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key2, value2)));
-            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key, value2)));
-            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AuthenticationResultEx>(key2, value)));
+            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key, value)));
+            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key2, value2)));
+            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key, value2)));
+            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key2, value)));
 
 
             // Duplicate key -> error
@@ -449,7 +450,7 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(3, cacheDictionary.Keys.Count);
             Assert.IsTrue(cacheDictionary.ContainsKey(key3));
 
-            var cacheItemsCopy = new KeyValuePair<TokenCacheKey, AuthenticationResultEx>[cacheDictionary.Count + 1];
+            var cacheItemsCopy = new KeyValuePair<TokenCacheKey, AdalResultWrapper>[cacheDictionary.Count + 1];
             cacheDictionary.CopyTo(cacheItemsCopy, 1);
             for (int i = 0; i < cacheDictionary.Count; i++)
             {
@@ -473,7 +474,7 @@ namespace Test.ADAL.Common.Unit
                 Assert.IsTrue(kvp.Value.Equals(value));
             }
 
-            AuthenticationResultEx cacheValue;
+            AdalResultWrapper cacheValue;
             Assert.IsTrue(cacheDictionary.TryGetValue(key, out cacheValue));
             Assert.AreEqual(cacheValue, value);
             Assert.IsTrue(cacheDictionary.TryGetValue(key3, out cacheValue));
@@ -490,9 +491,9 @@ namespace Test.ADAL.Common.Unit
                 TokenSubjectType.Client, null, "user1");
             TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.Client, null, "user2");
-            AuthenticationResultEx value = CreateCacheValue(null, "user1");
+            AdalResultWrapper value = CreateCacheValue(null, "user1");
             value.UserAssertionHash = "hash1";
-            AuthenticationResultEx value2 = CreateCacheValue(null, "user2");
+            AdalResultWrapper value2 = CreateCacheValue(null, "user2");
             value2.UserAssertionHash = "hash2";
 
             TokenCache cache = new TokenCache();
@@ -509,12 +510,12 @@ namespace Test.ADAL.Common.Unit
                 DisplayableId = null
             };
 
-            AuthenticationResultEx resultEx = await cache.LoadFromCache(data, new RequestContext(Guid.Empty)).ConfigureAwait(false);
-            AreAuthenticationResultExsEqual(value, resultEx);
+            AdalResultWrapper resultEx = await cache.LoadFromCache(data, new RequestContext(Guid.Empty)).ConfigureAwait(false);
+            AreAdalResultWrappersEqual(value, resultEx);
 
             data.AssertionHash = "hash2";
             resultEx = await cache.LoadFromCache(data, new RequestContext(Guid.Empty)).ConfigureAwait(false);
-            AreAuthenticationResultExsEqual(value2, resultEx);
+            AreAdalResultWrappersEqual(value2, resultEx);
 
             data.AssertionHash = null;
 
@@ -531,7 +532,7 @@ namespace Test.ADAL.Common.Unit
 
             const int MaxItemCount = 100;
             TokenCacheKey[] keys = new TokenCacheKey[MaxItemCount];
-            AuthenticationResultEx[] values = new AuthenticationResultEx[MaxItemCount];
+            AdalResultWrapper[] values = new AdalResultWrapper[MaxItemCount];
 
             for (int i = 0; i < MaxItemCount; i++)
             {
@@ -545,7 +546,7 @@ namespace Test.ADAL.Common.Unit
 
             for (int i = 0; i < MaxItemCount; i++)
             {
-                AuthenticationResultEx cacheValue;
+                AdalResultWrapper cacheValue;
                 int index = MaxItemCount - i - 1;
                 Assert.IsTrue(tokenCache.tokenCacheDictionary.TryGetValue(keys[index], out cacheValue));
                 Assert.AreEqual(values[index], cacheValue);
@@ -584,7 +585,7 @@ namespace Test.ADAL.Common.Unit
             for (int count = 0; count < Rand.Next(1, MaxItemCount); count++)
             {
                 TokenCacheKey key = GenerateRandomTokenCacheKey();
-                AuthenticationResultEx result = GenerateRandomCacheValue(MaxFieldSize, key.UniqueId, key.DisplayableId);
+                AdalResultWrapper result = GenerateRandomCacheValue(MaxFieldSize, key.UniqueId, key.DisplayableId);
                 AddToDictionary(tokenCache, key, result);
             }
 
@@ -601,21 +602,21 @@ namespace Test.ADAL.Common.Unit
 
             foreach (var key in tokenCache.tokenCacheDictionary.Keys)
             {
-                AuthenticationResultEx result2 = tokenCache2.tokenCacheDictionary[key];
-                VerifyAuthenticationResultExsAreEqual(tokenCache.tokenCacheDictionary[key], result2);
+                AdalResultWrapper result2 = tokenCache2.tokenCacheDictionary[key];
+                VerifyAdalResultWrappersAreEqual(tokenCache.tokenCacheDictionary[key], result2);
             }
         }
 
-        public static AuthenticationResultEx CreateCacheValue(string uniqueId, string displayableId)
+        public static AdalResultWrapper CreateCacheValue(string uniqueId, string displayableId)
         {
             string refreshToken = string.Format(CultureInfo.CurrentCulture, " RefreshToken{0}", Rand.Next());
-            var result = new AuthenticationResult(null, ValidAccessToken,
+            var result = new AdalResult(null, ValidAccessToken,
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)))
             {
-                UserInfo = new UserInfo {UniqueId = uniqueId, DisplayableId = displayableId}
+                UserInfo = new AdalUserInfo {UniqueId = uniqueId, DisplayableId = displayableId}
             };
 
-            return new AuthenticationResultEx
+            return new AdalResultWrapper
             {
                 Result = result,
                 RefreshToken = refreshToken
@@ -689,16 +690,16 @@ namespace Test.ADAL.Common.Unit
             return item.Match(key);
         }
 
-        private static void VerifyAuthenticationResultExsAreEqual(AuthenticationResultEx resultEx1,
-            AuthenticationResultEx resultEx2)
+        private static void VerifyAdalResultWrappersAreEqual(AdalResultWrapper resultEx1,
+            AdalResultWrapper resultEx2)
         {
-            Assert.IsTrue(AreAuthenticationResultExsEqual(resultEx1, resultEx2));
+            Assert.IsTrue(AreAdalResultWrappersEqual(resultEx1, resultEx2));
         }
 
-        private static void VerifyAuthenticationResultExsAreNotEqual(AuthenticationResultEx resultEx1,
-            AuthenticationResultEx resultEx2)
+        private static void VerifyAdalResultWrappersAreNotEqual(AdalResultWrapper resultEx1,
+            AdalResultWrapper resultEx2)
         {
-            Assert.IsFalse(AreAuthenticationResultExsEqual(resultEx1, resultEx2));
+            Assert.IsFalse(AreAdalResultWrappersEqual(resultEx1, resultEx2));
         }
 
         private static void VerifyAuthenticationResultsAreEqual(AuthenticationResult result1,
@@ -713,10 +714,10 @@ namespace Test.ADAL.Common.Unit
             Assert.IsFalse(AreAuthenticationResultsEqual(result1, result2));
         }
 
-        private static bool AreAuthenticationResultExsEqual(AuthenticationResultEx resultEx1,
-            AuthenticationResultEx resultEx2)
+        private static bool AreAdalResultWrappersEqual(AdalResultWrapper resultEx1,
+            AdalResultWrapper resultEx2)
         {
-            return AreAuthenticationResultsEqual(resultEx1.Result, resultEx2.Result) &&
+            return AreAuthenticationResultsEqual(new AuthenticationResult(resultEx1.Result), new AuthenticationResult(resultEx2.Result)) &&
                    resultEx1.RefreshToken == resultEx2.RefreshToken &&
                    resultEx1.IsMultipleResourceRefreshToken == resultEx2.IsMultipleResourceRefreshToken &&
                    resultEx1.UserAssertionHash == resultEx2.UserAssertionHash;
@@ -743,7 +744,7 @@ namespace Test.ADAL.Common.Unit
             return (str1 == str2 || string.IsNullOrEmpty(str1) && string.IsNullOrEmpty(str2));
         }
 
-        private static void AddToDictionary(TokenCache tokenCache, TokenCacheKey key, AuthenticationResultEx value)
+        private static void AddToDictionary(TokenCache tokenCache, TokenCacheKey key, AdalResultWrapper value)
         {
             tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs {TokenCache = tokenCache});
             tokenCache.OnBeforeWrite(new TokenCacheNotificationArgs {TokenCache = tokenCache});
@@ -773,17 +774,17 @@ namespace Test.ADAL.Common.Unit
                 Guid.NewGuid().ToString());
         }
 
-        public static AuthenticationResultEx GenerateRandomCacheValue(int maxFieldSize, string uniqueId,
+        public static AdalResultWrapper GenerateRandomCacheValue(int maxFieldSize, string uniqueId,
             string displayableId)
         {
-            return new AuthenticationResultEx
+            return new AdalResultWrapper
             {
-                Result = new AuthenticationResult(
+                Result = new AdalResult(
                     null,
                     GenerateRandomString(maxFieldSize),
                     new DateTimeOffset(DateTime.Now + TimeSpan.FromSeconds(ValidExpiresIn)))
                 {
-                    UserInfo = new UserInfo {UniqueId = uniqueId, DisplayableId = displayableId}
+                    UserInfo = new AdalUserInfo {UniqueId = uniqueId, DisplayableId = displayableId}
                 },
                 RefreshToken = GenerateRandomString(maxFieldSize),
                 UserAssertionHash = Guid.NewGuid().ToString()

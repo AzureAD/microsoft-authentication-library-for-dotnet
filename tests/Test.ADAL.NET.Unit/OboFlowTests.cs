@@ -31,6 +31,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
@@ -81,14 +82,14 @@ namespace Test.ADAL.NET.Unit
             foreach (var cachenoise in _cacheNoise)
             {
                 //cache entry has no user assertion hash
-                await context.TokenCache.StoreToCache(new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
-                    Result = new AuthenticationResult("Bearer", cachenoise + "some-token-in-cache", _expirationTime)
+                    Result = new AdalResult("Bearer", cachenoise + "some-token-in-cache", _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                 UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -142,14 +143,14 @@ namespace Test.ADAL.NET.Unit
             foreach (var cachenoise in _cacheNoise)
             {
                 //cache entry has no user assertion hash
-                await context.TokenCache.StoreToCache(new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
-                    Result = new AuthenticationResult("Bearer", cachenoise + "some-token-in-cache", _expirationTime)
+                    Result = new AdalResult("Bearer", cachenoise + "some-token-in-cache", _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                 UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -207,14 +208,14 @@ namespace Test.ADAL.NET.Unit
                     TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                     cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
                 //cache entry has no user assertion hash
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
-                    Result = new AuthenticationResult("Bearer", cachenoise + "some-token-in-cache", _expirationTime)
+                    Result = new AdalResult("Bearer", cachenoise + "some-token-in-cache", _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                 UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -278,15 +279,15 @@ namespace Test.ADAL.NET.Unit
                     TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                     cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
 
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
                     Result =
-                        new AuthenticationResult("Bearer", cachenoise + tokenInCache, _expirationTime)
+                        new AdalResult("Bearer", cachenoise + tokenInCache, _expirationTime)
                         {
                             UserInfo =
-                                new UserInfo()
+                                new AdalUserInfo()
                                 {
                                     DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -324,15 +325,15 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                await context.TokenCache.StoreToCache(new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
                     Result =
-                        new AuthenticationResult("Bearer", cachenoise + tokenInCache, _expirationTime)
+                        new AdalResult("Bearer", cachenoise + tokenInCache, _expirationTime)
                         {
                             UserInfo =
-                                new UserInfo()
+                                new AdalUserInfo()
                                 {
                                     DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -389,15 +390,15 @@ namespace Test.ADAL.NET.Unit
                     TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                     cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
 
-                context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+                context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
                     Result =
-                        new AuthenticationResult("Bearer", cachenoise + tokenInCache, _expirationTime)
+                        new AdalResult("Bearer", cachenoise + tokenInCache, _expirationTime)
                         {
                             UserInfo =
-                                new UserInfo()
+                                new AdalUserInfo()
                                 {
                                     DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -438,15 +439,15 @@ namespace Test.ADAL.NET.Unit
             string tokenInCache = "obo-access-token";
             foreach (var cachenoise in _cacheNoise)
             {
-                await context.TokenCache.StoreToCache(new AuthenticationResultEx
+                await context.TokenCache.StoreToCache(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
                     Result =
-                        new AuthenticationResult("Bearer", cachenoise + tokenInCache, _expirationTime)
+                        new AdalResult("Bearer", cachenoise + tokenInCache, _expirationTime)
                         {
                             UserInfo =
-                                new UserInfo()
+                                new AdalUserInfo()
                                 {
                                     DisplayableId = cachenoise + TestConstants.DefaultDisplayableId,
                                     UniqueId = cachenoise + TestConstants.DefaultUniqueId
@@ -495,14 +496,14 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            await context.TokenCache.StoreToCache(new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "some-token-in-cache", _expirationTime)
+                Result = new AdalResult("Bearer", "some-token-in-cache", _expirationTime)
                 {
                     UserInfo =
-                        new UserInfo()
+                        new AdalUserInfo()
                         {
                             DisplayableId = TestConstants.DefaultDisplayableId,
                             UniqueId = TestConstants.DefaultUniqueId
@@ -552,14 +553,14 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            await context.TokenCache.StoreToCache(new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "some-token-in-cache", _expirationTime)
+                Result = new AdalResult("Bearer", "some-token-in-cache", _expirationTime)
                 {
                     UserInfo =
-                        new UserInfo()
+                        new AdalUserInfo()
                         {
                             DisplayableId = TestConstants.DefaultDisplayableId,
                             UniqueId = TestConstants.DefaultUniqueId
@@ -614,14 +615,14 @@ namespace Test.ADAL.NET.Unit
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             //cache entry has no user assertion hash
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
-                Result = new AuthenticationResult("Bearer", "some-token-in-cache", _expirationTime)
+                Result = new AdalResult("Bearer", "some-token-in-cache", _expirationTime)
                 {
                     UserInfo =
-                        new UserInfo()
+                        new AdalUserInfo()
                         {
                             DisplayableId = TestConstants.DefaultDisplayableId,
                             UniqueId = TestConstants.DefaultUniqueId
@@ -682,15 +683,15 @@ namespace Test.ADAL.NET.Unit
 
             //cache entry has user assertion hash
             string tokenInCache = "obo-access-token";
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result =
-                    new AuthenticationResult("Bearer", tokenInCache, _expirationTime)
+                    new AdalResult("Bearer", tokenInCache, _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = TestConstants.DefaultDisplayableId,
                                 UniqueId = TestConstants.DefaultUniqueId
@@ -727,15 +728,15 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
             string tokenInCache = "obo-access-token";
-            await context.TokenCache.StoreToCache(new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result =
-                    new AuthenticationResult("Bearer", tokenInCache, _expirationTime)
+                    new AdalResult("Bearer", tokenInCache, _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = TestConstants.DefaultDisplayableId,
                                 UniqueId = TestConstants.DefaultUniqueId
@@ -793,15 +794,15 @@ namespace Test.ADAL.NET.Unit
 
             //cache entry has user assertion hash
             string tokenInCache = "obo-access-token";
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result =
-                    new AuthenticationResult("Bearer", tokenInCache, _expirationTime)
+                    new AdalResult("Bearer", tokenInCache, _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = TestConstants.DefaultDisplayableId,
                                 UniqueId = TestConstants.DefaultUniqueId
@@ -838,15 +839,15 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
             string tokenInCache = "obo-access-token";
-            await context.TokenCache.StoreToCache(new AuthenticationResultEx
+            await context.TokenCache.StoreToCache(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result =
-                    new AuthenticationResult("Bearer", tokenInCache, _expirationTime)
+                    new AdalResult("Bearer", tokenInCache, _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = TestConstants.DefaultDisplayableId,
                                 UniqueId = TestConstants.DefaultUniqueId
@@ -903,15 +904,15 @@ namespace Test.ADAL.NET.Unit
 
             //cache entry has user assertion hash
             string tokenInCache = "obo-access-token";
-            context.TokenCache.tokenCacheDictionary[key] = new AuthenticationResultEx
+            context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
                 Result =
-                    new AuthenticationResult("Bearer", tokenInCache, _expirationTime)
+                    new AdalResult("Bearer", tokenInCache, _expirationTime)
                     {
                         UserInfo =
-                            new UserInfo()
+                            new AdalUserInfo()
                             {
                                 DisplayableId = TestConstants.DefaultDisplayableId,
                                 UniqueId = TestConstants.DefaultUniqueId

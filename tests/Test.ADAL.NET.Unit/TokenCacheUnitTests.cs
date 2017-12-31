@@ -112,7 +112,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        [Description("Test for Token Cache backwasrd compatiblity where new attribute is added in AuthenticationResultEx")]
+        [Description("Test for Token Cache backwasrd compatiblity where new attribute is added in AdalResultWrapper")]
         [TestCategory("AdalDotNetUnit")]
         public void TokenCacheBackCompatTest()
         {

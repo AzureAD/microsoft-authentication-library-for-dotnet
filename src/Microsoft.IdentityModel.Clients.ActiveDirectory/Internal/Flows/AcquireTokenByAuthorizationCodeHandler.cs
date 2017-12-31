@@ -27,6 +27,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
@@ -71,12 +72,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.OriginalString;
         }
 
-        protected override async Task PostTokenRequest(AuthenticationResultEx resultEx)
+        protected override async Task PostTokenRequest(AdalResultWrapper resultEx)
         {
             await base.PostTokenRequest(resultEx).ConfigureAwait(false);
-            UserInfo userInfo = resultEx.Result.UserInfo;
-            this.UniqueId = (userInfo == null) ? null : userInfo.UniqueId;
-            this.DisplayableId = (userInfo == null) ? null : userInfo.DisplayableId;
+            AdalUserInfo adalUserInfo = resultEx.Result.UserInfo;
+            this.UniqueId = (adalUserInfo == null) ? null : adalUserInfo.UniqueId;
+            this.DisplayableId = (adalUserInfo == null) ? null : adalUserInfo.DisplayableId;
             if (resultEx.ResourceInResponse != null)
             {
                 this.Resource = resultEx.ResourceInResponse;

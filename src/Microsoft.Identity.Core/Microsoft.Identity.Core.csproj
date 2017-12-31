@@ -51,6 +51,9 @@
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Resources\**\*.*" />
+    <None Remove="Cache\AdalResult.cs" />
+    <None Remove="Cache\AdalResultWrapper.cs" />
+    <None Remove="Cache\AdalUserInfo.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
   

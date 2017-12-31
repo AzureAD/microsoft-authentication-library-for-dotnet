@@ -27,6 +27,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
@@ -44,10 +45,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.deviceCodeResult = deviceCodeResult;
         }
 
-        protected override async Task<AuthenticationResultEx> SendTokenRequestAsync()
+        protected override async Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             TimeSpan timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
-            AuthenticationResultEx resultEx = null;
+            AdalResultWrapper resultEx = null;
             //the interval is added so that the while loop does not end before aquiring the last response from the STS stating that the code has expired.
             //Without it, resultEx will end up being null.
             while (timeRemaining.TotalSeconds + deviceCodeResult.Interval > 0)
