@@ -38,7 +38,7 @@ namespace AdalAndroidTestApp
     [Activity(Label = "AdalAndroidTestApp", MainLauncher = true, Icon = "@drawable/icon")]
     public class MainActivity : Activity
     {
-        private TextView accessTokenTextView;
+        private UITextView accessTokenTextView;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -59,7 +59,8 @@ namespace AdalAndroidTestApp
             Button conditionalAccessButton = FindViewById<Button>(Resource.Id.conditionalAccessButton);
             conditionalAccessButton.Click += conditionalAccessButton_Click;
 
-            this.accessTokenTextView = FindViewById<TextView>(Resource.Id.accessTokenTextView);
+            this.accessTokenTextView = new UITextView(this, FindViewById<TextView>(Resource.Id.accessTokenTextView));
+
             EditText email = FindViewById<EditText>(Resource.Id.email);
             email.Text = "<USERNAME>";
         }
