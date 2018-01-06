@@ -1,9 +1,8 @@
 1.1.1-preview
 =============
-This release marks the third preview of the library which brings in several features and changes -
-- Functionality on Unix with Xamarin.Mac Full profile and Mono (#451)
-- Handle new RSACng default on netfx4.7 (#448)
-- Expose claims as attribute for MSALUiRequiredException (#459)
+This release contains -
+- Added support to use RSACng in .net 4.7 (#448)
+- Expose claims as an attribute for MSALUiRequiredException (#459)
 - Updated Xamarin Forms Android support libraries to 25.3.1 (#450)
 - Added Arlington URL to list of trusted authorities (#495)
 - Changes for GDPR complicance with PiiLogs (#492)
