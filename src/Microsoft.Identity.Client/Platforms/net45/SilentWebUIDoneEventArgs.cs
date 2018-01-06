@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class SilentWebUIDoneEventArgs : EventArgs
     {

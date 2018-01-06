@@ -26,39 +26,29 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using WebApi.Models;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-// For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-
-namespace WebApi.Controllers
+namespace Test.MSAL.NET.Unit
 {
-    [Authorize]
-    [Route("api/[controller]")]
-    public class TodoListController : Controller
+    [TestClass]
+    [DeploymentItem(@"Resources\testCert.crtfile")]
+    public class CryptographyTests
     {
-        static ConcurrentBag<TodoItem> todoStore = new ConcurrentBag<TodoItem>();
-
-        // GET: api/values
-        [HttpGet]
-        public IEnumerable<TodoItem> Get()
+        [TestMethod]
+        [TestCategory("CryptographyTests")]
+        public void SignWithCertificate()
         {
-            string owner = (User.FindFirst(ClaimTypes.NameIdentifier))?.Value;
-            return todoStore.Where(t => t.Owner == owner).ToList();
-        }
-
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody]TodoItem Todo)
-        {
-            string owner = (User.FindFirst(ClaimTypes.NameIdentifier))?.Value;
-            todoStore.Add(new TodoItem { Owner = owner, Title = Todo.Title });
+            //Tests the cryptography libraries used by MSAL to sign with certificates
+            var cert = new X509Certificate2("testCert.crtfile", "passw0rd!");
+            CryptographyHelper helper = new CryptographyHelper();
+            byte[] result = helper.SignWithCertificate("TEST", cert);
+            string value = Base64UrlHelpers.Encode(result);
+            Assert.IsNotNull(value);
+            Assert.AreEqual("MrknKHbOAVu2iuLHMFSk2SK773H1ysxaAjAPcTXYSfH4P2fUfvzP6aIb9MkBknjoE_aBYtTnQ7jOAvyQETvogdeSH7pRDPhCk2aX_8VIQw0bjo_zBZj5yJYVWQDLIu8XvbuzIGEvVaXKz4jJ1nYM6toun4tM74rEHvwa0ferafmqHWOd5puPhlKH1VVK2RPuNOoKNLWBprVBaAQVJVFOdRcd3iR0INBHykxtOsG0pgo0Q2uQBlKP7KQb7Ox8i_sw-M21BuUzdIdGs_oeUYh0B8s-eIGf34JmHRWMwWCnRWzZgY9YuIjRoaWNqlWYb8ASjKOxzvk99x8eFEYKOjgAcA", value);
         }
     }
 }

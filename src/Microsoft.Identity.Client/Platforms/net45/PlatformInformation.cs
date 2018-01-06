@@ -37,8 +37,24 @@ namespace Microsoft.Identity.Client
 {
     internal class PlatformInformation : PlatformInformationBase
     {
+	bool isWindows;
+	internal static bool IsWindows {
+            get {
+                switch (Environment.OSVersion.Platform) {
+                    case PlatformID.Win32S:
+                    case PlatformID.Win32Windows:
+                    case PlatformID.Win32NT:
+                    case PlatformID.WinCE:
+                        return true;
+                    default:
+                        return false;
+		}
+            }
+        }
+
         public PlatformInformation(RequestContext requestContext) :base(requestContext)
         {
+	    isWindows = IsWindows;
         }
 
         public override string GetProductName()
@@ -54,7 +70,10 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture(RequestContext);
+	        if (isWindows)
+                return NativeMethods.GetProcessorArchitecture(RequestContext);
+			else
+                return null;
         }
 
         public override string GetOperatingSystem()
@@ -85,6 +104,9 @@ namespace Microsoft.Identity.Client
 
         public override bool IsDomainJoined()
         {
+            if (!isWindows)
+                return false;
+            
             bool returnValue = false;
             try
             {
@@ -102,6 +124,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 RequestContext.Logger.Warning(ex.Message);
+                RequestContext.Logger.WarningPii(ex.Message);
                 // ignore the exception as the result is already set to false;
             }
 

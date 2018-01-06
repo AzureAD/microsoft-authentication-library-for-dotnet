@@ -25,16 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
-namespace WebApp.Models
+namespace WebApp.Utils
 {
-    public class TodoItem
+    public static class SessionExtensions
     {
-        public string Owner { get; set; }
-        public string Title { get; set; }
+        public static void Set<T>(this ISession session, string key, T value)
+        {
+            var json = JsonConvert.SerializeObject(value);
+            session.SetString(key, json);
+        }
+
+        public static T Get<T>(this ISession session, string key)
+        {
+            var value = session.GetString(key);
+            return value == null ? default(T) :
+                JsonConvert.DeserializeObject<T>(value);
+        }
     }
 }

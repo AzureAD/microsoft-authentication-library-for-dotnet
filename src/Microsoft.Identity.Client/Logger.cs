@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal static bool DefaultLoggingEnabled { get; set; } = false;
 
-        internal static void ExecuteCallback(Logger.LogLevel level, string message, bool containsPii)
+        internal static void ExecuteCallback(LogLevel level, string message, bool containsPii)
         {
             lock (LockObj)
             {
@@ -204,14 +204,16 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Method for error exception logging
+        /// Removes Pii from exception
         /// </summary>
         internal void Error(Exception ex)
         {
-            Error(ex.ToString());
+            Error(ex.GetPiiScrubbedDetails());
         }
 
         /// <summary>
         /// Method for error exception logging for Pii
+        /// Contains Pii passed from exception
         /// </summary>
         internal void ErrorPii(Exception ex)
         {
@@ -238,11 +240,21 @@ namespace Microsoft.Identity.Client
                 os = MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.OS];
             }
 
-
             string log = string.Format(CultureInfo.InvariantCulture, "MSAL {0} {1} {2} [{3}{4}]{5} {6}",
                 MsalIdHelper.GetMsalVersion(),
                 MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.Product],
                 os, DateTime.UtcNow, correlationId, Component, logMessage);
+
+            if (PiiLoggingEnabled && containsPii)
+            {
+                const string piiLogMsg = "(True) ";
+                log = piiLogMsg + log;
+            }
+            else
+            {
+                const string noPiiLogMsg = "(False) ";
+                log = noPiiLogMsg + log;
+            }
 
             if (DefaultLoggingEnabled)
             {

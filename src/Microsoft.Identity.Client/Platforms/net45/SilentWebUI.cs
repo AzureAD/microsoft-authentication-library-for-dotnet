@@ -30,7 +30,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class SilentWebUI : WebUI, IDisposable
     {
@@ -91,7 +91,9 @@ namespace Microsoft.Identity.Client
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int)navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    RequestContext.Logger.Info("Silent login thread did not complete on time.");
+                    const string msg = "Silent login thread did not complete on time.";
+                    RequestContext.Logger.Info(msg);
+                    RequestContext.Logger.InfoPii(msg);
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
@@ -131,6 +133,7 @@ namespace Microsoft.Identity.Client
                     catch (Exception e)
                     {
                         RequestContext.Logger.Error(e);
+                        RequestContext.Logger.ErrorPii(e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         uiException = e;
                     }

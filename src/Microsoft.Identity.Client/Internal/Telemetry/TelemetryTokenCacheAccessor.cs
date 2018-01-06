@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
+
 namespace Microsoft.Identity.Client.Internal.Telemetry
 {
     internal class TelemetryTokenCacheAccessor : TokenCacheAccessor

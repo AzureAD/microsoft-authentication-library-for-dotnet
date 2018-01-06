@@ -84,7 +84,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _webUi = webUI;
             _UIBehavior = UIBehavior;
             LoadFromCache = false; //no cache lookup and refresh for interactive.
-            AuthenticationRequestParameters.RequestContext.Logger.Info("Additional scopes - " + _extraScopesToConsent.AsSingleString() + ";" + "UIBehavior - " + _UIBehavior.PromptValue);
+            var msg = "Additional scopes - " + _extraScopesToConsent.AsSingleString() + ";" + "UIBehavior - " +
+                            _UIBehavior.PromptValue;
+            AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
+            AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
         }
 
         protected override string GetUIBehaviorPromptValue()

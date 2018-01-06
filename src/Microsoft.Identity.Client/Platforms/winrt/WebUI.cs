@@ -34,7 +34,7 @@ using Microsoft.Identity.Client.Internal;
 using Windows.Networking.Connectivity;
 using Windows.ApplicationModel.Core;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class WebUI : IWebUI
     {
@@ -92,6 +92,7 @@ namespace Microsoft.Identity.Client
             catch (Exception ex)
             {
                 requestContext.Logger.Error(ex);
+                requestContext.Logger.ErrorPii(ex);
                 throw new MsalException(MsalClientException.AuthenticationUiFailedError, "WAB authentication failed",
                     ex);
             }

@@ -144,7 +144,10 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                     StringComparison.OrdinalIgnoreCase))
                 {
                     throw new MsalUiRequiredException(MsalUiRequiredException.InvalidGrantError,
-                        tokenResponse.ErrorDescription);
+                        tokenResponse.ErrorDescription)
+                    {
+                        Claims = tokenResponse.Claims
+                    };
                 }
 
                 serviceEx = new MsalServiceException(tokenResponse.Error, tokenResponse.ErrorDescription, (int)response.StatusCode, tokenResponse.Claims, null)
@@ -158,6 +161,7 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             }
 
             requestContext.Logger.Error(serviceEx);
+            requestContext.Logger.ErrorPii(serviceEx);
             throw serviceEx;
         }
 
@@ -180,9 +184,10 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
                     string correlationIdHeader = headers[trimmedKey].Trim();
                     if (!string.Equals(correlationIdHeader, requestContext.CorrelationId))
                     {
-                        requestContext.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
-                                "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
-                                correlationIdHeader, requestContext.CorrelationId));
+                        requestContext.Logger.Warning("Returned correlation id does not match the sent correlation id");
+                        requestContext.Logger.WarningPii(string.Format(CultureInfo.InvariantCulture,
+                            "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
+                            correlationIdHeader, requestContext.CorrelationId));
                     }
 
                     break;
