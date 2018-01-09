@@ -1,0 +1,33 @@
+branches:
+  only:
+    - dev
+    - test/ci		# dummy branch used for testing the CI build (pusing directly to this branch will trigger a build)
+
+image: Visual Studio 2017     
+
+# clone directory
+clone_folder: c:\projects\msal-dotnet
+
+configuration: Release
+
+before_build:
+  - nuget restore
+    
+build_script:
+  - ps: .\build\build.ps1
+
+test:
+  assemblies: 
+    - Test.MSAL.NET.Unit.dll
+    - Test.MSAL.NET.Unit.PublicApi.dll
+
+skip_commits:
+  files:
+    - 'changelog.txt'
+
+artifacts:
+- path: .\artifacts\*.nupkg
+
+on_finish:
+# Uncomment this to be able to RDP into the build agent
+# ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))

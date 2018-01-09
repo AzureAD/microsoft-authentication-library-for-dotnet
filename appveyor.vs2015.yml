@@ -3,10 +3,10 @@ image: Visual Studio 2015
 configuration: Release
 
 before_build:
-  - '"C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/sn.exe" -Vr *,31bf3856ad364e35'
+  - '"C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/sn.exe" -Vr *,*'
 
 build:
-  project: ADAL.NET.VS2015.sln
+  project: adal\ADAL.NET.VS2015.sln
 
 skip_commits:
   files:

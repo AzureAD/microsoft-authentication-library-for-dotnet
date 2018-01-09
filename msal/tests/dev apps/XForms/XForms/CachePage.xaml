@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:XForms;assembly=XForms"
+             x:Class="XForms.CachePage">
+
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <OnPlatform.iOS>0,20,0,0</OnPlatform.iOS>
+        </OnPlatform>
+    </ContentPage.Padding>
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <local:ArrayToStringConverter x:Key="arrayToStringConverter"></local:ArrayToStringConverter>
+            <local:StringShortenerConverter x:Key="stringShortenerConverter"></local:StringShortenerConverter>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+
+    <StackLayout Padding="10,0">
+
+        <Label Text="Cache" HorizontalTextAlignment="Center" HorizontalOptions="FillAndExpand" Margin="5" />
+
+        <Label Text="Access Tokens:" HorizontalOptions="Start" Font="Bold,15"/>
+
+        <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
+
+            <ListView x:Name="accessTokenCacheItems" SeparatorVisibility="None" HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="ShowAccessTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="OnAtDelete" Text="Delete" CommandParameter="{Binding .}" />
+                        </ViewCell.ContextActions>
+                        <ViewCell.View>
+                            <ContentView Padding="5">
+                                <Frame OutlineColor="Black" Padding="10">
+                                    <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="DisplayableId: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding User.DisplayableId}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="ExpiresOn: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding ExpiresOn.DateTime, StringFormat='{0:MM/dd/yy H:mm:ss zzz}'}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="Scopes: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Scope}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                    </StackLayout>
+                                </Frame>
+                            </ContentView>
+                        </ViewCell.View>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        </StackLayout>
+
+        <Label Text="Refresh Tokens:" HorizontalOptions="Start" Font="Bold,15"/>
+
+        <ListView x:Name="refreshTokenCacheItems" SeparatorVisibility="None" HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="ShowRefreshTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding .}" />
+                        </ViewCell.ContextActions>
+                        <ViewCell.View>
+
+                            <ContentView Padding="5">
+                                <Frame OutlineColor="Black" Padding="10">
+                                    <StackLayout VerticalOptions="FillAndExpand">
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="DisplayableId: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding User.DisplayableId}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                        <Label Text="RefreshToken: " HorizontalOptions="Start" Font="Bold,13"/>
+                                        <Label Text="{Binding RefreshToken, Converter={StaticResource stringShortenerConverter}}" HorizontalOptions="CenterAndExpand"/>
+                                    </StackLayout>
+                                </Frame>
+                            </ContentView>
+                        </ViewCell.View>
+
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+
+        <Button  Text="Clear"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15"/>
+
+    </StackLayout>
+    
+</ContentPage>
