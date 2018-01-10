@@ -42,5 +42,13 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.Uid, clientInfo.UniqueIdentifier);
             Assert.AreEqual(TestConstants.Utid, clientInfo.UniqueTenantIdentifier);
         }
+
+        [TestMethod]
+        [TestCategory("MsalVersionRegexTest")]
+        public void MsalVersionRegexTest()
+        {
+            string msalVersion = MsalIdHelper.GetMsalVersion();
+            Assert.IsNotNull(msalVersion);
+        }
     }
 }

@@ -66,6 +66,8 @@ namespace Microsoft.Identity.Client.Internal
     /// </summary>
     internal static class MsalIdHelper
     {
+        private static readonly Regex MsalVersionRegex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+", RegexOptions.CultureInvariant);
+
         public static IDictionary<string, string> GetMsalIdParameters()
         {
             var parameters = new Dictionary<string, string>();
@@ -96,9 +98,9 @@ namespace Microsoft.Identity.Client.Internal
 
         public static string GetMsalVersion()
         {
-            string fullVersion = typeof (MsalIdHelper).GetTypeInfo().Assembly.FullName;
-            Regex regex = new Regex(@"Version=[\d]+.[\d+]+.[\d]+.[\d]+");
-            Match match = regex.Match(fullVersion);
+            string fullVersion = typeof(MsalIdHelper).GetTypeInfo().Assembly.FullName;
+
+            Match match = MsalVersionRegex.Match(fullVersion);
             if (match.Success)
             {
                 string[] version = match.Groups[0].Value.Split(new[] {'='}, StringSplitOptions.None);
