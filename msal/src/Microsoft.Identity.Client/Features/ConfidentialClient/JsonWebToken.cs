@@ -29,6 +29,8 @@ using Microsoft.Identity.Client;
 using System;
 using System.Runtime.Serialization;
 using System.Text;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client.Internal.Jwt
 {

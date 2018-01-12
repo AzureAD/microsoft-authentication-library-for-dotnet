@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Core.Cache
 
         internal static void SetCacheValue(IPropertySet containerValues, byte[] value)
         {
-            byte[] encryptedValue = CryptographyHelper.Encrypt(value);
+            byte[] encryptedValue = CoreCryptographyHelpers.Encrypt(value);
             containerValues[CacheValueLength] = encryptedValue.Length;
             if (encryptedValue.Length == 0)
             {
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Core.Cache
             }
 
             Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
-            return CryptographyHelper.Decrypt(encryptedValue);
+            return CoreCryptographyHelpers.Decrypt(encryptedValue);
         }
     }
 }

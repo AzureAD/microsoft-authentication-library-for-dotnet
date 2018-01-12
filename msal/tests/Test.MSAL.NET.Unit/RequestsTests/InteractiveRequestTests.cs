@@ -32,16 +32,17 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
-using Microsoft.Identity.Client.Internal.Http;
-using Microsoft.Identity.Client.Internal.Instance;
-using Microsoft.Identity.Client.Internal.OAuth2;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
-using Microsoft.Identity.Client.Internal.Telemetry;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Test.MSAL.NET.Unit.RequestsTests
 {
@@ -144,19 +145,19 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId
             };
 
-            AccessTokenCacheItem atItem = new AccessTokenCacheItem()
+            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 RawClientInfo = MockHelpers.CreateClientInfo(),
                 TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
+                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                 ScopeSet = TestConstants.Scope
             };
             atItem.IdToken = IdToken.Parse(atItem.RawIdToken);
             atItem.ClientInfo = ClientInfo.CreateFromJson(atItem.RawClientInfo);
-            AccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
+            MsalAccessTokenCacheKey atKey = atItem.GetAccessTokenItemKey();
             atItem.AccessToken = atKey.ToString();
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey.ToString()] = JsonHelper.SerializeToJson(atItem);
 

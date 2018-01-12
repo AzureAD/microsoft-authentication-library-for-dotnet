@@ -33,6 +33,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit.Mocks
@@ -75,7 +76,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 Assert.IsFalse(string.IsNullOrEmpty(uri.Query),
                     string.Format(CultureInfo.InvariantCulture,
                         "provided url ({0}) does not contain query parameters, as expected", uri.AbsolutePath));
-                IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
+                IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
                 foreach (var key in QueryParams.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key),
@@ -89,7 +90,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             if (QueryParams != null)
             {
                 Assert.IsFalse(string.IsNullOrEmpty(uri.Query));
-                IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
+                IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
                 foreach (var key in QueryParams.Keys)
                 {
                     Assert.IsTrue(inputQp.ContainsKey(key));
@@ -100,7 +101,7 @@ namespace Test.MSAL.NET.Unit.Mocks
             if (PostData != null)
             {
                 string postData = request.Content.ReadAsStringAsync().Result;
-                Dictionary<string, string> requestPostDataPairs = MsalHelpers.ParseKeyValueList(postData, '&', true, null);
+                Dictionary<string, string> requestPostDataPairs = CoreHelpers.ParseKeyValueList(postData, '&', true, null);
 
                 foreach (var key in PostData.Keys)
                 {

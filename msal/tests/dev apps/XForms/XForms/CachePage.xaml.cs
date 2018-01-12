@@ -25,8 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal.Cache;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,6 +33,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -81,7 +80,7 @@ namespace XForms
         public void OnExpire(object sender, EventArgs e)
         {
             var mi = ((MenuItem) sender);
-            var accessTokenCacheItem = (AccessTokenCacheItem) mi.CommandParameter;
+            var accessTokenCacheItem = (MsalAccessTokenCacheItem) mi.CommandParameter;
             var tokenCache = App.MsalPublicClient.UserTokenCache;
 
             // set access token as expired
@@ -96,7 +95,7 @@ namespace XForms
         public void OnAtDelete(object sender, EventArgs e)
         {
             var mi = ((MenuItem)sender);
-            var accessTokenCacheItem = (AccessTokenCacheItem)mi.CommandParameter;
+            var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
             var tokenCache = App.MsalPublicClient.UserTokenCache;
             tokenCache.DeleteAccessToken(accessTokenCacheItem);
@@ -107,7 +106,7 @@ namespace XForms
         public void OnInvalidate(object sender, EventArgs e)
         {
             var mi = ((MenuItem) sender);
-            var refreshTokenCacheItem = (RefreshTokenCacheItem) mi.CommandParameter;
+            var refreshTokenCacheItem = (MsalRefreshTokenCacheItem) mi.CommandParameter;
             var tokenCache = App.MsalPublicClient.UserTokenCache;
 
             // invalidate refresh token
@@ -122,7 +121,7 @@ namespace XForms
         public async Task ShowAccessTokenDetails(object sender, EventArgs e)
         {
             var mi = (MenuItem) sender;
-            var accessTokenCacheItem = (AccessTokenCacheItem) mi.CommandParameter;
+            var accessTokenCacheItem = (MsalAccessTokenCacheItem) mi.CommandParameter;
 
             await Navigation.PushAsync(new AccessTokenCacheItemDetails(accessTokenCacheItem));
         }
@@ -130,7 +129,7 @@ namespace XForms
         public async Task ShowRefreshTokenDetails(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
-            var refreshTokenCacheItem = (RefreshTokenCacheItem)mi.CommandParameter;
+            var refreshTokenCacheItem = (MsalRefreshTokenCacheItem)mi.CommandParameter;
 
             await Navigation.PushAsync(new RefreshTokenCacheItemDetails(refreshTokenCacheItem));
         }

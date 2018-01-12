@@ -29,8 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client
 {
@@ -90,7 +91,7 @@ namespace Microsoft.Identity.Client
                 {
                     foreach (var atItem in cacheDict["access_tokens"])
                     {
-                        tokenCache.AddAccessTokenCacheItem(JsonHelper.DeserializeFromJson<AccessTokenCacheItem>(atItem));
+                        tokenCache.AddAccessTokenCacheItem(JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atItem));
                     }
                 }
 
@@ -98,7 +99,7 @@ namespace Microsoft.Identity.Client
                 {
                     foreach (var rtItem in cacheDict["refresh_tokens"])
                     {
-                        tokenCache.AddRefreshTokenCacheItem(JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(rtItem));
+                        tokenCache.AddRefreshTokenCacheItem(JsonHelper.DeserializeFromJson<MsalRefreshTokenCacheItem>(rtItem));
                     }
                 }
             }

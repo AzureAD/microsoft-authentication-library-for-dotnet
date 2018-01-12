@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Test.MSAL.NET.Unit.Mocks
 {
@@ -38,12 +39,12 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static void PopulateCache(TokenCacheAccessor accessor)
         {
-            AccessTokenCacheItem item = new AccessTokenCacheItem()
+            MsalAccessTokenCacheItem item = new MsalAccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
+                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 RawClientInfo = MockHelpers.CreateClientInfo(),
                 Scope = TestConstants.Scope.AsSingleString(),
@@ -55,12 +56,12 @@ namespace Test.MSAL.NET.Unit.Mocks
             //add access token
             accessor.AccessTokenCacheDictionary[item.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(item);
 
-            item = new AccessTokenCacheItem()
+            item = new MsalAccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityGuestTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
+                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
                 RawClientInfo = MockHelpers.CreateClientInfo(),
                 Scope = TestConstants.ScopeForAnotherResource.AsSingleString(),
@@ -77,7 +78,7 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static void AddRefreshTokenToCache(TokenCacheAccessor accessor, string uid, string utid, string name)
         {
-            var rtItem = new RefreshTokenCacheItem
+            var rtItem = new MsalRefreshTokenCacheItem
             {
                 Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,

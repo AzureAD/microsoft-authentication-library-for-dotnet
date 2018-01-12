@@ -44,6 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         protected AdalLoggerBase(Guid correlationId) :base(correlationId)
         {
+            PiiLoggingEnabled = LoggerCallbackHandler.PiiLoggingEnabled;
         }
 
         private void Log(LogLevel logLevel, string message, bool containsPii,

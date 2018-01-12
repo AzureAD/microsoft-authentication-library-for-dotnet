@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Core
             CorrelationId = correlationId;
         }
 
+        public static bool PiiLoggingEnabled { get; set; }
 
         public abstract void Error(string message);
         public abstract void ErrorPii(string message);

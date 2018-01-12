@@ -32,15 +32,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.MSAL.NET.Unit.Mocks;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Internal.Http;
-using Microsoft.Identity.Client.Internal.Instance;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.Telemetry;
 using NSubstitute;
 
 namespace Test.MSAL.NET.Unit
@@ -366,7 +367,7 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DisplayableId, null);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
-            Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
             Assert.AreEqual(11, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));
@@ -406,7 +407,7 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.DisplayableId, null);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
-            Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
             Assert.AreEqual(12, qp.Count);
             Assert.AreEqual("my-policy", qp["p"]);
@@ -486,7 +487,7 @@ namespace Test.MSAL.NET.Unit
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.StartsWith(TestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
-            Dictionary<string, string> qp = MsalHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
+            Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(qp);
             Assert.AreEqual(12, qp.Count);
             Assert.IsTrue(qp.ContainsKey("client-request-id"));

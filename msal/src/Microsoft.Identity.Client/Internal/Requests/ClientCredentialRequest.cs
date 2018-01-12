@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // look for access token in the cache first.
             if (!ForceRefresh && LoadFromCache)
             {
-                AccessTokenItem
+                MsalAccessTokenItem
                     = TokenCache.FindAccessToken(AuthenticationRequestParameters);
             }
 
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
         protected override async Task SendTokenRequestAsync()
         {
-            if (AccessTokenItem == null)
+            if (MsalAccessTokenItem == null)
             {
                 await ResolveAuthorityEndpoints().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);

@@ -28,7 +28,6 @@
 using Android.App;
 using Android.Content;
 using System;
-using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core.Cache
 {
@@ -66,10 +65,8 @@ namespace Microsoft.Identity.Core.Cache
                     ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
                     ISharedPreferencesEditor editor = preferences.Edit();
                     editor.Remove(SharedPreferencesKey);
-                        string stateString = Convert.ToBase64String(serializedCache);
-                        editor.PutString(SharedPreferencesKey, stateString);
-                    
-
+                    string stateString = Convert.ToBase64String(serializedCache);
+                    editor.PutString(SharedPreferencesKey, stateString);
                     editor.Apply();
                 }
                 catch (Exception ex)

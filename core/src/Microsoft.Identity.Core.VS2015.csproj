@@ -107,6 +107,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="Http\**\*.cs" />
+    <Compile Include="Instance\**\*.cs" />
+    <Compile Include="Helpers\**\*.cs" />
+    <Compile Include="Telemetry\**\*.cs" />
+    <Compile Include="OAuth2\**\*.cs" />
     <Compile Include="Cache\**\*.cs" />
     <Compile Include="Properties\**\*.cs" />
     <Compile Include="Internal\**\*.cs" />

@@ -33,14 +33,16 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
-using Microsoft.Identity.Client.Internal.Http;
-using Microsoft.Identity.Client.Internal.Instance;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
-using Microsoft.Identity.Client.Internal.OAuth2;
-using Microsoft.Identity.Client.Internal.Telemetry;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -544,13 +546,13 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
 
-            AccessTokenCacheItem item = new AccessTokenCacheItem()
+            MsalAccessTokenCacheItem item = new MsalAccessTokenCacheItem()
             {
                 Authority = TestConstants.AuthorityHomeTenant,
                 ClientId = TestConstants.ClientId,
                 TokenType = "Bearer",
                 ExpiresOnUnixTimestamp =
-                    MsalHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
+                    CoreHelpers.DateTimeToUnixTimestamp((DateTime.UtcNow + TimeSpan.FromSeconds(3600))),
                 RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
                 RawClientInfo = MockHelpers.CreateClientInfo(),
                 ScopeSet = TestConstants.Scope
@@ -563,7 +565,7 @@ namespace Test.MSAL.NET.Unit
 
 
             // another cache entry for different uid. user count should be 2.
-            RefreshTokenCacheItem rtItem = new RefreshTokenCacheItem()
+            MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem()
             {
                 Environment = TestConstants.ProductionEnvironment,
                 ClientId = TestConstants.ClientId,
@@ -582,7 +584,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(2, users.Count());
 
             // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
-            rtItem = new RefreshTokenCacheItem()
+            rtItem = new MsalRefreshTokenCacheItem()
             {
                 Environment = TestConstants.SovereignEnvironment,
                 ClientId = TestConstants.ClientId,
@@ -726,7 +728,7 @@ namespace Test.MSAL.NET.Unit
 
             app.UserTokenCache = cache;
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new AccessTokenCacheKey(
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new MsalAccessTokenCacheKey(
                 TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UserIdentifier).ToString());
@@ -761,7 +763,7 @@ namespace Test.MSAL.NET.Unit
 
             app.UserTokenCache = cache;
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new AccessTokenCacheKey(
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new MsalAccessTokenCacheKey(
                 TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UserIdentifier).ToString());
@@ -794,7 +796,7 @@ namespace Test.MSAL.NET.Unit
 
             app.UserTokenCache = cache;
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new AccessTokenCacheKey(
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new MsalAccessTokenCacheKey(
                 TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UserIdentifier).ToString());
@@ -827,7 +829,7 @@ namespace Test.MSAL.NET.Unit
 
             app.UserTokenCache = cache;
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
-            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new AccessTokenCacheKey(
+            cache.TokenCacheAccessor.AccessTokenCacheDictionary.Remove(new MsalAccessTokenCacheKey(
                 TestConstants.AuthorityGuestTenant,
                 TestConstants.ScopeForAnotherResource, TestConstants.ClientId,
                 TestConstants.UserIdentifier).ToString());

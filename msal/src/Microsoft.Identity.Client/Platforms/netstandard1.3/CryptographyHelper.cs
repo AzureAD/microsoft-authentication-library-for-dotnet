@@ -36,31 +36,6 @@ namespace Microsoft.Identity.Client
 {
     internal class CryptographyHelper
     {
-        public static string CreateBase64UrlEncodedSha256Hash(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return null;
-            }
-
-            using (SHA256 sha = SHA256.Create())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
-
-        public static string GenerateCodeVerifier()
-        {
-            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            using (var randomSource = RandomNumberGenerator.Create())
-            {
-                randomSource.GetBytes(buffer);
-            }
-
-            return Base64UrlHelpers.Encode(buffer);
-        }
-
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             using (var key = certificate.GetRSAPrivateKey())

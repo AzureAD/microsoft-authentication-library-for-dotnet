@@ -32,8 +32,9 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 
 namespace DesktopTestApp
 {
@@ -292,7 +293,7 @@ namespace DesktopTestApp
             }
 
             cachePageTableLayout.RowCount = 0;
-            foreach (RefreshTokenCacheItem rtItem in _publicClientHandler.PublicClientApplication.UserTokenCache
+            foreach (MsalRefreshTokenCacheItem rtItem in _publicClientHandler.PublicClientApplication.UserTokenCache
                 .GetAllRefreshTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null))))
             {
                 AddControlToCachePageTableLayout(
@@ -301,10 +302,10 @@ namespace DesktopTestApp
                         RefreshViewDelegate = LoadCacheTabPage
                     });
 
-                foreach (AccessTokenCacheItem atItem in _publicClientHandler.PublicClientApplication.UserTokenCache
+                foreach (MsalAccessTokenCacheItem atItem in _publicClientHandler.PublicClientApplication.UserTokenCache
                     .GetAllAccessTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null))))
                 {
-                    if (atItem.User.Identifier.Equals(rtItem.User.Identifier))
+                    if (atItem.GetUserIdentifier().Equals(rtItem.GetUserIdentifier()))
                     {
                         AddControlToCachePageTableLayout(
                             new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache,

@@ -29,12 +29,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Test.MSAL.NET.Unit
 {
     class TestConstants
     {
-        public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] {"r1/scope1", "r1/scope2"});
+        public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly string ProductionEnvironment = "login.microsoftonline.com";
         public static readonly string SovereignEnvironment = "login.microsoftonline.de";
@@ -51,7 +52,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly string Uid = "my-UID";
-        public static readonly string Utid= "my-UTID";
+        public static readonly string Utid = "my-UTID";
 
         public static readonly string UserIdentifier = CreateUserIdentifer();
 

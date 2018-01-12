@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -18,6 +19,8 @@ namespace Microsoft.Identity.Client.Internal
                 //space is intentional for formatting of the message
                 Component = string.Format(CultureInfo.InvariantCulture, " ({0})", component);
             }
+
+            PiiLoggingEnabled = MsalLoggerSettings.PiiLoggingEnabled;
         }
 
         internal string Component { get; set; }

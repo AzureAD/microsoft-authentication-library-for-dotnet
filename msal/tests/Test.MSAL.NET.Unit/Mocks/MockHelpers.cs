@@ -35,13 +35,14 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
 using NSubstitute;
 
 namespace Test.MSAL.NET.Unit.Mocks
 {
     internal static class MockHelpers
     {
-        public static readonly string TokenResponseTemplate =
+        public static readonly string MsalTokenResponseTemplate =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"{0}\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +

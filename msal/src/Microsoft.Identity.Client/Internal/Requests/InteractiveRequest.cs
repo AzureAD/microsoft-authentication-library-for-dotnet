@@ -31,8 +31,10 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal.Interfaces;
-using Microsoft.Identity.Client.Internal.OAuth2;
-using Microsoft.Identity.Client.Internal.Telemetry;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -66,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             _extraScopesToConsent = new SortedSet<string>();
-            if (!MsalHelpers.IsNullOrEmpty(extraScopesToConsent))
+            if (!CoreHelpers.IsNullOrEmpty(extraScopesToConsent))
             {
                 _extraScopesToConsent = extraScopesToConsent.CreateSetFromEnumerable();
             }
@@ -106,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             Uri authorizationUri = CreateAuthorizationUri(true, true);
             var uiEvent = new UiEvent();
-            Client.Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
+            Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
             try
             {
                 _authorizationResult = await
@@ -117,7 +119,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             finally
             {
-                Client.Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
+                Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
             }
         }
 
@@ -142,8 +144,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (addVerifier)
             {
-                _codeVerifier = CryptographyHelper.GenerateCodeVerifier();
-                string codeVerifierHash = CryptographyHelper.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
+                _codeVerifier = CoreCryptographyHelpers.GenerateCodeVerifier();
+                string codeVerifierHash = CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
 
                 requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
@@ -193,7 +195,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 // Checks for _extraQueryParameters duplicating standard parameters
                 Dictionary<string, string> kvps =
-                    MsalHelpers.ParseKeyValueList(queryParams, '&', false,
+                    CoreHelpers.ParseKeyValueList(queryParams, '&', false,
                         AuthenticationRequestParameters.RequestContext);
 
                 foreach (KeyValuePair<string, string> kvp in kvps)

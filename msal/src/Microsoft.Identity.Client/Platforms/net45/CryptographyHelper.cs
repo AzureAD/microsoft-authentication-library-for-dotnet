@@ -32,36 +32,12 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Client
 {
     internal class CryptographyHelper
     {
-        public static string CreateBase64UrlEncodedSha256Hash(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-            {
-                return null;
-            }
-
-            using (SHA256Cng sha = new SHA256Cng())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
-            }
-        }
-
-        public static string GenerateCodeVerifier()
-        {
-            byte[] buffer = new byte[Constants.CodeVerifierByteSize];
-            using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
-            {
-                randomSource.GetBytes(buffer);
-            }
-
-            return Base64UrlHelpers.Encode(buffer);
-        }
-
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)

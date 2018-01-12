@@ -30,11 +30,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using Microsoft.Identity.Client.Internal.Telemetry;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client
 {
@@ -61,7 +62,7 @@ namespace Microsoft.Identity.Client
             bool validateAuthority)
         {
             ClientId = clientId;
-            Authority authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, validateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
@@ -74,7 +75,7 @@ namespace Microsoft.Identity.Client
 
             var msg = string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                PlatformPlugin.PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
+                new PlatformInformation().GetProductName(), MsalIdHelper.GetMsalVersion(),
                 MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion());
             requestContext.Logger.Info(msg);
             requestContext.Logger.InfoPii(msg);
@@ -191,7 +192,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = null;
             if (!string.IsNullOrEmpty(authority))
             {
-                authorityInstance = Internal.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+                authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
             }
 
             return

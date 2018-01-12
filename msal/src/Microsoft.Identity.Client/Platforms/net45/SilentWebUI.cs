@@ -29,6 +29,7 @@ using System;
 using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

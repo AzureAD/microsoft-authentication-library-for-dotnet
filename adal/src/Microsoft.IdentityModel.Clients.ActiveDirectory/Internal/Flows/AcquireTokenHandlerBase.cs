@@ -420,7 +420,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             if (result.AccessToken != null)
             {
-                var accessTokenHash = CryptographyHelper.CreateSha256Hash(result.AccessToken);
+                var accessTokenHash = CoreCryptographyHelpers.CreateSha256Hash(result.AccessToken);
 
                 var msg = string.Format(CultureInfo.CurrentCulture,
                     "=== Token Acquisition finished successfully. An access token was returned: Expiration Time: {0}",

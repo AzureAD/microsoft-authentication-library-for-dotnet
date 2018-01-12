@@ -89,6 +89,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\core\src\Microsoft.Identity.Core.csproj">
+      <Project>{3eef5981-8f11-4f54-9ddf-2f63c574d028}</Project>
+      <Name>Microsoft.Identity.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>

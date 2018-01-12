@@ -28,52 +28,27 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.OAuth2;
 using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal abstract class PlatformInformationBase
+    internal abstract class PlatformInformationBase : CorePlatformInformationBase
     {
-        internal const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
-        public abstract string GetProductName();
-        public abstract string GetEnvironmentVariable(string variable);
-        public abstract string GetProcessorArchitecture();
-        public abstract string GetOperatingSystem();
-        public abstract string GetDeviceModel();
+           
+        static PlatformInformationBase()
+        {
+            Instance = new PlatformInformation();
+        }
 
-        public virtual string GetAssemblyFileVersionAttribute()
+        public override string GetAssemblyFileVersionAttribute()
         {
             return
                 typeof (MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
         }
 
-        public virtual async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
-        }
-
-        public virtual bool IsDomainJoined()
-        {
-            return false;
-        }
-
-        public virtual void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
-        {
-            if (redirectUri == null)
-            {
-                throw new ArgumentNullException(nameof(redirectUri));
-            }
-        }
-
-        public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
-        {
-            return redirectUri.OriginalString;
-        }
-
-        public virtual string GetDefaultRedirectUri(string correlationId)
-        {
-            return DefaultRedirectUri;
         }
     }
 }

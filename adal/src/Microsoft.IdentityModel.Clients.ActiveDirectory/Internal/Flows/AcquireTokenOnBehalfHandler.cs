@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             this.userAssertion = userAssertion;
             this.DisplayableId = userAssertion.UserName;
-            CacheQueryData.AssertionHash = CryptographyHelper.CreateSha256Hash(userAssertion.Assertion);
+            CacheQueryData.AssertionHash = CoreCryptographyHelpers.CreateSha256Hash(userAssertion.Assertion);
 
             var msg = string.Format(CultureInfo.InvariantCulture,
                 "Username provided in user assertion - " + string.IsNullOrEmpty(DisplayableId));

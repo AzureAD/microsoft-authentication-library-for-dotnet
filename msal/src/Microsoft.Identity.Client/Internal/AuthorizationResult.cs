@@ -28,7 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -86,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal
             if (!string.IsNullOrWhiteSpace(resultData))
             {
                 // Remove the leading '?' first
-                Dictionary<string, string> response = MsalHelpers.ParseKeyValueList(resultData.Substring(1), '&',
+                Dictionary<string, string> response = CoreHelpers.ParseKeyValueList(resultData.Substring(1), '&',
                     true, null);
 
                 if (response.ContainsKey(OAuth2Parameter.State))

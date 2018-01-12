@@ -28,8 +28,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Client.Internal.Telemetry;
 
 namespace Test.MSAL.NET.Unit
 {

@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Core.Cache;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -39,21 +39,21 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class RefreshTokenCacheItemDetails : ContentPage
     {
-        internal RefreshTokenCacheItemDetails(RefreshTokenCacheItem refreshTokenCacheItem)
+        internal RefreshTokenCacheItemDetails(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem)
         {
             InitializeComponent();
 
-            environmentLabel.Text = refreshTokenCacheItem.Environment;
-            clientIdLabel.Text = refreshTokenCacheItem.ClientId;
+            environmentLabel.Text = msalRefreshTokenCacheItem.Environment;
+            clientIdLabel.Text = msalRefreshTokenCacheItem.ClientId;
 
-            userDisplayableIdLabel.Text = refreshTokenCacheItem.User.DisplayableId;
-            userNameLabel.Text = refreshTokenCacheItem.User.Name;
-            userIdentityProviderLabel.Text = refreshTokenCacheItem.User.IdentityProvider;
+            userDisplayableIdLabel.Text = msalRefreshTokenCacheItem.DisplayableId;
+            userNameLabel.Text = msalRefreshTokenCacheItem.Name;
+            userIdentityProviderLabel.Text = msalRefreshTokenCacheItem.IdentityProvider;
 
-            clientInfoUniqueIdentifierLabel.Text = refreshTokenCacheItem.ClientInfo.UniqueIdentifier;
-            clientInfoUniqueTenantIdentifierLabel.Text = refreshTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
+            clientInfoUniqueIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueIdentifier;
+            clientInfoUniqueTenantIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
-            refreshTokenLabel.Text = StringShortenerConverter.GetShortStr(refreshTokenCacheItem.RefreshToken, 100);
+            refreshTokenLabel.Text = StringShortenerConverter.GetShortStr(msalRefreshTokenCacheItem.RefreshToken, 100);
         }
     }
 }

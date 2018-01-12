@@ -31,7 +31,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Interfaces;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.OAuth2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit.Mocks
@@ -60,7 +61,7 @@ namespace Test.MSAL.NET.Unit.Mocks
                 throw ExceptionToThrow;
             }
 
-            IDictionary<string, string> inputQp = MsalHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
+            IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
             Assert.IsNotNull(inputQp[OAuth2Parameter.State]);
             if (AddStateInAuthorizationResult)
             {

@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.OAuth2;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
             AssertionType = assertionType;
             Assertion = assertion;
             AssertionHash =
-                CryptographyHelper.CreateBase64UrlEncodedSha256Hash(Assertion);
+                CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(Assertion);
         }
 
         /// <summary>

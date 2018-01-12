@@ -202,7 +202,7 @@ namespace Test.ADAL.NET.Common.Mocks
             {
                 responseMessage.Headers.Add(header.Key, header.Value);
             }
-
+            
             return responseMessage;
         }
 

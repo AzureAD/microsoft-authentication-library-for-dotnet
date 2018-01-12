@@ -27,14 +27,14 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.OAuth2;
-using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : RequestBase
     {
-        private RefreshTokenCacheItem _refreshTokenItem;
+        private MsalRefreshTokenCacheItem _msalRefreshTokenItem;
 
         public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
             : base(authenticationRequestParameters)
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
-            client.AddBodyParameter(OAuth2Parameter.RefreshToken, _refreshTokenItem.RefreshToken);
+            client.AddBodyParameter(OAuth2Parameter.RefreshToken, _msalRefreshTokenItem.RefreshToken);
         }
 
         internal override async Task PreTokenRequest()
@@ -63,12 +63,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             //look for access token.
-            AccessTokenItem
+            MsalAccessTokenItem
                 = TokenCache.FindAccessToken(AuthenticationRequestParameters);
 
             if (ForceRefresh)
             {
-                AccessTokenItem = null;
+                MsalAccessTokenItem = null;
             }
 
             await CompletedTask.ConfigureAwait(false);
@@ -76,12 +76,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected override async Task SendTokenRequestAsync()
         {
-            if (AccessTokenItem == null)
+            if (MsalAccessTokenItem == null)
             {
-                _refreshTokenItem =
+                _msalRefreshTokenItem =
                     TokenCache.FindRefreshToken(AuthenticationRequestParameters);
 
-                if (_refreshTokenItem == null)
+                if (_msalRefreshTokenItem == null)
                 {
                     const string msg = "No Refresh Token was found in the cache";
                     AuthenticationRequestParameters.RequestContext.Logger.Verbose(msg);
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (Response.RefreshToken == null)
                 {
-                    Response.RefreshToken = _refreshTokenItem.RefreshToken;
+                    Response.RefreshToken = _msalRefreshTokenItem.RefreshToken;
                     const string msg = "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead";
                     AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);

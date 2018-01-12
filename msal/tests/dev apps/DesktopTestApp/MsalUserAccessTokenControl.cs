@@ -2,20 +2,20 @@
 using System;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Cache;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 
 namespace DesktopTestApp
 {
     public partial class MsalUserAccessTokenControl : UserControl
     {
         private readonly TokenCache _cache;
-        private readonly AccessTokenCacheItem _item;
+        private readonly MsalAccessTokenCacheItem _item;
         public delegate void RefreshView();
 
         public RefreshView RefreshViewDelegate { get; set; }
 
-        internal MsalUserAccessTokenControl(TokenCache cache, AccessTokenCacheItem item) : this()
+        internal MsalUserAccessTokenControl(TokenCache cache, MsalAccessTokenCacheItem item) : this()
         {
             _cache = cache;
             _item = item;
@@ -32,7 +32,7 @@ namespace DesktopTestApp
         private void expireAccessTokenButton_Click(object sender, System.EventArgs e)
         {
             expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString();
-            _item.ExpiresOnUnixTimestamp = MsalHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
+            _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
             _cache.SaveAccesTokenCacheItem(_item);
         }
 
