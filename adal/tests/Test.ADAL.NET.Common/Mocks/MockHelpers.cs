@@ -245,7 +245,7 @@ namespace Test.ADAL.NET.Common.Mocks
             return responseMessage;
         }
 
-        private static string CreateIdToken(string uniqueId, string displayableId)
+        internal static string CreateIdToken(string uniqueId, string displayableId)
         {
             string header = "{alg: \"none\"," +
                              "typ:\"JWT\"" +

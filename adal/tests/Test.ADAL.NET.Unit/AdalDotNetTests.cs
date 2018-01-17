@@ -151,7 +151,7 @@ namespace Test.ADAL.NET.Unit
         public async Task ExtendedLifetimePositiveTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -186,7 +186,7 @@ namespace Test.ADAL.NET.Unit
         public async Task ExtendedLifetimeExpiredTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -226,7 +226,7 @@ namespace Test.ADAL.NET.Unit
         public async Task ExtendedLifetimeTokenTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -270,7 +270,7 @@ namespace Test.ADAL.NET.Unit
         public async Task ExtendedLifetimeRequestTimeoutTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -392,7 +392,7 @@ namespace Test.ADAL.NET.Unit
         public async Task ClientCredentialExtendedExpiryPositiveTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.Client,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -456,7 +456,7 @@ namespace Test.ADAL.NET.Unit
         public void ClientCredentialExtendedExpiryNegativeTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -518,7 +518,7 @@ namespace Test.ADAL.NET.Unit
         public void ClientCredentialNegativeRequestTimeoutTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -581,7 +581,7 @@ namespace Test.ADAL.NET.Unit
         public void ClientCredentialExtendedExpiryNoFlagSetTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -731,7 +731,7 @@ namespace Test.ADAL.NET.Unit
         public void AcquireTokenWithInvalidResourceTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -801,7 +801,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAdfsAuthorityTenant, false, new TokenCache());
             //add simple RT to cache
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAdfsAuthorityTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAdfsAuthorityTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, null, null);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
@@ -1096,7 +1096,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             string accessToken = "some-access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -1130,10 +1130,7 @@ namespace Test.ADAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-other-token\"}")
-                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                 PostData = new Dictionary<string, string>()
                 {
                     {"client_id", TestConstants.DefaultClientId},
@@ -1154,7 +1151,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             string accessToken = "some-access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -1188,10 +1185,7 @@ namespace Test.ADAL.NET.Unit
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityCommonTenant))
             {
                 Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"some-other-token\"}")
-                },
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                 PostData = new Dictionary<string, string>()
                 {
                     {"client_id", TestConstants.DefaultClientId},
@@ -1268,7 +1262,7 @@ namespace Test.ADAL.NET.Unit
             AdalResultWrapper resultEx = TokenCacheTests.CreateCacheValue("id", "user1");
             resultEx.UserAssertionHash = "hash1";
             cache.tokenCacheDictionary.Add(
-            new TokenCacheKey("https://login.microsoftonline.com/common/", "resource1", "client1",
+            new AdalTokenCacheKey("https://login.microsoftonline.com/common/", "resource1", "client1",
                 TokenSubjectType.Client, "id", "user1"), resultEx);
             RequestData data = new RequestData
             {
@@ -1297,7 +1291,7 @@ namespace Test.ADAL.NET.Unit
         public void HttpErrorResponseAsInnerException()
         {
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id", "displayable@id.com");
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id", "displayable@id.com");
             cache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "something-invalid",

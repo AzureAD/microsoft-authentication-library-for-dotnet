@@ -204,7 +204,7 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                     cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
                 //cache entry has no user assertion hash
@@ -275,7 +275,7 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                     cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
 
@@ -386,7 +386,7 @@ namespace Test.ADAL.NET.Unit
             string tokenInCache = "obo-access-token";
             foreach (var cachenoise in _cacheNoise)
             {
-                TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+                AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                     TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                     cachenoise + TestConstants.DefaultUniqueId, cachenoise + TestConstants.DefaultDisplayableId);
 
@@ -611,7 +611,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             //cache entry has no user assertion hash
@@ -677,7 +677,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
 
@@ -788,7 +788,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
 
@@ -898,7 +898,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.UserPlusClient,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
 

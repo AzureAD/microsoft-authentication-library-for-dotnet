@@ -258,7 +258,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper

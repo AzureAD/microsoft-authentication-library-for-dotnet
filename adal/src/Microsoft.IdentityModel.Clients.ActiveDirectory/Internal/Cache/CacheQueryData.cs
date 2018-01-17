@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Cache;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
 {
     class CacheQueryData

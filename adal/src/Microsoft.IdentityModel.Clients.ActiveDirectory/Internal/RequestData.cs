@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {

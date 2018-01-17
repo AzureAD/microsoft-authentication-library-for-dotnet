@@ -43,6 +43,9 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember]
         public AdalResult Result { get; set; }
 
+        [DataMember]
+        public string RawClientInfo { get; set; }
+
         /// <summary>
         /// Gets the Refresh Token associated with the requested Access Token. Note: not all operations will return a Refresh Token.
         /// </summary>

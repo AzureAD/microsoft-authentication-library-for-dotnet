@@ -36,13 +36,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class TokenCacheItem
     {
-        private readonly TokenCacheKey _key;
+        private readonly AdalTokenCacheKey _key;
         private readonly AdalResult _result;
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal TokenCacheItem(TokenCacheKey key, AdalResult result)
+        internal TokenCacheItem(AdalTokenCacheKey key, AdalResult result)
         {
             _key = key;
             _result = result;
@@ -110,7 +110,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         internal TokenSubjectType TokenSubjectType => _key.TokenSubjectType;
 
-        internal bool Match(TokenCacheKey key)
+        internal bool Match(AdalTokenCacheKey key)
         {
             return (key.Authority == this.Authority && key.ResourceEquals(this.Resource) &&
                     key.ClientIdEquals(this.ClientId)

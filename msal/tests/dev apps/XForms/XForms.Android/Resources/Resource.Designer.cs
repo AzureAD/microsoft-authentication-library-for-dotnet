@@ -565,7 +565,6 @@ namespace XForms.Droid
 			global::Microsoft.Identity.Client.Resource.Id.actions = global::XForms.Droid.Resource.Id.actions;
 			global::Microsoft.Identity.Client.Resource.Id.activity_chooser_view_content = global::XForms.Droid.Resource.Id.activity_chooser_view_content;
 			global::Microsoft.Identity.Client.Resource.Id.add = global::XForms.Droid.Resource.Id.add;
-			global::Microsoft.Identity.Client.Resource.Id.agentWebView = global::XForms.Droid.Resource.Id.agentWebView;
 			global::Microsoft.Identity.Client.Resource.Id.alertTitle = global::XForms.Droid.Resource.Id.alertTitle;
 			global::Microsoft.Identity.Client.Resource.Id.always = global::XForms.Droid.Resource.Id.always;
 			global::Microsoft.Identity.Client.Resource.Id.beginning = global::XForms.Droid.Resource.Id.beginning;
@@ -704,8 +703,6 @@ namespace XForms.Droid
 			global::Microsoft.Identity.Client.Resource.Layout.select_dialog_multichoice_material = global::XForms.Droid.Resource.Layout.select_dialog_multichoice_material;
 			global::Microsoft.Identity.Client.Resource.Layout.select_dialog_singlechoice_material = global::XForms.Droid.Resource.Layout.select_dialog_singlechoice_material;
 			global::Microsoft.Identity.Client.Resource.Layout.support_simple_spinner_dropdown_item = global::XForms.Droid.Resource.Layout.support_simple_spinner_dropdown_item;
-			global::Microsoft.Identity.Client.Resource.Layout.WebAuthenticationBroker = global::XForms.Droid.Resource.Layout.WebAuthenticationBroker;
-			global::Microsoft.Identity.Client.Resource.String.ApplicationName = global::XForms.Droid.Resource.String.ApplicationName;
 			global::Microsoft.Identity.Client.Resource.String.abc_action_bar_home_description = global::XForms.Droid.Resource.String.abc_action_bar_home_description;
 			global::Microsoft.Identity.Client.Resource.String.abc_action_bar_home_description_format = global::XForms.Droid.Resource.String.abc_action_bar_home_description_format;
 			global::Microsoft.Identity.Client.Resource.String.abc_action_bar_home_subtitle_description_format = global::XForms.Droid.Resource.String.abc_action_bar_home_subtitle_description_format;
@@ -4269,9 +4266,6 @@ namespace XForms.Droid
 			// aapt resource value: 0x7f08001e
 			public const int add = 2131230750;
 			
-			// aapt resource value: 0x7f0800b4
-			public const int agentWebView = 2131230900;
-			
 			// aapt resource value: 0x7f080058
 			public const int alertTitle = 2131230808;
 			
@@ -4437,8 +4431,8 @@ namespace XForms.Droid
 			// aapt resource value: 0x7f080048
 			public const int list_item = 2131230792;
 			
-			// aapt resource value: 0x7f0800b6
-			public const int masked = 2131230902;
+			// aapt resource value: 0x7f0800b5
+			public const int masked = 2131230901;
 			
 			// aapt resource value: 0x7f0800a1
 			public const int media_actions = 2131230881;
@@ -4743,8 +4737,8 @@ namespace XForms.Droid
 			// aapt resource value: 0x7f08000e
 			public const int view_offset_helper = 2131230734;
 			
-			// aapt resource value: 0x7f0800b5
-			public const int visible = 2131230901;
+			// aapt resource value: 0x7f0800b4
+			public const int visible = 2131230900;
 			
 			// aapt resource value: 0x7f080093
 			public const int volume_item_container = 2131230867;
@@ -5040,9 +5034,6 @@ namespace XForms.Droid
 			// aapt resource value: 0x7f030043
 			public const int Toolbar = 2130903107;
 			
-			// aapt resource value: 0x7f030044
-			public const int WebAuthenticationBroker = 2130903108;
-			
 			static Layout()
 			{
 				global::Android.Runtime.ResourceIdManager.UpdateIdValues();
@@ -5055,9 +5046,6 @@ namespace XForms.Droid
 		
 		public partial class String
 		{
-			
-			// aapt resource value: 0x7f09003e
-			public const int ApplicationName = 2131296318;
 			
 			// aapt resource value: 0x7f090015
 			public const int abc_action_bar_home_description = 2131296277;

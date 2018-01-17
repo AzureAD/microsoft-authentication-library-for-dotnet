@@ -68,23 +68,23 @@ namespace Test.ADAL.Common.Unit
 
             const string DisplayableId = "testuser@microsoft.com";
             Log.Comment("====== Creating a set of keys and values for the test...");
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", ValidResource, ValidClientId,
+            AdalTokenCacheKey key = new AdalTokenCacheKey("https://localhost/MockSts", ValidResource, ValidClientId,
                 TokenSubjectType.User, null, DisplayableId);
             var value = CreateCacheValue(key.UniqueId, key.DisplayableId);
             Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Key (with User): {0}", key));
             Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Value 1: {0}", value));
-            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts", InvalidResource, ValidClientId,
+            AdalTokenCacheKey key2 = new AdalTokenCacheKey("https://localhost/MockSts", InvalidResource, ValidClientId,
                 TokenSubjectType.User, null, DisplayableId);
             var value2 = CreateCacheValue(null, DisplayableId);
             Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Key (with User): {0}", key));
             Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Value 2: {0}", value2));
-            TokenCacheKey userlessKey = new TokenCacheKey("https://localhost/MockSts", ValidResource, ValidClientId,
+            AdalTokenCacheKey userlessKey = new AdalTokenCacheKey("https://localhost/MockSts", ValidResource, ValidClientId,
                 TokenSubjectType.User, null, null);
             var userlessValue = CreateCacheValue(null, null);
             Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Key (withoutUser): {0}", userlessKey));
             Log.Comment(string.Format(CultureInfo.CurrentCulture, " Cache Value 3: {0}", userlessValue));
 
-            TokenCacheKey incorrectUserKey = new TokenCacheKey("https://localhost/MockSts", InvalidResource,
+            AdalTokenCacheKey incorrectUserKey = new AdalTokenCacheKey("https://localhost/MockSts", InvalidResource,
                 ValidClientId, TokenSubjectType.User, null, "testuser2@microsoft.com");
 
             Log.Comment("====== Verifying that cache stores the first key/value pair...");
@@ -201,7 +201,7 @@ namespace Test.ADAL.Common.Unit
             displayableId = Guid.NewGuid().ToString();
             var cacheValue = CreateCacheValue(uniqueId, displayableId);
             AddToDictionary(localCache,
-                new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
+                new AdalTokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
                 cacheValue);
 
             //Add second user into cache
@@ -209,7 +209,7 @@ namespace Test.ADAL.Common.Unit
             displayableId = Guid.NewGuid().ToString();
             cacheValue = CreateCacheValue(uniqueId, displayableId);
             AddToDictionary(localCache,
-                new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
+                new AdalTokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
                 cacheValue);
 
             var acWithLocalCache = new AuthenticationContext(authority, false, localCache);
@@ -251,7 +251,7 @@ namespace Test.ADAL.Common.Unit
             localCache.Clear();
 
             // @Resource, Credential
-            TokenCacheKey tokenCacheKey = new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User,
+            AdalTokenCacheKey tokenCacheKey = new AdalTokenCacheKey(authority, resource, clientId, TokenSubjectType.User,
                 uniqueId, displayableId);
             AddToDictionary(localCache, tokenCacheKey, authenticationResult);
             AuthenticationContext acWithLocalCache = new AuthenticationContext(authority, false, localCache);
@@ -262,7 +262,7 @@ namespace Test.ADAL.Common.Unit
             // Duplicate throws error
             authenticationResult.Result.UserInfo.UniqueId = null;
             AddToDictionary(localCache,
-                new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, null, displayableId),
+                new AdalTokenCacheKey(authority, resource, clientId, TokenSubjectType.User, null, displayableId),
                 authenticationResult);
 
 
@@ -288,7 +288,7 @@ namespace Test.ADAL.Common.Unit
             resource = Guid.NewGuid().ToString();
             clientId = Guid.NewGuid().ToString();
 
-            TokenCacheKey tempKey = new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, null, null);
+            AdalTokenCacheKey tempKey = new AdalTokenCacheKey(authority, resource, clientId, TokenSubjectType.User, null, null);
             AddToDictionary(localCache, tempKey, cacheValue);
             RemoveFromDictionary(localCache, tempKey);
             Assert.IsFalse(localCache.tokenCacheDictionary.ContainsKey(tempKey));
@@ -307,7 +307,7 @@ namespace Test.ADAL.Common.Unit
             displayableId = Guid.NewGuid().ToString();
             cacheValue = CreateCacheValue(uniqueId, displayableId);
             AddToDictionary(localCache,
-                new TokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
+                new AdalTokenCacheKey(authority, resource, clientId, TokenSubjectType.User, uniqueId, displayableId),
                 cacheValue);
 
             var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
@@ -331,7 +331,7 @@ namespace Test.ADAL.Common.Unit
             var cacheDictionary = tokenCache.tokenCacheDictionary;
             tokenCache.Clear();
 
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+            AdalTokenCacheKey key = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.User, null, "user1");
             AdalResultWrapper value = CreateCacheValue(null, "user1");
         }
@@ -343,11 +343,11 @@ namespace Test.ADAL.Common.Unit
 
             tokenCache.Clear();
 
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+            AdalTokenCacheKey key = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.User, null, "user1");
-            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+            AdalTokenCacheKey key2 = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.User, null, "user2");
-            TokenCacheKey key3 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+            AdalTokenCacheKey key3 = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.UserPlusClient, null, "user1");
             Assert.AreNotEqual(key, key3);
 
@@ -436,10 +436,10 @@ namespace Test.ADAL.Common.Unit
             Assert.IsTrue(cacheDictionary.ContainsKey(key2));
             Assert.IsFalse(cacheDictionary.ContainsKey(key3));
 
-            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key, value)));
-            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key2, value2)));
-            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key, value2)));
-            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<TokenCacheKey, AdalResultWrapper>(key2, value)));
+            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>(key, value)));
+            Assert.IsTrue(cacheDictionary.Contains(new KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>(key2, value2)));
+            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>(key, value2)));
+            Assert.IsFalse(cacheDictionary.Contains(new KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>(key2, value)));
 
 
             // Duplicate key -> error
@@ -451,7 +451,7 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(3, cacheDictionary.Keys.Count);
             Assert.IsTrue(cacheDictionary.ContainsKey(key3));
 
-            var cacheItemsCopy = new KeyValuePair<TokenCacheKey, AdalResultWrapper>[cacheDictionary.Count + 1];
+            var cacheItemsCopy = new KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>[cacheDictionary.Count + 1];
             cacheDictionary.CopyTo(cacheItemsCopy, 1);
             for (int i = 0; i < cacheDictionary.Count; i++)
             {
@@ -488,9 +488,9 @@ namespace Test.ADAL.Common.Unit
 
         internal static async Task MultipleUserAssertionHashTest()
         {
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+            AdalTokenCacheKey key = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.Client, null, "user1");
-            TokenCacheKey key2 = new TokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
+            AdalTokenCacheKey key2 = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.Client, null, "user2");
             AdalResultWrapper value = CreateCacheValue(null, "user1");
             value.UserAssertionHash = "hash1";
@@ -532,7 +532,7 @@ namespace Test.ADAL.Common.Unit
             tokenCache.Clear();
 
             const int MaxItemCount = 100;
-            TokenCacheKey[] keys = new TokenCacheKey[MaxItemCount];
+            AdalTokenCacheKey[] keys = new AdalTokenCacheKey[MaxItemCount];
             AdalResultWrapper[] values = new AdalResultWrapper[MaxItemCount];
 
             for (int i = 0; i < MaxItemCount; i++)
@@ -561,7 +561,7 @@ namespace Test.ADAL.Common.Unit
         internal static void TokenCacheValueSplitTest()
         {
             var tokenCache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey("https://localhost/MockSts", "resourc1", "client1",
+            AdalTokenCacheKey key = new AdalTokenCacheKey("https://localhost/MockSts", "resourc1", "client1",
                 TokenSubjectType.User, null, "user1");
 
             tokenCache.Clear();
@@ -585,7 +585,7 @@ namespace Test.ADAL.Common.Unit
             tokenCache.Clear();
             for (int count = 0; count < Rand.Next(1, MaxItemCount); count++)
             {
-                TokenCacheKey key = GenerateRandomTokenCacheKey();
+                AdalTokenCacheKey key = GenerateRandomTokenCacheKey();
                 AdalResultWrapper result = GenerateRandomCacheValue(MaxFieldSize, key.UniqueId, key.DisplayableId);
                 AddToDictionary(tokenCache, key, result);
             }
@@ -626,7 +626,7 @@ namespace Test.ADAL.Common.Unit
 
         public static void CheckPublicGetSets()
         {
-            TokenCacheKey tokenCacheKey = new TokenCacheKey("Authority", "Resource", "ClientId", TokenSubjectType.User,
+            AdalTokenCacheKey tokenCacheKey = new AdalTokenCacheKey("Authority", "Resource", "ClientId", TokenSubjectType.User,
                 "UniqueId", "DisplayableId");
 
             Assert.IsTrue(tokenCacheKey.Authority == "Authority");
@@ -642,13 +642,13 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(cache.Count, expectedCount);
         }
 
-        private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey)
+        private static void VerifyCacheItems(TokenCache cache, int expectedCount, AdalTokenCacheKey firstKey)
         {
             VerifyCacheItems(cache, expectedCount, firstKey, null);
         }
 
-        private static void VerifyCacheItems(TokenCache cache, int expectedCount, TokenCacheKey firstKey,
-            TokenCacheKey secondKey)
+        private static void VerifyCacheItems(TokenCache cache, int expectedCount, AdalTokenCacheKey firstKey,
+            AdalTokenCacheKey secondKey)
         {
             var items = cache.ReadItems().ToList();
             Assert.AreEqual(expectedCount, items.Count);
@@ -686,7 +686,7 @@ namespace Test.ADAL.Common.Unit
             return EncodingHelper.Base64Encode(GenerateRandomString(len)).Substring(0, len);
         }
 
-        private static bool AreEqual(TokenCacheItem item, TokenCacheKey key)
+        private static bool AreEqual(TokenCacheItem item, AdalTokenCacheKey key)
         {
             return item.Match(key);
         }
@@ -745,7 +745,7 @@ namespace Test.ADAL.Common.Unit
             return (str1 == str2 || string.IsNullOrEmpty(str1) && string.IsNullOrEmpty(str2));
         }
 
-        private static void AddToDictionary(TokenCache tokenCache, TokenCacheKey key, AdalResultWrapper value)
+        private static void AddToDictionary(TokenCache tokenCache, AdalTokenCacheKey key, AdalResultWrapper value)
         {
             tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs {TokenCache = tokenCache});
             tokenCache.OnBeforeWrite(new TokenCacheNotificationArgs {TokenCache = tokenCache});
@@ -754,7 +754,7 @@ namespace Test.ADAL.Common.Unit
             tokenCache.OnAfterAccess(new TokenCacheNotificationArgs {TokenCache = tokenCache});
         }
 
-        private static bool RemoveFromDictionary(TokenCache tokenCache, TokenCacheKey key)
+        private static bool RemoveFromDictionary(TokenCache tokenCache, AdalTokenCacheKey key)
         {
             tokenCache.OnBeforeAccess(new TokenCacheNotificationArgs {TokenCache = tokenCache});
             tokenCache.OnBeforeWrite(new TokenCacheNotificationArgs {TokenCache = tokenCache});
@@ -765,9 +765,9 @@ namespace Test.ADAL.Common.Unit
             return result;
         }
 
-        private static TokenCacheKey GenerateRandomTokenCacheKey()
+        private static AdalTokenCacheKey GenerateRandomTokenCacheKey()
         {
-            return new TokenCacheKey(Guid.NewGuid().ToString(),
+            return new AdalTokenCacheKey(Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
                 TokenSubjectType.User,

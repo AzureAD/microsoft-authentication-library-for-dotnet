@@ -26,9 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core.Cache;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
+namespace Microsoft.Identity.Core.Cache
 {
     /// <summary>
     /// Determines what type of subject the token was issued for.
@@ -50,16 +49,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
     };
 
     /// <summary>
-    /// <see cref="TokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
+    /// <see cref="AdalTokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
-    internal sealed class TokenCacheKey
+    internal sealed class AdalTokenCacheKey
     {
-        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
+        internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
             : this(authority, resource, clientId, tokenSubjectType, (adalUserInfo != null) ? adalUserInfo.UniqueId : null, (adalUserInfo != null) ? adalUserInfo.DisplayableId : null)
         {
         }
 
-        internal TokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
+        internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
         {
             this.Authority = authority;
             this.Resource = resource;
@@ -90,7 +89,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
         /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
-            TokenCacheKey other = obj as TokenCacheKey;
+            AdalTokenCacheKey other = obj as AdalTokenCacheKey;
             return (other != null) && this.Equals(other);
         }
 
@@ -101,7 +100,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache
         /// true if the specified TokenCacheKey is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="other">The TokenCacheKey to compare with the current object. </param><filterpriority>2</filterpriority>
-        public bool Equals(TokenCacheKey other)
+        public bool Equals(AdalTokenCacheKey other)
         {
             if (ReferenceEquals(this, other))
             {

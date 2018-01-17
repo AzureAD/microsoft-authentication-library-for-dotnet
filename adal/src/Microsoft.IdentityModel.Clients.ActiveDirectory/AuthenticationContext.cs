@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;

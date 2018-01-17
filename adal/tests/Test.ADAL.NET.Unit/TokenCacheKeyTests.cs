@@ -31,6 +31,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 
 namespace Test.ADAL.NET.Unit
@@ -53,8 +54,8 @@ namespace Test.ADAL.NET.Unit
         public void TokenCacheKey_Equals_SameValuesDifferenceInstancesAreEqual()
         {
             // Setup
-            var testSubject1 = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
-            var testSubject2 = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
+            var testSubject1 = new AdalTokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
+            var testSubject2 = new AdalTokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
 
             // Act
             var result1 = testSubject1.Equals(testSubject2);
@@ -71,7 +72,7 @@ namespace Test.ADAL.NET.Unit
         public void TokenCacheKey_Equals_SameInstancesAreEqual()
         {
             // Setup
-            var testSubject = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
+            var testSubject = new AdalTokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
 
             // Act
             var result = testSubject.Equals(testSubject);
@@ -86,7 +87,7 @@ namespace Test.ADAL.NET.Unit
         public void TokenCacheKey_Equals_DifferentValuesAreNotEqual()
         {
             // Setup
-            var referenceSubject = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
+            var referenceSubject = new AdalTokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
 
             foreach (var other in ChangeEachProperty(referenceSubject, "a different value", TokenSubjectType.Client))
             {
@@ -112,7 +113,7 @@ namespace Test.ADAL.NET.Unit
         public void TokenCacheKey_GetHashCode_DifferentValuesAreNotEqual()
         {
             // Setup
-            var referenceSubject = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
+            var referenceSubject = new AdalTokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, DisplayableId);
 
             var baseCode = referenceSubject.GetHashCode();
 
@@ -136,7 +137,7 @@ namespace Test.ADAL.NET.Unit
             try
             {
                 // Setup
-                var testSubject = new TokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, "a displayable ID with four types of letter iIİı");
+                var testSubject = new AdalTokenCacheKey(Authority, Resource, ClientId, SubjectType, UniqueId, "a displayable ID with four types of letter iIİı");
 
                 // Act: en-US as current culture
                 Thread.CurrentThread.CurrentCulture = GetEnglishUsCulture();
@@ -193,34 +194,34 @@ namespace Test.ADAL.NET.Unit
             }
         }
 
-        private static string AsString(TokenCacheKey key)
+        private static string AsString(AdalTokenCacheKey key)
         {
             return $"({key.Authority}, {key.Resource}, {key.ClientId}, {key.TokenSubjectType}, {key.UniqueId}, {key.DisplayableId})";
         }
 
         /// <summary>
-        /// Generate a series of <see cref="TokenCacheKey"/> instances based on the given <paramref name="reference"/>
+        /// Generate a series of <see cref="AdalTokenCacheKey"/> instances based on the given <paramref name="reference"/>
         /// instance, but change one property in each instance.
         /// </summary>
-        private static IEnumerable<TokenCacheKey> ChangeEachProperty(TokenCacheKey reference, string differentString, TokenSubjectType differentSubjectType)
+        private static IEnumerable<AdalTokenCacheKey> ChangeEachProperty(AdalTokenCacheKey reference, string differentString, TokenSubjectType differentSubjectType)
         {
             // Different authority
-            yield return new TokenCacheKey(differentString, reference.Resource, reference.ClientId, reference.TokenSubjectType, reference.UniqueId, reference.DisplayableId);
+            yield return new AdalTokenCacheKey(differentString, reference.Resource, reference.ClientId, reference.TokenSubjectType, reference.UniqueId, reference.DisplayableId);
 
             // Different resource
-            yield return new TokenCacheKey(reference.Authority, differentString, reference.ClientId, reference.TokenSubjectType, reference.UniqueId, reference.DisplayableId);
+            yield return new AdalTokenCacheKey(reference.Authority, differentString, reference.ClientId, reference.TokenSubjectType, reference.UniqueId, reference.DisplayableId);
 
             // Different client ID
-            yield return new TokenCacheKey(reference.Authority, reference.Resource, differentString, reference.TokenSubjectType, reference.UniqueId, reference.DisplayableId);
+            yield return new AdalTokenCacheKey(reference.Authority, reference.Resource, differentString, reference.TokenSubjectType, reference.UniqueId, reference.DisplayableId);
 
             // Different token subject type
-            yield return new TokenCacheKey(reference.Authority, reference.Resource, reference.ClientId, differentSubjectType, reference.UniqueId, reference.DisplayableId);
+            yield return new AdalTokenCacheKey(reference.Authority, reference.Resource, reference.ClientId, differentSubjectType, reference.UniqueId, reference.DisplayableId);
 
             // Different unique ID
-            yield return new TokenCacheKey(reference.Authority, reference.Resource, reference.ClientId, reference.TokenSubjectType, differentString, reference.DisplayableId);
+            yield return new AdalTokenCacheKey(reference.Authority, reference.Resource, reference.ClientId, reference.TokenSubjectType, differentString, reference.DisplayableId);
 
             // Different displayable ID
-            yield return new TokenCacheKey(reference.Authority, reference.Resource, reference.ClientId, reference.TokenSubjectType, reference.UniqueId, differentString);
+            yield return new AdalTokenCacheKey(reference.Authority, reference.Resource, reference.ClientId, reference.TokenSubjectType, reference.UniqueId, differentString);
         }
 
         #endregion

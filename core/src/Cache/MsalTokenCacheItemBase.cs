@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Core.Cache
     [DataContract]
     internal abstract class MsalTokenCacheItemBase
     {
-        private const int CacheVersion = 1;
+        internal const int CacheVersion = 1;
 
         /// <summary>
         /// Default constructor.

@@ -26,49 +26,19 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-#if ANDROID || iOS || WINDOWS_APP
-using Microsoft.Identity.Core.Cache;
-#endif
-
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
+namespace Microsoft.Identity.Core.Cache
 {
-    /// <summary>
-    /// This class marked with ifdefs because only iOS/Android/WinRT provide platform default storage. 
-    /// Delegates have no implementation for netstandard1.1, netstandard1.3 and net45.
-    /// Platform specific persistance logic is implemented in core.
-    /// </summary>
-
-#if ANDROID
-    [Android.Runtime.Preserve(AllMembers = true)]
-#endif
-    internal static class StorageDelegates
+    internal class LegacyCachePersistance
     {
-        public static void BeforeAccess(TokenCacheNotificationArgs args)
+        //this class is an empty implementation to facilitate testing of forward/backward cache compat testing.
+        public static byte[] LoadCache()
         {
-#if ANDROID || iOS || WINDOWS_APP
-            if (args != null && args.TokenCache != null)
-            {
-                args.TokenCache.Deserialize(LegacyCachePersistance.LoadCache());
-            }
-
-#endif
+            return null;
         }
 
-        public static void AfterAccess(TokenCacheNotificationArgs args)
+        public static void WriteCache(byte[] serializedCache)
         {
-#if ANDROID || iOS || WINDOWS_APP
-            if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
-            {
-                LegacyCachePersistance.WriteCache(args.TokenCache.Serialize());
-                args.TokenCache.HasStateChanged = false;
-            }
-#endif
         }
-
     }
 }

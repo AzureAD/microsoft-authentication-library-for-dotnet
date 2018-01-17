@@ -58,7 +58,7 @@ namespace Test.ADAL.NET.Integration
         public void AcquireTokenSilentServiceErrorTestAsync()
         {
             TokenCache cache = new TokenCache();
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User, "unique_id",
                 "displayable@id.com");
             cache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -97,7 +97,7 @@ namespace Test.ADAL.NET.Integration
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
@@ -153,7 +153,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            TokenCacheKey key = new TokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
+            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
                 TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
                 TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
 

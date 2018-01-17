@@ -110,6 +110,7 @@ namespace Microsoft.Identity.Client
             {
                 try
                 {
+                    MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
                     // create the access token cache item
                     MsalAccessTokenCacheItem msalAccessTokenCacheItem =
                         new MsalAccessTokenCacheItem(requestParams.TenantUpdatedCanonicalAuthority, requestParams.ClientId,
@@ -180,7 +181,7 @@ namespace Microsoft.Identity.Client
                     if (response.RefreshToken != null)
                     {
                         // create the refresh token cache item
-                        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
+                       msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(
                             requestParams.Authority.Host,
                             requestParams.ClientId,
                             response);
@@ -192,6 +193,13 @@ namespace Microsoft.Identity.Client
                     }
 
                     OnAfterAccess(args);
+
+                    //save RT in ADAL cache for public clients
+                    if (!requestParams.IsClientCredentialRequest)
+                    {
+                        CacheFallbackOperations.WriteAdalRefreshToken(msalRefreshTokenCacheItem, requestParams.TenantUpdatedCanonicalAuthority, msalAccessTokenCacheItem.IdToken.ObjectId, response.Scope);
+                    }
+
                     return msalAccessTokenCacheItem;
                 }
                 finally
@@ -443,7 +451,15 @@ namespace Microsoft.Identity.Client
                 msg = "Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null);
                 requestParam.RequestContext.Logger.Info(msg);
                 requestParam.RequestContext.Logger.InfoPii(msg);
-                return msalRefreshTokenCacheItem;
+
+                if (msalRefreshTokenCacheItem != null)
+                {
+                    return msalRefreshTokenCacheItem;
+                }
+
+                requestParam.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
+                requestParam.RequestContext.Logger.InfoPii("Checking ADAL cache for matching RT");
+                return CacheFallbackOperations.GetAdalEntryForMsal(requestParam.Authority.Host, requestParam.ClientId, requestParam.LoginHint, requestParam.User?.Identifier);
             }
         }
 
@@ -521,6 +537,23 @@ namespace Microsoft.Identity.Client
                 {
                     if (environment.Equals(
                         item.Environment, StringComparison.OrdinalIgnoreCase))
+                    {
+                        User user = new User(item.GetUserIdentifier(),
+                            item.DisplayableId, item.Name,
+                            item.IdentityProvider);
+                        allUsers[item.GetUserIdentifier()] = user;
+                    }
+                }
+
+                if (allUsers.Count > 0)
+                {
+                    return allUsers.Values;
+                }
+
+                foreach (MsalRefreshTokenCacheItem item in CacheFallbackOperations.GetAllAdalUsersForMsal(environment, ClientId))
+                {
+                    //only return ADAL users if they have client info
+                    if (!string.IsNullOrEmpty(item.RawClientInfo))
                     {
                         User user = new User(item.GetUserIdentifier(),
                             item.DisplayableId, item.Name,
