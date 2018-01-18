@@ -1,0 +1,159 @@
+Version 3.17.2
+==============
+- Re-enable binary compatibility by re-adding the platform specific assemblies containing public types and adding TypeForwardedTo attributes (#887)
+
+Version 3.17.1
+==============
+This hotfix release includes the following changes to rollback breaking changes
+- Move select account enum to the end of the promptbehavior list (#874)
+- Move extension methods to be public instance methods in the primary assembly (#875)
+- Confidential client API for Xamarin iOS and Xamarin Android get an Obsolete attribute explaining why they should not be used (with link to FAQ) (#880)
+
+Version 3.17.0
+==============
+This release includes
+- Removal of API surfaces accidently exposed in some platforms.
+  - WinRT should only expose client credential API for confidential client flows (#768)
+  - Confidential client API surface should not be exposed on iOS/Android (#759)
+  - GetAuthorizationRequestUrl() API should not be exposed on WinRT, iOS and Android (#808)
+  - Device Profile API should not be exposed on iOS/Android (#806)
+- Update library to use [assembly: CLSCompliant(true)] (#673)
+- Removal of dependency injection of platform specific DLLs (#511)
+- Leak of ViewController passed with PlatformParameters (#534)
+- Log Scrubbing to remove potential PII (#772, #800)
+- Support to return all response headers from a failed request to the STS (#721)
+- Bug fix to include inner exception details in AdalClaimChallengeException (#777)
+- Fix to ensure refresh tokens are not used for incorrect environments (#290)
+- Support for PromptBehavior.SelectAccount (#754)
+- Fix for net47 where RSACng key was not being used correctly (#781)
+
+Version 3.16.1
+==============
+This release includes
+- Fix for net47 where non-exportable private key usage was failing. (#752)
+- Fix api surface -- Add GetAuthRequestUrlAsync method without claims overload (#740)
+
+Version 3.16.0
+==============
+This release includes
+- Fix for WinRT failure when logging an empty UserInfo object (#727).
+- Implement PromptBehavior support for iOS/Android
+- Url encode claims for iOS with Broker (#744)
+
+Version 3.15.0
+==============
+This release includes
+- Support for returning claims challenge back to developer for OBO flows. (#712)
+- Support for API overload to consume claims challenge. (#712)
+- Handle new RSA default (RSACng) on netfx4.7 (#708)
+- Minor source code cleanups to have culture invariant messages and address FxCop violations.
+
+Version 3.14.2
+==============
+This release includes
+- Use ISO 8601 formatted date-times in log messages (#710)
+- Fix TokenCacheKey::GetHashCode to no longer be culture-specific (#717)
+- More uniform use of Invariant Culture when manipulating URLs, tokens, and request messages
+
+Version 3.14.1
+==============
+This release includes
+- Fix SOAP message bug (GitHub issue #699)
+
+Version 3.14.0
+==============
+This release includes
+- Add support for ClientAssertionCertificate in CoreCLR
+- Port ADAL.PCL project to .NET Standard 1.1 project (requires VS2017 to build)
+- Port ADAL.CoreCLR project to .NET Standard 1.3 project (requires VS2017 to build)
+- Assemblies are signed with SHA-256 certificate
+- Fix an issue where silently logging in with an expired refresh token could cause a null reference exception
+- Fix casing bugs in SOAP requests (GitHub issue #401)
+
+Version 3.13.9
+==============
+This release includes
+- Add blackforest as a trusted authority
+- Addition of new US Gov STS as a trusted authority
+- Limit Http Response size to 1MB
+- Fix an issue where request to WS-Trust was not working when using ADAL in sovereign clouds
+- Fix to ignore all navigation events once redirect_uri is reached in the webview
+- Add support for configuring transitioning styles in iOS
+- Add support to disable logging to platform defaults.
+- Update resiliency error codes to be HTTP 500-599 (all inclusive)
+- Add support to consume developer configured Proxy in HttpMessageHandler.
+
+Version 3.13.8
+==============
+This release includes
+- update to nuget package to fix casing of NETStandard.Library nuget dependency
+- Add serialization packages to netstandard1.4 target as they are not part of netstandard.
+
+Version 3.13.7
+==============
+This release contains update to nuget package to use meta package and explicitly define target frameworks for the library.
+
+Version 3.13.6
+==============
+This release includes
+- Fix where UWP apps were ErrorHttp was causing unhandled exception.
+- Fix .NET webview to add javascript:// to whitelist.
+- Fix .NET webview to ensure if redirect_uri is hit, ignore errors raised by webview after that event.
+- Add support for UIStatusBarStyle in Xamarin.iOS.
+
+Version 3.13.5
+==============
+This release includes
+- Update to OBO flows to force userassertion match against cache entries.
+- Fix an issue where UWP was not handling ErrorHttp status and returning uncaught exception.
+
+Version 3.13.4
+==============
+This release includes
+- Fix to force iOS UIViewController to run on UI thread.
+- Fix regresssion where content was passed as a file path for UserCredential flows.
+- Fix an issue where internal exception was being thrown back to the developer.
+
+Version 3.13.3
+==============
+This release includes
+- Fix for null pointer exception when hash was computed on a null string.
+- Add support to return complete http response body as an inner exception.
+
+Version 3.13.2
+==============
+This release includes
+- Adding default constructor to UserInfo class to circumvent CoreCLR deserialization issue.
+
+Version 3.13.1
+==============
+This release contains
+- Fix to add ConfigureAwait(false) to all await calls to avoid deadlocks.
+- Fix bug where null reference was thrown in Android when onResult was called for an activity.
+- ext_expires_in claim was not being read from server response.
+- Disable Cross-Tenant refresh token redemption for client credentials flow.
+- Fix the bug where access token in authentication result could be null in multi-threaded scenarios.
+- Fix a bug where UserAssertion was not assumed to be JWT by default.
+- Add support for SecureString client secret.
+- Fix bug where null reference exception was thrown for AcquireTokenUsingDeviceCode.
+
+Version 3.12.0
+==============
+This release contains
+- Support for extended lifetime tokens.
+- Fix to allow hardware based keys to perform authentication.
+- Validate signing certificate chain in Android.
+- Update NetStandard GA packages.
+- Fix bug in cache lookup where developer provided parameters were ignored.
+
+Version 3.10.305231913
+======================
+This release contains
+- Retargeting Xamarin Android to Lollipop (5.0)
+- Fix for PromptBehavior.Always in UWP apps where prompt=login was not sent to server.
+
+
+Version 3.10.305161347
+======================
+This release contains
+- Fix in GetAuthorizationURLAsync where QP were not getting appended correctly.
