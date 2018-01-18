@@ -11,7 +11,7 @@ Write-Host "=========================="
 Write-Host "Versioning assembly info file..."
 $filename = "adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Properties\AssemblyInfo.cs"
 $content = Get-Content $filename
-$newContent = $newContent + "`n" + "[assembly: AssemblyInformationalVersionAttribute(""$hash"")]"
+$newContent = $content + "`n" + "[assembly: AssemblyInformationalVersionAttribute(""$hash"")]"
 
 $m = $newContent -match 'AssemblyFileVersion\(';
 #trying to match something like assembly: AssemblyFileVersion("3.11.0.0").
