@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\src\Microsoft.Identity.Core.csproj" />
+    <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\Test.Microsoft.Identity.Core.Unit.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
