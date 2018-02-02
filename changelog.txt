@@ -1,3 +1,10 @@
+1.1.2-preview
+=============
+This releases fixes references issues for Xamarin Android (for instance #520 & #524).
+When you create a new Xamarin Forms project and reference MSAL this now works out of the box. 
+If you want to migrate an existing project to MSAL 1.1.2, please read this [wiki] 
+(https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Troubleshooting-Xamarin.Android-issues-with-MSAL) page.
+
 1.1.1-preview
 =============
 This release contains -
