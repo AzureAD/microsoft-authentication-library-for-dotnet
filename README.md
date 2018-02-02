@@ -92,4 +92,4 @@ Copyright (c) Microsoft Corporation.  All rights reserved. Licensed under the MI
 
 #### Step 3: Use the token!
 
-The access token can now be used in an [HTTP Bearer request](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2/blob/master/active-directory-wpf-nodejs-webapi-v2/MainWindow.xaml.cs#L84).
+The access token can now be used in an [HTTP Bearer request](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2/blob/master/active-directory-wpf-msgraph-v2/MainWindow.xaml.cs#L83-L99).
