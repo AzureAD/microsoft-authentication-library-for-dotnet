@@ -66,22 +66,7 @@ This is obviously the first diagnostic.  We try to provide helpful error message
 
 ### Logs
 
-In order to configure logging, implementation of IAdalLogCallback interface should be provided
-
-```C#
-class LoggerCallbackImpl : IAdalLogCallback
-{
-    public void Log(LogLevel level, string message)
-    {
-        // process log message, for example write it to your favorite logging framework
-    }
-}
-```
-static property Callback of the LoggerCallbackHandler class should be set to the instance of a class implementing IAdalLogCallback interface
-
-```C#
-LoggerCallbackHandler.Callback = new LoggerCallbackImpl();
-```
+In order to configure logging, see the [wiki](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Logging-in-ADAL.Net) page for implementation details.
 
 ### Brokered Authentication for iOS
 
