@@ -50,7 +50,6 @@ namespace Test.ADAL.NET.Integration
     [DeploymentItem("TestMex.xml")]
     [DeploymentItem("WsTrustResponse.xml")]
     [DeploymentItem("WsTrustResponse13.xml")]
-    [DeploymentItem("TestMexMalformed.xml")]
     public class FederatedUserCredentialTests
     {
         [TestInitialize]

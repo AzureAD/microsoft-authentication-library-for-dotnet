@@ -81,7 +81,7 @@ namespace Test.ADAL.NET.Integration
                 });
             
             Assert.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
-            Assert.AreEqual(AdalErrorMessage.FailedToRefreshToken, ex.Message);
+            Assert.AreEqual(AdalErrorMessage.FailedToAcquireTokenSilently, ex.Message);
             Assert.IsNotNull(ex.InnerException);
             Assert.IsTrue(ex.InnerException is AdalException);
             Assert.AreEqual(((AdalException)ex.InnerException).ErrorCode, "invalid_grant");

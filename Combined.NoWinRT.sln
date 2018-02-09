@@ -89,7 +89,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample app", "sample app", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "msal\samples\desktop\SampleApp\SampleApp.csproj", "{85397CDA-120A-4626-9865-AD79EBFAC794}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Microsoft.Identity.Core.Unit", "core\tests\Test.Microsoft.Identity.Core.Unit\Test.Microsoft.Identity.Core.Unit.csproj", "{147076E1-195D-437A-A599-54AE8DABA9B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.Core.Unit", "core\tests\Test.Microsoft.Identity.Core.Unit\Test.Microsoft.Identity.Core.Unit.csproj", "{147076E1-195D-437A-A599-54AE8DABA9B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
