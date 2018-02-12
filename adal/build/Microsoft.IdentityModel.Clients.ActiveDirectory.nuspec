@@ -6,7 +6,7 @@
         <version>0.0.1-LOCALBUILD</version>
         <authors>Microsoft</authors>
         <licenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</licenseUrl>
-        <projectUrl>http://go.microsoft.com/fwlink/?LinkId=258232</projectUrl>
+        <projectUrl>https://aka.ms/adalnet</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
         <description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a .NET Standard class library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Azure Active Directory.</description>
         <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Azure Active Directory.</summary>
