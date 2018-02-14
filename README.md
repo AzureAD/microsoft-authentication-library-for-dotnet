@@ -1,6 +1,6 @@
 # Active Directory Authentication Library (ADAL) for .NET, Windows Store, .NET Core, Xamarin iOS and Xamarin Android.
 
-| [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev)
+| [Conceptual documentatoin](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki#documentation) || [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev)
 | --- | --- | --- |
 
 Active Directory Authentication Library (ADAL) provides easy to use authentication functionality for your .NET/.NET Core client, Windows Store/Xamarin.iOS/Xamarin.Android apps by taking advantage of Windows Server Active Directory and Windows Azure Active Directory.
