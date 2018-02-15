@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <package >
     <metadata minClientVersion="2.8.6">
         <title>Active Directory Authentication Library</title>
@@ -8,7 +8,10 @@
         <licenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</licenseUrl>
         <projectUrl>https://aka.ms/adalnet</projectUrl>
         <requireLicenseAcceptance>true</requireLicenseAcceptance>
-        <description>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides a .NET Standard class library with easy to use authentication functionality for your .NET client on various platforms including Windows desktop, Windows Store, Xamarin iOS and Xamarin Android by taking advantage of Windows Server Active Directory and Azure Active Directory.</description>
+        <description>ADAL.NET enables you to acquire a security token to access protected Web APIs, for instance Microsoft Graph or your own Web API.
+ADAL.NET is a .NET Standard class library which you can consume on various .NET client platforms (including Windows desktop, UWP, Windows 8.1, Xamarin iOS and Xamarin Android) but also you Web applications and Web APIs (ASP.NET, .NET Core, ASP.NET Core) that call other Web APIs in the name of a user, or without a user.
+ADAL.NET takes advantage of Windows Server Active Directory and Azure Active Directory (Azure AD).
+        </description>
         <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Azure Active Directory.</summary>
         <language>en-US</language>
         <owners>Microsoft Open Technologies</owners>
