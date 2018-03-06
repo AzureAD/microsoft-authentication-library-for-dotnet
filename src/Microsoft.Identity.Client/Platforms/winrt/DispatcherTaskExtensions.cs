@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
                 {
                     taskCompletionSource.SetException(ex);
                 }
-            });
+            }).ConfigureAwait(false);
             return await taskCompletionSource.Task.ConfigureAwait(false);
         }
     }

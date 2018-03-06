@@ -72,7 +72,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowRefreshTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="ShowRefreshTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding .}" />
                             <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding .}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
