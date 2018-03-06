@@ -230,7 +230,7 @@ namespace WebApp.Controllers
                     var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(
                         new[] {Startup.WebApiScope}, userName,
                         HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(),
-                        GetCurrentUserId());
+                        GetCurrentUserId()).ConfigureAwait(false);
 
                     result = await CallApi(WebApiUserProfileQuery, authenticationResult.AccessToken).ConfigureAwait(false);
                 }
