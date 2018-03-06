@@ -95,9 +95,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return _UIBehavior.PromptValue;
         }
 
-        internal override async Task PreTokenRequest()
+        internal override async Task PreTokenRequestAsync()
         {
-            await base.PreTokenRequest().ConfigureAwait(false);
+            await base.PreTokenRequestAsync().ConfigureAwait(false);
             await AcquireAuthorizationAsync().ConfigureAwait(false);
             VerifyAuthorizationResult();
         }

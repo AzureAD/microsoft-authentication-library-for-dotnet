@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
         internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =
             new ConcurrentDictionary<string, Authority>();
 
-        protected abstract Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext);
+        protected abstract Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName, RequestContext requestContext);
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
@@ -179,12 +179,12 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 string openIdConfigurationEndpoint =
                     await
-                        GetOpenIdConfigurationEndpoint(userPrincipalName, requestContext)
+                        GetOpenIdConfigurationEndpointAsync(userPrincipalName, requestContext)
                             .ConfigureAwait(false);
 
                 //discover endpoints via openid-configuration
                 TenantDiscoveryResponse edr =
-                    await DiscoverEndpoints(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
+                    await DiscoverEndpointsAsync(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
@@ -220,13 +220,13 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
         protected abstract string GetDefaultOpenIdConfigurationEndpoint();
 
-        private async Task<TenantDiscoveryResponse> DiscoverEndpoints(string openIdConfigurationEndpoint,
+        private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(string openIdConfigurationEndpoint,
             RequestContext requestContext)
         {
             OAuth2Client client = new OAuth2Client();
             return
                 await
-                    client.ExecuteRequest<TenantDiscoveryResponse>(new Uri(openIdConfigurationEndpoint),
+                    client.ExecuteRequestAsync<TenantDiscoveryResponse>(new Uri(openIdConfigurationEndpoint),
                         HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 

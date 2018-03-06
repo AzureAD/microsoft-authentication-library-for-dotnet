@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             try
             {
                 //authority endpoints resolution and validation
-                await PreTokenRequest().ConfigureAwait(false);
+                await PreTokenRequestAsync().ConfigureAwait(false);
                 await SendTokenRequestAsync().ConfigureAwait(false);
                 AuthenticationResult result = PostTokenRequest();
                 await PostRunAsync(result).ConfigureAwait(false);
@@ -236,13 +236,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return CompletedTask;
         }
 
-        internal virtual async Task PreTokenRequest()
+        internal virtual async Task PreTokenRequestAsync()
         {
-            await ResolveAuthorityEndpoints().ConfigureAwait(false);
+            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
         }
 
 
-        internal async Task ResolveAuthorityEndpoints()
+        internal async Task ResolveAuthorityEndpointsAsync()
         {
             await AuthenticationRequestParameters.Authority
                 .ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint,
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendQueryParameters(AuthenticationRequestParameters.SliceParameters);
             Response =
                 await client
-                    .GetToken(builder.Uri,
+                    .GetTokenAsync(builder.Uri,
                         AuthenticationRequestParameters.RequestContext)
                     .ConfigureAwait(false);
 

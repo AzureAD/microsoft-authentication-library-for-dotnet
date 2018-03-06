@@ -64,22 +64,22 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             _bodyParameters[key] = value;
         }
 
-        public async Task<TenantDiscoveryResponse> GetOpenIdConfiguration(Uri endPoint, RequestContext requestContext)
+        public async Task<TenantDiscoveryResponse> GetOpenIdConfigurationAsync(Uri endPoint, RequestContext requestContext)
         {
-            return await ExecuteRequest<TenantDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext);
+            return await ExecuteRequestAsync<TenantDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
-        public async Task<InstanceDiscoveryResponse> DiscoverAadInstance(Uri endPoint, RequestContext requestContext)
+        public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
         {
-            return await ExecuteRequest<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext);
+            return await ExecuteRequestAsync<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
-        public async Task<TokenResponse> GetToken(Uri endPoint, RequestContext requestContext)
+        public async Task<TokenResponse> GetTokenAsync(Uri endPoint, RequestContext requestContext)
         {
-            return await ExecuteRequest<TokenResponse>(endPoint, HttpMethod.Post, requestContext);
+            return await ExecuteRequestAsync<TokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
 
-        internal async Task<T> ExecuteRequest<T>(Uri endPoint, HttpMethod method, RequestContext requestContext)
+        internal async Task<T> ExecuteRequestAsync<T>(Uri endPoint, HttpMethod method, RequestContext requestContext)
         {
             bool addCorrelationId = (requestContext != null && !string.IsNullOrEmpty(requestContext.CorrelationId));
             if (addCorrelationId)
@@ -96,11 +96,11 @@ namespace Microsoft.Identity.Client.Internal.OAuth2
             {
                 if (method == HttpMethod.Post)
                 {
-                    response = await HttpRequest.SendPost(endpointUri, _headers, _bodyParameters, requestContext);
+                    response = await HttpRequest.SendPostAsync(endpointUri, _headers, _bodyParameters, requestContext).ConfigureAwait(false);
                 }
                 else
                 {
-                    response = await HttpRequest.SendGet(endpointUri, _headers, requestContext);
+                    response = await HttpRequest.SendGetAsync(endpointUri, _headers, requestContext).ConfigureAwait(false);
                 }
 
                 httpEvent.HttpResponseStatus = (int) response.StatusCode;
