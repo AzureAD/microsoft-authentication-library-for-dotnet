@@ -191,7 +191,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
             Task.Run(async () =>
             {
-                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
             }).GetAwaiter().GetResult();
 
             Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/",
@@ -220,7 +220,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
             Task.Run(async () =>
             {
-                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
             }).GetAwaiter().GetResult();
 
             Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/",
@@ -269,7 +269,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                 {
-                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                 }).GetAwaiter().GetResult();
                 Assert.Fail("ResolveEndpointsAsync should have failed here");
             }
@@ -318,7 +318,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                 {
-                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                 }).GetAwaiter().GetResult();
                 Assert.Fail("ResolveEndpointsAsync should have failed here");
             }
@@ -353,7 +353,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                 {
-                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                 }).GetAwaiter().GetResult();
                 Assert.Fail("ResolveEndpointsAsync should have failed here");
             }
@@ -384,7 +384,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                 {
-                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                    await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                 }).GetAwaiter().GetResult();
                 Assert.Fail("validation should have failed here");
             }
