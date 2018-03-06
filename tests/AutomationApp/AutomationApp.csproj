@@ -54,6 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\GlobalSuppressions.cs" />
     <Compile Include="TokenHandler.cs" />
     <Compile Include="AutomationUI.cs">
       <SubType>Form</SubType>

@@ -144,6 +144,9 @@
     <AndroidResource Include="Resources\**\*.axml" />
     <AndroidResource Include="Resources\**\*.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\GlobalSuppressions.cs" />
+  </ItemGroup>
   
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
   

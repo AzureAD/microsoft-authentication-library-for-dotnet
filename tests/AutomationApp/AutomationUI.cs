@@ -88,7 +88,7 @@ namespace AutomationApp
                 }
                 else
                 {
-                    AuthenticationResult authenticationResult = await _commandToRun(dict);
+                    AuthenticationResult authenticationResult = await _commandToRun(dict).ConfigureAwait(false);
                     SetResultPageInfo(authenticationResult);
                 }
             }

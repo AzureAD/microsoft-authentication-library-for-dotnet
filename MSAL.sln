@@ -44,6 +44,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9F42F896-9CED-4B2E-B9F3-6CB54B532216}"
 	ProjectSection(SolutionItems) = preProject
 		ConfigureAwait.ruleset = ConfigureAwait.ruleset
+		GlobalSuppressions.cs = GlobalSuppressions.cs
 	EndProjectSection
 EndProject
 Global
