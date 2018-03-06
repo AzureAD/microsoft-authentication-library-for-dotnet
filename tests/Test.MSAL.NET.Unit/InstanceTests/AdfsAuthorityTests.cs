@@ -107,7 +107,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
             Task.Run(async () =>
             {
-                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).configureAwait(false);
             }).GetAwaiter().GetResult();
 
             Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/",
@@ -125,7 +125,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
             Task.Run(async () =>
             {
-                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null));
+                await instance.ResolveEndpointsAsync(TestConstants.FabrikamDisplayableId, new RequestContext(Guid.NewGuid(), null)).configureAwait(false);
             }).GetAwaiter().GetResult();
 
             Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/",
