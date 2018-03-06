@@ -118,7 +118,7 @@ namespace XForms
             RefreshCacheView();
         }
 
-        public async Task ShowAccessTokenDetails(object sender, EventArgs e)
+        public async Task ShowAccessTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem) sender;
             var accessTokenCacheItem = (AccessTokenCacheItem) mi.CommandParameter;
@@ -126,7 +126,7 @@ namespace XForms
             await Navigation.PushAsync(new AccessTokenCacheItemDetails(accessTokenCacheItem));
         }
 
-        public async Task ShowRefreshTokenDetails(object sender, EventArgs e)
+        public async Task ShowRefreshTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var refreshTokenCacheItem = (RefreshTokenCacheItem)mi.CommandParameter;

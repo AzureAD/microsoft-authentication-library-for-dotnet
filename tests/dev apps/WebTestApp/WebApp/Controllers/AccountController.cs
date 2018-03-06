@@ -42,7 +42,7 @@ namespace WebApp.Controllers
             if (HttpContext.User == null || !HttpContext.User.Identity.IsAuthenticated)
             {
                 await HttpContext.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
-                    new AuthenticationProperties {RedirectUri = "/"});
+                    new AuthenticationProperties {RedirectUri = "/"}).ConfigureAwait(false);
             }
         }
 
