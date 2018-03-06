@@ -110,7 +110,7 @@ namespace WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> CallGraphMeQuery()
         {
-            await semaphore.WaitAsync();
+            await semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 ClearLog();
@@ -122,9 +122,9 @@ namespace WebApp.Controllers
                     var authenticationResult = await ConfidentialClientUtils.AcquireTokenSilentAsync(Startup.Scopes,
                         userName,
                         HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(),
-                        GetCurrentUserId());
+                        GetCurrentUserId()).ConfigureAwait(false);
 
-                    result = await CallApi(MsGraphMeQuery, authenticationResult.AccessToken);
+                    result = await CallApi(MsGraphMeQuery, authenticationResult.AccessToken).ConfigureAwait(false);
                 }
                 catch (MsalException ex)
                 {
