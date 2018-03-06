@@ -154,7 +154,7 @@ namespace XForms
                 var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
 
                 var res = await App.MsalPublicClient.AcquireTokenSilentAsync(GetScopes(),
-                    getUserByDisplayableId(selectedUser), authority, ForceRefreshSwitch.IsToggled);
+                    getUserByDisplayableId(selectedUser), authority, ForceRefreshSwitch.IsToggled).ConfigureAwait(false);
 
                 acquireResponseLabel.Text = ToString(res);
             }
