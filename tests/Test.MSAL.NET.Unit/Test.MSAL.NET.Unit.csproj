@@ -102,6 +102,9 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ConfigureAwait.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningsAsErrors />
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\GlobalSuppressions.cs" />
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />

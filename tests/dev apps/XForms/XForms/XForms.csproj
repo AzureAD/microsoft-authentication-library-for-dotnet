@@ -12,6 +12,9 @@
     <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>
     <DelaySign>False</DelaySign>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningsAsErrors />
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer" Version="0.0.6" />
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.91635" />
