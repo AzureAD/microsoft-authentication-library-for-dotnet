@@ -1,8 +1,8 @@
 Microsoft Authentication Library (MSAL) Preview for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
 ==========================================================================
 
-| [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-windowsdesktop-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [Library Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support)
-| --- | --- | --- | --- |
+| [Conceptual documentation](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) | [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-windowsdesktop-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [Library Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support)
+| --- | --- | --- | --- | --- |
 
 The MSAL library for .NET gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
