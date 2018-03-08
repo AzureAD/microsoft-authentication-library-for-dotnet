@@ -100,10 +100,8 @@
     </None>
   </ItemGroup>
   <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <CodeAnalysisRuleSet>..\..\ConfigureAwait.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <WarningsAsErrors />
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\GlobalSuppressions.cs" />

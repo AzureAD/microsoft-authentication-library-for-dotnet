@@ -117,7 +117,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<string> Get()
+        public async Task<string> GetAsync()
         {
             await Semaphore.WaitAsync().ConfigureAwait(false);
             try
@@ -136,7 +136,7 @@ namespace WebApi.Controllers
                         await GetConfidentialClient().AcquireTokenOnBehalfOfAsync(new[] {MsGraphUserReadScope},
                             userAssertion).ConfigureAwait(false);
 
-                    result = await CallApi(MsGraphMeQuery, authResult.AccessToken).ConfigureAwait(false);
+                    result = await CallApiAsync(MsGraphMeQuery, authResult.AccessToken).ConfigureAwait(false);
                 }
                 catch (MsalException ex)
                 {
@@ -155,7 +155,7 @@ namespace WebApi.Controllers
             }
         }
 
-        private static async Task<string> CallApi(string apiUrl, string accessToken)
+        private static async Task<string> CallApiAsync(string apiUrl, string accessToken)
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
