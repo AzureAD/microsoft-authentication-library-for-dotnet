@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
         {
             var taskCompletionSource = new TaskCompletionSource<T>();
 
-            async void AgileCallback()
+            async void TaskCompletionCallback()
             {
                 try
                 {
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            await dispatcher.RunAsync(priority, AgileCallback);
+            await dispatcher.RunAsync(priority, TaskCompletionCallback);
             return await taskCompletionSource.Task.ConfigureAwait(false);
         }
     }
