@@ -37,7 +37,8 @@ namespace Microsoft.Identity.Client
             Func<Task<T>> func, CoreDispatcherPriority priority = CoreDispatcherPriority.High)
         {
             var taskCompletionSource = new TaskCompletionSource<T>();
-            await dispatcher.RunAsync(priority, async () =>
+
+            async void AgileCallback()
             {
                 try
                 {
@@ -47,7 +48,9 @@ namespace Microsoft.Identity.Client
                 {
                     taskCompletionSource.SetException(ex);
                 }
-            });
+            }
+
+            await dispatcher.RunAsync(priority, AgileCallback);
             return await taskCompletionSource.Task.ConfigureAwait(false);
         }
     }
