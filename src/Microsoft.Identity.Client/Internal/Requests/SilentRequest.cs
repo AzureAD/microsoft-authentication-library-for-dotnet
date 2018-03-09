@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.RefreshToken, _refreshTokenItem.RefreshToken);
         }
 
-        internal override async Task PreTokenRequest()
+        internal override async Task PreTokenRequestAsync()
         {
             if (!LoadFromCache)
             {
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
-                await ResolveAuthorityEndpoints().ConfigureAwait(false);
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
 
                 if (Response.RefreshToken == null)

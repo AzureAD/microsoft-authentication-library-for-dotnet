@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return inputScope;
         }
         
-        internal override Task PreTokenRequest()
+        internal override Task PreTokenRequestAsync()
         {
             // look for access token in the cache first.
             if (!ForceRefresh && LoadFromCache)
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AccessTokenItem == null)
             {
-                await ResolveAuthorityEndpoints().ConfigureAwait(false);
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
             }
         }

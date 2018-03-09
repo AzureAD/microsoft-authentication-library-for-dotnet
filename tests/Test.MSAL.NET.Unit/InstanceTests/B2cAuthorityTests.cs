@@ -65,7 +65,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
                 Task
                     .Run(
-                        async () => { await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)); })
+                        async () => { await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false); })
                     .GetAwaiter()
                     .GetResult();
                 Assert.Fail("test should have failed");
@@ -88,7 +88,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task
                     .Run(
-                        async () => { await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)); })
+                        async () => { await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false); })
                     .GetAwaiter()
                     .GetResult();
                 Assert.Fail("test should have failed");

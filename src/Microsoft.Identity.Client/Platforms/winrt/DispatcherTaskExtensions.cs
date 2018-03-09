@@ -37,18 +37,21 @@ namespace Microsoft.Identity.Client
             Func<Task<T>> func, CoreDispatcherPriority priority = CoreDispatcherPriority.High)
         {
             var taskCompletionSource = new TaskCompletionSource<T>();
-            await dispatcher.RunAsync(priority, async () =>
+
+            async void TaskCompletionCallback()
             {
                 try
                 {
-                    taskCompletionSource.SetResult(await func());
+                    taskCompletionSource.SetResult(await func().ConfigureAwait(false));
                 }
                 catch (Exception ex)
                 {
                     taskCompletionSource.SetException(ex);
                 }
-            });
-            return await taskCompletionSource.Task;
+            }
+
+            await dispatcher.RunAsync(priority, TaskCompletionCallback);
+            return await taskCompletionSource.Task.ConfigureAwait(false);
         }
     }
 }

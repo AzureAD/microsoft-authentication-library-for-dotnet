@@ -142,7 +142,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public async Task NoStateReturnedTest()
+        public async Task NoStateReturnedTestAsync()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
 
@@ -164,7 +164,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope).ConfigureAwait(false);
                 Assert.Fail("API should have failed here");
             }
             catch (MsalClientException exc)
@@ -184,7 +184,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public async Task DifferentStateReturnedTest()
+        public async Task DifferentStateReturnedTestAsync()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
 
@@ -206,7 +206,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope).ConfigureAwait(false);
                 Assert.Fail("API should have failed here");
             }
             catch (MsalClientException exc)
@@ -222,7 +222,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public async Task AcquireTokenNoClientInfoReturnedTest()
+        public async Task AcquireTokenNoClientInfoReturnedTestAsync()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
 
@@ -624,7 +624,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public async Task AcquireTokenSilentScopeAndEmptyCacheTest()
+        public async Task AcquireTokenSilentScopeAndEmptyCacheTestAsync()
         {
             PublicClientApplication app =
                 new PublicClientApplication(TestConstants.ClientId)
@@ -660,7 +660,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public async Task AcquireTokenSilentScopeAndUserMultipleTokensFoundTest()
+        public async Task AcquireTokenSilentScopeAndUserMultipleTokensFoundTestAsync()
         {
             PublicClientApplication app =
                 new PublicClientApplication(TestConstants.ClientId)
@@ -955,7 +955,7 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PublicClientApplicationTests")]
         [ExpectedException(typeof(HttpRequestException),
             "Cannot write more bytes to the buffer than the configured maximum buffer size: 1048576.")]
-        public async Task HttpRequestExceptionIsNotSuppressed()
+        public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             var app = new PublicClientApplication(TestConstants.ClientId);
 
@@ -969,12 +969,12 @@ namespace Test.MSAL.NET.Unit
                 }
             });
 
-            await app.AcquireTokenAsync(TestConstants.Scope.ToArray());
+            await app.AcquireTokenAsync(TestConstants.Scope.ToArray()).ConfigureAwait(false);
         }
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public async Task AuthUiFailedExceptionTest()
+        public async Task AuthUiFailedExceptionTestAsync()
         {
             cache.ClientId = TestConstants.ClientId;
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
@@ -999,7 +999,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope);
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope).ConfigureAwait(false);
                 Assert.Fail("API should have failed here");
             }
             catch (MsalClientException exc)

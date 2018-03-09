@@ -76,7 +76,7 @@ namespace Test.MSAL.NET.Unit
                     MockHelpers.CreateSuccessTokenResponseMessage()
             });
             OAuth2Client client = new OAuth2Client();
-            Task<TokenResponse> task = client.GetToken(new Uri(TestConstants.AuthorityCommonTenant), new RequestContext(Guid.Empty, null));
+            Task<TokenResponse> task = client.GetTokenAsync(new Uri(TestConstants.AuthorityCommonTenant), new RequestContext(Guid.Empty, null));
             TokenResponse response = task.Result;
             Assert.IsNotNull(response);
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

@@ -42,7 +42,7 @@ namespace WebApp.Controllers
             if (HttpContext.User == null || !HttpContext.User.Identity.IsAuthenticated)
             {
                 await HttpContext.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
-                    new AuthenticationProperties {RedirectUri = "/"});
+                    new AuthenticationProperties {RedirectUri = "/"}).ConfigureAwait(false);
             }
         }
 
@@ -54,15 +54,15 @@ namespace WebApp.Controllers
             {
                 // authContext.TokenCache.Clear();
 
-                await HttpContext.Authentication.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
-                await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.Authentication.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme).ConfigureAwait(false);
+                await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
             }
         }
 
         public async Task EndSession()
         {
             // If AAD sends a single sign-out message to the app, end the user's session, but don't redirect to AAD for sign out.
-            await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
         }
     }
 }
