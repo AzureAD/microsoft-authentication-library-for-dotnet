@@ -191,7 +191,12 @@ namespace XForms
                 acquireResponseLabel.Text = ToString(res);
                 RefreshUsers();
             }
-            catch (MsalException exception)
+			catch (MsalServiceException serviceException)
+			{
+				acquireResponseLabel.Text = "MsalServiceException - " + serviceException.Message;
+			}
+
+			catch (MsalException exception)
             {
                 acquireResponseLabel.Text = "MsalException - " + exception.Message;
             }

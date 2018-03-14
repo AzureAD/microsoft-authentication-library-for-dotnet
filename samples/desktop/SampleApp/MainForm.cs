@@ -62,7 +62,7 @@ namespace SampleApp
         {
             if((sender as TabControl).TabIndex == 1)
             {
-                string token = await _msalHelper.GetTokenForCurrentUser(new[] {"user.read"}, user)
+                string token = await _msalHelper.GetTokenForCurrentUserAsync(new[] {"user.read"}, user)
                     .ConfigureAwait(false);
                 DisplayUserInformationFromGraph(token);
             }
@@ -70,7 +70,7 @@ namespace SampleApp
 
         private async void pictureBox1_Click(object sender, EventArgs e)
         {
-            user = await _msalHelper.SignIn().ConfigureAwait(false);
+            user = await _msalHelper.SignInAsync().ConfigureAwait(false);
             if (user!=null)
             {
                 tabControl1.SelectedTab = calendarPage;

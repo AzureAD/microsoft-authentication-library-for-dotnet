@@ -48,7 +48,7 @@ namespace SampleApp
                 CachePersistence.GetUserCache());
         }
 
-        public async Task<IUser> SignIn()
+        public async Task<IUser> SignInAsync()
         {
             try
             {
@@ -63,7 +63,7 @@ namespace SampleApp
             return null;
         }
 
-        public async Task<string> GetTokenForCurrentUser(IEnumerable<string> scopes, IUser user)
+        public async Task<string> GetTokenForCurrentUserAsync(IEnumerable<string> scopes, IUser user)
         {
             AuthenticationResult result = null;
             Exception exception = null;
@@ -72,7 +72,7 @@ namespace SampleApp
                 result = await Application.AcquireTokenAsync(scopes, user).ConfigureAwait(false);
                 return result.AccessToken;
             }
-            catch (MsalUiRequiredException exc)
+            catch (MsalUiRequiredException)
             {
                 try
                 {
