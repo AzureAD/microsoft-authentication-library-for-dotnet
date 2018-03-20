@@ -50,7 +50,11 @@ namespace XForms.Droid
     {
         AcquirePage _page;
 
-        protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
+		public AcquirePageRenderer(Context context) : base(context)
+		{
+		}
+
+		protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
             base.OnElementChanged(e);
             _page = (AcquirePage)e.NewElement;

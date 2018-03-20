@@ -51,7 +51,7 @@ namespace XForms.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
 #pragma warning disable CS0618
-            App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
+            App.UIParent = new UIParent(this.BaseContext as Activity);
 #pragma warning restore CS0618
         }
 

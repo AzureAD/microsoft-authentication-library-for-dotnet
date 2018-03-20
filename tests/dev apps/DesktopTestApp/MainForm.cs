@@ -86,9 +86,13 @@ namespace DesktopTestApp
                 userListDataSource.Insert(0, new User() { DisplayableId = string.Empty });
             }
 
-            userList.DataSource = userListDataSource;
-            userList.DisplayMember = "DisplayableId";
-            userList.Refresh();
+	        void EnsureUIThreadSync()
+	        {
+		        userList.DataSource = userListDataSource;
+		        userList.DisplayMember = "DisplayableId";
+		        userList.Refresh();
+	        }
+			this.RenderActionOnUIThread(EnsureUIThreadSync);
         }
 
         #region PublicClient UI Controls
@@ -238,8 +242,8 @@ namespace DesktopTestApp
                 output = ex.Message + Environment.NewLine + ex.StackTrace;
             }
 
-
-            callResult.Text = output;
+	        void EnsureUIThreadSync() => callResult.Text = output; 
+			this.RenderActionOnUIThread(EnsureUIThreadSync);
         }
 
         private UIBehavior GetUIBehavior()
@@ -268,13 +272,15 @@ namespace DesktopTestApp
 
         public void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
-            callResult.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
-                              @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
-                              @"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine +
-                              @"User: " + authenticationResult.User.DisplayableId + Environment.NewLine +
-                              @"Id Token: " + authenticationResult.IdToken;
+			void EnsureUIThreadSync() => callResult.Text =
+				@"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
+				@"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
+				@"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine +
+				@"User: " + authenticationResult.User.DisplayableId + Environment.NewLine +
+				@"Id Token: " + authenticationResult.IdToken;
+			this.RenderActionOnUIThread(EnsureUIThreadSync);
         }
-        
+
         public void ClearResultPageInfo()
         {
             callResult.Text = string.Empty;
@@ -361,5 +367,21 @@ namespace DesktopTestApp
             msalLogsTextBox.Text = string.Empty;
             msalPIILogsTextBox.Text = string.Empty;
         }
-    }
+
+		/// <summary>
+		/// Helper method to ensure work requiring rendering is performed on the UI
+		/// </summary>
+		/// <param name="action"></param>
+	    private void RenderActionOnUIThread(Action action)
+	    {
+		    if (this.InvokeRequired)
+		    {
+			    this.BeginInvoke(action);
+		    }
+		    else
+		    {
+			    action();
+		    }
+	    }
+	}
 }

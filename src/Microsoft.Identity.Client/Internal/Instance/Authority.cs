@@ -53,7 +53,9 @@ namespace Microsoft.Identity.Client.Internal.Instance
         internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =
             new ConcurrentDictionary<string, Authority>();
 
-        protected abstract Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName, RequestContext requestContext);
+	    private static readonly string RequiredAuthorityUriScheme = "https";
+
+	    protected abstract Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName, RequestContext requestContext);
 
         public static Authority CreateAuthority(string authority, bool validateAuthority)
         {
@@ -102,7 +104,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             }
             
             var authorityUri = new Uri(authority);
-            if (authorityUri.Scheme != "https")
+            if (authorityUri.Scheme != Authority.RequiredAuthorityUriScheme)
             {
                 throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
             }
