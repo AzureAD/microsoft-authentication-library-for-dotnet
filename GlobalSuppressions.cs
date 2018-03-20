@@ -3,31 +3,27 @@
 // attributes that are applied to this project.
 // Project-level suppressions either have no target or are given 
 // a specific target and scoped to a namespace, type, member, etc.
+using System.Diagnostics.CodeAnalysis;
 
 //XForms
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:XForms.AcquirePage.OnAcquireClicked(System.Object,System.EventArgs)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:XForms.AcquirePage.OnAcquireSilentlyClicked(System.Object,System.EventArgs)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.Droid.AcquirePageRenderer.#OnElementChanged(Xamarin.Forms.Platform.Android.ElementChangedEventArgs`1<Xamarin.Forms.Page>)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.Droid.MainActivity.#OnCreate(Android.OS.Bundle)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.iOS.AppDelegate.#FinishedLaunching(UIKit.UIApplication,Foundation.NSDictionary)")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.iOS.AcquirePageRenderer.#OnElementChanged(Xamarin.Forms.Platform.iOS.VisualElementChangedEventArgs)")]
+[assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:XForms.AcquirePage.OnAcquireClicked(System.Object,System.EventArgs)")]
+[assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:XForms.AcquirePage.OnAcquireSilentlyClicked(System.Object,System.EventArgs)")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.Droid.AcquirePageRenderer.#OnElementChanged(Xamarin.Forms.Platform.Android.ElementChangedEventArgs`1<Xamarin.Forms.Page>)")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.Droid.MainActivity.#OnCreate(Android.OS.Bundle)")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.iOS.AppDelegate.#FinishedLaunching(UIKit.UIApplication,Foundation.NSDictionary)")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member", Target = "XForms.iOS.AcquirePageRenderer.#OnElementChanged(Xamarin.Forms.Platform.iOS.VisualElementChangedEventArgs)")]
 
 //Desktop Test App
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~T:DesktopTestApp.MainForm(System.Object,System.EventArgs)")]
+[assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~T:DesktopTestApp.MainForm(System.Object,System.EventArgs)")]
 
 //Sample App
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~T:SampleApp.MainForm(System.Object,System.EventArgs)")]
+[assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~T:SampleApp.MainForm(System.Object,System.EventArgs)")]
 
 //Microsoft.Identity.Client
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:Microsoft.Identity.Client.DispatcherTaskExtensions.RunTaskAsync``1(Windows.UI.Core.CoreDispatcher,System.Func{System.Threading.Tasks.Task{``0}},Windows.UI.Core.CoreDispatcherPriority)~System.Threading.Tasks.Task{``0}")]
+[assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:Microsoft.Identity.Client.DispatcherTaskExtensions.RunTaskAsync``1(Windows.UI.Core.CoreDispatcher,System.Func{System.Threading.Tasks.Task{``0}},Windows.UI.Core.CoreDispatcherPriority)~System.Threading.Tasks.Task{``0}")]
 
 //Automation
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:AutomationApp.AutomationUI.GoBtn_Click(System.Object,System.EventArgs)")]
-
-//IOS Suppressions
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-using System.Diagnostics.CodeAnalysis;
+[assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "Reviewed", Scope = "member", Target = "~M:AutomationApp.AutomationUI.GoBtn_Click(System.Object,System.EventArgs)")]
 
 //XForms
 [assembly: SuppressMessage("AsyncUsage.CSharp.Reliability", "AvoidAsyncVoid:Avoid async void", Justification = "<Pending>", Scope = "member", Target = "~M:XForms.AcquirePage.OnAcquireClicked(System.Object,System.EventArgs)")]
