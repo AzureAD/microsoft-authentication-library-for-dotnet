@@ -18,7 +18,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>XForms.UWP_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>A9B8EEE8A42BE9C01D8B7FC0399EAB5EEA390DD7</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>965D1B5F95F4FD766EEE5B40AE866751DF16FFCB</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM'">
     <DebugSymbols>true</DebugSymbols>
