@@ -1,7 +1,7 @@
 Write-Host "=========================="
 Write-Host "Applying versioning to GitVersion.yml..."
 
-$filename = "GitVersion.yml"
+$filename = "msal\GitVersion.yml"
 $newContent = Get-Content $filename
 
 if ($env:BUILD_SOURCEBRANCHNAME -eq "master" -and $env:ReleaseVersioning -eq "true")
