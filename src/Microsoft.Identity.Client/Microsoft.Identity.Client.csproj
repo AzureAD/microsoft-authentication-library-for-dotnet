@@ -48,6 +48,10 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ConfigureAwait.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+  </PropertyGroup>
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />

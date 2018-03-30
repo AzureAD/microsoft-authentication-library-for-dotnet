@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{34FFBC9F-C270-4B10-98C8-F6882606DDFE}"
 EndProject
@@ -44,6 +44,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9F42F896-9CED-4B2E-B9F3-6CB54B532216}"
 	ProjectSection(SolutionItems) = preProject
 		ConfigureAwait.ruleset = ConfigureAwait.ruleset
+		GlobalSuppressions.cs = GlobalSuppressions.cs
 	EndProjectSection
 EndProject
 Global
@@ -106,7 +107,6 @@ Global
 		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
 		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
 		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|Win32.ActiveCfg = Debug|Any CPU
 		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{91E9E564-8A44-457B-A97C-E76C9F6275D6}.Debug|x64.Build.0 = Debug|Any CPU

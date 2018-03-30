@@ -11,6 +11,7 @@
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>
     <DelaySign>False</DelaySign>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer" Version="0.0.6" />

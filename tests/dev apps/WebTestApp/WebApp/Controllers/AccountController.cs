@@ -37,7 +37,7 @@ namespace WebApp.Controllers
     {
         // GET: /Account/Login
         [HttpGet]
-        public async Task Login(string returnUrl = null)
+        public async Task LoginAsync(string returnUrl = null)
         {
             if (HttpContext.User == null || !HttpContext.User.Identity.IsAuthenticated)
             {
@@ -48,7 +48,7 @@ namespace WebApp.Controllers
 
         // GET: /Account/LogOff
         [HttpGet]
-        public async Task LogOff()
+        public async Task LogOffAsync()
         {
             if (HttpContext.User.Identity.IsAuthenticated)
             {
@@ -59,7 +59,7 @@ namespace WebApp.Controllers
             }
         }
 
-        public async Task EndSession()
+        public async Task EndSessionAsync()
         {
             // If AAD sends a single sign-out message to the app, end the user's session, but don't redirect to AAD for sign out.
             await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);

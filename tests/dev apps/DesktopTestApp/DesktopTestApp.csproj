@@ -33,6 +33,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>

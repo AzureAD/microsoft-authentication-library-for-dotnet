@@ -108,7 +108,7 @@ namespace WebApp.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallGraphMeQuery()
+        public async Task<IActionResult> CallGraphMeQueryAsync()
         {
             await semaphore.WaitAsync().ConfigureAwait(false);
             try
@@ -124,7 +124,7 @@ namespace WebApp.Controllers
                         HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(),
                         GetCurrentUserId()).ConfigureAwait(false);
 
-                    result = await CallApi(MsGraphMeQuery, authenticationResult.AccessToken).ConfigureAwait(false);
+                    result = await CallApiAsync(MsGraphMeQuery, authenticationResult.AccessToken).ConfigureAwait(false);
                 }
                 catch (MsalException ex)
                 {
@@ -168,19 +168,19 @@ namespace WebApp.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallGraphUsersQueryBySecretClientCredential()
+        public async Task<IActionResult> CallGraphUsersQueryBySecretClientCredentialAsync()
         {
-            return await CallGraphUsersQuery(ConfidentialClientUtils.CreateSecretClientCredential()).ConfigureAwait(false);
+            return await CallGraphUsersQueryAsync(ConfidentialClientUtils.CreateSecretClientCredential()).ConfigureAwait(false);
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallGraphUsersQueryByCertClientCredential()
+        public async Task<IActionResult> CallGraphUsersQueryByCertClientCredentialAsync()
         {
-            return await CallGraphUsersQuery(ConfidentialClientUtils.CreateClientCertificateCredential()).ConfigureAwait(false);
+            return await CallGraphUsersQueryAsync(ConfidentialClientUtils.CreateClientCertificateCredential()).ConfigureAwait(false);
         }
 
-        private async Task<IActionResult> CallGraphUsersQuery(ClientCredential clientCredential)
+        private async Task<IActionResult> CallGraphUsersQueryAsync(ClientCredential clientCredential)
         {
             await semaphore.WaitAsync().ConfigureAwait(false);
             try
@@ -195,7 +195,7 @@ namespace WebApp.Controllers
                             clientCredential,
                             GetCurrentUserId()).ConfigureAwait(false);
 
-                    result = await CallApi(MsGraphUsersQuery, authenticationResult.AccessToken).ConfigureAwait(false);
+                    result = await CallApiAsync(MsGraphUsersQuery, authenticationResult.AccessToken).ConfigureAwait(false);
                 }
                 catch (MsalException ex)
                 {
@@ -216,7 +216,7 @@ namespace WebApp.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> CallWebApiUserProfileQuery()
+        public async Task<IActionResult> CallWebApiUserProfileQueryAsync()
         {
             await semaphore.WaitAsync().ConfigureAwait(false);
             try
@@ -232,7 +232,7 @@ namespace WebApp.Controllers
                         HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(),
                         GetCurrentUserId()).ConfigureAwait(false);
 
-                    result = await CallApi(WebApiUserProfileQuery, authenticationResult.AccessToken).ConfigureAwait(false);
+                    result = await CallApiAsync(WebApiUserProfileQuery, authenticationResult.AccessToken).ConfigureAwait(false);
                 }
                 catch (MsalException ex)
                 {
@@ -251,7 +251,7 @@ namespace WebApp.Controllers
             }
         }
 
-        private static async Task<string> CallApi(string apiUrl, string accessToken)
+        private static async Task<string> CallApiAsync(string apiUrl, string accessToken)
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Get, apiUrl);

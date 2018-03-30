@@ -45,6 +45,7 @@ using XForms.Droid;
 
 namespace XForms.Droid
 {
+#pragma warning disable CS0618
     internal class AcquirePageRenderer : PageRenderer
     {
         AcquirePage _page;
@@ -60,4 +61,5 @@ namespace XForms.Droid
             var activity = this.Context as Activity;
         }
     }
+#pragma warning restore CS0618
 }
