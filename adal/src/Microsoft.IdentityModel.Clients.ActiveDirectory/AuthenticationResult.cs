@@ -26,10 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
 using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -44,11 +41,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private readonly AdalResult _adalResult;
 
         /// <summary>
-        /// Creates result returned from AcquireToken. Except in advanced scenarios related to token caching, you do not need to create any instance of AuthenticationResult.
+        /// Creates result returned from AcquireToken.
         /// </summary>
-        /// <param name="accessTokenType">Type of the Access Token returned</param>
-        /// <param name="accessToken">The Access Token requested</param>
-        /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
         internal AuthenticationResult(AdalResult adalResult)
         {
             if (adalResult == null)
