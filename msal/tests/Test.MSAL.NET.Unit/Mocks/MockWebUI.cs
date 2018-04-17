@@ -29,15 +29,14 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Test.MSAL.NET.Unit.Mocks
 {
-    internal class MockWebUI : IWebUI 
+    internal class MockWebUI : IWebUI
     {
         public MockWebUI()
         {

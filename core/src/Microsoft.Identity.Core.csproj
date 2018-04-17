@@ -125,7 +125,17 @@
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\Android\**\*.cs" />
   </ItemGroup>
-  
+  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs">
+      <Version>25.4.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat">
+      <Version>25.4.0.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Platforms\Android\EmbeddedWebview\" />
+  </ItemGroup>
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
   
 </Project>

@@ -29,29 +29,24 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
-using Android.Net;
-using Microsoft.Identity.Client.Internal.Interfaces;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client;
 using Uri = System.Uri;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core.UI.SystemWebview
 {
     [Android.Runtime.Preserve(AllMembers = true)]
-    internal class WebUI : IWebUI
+    internal class SystemWebUI : WebviewBase
     {
-        private static SemaphoreSlim returnedUriReady;
-        private static AuthorizationResult authorizationResult;
-        private readonly UIParent _parent;
+        private readonly CoreUIParent _parent;
 
-        public WebUI(UIParent parent)
+        public SystemWebUI(CoreUIParent parent)
         {
             _parent = parent;
         }
 
         public RequestContext RequestContext { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -72,21 +67,6 @@ namespace Microsoft.Identity.Client
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
-        }
-
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
-        {
-            if (returnedUriReady != null)
-            {
-                authorizationResult = authorizationResultInput;
-                returnedUriReady.Release();
-            }
-            else
-            {
-                const string msg = "No pending request for response from web ui.";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
-            }
         }
     }
 }

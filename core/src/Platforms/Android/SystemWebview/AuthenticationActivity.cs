@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Support.CustomTabs;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
 using Uri = Android.Net.Uri;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core.UI.SystemWebview
 {
     /// <summary>
     /// </summary>
     [Activity(Name = "microsoft.identity.client.AuthenticationActivity")]
     [Android.Runtime.Preserve(AllMembers = true)]
-    public class AuthenticationActivity : Activity
+    internal class AuthenticationActivity : Activity
     {
-        internal static RequestContext RequestContext { get; set; } 
+        internal static RequestContext RequestContext { get; set; }
 
         /// <summary>
         /// Default Constructor
         /// </summary>
         public AuthenticationActivity()
         { }
-        
+
         private readonly string _customTabsServiceAction =
             "android.support.customtabs.action.CustomTabsService";
         private readonly string[] _chromePackages =
@@ -61,7 +60,6 @@ namespace Microsoft.Identity.Client
         private string _requestUrl;
         private int _requestId;
         private bool _restarted;
-       // private CustomTabsActivityManager _customTabsActivityManager;
 
         /// <summary>
         /// </summary>
@@ -175,7 +173,7 @@ namespace Microsoft.Identity.Client
         private void ReturnToCaller(int resultCode, Intent data)
         {
             data.PutExtra(AndroidConstants.RequestId, _requestId);
-            SetResult((Result) resultCode, data);
+            SetResult((Result)resultCode, data);
             Finish();
         }
 
@@ -201,7 +199,7 @@ namespace Microsoft.Identity.Client
             }
 
             Intent customTabServiceIntent = new Intent(_customTabsServiceAction);
-            IList< ResolveInfo > resolveInfoList = context.PackageManager.QueryIntentServices(
+            IList<ResolveInfo> resolveInfoList = context.PackageManager.QueryIntentServices(
                     customTabServiceIntent, 0);
 
             // queryIntentServices could return null or an empty list if no matching service existed.

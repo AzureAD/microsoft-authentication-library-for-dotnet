@@ -26,17 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
 
-namespace Microsoft.Identity.Client.Internal.Interfaces
+namespace Microsoft.Identity.Core.UI
 {
     internal interface IWebUI
     {
-        RequestContext RequestContext { get; set; }
-
         Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
     }
 }

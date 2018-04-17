@@ -28,6 +28,7 @@
 using Android.App;
 using Android.Content;
 using Android.OS;
+using Microsoft.Identity.Core.UI.SystemWebview;
 
 namespace Microsoft.Identity.Client
 {

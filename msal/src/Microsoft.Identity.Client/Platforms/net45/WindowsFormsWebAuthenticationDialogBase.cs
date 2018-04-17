@@ -35,6 +35,7 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

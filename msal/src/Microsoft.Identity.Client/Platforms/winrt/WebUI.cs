@@ -29,11 +29,10 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
-using Microsoft.Identity.Client.Internal.Interfaces;
-using Microsoft.Identity.Client.Internal;
 using Windows.Networking.Connectivity;
 using Windows.ApplicationModel.Core;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {
@@ -44,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal.UI
 
         public RequestContext RequestContext { get; set; }
 
-        public WebUI(UIParent parent, RequestContext requestContext)
+        public WebUI(CoreUIParent parent, RequestContext requestContext)
         {
             useCorporateNetwork = parent.UseCorporateNetwork;
             silentMode = parent.UseHiddenBrowser;

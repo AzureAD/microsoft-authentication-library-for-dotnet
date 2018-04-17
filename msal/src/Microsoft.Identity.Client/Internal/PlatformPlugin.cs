@@ -26,8 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal.Interfaces;
+
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -59,8 +60,13 @@ namespace Microsoft.Identity.Client.Internal
         {
 #if !FACADE
             CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
-            InjectDependecies(
-                (IWebUIFactory) new UI.WebUIFactory(),
+            IWebUIFactory obj = null;
+#if ANDROID
+            obj = new Microsoft.Identity.Core.UI.WebUIFactory();
+#else
+            obj = new Microsoft.Identity.Client.Internal.UI.WebUIFactory();
+#endif
+            InjectDependecies(obj,
                 (PlatformInformationBase) new PlatformInformation());
 #endif
         }

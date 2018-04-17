@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -22,28 +22,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Core.UI.SystemWebview;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Core.UI
 {
-    internal class InteractiveWebUI : WebUI
+    [Android.Runtime.Preserve(AllMembers = true)]
+    internal class WebUIFactory : IWebUIFactory
     {
-        private WindowsFormsWebAuthenticationDialog dialog;
-
-        protected override AuthorizationResult OnAuthenticate()
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
-            AuthorizationResult result;
-
-            using (dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow) {RequestContext = this.RequestContext})
+            if (coreUIParent.UseEmbeddedWebview)
             {
-                result = dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
+                //return new EmbeddedWebUI(coreUIParent)
+                //{
+                //    RequestContext = requestContext
+                //};
             }
 
-            return result;
+            return new SystemWebUI(coreUIParent)
+            {
+                RequestContext = requestContext
+            };
         }
     }
 }

@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core.UI.SystemWebview
 {
     internal static class MsalErrorAndroidEx
     {

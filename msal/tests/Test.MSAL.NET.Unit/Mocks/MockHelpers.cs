@@ -33,9 +33,9 @@ using System.Net;
 using System.Net.Http;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.UI;
 using NSubstitute;
 
 namespace Test.MSAL.NET.Unit.Mocks
@@ -75,7 +75,7 @@ namespace Test.MSAL.NET.Unit.Mocks
         public static void ConfigureMockWebUI(MockWebUI webUi)
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
-            mockFactory.CreateAuthenticationDialog(Arg.Any<UIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
+            mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
             PlatformPlugin.WebUIFactory = mockFactory;
         }
 

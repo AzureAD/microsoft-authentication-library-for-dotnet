@@ -22,15 +22,33 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal.Interfaces
+namespace Microsoft.Identity.Core.UI
 {
-    internal interface IWebUIFactory
+    internal abstract class WebviewBase : IWebUI
     {
-        IWebUI CreateAuthenticationDialog(UIParent parent, RequestContext requestContext);
+        protected static SemaphoreSlim returnedUriReady;
+        protected static AuthorizationResult authorizationResult;
+
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput, RequestContext requestContext)
+        {
+            if (returnedUriReady != null)
+            {
+                authorizationResult = authorizationResultInput;
+                returnedUriReady.Release();
+            }
+            else
+            {
+                const string msg = "No pending request for response from web ui.";
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
+            }
+        }
+
+        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
     }
 }

@@ -25,21 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
-using Microsoft.Identity.Core;
-
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Core.UI
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class WebUIFactory : IWebUIFactory
+    internal interface IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(UIParent parent, RequestContext requestContext)
-        {
-            return new WebUI(parent)
-            {
-                RequestContext = requestContext
-            };
-        }
+        IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext);
     }
 }

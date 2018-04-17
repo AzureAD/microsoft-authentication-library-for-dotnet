@@ -30,6 +30,7 @@ using System;
 using Android.App;
 #endif
 
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -38,15 +39,17 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class UIParent
     {
+        internal CoreUIParent CoreUIParent { get; private set; }
+
         /// <summary>
         /// Default constructor.
         /// </summary>
         public UIParent()
         {
+            CoreUIParent = new CoreUIParent();
         }
 
 #if ANDROID
-        internal Activity Activity { get; set; }
 
         /// <summary>
         /// Initializes an instance for a provided activity.
@@ -54,21 +57,17 @@ namespace Microsoft.Identity.Client
         /// <param name="activity">parent activity for the call. REQUIRED.</param>
         public UIParent(Activity activity)
         {
-           if(activity == null)
-           {		
-                throw new ArgumentException("passed in activity is null", nameof(activity));		
-           }	
-           
-            Activity = activity;
+            CoreUIParent = new CoreUIParent(activity);
         }
 #endif
 
 #if DESKTOP || WINRT
         //hidden webview can be used in both WinRT and desktop applications.
-        internal bool UseHiddenBrowser { get; set; }
+        internal bool UseHiddenBrowser { get { return CoreUIParent.UseHiddenBrowser; } set { CoreUIParent.UseHiddenBrowser = value; } }
 
 #if WINRT
-        internal bool UseCorporateNetwork { get; set; }
+        internal bool UseCorporateNetwork { get { return CoreUIParent.UseCorporateNetwork; } set { CoreUIParent.UseCorporateNetwork = value; } }
+
 #endif
 
 #if DESKTOP
@@ -80,7 +79,7 @@ namespace Microsoft.Identity.Client
         /// <param name="ownerWindow">Parent window object reference. OPTIONAL.</param>
         public UIParent(object ownerWindow)
         {
-            OwnerWindow = ownerWindow;
+            CoreUIParent = new CoreUIParent(ownerWindow);
         }
 #endif
 #endif

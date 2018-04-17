@@ -26,14 +26,13 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Interfaces;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(UIParent parent, RequestContext requestContext)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
             //there is no need to pass UIParent.
             return new WebUI()

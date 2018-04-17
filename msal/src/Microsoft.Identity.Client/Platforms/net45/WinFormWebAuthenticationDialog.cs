@@ -30,6 +30,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

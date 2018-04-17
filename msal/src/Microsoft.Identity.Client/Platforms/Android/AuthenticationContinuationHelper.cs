@@ -31,6 +31,8 @@ using Android.Content;
 using Microsoft.Identity.Client.Internal;
 using System;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI.SystemWebview;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -69,7 +71,7 @@ namespace Microsoft.Identity.Client
                     break;
             }
 
-            WebUI.SetAuthorizationResult(authorizationResult, requestContext);
+            WebviewBase.SetAuthorizationResult(authorizationResult, requestContext);
         }
 
         private static AuthorizationResult CreateResultForOkResponse(string url)

@@ -34,7 +34,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 using Test.MSAL.NET.Unit.Mocks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
@@ -44,6 +43,7 @@ using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 using Test.Microsoft.Identity.Core.Unit;
+using Microsoft.Identity.Core.UI;
 
 namespace Test.MSAL.NET.Unit.RequestsTests
 {

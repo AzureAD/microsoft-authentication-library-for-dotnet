@@ -25,22 +25,60 @@
 //
 //------------------------------------------------------------------------------
 
+#if ANDROID
 using System;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.UI;
+using Android.App;
+#endif
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Core.UI
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class CoreUIParent
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        public CoreUIParent()
         {
-            if (parent.UseHiddenBrowser)
-            {
-                return new SilentWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
-            }
-
-            return new InteractiveWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
         }
+
+#if ANDROID || IOS
+        internal bool UseEmbeddedWebview { get; set; }
+#endif
+
+#if ANDROID
+        internal Activity Activity { get; set; }
+        /// <summary>
+        /// Initializes an instance for a provided activity.
+        /// </summary>
+        /// <param name="activity">parent activity for the call. REQUIRED.</param>
+        public CoreUIParent(Activity activity)
+        {
+           if(activity == null)
+           {		
+                throw new ArgumentException("passed in activity is null", nameof(activity));		
+           }	
+           
+            Activity = activity;
+        }
+#endif
+
+#if DESKTOP || WINDOWS_APP
+        //hidden webview can be used in both WinRT and desktop applications.
+        internal bool UseHiddenBrowser { get; set; }
+#endif
+
+#if WINDOWS_APP
+        internal bool UseCorporateNetwork { get; set; }
+#endif
+
+#if DESKTOP
+        internal object OwnerWindow { get; set; }
+
+        /// <summary>
+        /// Initializes an instance for a provided parent window.
+        /// </summary>
+        /// <param name="ownerWindow">Parent window object reference. OPTIONAL.</param>
+        public CoreUIParent(object ownerWindow)
+        {
+            OwnerWindow = ownerWindow;
+        }
+#endif
     }
 }

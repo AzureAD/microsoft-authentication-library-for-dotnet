@@ -27,13 +27,13 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal.Interfaces;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Collections.Generic;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -343,7 +343,7 @@ namespace Microsoft.Identity.Client
 #endif
 #endif
 
-            return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parent, requestContext);
+            return PlatformPlugin.WebUIFactory.CreateAuthenticationDialog(parent.CoreUIParent, requestContext);
         }
 
         private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(Authority authority, IEnumerable<string> scopes,
