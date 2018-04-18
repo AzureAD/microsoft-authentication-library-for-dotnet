@@ -46,7 +46,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         internal override void DefaultLog(LogLevel logLevel, string message)
         {
-            AdalEventSource.Error(message);
+            if (logLevel == LogLevel.Verbose)
+            {
+                AdalEventSource.Verbose(message);
+            }
+            else if (logLevel == LogLevel.Information)
+            {
+                AdalEventSource.Information(message);
+            }
+            else if (logLevel == LogLevel.Warning)
+            {
+                AdalEventSource.Warning(message);
+            }
+            else
+            {
+                AdalEventSource.Error(message);
+            }
         }
     }
 }
