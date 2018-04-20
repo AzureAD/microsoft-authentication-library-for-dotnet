@@ -61,7 +61,8 @@ namespace Microsoft.Identity.Client.Internal
 #if !FACADE
             CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
             IWebUIFactory obj = null;
-#if ANDROID
+
+#if ANDROID || iOS
             obj = new Microsoft.Identity.Core.UI.WebUIFactory();
 #else
             obj = new Microsoft.Identity.Client.Internal.UI.WebUIFactory();

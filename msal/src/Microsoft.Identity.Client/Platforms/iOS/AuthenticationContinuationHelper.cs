@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Foundation;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client
         /// <param name="url">url used to invoke the application</param>
         public static bool SetAuthenticationContinuationEventArgs(NSUrl url)
         {
-            return WebUI.ContinueAuthentication(url.AbsoluteString);
+            return WebviewBase.ContinueAuthentication(url.AbsoluteString);
         }
     }
 }

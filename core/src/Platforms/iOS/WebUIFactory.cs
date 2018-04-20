@@ -25,60 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-#if ANDROID
-using System;
-using Android.App;
-#endif
+using Microsoft.Identity.Core.UI.SystemWebview;
 
 namespace Microsoft.Identity.Core.UI
 {
-    internal class CoreUIParent
+    internal class WebUIFactory : IWebUIFactory
     {
-        public CoreUIParent()
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
+            if (coreUIParent.UseEmbeddedWebview)
+            {
+                //return new EmbeddedWebUI(coreUIParent)
+                //{
+                //    RequestContext = requestContext
+                //};
+            }
+
+            //there is no need to pass UIParent.
+            return new SystemWebUI()
+            {
+                RequestContext = requestContext
+            };
         }
-
-#if ANDROID || iOS
-        internal bool UseEmbeddedWebview { get; set; }
-#endif
-
-#if ANDROID
-        internal Activity Activity { get; set; }
-        /// <summary>
-        /// Initializes an instance for a provided activity.
-        /// </summary>
-        /// <param name="activity">parent activity for the call. REQUIRED.</param>
-        public CoreUIParent(Activity activity)
-        {
-           if(activity == null)
-           {		
-                throw new ArgumentException("passed in activity is null", nameof(activity));		
-           }	
-           
-            Activity = activity;
-        }
-#endif
-
-#if DESKTOP || WINDOWS_APP
-        //hidden webview can be used in both WinRT and desktop applications.
-        internal bool UseHiddenBrowser { get; set; }
-#endif
-
-#if WINDOWS_APP
-        internal bool UseCorporateNetwork { get; set; }
-#endif
-
-#if DESKTOP
-        internal object OwnerWindow { get; set; }
-
-        /// <summary>
-        /// Initializes an instance for a provided parent window.
-        /// </summary>
-        /// <param name="ownerWindow">Parent window object reference. OPTIONAL.</param>
-        public CoreUIParent(object ownerWindow)
-        {
-            OwnerWindow = ownerWindow;
-        }
-#endif
     }
 }

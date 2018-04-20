@@ -22,23 +22,34 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.UI;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using SafariServices;
+using Foundation;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Core.UI
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal abstract class WebviewBase : NSObject, IWebUI, ISFSafariViewControllerDelegate
     {
-        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
+        protected static SemaphoreSlim returnedUriReady;
+        protected static AuthorizationResult authorizationResult;
+        protected SFSafariViewController safariViewController;
+
+        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+            RequestContext requestContext);
+
+        public static bool ContinueAuthentication(string url)
         {
-            //there is no need to pass UIParent.
-            return new WebUI()
+            if (returnedUriReady == null)
             {
-                RequestContext = requestContext
-            };
+                return false;
+            }
+
+            authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, url);
+            returnedUriReady.Release();
+            return true;
         }
     }
 }

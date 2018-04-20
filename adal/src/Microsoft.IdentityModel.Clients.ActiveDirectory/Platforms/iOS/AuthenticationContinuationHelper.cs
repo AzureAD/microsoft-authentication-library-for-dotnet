@@ -55,6 +55,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             BrokerHelper.SetBrokerResponse(url);
         }
-
     }
 }
