@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client
 
             if (result != SecStatusCode.Success)
             {
-                _requestContext.Logger.Warning("Failed to remove cache record: SecStatusCode." + result.ToString());
+                _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode." + result.ToString());
             }
             return result;
         }
@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Client
 
                     if (result != SecStatusCode.Success)
                     {
-                        _requestContext.Logger.Warning("Failed to remove cache record: SecStatusCode." + result.ToString());
+                        _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode." + result.ToString());
                     }
                 }
             }
