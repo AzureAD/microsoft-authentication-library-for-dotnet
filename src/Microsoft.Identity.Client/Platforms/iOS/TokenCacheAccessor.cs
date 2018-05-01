@@ -165,6 +165,11 @@ namespace Microsoft.Identity.Client
 
             var result = SecKeyChain.Add(CreateRecord(key, value, service));
 
+            if (result != SecStatusCode.Success)
+            {
+                _requestContext.Logger.Warning("Failed to add cache record to iOS Keychain: SecStatusCode." + result.ToString());
+            }
+
             return result;
         }
 
@@ -190,7 +195,13 @@ namespace Microsoft.Identity.Client
                 Label = key
             };
 
-            return SecKeyChain.Remove(record);
+            var result = SecKeyChain.Remove(record);
+
+            if (result != SecStatusCode.Success)
+            {
+                _requestContext.Logger.Warning("Failed to remove cache record: SecStatusCode." + result.ToString());
+            }
+            return result;
         }
 
         private void RemoveAll(string service)
@@ -206,7 +217,12 @@ namespace Microsoft.Identity.Client
             {
                 foreach (var record in records)
                 {
-                    SecKeyChain.Remove(record);
+                    var result = SecKeyChain.Remove(record);
+
+                    if (result != SecStatusCode.Success)
+                    {
+                        _requestContext.Logger.Warning("Failed to remove cache record: SecStatusCode." + result.ToString());
+                    }
                 }
             }
         }
