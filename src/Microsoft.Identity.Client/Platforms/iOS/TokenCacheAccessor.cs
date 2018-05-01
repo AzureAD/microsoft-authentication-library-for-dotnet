@@ -165,7 +165,11 @@ namespace Microsoft.Identity.Client
 
             var result = SecKeyChain.Add(CreateRecord(key, value, service));
 
-            if (result != SecStatusCode.Success)
+            if (result == SecStatusCode.Param)
+            {
+                _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode.Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.");
+            }
+            else if (result != SecStatusCode.Success)
             {
                 _requestContext.Logger.Warning("Failed to add cache record to iOS Keychain: SecStatusCode." + result.ToString());
             }
@@ -197,7 +201,11 @@ namespace Microsoft.Identity.Client
 
             var result = SecKeyChain.Remove(record);
 
-            if (result != SecStatusCode.Success)
+            if (result == SecStatusCode.Param)
+            {
+                _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode.Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.");
+            }
+            else if (result != SecStatusCode.Success )
             {
                 _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode." + result.ToString());
             }
@@ -219,9 +227,13 @@ namespace Microsoft.Identity.Client
                 {
                     var result = SecKeyChain.Remove(record);
 
-                    if (result != SecStatusCode.Success)
+                    if (result == SecStatusCode.Param)
                     {
-                        _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode." + result.ToString());
+                        _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain: SecStatusCode.Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.");
+                    }
+                    else if (result != SecStatusCode.Success)
+                    {
+                        _requestContext.Logger.Warning("Failed to add cache record to iOS Keychain: SecStatusCode." + result.ToString());
                     }
                 }
             }
