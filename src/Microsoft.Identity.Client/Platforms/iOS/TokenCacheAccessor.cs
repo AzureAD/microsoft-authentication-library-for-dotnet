@@ -167,13 +167,11 @@ namespace Microsoft.Identity.Client
 
             if (result == SecStatusCode.Param)
             {
-                _requestContext.Logger.Warning(Properties.Resources.FailedToAddCacheToiOSParam);
-                _requestContext.Logger.WarningPii(Properties.Resources.FailedToAddCacheToiOSParam);
+                _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.");
             }
             else if (result != SecStatusCode.Success)
             {
-                _requestContext.Logger.Warning(Properties.Resources.FailedToAddCacheToiOS + result.ToString());
-                _requestContext.Logger.WarningPii(Properties.Resources.FailedToAddCacheToiOS + result.ToString());
+                _requestContext.Logger.Warning("Failed to add cache record to iOS Keychain. SecStatusCode: " + result.ToString());
             }
 
             return result;
@@ -205,13 +203,11 @@ namespace Microsoft.Identity.Client
 
             if (result == SecStatusCode.Param)
             {
-                _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOSParam);
-                _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOSParam);
+                _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.");
             }
             else if (result != SecStatusCode.Success )
             {
-                _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
-                _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
+                _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain. SecStatusCode: " + result.ToString());
             }
             return result;
         }
@@ -233,13 +229,11 @@ namespace Microsoft.Identity.Client
 
                     if (result == SecStatusCode.Param)
                     {
-                        _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOSParam);
-                        _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOSParam);
+                        _requestContext.Logger.Warning("Failed to remove cache record from iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.");
                     }
                     else if (result != SecStatusCode.Success)
                     {
-                        _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
-                        _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
+                        _requestContext.Logger.Warning("Failed to add cache record to iOS Keychain. SecStatusCode: " + result.ToString());
                     }
                 }
             }
