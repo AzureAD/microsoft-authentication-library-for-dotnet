@@ -59,6 +59,18 @@ namespace Microsoft.Identity.Client
             _requestContext = requestContext;
         }
 
+        public RequestContext RequestContext
+        {
+            get
+            {
+                return _requestContext;
+            }
+            set
+            {
+                _requestContext = value;
+            }
+        }
+
         public void SaveAccessToken(string cacheKey, string item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();

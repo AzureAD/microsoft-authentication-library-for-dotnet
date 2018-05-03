@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
+                RequestContext = requestContext;
                 SaveAccessToken(cacheKey, item);
             }
             finally
@@ -53,6 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
+                RequestContext = requestContext;
                 SaveRefreshToken(cacheKey, item);
             }
             finally
@@ -67,6 +69,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
+                RequestContext = requestContext;
                 DeleteAccessToken(cacheKey);
             }
             finally
@@ -81,6 +84,7 @@ namespace Microsoft.Identity.Client.Internal.Telemetry
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
+                RequestContext = requestContext;
                 DeleteRefreshToken(cacheKey);
             }
             finally

@@ -8,8 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Properties {
+namespace Microsoft.Identity.Client.Resources.Properties {
     using System;
+    using System.Reflection;
     
     
     /// <summary>
@@ -22,7 +23,7 @@ namespace Microsoft.Identity.Client.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,10 +37,10 @@ namespace Microsoft.Identity.Client.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.Identity.Client.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.Identity.Client.Resources.Properties.Resources", typeof(Resources).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -51,7 +52,7 @@ namespace Microsoft.Identity.Client.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,38 +62,29 @@ namespace Microsoft.Identity.Client.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to add cache record to iOS Keychain. SecStatusCode: .
+        ///   Looks up a localized string similar to Ensure that your project contains an Entitlements.plist file.
         /// </summary>
-        internal static string FailedToAddCacheToiOS {
+        public static string EntitlementsNotice {
             get {
-                return ResourceManager.GetString("FailedToAddCacheToiOS", resourceCulture);
+                return ResourceManager.GetString("EntitlementsNotice", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to add cache record to iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS..
+        ///   Looks up a localized string similar to Failed to add cache record to iOS Keychain with SecStatusCode: {0}.
         /// </summary>
-        internal static string FailedToAddCacheToiOSParam {
+        public static string iOSKeychainCacheAddOperationFailed {
             get {
-                return ResourceManager.GetString("FailedToAddCacheToiOSParam", resourceCulture);
+                return ResourceManager.GetString("iOSKeychainCacheAddOperationFailed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to remove cache record from iOS Keychain. SecStatusCode: .
+        ///   Looks up a localized string similar to Failed to remove cache record from iOS Keychain with SecStatusCode: {0}.
         /// </summary>
-        internal static string FailedToRemoveCacheFromiOS {
+        public static string iOSKeychainCacheRemoveOperationFailed {
             get {
-                return ResourceManager.GetString("FailedToRemoveCacheFromiOS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to remove cache record from iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS..
-        /// </summary>
-        internal static string FailedToRemoveCacheFromiOSParam {
-            get {
-                return ResourceManager.GetString("FailedToRemoveCacheFromiOSParam", resourceCulture);
+                return ResourceManager.GetString("iOSKeychainCacheRemoveOperationFailed", resourceCulture);
             }
         }
     }

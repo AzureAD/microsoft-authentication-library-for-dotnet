@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client.Internal.Cache
 
         void DeleteRefreshToken(string cacheKey);
 
+        RequestContext RequestContext { get; set; }
+
         ICollection<string> GetAllAccessTokensAsString();
 
         ICollection<string> GetAllRefreshTokensAsString();
