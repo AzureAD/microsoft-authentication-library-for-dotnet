@@ -40,8 +40,6 @@ namespace Microsoft.Identity.Client
 
         internal readonly IDictionary<string, string> RefreshTokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
-
-        public RequestContext RequestContext { get; set; }
         
         public void SaveAccessToken(string cacheKey, string item)
         {

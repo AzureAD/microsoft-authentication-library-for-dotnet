@@ -53,18 +53,6 @@ namespace Microsoft.Identity.Client
             _requestContext = requestContext;
         }
 
-        public RequestContext RequestContext
-        {
-            get
-            {
-                return _requestContext;
-            }
-            set
-            {
-                _requestContext = value;
-            }
-        }
-
         public void SaveAccessToken(string cacheKey, string item)
         {
             SetValueForKey(cacheKey, item, AccessTokenServiceId);
@@ -179,13 +167,13 @@ namespace Microsoft.Identity.Client
 
             if (result == SecStatusCode.Param)
             {
-                _requestContext.Logger.Warning(String.Format(Resources.Properties.Resources.iOSKeychainCacheAddOperationFailed, result.ToString()) + ". " + Resources.Properties.Resources.EntitlementsNotice);
-                _requestContext.Logger.WarningPii(String.Format(Resources.Properties.Resources.iOSKeychainCacheAddOperationFailed, result.ToString()) + ". " + Resources.Properties.Resources.EntitlementsNotice);
+                _requestContext.Logger.Warning(Properties.Resources.FailedToAddCacheToiOSParam);
+                _requestContext.Logger.WarningPii(Properties.Resources.FailedToAddCacheToiOSParam);
             }
             else if (result != SecStatusCode.Success)
             {
-                _requestContext.Logger.Warning(String.Format(Resources.Properties.Resources.iOSKeychainCacheAddOperationFailed, result.ToString()));
-                _requestContext.Logger.WarningPii(String.Format(Resources.Properties.Resources.iOSKeychainCacheAddOperationFailed, result.ToString()));
+                _requestContext.Logger.Warning(Properties.Resources.FailedToAddCacheToiOS + result.ToString());
+                _requestContext.Logger.WarningPii(Properties.Resources.FailedToAddCacheToiOS + result.ToString());
             }
 
             return result;
@@ -217,13 +205,13 @@ namespace Microsoft.Identity.Client
 
             if (result == SecStatusCode.Param)
             {
-                _requestContext.Logger.Warning(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()) + ". " + Resources.Properties.Resources.EntitlementsNotice);
-                _requestContext.Logger.WarningPii(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()) + ". " + Resources.Properties.Resources.EntitlementsNotice);
+                _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOSParam);
+                _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOSParam);
             }
-            else if (result != SecStatusCode.Success)
+            else if (result != SecStatusCode.Success )
             {
-                _requestContext.Logger.Warning(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()));
-                _requestContext.Logger.WarningPii(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()));
+                _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
+                _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
             }
             return result;
         }
@@ -245,13 +233,13 @@ namespace Microsoft.Identity.Client
 
                     if (result == SecStatusCode.Param)
                     {
-                        _requestContext.Logger.Warning(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()) + ". " + Resources.Properties.Resources.EntitlementsNotice);
-                        _requestContext.Logger.WarningPii(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()) + ". " + Resources.Properties.Resources.EntitlementsNotice);
+                        _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOSParam);
+                        _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOSParam);
                     }
                     else if (result != SecStatusCode.Success)
                     {
-                        _requestContext.Logger.Warning(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()));
-                        _requestContext.Logger.WarningPii(String.Format(Resources.Properties.Resources.iOSKeychainCacheRemoveOperationFailed, result.ToString()));
+                        _requestContext.Logger.Warning(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
+                        _requestContext.Logger.WarningPii(Properties.Resources.FailedToRemoveCacheFromiOS + result.ToString());
                     }
                 }
             }

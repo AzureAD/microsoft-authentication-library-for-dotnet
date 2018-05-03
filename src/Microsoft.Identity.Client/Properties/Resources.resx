@@ -117,13 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EntitlementsNotice" xml:space="preserve">
-    <value>Ensure that your project contains an Entitlements.plist file</value>
+  <data name="FailedToAddCacheToiOS" xml:space="preserve">
+    <value>Failed to add cache record to iOS Keychain. SecStatusCode: </value>
   </data>
-  <data name="iOSKeychainCacheAddOperationFailed" xml:space="preserve">
-    <value>Failed to add cache record to iOS Keychain with SecStatusCode: {0}</value>
+  <data name="FailedToAddCacheToiOSParam" xml:space="preserve">
+    <value>Failed to add cache record to iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.</value>
   </data>
-  <data name="iOSKeychainCacheRemoveOperationFailed" xml:space="preserve">
-    <value>Failed to remove cache record from iOS Keychain with SecStatusCode: {0}</value>
+  <data name="FailedToRemoveCacheFromiOS" xml:space="preserve">
+    <value>Failed to remove cache record from iOS Keychain. SecStatusCode: </value>
+  </data>
+  <data name="FailedToRemoveCacheFromiOSParam" xml:space="preserve">
+    <value>Failed to remove cache record from iOS Keychain. SecStatusCode: Param. Ensure that your project contains an Entitlements.plist file as it may be required for keychain access due to a known bug with Xamarin/iOS.</value>
   </data>
 </root>
