@@ -25,35 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using UIKit;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
-    internal class WebUI : IWebUI
+    internal class EmbeddedWebUI : WebviewBase
     {
-        private static SemaphoreSlim returnedUriReady;
-        private static AuthorizationResult authorizationResult;
-        private PlatformParameters parameters;
+        public RequestContext RequestContext { get; internal set; }
+        public CoreUIParent CoreUIParent { get; set; }
 
-        public WebUI(IPlatformParameters parameters)
-        {
-            this.parameters = parameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-        }
-
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
 
-            this.parameters = null;
             return authorizationResult;
         }
 
@@ -65,29 +55,34 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
+            UIViewController viewController = null;
+            InvokeOnMainThread(() =>
+            {
+                UIWindow window = UIApplication.SharedApplication.KeyWindow;
+                viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
+            });
             try
             {
-                this.parameters.CallerViewController.InvokeOnMainThread(() =>
+                viewController.InvokeOnMainThread(() =>
                 {
                     var navigationController =
                         new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                            redirectUri.OriginalString, CallbackMethod, this.parameters.PreferredStatusBarStyle);
+                            redirectUri.OriginalString, CallbackMethod, CoreUIParent.PreferredStatusBarStyle);
 
-                    navigationController.ModalPresentationStyle = this.parameters.ModalPresentationStyle;
-                    navigationController.ModalTransitionStyle = this.parameters.ModalTransitionStyle;
-                    navigationController.TransitioningDelegate = this.parameters.TransitioningDelegate;
+                    navigationController.ModalPresentationStyle = CoreUIParent.ModalPresentationStyle;
+                    navigationController.ModalTransitionStyle = CoreUIParent.ModalTransitionStyle;
+                    navigationController.TransitioningDelegate = viewController.TransitioningDelegate;
 
-                    this.parameters.CallerViewController.PresentViewController(navigationController, true, null);
+                    viewController.PresentViewController(navigationController, true, null);
                 });
             }
             catch (Exception ex)
             {
-                this.parameters = null;
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                throw new MsalException(MsalError.AuthenticationUiFailed, ex.ToString());
             }
         }
 
-        private void CallbackMethod(AuthorizationResult result)
+        private static void CallbackMethod(AuthorizationResult result)
         {
             SetAuthorizationResult(result);
         }

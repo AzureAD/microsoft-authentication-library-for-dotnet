@@ -32,34 +32,38 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Android.Webkit;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
+using Android.Widget;
+using Microsoft.Identity.Core.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
     [Activity(Label = "Sign in")]
     [CLSCompliant(false)]
+#pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
     internal class AuthenticationAgentActivity : Activity
+#pragma warning restore CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
     {
         private const string AboutBlankUri = "about:blank";
 
-        private AdalWebViewClient client;
+        private CoreWebViewClient client;
 
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
-
             // Create your application here
 
-            SetContentView(Resource.Layout.WebAuthenticationBroker);
+            WebView webView = new WebView(ApplicationContext);
+            var linearLayout = new LinearLayout(ApplicationContext)
+            {
+                Orientation = Orientation.Vertical
+            };
+            linearLayout.AddView(webView);
+            SetContentView(linearLayout);
 
             string url = Intent.GetStringExtra("Url");
-
-            WebView webView = FindViewById<WebView>(Resource.Id.agentWebView);
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
-            webSettings.UserAgentString = 
-                    userAgent + BrokerConstants.ClientTlsNotSupported;
+            webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
             CoreLoggerBase.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
 
             webSettings.JavaScriptEnabled = true;
@@ -69,10 +73,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             webSettings.UseWideViewPort = true;
             webSettings.BuiltInZoomControls = true;
 
-            this.client = new AdalWebViewClient(Intent.GetStringExtra("Callback"));
+            this.client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(client);
             webView.LoadUrl(url);
-
         }
 
         public override void Finish()
@@ -83,18 +86,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             else
             {
-                this.SetResult(Result.Canceled, new Intent("Return"));
+                this.SetResult(Result.Canceled, new Intent("ReturnFromEmbeddedWebview"));
             }
             base.Finish();
         }
 
-        sealed class AdalWebViewClient : WebViewClient
+        sealed class CoreWebViewClient : WebViewClient
         {
             private readonly string callback;
+            private Activity Activity { get; set; }
 
-            public AdalWebViewClient(string callback)
+            public CoreWebViewClient(string callback, Activity activity)
             {
                 this.callback = callback;
+                this.Activity = activity;
             }
 
             public Intent ReturnIntent { get; private set; }
@@ -106,8 +111,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 if (url.StartsWith(callback))
                 {
                     base.OnLoadResource(view, url);
-                    this.Finish(view, url);
+                    this.Finish(Activity, url);
                 }
+
             }
 
             [Obsolete]
@@ -117,9 +123,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
                     CoreLoggerBase.Default.Verbose("It is browser launch request");
-                    OpenLinkInBrowser(url, ((Activity)view.Context));
+                    OpenLinkInBrowser(url, Activity);
                     view.StopLoading();
-                    ((Activity)view.Context).Finish();
+                    Activity.Finish();
                     return true;
                 }
 
@@ -127,7 +133,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 {
                     CoreLoggerBase.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
-                    this.Finish(view, url);
+                    this.Finish(Activity, url);
                     return true;
                 }
 
@@ -139,7 +145,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                         query = query.Substring(1);
                     }
 
-                    Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
+                    Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
                     string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
                     Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
                     pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
@@ -149,7 +155,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
                 if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
                 {
-                    this.Finish(view, url);
+                    this.Finish(Activity, url);
                     return true;
                 }
 
@@ -158,8 +164,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 {
                     UriBuilder errorUri = new UriBuilder(callback);
                     errorUri.Query = string.Format(CultureInfo.InvariantCulture, "error={0}&error_description={1}",
-                        AdalError.NonHttpsRedirectNotSupported, AdalErrorMessage.NonHttpsRedirectNotSupported);
-                    this.Finish(view, errorUri.ToString());
+                        MsalError.NonHttpsRedirectNotSupported, MsalErrorMessage.NonHttpsRedirectNotSupported);
+                    this.Finish(Activity, errorUri.ToString());
                     return true;
                 }
 
@@ -185,7 +191,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageFinished(view, url);
-                    this.Finish(view, url);
+                    this.Finish(Activity, url);
                 }
 
                 base.OnPageFinished(view, url);
@@ -201,17 +207,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 base.OnPageStarted(view, url, favicon);
             }
 
-            private void Finish(WebView view, string url)
+            private void Finish(Activity activity, string url)
             {
-                var activity = ((Activity)view.Context);
-                if (activity != null && !activity.IsFinishing)
-                {
-                    this.ReturnIntent = new Intent("Return");
-                    this.ReturnIntent.PutExtra("ReturnedUrl", url);
-                    ((Activity)view.Context).Finish();
-                }
+                this.ReturnIntent = new Intent("ReturnFromEmbeddedWebview");
+                this.ReturnIntent.PutExtra("ReturnedUrl", url);
+                activity.Finish();
             }
-
         }
     }
 }

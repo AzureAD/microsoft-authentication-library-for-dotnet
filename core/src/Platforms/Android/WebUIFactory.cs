@@ -23,6 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Microsoft.Identity.Core.UI.EmbeddedWebview;
 using Microsoft.Identity.Core.UI.SystemWebview;
 
 namespace Microsoft.Identity.Core.UI
@@ -34,10 +35,10 @@ namespace Microsoft.Identity.Core.UI
         {
             if (coreUIParent.UseEmbeddedWebview)
             {
-                //return new EmbeddedWebUI(coreUIParent)
-                //{
-                //    RequestContext = requestContext
-                //};
+                return new EmbeddedWebUI(coreUIParent)
+                {
+                    RequestContext = requestContext
+                };
             }
 
             return new SystemWebUI(coreUIParent)

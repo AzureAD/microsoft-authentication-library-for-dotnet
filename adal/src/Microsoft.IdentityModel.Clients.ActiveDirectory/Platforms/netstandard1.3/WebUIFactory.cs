@@ -25,13 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext context)
         {
             throw new NotImplementedException();
         }

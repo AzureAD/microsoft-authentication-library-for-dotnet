@@ -25,32 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters inputParameters)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext context)
         {
-            var parameters = inputParameters as PlatformParameters;
-            if (parameters == null)
+            if (coreUIParent.UseHiddenBrowser)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(inputParameters));
+
+                return new SilentWebUI(context) { OwnerWindow = coreUIParent.OwnerWindow };
             }
 
-            switch (parameters.PromptBehavior)
-            {
-                case PromptBehavior.Auto:
-                case PromptBehavior.Always:
-                case PromptBehavior.SelectAccount:
-                case PromptBehavior.RefreshSession:
-                    return new InteractiveWebUI { OwnerWindow = parameters.OwnerWindow };
-                case PromptBehavior.Never:
-                    return new SilentWebUI { OwnerWindow = parameters.OwnerWindow };
-                default:
-                    throw new InvalidOperationException("Unexpected PromptBehavior value");
-            }
-        }  
+            return new InteractiveWebUI(context) { OwnerWindow = coreUIParent.OwnerWindow };
+        }
     }
 }

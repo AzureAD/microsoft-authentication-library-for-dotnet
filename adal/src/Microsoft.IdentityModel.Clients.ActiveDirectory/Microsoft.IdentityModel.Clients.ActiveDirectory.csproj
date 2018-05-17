@@ -25,9 +25,8 @@
     <!-- Workaround until Xamarin supports PPDB -->
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
-  
-
 </PropertyGroup>
+  
  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
@@ -47,17 +46,18 @@
     <DefineConstants>$(DefineConstants);iOS</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
+  
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
-    <Compile Remove="Resources\**\*.*" />
     <EmbeddedResource Include="Properties\Microsoft.IdentityModel.Clients.ActiveDirectory.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.1.0" PrivateAssets="All" />
   </ItemGroup>
+  
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -133,8 +133,6 @@
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\Android\**\*.cs" />
     <Compile Include="Features\NonWinCommon\**\*.cs" />
-    <AndroidResource Include="Resources\**\*.axml" />
-    <AndroidResource Include="Resources\**\*.xml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -142,7 +140,8 @@
   </ItemGroup>
   
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
-  
+
+
  
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
   <ItemGroup>

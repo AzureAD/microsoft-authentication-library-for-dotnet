@@ -32,16 +32,14 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
 using Test.ADAL.Common;
-using System.Net;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
+using Microsoft.Identity.Core.UI;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -82,7 +80,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Auto));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -92,6 +90,8 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
             // There should be one cached entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
         
         [TestMethod]
@@ -114,13 +114,15 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Auto));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto));
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
 
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -164,13 +166,15 @@ namespace Test.ADAL.NET.Integration
                 await
                     context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                     new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId),
-                    new PlatformParameters(PromptBehavior.Auto));
+                    new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto));
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
 
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -213,13 +217,15 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Always));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Always));
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
 
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
         
         [TestMethod]
@@ -265,7 +271,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.SelectAccount));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.SelectAccount));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -276,6 +282,8 @@ namespace Test.ADAL.NET.Integration
 
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
         
         [TestMethod]
@@ -302,11 +310,13 @@ namespace Test.ADAL.NET.Integration
 
             var exc = AssertException.TaskThrows<AdalServiceException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Never)));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Never)));
 
             Assert.AreEqual(AdalError.FailedToRefreshToken, exc.ErrorCode);
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
         
         [TestMethod]
@@ -351,13 +361,15 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.RefreshSession));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.RefreshSession));
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
 
             // There should be only one cache entry.
             Assert.AreEqual(1, context.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
     }
 }

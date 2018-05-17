@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using Android.Accounts;
 using Android.App;
 using Android.Content;
-using Java.IO;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;

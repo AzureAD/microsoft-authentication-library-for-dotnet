@@ -31,41 +31,36 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class WebUI : IWebUI
     {
-        private readonly PromptBehavior promptBehavior;
-        private readonly bool useCorporateNetwork;
+        protected RequestContext context;
+        protected CoreUIParent uiParent;
 
-        public WebUI(IPlatformParameters parameters)
+        public WebUI(CoreUIParent uiParent, RequestContext context)
         {
-            if (!(parameters is PlatformParameters))
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
-
-            this.promptBehavior = ((PlatformParameters)parameters).PromptBehavior;
-            this.useCorporateNetwork = ((PlatformParameters)parameters).UseCorporateNetwork;
+            this.uiParent = uiParent;
+            this.context = context;
         }
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
-            if (this.promptBehavior == PromptBehavior.Never && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
+            if (uiParent.UseHiddenBrowser && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 throw new ArgumentException(AdalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
             }
             
             WebAuthenticationResult webAuthenticationResult;
-
-            WebAuthenticationOptions options = (this.useCorporateNetwork &&
+            WebAuthenticationOptions options = (uiParent.UseCorporateNetwork &&
                                                 (ssoMode || redirectUri.Scheme == Constant.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
-
-            if (this.promptBehavior == PromptBehavior.Never)
+            
+            if (uiParent.UseHiddenBrowser)
             {
                 options |= WebAuthenticationOptions.SilentMode;
             }
@@ -95,7 +90,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch (Exception ex)
             {
-                if (this.promptBehavior == PromptBehavior.Never)
+                if (uiParent.UseHiddenBrowser)
                 {
                     throw new AdalException(AdalError.UserInteractionRequired, ex);
                 }

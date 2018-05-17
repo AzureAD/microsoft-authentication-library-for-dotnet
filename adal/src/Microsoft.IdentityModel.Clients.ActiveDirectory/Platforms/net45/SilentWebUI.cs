@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 using System;
 using System.Threading;
 using System.Windows.Forms;
@@ -57,9 +58,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         private SilentWindowsFormsAuthenticationDialog dialog;
 
-        public SilentWebUI()
+        public SilentWebUI(RequestContext context)
         {
             this.threadInitializedEvent = new ManualResetEvent(false);
+            this.context = context;
         }
 
         ~SilentWebUI()
@@ -96,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int)navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    CoreLoggerBase.Default.Info("Silent login thread did not complete on time.");
+                    context.Logger.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.

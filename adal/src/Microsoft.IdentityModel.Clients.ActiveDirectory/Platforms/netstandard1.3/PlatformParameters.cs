@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,12 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.UI;
+using System;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    /// <summary>
-    /// Additional parameters used in acquiring user's authorization
-    /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
+        // NetStandard1.3 does not have UI
+        internal CoreUIParent GetCoreUIParent()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

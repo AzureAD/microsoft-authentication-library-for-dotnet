@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
@@ -42,6 +43,7 @@ namespace Microsoft.Identity.Core.UI
         UnknownError
     }
     
+    [DataContract]
     internal class AuthorizationResult
     {
         internal AuthorizationResult(AuthorizationStatus status, string returnedUriInput) : this(status)
@@ -68,13 +70,19 @@ namespace Microsoft.Identity.Core.UI
         }
 
         public AuthorizationStatus Status { get; private set; }
-        
+
+        [DataMember]
         public string Code { get; private set; }
-        
+
+        [DataMember]
         public string Error { get; set; }
-        
+
+        [DataMember]
         public string ErrorDescription { get; set; }
-        
+
+        [DataMember]
+        public string CloudInstanceHost { get; set; }
+
         public string State { get; set; }
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
@@ -99,6 +107,10 @@ namespace Microsoft.Identity.Core.UI
                 {
                     Code = response[TokenResponseClaim.Code];
                 }
+                else if (webAuthenticationResult.StartsWith("msauth://", StringComparison.OrdinalIgnoreCase))
+                {
+                    Code = webAuthenticationResult;
+                }
                 else if (response.ContainsKey(TokenResponseClaim.Error))
                 {
                     Error = response[TokenResponseClaim.Error];
@@ -112,6 +124,11 @@ namespace Microsoft.Identity.Core.UI
                     Error = MsalError.AuthenticationFailed;
                     ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                     Status = AuthorizationStatus.UnknownError;
+                }
+
+                if (response.ContainsKey(TokenResponseClaim.CloudInstanceHost))
+                {
+                    CloudInstanceHost = response[TokenResponseClaim.CloudInstanceHost];
                 }
             }
             else

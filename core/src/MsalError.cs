@@ -82,5 +82,15 @@ namespace Microsoft.Identity.Core
         /// RedirectUri validation failed.
         /// </summary>
         public const string RedirectUriValidationFailed = "redirect_uri_validation_failed";
+
+        /// <summary>
+        /// The request could not be preformed because of an unknown failure in the UI flow.
+        /// </summary>
+        public const string AuthenticationUiFailed = "authentication_ui_failed";
+
+        /// <summary>
+        /// Non https redirect failed
+        /// </summary>
+        public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
     }
 }

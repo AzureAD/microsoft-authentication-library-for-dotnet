@@ -123,7 +123,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
-    <Compile Include="Platforms\Android\**\*.cs" />
+    <Compile Include="Platforms\android\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
     <PackageReference Include="Xamarin.Android.Support.CustomTabs">
@@ -133,10 +133,5 @@
       <Version>25.4.0.2</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Platforms\Android\EmbeddedWebview\" />
-    <Folder Include="Platforms\iOS\EmbeddedWebview\" />
-  </ItemGroup>
   <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
-  
 </Project>

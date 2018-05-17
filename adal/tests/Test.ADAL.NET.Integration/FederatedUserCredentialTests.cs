@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;

@@ -25,10 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.UI;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal static class WebUIFactoryProvider
     {
-        public static IWebUIFactory WebUIFactory { get; set; } = new WebUIFactory();
+        static WebUIFactoryProvider()
+        {
+
+#if ANDROID || iOS
+            WebUIFactory = new Microsoft.Identity.Core.UI.WebUIFactory();
+#else
+            WebUIFactory = new WebUIFactory();
+#endif
+        }
+
+        public static IWebUIFactory WebUIFactory { get; set; }
     }
 }

@@ -325,8 +325,6 @@ namespace Microsoft.Identity.Client
                         behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 
-
-
         internal IWebUI CreateWebAuthenticationDialog(UIParent parent, UIBehavior behavior, RequestContext requestContext)
         {
             //create instance of UIParent and assign useCorporateNetwork to UIParent 
@@ -361,7 +359,6 @@ namespace Microsoft.Identity.Client
         private async Task<AuthenticationResult> AcquireTokenForUserCommonAsync(Authority authority, IEnumerable<string> scopes,
             IEnumerable<string> extraScopesToConsent, IUser user, UIBehavior behavior, string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
         {
-
             var requestParams = CreateRequestParameters(authority, scopes, user, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 

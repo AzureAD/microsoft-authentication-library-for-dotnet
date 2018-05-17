@@ -35,10 +35,11 @@ namespace Microsoft.Identity.Core.UI
         {
             if (coreUIParent.UseEmbeddedWebview)
             {
-                //return new EmbeddedWebUI(coreUIParent)
-                //{
-                //    RequestContext = requestContext
-                //};
+                return new EmbeddedWebview.EmbeddedWebUI()
+                {
+                    RequestContext = requestContext,
+                    CoreUIParent = coreUIParent
+                };
             }
 
             //there is no need to pass UIParent.

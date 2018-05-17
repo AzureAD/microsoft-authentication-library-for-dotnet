@@ -28,16 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Android.Accounts;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
 using Android.Content.PM;
 using Android.Util;
 using Java.Security;

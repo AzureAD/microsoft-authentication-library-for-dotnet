@@ -49,6 +49,12 @@ namespace Microsoft.Identity.Core.UI
             }
         }
 
+        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        {
+            authorizationResult = authorizationResultInput;
+            returnedUriReady.Release();
+        }
+
         public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
     }
 }

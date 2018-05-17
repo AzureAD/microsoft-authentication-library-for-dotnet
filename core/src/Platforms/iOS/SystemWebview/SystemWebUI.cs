@@ -42,18 +42,18 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
         public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
-            UIViewController vc = null;
+            UIViewController viewController = null;
             InvokeOnMainThread(() =>
             {
                 UIWindow window = UIApplication.SharedApplication.KeyWindow;
-                vc = FindCurrentViewController(window.RootViewController);
+                viewController = CoreUIParent.FindCurrentViewController(window.RootViewController);
             });
 
             returnedUriReady = new SemaphoreSlim(0);
-            Authenticate(authorizationUri, redirectUri, vc, requestContext);
+            Authenticate(authorizationUri, redirectUri, viewController, requestContext);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
             //dismiss safariviewcontroller
-            vc.InvokeOnMainThread(() =>
+            viewController.InvokeOnMainThread(() =>
             {
                 safariViewController.DismissViewController(false, null);
             });
@@ -91,29 +91,5 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 returnedUriReady.Release();
             }
         }
-
-        private UIViewController FindCurrentViewController(UIViewController rootViewController)
-        {
-            if (rootViewController is UITabBarController)
-            {
-                UITabBarController tabBarController = (UITabBarController)rootViewController;
-                return FindCurrentViewController(tabBarController.SelectedViewController);
-            }
-            else if (rootViewController is UINavigationController)
-            {
-                UINavigationController navigationController = (UINavigationController)rootViewController;
-                return FindCurrentViewController(navigationController.VisibleViewController);
-            }
-            else if (rootViewController.PresentedViewController != null)
-            {
-                UIViewController presentedViewController = rootViewController.PresentedViewController;
-                return FindCurrentViewController(presentedViewController);
-            }
-            else
-            {
-                return rootViewController;
-            }
-        }
     }
 }
-

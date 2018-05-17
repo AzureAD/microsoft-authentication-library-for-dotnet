@@ -26,59 +26,44 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
-using Android.Accounts;
-using Android.App;
-using Android.OS;
-using Java.Util.Concurrent;
-using Android.Content.PM;
-using Java.Security;
-using Java.IO;
-using Android.Util;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client;
 
-
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
-    internal class WebUI : IWebUI
+    internal class EmbeddedWebUI : WebviewBase
     {
-        private static SemaphoreSlim returnedUriReady;
-        private static AuthorizationResult authorizationResult;
-        private readonly PlatformParameters parameters;
+        private readonly CoreUIParent _coreUIParent;
+        public RequestContext RequestContext { get; internal set; }
 
-        public WebUI(IPlatformParameters parameters)
+        public EmbeddedWebUI(CoreUIParent coreUIParent)
         {
-            this.parameters = parameters as PlatformParameters;
-            if (this.parameters == null)
-            {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
-            }
+            _coreUIParent = coreUIParent;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
             try
             {
-                var agentIntent = new Intent(this.parameters.CallerActivity, typeof(AuthenticationAgentActivity));
+                var agentIntent = new Intent(_coreUIParent.CallerActivity, typeof(AuthenticationAgentActivity));
                 agentIntent.PutExtra("Url", authorizationUri.AbsoluteUri);
                 agentIntent.PutExtra("Callback", redirectUri.AbsoluteUri);
-                this.parameters.CallerActivity.StartActivityForResult(agentIntent, 0);
+                _coreUIParent.CallerActivity.StartActivityForResult(agentIntent, 0);
             }
             catch (Exception ex)
             {
-                throw new AdalException(AdalError.AuthenticationUiFailed, ex);
+                throw new MsalClientException(MsalClientException.AuthenticationUiFailedError, "AuthenticationActivity failed to start", ex);
             }
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
         }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        public new static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
             if (returnedUriReady != null)
             {

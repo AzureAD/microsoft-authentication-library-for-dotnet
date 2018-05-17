@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,14 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.UI;
 using System;
-using System.Threading.Tasks;
-using Microsoft.Identity.Core;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    interface IWebUI
+    public class PlatformParameters : IPlatformParameters
     {
-        Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
+        // NetStandard1.1 does not have UI
+        internal CoreUIParent GetCoreUIParent()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

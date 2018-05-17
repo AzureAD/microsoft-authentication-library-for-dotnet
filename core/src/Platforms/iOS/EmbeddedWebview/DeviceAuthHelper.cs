@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,14 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class DeviceAuthHelper
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        public static bool CanHandleDeviceAuthChallenge { get { return false; } }
+
+        public static Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
         {
-            return new WebUI(parameters);
+            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
         }
     }
 }

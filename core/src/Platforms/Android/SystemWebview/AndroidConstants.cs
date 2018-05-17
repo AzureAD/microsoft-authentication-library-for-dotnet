@@ -67,5 +67,6 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
         public const int Cancel = 2001;
         public const int AuthCodeError = 2002;
         public const int AuthCodeReceived = 2003;
+        public const int AuthCodeReceivedFromEmbeddedWebview = -1;
     }
 }

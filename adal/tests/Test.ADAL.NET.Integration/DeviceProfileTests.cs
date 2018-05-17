@@ -91,6 +91,8 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(dcr);
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -146,6 +148,8 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual("some-access-token", result.AccessToken);
             // There should be one cached entry.
             Assert.AreEqual(1, ctx.TokenCache.Count);
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -165,6 +169,8 @@ namespace Test.ADAL.NET.Integration
             DeviceCodeResult dcr;
             AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(async () => dcr = await ctx.AcquireDeviceCodeAsync("some-resource", "some-client"));
             Assert.IsTrue(ex.Message.Contains("some error message"));
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -210,6 +216,8 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result;
             AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(async () => result = await ctx.AcquireTokenByDeviceCodeAsync(dcr));
             Assert.IsTrue(ex.Message.Contains("Verification code expired"));
+
+            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
         }
     }
 }

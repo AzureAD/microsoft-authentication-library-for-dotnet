@@ -32,9 +32,9 @@ using CoreFoundation;
 using CoreGraphics;
 using Foundation;
 using UIKit;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
+using Microsoft.Identity.Core.Helpers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             this.url = url;
             this.callback = callback;
             this.callbackMethod = callbackMethod;
-            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
+            NSUrlProtocol.RegisterClass(new ObjCRuntime.Class(typeof(CoreCustomUrlProtocol)));
         }
 
         public override void ViewDidLoad()
@@ -109,7 +109,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                         query = query.Substring(1);
                     }
 
-                    Dictionary<string, string> keyPair = EncodingHelper.ParseKeyValueList(query, '&', true, false, null);
+                    Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
                     string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
                     
                     NSMutableUrlRequest newRequest = (NSMutableUrlRequest)request.MutableCopy();
@@ -123,8 +123,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                  && !request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                    result.Error = AdalError.NonHttpsRedirectNotSupported;
-                    result.ErrorDescription = AdalErrorMessage.NonHttpsRedirectNotSupported;
+                    result.Error = MsalError.NonHttpsRedirectNotSupported;
+                    result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
                     callbackMethod(result);
                     this.DismissViewController(true, null);
                     return false;
@@ -158,7 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public override void DismissViewController(bool animated, Action completionHandler)
         {
-            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(AdalCustomUrlProtocol)));
+            NSUrlProtocol.UnregisterClass(new ObjCRuntime.Class(typeof(CoreCustomUrlProtocol)));
             base.DismissViewController(animated, completionHandler);
         }
     }

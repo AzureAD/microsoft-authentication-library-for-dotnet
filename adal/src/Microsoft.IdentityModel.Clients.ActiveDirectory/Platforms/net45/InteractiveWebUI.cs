@@ -25,10 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class InteractiveWebUI : WebUI
     {
+        public InteractiveWebUI(RequestContext context) { 
+            this.context = context;
+        }
+
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;

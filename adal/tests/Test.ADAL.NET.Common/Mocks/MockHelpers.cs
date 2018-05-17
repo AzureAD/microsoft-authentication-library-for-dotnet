@@ -30,8 +30,8 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using NSubstitute;
@@ -52,7 +52,7 @@ namespace Test.ADAL.NET.Common.Mocks
             webUi.MockResult = authorizationResult;
 
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
-            mockFactory.CreateAuthenticationDialog(Arg.Any<IPlatformParameters>()).Returns(webUi);
+            mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
             WebUIFactoryProvider.WebUIFactory = mockFactory;
         }
 

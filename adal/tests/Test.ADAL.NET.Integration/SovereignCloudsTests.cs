@@ -35,10 +35,10 @@ using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.Au
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Net;
+using Microsoft.Identity.Core.UI;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -55,7 +55,7 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             HttpMessageHandlerFactory.InitializeMockProvider();
-            _platformParameters = new PlatformParameters(PromptBehavior.Auto);
+            _platformParameters = new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto);
             InstanceDiscovery.InstanceCache.Clear();
         }
 

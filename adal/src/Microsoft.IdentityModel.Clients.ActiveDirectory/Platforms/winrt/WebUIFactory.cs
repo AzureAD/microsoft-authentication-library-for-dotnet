@@ -25,13 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
+
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class WebUIFactory : IWebUIFactory
     {
-        public IWebUI CreateAuthenticationDialog(IPlatformParameters parameters)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
-            return new WebUI(parameters);
+            return new WebUI(parent, requestContext);
         }   
     }
 }

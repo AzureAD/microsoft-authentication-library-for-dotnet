@@ -36,10 +36,14 @@ namespace Microsoft.Identity.Core.OAuth2
         public const string TokenType = "token_type";
         public const string AccessToken = "access_token";
         public const string RefreshToken = "refresh_token";
+        public const string IdToken = "id_token";
         public const string Scope = "scope";
         public const string ClientInfo = "client_info";
-        public const string IdToken = "id_token";
         public const string ExpiresIn = "expires_in";
+        public const string CloudInstanceHost = "cloud_instance_host_name";
+        public const string CreatedOn = "created_on";
+        public const string ExtendedExpiresIn = "ext_expires_in";
+        public const string Authority = "authority";
     }
 
     [DataContract]

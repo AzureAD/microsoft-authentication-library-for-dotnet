@@ -115,6 +115,7 @@
     <Compile Include="Cache\**\*.cs" />
     <Compile Include="Properties\**\*.cs" />
     <Compile Include="Internal\**\*.cs" />
+    <Compile Include="UI\**\*.cs" />
     <Compile Include="Platforms\winrt\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
   </ItemGroup>

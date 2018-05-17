@@ -32,24 +32,11 @@ using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal static class PlatformPluginSwitch
-    {
-        static PlatformPluginSwitch()
-        {
-            DynamicallyLinkAssembly = true;
-        }
-
-        public static bool DynamicallyLinkAssembly { get; set; }
-    }
-
     internal static class PlatformPlugin
     {
         static PlatformPlugin()
         {
-            if (PlatformPluginSwitch.DynamicallyLinkAssembly)
-            {
-                InitializeByAssemblyDynamicLinking();
-            }
+            InitializeByAssemblyDynamicLinking();
         }
 
         public static IWebUIFactory WebUIFactory { get; set; }

@@ -26,9 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;

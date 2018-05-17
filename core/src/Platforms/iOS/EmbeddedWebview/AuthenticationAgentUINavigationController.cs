@@ -25,14 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using CoreGraphics;
-
-using CoreFoundation;
 using UIKit;
-using Foundation;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
     [Foundation.Register("UniversalView")]
     internal class UniversalView : UIView

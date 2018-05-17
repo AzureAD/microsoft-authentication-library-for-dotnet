@@ -27,15 +27,14 @@
 
 
 using System;
-using CoreFoundation;
 using Foundation;
 #if MAC
 using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
 #endif
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
-    internal class AdalCustomUrlProtocol : NSUrlProtocol
+    internal class CoreCustomUrlProtocol : NSUrlProtocol
     {
         private NSUrlConnection connection;
 
@@ -57,7 +56,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         }
 
         [Export("initWithRequest:cachedResponse:client:")]
-        public AdalCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
+        public CoreCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
             INSUrlProtocolClient client)
             : base(request, cachedResponse, client)
         {
@@ -72,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             NSMutableUrlRequest mutableRequest = (NSMutableUrlRequest) this.Request.MutableCopy();
             SetProperty(new NSString("YES"), "ADURLProtocol", mutableRequest);
-            this.connection = new NSUrlConnection(mutableRequest, new AdalCustomConnectionDelegate(this), true);
+            this.connection = new NSUrlConnection(mutableRequest, new CoreCustomConnectionDelegate(this), true);
         }
 
         public override void StopLoading()
@@ -80,12 +79,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             this.connection.Cancel();
         }
 
-        private class AdalCustomConnectionDelegate : NSUrlConnectionDataDelegate
+        private class CoreCustomConnectionDelegate : NSUrlConnectionDataDelegate
         {
-            private readonly AdalCustomUrlProtocol handler;
+            private readonly CoreCustomUrlProtocol handler;
             private readonly INSUrlProtocolClient client;
 
-            public AdalCustomConnectionDelegate(AdalCustomUrlProtocol handler)
+            public CoreCustomConnectionDelegate(CoreCustomUrlProtocol handler)
             {
                 this.handler = handler;
 #if MAC

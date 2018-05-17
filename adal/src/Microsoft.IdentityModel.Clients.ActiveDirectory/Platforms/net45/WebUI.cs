@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.UI;
 using System;
 using System.Net.NetworkInformation;
 using System.Threading;
@@ -36,6 +37,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     internal abstract class WebUI : IWebUI
     {
         protected Uri RequestUri { get; private set; }
+
+        protected RequestContext context;
 
         protected Uri CallbackUri { get; private set; }
 
