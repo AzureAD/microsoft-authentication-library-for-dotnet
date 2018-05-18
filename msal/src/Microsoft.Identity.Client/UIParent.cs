@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         }
 
 #if iOS
-        public UIParent(bool useEmbeddedWebview)
+        public UIParent(bool useEmbeddedWebview) : this()
         {
             CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
             CoreUIParent = new CoreUIParent(Activity);
         }
 
-        public UIParent(Activity activity, bool useEmbeddedWebview) :this(activity)
+        public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
         {
             CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;
         }
