@@ -72,7 +72,7 @@ namespace SampleApp
                 result = await Application.AcquireTokenAsync(scopes, user).ConfigureAwait(false);
                 return result.AccessToken;
             }
-            catch (MsalUiRequiredException exc)
+            catch (MsalUiRequiredException)
             {
                 try
                 {

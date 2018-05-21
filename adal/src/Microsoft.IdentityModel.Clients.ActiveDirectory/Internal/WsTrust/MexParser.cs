@@ -63,6 +63,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
         public Uri Url { get; set; }
     }
 
+    /// <summary>
+    /// MexParser gets the mex document from the wstrust endpoint and parses the document for policies and bindings to 
+    /// identify the url and version of the WsTrust endpoint.
+    /// </summary>
     internal static class MexParser
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";

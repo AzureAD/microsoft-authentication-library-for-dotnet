@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
 
     /// <summary>
-    /// The exception type thrown when user returned by service does not match user in the request.
+    /// The exception type thrown when the server returns an error. It's required to look at the internal details of the exception for a more information.
     /// </summary>
     public class AdalServiceException : AdalException
     {

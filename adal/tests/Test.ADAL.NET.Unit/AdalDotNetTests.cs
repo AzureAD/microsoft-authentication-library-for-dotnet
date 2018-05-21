@@ -690,7 +690,7 @@ namespace Test.ADAL.NET.Unit
 
             //whitelisted authority
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
-            context.TokenCache.Clear();
+            context.TokenCache.Clear(); // need to reset cache before starting utest.
             result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
@@ -701,7 +701,7 @@ namespace Test.ADAL.NET.Unit
             Assert.IsNotNull(result.UserInfo);
 
             // There should be one cached entry.
-            Assert.AreEqual(1, context.TokenCache.Count);
+            Assert.AreEqual(1, context.TokenCache.Count, "Number of items in the cache is not as expected.");
 
             //add handler to return failed discovery response
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant))

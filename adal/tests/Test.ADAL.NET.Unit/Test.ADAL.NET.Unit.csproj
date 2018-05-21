@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
-    <Configurations>Debug;Release;Appveyor</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
   <!-- Import common settings -->
   <Import Project="..\..\build\ADAL.Net.settings.targets" />

@@ -43,6 +43,9 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
 {
+    /// <summary>
+    /// Helper to build a WsTrustRequest message.
+    /// </summary>
     internal static class WsTrustRequest
     {
         private const int MaxExpectedMessageSize = 1024;

@@ -100,14 +100,18 @@ namespace AdalAndroidTestApp
         private async void acquireTokenInteractiveButton_Click(object sender, EventArgs e)
         {
             this.accessTokenTextView.Text = string.Empty;
-            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common/");
             EditText email = FindViewById<EditText>(Resource.Id.email);
             string value = null;
             try
             {
+                string clientId = "b7ef0cbd-fee5-420a-9ec0-6d29549f950b";
+                Uri redirectUri = new Uri("https://todolistclient");
+                string resource = "https://graph.microsoft.com"; // "https://graph.windows.net"
+
                 AuthenticationResult result = await ctx
-                    .AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>", new Uri("<REDIRECT_URI>"),
-                        new PlatformParameters(this, false)).ConfigureAwait(false);
+                    .AcquireTokenAsync(resource, clientId, redirectUri,
+                        new PlatformParameters(this, false, false)).ConfigureAwait(false);
                 value = result.AccessToken;
             }
             catch (Java.Lang.Exception ex)

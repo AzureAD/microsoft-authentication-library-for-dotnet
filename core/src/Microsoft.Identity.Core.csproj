@@ -5,7 +5,7 @@
        which assembly to analyse. -->
   <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
     <SonarQubeExclude>true</SonarQubeExclude>
-    <Configurations>Debug;Release;Appveyor</Configurations>
+    <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -21,13 +21,13 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>build\Core.snk</AssemblyOriginatorKeyFile>
-	<DelaySign>true</DelaySign>
+    <DelaySign>true</DelaySign>
     <!-- Workaround until Xamarin supports PPDB -->
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
 </PropertyGroup>
-  
- <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
@@ -96,6 +96,7 @@
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.3" />
     <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />
   </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Reference Include="System" />
     <Reference Include="System.Runtime" />
@@ -110,6 +111,7 @@
     <Reference Include="Xamarin.iOS" />
     <Compile Include="Platforms\iOS\**\*.cs" />
   </ItemGroup>
+  
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid7' ">
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
@@ -123,9 +125,7 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
-    <Compile Include="Platforms\android\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+    <Compile Include="Platforms\Android\**\*.cs" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs">
       <Version>25.4.0.2</Version>
     </PackageReference>
