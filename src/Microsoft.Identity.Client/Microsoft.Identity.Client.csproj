@@ -167,10 +167,10 @@
   <!-- CustomTabs and AppCompat must reference the same version -->
   <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
     <PackageReference Include="Xamarin.Android.Support.CustomTabs">
-      <Version>25.4.0.2</Version>
+      <Version>27.0.2</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat">
-      <Version>25.4.0.2</Version>
+      <Version>27.0.2</Version>
     </PackageReference>
   </ItemGroup>
 </Project>
