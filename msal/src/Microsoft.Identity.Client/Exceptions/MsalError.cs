@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// User Mismatch.
         /// </summary>
         public const string UserMismatch = "user_mismatch";
-        
+
         /// <summary>
         /// Failed to refresh token.
         /// </summary>
@@ -97,5 +97,10 @@ namespace Microsoft.Identity.Client
         /// Internal error
         /// </summary>
         public const string InternalError = "internal_error";
+
+        /// <summary>
+        /// Accessing WS Metadata Exchange Failed.
+        /// </summary>
+        public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
     }
 }

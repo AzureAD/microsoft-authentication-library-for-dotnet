@@ -27,17 +27,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
+using Microsoft.Identity.Core.Http;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
+namespace Microsoft.Identity.Core.WsTrust
 {
     internal enum WsTrustVersion
     {
@@ -63,14 +59,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
         public Uri Url { get; set; }
     }
 
-    /// <summary>
-    /// MexParser gets the mex document from the wstrust endpoint and parses the document for policies and bindings to 
-    /// identify the url and version of the WsTrust endpoint.
-    /// </summary>
     internal static class MexParser
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
 
+        /// <summary>
+        /// Fetch federation metadata, parse it, and returns relevant WsTrustAddress.
+        /// </summary>
+        /// <returns>Returns WsTrustAddress, or returns null if the wanted policy is not found in mexDocument.</returns>
+        /// <exception cref="Client.MsalException">If unable to access mex endpoint.</exception>
+        /// <remarks>It could also potentially throw XmlException or http-relevant exceptions.</remarks>
         public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, RequestContext requestContext)
         {
             XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, requestContext).ConfigureAwait(false);
@@ -79,61 +77,42 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
 
         internal static async Task<XDocument> FetchMexAsync(string federationMetadataUrl, RequestContext requestContext)
         {
-            XDocument mexDocument;
-            try
-            {
-                IHttpClient request = new HttpClientWrapper(federationMetadataUrl, requestContext);
-                using (var response = await request.GetResponseAsync().ConfigureAwait(false))
-                {
-                    mexDocument = XDocument.Load(EncodingHelper.GenerateStreamFromString(response.ResponseString), LoadOptions.None);
-                }
+            var uri = new UriBuilder(federationMetadataUrl);
+            var httpResponse = await HttpRequest.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
+            if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK) {
+                throw new Client.MsalException(
+                    MsalError.AccessingWsMetadataExchangeFailed,
+                    string.Format(CultureInfo.CurrentCulture,
+                        "Response status code does not indicate success: {0} ({1}).",
+                        (int)httpResponse.StatusCode, httpResponse.StatusCode));
             }
-            catch (HttpRequestWrapperException ex)
-            {
-                throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
-            }
-            catch (XmlException ex)
-            {
-                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-            }
-
-            return mexDocument;
+            return XDocument.Parse(httpResponse.Body, LoadOptions.None);
         }
 
+        /// <summary>
+        /// Extract WsTrust Address from Mex Document
+        /// </summary>
+        /// <returns>Returns WsTrustAddress, or returns null if the wanted policy is not found in mexDocument.</returns>
+        /// <exception cref="System.Xml.XmlException">If unable to parse mex document.</exception>
         internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, RequestContext requestContext)
         {
             WsTrustAddress address = null;
             MexPolicy policy = null;
-            try
-            {
-                Dictionary<string, MexPolicy> policies = ReadPolicies(mexDocument);
-                Dictionary<string, MexPolicy> bindings = ReadPolicyBindings(mexDocument, policies);
-                SetPolicyEndpointAddresses(mexDocument, bindings);
-                Random random = new Random();
-                //try ws-trust 1.3 first
-                policy = policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).OrderBy(p => random.Next()).FirstOrDefault() ??
-                         policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).OrderBy(p => random.Next()).FirstOrDefault();
 
-                if (policy != null)
-                {
-                    address = new WsTrustAddress();
-                    address.Uri = policy.Url;
-                    address.Version = policy.Version;
-                }
-                else if (userAuthType == UserAuthType.IntegratedAuth)
-                {
-                    throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
-                }
-                else
-                {
-                    throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
-                }
-            }
-            catch (XmlException ex)
-            {
-                throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
-            }
+            Dictionary<string, MexPolicy> policies = ReadPolicies(mexDocument);
+            Dictionary<string, MexPolicy> bindings = ReadPolicyBindings(mexDocument, policies);
+            SetPolicyEndpointAddresses(mexDocument, bindings);
+            Random random = new Random();
+            //try ws-trust 1.3 first
+            policy = policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).OrderBy(p => random.Next()).FirstOrDefault() ??
+                        policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).OrderBy(p => random.Next()).FirstOrDefault();
 
+            if (policy != null)
+            {
+                address = new WsTrustAddress();
+                address.Uri = policy.Url;
+                address.Version = policy.Version;
+            }
             return address;
         }
 

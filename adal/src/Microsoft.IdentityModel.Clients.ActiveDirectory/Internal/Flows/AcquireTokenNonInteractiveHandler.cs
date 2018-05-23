@@ -126,8 +126,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     {
                         throw new AdalException(AdalError.MissingFederationMetadataUrl);
                     }
-                    
-                    WsTrustAddress wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, RequestContext).ConfigureAwait(false);
+
+                    WsTrustAddress wsTrustAddress = null;
+                    try
+                    {
+                        var _wsTrustAddress = await Microsoft.Identity.Core.WsTrust.MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, RequestContext).ConfigureAwait(false);
+                        wsTrustAddress = new WsTrustAddress() { Uri = _wsTrustAddress.Uri, Version = _wsTrustAddress.Version == Identity.Core.WsTrust.WsTrustVersion.WsTrust13 ? WsTrustVersion.WsTrust13 : WsTrustVersion.WsTrust2005 };
+                        if (wsTrustAddress == null)
+                        {
+                            if (this.userCredential.UserAuthType == Identity.Core.UserAuthType.IntegratedAuth)
+                            {
+                                throw new AdalException(AdalError.IntegratedAuthFailed, new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument));
+                            }
+                            else
+                            {
+                                throw new AdalException(AdalError.WsTrustEndpointNotFoundInMetadataDocument);
+                            }
+                        }
+                    }
+                    catch (System.Xml.XmlException ex)
+                    {
+                        throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
+                    }
+                    catch (Identity.Client.MsalServiceException ex)
+                    {
+                        throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
+                    }
                     RequestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'",
                             wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
