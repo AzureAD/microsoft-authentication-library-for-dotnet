@@ -9,7 +9,6 @@ function ExitOnError
     }
 }
 
-
 function Log([String] $message)
 {
     Write-Host $message -Foreground Green
@@ -20,29 +19,24 @@ $sourcePath = split-path -parent $scriptPath
 
 $configuration = "Release"
 
-$isAppVeyor = Test-Path -Path env:\APPVEYOR
 $rootPath = (Resolve-Path .).Path
 $artifacts = Join-Path $rootPath "artifacts"
 
-if ($isAppVeyor)
-{
-    $appVeyorLogger = "/logger:""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"""
-}
 
 # Restoring the test project will restore the product project packages too
 Log ("Restoring NuGet packages...")
-msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration $appVeyorLogger
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration
 ExitOnError
 
 Log ("Building product code...")
-msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true $appVeyorLogger
+msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true
 ExitOnError
 
 Log("Building tests...")
-msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true $appVeyorLogger
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true
 ExitOnError
 
 
 #Log("Building Packages")
-#msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /t:pack /p:Configuration=$configuration /p:PackageOutputPath=$artifacts /p:NoPackageAnalysis=true /p:NuGetBuildTasksPackTargets="workaround" $appVeyorLogger
+#msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /t:pack /p:Configuration=$configuration /p:PackageOutputPath=$artifacts /p:NoPackageAnalysis=true /p:NuGetBuildTasksPackTargets="workaround"
 #ExitOnError
