@@ -22,7 +22,6 @@ $configuration = "Release"
 $rootPath = (Resolve-Path .).Path
 $artifacts = Join-Path $rootPath "artifacts"
 
-
 # Restoring the test project will restore the product project packages too
 Log ("Restoring NuGet packages...")
 msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration
