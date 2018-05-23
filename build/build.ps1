@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 function ExitOnError
 {
     if ($LastExitCode -ne 0) {
-        # Force the PS script to exit with an error code, signalling the error to AppVeyor 
+        # Force the PS script to exit with an error code
         $host.SetShouldExit($LastExitCode)
         exit $LastExitCode
     }
