@@ -21,25 +21,26 @@ $sourcePath = split-path -parent $scriptPath
 $configuration = "Release"
 
 $isAppVeyor = Test-Path -Path env:\APPVEYOR
-$rootPath = (Resolve-Path .).Path
-$artifacts = Join-Path $rootPath "artifacts"
 
 if ($isAppVeyor)
 {
-    $appVeyorLogger = "/logger:""C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"""
+	exit 0
 }
+
+$rootPath = (Resolve-Path .).Path
+$artifacts = Join-Path $rootPath "artifacts"
 
 # Restoring the test project will restore the product project packages too
 Log ("Restoring NuGet packages...")
-msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration $appVeyorLogger
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:restore /p:Configuration=$configuration
 ExitOnError
 
 Log ("Building product code...")
-msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true $appVeyorLogger
+msbuild "$sourcePath\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true
 ExitOnError
 
 Log("Building tests...")
-msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true $appVeyorLogger
+msbuild "$sourcePath\tests\Test.MSAL.NET.Unit\Test.MSAL.NET.Unit.csproj" /m /t:build /p:Configuration=$configuration /p:TreatWarningsAsErrors=true
 ExitOnError
 
 
