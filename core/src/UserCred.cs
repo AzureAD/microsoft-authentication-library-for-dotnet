@@ -25,22 +25,28 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using System.Runtime.InteropServices;
+using System.Security;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory
+namespace Microsoft.Identity.Core
 {
-    using UserAuthType = Microsoft.Identity.Core.UserAuthType;
-
+    internal enum UserAuthType
+    {
+        IntegratedAuth,
+        UsernamePassword
+    }
 
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
+    /// The implementation is  here, and the ADAL UserCredential class will subclass this.
     /// </summary>
-    public class UserCredential: Microsoft.Identity.Core.UserCred {
+    public class UserCred
+    {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
         /// and it can only be used in domain joined scenarios.
         /// </summary>
-        public UserCredential():base()
+        public UserCred(): this(null, UserAuthType.IntegratedAuth)
         {
         }
 
@@ -48,16 +54,47 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Constructor to create credential with username
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName) : base(userName)
+        public UserCred(string userName) : this(userName, UserAuthType.IntegratedAuth)
         {
         }
 
-        internal UserCredential(string userName, UserAuthType userAuthType):base(userName, userAuthType)
+        internal UserCred(string userName, UserAuthType userAuthType)
         {
+            this.UserName = userName;
+            this.UserAuthType = userAuthType;
         }
 
+        /// <summary>
+        /// Gets identifier of the user.
+        /// </summary>
+        public string UserName { get; internal set; }
+
+        internal UserAuthType UserAuthType { get; private set; }
+
+        // In order to reduce coupling, this internal function is being removed. Its logic will go inside AcquireTokenNonInteractiveHandler.
+        /*
         internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
         {
+        }
+
+            internal override void ApplyTo(DictionaryRequestParameters requestParameters)
+        {
+            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
+            requestParameters[OAuthParameter.Username] = this.UserName;
+            requestParameters[OAuthParameter.Password] = new string(PasswordToCharArray());
+
+            if (SecurePassword != null && !SecurePassword.IsReadOnly())
+            {
+                SecurePassword.Clear();
+            }
+
+            SecurePassword = null;
+        }
+        */
+
+        internal virtual char[] PasswordToCharArray()
+        {
+            return null;
         }
     }
 }

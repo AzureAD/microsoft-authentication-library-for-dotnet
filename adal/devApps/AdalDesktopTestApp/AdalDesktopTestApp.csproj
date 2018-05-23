@@ -62,6 +62,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\core\src\Microsoft.Identity.Core.csproj">
+      <Project>{3EEF5981-8F11-4F54-9DDF-2F63C574D028}</Project>
+      <Name>Microsoft.Identity.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
       <Project>{aece489d-9ed4-442d-8d8f-0f383aebb781}</Project>
       <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
