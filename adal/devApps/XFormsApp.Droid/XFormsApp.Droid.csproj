@@ -17,7 +17,7 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v8.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <AndroidStoreUncompressedFileExtensions />
     <MandroidI18n />
     <JavaMaximumHeapSize />
@@ -91,8 +91,16 @@
     <None Include="Properties\AndroidManifest.xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Android.Support.V4" Version="25.4.0.2" />
-    <!--PackageReference Include="Xamarin.Android.Support.Compat" Version="25.4.0.2" /-->
+    <PackageReference Include="Xamarin.Android.Support.V4" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Compat" Version="27.0.2" />
+  	<PackageReference Include="Xamarin.Android.Support.Design" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Core.UI" Version="27.0.2" />
+   	<PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Annotations" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="27.0.2" />
+  	<PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.v7.Palette" Version="27.0.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer">

@@ -8,7 +8,7 @@ Active Directory Authentication Library for .NET (ADAL.NET) is an easy to use au
 
  Stable (`master` branch)    | Nightly (`dev` branch)
 -----------------------------|-------------------------
- [![NuGet](https://img.shields.io/nuget/v/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=myget&colorB=ff0000)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.IdentityModel.Clients.ActiveDirectory)
+ [![NuGet](https://img.shields.io/nuget/v/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=myget&colorB=00b200)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.IdentityModel.Clients.ActiveDirectory)
 
 ## Build status
 | Branch  | Status |
