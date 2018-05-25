@@ -1,3 +1,7 @@
+1.1.3-preview
+=============
+This releases updates to Xamarin.Android.Support v27.0.2 and MonoAndroid8.1 (#553 #520).
+
 1.1.2-preview
 =============
 This releases fixes references issues for Xamarin Android (for instance #520 & #524).
