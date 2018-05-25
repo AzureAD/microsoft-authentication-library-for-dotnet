@@ -129,8 +129,8 @@ namespace WebApp
                 GetClaimsFromUserInfoEndpoint = false,
                 Events = new OpenIdConnectEvents
                 {
-                    OnRemoteFailure = OnAuthenticationFailed,
-                    OnAuthorizationCodeReceived = OnAuthorizationCodeReceived,
+                    OnRemoteFailure = OnAuthenticationFailedAsync,
+                    OnAuthorizationCodeReceived = OnAuthorizationCodeReceivedAsync,
                     OnRedirectToIdentityProvider = context =>
                     {
                         foreach (var entry in ExtraParamsDictionary)
@@ -164,14 +164,14 @@ namespace WebApp
             });
         }
 
-        private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedContext context)
+        private async Task OnAuthorizationCodeReceivedAsync(AuthorizationCodeReceivedContext context)
         {
             string[] scopes = { "User.Read" };
 
             var userId =  context.JwtSecurityToken != null ? context.JwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type == "oid").Value : "";
             // Acquire a Token for the Graph API and cache it using MSAL.  
             var authenticationResult = await ConfidentialClientUtils.AcquireTokenByAuthorizationCodeAsync(context.ProtocolMessage.Code,
-                scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), userId);
+                scopes, context.HttpContext.Session, ConfidentialClientUtils.CreateSecretClientCredential(), userId).ConfigureAwait(false);
 
             // Notify the OIDC middleware that we already took care of code redemption.
             context.HandleCodeRedemption(authenticationResult.AccessToken, authenticationResult.IdToken);
@@ -179,7 +179,7 @@ namespace WebApp
         
  
         // Handle sign-in errors differently than generic errors.
-        private Task OnAuthenticationFailed(FailureContext context)
+        private Task OnAuthenticationFailedAsync(FailureContext context)
         {
             context.HandleResponse();
             context.Response.Redirect("/Home/Error?message=" + context.Failure.Message);

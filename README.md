@@ -1,8 +1,8 @@
 Microsoft Authentication Library (MSAL) Preview for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
 ==========================================================================
 
-| [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-windowsdesktop-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [Library Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support)
-| --- | --- | --- | --- |
+| [Conceptual documentation](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) | [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-windowsdesktop-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [Library Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support)
+| --- | --- | --- | --- | --- |
 
 The MSAL library for .NET gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
@@ -13,7 +13,6 @@ The MSAL library for .NET gives your app the ability to begin using the [Microso
 | Branch  | Status | Notes |
 | ------------- | ------------- |  ------------- | 
 | dev (VSTS) | ![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/10/badge)  | Builds the entire MSAL solution |
-| dev (AppVeyor)  | [![Build status](https://ci.appveyor.com/api/projects/status/pqtq4xvppjm0o4ul/branch/dev?svg=true)](https://ci.appveyor.com/project/AADDevExLibraries/microsoft-authentication-library-for-dotnet/branch/dev)  | Partial build - product assembly and tests only |
 
 ## Important Note about the MSAL Preview
 
@@ -39,7 +38,7 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 
 ## Security Library
 
-This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use [semantic versioning](http://semver.org) so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.*y*.x) ensures you get the latest security and feature enhanements but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.
+This library controls how users sign-in and access services. We recommend you always take the latest version of our library in your app when possible. We use [semantic versioning](http://semver.org) so you can control the risk associated with updating your app. As an example, always downloading the latest minor version number (e.g. x.*y*.x) ensures you get the latest security and feature enhancements but our API surface remains the same. You can always see the latest version and release notes under the Releases tab of GitHub.
 
 ## Security Reporting
 

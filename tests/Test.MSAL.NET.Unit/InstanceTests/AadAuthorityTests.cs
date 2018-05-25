@@ -90,7 +90,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             Task.Run(async () =>
                 {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null));
+                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                 })
                 .GetAwaiter()
                 .GetResult();
@@ -121,7 +121,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             Task.Run(async () =>
                 {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null));
+                    await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                 })
                 .GetAwaiter()
                 .GetResult();
@@ -170,7 +170,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                     {
-                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null));
+                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                     })
                     .GetAwaiter()
                     .GetResult();
@@ -209,7 +209,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                     {
-                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null));
+                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                     })
                     .GetAwaiter()
                     .GetResult();
@@ -243,7 +243,7 @@ namespace Test.MSAL.NET.Unit.InstanceTests
             {
                 Task.Run(async () =>
                     {
-                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null));
+                        await instance.ResolveEndpointsAsync(null, new RequestContext(Guid.NewGuid(), null)).ConfigureAwait(false);
                     })
                     .GetAwaiter()
                     .GetResult();

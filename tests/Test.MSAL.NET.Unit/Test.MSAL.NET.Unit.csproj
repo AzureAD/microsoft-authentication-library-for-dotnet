@@ -99,4 +99,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>..\..\ConfigureAwait.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\GlobalSuppressions.cs" />
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
+  </ItemGroup>
 </Project>

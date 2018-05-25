@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             CanonicalAuthority = uriBuilder.Uri.AbsoluteUri;
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName,
+        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName,
             RequestContext requestContext)
         {
 
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
 
                 InstanceDiscoveryResponse discoveryResponse =
                     await
-                        client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), requestContext)
+                        client.DiscoverAadInstanceAsync(new Uri(AadInstanceDiscoveryEndpoint), requestContext)
                             .ConfigureAwait(false);
                 if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {

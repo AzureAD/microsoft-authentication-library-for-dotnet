@@ -140,4 +140,7 @@
      <Rule Id="CA3074" Action="Error" />
      <Rule Id="CA2153" Action="Error" />
   </Rules>
+  <Rules AnalyzerId="AsyncUsageAnalyzers" RuleNamespace="AsyncUsageAnalyzers">
+    <Rule Id="UseConfigureAwait" Action="Error" />
+  </Rules>
 </RuleSet>

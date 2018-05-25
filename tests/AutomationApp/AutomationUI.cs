@@ -57,13 +57,13 @@ namespace AutomationApp
 
         private void acquireToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = _tokenHandlerApp.AcquireToken;
+            _commandToRun = _tokenHandlerApp.AcquireTokenAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private void acquireTokenSilent_Click(object sender, EventArgs e)
         {
-            _commandToRun = _tokenHandlerApp.AcquireTokenSilent;
+            _commandToRun = _tokenHandlerApp.AcquireTokenSilentAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
 
@@ -88,7 +88,7 @@ namespace AutomationApp
                 }
                 else
                 {
-                    AuthenticationResult authenticationResult = await _commandToRun(dict);
+                    AuthenticationResult authenticationResult = await _commandToRun(dict).ConfigureAwait(false);
                     SetResultPageInfo(authenticationResult);
                 }
             }

@@ -31,7 +31,7 @@
                 <DataTemplate>
                     <ViewCell>
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowAccessTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="ShowAccessTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding .}" />
                             <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
                             <MenuItem Clicked="OnAtDelete" Text="Delete" CommandParameter="{Binding .}" />
                         </ViewCell.ContextActions>
@@ -72,7 +72,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowRefreshTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="ShowRefreshTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding .}" />
                             <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding .}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>

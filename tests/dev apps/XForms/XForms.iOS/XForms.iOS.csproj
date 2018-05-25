@@ -93,7 +93,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AcquirePageRenderer.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <None Include="Entitlements.plist" />

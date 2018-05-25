@@ -45,15 +45,21 @@ using XForms.Droid;
 
 namespace XForms.Droid
 {
+#pragma warning disable CS0618
     internal class AcquirePageRenderer : PageRenderer
     {
         AcquirePage _page;
 
-        protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
+		public AcquirePageRenderer(Context context) : base(context)
+		{
+		}
+
+		protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
         {
             base.OnElementChanged(e);
             _page = (AcquirePage)e.NewElement;
             var activity = this.Context as Activity;
         }
     }
+#pragma warning restore CS0618
 }

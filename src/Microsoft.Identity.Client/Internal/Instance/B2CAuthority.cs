@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Instance
             UpdateCanonicalAuthority();
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName, RequestContext requestContext)
         {
             if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
             {

@@ -37,32 +37,32 @@ namespace WebApp.Controllers
     {
         // GET: /Account/Login
         [HttpGet]
-        public async Task Login(string returnUrl = null)
+        public async Task LoginAsync(string returnUrl = null)
         {
             if (HttpContext.User == null || !HttpContext.User.Identity.IsAuthenticated)
             {
                 await HttpContext.Authentication.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme,
-                    new AuthenticationProperties {RedirectUri = "/"});
+                    new AuthenticationProperties {RedirectUri = "/"}).ConfigureAwait(false);
             }
         }
 
         // GET: /Account/LogOff
         [HttpGet]
-        public async Task LogOff()
+        public async Task LogOffAsync()
         {
             if (HttpContext.User.Identity.IsAuthenticated)
             {
                 // authContext.TokenCache.Clear();
 
-                await HttpContext.Authentication.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme);
-                await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                await HttpContext.Authentication.SignOutAsync(OpenIdConnectDefaults.AuthenticationScheme).ConfigureAwait(false);
+                await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
             }
         }
 
-        public async Task EndSession()
+        public async Task EndSessionAsync()
         {
             // If AAD sends a single sign-out message to the app, end the user's session, but don't redirect to AAD for sign out.
-            await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.Authentication.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme).ConfigureAwait(false);
         }
     }
 }

@@ -508,7 +508,7 @@ namespace Test.MSAL.NET.Unit
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
         [ExpectedException(typeof(HttpRequestException), "Cannot write more bytes to the buffer than the configured maximum buffer size: 1048576.")]
-        public async Task HttpRequestExceptionIsNotSuppressed()
+        public async Task HttpRequestExceptionIsNotSuppressedAsync()
         {
             var app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
@@ -527,12 +527,12 @@ namespace Test.MSAL.NET.Unit
                 }
             });
 
-            await app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
+            await app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray()).ConfigureAwait(false);
         }
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
-        public void ForceRefreshParameterFalseTestAsync()
+        public void ForceRefreshParameterFalseTest()
         {
             var cache = new TokenCache();
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
@@ -595,7 +595,7 @@ namespace Test.MSAL.NET.Unit
                     MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(tokenRetrievedFromNetCall)
             });
 
-            var result = await app.AcquireTokenForClientAsync(TestConstants.Scope, true);
+            var result = await app.AcquireTokenForClientAsync(TestConstants.Scope, true).ConfigureAwait(false);
             Assert.AreEqual(tokenRetrievedFromNetCall, result.AccessToken);
 
             // make sure token in Cache was updated
@@ -614,7 +614,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
-        public async Task AuthorizationCodeRequestTest()
+        public async Task AuthorizationCodeRequestTestAsync()
         {
             TokenCache cache = new TokenCache()
             {

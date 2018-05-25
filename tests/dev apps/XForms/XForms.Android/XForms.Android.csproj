@@ -17,11 +17,12 @@
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <AndroidUseLatestPlatformSdk>false</AndroidUseLatestPlatformSdk>
-    <TargetFrameworkVersion>v8.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <AndroidStoreUncompressedFileExtensions />
     <MandroidI18n />
     <JavaMaximumHeapSize />
     <JavaOptions />
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>True</DebugSymbols>
@@ -42,6 +43,7 @@
     <EnableLLVM>False</EnableLLVM>
     <AndroidEnableMultiDex>False</AndroidEnableMultiDex>
     <EnableProguard>False</EnableProguard>
+    <NoWarn>CS0618</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -65,7 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AcquirePageRenderer.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="MainActivity.cs" />
     <Compile Include="Resources\Resource.Designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -89,8 +90,16 @@
     <AndroidResource Include="Resources\values\styles.xml" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Android.Support.V4" Version="25.4.0.2" />
-	<PackageReference Include="Xamarin.Android.Support.Compat" Version="25.4.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.V4" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Compat" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Design" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.v7.RecyclerView" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Transition" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.v7.Palette" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Core.UI" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.Annotations" Version="27.0.2" />
+	<PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="27.0.2" />
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
@@ -110,6 +119,12 @@
       <Project>{a00ac06a-694f-4fea-999f-81e753fa7c28}</Project>
       <Name>XForms</Name>
     </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+	<CodeAnalysisRuleSet>..\..\ConfigureAwait.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- Import the Xamarin targets workaround -->
