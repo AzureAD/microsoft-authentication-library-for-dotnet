@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 
 namespace WinFormsAutomationApp
@@ -17,6 +18,8 @@ namespace WinFormsAutomationApp
             Application.SetCompatibleTextRenderingDefault(false);
 
             KillOtherInstances();
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             Application.Run(new MainForm());
         }

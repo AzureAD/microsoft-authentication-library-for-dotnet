@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Net;
 using System.Windows.Forms;
 
 namespace AutomationApp
@@ -40,6 +41,7 @@ namespace AutomationApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             Application.Run(new AutomationUI());
         }
     }
