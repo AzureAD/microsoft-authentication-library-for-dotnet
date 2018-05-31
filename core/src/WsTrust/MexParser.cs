@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Core.WsTrust
                 throw new Client.MsalException(
                     MsalError.AccessingWsMetadataExchangeFailed,
                     string.Format(CultureInfo.CurrentCulture,
-                        "Response status code does not indicate success: {0} ({1}).",
+                        MsalErrorMessage.HttpRequestUnsuccessful,
                         (int)httpResponse.StatusCode, httpResponse.StatusCode));
             }
             return XDocument.Parse(httpResponse.Body, LoadOptions.None);

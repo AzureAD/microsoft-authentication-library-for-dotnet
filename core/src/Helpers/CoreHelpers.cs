@@ -29,7 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Helpers
 {
@@ -229,6 +231,22 @@ namespace Microsoft.Identity.Core.Helpers
             string delimiter = (messageBuilder.Length == 0) ? string.Empty : "&";
             messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
+        }
+
+        internal static async Task<HttpContent> DeepCopyAsync(HttpContent content)
+        {
+            var temp = new System.IO.MemoryStream();
+            await content.CopyToAsync(temp).ConfigureAwait(false);
+            temp.Position = 0;
+            var clone = new StreamContent(temp);
+            if (content.Headers != null)
+            {
+                foreach (var h in content.Headers)
+                {
+                    clone.Headers.Add(h.Key, h.Value);
+                }
+            }
+            return clone;
         }
     }
 }

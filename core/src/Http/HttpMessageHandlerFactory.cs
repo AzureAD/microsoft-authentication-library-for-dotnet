@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Core.Http
 
         internal static HttpMessageHandler GetMessageHandler(bool forMock)
         {
-            return forMock ? MockHttpMessageHandlerQueue.Dequeue() : new HttpClientHandler();
+            return forMock ? MockHttpMessageHandlerQueue.Dequeue() : new HttpClientHandler() { UseDefaultCredentials = true };
         }
 
         internal static void AddMockHandler(HttpMessageHandler mockHandler)

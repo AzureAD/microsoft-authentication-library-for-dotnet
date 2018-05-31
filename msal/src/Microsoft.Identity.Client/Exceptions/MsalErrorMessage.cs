@@ -33,6 +33,7 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal static class MsalErrorMessage
     {
+        public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}).";
         public const string AccessingMetadataDocumentFailed = "Accessing WS metadata exchange failed";
 
         public const string AssemblyNotFoundTemplate =
