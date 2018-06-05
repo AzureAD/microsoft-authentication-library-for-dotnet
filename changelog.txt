@@ -1,3 +1,7 @@
+1.1.4-preview
+=============
+Hot fix of null pointer in iOS TokenCacheAccessor(#570)
+
 1.1.3-preview
 =============
 This release contains updates to Xamarin.Android.Support v27.0.2 and MonoAndroid8.1 (#553 #520).
