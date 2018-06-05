@@ -28,24 +28,15 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
+namespace Microsoft.Identity.Core.WsTrust
 {
-    /// <summary>
-    /// Helper to build a WsTrustRequest message.
-    /// </summary>
     internal static class WsTrustRequest
     {
         private const int MaxExpectedMessageSize = 1024;
@@ -77,70 +68,38 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
 
         private const string defaultAppliesTo = "urn:federation:MicrosoftOnline";
 
-        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, RequestContext requestContext, string cloudAudience)
+        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCred credential, RequestContext requestContext, string cloudAudience)
         {
-            IHttpClient request = new HttpClientWrapper(wsTrustAddress.Uri.AbsoluteUri, requestContext);
-            request.ContentType = "application/soap+xml";
-            if (credential.UserAuthType == UserAuthType.IntegratedAuth)
+            var headers = new Dictionary<string, string>
             {
-                SetKerberosOption(request);
-            }
-
-            if (string.IsNullOrEmpty(cloudAudience))
+                { "ContentType", "application/soap+xml" },
+                {"SOAPAction", (wsTrustAddress.Version == WsTrustVersion.WsTrust2005) ? XmlNamespace.Issue2005.ToString() : XmlNamespace.Issue.ToString() }
+            };
+            var body = new StringContent(
+                BuildMessage(string.IsNullOrEmpty(cloudAudience) ? defaultAppliesTo : cloudAudience, wsTrustAddress, credential).ToString(),
+                Encoding.UTF8, headers["ContentType"]);
+            var resp = await HttpRequest.SendPostAsync(wsTrustAddress.Uri, headers, body, requestContext).ConfigureAwait(false);
+            if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                cloudAudience = defaultAppliesTo;
-            }
-
-            StringBuilder messageBuilder = BuildMessage(cloudAudience, wsTrustAddress, credential);
-            string soapAction = XmlNamespace.Issue.ToString();
-            if (wsTrustAddress.Version == WsTrustVersion.WsTrust2005)
-            {
-                soapAction = XmlNamespace.Issue2005.ToString();
-            }
-
-            WsTrustResponse wstResponse;
-
-            try
-            {
-                request.BodyParameters = new StringRequestParameters(messageBuilder);
-                request.Headers["SOAPAction"] = soapAction;
-                IHttpWebResponse response = await request.GetResponseAsync().ConfigureAwait(false);
-                wstResponse = WsTrustResponse.CreateFromResponse(EncodingHelper.GenerateStreamFromString(response.ResponseString), wsTrustAddress.Version);
-            }
-            catch (HttpRequestWrapperException ex)
-            {
-                string errorMessage;
-
+                string errorMessage = null;
                 try
                 {
-                    using (Stream stream = EncodingHelper.GenerateStreamFromString(ex.WebResponse.ResponseString))
-                    {
-                        XDocument responseDocument = WsTrustResponse.ReadDocumentFromResponse(stream);
-                        errorMessage = WsTrustResponse.ReadErrorResponse(responseDocument, requestContext);
-                    }
+                    errorMessage = WsTrustResponse.ReadErrorResponse(XDocument.Parse(resp.Body, LoadOptions.None), requestContext);
                 }
-                catch (AdalException)
+                catch (System.Xml.XmlException)
                 {
-                    errorMessage = "See inner exception for detail.";
+                    errorMessage = resp.Body;
                 }
-
-                throw new AdalServiceException(
-                    AdalError.FederatedServiceReturnedError,
-                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage),
-                    null,
-                    ex);
+                throw new Client.MsalServiceException(
+                    MsalError.FederatedServiceReturnedError,
+                    string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage)
+                );
             }
-
-            return wstResponse;
-        }
-
-        private static void SetKerberosOption(IHttpClient request)
-        {
-            request.UseDefaultCredentials = true;
+            return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustAddress.Version);
         }
 
         public static StringBuilder BuildMessage(string appliesTo, WsTrustAddress wsTrustAddress,
-            UserCredential credential)
+            UserCred credential)
         {
             // securityHeader will be empty string for Kerberos.
             StringBuilder securityHeaderBuilder = BuildSecurityHeader(credential);
@@ -185,7 +144,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
             return escapeStr;
         }
 
-        private static StringBuilder BuildSecurityHeader(UserCredential credential)
+        private static StringBuilder BuildSecurityHeader(UserCred credential)
         {
             StringBuilder securityHeaderBuilder = new StringBuilder(MaxExpectedMessageSize);
 

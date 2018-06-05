@@ -102,5 +102,10 @@ namespace Microsoft.Identity.Client
         /// Accessing WS Metadata Exchange Failed.
         /// </summary>
         public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
+
+        /// <summary>
+        /// Federated service returned error.
+        /// </summary>
+        public const string FederatedServiceReturnedError = "federated_service_returned_error";
     }
 }

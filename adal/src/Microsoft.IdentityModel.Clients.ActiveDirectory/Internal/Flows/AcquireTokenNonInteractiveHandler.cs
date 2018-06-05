@@ -31,7 +31,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust;
+using Microsoft.Identity.Core.WsTrust;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
@@ -130,8 +130,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     WsTrustAddress wsTrustAddress = null;
                     try
                     {
-                        var _wsTrustAddress = await Microsoft.Identity.Core.WsTrust.MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, RequestContext).ConfigureAwait(false);
-                        wsTrustAddress = new WsTrustAddress() { Uri = _wsTrustAddress.Uri, Version = _wsTrustAddress.Version == Identity.Core.WsTrust.WsTrustVersion.WsTrust13 ? WsTrustVersion.WsTrust13 : WsTrustVersion.WsTrust2005 };
+                        wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(userRealmResponse.FederationMetadataUrl, this.userCredential.UserAuthType, RequestContext).ConfigureAwait(false);
                         if (wsTrustAddress == null)
                         {
                             if (this.userCredential.UserAuthType == Identity.Core.UserAuthType.IntegratedAuth)
@@ -148,14 +147,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     {
                         throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
                     }
-                    catch (Identity.Client.MsalServiceException ex)
+                    catch (Identity.Client.MsalException ex)
                     {
-                        throw new AdalServiceException(AdalError.AccessingWsMetadataExchangeFailed, ex);
+                        throw new AdalException(AdalError.AccessingWsMetadataExchangeFailed, ex);
                     }
                     RequestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'",
                             wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
+                    WsTrustResponse wsTrustResponse;
+                    try
+                    {
+                        wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
+                    }
+                    catch (System.Xml.XmlException ex)
+                    {
+                        throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
+                    }
+                    catch (Identity.Client.MsalServiceException ex)
+                    {
+                        throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex.Message, ex);
+                    }
+                    if (wsTrustResponse == null)
+                    {
+                        throw new AdalException(AdalError.ParsingWsTrustResponseFailed);
+                    }
+
 
                     var msg = string.Format(CultureInfo.CurrentCulture,
                         " Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
