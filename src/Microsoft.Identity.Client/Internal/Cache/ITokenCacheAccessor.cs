@@ -31,15 +31,15 @@ namespace Microsoft.Identity.Client.Internal.Cache
 {
     internal interface ITokenCacheAccessor
     {
-        void SaveAccessToken(string cacheKey, string item);
+        void SaveAccessToken(string cacheKey, string item, RequestContext RequestContext);
 
-        void SaveRefreshToken(string cacheKey, string item);
+        void SaveRefreshToken(string cacheKey, string item, RequestContext RequestContext);
 
-        string GetRefreshToken(string refreshTokenKey);
+        string GetRefreshToken(string refreshTokenKey, RequestContext RequestContext);
 
-        void DeleteAccessToken(string cacheKey);
+        void DeleteAccessToken(string cacheKey, RequestContext RequestContext);
 
-        void DeleteRefreshToken(string cacheKey);
+        void DeleteRefreshToken(string cacheKey, RequestContext RequestContext);
 
         ICollection<string> GetAllAccessTokensAsString();
 
