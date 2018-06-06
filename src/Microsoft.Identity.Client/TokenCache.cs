@@ -433,7 +433,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 RefreshTokenCacheItem refreshTokenCacheItem =
                     JsonHelper.DeserializeFromJson<RefreshTokenCacheItem>(
-                        TokenCacheAccessor.GetRefreshToken(key.ToString()));
+                        TokenCacheAccessor.GetRefreshToken(key.ToString(), requestParam.RequestContext));
                 OnAfterAccess(args);
 
                 msg = "Refresh token found in the cache? - " + (refreshTokenCacheItem != null);
@@ -458,7 +458,7 @@ namespace Microsoft.Identity.Client
 
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
-                    TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString());
+                    TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(), new RequestContext(Guid.Empty, null));
                     OnAfterAccess(args);
                 }
                 finally
@@ -483,7 +483,7 @@ namespace Microsoft.Identity.Client
 
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
-                    TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString());
+                    TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(), new RequestContext(Guid.Empty, null));
                     OnAfterAccess(args);
                 }
                 finally
@@ -643,7 +643,7 @@ namespace Microsoft.Identity.Client
             lock (LockObject)
             {
                 TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
-                    JsonHelper.SerializeToJson(accessTokenCacheItem));
+                    JsonHelper.SerializeToJson(accessTokenCacheItem), new RequestContext(Guid.Empty, null));
             }
         }
 
@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Client
             lock (LockObject)
             {
                 TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
-                    JsonHelper.SerializeToJson(refreshTokenCacheItem));
+                    JsonHelper.SerializeToJson(refreshTokenCacheItem), new RequestContext(Guid.Empty, null));
             }
         }
 
@@ -707,7 +707,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeWrite(args);
 
                     TokenCacheAccessor.SaveAccessToken(accessTokenCacheItem.GetAccessTokenItemKey().ToString(),
-                        JsonHelper.SerializeToJson(accessTokenCacheItem));
+                        JsonHelper.SerializeToJson(accessTokenCacheItem), new RequestContext(Guid.Empty, null));
                 }
                 finally
                 {
@@ -739,7 +739,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeWrite(args);
 
                     TokenCacheAccessor.SaveRefreshToken(refreshTokenCacheItem.GetRefreshTokenItemKey().ToString(),
-                        JsonHelper.SerializeToJson(refreshTokenCacheItem));
+                        JsonHelper.SerializeToJson(refreshTokenCacheItem), new RequestContext(Guid.Empty, null));
                 }
                 finally
                 {

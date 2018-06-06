@@ -40,19 +40,24 @@ namespace Microsoft.Identity.Client
 
         internal readonly IDictionary<string, string> RefreshTokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
+
+        RequestContext _requestContext;
         
-        public void SaveAccessToken(string cacheKey, string item)
+        public void SaveAccessToken(string cacheKey, string item, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             AccessTokenCacheDictionary[cacheKey] = item;
         }
 
-        public void SaveRefreshToken(string cacheKey, string item)
+        public void SaveRefreshToken(string cacheKey, string item, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             RefreshTokenCacheDictionary[cacheKey] = item;
         }
         
-        public string GetRefreshToken(string refreshTokenKey)
+        public string GetRefreshToken(string refreshTokenKey, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             if (!RefreshTokenCacheDictionary.ContainsKey(refreshTokenKey))
             {
                 return null;
@@ -61,13 +66,15 @@ namespace Microsoft.Identity.Client
             return RefreshTokenCacheDictionary[refreshTokenKey];
         }
 
-        public void DeleteAccessToken(string cacheKey)
+        public void DeleteAccessToken(string cacheKey, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             AccessTokenCacheDictionary.Remove(cacheKey);
         }
 
-        public void DeleteRefreshToken(string cacheKey)
+        public void DeleteRefreshToken(string cacheKey, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             RefreshTokenCacheDictionary.Remove(cacheKey);
         }
         
@@ -103,12 +110,12 @@ namespace Microsoft.Identity.Client
         {
             foreach (var key in GetAllAccessTokenKeys())
             {
-                DeleteAccessToken(key);
+                DeleteAccessToken(key, _requestContext);
             }
 
             foreach (var key in GetAllRefreshTokenKeys())
             {
-                DeleteRefreshToken(key);
+                DeleteRefreshToken(key, _requestContext);
             }
         }
     }

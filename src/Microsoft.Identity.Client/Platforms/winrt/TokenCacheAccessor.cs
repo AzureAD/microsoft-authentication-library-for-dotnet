@@ -54,39 +54,40 @@ namespace Microsoft.Identity.Client
                 localSettings.CreateContainer(LocalSettingsRefreshTokenContainerName,
                     ApplicationDataCreateDisposition.Always);
         }
-        public TokenCacheAccessor(RequestContext requestContext) : this()
-        {
-            _requestContext = requestContext;
-        }
 
-        public void SaveAccessToken(string cacheKey, string item)
+        public void SaveAccessToken(string cacheKey, string item, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
             SetCacheValue(composite, item);
             _accessTokenContainer.Values[CryptographyHelper.CreateBase64UrlEncodedSha256Hash(cacheKey)] = composite;
         }
 
-        public void SaveRefreshToken(string cacheKey, string item)
+        public void SaveRefreshToken(string cacheKey, string item, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
             SetCacheValue(composite, item);
             _refreshTokenContainer.Values[CryptographyHelper.CreateBase64UrlEncodedSha256Hash(cacheKey)] = composite;
         }
 
-        public string GetRefreshToken(string refreshTokenKey)
+        public string GetRefreshToken(string refreshTokenKey, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             return MsalHelpers.ByteArrayToString(
                 GetCacheValue((ApplicationDataCompositeValue) _refreshTokenContainer.Values[
                     CryptographyHelper.CreateBase64UrlEncodedSha256Hash(refreshTokenKey)]));
         }
         
-        public void DeleteAccessToken(string cacheKey)
+        public void DeleteAccessToken(string cacheKey, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             _accessTokenContainer.Values.Remove(CryptographyHelper.CreateBase64UrlEncodedSha256Hash(cacheKey));
         }
 
-        public void DeleteRefreshToken(string cacheKey)
+        public void DeleteRefreshToken(string cacheKey, RequestContext RequestContext)
         {
+            _requestContext = RequestContext;
             _refreshTokenContainer.Values.Remove(CryptographyHelper.CreateBase64UrlEncodedSha256Hash(cacheKey));
         }
 
