@@ -37,20 +37,20 @@ namespace Microsoft.Identity.Core.UI
         /// Acquire token will prompt the user for credentials only when necessary.  If a token
         /// that meets the requirements is already cached then the user will not be prompted.
         /// </summary>
-        Auto,
+        Auto = 0,
 
         /// <summary>
         /// The user will be prompted for credentials even if there is a token that meets the requirements
         /// already in the cache.
         /// </summary>
-        Always,
+        Always = 1,
 #if !ANDROID || iOS
         /// <summary>
         /// The user will not be prompted for credentials.  If prompting is necessary then the AcquireToken request
         /// will fail.
         /// NB: We do not support the "Never" option on Xamarin iOS or Android.
         /// </summary>
-        Never,
+        Never = 2,
 #endif
 
         /// <summary>
@@ -58,13 +58,13 @@ namespace Microsoft.Identity.Core.UI
         /// token contains updated claims. If user logon cookies are available, the user will not be asked for 
         /// credentials again and the logon dialog will dismiss automatically.
         /// </summary>
-        RefreshSession,
+        RefreshSession = 3,
 
         /// <summary>
         /// Prompt the user to select a user account even if there is a token that meets the requirements
         /// already in the cache. This enables an user who has multiple accounts at the Authorization Server to select amongst 
         /// the multiple accounts that they might have current sessions for. 
         /// </summary>
-        SelectAccount
+        SelectAccount = 4
     }
 }

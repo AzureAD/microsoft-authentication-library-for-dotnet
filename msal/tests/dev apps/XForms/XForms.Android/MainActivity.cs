@@ -47,13 +47,13 @@ namespace XForms.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
 
-            App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
+            App.UIParent = new UIParent(this);
 
             #region Web browsers for MSAL.NET Android
             // To activate embedded webview, remove '//' from line 56 below, 
             // and comment out line 50 above -> App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
 
-            //App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity, true);
+            //App.UIParent = new UIParent(this, true);
 
             // Use helper method to determine first if Chrome or Chrome Custom Tabs
             // are installed on the device. 
@@ -66,12 +66,12 @@ namespace XForms.Droid
             if (useEmbeddedWebview)
             {
                 // Chrome present on device, use system browser
-                App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
+                App.UIParent = new UIParent(this);
             }
             else
             {
                 // Chrome not present on device, use embedded webview
-                App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity, true);
+                App.UIParent = new UIParent(this, true);
             }*/
             #endregion
         }

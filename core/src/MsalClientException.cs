@@ -96,6 +96,12 @@ namespace Microsoft.Identity.Client
         public const string ChromeNotInstalledError = "chrome_not_installed";
 
         /// <summary>
+        /// Indicates that chrome is installed on the device but disabled. The sdk uses chrome custom tab for
+        /// authorize request if applicable or fall back to chrome browser.
+        /// </summary>
+        public const string ChromeDisabledError = "chrome_disabled";
+
+        /// <summary>
         /// The intent to launch AuthenticationActivity is not resolvable by the OS or the intent.
         /// </summary>
         public const string UnresolvableIntentError = "unresolvable_intent";

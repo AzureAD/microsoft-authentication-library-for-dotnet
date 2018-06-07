@@ -127,15 +127,23 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 string chromePackage = GetChromePackage();
                 if (string.IsNullOrEmpty(chromePackage))
                 {
-                    throw new MsalClientException(MsalClientException.ChromeNotInstalledError,
-                        "Chrome is not installed on the device, cannot proceed with authentication");
+                    const string chromeNotInstalledMessage = " Chrome is not installed on the device, cannot proceed with authentication";
+                    throw new MsalClientException(MsalClientException.ChromeNotInstalledError, chromeNotInstalledMessage);
                 }
 
                 Intent browserIntent = new Intent(Intent.ActionView);
                 browserIntent.SetData(Uri.Parse(_requestUrl));
                 browserIntent.SetPackage(chromePackage);
                 browserIntent.AddCategory(Intent.CategoryBrowsable);
-                StartActivity(browserIntent);
+                try
+                {
+                    StartActivity(browserIntent);
+                }
+                catch (ActivityNotFoundException ex)
+                {
+                    const string chromeDisabledMessage = "Chrome is disabled on the device, cannot proceed with authentication ";
+                    throw new MsalClientException(MsalClientException.ChromeDisabledError, chromeDisabledMessage + ex.InnerException);
+                }
             }
             else
             {

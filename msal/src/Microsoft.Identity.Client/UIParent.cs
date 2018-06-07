@@ -81,21 +81,27 @@ namespace Microsoft.Identity.Client
         {
             PackageManager packageManager = Application.Context.PackageManager;
 
-            string installedChromePackage = null;
-            try
+            int counter = 0;
+
+            ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(_chromePackages[0], 0);
+
+            for (int i = 0; i < _chromePackages.Length; i++)
             {
-                for (int i = 0; i < _chromePackages.Length; i++)
+                try
                 {
                     packageManager.GetPackageInfo(_chromePackages[i], PackageInfoFlags.Activities);
-                    installedChromePackage = _chromePackages[i];
+                    counter++;
+                }
+                catch (PackageManager.NameNotFoundException)
+                {
                 }
             }
-            catch (PackageManager.NameNotFoundException)
+            if (counter > 0 && applicationInfo.Enabled == true)
             {
-                return false;
+                return true;
             }
-
-            return true;
+            else
+                return false;
         }
 #endif
 
