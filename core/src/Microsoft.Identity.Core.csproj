@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSBuild.Sdk.Extras/1.5.4">
 
   <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
   <!-- NB this property has no effect on the assemblies that are built - it is only to tell the VSTS SonarQube analysis tasks
@@ -54,10 +54,6 @@
     <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.2.0" PrivateAssets="All" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -90,7 +86,6 @@
     <Compile Include="Features\Cache\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.2.2" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.3" />
     <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />
@@ -98,27 +93,17 @@
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Reference Include="System" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="Xamarin.iOS" />
     <Compile Include="Platforms\iOS\**\*.cs" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
-    <Reference Include="Mono.Android" />
     <Reference Include="System" />
-    <Reference Include="System.Collections" />
-    <Reference Include="System.Threading.Tasks" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
@@ -132,5 +117,4 @@
       <Version>27.0.2</Version>
     </PackageReference>
   </ItemGroup>
-  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
 </Project>
