@@ -41,6 +41,8 @@ using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
+using CoreHttpClientFactory = Microsoft.Identity.Core.Http.HttpClientFactory;
+using CoreHttpMessageHandlerFactory = Microsoft.Identity.Core.Http.HttpMessageHandlerFactory;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Test.ADAL.NET.Integration
@@ -53,6 +55,8 @@ namespace Test.ADAL.NET.Integration
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
             ResetInstanceDiscovery();
+            CoreHttpClientFactory.ReturnHttpClientForMocks = true;
+            CoreHttpMessageHandlerFactory.ClearMockHandlers();
         }
 
         public void ResetInstanceDiscovery()
@@ -65,7 +69,7 @@ namespace Test.ADAL.NET.Integration
         [Description("Test for AcquireToken with an empty cache")]
         public async Task AcquireTokenWithEmptyCache_GetsTokenFromServiceTestAsync()
         {
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId
             )
             {
                 Method = HttpMethod.Get,
@@ -108,6 +112,7 @@ namespace Test.ADAL.NET.Integration
 
             // All mocks are consumed
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
             // There should be one cached entry
             Assert.AreEqual(1, context.TokenCache.Count);
@@ -146,7 +151,7 @@ namespace Test.ADAL.NET.Integration
         [Description("Test for AcquireToken for a user when a valid access token already exists in cache for another user.")]
         public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsTokenFromServiceAsync()
         {
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(
             TestConstants.DefaultAuthorityCommonTenant + "userrealm/user2@id.com")
             {
                 Method = HttpMethod.Get,
@@ -212,6 +217,7 @@ namespace Test.ADAL.NET.Integration
             Assert.AreNotEqual(keys[0].Result.UserInfo.UniqueId, keys[1].Result.UserInfo.UniqueId);
             Assert.AreNotEqual(values[0].Result.UserInfo.UniqueId, values[1].Result.UserInfo.UniqueId);
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -275,7 +281,7 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(1, context.TokenCache.Count);
 
             // All mocks are consumed
-            Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());           
+            Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -284,7 +290,7 @@ namespace Test.ADAL.NET.Integration
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
@@ -302,6 +308,7 @@ namespace Test.ADAL.NET.Integration
                                                          new UserPasswordCredential(TestConstants.DefaultDisplayableId,
                                                                                     TestConstants.DefaultPassword)));
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             Assert.AreEqual(0, context.TokenCache.Count);
 
             //To be addressed in a later fix
@@ -315,7 +322,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -330,11 +337,12 @@ namespace Test.ADAL.NET.Integration
 
             var ex = AssertException.TaskThrows<AdalException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, 
+                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId,
                                                                                     TestConstants.DefaultPassword)));
 
             Assert.AreEqual(AdalError.UnknownUserType, ex.ErrorCode);
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             Assert.AreEqual(0, context.TokenCache.Count);
         }
     }

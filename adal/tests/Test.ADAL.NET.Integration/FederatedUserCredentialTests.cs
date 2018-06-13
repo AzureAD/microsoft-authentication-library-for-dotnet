@@ -42,6 +42,8 @@ using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using HttpMessageHandlerFactory = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http.AdalHttpMessageHandlerFactory;
+using CoreHttpMessageHandlerFactory = Microsoft.Identity.Core.Http.HttpMessageHandlerFactory;
+using CoreHttpClientFactory = Microsoft.Identity.Core.Http.HttpClientFactory;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -54,13 +56,16 @@ namespace Test.ADAL.NET.Integration
         [TestInitialize]
         public void Initialize()
         {
-            HttpMessageHandlerFactory.InitializeMockProvider();
+            CoreHttpClientFactory.ReturnHttpClientForMocks = true;
+            CoreHttpMessageHandlerFactory.ClearMockHandlers();
             ResetInstanceDiscovery();
+            CoreExceptionFactory.Instance = new AdalExceptionFactory();
         }
 
         public void ResetInstanceDiscovery()
         {
             InstanceDiscovery.InstanceCache.Clear();
+            HttpMessageHandlerFactory.InitializeMockProvider();
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
 
@@ -71,7 +76,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -88,7 +93,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -97,7 +102,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -130,6 +135,7 @@ namespace Test.ADAL.NET.Integration
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -139,7 +145,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -156,7 +162,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -165,7 +171,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -198,6 +204,7 @@ namespace Test.ADAL.NET.Integration
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
 
@@ -208,7 +215,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -225,7 +232,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -247,6 +254,7 @@ namespace Test.ADAL.NET.Integration
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -361,7 +369,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -379,7 +387,7 @@ namespace Test.ADAL.NET.Integration
             });
 
             // Malformed Mex returned
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -401,6 +409,7 @@ namespace Test.ADAL.NET.Integration
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -410,7 +419,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -427,7 +436,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -437,7 +446,7 @@ namespace Test.ADAL.NET.Integration
             });
 
             // Mex does not return integrated auth endpoint (.../13/windowstransport)
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -447,18 +456,18 @@ namespace Test.ADAL.NET.Integration
             });
 
             // Call acquire token, endpoint not found
-            var result = AssertException.TaskThrows<Exception>(() =>
+            var result = AssertException.TaskThrows<AdalException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserCredential(TestConstants.DefaultDisplayableId)));
 
             // Check exception message
-            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: See inner exception for detail.", result.Message);
-            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: Not found", result.Message);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]
@@ -468,7 +477,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -485,7 +494,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -494,7 +503,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
+            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
             {
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
@@ -504,18 +513,18 @@ namespace Test.ADAL.NET.Integration
             });
 
             // Call acquire token, endpoint not found
-            var result = AssertException.TaskThrows<Exception>(() =>
+            var result = AssertException.TaskThrows<AdalException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)));
 
             // Check exception message
-            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: See inner exception for detail.", result.Message);
-            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: Not found", result.Message);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
 
             // All mocks are consumed
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
     }
 }

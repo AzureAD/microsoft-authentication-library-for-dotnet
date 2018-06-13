@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
+using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
+namespace Microsoft.Identity.Core.Realm
 {
     [DataContract]
     internal sealed class UserRealmDiscoveryResponse
@@ -53,18 +53,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
 
         [DataMember(Name = "cloud_audience_urn")]
         public string CloudAudienceUrn { get; set; }
-             
+
         internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUri, string userName, RequestContext requestContext)
         {
-            string userRealmEndpoint = userRealmUri;
-            userRealmEndpoint += (userName + "?api-version=1.0");
-
             var msg = "Sending request to userrealm endpoint.";
             requestContext.Logger.Info(msg);
             requestContext.Logger.InfoPii(msg);
-
-            var client = new AdalHttpClient(userRealmEndpoint, requestContext) { Client = { Accept = "application/json" } };
-            return await client.GetResponseAsync<UserRealmDiscoveryResponse>().ConfigureAwait(false);
+            var httpResponse = await HttpRequest.SendGetAsync(
+                new UriBuilder(userRealmUri + userName + "?api-version=1.0").Uri, null, requestContext).ConfigureAwait(false);
+            return httpResponse.StatusCode == System.Net.HttpStatusCode.OK ? JsonHelper.DeserializeFromJson<UserRealmDiscoveryResponse>(httpResponse.Body) : null;
         }
     }
 }

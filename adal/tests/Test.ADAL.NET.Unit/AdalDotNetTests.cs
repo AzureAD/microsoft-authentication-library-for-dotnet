@@ -163,7 +163,7 @@ namespace Test.ADAL.NET.Unit
             await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, TestConstants.DefaultRedirectUri, _platformParameters);
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.AccessToken);
-          
+
             context.TokenCache.Clear();
             // All mocks are consumed
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
@@ -699,7 +699,7 @@ namespace Test.ADAL.NET.Unit
             });
 
             //whitelisted authority
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
+            context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true, new TokenCache());
             context.TokenCache.Clear(); // need to reset cache before starting utest.
             result =
                 await

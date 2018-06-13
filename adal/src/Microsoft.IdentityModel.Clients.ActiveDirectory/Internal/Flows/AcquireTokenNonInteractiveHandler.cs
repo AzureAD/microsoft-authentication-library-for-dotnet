@@ -114,7 +114,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             await base.PreTokenRequestAsync().ConfigureAwait(false);
             if (this.PerformUserRealmDiscovery())
             {
-                UserRealmDiscoveryResponse userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, RequestContext).ConfigureAwait(false);
+                var userRealmResponse = await Microsoft.Identity.Core.Realm.UserRealmDiscoveryResponse.CreateByDiscoveryAsync(this.Authenticator.UserRealmUri, this.userCredential.UserName, RequestContext).ConfigureAwait(false);
+                if (userRealmResponse == null)
+                {
+                    throw new AdalException(AdalError.UserRealmDiscoveryFailed);
+                }
 
                 RequestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture,
                     " User with user name '{0}' detected as '{1}'", userCredential.UserName,
