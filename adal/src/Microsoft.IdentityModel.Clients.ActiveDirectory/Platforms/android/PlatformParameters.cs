@@ -65,16 +65,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="callerActivity">activity calling ADAL to acquire token</param>
         /// <param name="useBroker">flag to enable or disable broker flow. FALSE by default.</param>
-        public PlatformParameters(Activity callerActivity, bool useBroker, bool useEmbeddedWebView) : this(callerActivity, useBroker, PromptBehavior.Auto)
-        {
-            this.UseEmbeddedWebview = useEmbeddedWebView;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="callerActivity">activity calling ADAL to acquire token</param>
-        /// <param name="useBroker">flag to enable or disable broker flow. FALSE by default.</param>
         /// <param name="promptBehavior">Prompt behavior enum to control UI</param>
         public PlatformParameters(Activity callerActivity, bool useBroker, PromptBehavior promptBehavior)
         {

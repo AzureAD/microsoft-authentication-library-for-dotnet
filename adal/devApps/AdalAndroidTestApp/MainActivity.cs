@@ -111,7 +111,7 @@ namespace AdalAndroidTestApp
 
                 AuthenticationResult result = await ctx
                     .AcquireTokenAsync(resource, clientId, redirectUri,
-                        new PlatformParameters(this, false, false)).ConfigureAwait(false);
+                        new PlatformParameters(this, false)).ConfigureAwait(false);
                 value = result.AccessToken;
             }
             catch (Java.Lang.Exception ex)
