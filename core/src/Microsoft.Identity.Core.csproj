@@ -9,22 +9,23 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
-    <Product>Microsoft.Identity.Core ($(TargetFramework))</Product>
-    <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
-    <Version>1.1.0.0</Version>
-    <Authors>Microsoft</Authors>
-    <Copyright>(C) Microsoft Corporation. All rights reserved.</Copyright>
-    <Product>Microsoft Identity Core</Product>
-    <IncludeSymbols>true</IncludeSymbols>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>build\Core.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>true</DelaySign>
-    <!-- Workaround until Xamarin supports PPDB -->
-    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
 </PropertyGroup>
+
+  <PropertyGroup Label="GenerateAssemblyInfo inputs">
+    <!-- This should be passed from the VSTS build -->
+    <CoreSemVer Condition="'$(CoreSemVer)' == '1.0.0-privatebuild'"></CoreSemVer>
+
+    <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
+    <Version>$(CoreSemVer)</Version>
+
+    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>

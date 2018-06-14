@@ -21,7 +21,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-	<DelaySign>true</DelaySign>
+	  <DelaySign>true</DelaySign>
     <!-- Workaround until Xamarin supports PPDB -->
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
@@ -36,6 +36,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
     <DefineConstants>$(DefineConstants);ANDROID</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
+    <CodeAnalysisAdditionalOptions>/assemblyCompareMode:StrongNameIgnoringVersion</CodeAnalysisAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
 	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>

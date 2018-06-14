@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="2.12">
+    <id>Microsoft.Identity.Client</id>
+    <version>$version$</version>
+    <title>Microsoft Authentication Library for .NET (Preview)</title>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</licenseUrl>
+    <projectUrl>https://go.microsoft.com/fwlink/?linkid=844761</projectUrl>
+    <description>MSAL makes it easy to obtain tokens from Azure AD v2 (work &amp; school accounts, MSA) and Azure AD B2C, gaining access to Microsoft Cloud API and any other API secured by Microsoft identities. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.</description>
+    <summary>This package contains the binaries of the Microsoft Authentication Library (MSAL).</summary>
+    <copyright>(C) Microsoft Corporation. All rights reserved.</copyright>
+    <tags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</tags>
+    <dependencies>
+      <group targetFramework=".NETFramework4.5" />
+      <group targetFramework=".NETStandard1.1">
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard1.3">
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="MonoAndroid8.1">
+        <dependency id="Xamarin.Android.Support.CustomTabs" version="27.0.2" exclude="Build,Analyzers" />
+        <dependency id="Xamarin.Android.Support.v7.AppCompat" version="27.0.2" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="Windows8.1" />
+      <group targetFramework="Xamarin.iOS1.0" />
+    </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Java.Interop" targetFramework="MonoAndroid8.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.IdentityModel" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Net.Http" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Runtime.Serialization" targetFramework="MonoAndroid8.1, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Data.DataSetExtensions" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Data" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Drawing" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Windows.Forms" targetFramework=".NETFramework4.5" />
+    </frameworkAssemblies>
+  </metadata>
+</package>
