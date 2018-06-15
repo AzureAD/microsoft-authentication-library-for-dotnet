@@ -29,6 +29,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust;
 using System.IO;
 using System.Xml.Linq;
+using System.Text;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -45,6 +46,18 @@ namespace Test.ADAL.NET.Unit
             StringAssert.Contains(sample, characteristic);
             WsTrustResponse resp = WsTrustResponse.CreateFromResponseDocument(
                 XDocument.Parse(sample, LoadOptions.PreserveWhitespace), WsTrustVersion.WsTrust2005);
+            StringAssert.Contains(resp.Token, characteristic);
+        }
+
+        [TestMethod]
+        [TestCategory("WsTrustTests")]
+        public void TestCreateFromResponse_WhenInputContainsWhitespace_ShouldPreserveWhitespace()
+        {
+            string sample = File.ReadAllText("WsTrustResponse.xml");
+            string characteristic = "\n        <saml:Assertion";
+            StringAssert.Contains(sample, characteristic);
+            WsTrustResponse resp = WsTrustResponse.CreateFromResponse(
+                new MemoryStream(Encoding.UTF8.GetBytes(sample)), WsTrustVersion.WsTrust2005);
             StringAssert.Contains(resp.Token, characteristic);
         }
     }
