@@ -53,7 +53,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 #if ANDROID || iOS || WINDOWS_APP
             if (args != null && args.TokenCache != null)
             {
-                args.TokenCache.Deserialize(LegacyCachePersistance.LoadCache());
+                ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
+                args.TokenCache.Deserialize(legacyCachePersistance.LoadCache());
             }
 
 #endif
@@ -64,7 +65,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 #if ANDROID || iOS || WINDOWS_APP
             if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
             {
-                LegacyCachePersistance.WriteCache(args.TokenCache.Serialize());
+                ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
+                legacyCachePersistance.WriteCache(args.TokenCache.Serialize());
                 args.TokenCache.HasStateChanged = false;
             }
 #endif

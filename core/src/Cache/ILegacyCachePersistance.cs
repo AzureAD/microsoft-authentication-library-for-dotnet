@@ -27,48 +27,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
+namespace Microsoft.Identity.Core.Cache
 {
-    internal static class HttpMessageHandlerFactory
+    internal interface ILegacyCachePersistance
     {
-        internal static HttpMessageHandler GetMessageHandler(bool useDefaultCredentials)
-        {
-            if (UseMocks)
-            {
-                if (MockHandlerQueue.Count > 0)
-                {
-                    return MockHandlerQueue.Dequeue();
-                }
+        byte[] LoadCache();
 
-                throw new ArgumentException("No mocks available to consume");
-            }
-
-            return new HttpClientHandler { UseDefaultCredentials = useDefaultCredentials, Proxy = WebProxyProvider.DefaultWebProxy};
-        }
-
-        private static readonly Queue<HttpMessageHandler> MockHandlerQueue = new Queue<HttpMessageHandler>();
-
-        public static void AddMockHandler(HttpMessageHandler mockHandler)
-        {
-            MockHandlerQueue.Enqueue(mockHandler);
-        }
-
-        public static void InitializeMockProvider()
-        {
-            UseMocks = true;
-            MockHandlerQueue.Clear();
-        }
-
-        public static int MockHandlersCount()
-        {
-            return MockHandlerQueue.Count;
-        }
-
-        public static bool UseMocks
-        {
-            get; set;
-        }
+        void WriteCache(byte[] serializedCache);
     }
 }

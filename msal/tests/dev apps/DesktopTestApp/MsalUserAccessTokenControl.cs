@@ -15,12 +15,13 @@ namespace DesktopTestApp
 
         public RefreshView RefreshViewDelegate { get; set; }
 
+        // todo add id token
         internal MsalUserAccessTokenControl(TokenCache cache, MsalAccessTokenCacheItem item) : this()
         {
             _cache = cache;
             _item = item;
             accessTokenAuthorityLabel.Text = _item.Authority;
-            accessTokenScopesLabel.Text = _item.Scope;
+            accessTokenScopesLabel.Text = _item.Scopes;
             expiresOnLabel.Text = _item.ExpiresOn.ToString();
         }
         
@@ -33,12 +34,12 @@ namespace DesktopTestApp
         {
             expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString();
             _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
-            _cache.SaveAccesTokenCacheItem(_item);
+            _cache.SaveAccesTokenCacheItem(_item, null);
         }
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)
         {
-            _cache.DeleteAccessToken(_item);
+            _cache.DeleteAccessToken(_item, null);
             RefreshViewDelegate?.Invoke();
         }
     }

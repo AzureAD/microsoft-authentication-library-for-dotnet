@@ -51,6 +51,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal readonly TokenCache TokenCache;
         protected MsalTokenResponse Response;
         protected MsalAccessTokenCacheItem MsalAccessTokenItem;
+        protected MsalIdTokenCacheItem MsalIdTokenItem;
+
         public ApiEvent.ApiIds ApiId { get; set; }
         public bool IsConfidentialClient { get; set; }
         protected virtual string GetUIBehaviorPromptValue()
@@ -184,7 +186,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        private MsalAccessTokenCacheItem SaveTokenResponseToCache()
+        private void SaveTokenResponseToCache()
         {
             // developer passed in user object.
             string msg = "checking client info returned from the server..";
@@ -220,6 +222,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             IdToken idToken = IdToken.Parse(Response.IdToken);
+            // todo throw Exception when IdToken or client_info in null
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = Authority.UpdateTenantId(
                 AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
 
@@ -229,11 +232,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
 
-                return TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
+                // todo should we return idToken from SaveAccessAndRefreshToken as well ?
+                // problem - if AT is not stored we will fail  ?
+                MsalAccessTokenItem = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
+                MsalIdTokenItem = TokenCache.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey(), AuthenticationRequestParameters.RequestContext);
             }
 
-            return new MsalAccessTokenCacheItem(AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority,
-                AuthenticationRequestParameters.ClientId, Response);
+            MsalAccessTokenItem =  new MsalAccessTokenCacheItem(AuthenticationRequestParameters.Authority,
+                AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
+
+            MsalIdTokenItem = new MsalIdTokenCacheItem(AuthenticationRequestParameters.Authority,
+                AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
         }
 
         protected virtual Task PostRunAsync(AuthenticationResult result)
@@ -263,10 +272,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //this means that no cached item was found
             if (MsalAccessTokenItem == null)
             {
-                MsalAccessTokenItem = SaveTokenResponseToCache();
+                SaveTokenResponseToCache();
             }
 
-            return new AuthenticationResult(MsalAccessTokenItem);
+            //MsalIdTokenCacheItem msalIdTokenCacheItem = TokenCache?.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey());
+
+            return new AuthenticationResult(MsalAccessTokenItem, MsalIdTokenItem);
         }
 
         protected abstract void SetAdditionalRequestParameters(OAuth2Client client);

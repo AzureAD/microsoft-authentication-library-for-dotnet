@@ -34,7 +34,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Guid = System.Guid;
 
-namespace Test.Microsoft.Identity.Unit.InstanceTests
+namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 {
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]

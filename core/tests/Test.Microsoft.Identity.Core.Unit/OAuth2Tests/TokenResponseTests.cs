@@ -34,7 +34,7 @@ using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Unit.Mocks;
+using Test.Microsoft.Identity.Core.Unit.Mocks;
 
 namespace Test.Microsoft.Identity.Unit.OAuth2Tests
 {

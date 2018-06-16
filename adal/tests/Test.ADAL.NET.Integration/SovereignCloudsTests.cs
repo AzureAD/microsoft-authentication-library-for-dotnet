@@ -34,10 +34,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Net;
+using TokenResponseClaim = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2.TokenResponseClaim;
 using Microsoft.Identity.Core.UI;
 
 namespace Test.ADAL.NET.Integration
@@ -54,8 +55,9 @@ namespace Test.ADAL.NET.Integration
         [TestInitialize]
         public void Initialize()
         {
-            HttpMessageHandlerFactory.InitializeMockProvider();
+            AdalHttpMessageHandlerFactory.InitializeMockProvider();
             _platformParameters = new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto);
+
             InstanceDiscovery.InstanceCache.Clear();
         }
 
@@ -76,9 +78,9 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains instance_aware query parameter
                 new Dictionary<string, string> { { "instance_aware", "true" } });
 
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
@@ -108,7 +110,7 @@ namespace Test.ADAL.NET.Integration
                 authenticationContext.TokenCache.tokenCacheDictionary.Keys.FirstOrDefault()?.Authority);
 
             // all mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
 
         [TestMethod]
@@ -140,9 +142,9 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains instance_aware query parameter
                 new Dictionary<string, string> { { "instance_aware", "true" } });
 
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant), content));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant), content));
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -151,7 +153,7 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
@@ -178,7 +180,7 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(false, InstanceDiscovery.InstanceCache.Keys.Contains("login.partner.microsoftonline.cn"));
 
             // all mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
     }
 }

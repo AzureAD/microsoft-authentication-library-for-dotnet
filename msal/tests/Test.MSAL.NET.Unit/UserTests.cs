@@ -39,22 +39,21 @@ namespace Test.MSAL.NET.Unit
         public void Constructor_IdIsRequired()
         {
             // 1. Id is required
-            AssertException.Throws<ArgumentNullException>(() => new User(null, "d", "n", "id"));
+            AssertException.Throws<ArgumentNullException>(() => new User(null, "d", "n"));
 
             // 2. Other properties are optional
-            new User("id", null, null, null);
+            new User("id", null, null);
         }
 
         [TestMethod]
         [TestCategory("UserTests")]
         public void Constructor_PropertiesSet()
         {
-            User actual = new User("id", "disp", "name", "idp");
+            User actual = new User("id", "disp", "name");
 
             Assert.AreEqual("id", actual.Identifier);
             Assert.AreEqual("disp", actual.DisplayableId);
             Assert.AreEqual("name", actual.Name);
-            Assert.AreEqual("idp", actual.IdentityProvider);
         }
     }
 }

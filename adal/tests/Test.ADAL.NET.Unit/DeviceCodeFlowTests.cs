@@ -42,9 +42,9 @@ namespace Test.ADAL.NET.Unit
         [TestInitialize]
         public void Initialize()
         {
-            HttpMessageHandlerFactory.InitializeMockProvider();
+            AdalHttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
-            HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
 
         [TestMethod]
@@ -75,8 +75,8 @@ namespace Test.ADAL.NET.Unit
                                                                            "\"36fe3e82-442f-4418-b9f4-9f4b9295831d\"}")
             };
 
-            HttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
                 Method = HttpMethod.Post,
                 Url = "https://login.microsoftonline.com/home/oauth2/token",

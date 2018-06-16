@@ -12,7 +12,9 @@
         <Button Content="Acquire Token Username/Password" HorizontalAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Click="Button_Click_1"/>
         <Button Content="Acquire Token Interactive with ms-app" HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Click="Button_Click_2"/>
         <Button Content="Acquire Token with Client Credential" HorizontalAlignment="Center" Margin="0,250,0,0" VerticalAlignment="Top" Click="Button_Click_3"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,350,0,0" Height="400" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
+        <Button Content="Clear Cache" HorizontalAlignment="Center" Margin="0,300,0,0" VerticalAlignment="Top" Click="ClearCache"/>
+        <Button Content="Show Cache Size" HorizontalAlignment="Center" Margin="0,350,0,0" VerticalAlignment="Top" Click="ShowCacheCount"/>
+        <TextBlock HorizontalAlignment="Center" Margin="0,500,0,0" Height="400" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
 
     </Grid>
 </Page>

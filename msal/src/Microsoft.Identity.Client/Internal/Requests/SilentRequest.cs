@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
             client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.RefreshToken);
-            client.AddBodyParameter(OAuth2Parameter.RefreshToken, _msalRefreshTokenItem.RefreshToken);
+            client.AddBodyParameter(OAuth2Parameter.RefreshToken, _msalRefreshTokenItem.Secret);
         }
 
         internal override async Task PreTokenRequest()
@@ -65,6 +65,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //look for access token.
             MsalAccessTokenItem
                 = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+            if (MsalAccessTokenItem != null)
+            {
+                MsalIdTokenItem = TokenCache.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey(), AuthenticationRequestParameters.RequestContext);
+            }
 
             if (ForceRefresh)
             {
@@ -97,7 +101,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (Response.RefreshToken == null)
                 {
-                    Response.RefreshToken = _msalRefreshTokenItem.RefreshToken;
+                    Response.RefreshToken = _msalRefreshTokenItem.Secret;
                     const string msg = "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead";
                     AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);

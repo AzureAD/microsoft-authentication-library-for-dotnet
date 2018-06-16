@@ -60,7 +60,7 @@ namespace Test.ADAL.NET.Unit
         [TestInitialize]
         public void Initialize()
         {
-            HttpMessageHandlerFactory.InitializeMockProvider();
+            AdalHttpMessageHandlerFactory.InitializeMockProvider();
         }
 
         [TestMethod]
@@ -129,9 +129,9 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for authority type detection")]
         public void AuthorityTypeDetectionTest()
         {
-            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
-            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
-            Assert.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
+            Assert.AreEqual(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
+            Assert.AreEqual(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
+            Assert.AreEqual(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
         }
 
 
@@ -295,7 +295,7 @@ namespace Test.ADAL.NET.Unit
             }
 
             var finalString = new string(stringChars);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -323,7 +323,7 @@ namespace Test.ADAL.NET.Unit
             }
 
             var finalString = new string(stringChars);
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant)
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Helpers;
@@ -63,6 +64,36 @@ namespace Microsoft.Identity.Core
                 throw new MsalClientException(MsalClientException.JsonParseError,
                     "Failed to parse the returned client info.", exc);
             }
+        }
+
+        public string ToEncodedJson() {
+            return Base64UrlHelpers.Encode(JsonHelper.SerializeToJson<ClientInfo>(this));
+        }
+
+        public string ToUserIdentifier()
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", UniqueIdentifier, UniqueTenantIdentifier);
+        }
+
+        public static ClientInfo CreateFromUserIdentifier(string userIdentifier)
+        {
+            if (string.IsNullOrEmpty(userIdentifier))
+            {
+                return null;
+            }
+
+            string[] artifacts = userIdentifier.Split('.');
+
+            if (artifacts.Length == 0)
+            {
+                return null;
+            }
+
+            return new ClientInfo()
+            {
+                UniqueIdentifier = artifacts[0],
+                UniqueTenantIdentifier = artifacts[1]
+            };
         }
         public static ClientInfo CreateFromEncodedString(string encodedUserIdentiier)
         {

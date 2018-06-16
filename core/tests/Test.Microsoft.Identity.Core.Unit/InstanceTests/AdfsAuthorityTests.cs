@@ -38,10 +38,10 @@ using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Unit.Mocks;
+using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Guid = System.Guid;
 
-namespace Test.Microsoft.Identity.Unit.InstanceTests
+namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 {
     [TestClass]
     [DeploymentItem("Resources\\drs-response-missing-field.json")]

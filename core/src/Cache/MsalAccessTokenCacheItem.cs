@@ -31,71 +31,76 @@ using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Core.Cache
 {
     [DataContract]
-    internal class MsalAccessTokenCacheItem : MsalTokenCacheItemBase
+    internal class MsalAccessTokenCacheItem : MsalCredentialCacheItemBase
     {
-        public MsalAccessTokenCacheItem()
+        internal MsalAccessTokenCacheItem()
         {
+            CredentialType = Cache.CredentialType.AccessToken.ToString();
         }
 
-        public MsalAccessTokenCacheItem(string authority, string clientId, MsalTokenResponse response)
-            : base(clientId)
-        {
+        internal MsalAccessTokenCacheItem
+            (Authority authority, string clientId, MsalTokenResponse response, string tenantId){
 
+            CredentialType = Cache.CredentialType.AccessToken.ToString();
+
+            ClientId = clientId;
             TokenType = response.TokenType;
-            Scope = response.Scope;
-            Authority = authority;
-            if (response.AccessToken != null)
-            {
-                AccessToken = response.AccessToken;
-                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
-            }
+            Scopes = response.Scope;
+            Authority = authority.CanonicalAuthority;
+
+            TenantId = tenantId;
+            Environment = authority.Host;
+
+            Secret = response.AccessToken;
+            ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
+            CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
 
             RawClientInfo = response.ClientInfo;
-            RawIdToken = response.IdToken;
             CreateDerivedProperties();
         }
 
-        /// <summary>
-        /// Gets the AccessToken Type.
-        /// </summary>
-        [DataMember(Name = "token_type")]
-        public string TokenType { get; set; }
+        [DataMember(Name = "realm")]
+        internal string TenantId { get; set; }
 
-        /// <summary>
-        /// Gets the Access Token requested.
-        /// </summary>
-        [DataMember(Name = "access_token")]
-        public string AccessToken { get; set; }
+        [DataMember(Name = "target", IsRequired = true)]
+        public string Scopes { get; internal set; }
 
-        [DataMember(Name = "id_token")]
-        public string RawIdToken { get; set; }
+        [DataMember(Name = "cached_at", IsRequired = true)]
+        internal long CachedAt { get; set; }
 
-        [DataMember(Name = "expires_on")]
-        public long ExpiresOnUnixTimestamp { get; set; }
+        [DataMember(Name = "expires_on", IsRequired = true)]
+        public long ExpiresOnUnixTimestamp { get; internal set; }
 
-        /// <summary>
-        /// Gets the Authority.
-        /// </summary>
-        [DataMember(Name = "authority")]
-        public string Authority { get; set; }
-
-        /// <summary>
-        /// Gets the ScopeSet.
-        /// </summary>
-        [DataMember(Name = "scope")]
-        public string Scope { get; set; }
+        /*
+        [DataMember(Name = "extended_expires_on")]
+        internal string ExtendedExpiresOn { get; set; }
+        */
 
         [DataMember(Name = "user_assertion_hash")]
         public string UserAssertionHash { get; set; }
 
-        public SortedSet<string> ScopeSet { get; set; }
+        [DataMember(Name = "authority")]
+        public string Authority { get; internal set; }
 
-        public IdToken IdToken { get; set; }
+        [DataMember(Name = "access_token_type")]
+        internal string TokenType { get; set; }
+
+        internal SortedSet<string> ScopeSet { get; set; }
+
+        internal string GetAccessTokenItemKey()
+        {
+            return new MsalAccessTokenCacheKey(Environment, TenantId, UserIdentifier, ClientId, ScopeSet).ToString();
+        }
+        internal string GetIdTokenItemKey()
+        {
+            return new MsalIdTokenCacheKey(Environment, TenantId, UserIdentifier, ClientId).ToString();
+        }
 
         public DateTimeOffset ExpiresOn
         {
@@ -104,26 +109,13 @@ namespace Microsoft.Identity.Core.Cache
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
                 return dtDateTime.AddSeconds(ExpiresOnUnixTimestamp).ToUniversalTime();
             }
-            set
-            {
-                DateTimeOffset ignored = value;
-            }
         }
 
-        public MsalAccessTokenCacheKey GetAccessTokenItemKey()
+        internal void CreateDerivedProperties()
         {
-            return new MsalAccessTokenCacheKey(Authority, ScopeSet, ClientId, GetUserIdentifier());
-        }
+            ScopeSet = Scopes.AsSet();
 
-        private void CreateDerivedProperties()
-        {
-            ScopeSet = Scope.AsSet();
-            IdToken = IdToken.Parse(RawIdToken);
-            if (!string.IsNullOrEmpty(RawClientInfo))
-            {
-                // this should only happen for client credentials.
-                ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
-            }
+            InitRawClientInfoDerivedProperties();
         }
 
         // This method is called after the object 

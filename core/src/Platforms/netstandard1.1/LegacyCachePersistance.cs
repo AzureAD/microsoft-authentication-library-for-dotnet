@@ -29,15 +29,15 @@ using System;
 
 namespace Microsoft.Identity.Core.Cache
 {
-    internal class LegacyCachePersistance
+    internal class LegacyCachePersistance : ILegacyCachePersistance
     {
         //this class is an empty implementation to facilitate testing of forward/backward cache compat testing.
-        public static byte[] LoadCache()
+        byte[] ILegacyCachePersistance.LoadCache()
         {
             return null;
         }
 
-        public static void WriteCache(byte[] serializedCache)
+        void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
         {
         }
     }

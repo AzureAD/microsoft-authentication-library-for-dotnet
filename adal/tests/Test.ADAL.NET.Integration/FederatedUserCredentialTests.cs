@@ -41,7 +41,7 @@ using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
-using HttpMessageHandlerFactory = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http.HttpMessageHandlerFactory;
+using HttpMessageHandlerFactory = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http.AdalHttpMessageHandlerFactory;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -306,7 +306,8 @@ namespace Test.ADAL.NET.Integration
                         {
                             DisplayableId = TestConstants.DefaultDisplayableId,
                             UniqueId = TestConstants.DefaultUniqueId
-                        }
+                        },
+                    IdToken = MockHelpers.CreateIdToken(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId)
                 },
             },
             TestConstants.DefaultAuthorityCommonTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,

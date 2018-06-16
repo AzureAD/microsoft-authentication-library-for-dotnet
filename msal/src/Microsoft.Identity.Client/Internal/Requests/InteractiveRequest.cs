@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     requestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.User.DisplayableId;
                 }
 
-                AuthenticationRequestParameters.ClientInfo = ClientInfo.CreateFromEncodedString(AuthenticationRequestParameters.User.Identifier);
+                AuthenticationRequestParameters.ClientInfo = ClientInfo.CreateFromUserIdentifier(AuthenticationRequestParameters.User.Identifier);
 
                 if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier))
                 {

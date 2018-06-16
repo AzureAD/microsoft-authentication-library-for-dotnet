@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -34,24 +35,31 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class AccessTokenCacheItemDetails : ContentPage
     {
-        internal AccessTokenCacheItemDetails(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        internal AccessTokenCacheItemDetails(MsalAccessTokenCacheItem msalAccessTokenCacheItem, 
+            MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
             InitializeComponent();
 
             authorityLabel.Text = msalAccessTokenCacheItem.Authority;
             clientIdLabel.Text = msalAccessTokenCacheItem.ClientId;
 
-            userDisplayableIdLabel.Text = msalAccessTokenCacheItem.IdToken.PreferredUsername;
-            userNameLabel.Text = msalAccessTokenCacheItem.IdToken.Name;
-            userIdentityProviderLabel.Text = msalAccessTokenCacheItem.IdToken.Issuer;
+            credentialTypeLabel.Text = msalAccessTokenCacheItem.CredentialType;
+            environmentLabel.Text = msalAccessTokenCacheItem.Environment;
+            tenantIdLabel.Text = msalAccessTokenCacheItem.TenantId;
+
+            userIdentifierLabel.Text = msalAccessTokenCacheItem.UserIdentifier;
+            userAssertionHashLabel.Text = msalAccessTokenCacheItem.UserAssertionHash;
 
             expiresOnLabel.Text = msalAccessTokenCacheItem.ExpiresOn.ToString();
-            scopesLabel.Text = msalAccessTokenCacheItem.Scope;
+            scopesLabel.Text = msalAccessTokenCacheItem.Scopes;
 
+            cachedAtLabel.Text = CoreHelpers.UnixTimestampToDateTime(msalAccessTokenCacheItem.CachedAt).ToString();
+
+            rawClientInfoLabel.Text = msalAccessTokenCacheItem.RawClientInfo;
             clientInfoUniqueIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueIdentifier;
             clientInfoUniqueTenantIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
-            accessTokenLabel.Text = StringShortenerConverter.GetShortStr(msalAccessTokenCacheItem.AccessToken, 100);
+            secretLabel.Text = StringShortenerConverter.GetShortStr(msalAccessTokenCacheItem.Secret, 100);
         }
     }
 }

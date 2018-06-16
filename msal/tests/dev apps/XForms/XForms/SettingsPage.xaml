@@ -42,12 +42,20 @@
         <Frame OutlineColor="Black" Padding="10">
             <StackLayout Orientation="Vertical"  VerticalOptions="FillAndExpand">
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                    <Label Text="Number of items in AT Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
+                    <Label Text="Number of AT in the Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
                     <Label x:Name="numOfAtItems" Margin="5"/>
                 </StackLayout>
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                    <Label Text="Number of RT items in Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
+                    <Label Text="Number of RT in the Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
                     <Label x:Name="numOfRtItems" Margin="5"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="Number of ID in the Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
+                    <Label x:Name="numOfIdItems" Margin="5"/>
+                </StackLayout>
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Label Text="Number of Accounts in the Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
+                    <Label x:Name="numOfAccountItems" Margin="5"/>
                 </StackLayout>
                 <Button  Text="ClearCache"  Clicked="OnClearCache" TextColor="Blue" Font="Bold,15"/>
             </StackLayout>

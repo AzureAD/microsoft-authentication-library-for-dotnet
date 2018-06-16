@@ -44,6 +44,7 @@ using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
 using NSubstitute;
 using Test.Microsoft.Identity.Core.Unit;
+using Test.Microsoft.Identity.Core.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -538,7 +539,7 @@ namespace Test.MSAL.NET.Unit
         public void ForceRefreshParameterFalseTestAsync()
         {
             var cache = new TokenCache();
-            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+            TokenCacheHelper.PopulateCacheForClientCredential(cache.TokenCacheAccessor);
 
             var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
@@ -564,7 +565,7 @@ namespace Test.MSAL.NET.Unit
             var task = app.AcquireTokenForClientAsync(TestConstants.Scope, false);
             var result = task.Result;
 
-            Assert.AreEqual(accessTokenInCache?.AccessToken, result.AccessToken);
+            Assert.AreEqual(accessTokenInCache.Secret, result.AccessToken);
         }
 
         [TestMethod]
@@ -609,7 +610,7 @@ namespace Test.MSAL.NET.Unit
                 .ToList()
                 .FirstOrDefault();
 
-            Assert.AreEqual(tokenRetrievedFromNetCall, accessTokenInCache?.AccessToken);
+            Assert.AreEqual(tokenRetrievedFromNetCall, accessTokenInCache.Secret);
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
                 && anEvent[ApiEvent.ApiIdKey] == "727"));

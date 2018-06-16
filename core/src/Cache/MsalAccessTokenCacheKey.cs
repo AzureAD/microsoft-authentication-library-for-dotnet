@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,65 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Cache
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    internal class MsalAccessTokenCacheKey : MsalTokenCacheKeyBase
+    internal class MsalAccessTokenCacheKey : MsalCredentialCacheKey
     {
-        public MsalAccessTokenCacheKey(string authority, SortedSet<string> scopes, string clientId, string userIdentifier) : base(clientId, userIdentifier)
+        internal MsalAccessTokenCacheKey(string environment, string tenantId, string userIdentifier, string clientId, SortedSet<string> scopes)
+            : base(environment, tenantId, userIdentifier, CredentialType.AccessToken, clientId, scopes)
         {
-            Authority = authority;
-            Scope = scopes ?? new SortedSet<string>();
-        }
-
-        public string Authority { get; }
-
-        public SortedSet<string> Scope { get; }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(Base64UrlHelpers.Encode(Authority));
-            stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(Base64UrlHelpers.Encode(ClientId));
-            stringBuilder.Append(CacheKeyDelimiter);
-            // scope is treeSet to guarantee the order of the scopes when converting to string.
-            stringBuilder.Append(Base64UrlHelpers.Encode(Scope.AsSingleString()));
-            stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(Base64UrlHelpers.Encode(UserIdentifier));
-
-            return stringBuilder.ToString();
-        }
-
-        internal bool ScopeEquals(SortedSet<string> otherScope)
-        {
-            if (Scope == null)
-            {
-                return otherScope == null;
-            }
-
-            if (otherScope == null)
-            {
-                return Scope == null;
-            }
-
-            if (Scope.Count == otherScope.Count)
-            {
-                return Scope.Intersect(otherScope, StringComparer.OrdinalIgnoreCase).Count() == Scope.Count;
-            }
-
-            return false;
         }
     }
 }

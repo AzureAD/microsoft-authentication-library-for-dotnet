@@ -37,7 +37,7 @@ namespace Test.ADAL.NET.Common
         public static readonly string DefaultAdfsAuthorityTenant = "https://login.contodo.com/adfs/";
         public static readonly string DefaultAuthorityHomeTenant = "https://login.microsoftonline.com/home/";
         public static readonly string SomeTenantId = "some-tenant-id";
-        public static readonly string TenantSpecificAuthority = "https://login.microsoftonline.com/SomeTenantId/";
+        public static readonly string TenantSpecificAuthority = "https://login.microsoftonline.com/" + SomeTenantId + "/";
         public static readonly string DefaultAuthorityGuestTenant = "https://login.microsoftonline.com/guest/";
         public static readonly string DefaultAuthorityCommonTenant = "https://login.microsoftonline.com/common/";
         public static readonly string DefaultAuthorityBlackforestTenant = "https://login.microsoftonline.de/common/";
@@ -57,6 +57,10 @@ namespace Test.ADAL.NET.Common
         public static readonly string TokenEndPoint = "oauth2/token";
         public static readonly string UserRealmEndPoint = "userrealm";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
+        public static readonly string DefaultRefreshTokenValue = "RefreshTokenValue";
+
+        public static readonly string DefaultUniqueIdentifier = "testUniqueIdentifier";
+        public static readonly string DefaultUniqueTenantIdentifier = "testUniqueTenantIdentifier";
 
         public static string GetTokenEndpoint(string Authority)
         {

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
-using Microsoft.Identity.Core.Helpers;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Cache
 {
-    class MsalRefreshTokenCacheKey : MsalTokenCacheKeyBase
+    internal class MsalRefreshTokenCacheKey : MsalCredentialCacheKey
     {
-
-        public MsalRefreshTokenCacheKey(string environment, string clientId, string userIdentifier) : base(clientId, userIdentifier)
+        internal MsalRefreshTokenCacheKey(string environment, string clientId, string userIdentifier)
+            : base(environment, null, userIdentifier, CredentialType.RefreshToken, clientId, null)
         {
-            Environment = environment;
-        }
-
-        public string Environment { get; }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append(Base64UrlHelpers.Encode(Environment));
-            stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(Base64UrlHelpers.Encode(ClientId));
-            stringBuilder.Append(CacheKeyDelimiter);
-            stringBuilder.Append(Base64UrlHelpers.Encode(UserIdentifier));
-
-            return stringBuilder.ToString();
         }
     }
 }

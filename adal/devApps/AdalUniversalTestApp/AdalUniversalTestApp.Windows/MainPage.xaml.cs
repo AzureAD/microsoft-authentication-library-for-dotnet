@@ -51,14 +51,51 @@ namespace AdalUniversalTestApp
             
             try
             {
-                AuthenticationResult result =
-                    await
-                        ctx.AcquireTokenAsync("https://graph.windows.net", "<CLIENT-ID>",
-                            new Uri("<REDIRECT-URI>"), new PlatformParameters(PromptBehavior.SelectAccount, false)).ConfigureAwait(false);
+                AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net",
+                    "<CLIENT-ID>", new Uri("<REDIRECT-URI>"),
+                    new PlatformParameters(PromptBehavior.Auto, false));
 
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                    () =>
                 {
                     AccessToken.Text = "Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken;
+                });
+            }
+            catch (Exception exc)
+            {
+                this.AccessToken.Text = exc.Message;
+            }
+        }
+
+        private async void ClearCache(object sender, RoutedEventArgs e)
+        {
+            this.AccessToken.Text = string.Empty;
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+            try
+            {
+                ctx.TokenCache.Clear();
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                () =>
+                {
+                    AccessToken.Text = "Cache was cleared";
+                });
+            }
+            catch (Exception exc)
+            {
+                this.AccessToken.Text = exc.Message;
+            }
+        }
+
+        private async void ShowCacheCount(object sender, RoutedEventArgs e)
+        {
+            this.AccessToken.Text = string.Empty;
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+            try
+            {
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                () =>
+                {
+                    AccessToken.Text = "Token Cache count is " + ctx.TokenCache.Count;
                 });
             }
             catch (Exception exc)

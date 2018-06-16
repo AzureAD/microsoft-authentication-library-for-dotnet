@@ -53,6 +53,10 @@ namespace XForms
                 .Count.ToString();
             numOfRtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString()
                 .Count.ToString();
+            numOfIdItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllIdTokensAsString()
+                .Count.ToString();
+            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllAccountsAsString()
+                .Count.ToString();
 
             validateAuthority.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.RedirectUri;

@@ -11,19 +11,21 @@ namespace DesktopTestApp
     public partial class MsalUserRefreshTokenControl : UserControl
     {
         private TokenCache _cache;
-        private MsalRefreshTokenCacheItem _item;
+        private MsalRefreshTokenCacheItem _rtItem;
+        private MsalAccountCacheItem _accountItem;
         public delegate void RefreshView();
 
         private const string GarbageRtValue = "garbage-refresh-token";
 
         public RefreshView RefreshViewDelegate { get; set; }
 
-        internal MsalUserRefreshTokenControl(TokenCache cache, MsalRefreshTokenCacheItem item) : this()
+        internal MsalUserRefreshTokenControl(TokenCache cache, MsalRefreshTokenCacheItem rtIitem, MsalAccountCacheItem accountItem) : this()
         {
             _cache = cache;
-            _item = item;
-            upnLabel.Text = _item.DisplayableId;
-            invalidateRefreshTokenBtn.Enabled = !_item.RefreshToken.Equals(GarbageRtValue);
+            _rtItem = rtIitem;
+            _accountItem = accountItem;
+            upnLabel.Text = accountItem.PreferredUsername;
+            invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue);
         }
 
         public MsalUserRefreshTokenControl()
@@ -33,14 +35,16 @@ namespace DesktopTestApp
 
         private void InvalidateRefreshTokenBtn_Click(object sender, System.EventArgs e)
         {
-            _item.RefreshToken = GarbageRtValue;
-            _cache.SaveRefreshTokenCacheItem(_item);
+            _rtItem.Secret = GarbageRtValue;
+            _cache.SaveRefreshTokenCacheItem(_rtItem, null);
             invalidateRefreshTokenBtn.Enabled = false;
         }
 
         private void signOutUserOneBtn_Click(object sender, System.EventArgs e)
         {
-            _cache.Remove(new User(_item.GetUserIdentifier(), _item.DisplayableId, _item.Name, _item.IdentityProvider), new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+            _cache.Remove(
+                new User(_rtItem.UserIdentifier, _accountItem.PreferredUsername, _accountItem.Name), 
+                    new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
             RefreshViewDelegate?.Invoke();
         }
     }

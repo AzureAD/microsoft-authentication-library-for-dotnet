@@ -98,7 +98,7 @@ namespace XForms
             var sb = new StringBuilder();
 
             sb.AppendLine("user.DisplayableId : " + user.DisplayableId);
-            sb.AppendLine("user.IdentityProvider : " + user.IdentityProvider);
+            //sb.AppendLine("user.IdentityProvider : " + user.IdentityProvider);
             sb.AppendLine("user.Name : " + user.Name);
 
             return sb.ToString();

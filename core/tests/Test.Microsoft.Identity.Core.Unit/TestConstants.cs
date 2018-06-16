@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Core.Helpers;
 
-namespace Test.Microsoft.Identity.Unit
+namespace Test.Microsoft.Identity.Core.Unit
 {
     class TestConstants
     {

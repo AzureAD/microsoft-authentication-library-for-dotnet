@@ -27,41 +27,51 @@
         <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
 
             <ListView x:Name="accessTokenCacheItems" SeparatorVisibility="None" HasUnevenRows="True">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <ViewCell>
-                        <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowAccessTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
-                            <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding .}" />
-                            <MenuItem Clicked="OnAtDelete" Text="Delete" CommandParameter="{Binding .}" />
-                        </ViewCell.ContextActions>
-                        <ViewCell.View>
-                            <ContentView Padding="5">
-                                <Frame OutlineColor="Black" Padding="10">
-                                    <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="DisplayableId: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding User.DisplayableId}" HorizontalOptions="CenterAndExpand"/>
-                                        </StackLayout>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <ViewCell.ContextActions>
+                                <MenuItem Clicked="ShowAccessTokenDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                                <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding Value}" />
+                                <MenuItem Clicked="OnAtDelete" Text="Delete" CommandParameter="{Binding Value}" />
+                            </ViewCell.ContextActions>
+                            <ViewCell.View>
+                                <ContentView Padding="5">
+                                    <Frame OutlineColor="Black" Padding="10">
+                                        <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                                <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
+                                            </StackLayout>
+                                            
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                                                <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
+                                            </StackLayout>
 
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="ExpiresOn: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding ExpiresOn.DateTime, StringFormat='{0:MM/dd/yy H:mm:ss zzz}'}" HorizontalOptions="CenterAndExpand"/>
-                                        </StackLayout>
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label Text="Authority: " HorizontalOptions="Start" Font="Bold,13"/>
+                                                <Label Text="{Binding Value.Authority}" HorizontalOptions="CenterAndExpand"/>
+                                            </StackLayout>
 
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="Scopes: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding Scope}" HorizontalOptions="CenterAndExpand"/>
-                                        </StackLayout>
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label Text="ExpiresOn: " HorizontalOptions="Start" Font="Bold,13"/>
+                                                <Label Text="{Binding Value.DateTime, StringFormat='{0:MM/dd/yy H:mm:ss zzz}'}" HorizontalOptions="CenterAndExpand"/>
+                                            </StackLayout>
 
-                                    </StackLayout>
-                                </Frame>
-                            </ContentView>
-                        </ViewCell.View>
-                    </ViewCell>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                                            <StackLayout Orientation="Horizontal">
+                                                <Label Text="Scopes: " HorizontalOptions="Start" Font="Bold,13"/>
+                                                <Label Text="{Binding Value.Scopes}" HorizontalOptions="CenterAndExpand"/>
+                                            </StackLayout>
+
+                                        </StackLayout>
+                                    </Frame>
+                                </ContentView>
+                            </ViewCell.View>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </StackLayout>
 
         <Label Text="Refresh Tokens:" HorizontalOptions="Start" Font="Bold,15"/>
@@ -72,8 +82,8 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowRefreshTokenDetails" Text="ShowDetails" CommandParameter="{Binding .}" />
-                            <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding .}" />
+                            <MenuItem Clicked="ShowRefreshTokenDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding Value}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
 
@@ -81,12 +91,17 @@
                                 <Frame OutlineColor="Black" Padding="10">
                                     <StackLayout VerticalOptions="FillAndExpand">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Text="DisplayableId: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding User.DisplayableId}" HorizontalOptions="CenterAndExpand"/>
+                                            <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+                                        
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
                                         </StackLayout>
 
-                                        <Label Text="RefreshToken: " HorizontalOptions="Start" Font="Bold,13"/>
-                                        <Label Text="{Binding RefreshToken, Converter={StaticResource stringShortenerConverter}}" HorizontalOptions="CenterAndExpand"/>
+                                        <Label Text="Secret: " HorizontalOptions="Start" Font="Bold,13"/>
+                                        <Label Text="{Binding Value.Secret, Converter={StaticResource stringShortenerConverter}}" HorizontalOptions="CenterAndExpand"/>
                                     </StackLayout>
                                 </Frame>
                             </ContentView>
@@ -97,9 +112,83 @@
             </ListView.ItemTemplate>
         </ListView>
 
+        <Label Text="Id Tokens:" HorizontalOptions="Start" Font="Bold,15"/>
+
+        <ListView x:Name="idTokenCacheItems" SeparatorVisibility="None" HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="ShowIdTokenDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                        </ViewCell.ContextActions>
+                        <ViewCell.View>
+
+                            <ContentView Padding="5">
+                                <Frame OutlineColor="Black" Padding="10">
+                                    <StackLayout VerticalOptions="FillAndExpand">
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+                                        
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                        <Label Text="Secret: " HorizontalOptions="Start" Font="Bold,13"/>
+                                        <Label Text="{Binding Value.Secret, Converter={StaticResource stringShortenerConverter}}" HorizontalOptions="CenterAndExpand"/>
+                                    </StackLayout>
+                                </Frame>
+                            </ContentView>
+                        </ViewCell.View>
+
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Label Text="Accounts:" HorizontalOptions="Start" Font="Bold,15"/>
+
+        <ListView x:Name="accountsCacheItems" SeparatorVisibility="None" HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+
+                        <ViewCell.ContextActions>
+                            <MenuItem Clicked="ShowAccountDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                        </ViewCell.ContextActions>
+                        <ViewCell.View>
+
+                            <ContentView Padding="5">
+                                <Frame OutlineColor="Black" Padding="10">
+                                    <StackLayout VerticalOptions="FillAndExpand">
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+                                        
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Text="PreferredUsername: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="{Binding Value.PreferredUsername}" HorizontalOptions="CenterAndExpand"/>
+                                        </StackLayout>
+                                    </StackLayout>
+                                </Frame>
+                            </ContentView>
+                        </ViewCell.View>
+
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
 
         <Button  Text="Clear"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15"/>
 
     </StackLayout>
-    
 </ContentPage>

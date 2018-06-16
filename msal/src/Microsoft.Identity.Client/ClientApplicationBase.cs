@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Client
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
         /// This means that an access token with more scopes than requested could be returned as well. If access token is expired or 
         /// close to expiration (within 5 minute window), then refresh token (if available) is used to acquire a new access token by making a network call.
-        /// </summary>
+        /// </summary> 
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="user">User for which the token is requested. <see cref="IUser"/></param>
         /// <returns></returns>

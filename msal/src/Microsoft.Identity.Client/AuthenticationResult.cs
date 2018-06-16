@@ -39,28 +39,33 @@ namespace Microsoft.Identity.Client
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly MsalAccessTokenCacheItem _msalAccessTokenCacheItem;
+        private readonly MsalIdTokenCacheItem _msalIdTokenCacheItem;
+
 
         internal AuthenticationResult()
         {
         }
 
-        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        internal AuthenticationResult(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
             _msalAccessTokenCacheItem = msalAccessTokenCacheItem;
-            User = new User(_msalAccessTokenCacheItem.GetUserIdentifier(),
-                _msalAccessTokenCacheItem.IdToken?.PreferredUsername, _msalAccessTokenCacheItem.IdToken?.Name,
-                _msalAccessTokenCacheItem.IdToken?.Issuer);
+            _msalIdTokenCacheItem = msalIdTokenCacheItem;
+            if (_msalAccessTokenCacheItem.UserIdentifier != null)
+            {
+                User = new User(_msalAccessTokenCacheItem.UserIdentifier,
+                    _msalIdTokenCacheItem.IdToken?.PreferredUsername, _msalIdTokenCacheItem.IdToken?.Name);
+            }
         }
 
         /// <summary>
         /// Gets the Access Token requested.
         /// </summary>
-        public virtual string AccessToken => _msalAccessTokenCacheItem.AccessToken;
+        public virtual string AccessToken => _msalAccessTokenCacheItem.Secret;
 
         /// <summary>
         /// Gets the Unique Id of the user.
         /// </summary>
-        public virtual string UniqueId => _msalAccessTokenCacheItem.IdToken?.GetUniqueId();
+        public virtual string UniqueId => _msalIdTokenCacheItem?.IdToken?.GetUniqueId();
 
         /// <summary>
         /// Gets the point in time in which the Access Token returned in the Token property ceases to be valid.
@@ -73,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
-        public virtual string TenantId => _msalAccessTokenCacheItem.IdToken?.TenantId;
+        public virtual string TenantId => _msalIdTokenCacheItem?.IdToken?.TenantId;
 
         /// <summary>
         /// Gets the user object. Some elements in User might be null if not returned by the
@@ -84,7 +89,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public virtual string IdToken => _msalAccessTokenCacheItem.RawIdToken;
+        public virtual string IdToken => _msalIdTokenCacheItem.Secret;
 
         /// <summary>
         /// Gets the scope values returned from the service.

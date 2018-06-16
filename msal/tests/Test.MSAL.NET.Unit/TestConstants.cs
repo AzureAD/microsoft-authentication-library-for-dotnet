@@ -64,15 +64,15 @@ namespace Test.MSAL.NET.Unit
         public static string CreateUserIdentifer(string uid, string utid)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
-                Base64UrlHelpers.Encode(uid),
-                Base64UrlHelpers.Encode(utid));
+                //Base64UrlHelpers.Encode(uid),
+                //Base64UrlHelpers.Encode(utid));
+                uid, utid);
         }
 
         public static readonly User User = new User
         {
             DisplayableId = DisplayableId,
             Identifier = UserIdentifier,
-            IdentityProvider = IdentityProvider,
             Name = Name,
         };
 

@@ -31,7 +31,7 @@ using System.Linq;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Unit.CacheTests
+namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 {
     [TestClass]
     public class MsalAccessTokenCacheKeyTests
@@ -40,27 +40,31 @@ namespace Test.Microsoft.Identity.Unit.CacheTests
         [TestCategory("AccessTokenCacheKeyTests")]
         public void ConstructorTest()
         {
-            MsalAccessTokenCacheKey key = new MsalAccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                TestConstants.Scope, TestConstants.ClientId, TestConstants.UserIdentifier);
+            MsalCredentialCacheKey key = new MsalAccessTokenCacheKey(TestConstants.ProductionEnvironment, TestConstants.Utid,
+                TestConstants.UserIdentifier, TestConstants.ClientId, TestConstants.Scope);
+
             ValidateTokenCacheKey(key);
 
-            key = new MsalAccessTokenCacheKey(TestConstants.AuthorityHomeTenant,
-                null, TestConstants.ClientId, TestConstants.UserIdentifier);
+            key = new MsalRefreshTokenCacheKey(TestConstants.ProductionEnvironment, TestConstants.ClientId,
+                TestConstants.UserIdentifier);
             
-            Assert.IsNotNull(key.Scope);
-            Assert.AreEqual(0, key.Scope.Count);
-
+            Assert.IsNull(key.Scopes);
+            Assert.AreEqual(CredentialType.RefreshToken, key.CredentialType);
         }
 
-        private void ValidateTokenCacheKey(MsalAccessTokenCacheKey key)
+        private void ValidateTokenCacheKey(MsalCredentialCacheKey key)
         {
-            Assert.IsNotNull(key);
-            Assert.AreEqual(TestConstants.AuthorityHomeTenant, key.Authority);
-            Assert.AreEqual(TestConstants.Scope, key.Scope);
-            Assert.AreEqual(TestConstants.ClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.ProductionEnvironment, key.Environment);
+            Assert.AreEqual(TestConstants.Utid, key.TenantId);
             Assert.AreEqual(TestConstants.UserIdentifier, key.UserIdentifier);
+            Assert.AreEqual(CredentialType.AccessToken, key.CredentialType);
+            Assert.AreEqual(TestConstants.ClientId, key.ClientId);
+            Assert.AreEqual(TestConstants.Scope, key.Scopes);
         }
+        // todo add test for key serialization
 
+
+/*
         [TestMethod]
         [TestCategory("AccessTokenCacheKeyTests")]
         public void TestScopeEquals()
@@ -81,5 +85,6 @@ namespace Test.Microsoft.Identity.Unit.CacheTests
             otherScope.Clear();
             Assert.IsFalse(key.ScopeEquals(otherScope));
         }
+        */
     }
 }

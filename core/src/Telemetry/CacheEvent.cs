@@ -48,7 +48,9 @@ namespace Microsoft.Identity.Core.Telemetry
         public enum TokenTypes
         {
             AT,
-            RT
+            RT,
+            ID,
+            ACCOUNT
         };
 
         public TokenTypes TokenType
@@ -58,7 +60,9 @@ namespace Microsoft.Identity.Core.Telemetry
                 var types = new Dictionary<TokenTypes, string>()
                 {
                     {TokenTypes.AT, "at"},
-                    {TokenTypes.RT, "rt"}
+                    {TokenTypes.RT, "rt"},
+                    {TokenTypes.ID, "id"},
+                    {TokenTypes.ACCOUNT, "account"}
                 };
                 this[TokenTypeKey] = types[value];
             }

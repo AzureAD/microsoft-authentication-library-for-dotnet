@@ -34,7 +34,7 @@ using System.Net.Http;
 using Microsoft.Identity.Core.Helpers;
 using NSubstitute;
 
-namespace Test.Microsoft.Identity.Unit.Mocks
+namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
     internal static class MockHelpers
     {
@@ -52,7 +52,7 @@ namespace Test.Microsoft.Identity.Unit.Mocks
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
             ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
-        
+
         public static string CreateClientInfo()
         {
             return CreateClientInfo(TestConstants.Uid, TestConstants.Utid);

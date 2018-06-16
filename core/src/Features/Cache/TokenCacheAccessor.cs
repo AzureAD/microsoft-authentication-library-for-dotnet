@@ -39,7 +39,13 @@ namespace Microsoft.Identity.Core
 
         internal readonly IDictionary<string, string> RefreshTokenCacheDictionary =
             new ConcurrentDictionary<string, string>();
-        
+
+        internal readonly IDictionary<string, string> IdTokenCacheDictionary =
+            new ConcurrentDictionary<string, string>();
+
+        internal readonly IDictionary<string, string> AccountCacheDictionary =
+            new ConcurrentDictionary<string, string>();
+
         public void SaveAccessToken(string cacheKey, string item)
         {
             AccessTokenCacheDictionary[cacheKey] = item;
@@ -49,7 +55,17 @@ namespace Microsoft.Identity.Core
         {
             RefreshTokenCacheDictionary[cacheKey] = item;
         }
-        
+
+        public void SaveIdToken(string cacheKey, string item)
+        {
+            IdTokenCacheDictionary[cacheKey] = item;
+        }
+
+        public void SaveAccount(string cacheKey, string item)
+        {
+            AccountCacheDictionary[cacheKey] = item;
+        }
+
         public string GetRefreshToken(string refreshTokenKey)
         {
             if (!RefreshTokenCacheDictionary.ContainsKey(refreshTokenKey))
@@ -69,7 +85,17 @@ namespace Microsoft.Identity.Core
         {
             RefreshTokenCacheDictionary.Remove(cacheKey);
         }
-        
+
+        public void DeleteIdToken(string cacheKey)
+        {
+            IdTokenCacheDictionary.Remove(cacheKey);
+        }
+
+        public void DeleteAccount(string cacheKey)
+        {
+            AccountCacheDictionary.Remove(cacheKey);
+        }
+
         public ICollection<string> GetAllAccessTokensAsString()
         {
             return
@@ -82,6 +108,20 @@ namespace Microsoft.Identity.Core
             return
                 new ReadOnlyCollection<string>(
                     RefreshTokenCacheDictionary.Values.ToList());
+        }
+
+        public ICollection<string> GetAllIdTokensAsString()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                   IdTokenCacheDictionary.Values.ToList());
+        }
+
+        public ICollection<string> GetAllAccountsAsString()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                   AccountCacheDictionary.Values.ToList());
         }
 
         public ICollection<string> GetAllAccessTokenKeys()
@@ -98,6 +138,20 @@ namespace Microsoft.Identity.Core
                     RefreshTokenCacheDictionary.Keys.ToList());
         }
 
+        public ICollection<string> GetAllIdTokenKeys()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                    IdTokenCacheDictionary.Keys.ToList());
+        }
+
+        public ICollection<string> GetAllAccountKeys()
+        {
+            return
+                new ReadOnlyCollection<string>(
+                    AccountCacheDictionary.Keys.ToList());
+        }
+
         public void Clear()
         {
             foreach (var key in GetAllAccessTokenKeys())
@@ -109,6 +163,46 @@ namespace Microsoft.Identity.Core
             {
                 DeleteRefreshToken(key);
             }
+
+            foreach (var key in GetAllIdTokenKeys())
+            {
+                DeleteIdToken(key);
+            }
+
+            foreach (var key in GetAllAccountKeys())
+            {
+                DeleteAccount(key);
+            }
+        }
+
+        public string GetIdToken(string idTokenKey)
+        {
+            if (!IdTokenCacheDictionary.ContainsKey(idTokenKey))
+            {
+                return null;
+            }
+
+            return IdTokenCacheDictionary[idTokenKey];
+        }
+
+        public string GetAccessToken(string accessTokenKey)
+        {
+            if (!AccessTokenCacheDictionary.ContainsKey(accessTokenKey))
+            {
+                return null;
+            }
+
+            return IdTokenCacheDictionary[accessTokenKey];
+        }
+
+        public string GetAccount(string accountKey)
+        {
+            if (!AccountCacheDictionary.ContainsKey(accountKey))
+            {
+                return null;
+            }
+
+            return AccountCacheDictionary[accountKey];
         }
     }
 }

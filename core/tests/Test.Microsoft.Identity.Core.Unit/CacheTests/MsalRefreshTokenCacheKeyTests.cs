@@ -28,7 +28,7 @@
 using Microsoft.Identity.Core.Cache;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Unit.CacheTests
+namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 {
     [TestClass]
     public class MsalRefreshTokenCacheKeyTests

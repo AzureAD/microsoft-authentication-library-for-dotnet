@@ -53,6 +53,26 @@ namespace Microsoft.Identity.Core.Helpers
             return DeserializeFromJson<T>(json.ToByteArray());
         }
 
+        internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext)
+        {
+            if (string.IsNullOrEmpty(json))
+            {
+                return default(T);
+            }
+
+            T result = default(T);
+            try
+            {
+                result = DeserializeFromJson<T>(json.ToByteArray());
+            }
+            catch (System.Runtime.Serialization.SerializationException ex)
+            {
+                requestContext.Logger.Warning(ex.ToString());
+            }
+
+            return result;
+        }
+
         internal static T DeserializeFromJson<T>(byte[] jsonByteArray)
         {
             if (jsonByteArray == null || jsonByteArray.Length == 0)

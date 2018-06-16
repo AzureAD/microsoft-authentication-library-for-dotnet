@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
@@ -70,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 "=== Token Acquisition started: \n\tCacheType: {0}\n\tAuthentication Target: {1}\n\t",
                 tokenCache != null
                     ? tokenCache.GetType().FullName +
-                      string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.Count)
+                      string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.tokenCacheDictionary.Count)
                     : "null",
                 requestData.SubjectType);
             if (InstanceDiscovery.IsWhitelisted(requestData.Authenticator.GetAuthorityHost()))
@@ -87,7 +88,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 requestData.Authenticator.Authority, requestData.Resource, requestData.ClientKey.ClientId,
                 (tokenCache != null)
                     ? tokenCache.GetType().FullName +
-                      string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.Count)
+                      string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.tokenCacheDictionary.Count)
                     : "null",
                 requestData.SubjectType);
             RequestContext.Logger.InfoPii(piiMsg);
@@ -315,7 +316,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected virtual async Task<AdalResultWrapper> SendTokenRequestAsync()
         {
-            var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey);
+            var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey)
+            {
+                { OAuth2Parameter.ClientInfo, "1" }
+            };
             this.AddAditionalRequestParameters(requestParameters);
             return await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
         }
@@ -326,6 +330,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             requestParameters[OAuthParameter.GrantType] = OAuthGrantType.RefreshToken;
             requestParameters[OAuthParameter.RefreshToken] = refreshToken;
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+            requestParameters[OAuth2Parameter.ClientInfo] = "1";
 
             AdalResultWrapper result = await this.SendHttpMessageAsync(requestParameters).ConfigureAwait(false);
 
@@ -438,7 +443,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected void ValidateAuthorityType()
         {
-            if (!SupportADFS && Authenticator.AuthorityType == AuthorityType.ADFS)
+            if (!SupportADFS && Authenticator.AuthorityType == Instance.AuthorityType.ADFS)
             {
                 throw new AdalException(AdalError.InvalidAuthorityType,
                     string.Format(CultureInfo.InvariantCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate,

@@ -126,7 +126,7 @@ namespace AdalDesktopTestApp
             string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
 
             AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
-            var result = await context.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>", 
+            var result = await context.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>",
                 new Uri("<REDIRECT_URI>"), new PlatformParameters(PromptBehavior.Auto), new UserIdentifier("<USER>", UserIdentifierType.OptionalDisplayableId), null, claims).ConfigureAwait(false);
 
             string token = result.AccessToken;

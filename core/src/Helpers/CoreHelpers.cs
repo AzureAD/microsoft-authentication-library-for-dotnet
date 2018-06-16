@@ -64,6 +64,12 @@ namespace Microsoft.Identity.Core.Helpers
             return unixTimestamp;
         }
 
+        public static long CurrDateTimeInUnixTimestamp()
+        {
+            var unixEpochDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            return (long)DateTime.UtcNow.Subtract(unixEpochDateTime).TotalSeconds;
+        }
+
         public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)
         {
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);

@@ -75,7 +75,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         public async Task<IHttpWebResponse> GetResponseAsync()
         {
             using (HttpClient client =
-                new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(this.UseDefaultCredentials)))
+                new HttpClient(AdalHttpMessageHandlerFactory.GetMessageHandler(this.UseDefaultCredentials)))
             {
                 client.MaxResponseContentBufferSize = _maxResponseSizeInBytes;
                 client.DefaultRequestHeaders.Accept.Clear();

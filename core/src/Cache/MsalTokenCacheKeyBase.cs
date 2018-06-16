@@ -31,6 +31,8 @@ namespace Microsoft.Identity.Core.Cache
 {
     internal abstract class MsalTokenCacheKeyBase
     {
+        // ps todo
+        // change delimiter to "-"
         public const string CacheKeyDelimiter = "$";
 
         public MsalTokenCacheKeyBase(string clientId, string userIdentifier)
