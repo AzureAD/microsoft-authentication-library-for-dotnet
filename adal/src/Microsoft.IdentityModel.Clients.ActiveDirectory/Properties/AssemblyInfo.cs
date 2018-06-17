@@ -29,16 +29,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyProduct("Active Directory Authentication Library")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCulture("")]
-[assembly: AssemblyCompany("Microsoft Corporation")]
-[assembly: AssemblyCopyright("Copyright (c) Microsoft Corporation. All rights reserved.")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyMetadata("Serviceable", "True")]
+// Version and Metadata are set at build time from msbuild properties defined in the csproj
 
-[assembly: AssemblyFileVersion("3.17.3.0")]
+[assembly: AssemblyMetadata("Serviceable", "True")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

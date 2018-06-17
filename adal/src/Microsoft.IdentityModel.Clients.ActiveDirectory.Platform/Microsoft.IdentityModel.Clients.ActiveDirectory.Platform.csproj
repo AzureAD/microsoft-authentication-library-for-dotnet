@@ -10,24 +10,28 @@
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
     <Product>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform ($(TargetFramework))</Product>
-    <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-	<DelaySign>true</DelaySign>
+	  <DelaySign>true</DelaySign>
     <!-- Workaround until Xamarin supports PPDB -->
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
     <RootNamespace>Microsoft.IdentityModel.Clients.ActiveDirectory</RootNamespace>
-	<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+	  <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
 
-</PropertyGroup>
+  <PropertyGroup Label="GenerateAssemblyInfo inputs">
+    <!-- This should be passed from the VSTS build -->
+    <AdalClientSemVer Condition="'$(AdalClientSemVer)' == ''">1.0.0-localbuild</AdalClientSemVer>
+
+    <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
+    <Version>$(AdalClientSemVer)</Version>
+
+    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+  </PropertyGroup>
+  
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
@@ -67,5 +71,30 @@
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj" />
   </ItemGroup>
+
+  <!-- Copies all artifacts needed to generate the nuget package. This should be replaced with msbuild /t:pack, however
+  bug https://github.com/NuGet/Home/issues/3891 blocks this, espcially that packaging rebuilds the Core assemblies, so we cannot sign it.-->
+  <Target Name="LayoutNuGet">
+    <PropertyGroup>
+      <NugetPackageRootFolder Condition="'$(NugetPackageRootFolder)' == ''">$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", ".nugetlayout"))</NugetPackageRootFolder>
+      <NuspecFilePath>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", "..", "build", "Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"))</NuspecFilePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.dll" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.xml" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.Platform.pdb" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.dll" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.xml" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.pdb" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(NugetPackageRootFolder)" />
+    <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
+  </Target>
   
 </Project>

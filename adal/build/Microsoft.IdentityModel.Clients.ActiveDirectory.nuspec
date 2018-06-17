@@ -3,7 +3,7 @@
     <metadata minClientVersion="2.8.6">
         <title>Active Directory Authentication Library</title>
         <id>Microsoft.IdentityModel.Clients.ActiveDirectory</id>
-        <version>0.0.1-LOCALBUILD</version>
+        <version>$version$</version>
         <authors>Microsoft</authors>
         <licenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</licenseUrl>
         <projectUrl>https://aka.ms/adalnet</projectUrl>

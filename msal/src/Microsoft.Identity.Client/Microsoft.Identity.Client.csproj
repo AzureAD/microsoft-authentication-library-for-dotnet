@@ -19,7 +19,7 @@
   
   <PropertyGroup Label="GenerateAssemblyInfo inputs">
     <!-- This should be passed from the VSTS build -->
-    <MsalClientSemVer Condition="'$(MsalClientVersion)' == '1.0.0-privatebuild'"></MsalClientSemVer>
+    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">1.0.0-localbuild</MsalClientSemVer>
     
     <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
     <Version>$(MsalClientSemVer)</Version>
@@ -151,21 +151,20 @@
     <None Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
 
-  <!-- Copy all artifacts needed to generate the nuget package. This should be replaced with msbuild /t:pack, however
+  <!-- Copies all artifacts needed to generate the nuget package. This should be replaced with msbuild /t:pack, however
   bug https://github.com/NuGet/Home/issues/3891 blocks this, espcially that packaging rebuilds the Core assemblies, so we cannot sign it.-->
   <Target Name="LayoutNuGet">
     <PropertyGroup>
-      <NugetPackageRootFolder Condition="'$(NugetPackageRootFolder)' == ''">$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", "..", "layout"))</NugetPackageRootFolder>
-      <PackagePdb Condition="'$(PackagePdb)'==''">false</PackagePdb>
+      <NugetPackageRootFolder Condition="'$(NugetPackageRootFolder)' == ''">$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..",".nugetlayout"))</NugetPackageRootFolder>
       <NuspecFilePath>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", "..", "build", "Microsoft.Identity.Client.nuspec"))</NuspecFilePath>
     </PropertyGroup>
     <ItemGroup>
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.dll" />
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.xml" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.pdb" Condition="'$(PackagePdb)' == 'true' " />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.pdb" />
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.dll" />
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.xml" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.pdb" Condition="'$(PackagePdb)' == 'true' " />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.pdb" />
     </ItemGroup>
 
     <RemoveDir Directories="$(NugetPackageRootFolder)" />

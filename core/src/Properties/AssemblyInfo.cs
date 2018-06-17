@@ -29,6 +29,8 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
+// Version and Metadata are set at build time from msbuild properties defined in the csproj
+
 [assembly: AssemblyMetadata("Serviceable", "True")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
