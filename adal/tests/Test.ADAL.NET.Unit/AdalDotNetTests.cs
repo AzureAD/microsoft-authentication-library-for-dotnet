@@ -71,7 +71,7 @@ namespace Test.ADAL.NET.Unit
         [TestCleanup()]
         public void Cleanup()
         {
-            if (context != null)
+            if (context != null && context.TokenCache != null)
             {
                 context.TokenCache.Clear();
             }
