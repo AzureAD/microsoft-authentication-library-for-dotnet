@@ -6,18 +6,21 @@
 Active Directory Authentication Library for .NET (ADAL.NET) is an easy to use authentication library. You can use ADAL.NET to acquire **security tokens to access protected Web APIs**, for instance Microsoft Graph, or another Web APIs. ADAL.NET is available on various .NET Desktop/Mobile platforms to acquire a token for the signed-in user ( Windows desktop, UWP, Windows 8.1, Xamarin iOS and Xamarin Android). It can also be used in Web applications and Web APIs (ASP.NET, .NET Core, ASP.NET Core) that call other Web APIs in the name of a user, or without a user. ADAL.NET takes advantage of Windows Server Active Directory and Windows Azure Active Directory.
 
 
- Stable (`master` branch)    | Nightly (`dev` branch)
------------------------------|-------------------------
- [![NuGet](https://img.shields.io/nuget/v/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=myget&colorB=00b200)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.IdentityModel.Clients.ActiveDirectory)
+| Release | Location |
+| ------------- | ------------- |
+| Stable  | [![NuGet](https://img.shields.io/nuget/v/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/) 
+
 
 ## Build status
-| Branch  | Status |
+| dev  | adalV3/dev |
 | ------------- | ------------- |
-| dev (AppVeyor)  | [![Build status](https://ci.appveyor.com/api/projects/status/e9rsfjshqr3vj6b7/branch/dev?svg=true)](https://ci.appveyor.com/project/AADDevExLibraries/azure-activedirectory-library-for-dotnet/branch/dev) |
+| [![Build status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/556/badge)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=556) | [![Build status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/187/badge)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=187)
+
 
 ## Versions
 Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
 Minimum recommended version - 2.29.0
+
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/changelog.txt).
 
 ## Security Issue in Multiple Versions of ADAL .Net ###
