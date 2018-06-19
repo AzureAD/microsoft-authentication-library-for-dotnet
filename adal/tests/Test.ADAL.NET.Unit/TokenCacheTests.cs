@@ -824,5 +824,18 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(1, _count);
             _count--;
         }
+
+        public static void TokenCacheClearTest(byte[] oldcache)
+        {
+            CoreLoggerBase.Default = null;
+            TokenCache cache = new TokenCache();
+            //Verifying default constructor sets CoreLoggerBase.Default
+            cache.Clear();
+
+            CoreLoggerBase.Default = null;
+            TokenCache cache2 = new TokenCache(oldcache);
+            //Verifying overloaded constructor sets CoreLoggerBase.Default
+            cache.Clear();
+        }
     }
 }

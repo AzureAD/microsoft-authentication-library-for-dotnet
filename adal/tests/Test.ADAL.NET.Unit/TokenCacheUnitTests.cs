@@ -126,5 +126,13 @@ namespace Test.ADAL.NET.Unit
         {
             TokenCacheTests.ParallelStorePositiveTest(File.ReadAllBytes("oldcache.serialized"));
         }
+
+        [TestMethod]
+        [Description("Test to ensure the token cache doesnt throw an exception when cleared")]
+        [TestCategory("AdalDotNet.Unit")]
+        public void TokenCacheClearTest()
+        {
+            TokenCacheTests.TokenCacheClearTest(File.ReadAllBytes("oldcache.serialized"));
+        }
     }
 }
