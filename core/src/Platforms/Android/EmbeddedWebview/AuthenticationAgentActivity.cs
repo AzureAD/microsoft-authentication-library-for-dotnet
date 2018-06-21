@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
             {
                 base.OnLoadResource(view, url);
 
-                if (url.StartsWith(callback))
+                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnLoadResource(view, url);
                     this.Finish(Activity, url);
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                 if (url.StartsWith(BrokerConstants.ClientTlsRedirect, StringComparison.OrdinalIgnoreCase))
                 {
                     string query = uri.Query;
-                    if (query.StartsWith("?"))
+                    if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
                     {
                         query = query.Substring(1);
                     }

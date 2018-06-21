@@ -101,7 +101,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 string url = brokerPayload[BrokerParameter.BrokerInstallUrl];
                 Uri uri = new Uri(url);
                 string query = uri.Query;
-                if (query.StartsWith("?"))
+                if (query.StartsWith("?", StringComparison.OrdinalIgnoreCase))
                 {
                     query = query.Substring(1);
                 }

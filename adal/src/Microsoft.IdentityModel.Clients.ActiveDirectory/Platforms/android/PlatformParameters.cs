@@ -39,6 +39,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     {
         internal CoreUIParent CoreUIParent { get; private set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public PlatformParameters()
         {
         }

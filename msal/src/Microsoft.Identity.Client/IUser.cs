@@ -45,11 +45,6 @@ namespace Microsoft.Identity.Client
         string Name { get; }
 
         /// <summary>
-        /// Gets identity provider if returned by the service. If not, the value is null.
-        /// </summary>
-        //string IdentityProvider { get; }
-
-        /// <summary>
         /// Gets an identifier for the user that is used by the library and the service as a strong handle to user identity. Cannot be null.
         /// </summary>
         string Identifier { get; }
