@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using System.Collections.Generic;
 using Microsoft.Identity.Core;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
@@ -85,7 +86,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetDefaultRedirectUri(string clientId)
         {
-            return string.Format(AndroidDefaultRedirectUriTemplate, clientId);
+            return String.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
         }
     }
 }
