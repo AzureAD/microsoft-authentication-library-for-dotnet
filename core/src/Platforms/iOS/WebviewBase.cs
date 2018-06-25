@@ -28,7 +28,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using SafariServices;
 using Foundation;
-using UIKit;
 
 namespace Microsoft.Identity.Core.UI
 {

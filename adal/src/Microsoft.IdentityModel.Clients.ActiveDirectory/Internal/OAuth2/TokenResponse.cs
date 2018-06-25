@@ -140,7 +140,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
                 CorrelationId = responseDictionary["correlation_id"],
                 Resource = responseDictionary["resource"],
                 ExpiresOn = long.Parse(responseDictionary["expires_on"].Split('.')[0], CultureInfo.CurrentCulture),
-                ClientInfo = responseDictionary["client_info"]
+                ClientInfo = responseDictionary.ContainsKey("client_info")
+                ? responseDictionary["client_info"]
+                : null,
             };
         }
 
@@ -173,8 +175,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
                     responseStreamString.Append(ReadStreamContent(responseStream));
                     using (MemoryStream ms = new MemoryStream(responseStreamString.ToByteArray()))
                     {
-                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (TokenResponse));
-                        tokenResponse = ((TokenResponse) serializer.ReadObject(ms));
+                        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(TokenResponse));
+                        tokenResponse = ((TokenResponse)serializer.ReadObject(ms));
                     }
                 }
                 catch (SerializationException)
