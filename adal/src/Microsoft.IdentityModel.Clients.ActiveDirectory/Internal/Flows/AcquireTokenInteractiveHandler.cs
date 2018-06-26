@@ -205,6 +205,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             authorizationRequestParameters[OAuthParameter.HasChrome] = "1";
             authorizationRequestParameters[OAuthParameter.RedirectUri] = this.redirectUriRequestParameter;
 
+#if DESKTOP
+            // Added form_post as a way to request to ensure we can handle large requests for dsts scenarios
+            authorizationRequestParameters[OAuthParameter.ResponseMode] = OAuthResponseModeType.FormPost;
+#endif
+
             if (!string.IsNullOrWhiteSpace(loginHint))
             {
                 authorizationRequestParameters[OAuthParameter.LoginHint] = loginHint;

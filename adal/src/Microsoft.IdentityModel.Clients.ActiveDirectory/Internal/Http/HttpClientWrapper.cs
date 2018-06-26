@@ -113,8 +113,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                         }
                         else
                         {
-                            content = new FormUrlEncodedContent(((DictionaryRequestParameters) this.BodyParameters)
-                                .ToList());
+                            content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, 
+                                "application/x-www-form-urlencoded");
                         }
 
                         requestMessage.Method = HttpMethod.Post;

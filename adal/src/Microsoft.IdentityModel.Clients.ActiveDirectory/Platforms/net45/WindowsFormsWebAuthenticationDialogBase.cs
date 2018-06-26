@@ -157,7 +157,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // we cancel further processing, if we reached final URL.
             // Security issue: we prohibit navigation with auth code
             // if redirect URI is URN, then we prohibit navigation, to prevent random browser popup.
-            e.Cancel = this.CheckForClosingUrl(e.Url);
+            e.Cancel = this.CheckForClosingUrl(sender, e.Url);
 
             // check if the url scheme is of type browser://
             // this means we need to launch external browser
@@ -177,7 +177,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
-            this.CheckForClosingUrl(e.Url);
+            this.CheckForClosingUrl(sender, e.Url);
         }
 
         /// <summary>
@@ -217,14 +217,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.OnNavigationCanceled(e.StatusCode);
         }
 
-        private bool CheckForClosingUrl(Uri url)
+        private bool CheckForClosingUrl(object sender, Uri url)
         {
             // Make change here
             bool canClose = false;
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
             {
-                this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
+                this.Result = new AuthorizationResult(AuthorizationStatus.Success, GetAuthenticationCode(((CustomWebBrowser)sender).Document));
                 canClose = true;
             }
 
@@ -249,6 +249,27 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
 
             return canClose;
+        }
+
+        private string GetAuthenticationCode(HtmlDocument document)
+        {
+            string result = null;
+            HtmlElementCollection elems = document.GetElementsByTagName("input");
+            foreach(HtmlElement elem in elems)
+            {
+                string name = elem.GetAttribute("name");
+                if(!string.IsNullOrEmpty(name))
+                {
+                    if(string.Equals(name, "code", StringComparison.OrdinalIgnoreCase))
+                    {
+                        result = elem.GetAttribute("value");
+                        result = Constants.FormPostPrefix + result;
+                        break;
+                    }
+                }
+            }
+
+            return result;
         }
 
         private void StopWebBrowser()
