@@ -418,6 +418,41 @@ namespace Microsoft.Identity.Client
                         behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Non-interactive request to acquire token via Windows Integrated Authentication.
+        /// </summary>
+        /// <param name="scopes">Array of scopes requested for resource</param>
+        /// <returns>Authentication result containing token of the current login user</returns>
+        public async Task<AuthenticationResult> AcquireTokenByWindowsIntegratedAuthAsync(IEnumerable<string> scopes)
+        {
+            return await AcquireTokenByUserCredAsync(scopes, new UserCred()).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Non-interactive request to acquire token via Windows Integrated Authentication.
+        /// </summary>
+        /// <param name="scopes">Array of scopes requested for resource</param>
+        /// <param name="username">Username</param>
+        /// <returns>Authentication result containing token of the specified login user</returns>
+        public async Task<AuthenticationResult> AcquireTokenByWindowsIntegratedAuthAsync(IEnumerable<string> scopes, string username)
+        {
+            return await AcquireTokenByUserCredAsync(scopes, new UserCred(username)).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Non-interactive request to acquire token via Windows Integrated Authentication.
+        /// </summary>
+        /// <param name="scopes">Array of scopes requested for resource</param>
+        /// <param name="userCred">A UserCred representing the user account</param>
+        /// <returns>Authentication result containing token</returns>
+        private async Task<AuthenticationResult> AcquireTokenByUserCredAsync(IEnumerable<string> scopes, UserCred userCred)
+        {
+            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
+            var handler = new NonInteractiveRequest(requestParams, userCred) { ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser };
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+
         internal IWebUI CreateWebAuthenticationDialog(UIParent parent, UIBehavior behavior, RequestContext requestContext)
         {
             //create instance of UIParent and assign useCorporateNetwork to UIParent 

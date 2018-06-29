@@ -26,7 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
@@ -53,6 +56,28 @@ namespace Microsoft.Identity.Client
         public override string GetProductName()
         {
             return "MSAL.Desktop";
+        }
+
+        public override async Task<string> GetUserPrincipalNameAsync()
+        {
+            return await Task.Factory.StartNew(() =>
+            {
+                const int NameUserPrincipal = 8;
+                uint userNameSize = 0;
+                WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                if (userNameSize == 0)
+                {
+                    throw new MsalException(MsalError.GetUserNameFailed, MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                StringBuilder sb = new StringBuilder((int)userNameSize);
+                if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                {
+                    throw new MsalException(MsalError.GetUserNameFailed, MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                }
+
+                return sb.ToString();
+            }).ConfigureAwait(false);
         }
 
         public override string GetEnvironmentVariable(string variable)

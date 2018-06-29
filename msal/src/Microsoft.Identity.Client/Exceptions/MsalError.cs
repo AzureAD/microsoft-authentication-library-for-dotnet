@@ -107,5 +107,44 @@ namespace Microsoft.Identity.Client
         /// Federated service returned error.
         /// </summary>
         public const string FederatedServiceReturnedError = "federated_service_returned_error";
+
+        /// User Realm Discovery Failed.
+        /// </summary>
+        public const string UserRealmDiscoveryFailed = "user_realm_discovery_failed";
+
+        /// <summary>
+        /// Federation Metadata Url is missing for federated user.
+        /// </summary>
+        public const string MissingFederationMetadataUrl = "missing_federation_metadata_url";
+
+        /// <summary>
+        /// Parsing WS Metadata Exchange Failed.
+        /// </summary>
+        public const string ParsingWsMetadataExchangeFailed = "parsing_ws_metadata_exchange_failed";
+
+        /// <summary>
+        /// WS-Trust Endpoint Not Found in Metadata Document.
+        /// </summary>
+        public const string WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found";
+
+        /// <summary>
+        /// Parsing WS-Trust Response Failed.
+        /// </summary>
+        public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
+
+        /// <summary>
+        /// Unknown User Type.
+        /// </summary>
+        public const string UnknownUserType = "unknown_user_type";
+
+        /// <summary>
+        /// Unknown User.
+        /// </summary>
+        public const string UnknownUser = "unknown_user";
+
+        /// <summary>
+        /// Failed to get user name.
+        /// </summary>
+        public const string GetUserNameFailed = "get_user_name_failed";
     }
 }
