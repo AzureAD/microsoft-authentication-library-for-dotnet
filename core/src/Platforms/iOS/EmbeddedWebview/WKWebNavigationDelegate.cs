@@ -72,8 +72,8 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
             if (requestUrlString.StartsWith(AuthenticationAgentUIViewController.callback, StringComparison.OrdinalIgnoreCase) ||
                    requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
-                AuthenticationAgentUIViewController.callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, requestUrlString));
-                AuthenticationAgentUIViewController.DismissViewController(true, null);
+                AuthenticationAgentUIViewController.DismissViewController(true, () =>
+                    AuthenticationAgentUIViewController.callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, requestUrlString)));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
@@ -104,8 +104,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                 AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 result.Error = MsalError.NonHttpsRedirectNotSupported;
                 result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
-                AuthenticationAgentUIViewController.callbackMethod(result);
-                AuthenticationAgentUIViewController.DismissViewController(true, null);
+                AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.callbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }

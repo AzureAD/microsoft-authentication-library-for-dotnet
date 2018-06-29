@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 
             this.NavigationItem.LeftBarButtonItem = new UIBarButtonItem(UIBarButtonSystemItem.Cancel,
                 CancelAuthentication);
-            
+
             wkWebView.LoadRequest(new NSUrlRequest(new NSUrl(this.url)));
         }
 
@@ -107,7 +107,8 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
         public void CancelAuthentication(object sender, EventArgs e)
         {
             this.callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
-            this.DismissViewController(true, null);
+            this.DismissViewController(true, () =>
+                    callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null)));
         }
 
         public override void DismissViewController(bool animated, Action completionHandler)
