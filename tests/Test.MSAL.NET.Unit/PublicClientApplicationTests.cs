@@ -1081,6 +1081,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(exc);
                 Assert.AreEqual("authentication_canceled", exc.ErrorCode);
                 Assert.AreEqual("User canceled authentication", exc.Message);
+                return;
             }
             finally
             {
@@ -1120,6 +1121,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsNotNull(exc);
                 Assert.AreEqual("access_denied", exc.ErrorCode);
+                return;
             }
             finally
             {
