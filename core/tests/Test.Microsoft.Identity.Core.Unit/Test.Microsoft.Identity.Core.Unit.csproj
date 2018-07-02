@@ -45,6 +45,17 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\TestMex.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\TestMex2005.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\WsTrustResponse13.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\OpenidConfiguration-B2C.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
