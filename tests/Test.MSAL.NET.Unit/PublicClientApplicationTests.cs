@@ -1063,6 +1063,13 @@ namespace Test.MSAL.NET.Unit
                     TestConstants.AuthorityHomeTenant + "?error=user_canceled")
             };
 
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
             MockHelpers.ConfigureMockWebUI(ui);
 
             try
@@ -1079,6 +1086,8 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
+
+             Assert.Fail("Should not reach here. Exception was not thrown.");
         }
 
         [TestMethod]
@@ -1093,6 +1102,13 @@ namespace Test.MSAL.NET.Unit
                 MockResult = new AuthorizationResult(AuthorizationStatus.ProtocolError,
                     TestConstants.AuthorityHomeTenant + "?error=access_denied")
             };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
 
             MockHelpers.ConfigureMockWebUI(ui);
 
@@ -1109,6 +1125,8 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
             }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
         }
     }
 }
