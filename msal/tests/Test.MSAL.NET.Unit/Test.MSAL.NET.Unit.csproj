@@ -93,6 +93,9 @@
     <None Update="valid_cert.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\WsTrustResponse.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Target Name="ProjectReferenceSolution" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="ResolveProjectReferences">
   </Target>
