@@ -339,7 +339,7 @@ namespace Test.MSAL.NET.Unit
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
-        [DeploymentItem(@"Resources\WsTrustResponse.xml", "MsalResource")]
+        [DeploymentItem(@"Resources\WsTrustResponse13.xml", "MsalResource")]
         public async Task AcquireTokenByWindowsIntegratedAuthTest()
         {
             //add mock response for tenant endpoint discovery
@@ -377,11 +377,11 @@ namespace Test.MSAL.NET.Unit
             // WsTrust
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
-                Url = "https://aadadfs.cloudapp.net/adfs/services/trust/2005/windowstransport",
+                Url = "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport",
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText(@"MsalResource\WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText(@"MsalResource\WsTrustResponse13.xml"))
                 }
             });
 
