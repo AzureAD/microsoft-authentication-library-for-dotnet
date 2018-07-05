@@ -338,8 +338,8 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        [DeploymentItem(@"Resources\TestMex.xml")]
-        [DeploymentItem(@"Resources\WsTrustResponse.xml")]
+        [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
+        [DeploymentItem(@"Resources\WsTrustResponse.xml", "MsalResource")]
         public async Task AcquireTokenByWindowsIntegratedAuthTest()
         {
             //add mock response for tenant endpoint discovery
@@ -370,7 +370,7 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                    Content = new StringContent(File.ReadAllText(@"MsalResource\TestMex.xml"))
                 }
             });
 
@@ -381,7 +381,7 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                    Content = new StringContent(File.ReadAllText(@"MsalResource\WsTrustResponse.xml"))
                 }
             });
 
