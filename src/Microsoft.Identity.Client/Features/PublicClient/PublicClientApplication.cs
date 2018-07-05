@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client
     {
 
         /// <summary>
-        /// Constructor to create application instance. This constructor is only available for Dekstop and NetCore apps
+        /// Constructor to create application instance. This constructor is only available for Desktop and NetCore apps
         /// </summary>
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
