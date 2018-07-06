@@ -350,6 +350,14 @@ namespace Microsoft.Identity.Client
         {
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
+
+#if iOS || ANDROID
+            if (!parent.CoreUIParent.UseEmbeddedWebview)
+            {
+                PlatformPlugin.PlatformInformation.ValidateRedirectUri(requestParams.RedirectUri, requestParams.RequestContext);
+            }
+#endif
+
             var handler =
                 new InteractiveRequest(requestParams, extraScopesToConsent, loginHint, behavior,
                     CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
@@ -361,6 +369,13 @@ namespace Microsoft.Identity.Client
         {
             var requestParams = CreateRequestParameters(authority, scopes, user, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
+
+#if iOS || ANDROID
+            if(!parent.CoreUIParent.UseEmbeddedWebview)
+            {
+                PlatformPlugin.PlatformInformation.ValidateRedirectUri(requestParams.RedirectUri, requestParams.RequestContext);
+            }
+#endif
 
             var handler =
                 new InteractiveRequest(requestParams, extraScopesToConsent, behavior,

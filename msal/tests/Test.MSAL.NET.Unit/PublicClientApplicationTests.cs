@@ -1087,5 +1087,86 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(userToFind.Identifier, fetchedUser.Identifier);
             Assert.AreEqual(userToFind.Name, fetchedUser.Name);
         }
+
+        [TestMethod]
+        [Description("Test for AcquireToken with user canceling authentication")]
+        public async Task AcquireTokenWithAuthenticationCanceledTestAsync()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
+
+            // Interactive call and user cancels authentication
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.UserCancel,
+                    TestConstants.AuthorityHomeTenant + "?error=user_canceled")
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            MsalMockHelpers.ConfigureMockWebUI(ui);
+
+            try
+            {
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope).ConfigureAwait(false);
+            }
+            catch (MsalClientException exc)
+            {
+                Assert.IsNotNull(exc);
+                Assert.AreEqual("authentication_canceled", exc.ErrorCode);
+                return;
+            }
+            finally
+            {
+                Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+            }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
+        }
+
+        [TestMethod]
+        [Description("Test for AcquireToken with access denied error. This error will occur if" +
+            "user cancels authentication with embedded webview")]
+        public async Task AcquireTokenWithAccessDeniedErrorTestAsync()
+        {
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
+
+            // Interactive call and authentication fails with access denied
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.ProtocolError,
+                    TestConstants.AuthorityHomeTenant + "?error=access_denied")
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+
+            MsalMockHelpers.ConfigureMockWebUI(ui);
+
+            try
+            {
+                AuthenticationResult result = await app.AcquireTokenAsync(TestConstants.Scope).ConfigureAwait(false);
+            }
+            catch (MsalServiceException exc)
+            {
+                Assert.IsNotNull(exc);
+                Assert.AreEqual("access_denied", exc.ErrorCode);
+                return;
+            }
+            finally
+            {
+                Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+            }
+
+            Assert.Fail("Should not reach here. Exception was not thrown.");
+        }
     }
 }

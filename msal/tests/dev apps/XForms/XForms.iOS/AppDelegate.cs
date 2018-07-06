@@ -52,6 +52,9 @@ namespace XForms.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
+            // Default system browser
+            App.UIParent = new UIParent();
+
             // To activate embedded webview, remove '//' below
             //App.UIParent = new UIParent(true);
             return base.FinishedLaunching(app, options);
