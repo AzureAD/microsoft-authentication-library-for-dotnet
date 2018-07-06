@@ -53,13 +53,12 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
             // Create your application here
 
             WebView webView = new WebView(ApplicationContext);
-            var linearLayout = new LinearLayout(ApplicationContext)
-            {
-                Orientation = Orientation.Vertical
-            };
-            linearLayout.AddView(webView);
-            SetContentView(linearLayout);
+            var relativeLayout = new RelativeLayout(ApplicationContext);
+            webView.LayoutParameters = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MatchParent, RelativeLayout.LayoutParams.MatchParent);
 
+            relativeLayout.AddView(webView);
+            SetContentView(relativeLayout);
+            
             string url = Intent.GetStringExtra("Url");
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
