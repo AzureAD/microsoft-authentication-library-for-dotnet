@@ -211,6 +211,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[UiEvent.UserCancelledKey] == "false"));
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.UiBehaviorKey] == "select_account"));
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[UiEvent.AccessDeniedKey] == "false"));
         }
 
         [TestMethod]

@@ -114,6 +114,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         AuthenticationRequestParameters.RequestContext)
                         .ConfigureAwait(false);
                 uiEvent.UserCancelled = _authorizationResult.Status == AuthorizationStatus.UserCancel;
+                uiEvent.AccessDenied = _authorizationResult.Status == AuthorizationStatus.ProtocolError;
             }
             finally
             {

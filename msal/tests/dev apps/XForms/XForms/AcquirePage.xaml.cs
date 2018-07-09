@@ -160,7 +160,7 @@ namespace XForms
             }
             catch (MsalException exception)
             {
-                acquireResponseLabel.Text = "MsalException - " + exception.Message;
+                acquireResponseLabel.Text = String.Format("MsalException -\nError Code: {0}\nMessage: {1}", exception.ErrorCode, exception.Message);
             }
             catch (Exception exception)
             {
@@ -193,7 +193,7 @@ namespace XForms
             }
             catch (MsalException exception)
             {
-                acquireResponseLabel.Text = "MsalException - " + exception.Message;
+                acquireResponseLabel.Text = String.Format("MsalException -\nError Code: {0}\nMessage: {1}", exception.ErrorCode, exception.Message);
             }
             catch (Exception exception)
             {

@@ -153,6 +153,10 @@ namespace Test.Microsoft.Identity.Core.Unit
                 var e2 = new UiEvent() { UserCancelled = false };
                 telemetry.StartEvent(reqId, e2);
                 telemetry.StopEvent(reqId, e2);
+
+                var e3 = new UiEvent() {AccessDenied = false };
+                telemetry.StartEvent(reqId, e3);
+                telemetry.StopEvent(reqId, e3);
             }
             finally
             {
@@ -172,6 +176,10 @@ namespace Test.Microsoft.Identity.Core.Unit
                 var e2 = new UiEvent() { UserCancelled = true };
                 telemetry.StartEvent(reqId, e2);
                 telemetry.StopEvent(reqId, e2);
+
+                var e3 = new UiEvent() { AccessDenied = true };
+                telemetry.StartEvent(reqId, e3);
+                telemetry.StopEvent(reqId, e3);
             }
             finally
             {

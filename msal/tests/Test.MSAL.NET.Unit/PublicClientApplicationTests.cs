@@ -81,20 +81,20 @@ namespace Test.MSAL.NET.Unit
             // The caller asks for two scopes, but only one is returned
             var mockResult = Substitute.For<AuthenticationResult>();
             mockResult.IdToken.Returns("id token");
-            mockResult.Scopes.Returns(new string[] {"scope1"});
+            mockResult.Scopes.Returns(new string[] { "scope1" });
 
             var mockApp = Substitute.For<IPublicClientApplication>();
-            mockApp.AcquireTokenAsync(new string[] {"scope1", "scope2"}).ReturnsForAnyArgs(mockResult);
+            mockApp.AcquireTokenAsync(new string[] { "scope1", "scope2" }).ReturnsForAnyArgs(mockResult);
 
             // Now call the substitute with the args to get the substitute result
-            AuthenticationResult actualResult = mockApp.AcquireTokenAsync(new string[] {"scope1"}).Result;
+            AuthenticationResult actualResult = mockApp.AcquireTokenAsync(new string[] { "scope1" }).Result;
             Assert.IsNotNull(actualResult);
             Assert.AreEqual("id token", actualResult.IdToken, "Mock result failed to return the expected id token");
 
             // Check the users properties returns the dummy users
             IEnumerable<string> scopes = actualResult.Scopes;
             Assert.IsNotNull(scopes);
-            CollectionAssert.AreEqual(new string[] {"scope1"}, actualResult.Scopes.ToArray());
+            CollectionAssert.AreEqual(new string[] { "scope1" }, actualResult.Scopes.ToArray());
         }
 
         [TestMethod]
@@ -111,7 +111,7 @@ namespace Test.MSAL.NET.Unit
 
             // Now call the substitute and check the exception is thrown
             MsalServiceException ex =
-                AssertException.Throws<MsalServiceException>(() => mockApp.AcquireTokenAsync(new string[] {"scope1"}));
+                AssertException.Throws<MsalServiceException>(() => mockApp.AcquireTokenAsync(new string[] { "scope1" }));
             Assert.AreEqual("my error code", ex.ErrorCode);
             Assert.AreEqual("my message", ex.Message);
         }
@@ -346,7 +346,7 @@ namespace Test.MSAL.NET.Unit
                 Method = HttpMethod.Get,
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
             });
-            
+
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Post,
@@ -451,7 +451,7 @@ namespace Test.MSAL.NET.Unit
             }
             catch (AggregateException ex)
             {
-                MsalServiceException exc = (MsalServiceException) ex.InnerException;
+                MsalServiceException exc = (MsalServiceException)ex.InnerException;
                 Assert.IsNotNull(exc);
                 Assert.AreEqual("user_mismatch", exc.ErrorCode);
             }
@@ -518,7 +518,7 @@ namespace Test.MSAL.NET.Unit
                     MockHelpers.CreateClientInfo(TestConstants.Uid, TestConstants.Utid + "more"))
             });
 
-            result = app.AcquireTokenAsync(TestConstants.Scope, (IUser) null, UIBehavior.SelectAccount, null).Result;
+            result = app.AcquireTokenAsync(TestConstants.Scope, (IUser)null, UIBehavior.SelectAccount, null).Result;
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.User);
             Assert.AreEqual(TestConstants.UniqueId, result.UniqueId);
@@ -978,7 +978,7 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsNotNull(ex.InnerException);
                 Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
-                var msalExc = (MsalUiRequiredException) ex.InnerException;
+                var msalExc = (MsalUiRequiredException)ex.InnerException;
                 Assert.AreEqual(msalExc.ErrorCode, MsalUiRequiredException.InvalidGrantError);
             }
 
@@ -1118,6 +1118,8 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsNotNull(exc);
                 Assert.AreEqual("authentication_canceled", exc.ErrorCode);
+                Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[UiEvent.UserCancelledKey] == "true"));
                 return;
             }
             finally
@@ -1159,6 +1161,8 @@ namespace Test.MSAL.NET.Unit
             {
                 Assert.IsNotNull(exc);
                 Assert.AreEqual("access_denied", exc.ErrorCode);
+                Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+                anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[UiEvent.AccessDeniedKey] == "true"));
                 return;
             }
             finally
