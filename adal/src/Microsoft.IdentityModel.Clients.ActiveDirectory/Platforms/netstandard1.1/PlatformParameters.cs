@@ -30,9 +30,15 @@ using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
+    /// <summary>
+    ///  Additional parameters used in acquiring user's authorization, specific to netstadard 1.1
+    /// </summary>
     public class PlatformParameters : IPlatformParameters
     {
-        // NetStandard1.1 does not have UI
+        /// <summary>
+        /// Get the UI parent for the app
+        /// </summary>
+        /// <remarks> NetStandard1.1 does not have UI</remarks>
         internal CoreUIParent GetCoreUIParent()
         {
             throw new NotImplementedException();

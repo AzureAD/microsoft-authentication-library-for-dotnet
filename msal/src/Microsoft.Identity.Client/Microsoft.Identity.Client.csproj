@@ -139,8 +139,6 @@
     </PackageReference>
     <Compile Include="Platforms\Android\**\*.cs" />
   </ItemGroup>
-
-  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
   
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
   <ItemGroup>
