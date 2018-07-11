@@ -5,9 +5,9 @@
              xmlns:pages="clr-namespace:XForms;assembly=XForms"
              Title="Main Page">
 
-    <pages:AcquirePage Title="Acquire"/>
-    <pages:SettingsPage Title="Settings"/>
-    <pages:CachePage Title="Cache"/>
-    <pages:LogPage Title="Log"/>
+    <pages:AcquirePage Title="Acquire" AutomationId="AcquirePage"/>
+    <pages:SettingsPage Title="Settings" AutomationId="SettingsPage"/>
+    <pages:CachePage Title="Cache" AutomationId="CachePage"/>
+    <pages:LogPage Title="Log" AutomationId="LogPage"/>
 
 </TabbedPage>

@@ -15,33 +15,33 @@
 
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
             <Label Text="Scopes" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
-            <Entry x:Name="ScopesEntry" Text=""  HorizontalOptions="FillAndExpand"/>
+            <Entry x:Name="ScopesEntry" Text=""  HorizontalOptions="FillAndExpand" AutomationId="scopesList"/>
         </StackLayout>
 
         <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
             <Label Text="Users" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
-            <Picker x:Name="usersPicker" HorizontalOptions="FillAndExpand"/>
+            <Picker x:Name="usersPicker" HorizontalOptions="FillAndExpand" AutomationId="userList"/>
         </StackLayout>
 
         <Frame OutlineColor="Black" Padding="10">
             <StackLayout Orientation="Vertical">
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                     <Label Text="UIBehavior" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
-                    <Picker x:Name="UIBehaviorPicker"/>
+                    <Picker x:Name="UIBehaviorPicker" AutomationId="uiBehavior"/>
                 </StackLayout>
 
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                     <Label Text="Login hint" HorizontalTextAlignment="Center" Margin="5" Font="Bold,13"/>
                     <Switch x:Name="LoginHintSwitch"/>
-                    <Entry x:Name="LoginHintEntry" Text="user@msdevex.onmicrosoft.com"/>
+                    <Entry x:Name="LoginHintEntry" Text="user@msdevex.onmicrosoft.com" AutomationId="loginHintEntry"/>
                 </StackLayout>
 
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                     <Label Text="ExtraQueryParameters" HorizontalTextAlignment="Start"  Margin="5" Font="Bold,13"/>
-                    <Entry x:Name="ExtraQueryParametersEntry" Text=""  HorizontalOptions="FillAndExpand"/>
+                    <Entry x:Name="ExtraQueryParametersEntry" Text=""  HorizontalOptions="FillAndExpand" AutomationId="extraQueryParametersEntry"/>
                 </StackLayout>
 
-                <Button  Text="Acquire" Clicked="OnAcquireClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center"/>
+                <Button  Text="Acquire" Clicked="OnAcquireClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken"/>
             </StackLayout>
         </Frame>
 
@@ -51,28 +51,31 @@
 
                     <StackLayout Orientation="Horizontal"  HorizontalOptions="Start">
                         <Label Text="Force Refresh" Margin="5" Font="Bold,13"/>
-                        <Switch x:Name="ForceRefreshSwitch" />
+                        <Switch x:Name="ForceRefreshSwitch" AutomationId="forceRefreshSwitch"/>
                     </StackLayout>
 
                     <StackLayout Orientation="Horizontal"  HorizontalOptions="Start">
                         <Label Text="Pass Authority" Margin="5" Font="Bold,13"/>
-                        <Switch x:Name="PassAuthoritySwitch"/>
+                        <Switch x:Name="PassAuthoritySwitch" AutomationId="passAuthoritySwitch"/>
                     </StackLayout>
 
                 </StackLayout>
-                <Button  Text="AcquireSilently" Clicked="OnAcquireSilentlyClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center"/>
+                <Button  Text="AcquireSilently" Clicked="OnAcquireSilentlyClicked" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenSilent"/>
 
             </StackLayout>
         </Frame>
 
-        <Label Text="Result:" Font="Bold,15"/>
+        <Label x:Name="acquireResponseTitleLabel" Text="Result:" Font="Bold,15"  AutomationId="testResult"/>
         
         <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
             <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
                 <Frame OutlineColor="Black" Padding="10">
-                    <Label x:Name="acquireResponseLabel" Text="" />
+                    <Label x:Name="acquireResponseLabel" Text=""/>
                 </Frame>
-                <Button  Text="Clear"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15"/>
+                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
+                    <Button  Text="Clear Result"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15" AutomationId="clearLog"/>
+                    <Button  Text="Clear Cache"  Clicked="OnClearCacheClicked" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>
+                </StackLayout>
             </StackLayout>
         </ScrollView>
 

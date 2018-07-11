@@ -31,10 +31,10 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AndroidUseSharedRuntime>True</AndroidUseSharedRuntime>
+    <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <AndroidLinkMode>Full</AndroidLinkMode>
     <AndroidLinkSkip />
-    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>True</EmbedAssembliesIntoApk>
     <BundleAssemblies>False</BundleAssemblies>
     <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
     <AndroidSupportedAbis>armeabi,armeabi-v7a,x86</AndroidSupportedAbis>
@@ -92,15 +92,15 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Android.Support.V4" Version="27.0.2" />
-	<PackageReference Include="Xamarin.Android.Support.Compat" Version="27.0.2" />
-  	<PackageReference Include="Xamarin.Android.Support.Design" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Compat" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Design" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.Core.UI" Version="27.0.2" />
-   	<PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="27.0.2" />
-	<PackageReference Include="Xamarin.Android.Support.Annotations" Version="27.0.2" />
-	<PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="27.0.2" />
-  	<PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.v7.CardView" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Annotations" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="27.0.2" />
-	<PackageReference Include="Xamarin.Android.Support.v7.Palette" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.v7.Palette" Version="27.0.2" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer">

@@ -41,7 +41,8 @@ namespace XFormsApp
         {
             var secondPageButton = new Button
             {
-                Text = "Second Page"
+                Text = "Second Page",
+                AutomationId = "secondPage"
             };
 
             secondPageButton.Clicked += browseButton_Clicked;

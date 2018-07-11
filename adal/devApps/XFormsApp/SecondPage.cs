@@ -45,27 +45,39 @@ namespace XFormsApp
         }
 
         private Label result;
+        private Label testResult;
 
         public SecondPage()
         {
             var acquireTokenButton = new Button
             {
-                Text = "Acquire Token"
+                Text = "Acquire Token",
+                AutomationId = "acquireToken"
             };
 
             var acquireTokenSilentButton = new Button
             {
-                Text = "Acquire Token Silent"
+                Text = "Acquire Token Silent",
+                AutomationId = "acquireTokenSilent"
             };
 
             var conditionalAccessButton = new Button
             {
-                Text = "Conditional Access"
+                Text = "Conditional Access",
+                AutomationId = "conditionalAccess"
             };
 
             var clearButton = new Button
             {
-                Text = "Clear Cache"
+                Text = "Clear Cache",
+                AutomationId = "clearCache"
+            };
+
+            testResult = new Label()
+            {
+                Text = "Succsess:",
+                VerticalOptions = LayoutOptions.FillAndExpand,
+                AutomationId = "testResult"
             };
 
             result = new Label()
@@ -81,6 +93,7 @@ namespace XFormsApp
                     VerticalOptions = LayoutOptions.FillAndExpand,
                     Children =
                     {
+                        testResult,
                         result
                     }
                 }
@@ -156,14 +169,17 @@ namespace XFormsApp
             this.result.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
             string output = string.Empty;
+            string accessToken = String.Empty;
+            this.testResult.Text = "Succsess:";
             try
             {
                 AuthenticationResult result =
                     await
-                        ctx.AcquireTokenAsync("https://graph.windows.net", "de49ddaf-c7f8-4a06-8463-3c6ae124fe52",
-                            new Uri("adaliosapp://com.yourcompany.xformsapp"),
+                        ctx.AcquireTokenAsync("https://graph.microsoft.com", "d3590ed6-52b3-4102-aeff-aad2292ab01c",
+                            new Uri("urn:ietf:wg:oauth:2.0:oob"),
                             Parameters).ConfigureAwait(false);
                 output = "Signed in User - " + result.UserInfo.DisplayableId;
+                accessToken = result.AccessToken;
             }
             catch (Exception exc)
             {
@@ -173,6 +189,7 @@ namespace XFormsApp
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    this.testResult.Text = string.IsNullOrWhiteSpace(accessToken) ? "Success: False" : "Success: True";
                     this.result.Text += "Result : " + output;
 
                     this.result.Text += "Logs : " + DrainLogs();
