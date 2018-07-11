@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client
         /// <param name="identifier">user identifier</param>
         public IUser GetUser(string identifier)
         {
-            return Users.FirstOrDefault(user => user.Identifier.Equals(identifier));
+            return Users.FirstOrDefault(user => user.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>

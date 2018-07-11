@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.Identity.Core.Telemetry
 {
@@ -34,13 +35,13 @@ namespace Microsoft.Identity.Core.Telemetry
     {
         // The content of this class has to be placed outside of its base class TokenCacheAccessor,
         // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
-        public void SaveAccessToken(string cacheKey, string item, RequestContext requestContext)
+        public void SaveAccessToken(MsalAccessTokenCacheItem item, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
-                SaveAccessToken(cacheKey, item);
+                SaveAccessToken(item);
             }
             finally
             {
@@ -48,13 +49,13 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void SaveRefreshToken(string cacheKey, string item, RequestContext requestContext)
+        public void SaveRefreshToken(MsalRefreshTokenCacheItem item, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
-                SaveRefreshToken(cacheKey, item);
+                SaveRefreshToken(item);
             }
             finally
             {
@@ -62,13 +63,13 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void SaveIdToken(string cacheKey, string item, RequestContext requestContext)
+        public void SaveIdToken(MsalIdTokenCacheItem item, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ID };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
-                SaveIdToken(cacheKey, item);
+                SaveIdToken(item);
             }
             finally
             {
@@ -76,13 +77,13 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void SaveAccount(string cacheKey, string item, RequestContext requestContext)
+        public void SaveAccount(MsalAccountCacheItem item, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ACCOUNT };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
             try
             {
-                SaveAccount(cacheKey, item);
+                SaveAccount(item);
             }
             finally
             {
@@ -90,7 +91,7 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void DeleteAccessToken(string cacheKey, RequestContext requestContext)
+        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.AT };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void DeleteRefreshToken(string cacheKey, RequestContext requestContext)
+        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
@@ -118,7 +119,7 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void DeleteIdToken(string cacheKey, RequestContext requestContext)
+        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ID };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
@@ -132,7 +133,7 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public void DeleteAccount(string cacheKey, RequestContext requestContext)
+        public void DeleteAccount(MsalAccountCacheKey cacheKey, RequestContext requestContext)
         {
             var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ACCOUNT };
             Client.Telemetry.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);

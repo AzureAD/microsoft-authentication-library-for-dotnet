@@ -56,7 +56,7 @@ namespace XFormsApp.iOS
         public override void ViewDidLoad ()
         {
             base.ViewDidLoad ();
-            page.Parameters = new PlatformParameters(this, true);
+            page.Parameters = new PlatformParameters(this, true, PromptBehavior.SelectAccount);
         }
     }
 }

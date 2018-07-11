@@ -57,11 +57,13 @@ namespace Microsoft.Identity.Core.Instance
         protected void UpdateCanonicalAuthority()
         {
             UriBuilder uriBuilder = new UriBuilder(CanonicalAuthority);
+            // will not be needed after authority aliasses will be added
+            /*
             if (uriBuilder.Host.Equals("login.windows.net", StringComparison.OrdinalIgnoreCase))
             {
                 uriBuilder.Host = "login.microsoftonline.com";
             }
-
+            */
             CanonicalAuthority = uriBuilder.Uri.AbsoluteUri;
         }
 

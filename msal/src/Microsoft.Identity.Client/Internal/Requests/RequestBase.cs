@@ -203,9 +203,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (fromServer!= null && AuthenticationRequestParameters.ClientInfo != null)
             {
-                if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier) ||
-                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo
-                        .UniqueTenantIdentifier))
+                if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier, StringComparison.OrdinalIgnoreCase) ||
+                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(String.Format(
                         CultureInfo.InvariantCulture,
@@ -237,12 +236,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 MsalAccessTokenItem = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
                 MsalIdTokenItem = TokenCache.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey(), AuthenticationRequestParameters.RequestContext);
             }
+            else{
+                MsalAccessTokenItem = new MsalAccessTokenCacheItem(AuthenticationRequestParameters.Authority,
+                    AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
 
-            MsalAccessTokenItem =  new MsalAccessTokenCacheItem(AuthenticationRequestParameters.Authority,
-                AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
-
-            MsalIdTokenItem = new MsalIdTokenCacheItem(AuthenticationRequestParameters.Authority,
-                AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
+                MsalIdTokenItem = new MsalIdTokenCacheItem(AuthenticationRequestParameters.Authority,
+                    AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
+            }
         }
 
         protected virtual Task PostRunAsync(AuthenticationResult result)

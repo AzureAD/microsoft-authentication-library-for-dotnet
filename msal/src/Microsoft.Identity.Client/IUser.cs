@@ -40,9 +40,9 @@ namespace Microsoft.Identity.Client
         string DisplayableId { get; }
 
         /// <summary>
-        /// Gets given name of the user if provided by the service. If not, the value is null.
+        /// Gets user`s environment.
         /// </summary>
-        string Name { get; }
+        string Environment { get; }
 
         /// <summary>
         /// Gets an identifier for the user that is used by the library and the service as a strong handle to user identity. Cannot be null.

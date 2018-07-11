@@ -41,7 +41,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
         public void ConstructorTest()
         {
             MsalCredentialCacheKey key = new MsalAccessTokenCacheKey(TestConstants.ProductionEnvironment, TestConstants.Utid,
-                TestConstants.UserIdentifier, TestConstants.ClientId, TestConstants.Scope);
+                TestConstants.UserIdentifier, TestConstants.ClientId, TestConstants.ScopeStr);
 
             ValidateTokenCacheKey(key);
 
@@ -49,17 +49,17 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 TestConstants.UserIdentifier);
             
             Assert.IsNull(key.Scopes);
-            Assert.AreEqual(CredentialType.RefreshToken, key.CredentialType);
+            Assert.AreEqual(CredentialType.refreshtoken, key.CredentialType);
         }
 
         private void ValidateTokenCacheKey(MsalCredentialCacheKey key)
         {
             Assert.AreEqual(TestConstants.ProductionEnvironment, key.Environment);
             Assert.AreEqual(TestConstants.Utid, key.TenantId);
-            Assert.AreEqual(TestConstants.UserIdentifier, key.UserIdentifier);
-            Assert.AreEqual(CredentialType.AccessToken, key.CredentialType);
+            Assert.AreEqual(TestConstants.UserIdentifier, key.HomeAccountId);
+            Assert.AreEqual(CredentialType.accesstoken, key.CredentialType);
             Assert.AreEqual(TestConstants.ClientId, key.ClientId);
-            Assert.AreEqual(TestConstants.Scope, key.Scopes);
+            Assert.AreEqual(TestConstants.ScopeStr, key.Scopes);
         }
         // todo add test for key serialization
 

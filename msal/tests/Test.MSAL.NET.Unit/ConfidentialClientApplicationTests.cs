@@ -99,10 +99,10 @@ namespace Test.MSAL.NET.Unit
             IList<IUser> users = new List<IUser>();
 
             IUser mockUser1 = Substitute.For<IUser>();
-            mockUser1.Name.Returns("Name1");
+            mockUser1.DisplayableId.Returns("DisplayableId_1");
 
             IUser mockUser2 = Substitute.For<IUser>();
-            mockUser2.Name.Returns("Name2");
+            mockUser2.DisplayableId.Returns("DisplayableId_2");
 
             users.Add(mockUser1);
             users.Add(mockUser2);
@@ -115,8 +115,8 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNotNull(actualUsers);
             Assert.AreEqual(2, actualUsers.Count());
 
-            Assert.AreEqual("Name1", users.First().Name);
-            Assert.AreEqual("Name2", users.Last().Name);
+            Assert.AreEqual("DisplayableId_1", users.First().DisplayableId);
+            Assert.AreEqual("DisplayableId_2", users.Last().DisplayableId);
         }
 
         [TestMethod]
@@ -541,7 +541,7 @@ namespace Test.MSAL.NET.Unit
             var cache = new TokenCache();
             TokenCacheHelper.PopulateCacheForClientCredential(cache.TokenCacheAccessor);
 
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false).CanonicalAuthority;
+            var authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
                 null, cache)
@@ -575,7 +575,7 @@ namespace Test.MSAL.NET.Unit
             var cache = new TokenCache();
             TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false).CanonicalAuthority;
+            var authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
                 null, cache)

@@ -281,6 +281,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
         }
 
+        /*
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void DeprecatedAuthorityTest()
@@ -296,5 +297,6 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             authority = Authority.CreateAuthority("https://login.windows.net:444/tfp/tenant/policy", false);
             Assert.AreEqual("https://login.microsoftonline.com:444/tfp/tenant/policy/", authority.CanonicalAuthority);
         }
+        */
     }
 }

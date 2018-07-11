@@ -147,18 +147,17 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientId = TestConstants.ClientId
             };
 
-            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem()
-            {
-                Authority = TestConstants.AuthorityHomeTenant,
-                Environment = TestConstants.ProductionEnvironment,
-                ClientId = TestConstants.ClientId,
-                RawClientInfo = MockHelpers.CreateClientInfo(),
-                TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
-                ScopeSet = TestConstants.Scope
-            };
-            atItem.CreateDerivedProperties();
-            string atKey = atItem.GetAccessTokenItemKey();
+            var atItem = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionEnvironment,
+                TestConstants.ClientId,
+                "Bearer",
+                TestConstants.Scope.AsSingleString(),
+                TestConstants.Utid,
+                null,
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
+                MockHelpers.CreateClientInfo());
+
+            string atKey = atItem.GetKey().ToString();
             atItem.Secret = atKey;
             cache.TokenCacheAccessor.AccessTokenCacheDictionary[atKey] = JsonHelper.SerializeToJson(atItem);
 

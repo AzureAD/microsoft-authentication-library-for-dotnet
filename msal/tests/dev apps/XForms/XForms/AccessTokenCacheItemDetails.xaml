@@ -10,9 +10,6 @@
             <Label Text="CredentialType: " HorizontalOptions="Start" Font="Bold,13"/>
             <Label x:Name="credentialTypeLabel" HorizontalOptions="CenterAndExpand"/>
 
-            <Label Text="Authority: " HorizontalOptions="Start" Font="Bold,13"/>
-            <Label x:Name="authorityLabel" HorizontalOptions="CenterAndExpand"/>
-
             <Label Text="Environment: " HorizontalOptions="Start" Font="Bold,13"/>
             <Label x:Name="environmentLabel" HorizontalOptions="CenterAndExpand"/>
 

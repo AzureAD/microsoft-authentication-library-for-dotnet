@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Core.Cache
     internal class MsalRefreshTokenCacheKey : MsalCredentialCacheKey
     {
         internal MsalRefreshTokenCacheKey(string environment, string clientId, string userIdentifier)
-            : base(environment, null, userIdentifier, CredentialType.RefreshToken, clientId, null)
+            : base(environment, null, userIdentifier, CredentialType.refreshtoken, clientId, null)
         {
         }
     }

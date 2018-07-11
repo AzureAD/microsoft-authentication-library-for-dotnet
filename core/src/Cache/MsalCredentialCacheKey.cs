@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Core.Cache
         public const string ScopesDelimiter = " ";
 
         internal MsalCredentialCacheKey(string environment, string tenantId, string userIdentifier,
-            CredentialType credentialType, string clientId, SortedSet<string> scopes)
+            CredentialType credentialType, string clientId, string scopes)
             : base(environment, userIdentifier)
         {
             if (string.IsNullOrEmpty(clientId))
@@ -58,19 +58,19 @@ namespace Microsoft.Identity.Core.Cache
 
         internal string ClientId { get; set; }
 
-        internal SortedSet<string> Scopes { get; set; }
+        internal string Scopes { get; set; }
 
         internal string TenantId { get; set; }
 
         public override string ToString()
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append((UserIdentifier ?? "") + CacheKeyDelimiter);
+            stringBuilder.Append((HomeAccountId ?? "") + CacheKeyDelimiter);
             stringBuilder.Append(this.Environment + CacheKeyDelimiter);
             stringBuilder.Append(CredentialType + CacheKeyDelimiter);
             stringBuilder.Append(ClientId + CacheKeyDelimiter);
             stringBuilder.Append((TenantId ?? "") + CacheKeyDelimiter);
-            stringBuilder.Append(Scopes != null ? string.Join(ScopesDelimiter, Scopes) : "");
+            stringBuilder.Append(Scopes);
 
             return stringBuilder.ToString();
         }

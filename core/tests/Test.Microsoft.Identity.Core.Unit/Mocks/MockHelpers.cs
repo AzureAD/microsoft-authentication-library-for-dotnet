@@ -145,7 +145,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)
         {
-            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.IdentityProvider);
+            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
@@ -159,7 +159,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public static string CreateIdToken(string uniqueId, string displayableId)
         {
-            return CreateIdToken(uniqueId, displayableId, TestConstants.IdentityProvider);
+            return CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
         }
 
         public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)
@@ -208,7 +208,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
             var authorityUri = new Uri(authority);
             string path = authorityUri.AbsolutePath.Substring(1);
             string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-            if (tenant.ToLower(CultureInfo.InvariantCulture).Equals("common"))
+            if (tenant.ToLowerInvariant().Equals("common", StringComparison.OrdinalIgnoreCase))
             {
                 tenant = "{tenant}";
             }

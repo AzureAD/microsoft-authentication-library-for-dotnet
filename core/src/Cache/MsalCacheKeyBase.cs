@@ -45,11 +45,11 @@ namespace Microsoft.Identity.Core.Cache
             }
 
             Environment = environment;
-            UserIdentifier = userIdentifier;
+            HomeAccountId = userIdentifier;
         }
 
         internal string Environment { get; set; }
 
-        internal string UserIdentifier { get; set; }
+        internal string HomeAccountId { get; set; }
     }
 }

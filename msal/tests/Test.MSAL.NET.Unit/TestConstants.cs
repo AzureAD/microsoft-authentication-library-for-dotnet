@@ -36,7 +36,9 @@ namespace Test.MSAL.NET.Unit
     class TestConstants
     {
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
+        public static readonly string ScopeStr = "r1/scope1 r1/scope2";
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
+        public static readonly string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public static readonly string ProductionEnvironment = "login.microsoftonline.com";
         public static readonly string SovereignEnvironment = "login.microsoftonline.de";
         public static readonly string AuthorityHomeTenant = "https://" + ProductionEnvironment + "/home/";
@@ -51,8 +53,9 @@ namespace Test.MSAL.NET.Unit
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
-        public static readonly string Uid = "my-UID";
-        public static readonly string Utid = "my-UTID";
+        public static readonly string Uid = "my-uid";
+        public static readonly string Utid = "my-utid";
+        public static readonly string AuthorityTestTenant = "https://" + ProductionEnvironment + "/" + Utid + "/";
 
         public static readonly string UserIdentifier = CreateUserIdentifer();
 
@@ -73,7 +76,7 @@ namespace Test.MSAL.NET.Unit
         {
             DisplayableId = DisplayableId,
             Identifier = UserIdentifier,
-            Name = Name,
+            Environment = ProductionEnvironment,
         };
 
         public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";

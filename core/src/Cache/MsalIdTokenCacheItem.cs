@@ -42,22 +42,23 @@ namespace Microsoft.Identity.Core.Cache
     {
         internal MsalIdTokenCacheItem()
         {
+            CredentialType = Cache.CredentialType.idtoken.ToString();
         }
         internal MsalIdTokenCacheItem(Authority authority, string clientId, MsalTokenResponse response, string tenantId)
+            : this(authority, clientId, response.IdToken, response.ClientInfo, tenantId)
         {
-            CredentialType = Cache.CredentialType.IdToken.ToString();
+        }
+        internal MsalIdTokenCacheItem
+            (Authority authority, string clientId, string secret, string rawClientInfo, string tenantId) : this()
+        {
             Authority = authority.CanonicalAuthority;
-
             Environment = authority.Host;
             TenantId = tenantId;
-
             ClientId = clientId;
+            Secret = secret;
+            RawClientInfo = rawClientInfo;
 
-            Secret = response.IdToken;
-
-            RawClientInfo = response.ClientInfo;
-
-            CreateDerivedProperties();
+            InitUserIdentifier();
         }
 
         [DataMember(Name = "realm")]
@@ -66,24 +67,16 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "authority")]
         internal string Authority { get; set; }
 
-        internal IdToken IdToken { get; set; }
-
-        internal void CreateDerivedProperties()
-        {
-            IdToken = IdToken.Parse(Secret);
-
-            InitRawClientInfoDerivedProperties();
+        internal IdToken IdToken {
+            get
+            {
+                return IdToken.Parse(Secret);
+            }
         }
 
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
+        internal MsalIdTokenCacheKey GetKey()
         {
-            CreateDerivedProperties();
-        }
-
-        internal string GetIdTokenItemKey()
-        {
-            return new MsalIdTokenCacheKey(Environment, TenantId, UserIdentifier, ClientId).ToString();
+            return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
         }
     }
 }

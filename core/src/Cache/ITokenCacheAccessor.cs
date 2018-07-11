@@ -31,29 +31,29 @@ namespace Microsoft.Identity.Core.Cache
 {
     internal interface ITokenCacheAccessor
     {
-        void SaveAccessToken(string cacheKey, string item);
+        void SaveAccessToken(MsalAccessTokenCacheItem item);
 
-        void SaveRefreshToken(string cacheKey, string item);
+        void SaveRefreshToken(MsalRefreshTokenCacheItem item);
 
-        void SaveIdToken(string cacheKey, string item);
+        void SaveIdToken(MsalIdTokenCacheItem item);
 
-        void SaveAccount(string cacheKey, string item);
+        void SaveAccount(MsalAccountCacheItem item);
 
-        string GetRefreshToken(string refreshTokenKey);
+        string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
 
-        string GetAccessToken(string accessTokenKey);
+        string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey);
 
-        string GetIdToken(string idTokenKey);
+        string GetIdToken(MsalIdTokenCacheKey idTokenKey);
 
-        string GetAccount(string accountKey);
+        string GetAccount(MsalAccountCacheKey accountKey);
 
-        void DeleteAccessToken(string cacheKey);
+        void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey);
 
-        void DeleteRefreshToken(string cacheKey);
+        void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey);
 
-        void DeleteIdToken(string cacheKey);
+        void DeleteIdToken(MsalIdTokenCacheKey cacheKey);
 
-        void DeleteAccount(string cacheKey);
+        void DeleteAccount(MsalAccountCacheKey cacheKey);
 
         ICollection<string> GetAllAccessTokensAsString();
 
@@ -63,6 +63,7 @@ namespace Microsoft.Identity.Core.Cache
 
         ICollection<string> GetAllAccountsAsString();
 
+        /*
         ICollection<string> GetAllAccessTokenKeys();
 
         ICollection<string> GetAllRefreshTokenKeys();
@@ -70,6 +71,8 @@ namespace Microsoft.Identity.Core.Cache
         ICollection<string> GetAllIdTokenKeys();
 
         ICollection<string> GetAllAccountKeys();
+        */
+        void SetSecurityGroup(string securityGroup);
 
         void Clear();
     }

@@ -4,49 +4,50 @@
              x:Class="XForms.IdTokenCacheItemDetails"
              Title="Id Token details"
              NavigationPage.HasBackButton="True">
-    
-    <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
-        <Label Text="CredentialType: " HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="credentialTypeLabel" HorizontalOptions="CenterAndExpand"/>
 
-        <Label Text="Authority: " HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="authorityLabel" HorizontalOptions="CenterAndExpand"/>
+    <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
+        <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
+            <Label Text="CredentialType: " HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="credentialTypeLabel" HorizontalOptions="CenterAndExpand"/>
+
+            <Label Text="Authority: " HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="authorityLabel" HorizontalOptions="CenterAndExpand"/>
         
-        <Label Text="Environment: " HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="environmentLabel" HorizontalOptions="CenterAndExpand"/>
+            <Label Text="Environment: " HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="environmentLabel" HorizontalOptions="CenterAndExpand"/>
 
-        <Label Text="TenantId: " HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="tenantIdLabel" HorizontalOptions="CenterAndExpand"/>
+            <Label Text="TenantId: " HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="tenantIdLabel" HorizontalOptions="CenterAndExpand"/>
 
-        <Label Text="ClientId: " HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="clientIdLabel" HorizontalOptions="CenterAndExpand"/>
+            <Label Text="ClientId: " HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="clientIdLabel" HorizontalOptions="CenterAndExpand"/>
 
-        <Frame OutlineColor="Black" Padding="10">
-            <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
-                <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                <Label x:Name="userIdentifierLabel" HorizontalOptions="CenterAndExpand"/>
-            </StackLayout>
-        </Frame>
+            <Frame OutlineColor="Black" Padding="10">
+                <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
+                    <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                    <Label x:Name="userIdentifierLabel" HorizontalOptions="CenterAndExpand"/>
+                </StackLayout>
+            </Frame>
 
-        <Frame OutlineColor="Black" Padding="10">
-            <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
-                <Label Text="RawClientInfo: " HorizontalOptions="Start" Font="Bold,13"/>
-                <Label x:Name="rawClientInfoLabel" HorizontalOptions="CenterAndExpand"/>
+            <Frame OutlineColor="Black" Padding="10">
+                <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
+                    <Label Text="RawClientInfo: " HorizontalOptions="Start" Font="Bold,13"/>
+                    <Label x:Name="rawClientInfoLabel" HorizontalOptions="CenterAndExpand"/>
 
-                <Label Text="ClientInfo.UniqueIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                <Label x:Name="clientInfoUniqueIdentifierLabel" HorizontalOptions="CenterAndExpand"/>
+                    <Label Text="ClientInfo.UniqueIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                    <Label x:Name="clientInfoUniqueIdentifierLabel" HorizontalOptions="CenterAndExpand"/>
 
-                <Label Text="ClientInfo.UniqueTenantIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                <Label x:Name="clientInfoUniqueTenantIdentifierLabel" HorizontalOptions="CenterAndExpand"/>
-            </StackLayout>
-        </Frame>
+                    <Label Text="ClientInfo.UniqueTenantIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
+                    <Label x:Name="clientInfoUniqueTenantIdentifierLabel" HorizontalOptions="CenterAndExpand"/>
+                </StackLayout>
+            </Frame>
 
-        <Label Text="Secret:" HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="secretLabel" HorizontalOptions="CenterAndExpand"/>
+            <Label Text="Secret:" HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="secretLabel" HorizontalOptions="CenterAndExpand"/>
 
-        <Label Text="IdToken:" HorizontalOptions="Start" Font="Bold,13"/>
-        <Label x:Name="idTokenLabel" HorizontalOptions="CenterAndExpand"/>
+            <Label Text="IdToken:" HorizontalOptions="Start" Font="Bold,13"/>
+            <Label x:Name="idTokenLabel" HorizontalOptions="CenterAndExpand"/>
+        </StackLayout>
+    </ScrollView>
 
-    </StackLayout>
-    
 </ContentPage>

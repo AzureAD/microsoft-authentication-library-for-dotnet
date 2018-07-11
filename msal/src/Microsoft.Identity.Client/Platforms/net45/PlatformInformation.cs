@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client
                 if (current != null)
                 {
                     string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
-                    return prefix.Equals(Environment.MachineName.ToUpperInvariant());
+                    return prefix.Equals(Environment.MachineName.ToUpperInvariant(), StringComparison.OrdinalIgnoreCase);
                 }
 
                 return false;

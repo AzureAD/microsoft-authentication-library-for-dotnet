@@ -41,41 +41,26 @@ namespace Microsoft.Identity.Core.Cache
     {
         internal MsalRefreshTokenCacheItem()
         {
-            CredentialType = Cache.CredentialType.RefreshToken.ToString();
+            CredentialType = Cache.CredentialType.refreshtoken.ToString();
         }
-        internal MsalRefreshTokenCacheItem(string environment, string tenantId, string clientId, MsalTokenResponse response) : this()
+        internal MsalRefreshTokenCacheItem(string environment, string clientId, MsalTokenResponse response) : 
+            this(environment, clientId, response.RefreshToken, response.ClientInfo)
+        {
+        }
+
+        internal MsalRefreshTokenCacheItem(string environment, string clientId, string secret, string rawClientInfo) : this()
         {
             ClientId = clientId;
             Environment = environment;
+            Secret = secret;
+            RawClientInfo = rawClientInfo;
 
-            Secret = response.RefreshToken;
-        
-            RawClientInfo = response.ClientInfo;
-
-            TenantId = tenantId;
-
-            InitRawClientInfoDerivedProperties();
+            InitUserIdentifier();
         }
 
-        internal string GetRefreshTokenItemKey()
+        internal MsalRefreshTokenCacheKey GetKey()
         {
-            return new MsalRefreshTokenCacheKey(Environment, ClientId, UserIdentifier).ToString();
+            return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId);
         }
-
-        internal string GetIdTokenItemKey()
-        {
-            return new MsalIdTokenCacheKey(Environment, TenantId, UserIdentifier, ClientId).ToString();
-        }
-
-        internal string GetAccountItemKey()
-        {
-            return new MsalAccountCacheKey(Environment, TenantId, UserIdentifier).ToString();
-        }
-
-        [DataMember(Name = "target")]
-        internal string Scopes { get; set; }
-
-        [DataMember(Name = "realm")]
-        internal string TenantId { get; set; }
     }
 }

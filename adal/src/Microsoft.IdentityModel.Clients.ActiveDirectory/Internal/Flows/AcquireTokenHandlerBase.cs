@@ -292,7 +292,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         
         protected async Task UpdateAuthority(string updatedAuthority)
         {
-            if(!Authenticator.Authority.Equals(updatedAuthority))
+            if(!Authenticator.Authority.Equals(updatedAuthority, StringComparison.OrdinalIgnoreCase))
             {
                 await Authenticator.UpdateAuthority(updatedAuthority, RequestContext).ConfigureAwait(false);
                 this.ValidateAuthorityType();

@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Core.Cache
     [DataContract]
     internal abstract class MsalCacheItemBase
     {
-        [DataMember(Name = "unique_user_id", IsRequired = true)]
-        public string UserIdentifier { get; internal set; }
+        [DataMember(Name = "home_account_id", IsRequired = true)]
+        internal string HomeAccountId { get; set; }
 
         [DataMember(Name = "environment", IsRequired = true)]
         internal string Environment { get; set; }
@@ -44,36 +44,19 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "client_info")]
         internal string RawClientInfo { get; set; }
 
-        public ClientInfo ClientInfo { get; set; }
-
-        internal void InitClientInfo()
-        {
-            if (RawClientInfo != null)
-            {
-                ClientInfo = ClientInfo.CreateFromJson(RawClientInfo);
+        internal ClientInfo ClientInfo {
+            get {
+                return RawClientInfo != null ? 
+                    ClientInfo.CreateFromJson(RawClientInfo) : null;
             }
         }
 
-        internal void InitRawClientInfoDerivedProperties()
+        internal void InitUserIdentifier()
         {
-            InitClientInfo();
-
-            UserIdentifier = GetUserIdentifier();
-        }
-
-        string GetUserIdentifier()
-        {
-            if (ClientInfo == null)
+            if (ClientInfo != null)
             {
-                return null;
+                HomeAccountId = ClientInfo.ToUserIdentifier();
             }
-            return ClientInfo.ToUserIdentifier();
-        }
-
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
-        {
-            InitClientInfo();
         }
     }
 }

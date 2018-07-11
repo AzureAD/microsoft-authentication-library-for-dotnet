@@ -40,14 +40,13 @@ namespace XForms
         {
             InitializeComponent();
 
-            authorityLabel.Text = msalAccessTokenCacheItem.Authority;
             clientIdLabel.Text = msalAccessTokenCacheItem.ClientId;
 
             credentialTypeLabel.Text = msalAccessTokenCacheItem.CredentialType;
             environmentLabel.Text = msalAccessTokenCacheItem.Environment;
             tenantIdLabel.Text = msalAccessTokenCacheItem.TenantId;
 
-            userIdentifierLabel.Text = msalAccessTokenCacheItem.UserIdentifier;
+            userIdentifierLabel.Text = msalAccessTokenCacheItem.HomeAccountId;
             userAssertionHashLabel.Text = msalAccessTokenCacheItem.UserAssertionHash;
 
             expiresOnLabel.Text = msalAccessTokenCacheItem.ExpiresOn.ToString();

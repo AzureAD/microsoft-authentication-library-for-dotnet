@@ -131,7 +131,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             {
                 string[] keyValue = pair.Split('=');
                 responseDictionary[keyValue[0]] = EncodingHelper.UrlDecode(keyValue[1]);
-                if (responseDictionary[keyValue[0]].Equals("(null)") && keyValue[0].Equals("code"))
+                if (responseDictionary[keyValue[0]].Equals("(null)", StringComparison.OrdinalIgnoreCase) && keyValue[0].Equals("code", StringComparison.OrdinalIgnoreCase))
                 {
                     responseDictionary["error"] = "broker_error";
                 }
@@ -156,7 +156,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 string responseActualHash = CoreCryptographyHelpers.CreateSha256Hash(decryptedResponse);
                 byte[] rawHash = Convert.FromBase64String(responseActualHash);
                 string hash  = BitConverter.ToString(rawHash);
-                if (expectedHash.Equals(hash.Replace("-","")))
+                if (expectedHash.Equals(hash.Replace("-",""), StringComparison.OrdinalIgnoreCase))
                 {
                     responseDictionary = EncodingHelper.ParseKeyValueList(decryptedResponse, '&', false, null);
                     response = TokenResponse.CreateFromBrokerResponse(responseDictionary);

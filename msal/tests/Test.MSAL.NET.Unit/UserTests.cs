@@ -49,11 +49,11 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("UserTests")]
         public void Constructor_PropertiesSet()
         {
-            User actual = new User("id", "disp", "name");
+            User actual = new User("id", "disp", "env");
 
             Assert.AreEqual("id", actual.Identifier);
             Assert.AreEqual("disp", actual.DisplayableId);
-            Assert.AreEqual("name", actual.Name);
+            Assert.AreEqual("env", actual.Environment);
         }
     }
 }

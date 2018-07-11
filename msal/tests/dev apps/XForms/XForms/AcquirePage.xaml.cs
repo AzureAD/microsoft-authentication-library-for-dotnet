@@ -80,9 +80,9 @@ namespace XForms
         {
             var selectedUIBehavior = UIBehaviorPicker.SelectedItem as string;
 
-            if (UIBehavior.ForceLogin.PromptValue.Equals(selectedUIBehavior))
+            if (UIBehavior.ForceLogin.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
                 return UIBehavior.ForceLogin;
-            if (UIBehavior.Consent.PromptValue.Equals(selectedUIBehavior))
+            if (UIBehavior.Consent.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
                 return UIBehavior.Consent;
 
             return UIBehavior.SelectAccount;
@@ -99,7 +99,7 @@ namespace XForms
 
             sb.AppendLine("user.DisplayableId : " + user.DisplayableId);
             //sb.AppendLine("user.IdentityProvider : " + user.IdentityProvider);
-            sb.AppendLine("user.Name : " + user.Name);
+            sb.AppendLine("user.Environment : " + user.Environment);
 
             return sb.ToString();
         }
@@ -121,7 +121,7 @@ namespace XForms
 
         private IUser getUserByDisplayableId(string str)
         {
-            return string.IsNullOrWhiteSpace(str) ? null : App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str));
+            return string.IsNullOrWhiteSpace(str) ? null : App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str, StringComparison.OrdinalIgnoreCase));
         }
 
         private string[] GetScopes()
@@ -134,7 +134,7 @@ namespace XForms
             if (usersPicker.SelectedIndex == -1) return null;
 
             var selectedUserId = usersPicker.SelectedItem as string;
-            return UserNotSelected.Equals(selectedUserId) ? null : selectedUserId;
+            return UserNotSelected.Equals(selectedUserId, StringComparison.OrdinalIgnoreCase) ? null : selectedUserId;
         }
 
         private async void OnAcquireSilentlyClicked(object sender, EventArgs e)

@@ -157,14 +157,14 @@ namespace Microsoft.Identity.Core.Helpers
             return String.Join(" ", input);
         }
 
-        internal static SortedSet<string> AsSet(this string singleString)
+        internal static SortedSet<string> AsLowerCaseSortedSet(this string singleString)
         {
             if (String.IsNullOrEmpty(singleString))
             {
                 return new SortedSet<string>();
             }
 
-            return new SortedSet<string>(singleString.Split(new[] { " " }, StringSplitOptions.None));
+            return new SortedSet<string>(singleString.ToLowerInvariant().Split(new[] { " " }, StringSplitOptions.None));
         }
 
         internal static string[] AsArray(this string singleString)

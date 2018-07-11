@@ -33,6 +33,7 @@ namespace Test.Microsoft.Identity.Core.Unit
 {
     class TestConstants
     {
+        public static readonly string ScopeStr = "scope1 scope2";
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] {"r1/scope1", "r1/scope2"});
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly string ProductionEnvironment = "login.microsoftonline.com";
@@ -48,8 +49,8 @@ namespace Test.Microsoft.Identity.Core.Unit
         public static readonly string DisplayableId = "displayable@id.com";
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
-        public static readonly string Uid = "my-UID";
-        public static readonly string Utid= "my-UTID";
+        public static readonly string Uid = "my-uid";
+        public static readonly string Utid= "my-utid";
 
         public static readonly string UserIdentifier = CreateUserIdentifer();
 

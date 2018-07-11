@@ -93,8 +93,8 @@ namespace Test.ADAL.NET.Integration
 
 
 
-            Assert.IsTrue(adalTokenCache.TokenCacheAccessor.GetAllAccessTokenKeys().Count == 0);
-            Assert.IsTrue(adalTokenCache.TokenCacheAccessor.GetAllRefreshTokenKeys().Count > 0);
+            Assert.IsTrue(adalTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count == 0);
+            Assert.IsTrue(adalTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count > 0);
 
             // clear Adal Cache
             adalTokenCache.Clear();

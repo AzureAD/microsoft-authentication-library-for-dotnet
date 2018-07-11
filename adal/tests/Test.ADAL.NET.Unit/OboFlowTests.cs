@@ -671,7 +671,7 @@ namespace Test.ADAL.NET.Unit
             //assertion hash should be stored in the cache entry.
             Assert.AreEqual(CoreCryptographyHelpers.CreateSha256Hash(accessToken),
                 context.TokenCache.tokenCacheDictionary.Values.First(
-                    s => s.Result.UserInfo != null && s.Result.UserInfo.DisplayableId.Equals(displayableId2))
+                    s => s.Result.UserInfo != null && s.Result.UserInfo.DisplayableId.Equals(displayableId2, StringComparison.OrdinalIgnoreCase))
                     .UserAssertionHash);
         }
 

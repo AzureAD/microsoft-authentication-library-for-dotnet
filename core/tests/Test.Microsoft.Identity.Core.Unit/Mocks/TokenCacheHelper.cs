@@ -40,84 +40,58 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         internal static void PopulateCacheForClientCredential(TokenCacheAccessor accessor)
         {
-            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem()
-            {
-                Authority = TestConstants.AuthorityHomeTenant,
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = TestConstants.Utid,
-                ClientId = TestConstants.ClientId,
-                TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
-                Scopes = TestConstants.Scope.AsSingleString(),
-                ScopeSet = TestConstants.Scope
-            };
-            atItem.CreateDerivedProperties();
-            atItem.Secret = atItem.GetAccessTokenItemKey().ToString();
+            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionEnvironment,
+                TestConstants.ClientId,
+                "Bearer",
+                TestConstants.Scope.AsSingleString(),
+                TestConstants.Utid,
+                "",
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                MockHelpers.CreateClientInfo());
 
-            accessor.AccessTokenCacheDictionary[atItem.GetAccessTokenItemKey()] = JsonHelper.SerializeToJson(atItem);
+            accessor.AccessTokenCacheDictionary[atItem.GetKey().ToString()] = JsonHelper.SerializeToJson(atItem);
         }
 
         internal static void PopulateCache(TokenCacheAccessor accessor)
         {
-            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem()
-            {
-                Authority = TestConstants.AuthorityHomeTenant,
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = TestConstants.Utid,
-                ClientId = TestConstants.ClientId,
-                TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
-                RawClientInfo = MockHelpers.CreateClientInfo(),
-                Scopes = TestConstants.Scope.AsSingleString(),
-                ScopeSet = TestConstants.Scope
-            };
-            atItem.CreateDerivedProperties();
-            atItem.Secret = atItem.GetAccessTokenItemKey().ToString();
+            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionEnvironment,
+                TestConstants.ClientId,
+                "Bearer",
+                TestConstants.Scope.AsSingleString(),
+                TestConstants.Utid,
+                "",
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                MockHelpers.CreateClientInfo());
 
             //add access token
-            accessor.AccessTokenCacheDictionary[atItem.GetAccessTokenItemKey()] = JsonHelper.SerializeToJson(atItem);
+            accessor.AccessTokenCacheDictionary[atItem.GetKey().ToString()] = JsonHelper.SerializeToJson(atItem);
 
-            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem()
-            {
-                Authority = TestConstants.AuthorityHomeTenant,
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = TestConstants.Utid,
-                ClientId = TestConstants.ClientId,
-                RawClientInfo = MockHelpers.CreateClientInfo(),
-                Secret = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId)
-            };
-            idTokenCacheItem.CreateDerivedProperties();
-            accessor.IdTokenCacheDictionary[idTokenCacheItem.GetIdTokenItemKey()] = JsonHelper.SerializeToJson(idTokenCacheItem);
+            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
+                Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false), TestConstants.ClientId, 
+                MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
+                MockHelpers.CreateClientInfo(), TestConstants.Utid);
 
-            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem()
-            {
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = TestConstants.Utid,
-                RawClientInfo = MockHelpers.CreateClientInfo(),
-            };
-            accountCacheItem.InitRawClientInfoDerivedProperties();
-            accessor.AccountCacheDictionary[accountCacheItem.GetAccountItemKey()] = JsonHelper.SerializeToJson(accountCacheItem);
+            accessor.IdTokenCacheDictionary[idTokenCacheItem.GetKey().ToString()] = JsonHelper.SerializeToJson(idTokenCacheItem);
 
-            atItem = new MsalAccessTokenCacheItem()
-            {
-                Authority = TestConstants.AuthorityGuestTenant,
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = TestConstants.Utid,
-                ClientId = TestConstants.ClientId,
-                TokenType = "Bearer",
-                ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn))),
-                //RawIdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId + "more", TestConstants.DisplayableId),
-                RawClientInfo = MockHelpers.CreateClientInfo(),
-                Scopes = TestConstants.ScopeForAnotherResource.AsSingleString(),
-                ScopeSet = TestConstants.ScopeForAnotherResource
-            };
-            //item.IdToken = IdToken.Parse(item.RawIdToken);
-            //item.ClientInfo = ClientInfo.CreateFromJson(item.RawClientInfo);
-            atItem.CreateDerivedProperties();
-            atItem.Secret = atItem.GetAccessTokenItemKey().ToString();
+            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
+                (TestConstants.ProductionEnvironment, null, MockHelpers.CreateClientInfo(), null, null, TestConstants.Utid);
+
+            accessor.AccountCacheDictionary[accountCacheItem.GetKey().ToString()] = JsonHelper.SerializeToJson(accountCacheItem);
+
+            atItem = new MsalAccessTokenCacheItem(
+                TestConstants.ProductionEnvironment,
+                TestConstants.ClientId,
+                "Bearer",
+                TestConstants.ScopeForAnotherResource.AsSingleString(),
+                TestConstants.Utid,
+                "",
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                MockHelpers.CreateClientInfo());
 
             //add another access token
-            accessor.AccessTokenCacheDictionary[atItem.GetAccessTokenItemKey().ToString()] = JsonHelper.SerializeToJson(atItem);
+            accessor.AccessTokenCacheDictionary[atItem.GetKey().ToString()] = JsonHelper.SerializeToJson(atItem);
 
             AddRefreshTokenToCache(accessor, TestConstants.Uid, TestConstants.Utid, TestConstants.Name);
         }
@@ -125,44 +99,30 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
         public static void AddRefreshTokenToCache(TokenCacheAccessor accessor, string uid, string utid, string name)
         {
             var rtItem = new MsalRefreshTokenCacheItem
-            {
-                Environment = TestConstants.ProductionEnvironment,
-                ClientId = TestConstants.ClientId,
-                Secret = "someRT",
-                RawClientInfo = MockHelpers.CreateClientInfo(uid, utid),
-                TenantId = TestConstants.Utid
-            };
-            rtItem.InitRawClientInfoDerivedProperties();
+                (TestConstants.ProductionEnvironment, TestConstants.ClientId, "someRT", MockHelpers.CreateClientInfo(uid, utid));
 
-            accessor.RefreshTokenCacheDictionary[rtItem.GetRefreshTokenItemKey().ToString()] =
+            accessor.RefreshTokenCacheDictionary[rtItem.GetKey().ToString()] =
                 JsonHelper.SerializeToJson(rtItem);
         }
 
         public static void AddIdTokenToCache(TokenCacheAccessor accessor, string uid, string utid)
         {
-            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem()
-            {
-                Authority = TestConstants.AuthorityHomeTenant,
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = utid,
-                ClientId = TestConstants.ClientId,
-                RawClientInfo = MockHelpers.CreateClientInfo(uid, utid),
-                Secret = MockHelpers.CreateIdToken(uid, TestConstants.DisplayableId)
-            };
-            idTokenCacheItem.CreateDerivedProperties();
-            accessor.IdTokenCacheDictionary[idTokenCacheItem.GetIdTokenItemKey()] = JsonHelper.SerializeToJson(idTokenCacheItem);
+            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
+                Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                TestConstants.ClientId,
+                MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId),
+                MockHelpers.CreateClientInfo(), 
+                TestConstants.Utid);
+
+            accessor.IdTokenCacheDictionary[idTokenCacheItem.GetKey().ToString()] = JsonHelper.SerializeToJson(idTokenCacheItem);
         }
 
         public static void AddAccountToCache(TokenCacheAccessor accessor, string uid, string utid)
         {
-            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem()
-            {
-                Environment = TestConstants.ProductionEnvironment,
-                TenantId = utid,
-                RawClientInfo = MockHelpers.CreateClientInfo(uid, utid),
-            };
-            accountCacheItem.InitRawClientInfoDerivedProperties();
-            accessor.AccountCacheDictionary[accountCacheItem.GetAccountItemKey()] = JsonHelper.SerializeToJson(accountCacheItem);
+            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
+                (TestConstants.ProductionEnvironment, null, MockHelpers.CreateClientInfo(uid, utid), null, null, utid);
+
+            accessor.AccountCacheDictionary[accountCacheItem.GetKey().ToString()] = JsonHelper.SerializeToJson(accountCacheItem);
         }
     }
 }

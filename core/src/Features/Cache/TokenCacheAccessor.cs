@@ -29,6 +29,7 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core
 {
@@ -46,56 +47,90 @@ namespace Microsoft.Identity.Core
         internal readonly IDictionary<string, string> AccountCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
-        public void SaveAccessToken(string cacheKey, string item)
+        public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            AccessTokenCacheDictionary[cacheKey] = item;
+            AccessTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
         }
 
-        public void SaveRefreshToken(string cacheKey, string item)
+        public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            RefreshTokenCacheDictionary[cacheKey] = item;
+            RefreshTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
         }
 
-        public void SaveIdToken(string cacheKey, string item)
+        public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            IdTokenCacheDictionary[cacheKey] = item;
+            IdTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
         }
 
-        public void SaveAccount(string cacheKey, string item)
+        public void SaveAccount(MsalAccountCacheItem item)
         {
-            AccountCacheDictionary[cacheKey] = item;
+            AccountCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
         }
 
-        public string GetRefreshToken(string refreshTokenKey)
+        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            if (!RefreshTokenCacheDictionary.ContainsKey(refreshTokenKey))
+            var strKey = accessTokenKey.ToString();
+            if (!AccessTokenCacheDictionary.ContainsKey(strKey))
             {
                 return null;
             }
 
-            return RefreshTokenCacheDictionary[refreshTokenKey];
+            return AccessTokenCacheDictionary[strKey];
         }
 
-        public void DeleteAccessToken(string cacheKey)
+        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
-            AccessTokenCacheDictionary.Remove(cacheKey);
+            var strKey = refreshTokenKey.ToString();
+            if (!RefreshTokenCacheDictionary.ContainsKey(strKey))
+            {
+                return null;
+            }
+
+            return RefreshTokenCacheDictionary[strKey];
         }
 
-        public void DeleteRefreshToken(string cacheKey)
+        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
-            RefreshTokenCacheDictionary.Remove(cacheKey);
+            var strKey = idTokenKey.ToString();
+            if (!IdTokenCacheDictionary.ContainsKey(strKey))
+            {
+                return null;
+            }
+
+            return IdTokenCacheDictionary[strKey];
         }
 
-        public void DeleteIdToken(string cacheKey)
+        public string GetAccount(MsalAccountCacheKey accountKey)
         {
-            IdTokenCacheDictionary.Remove(cacheKey);
+            var strKey = accountKey.ToString();
+            if (!AccountCacheDictionary.ContainsKey(strKey))
+            {
+                return null;
+            }
+
+            return AccountCacheDictionary[strKey];
         }
 
-        public void DeleteAccount(string cacheKey)
+        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
-            AccountCacheDictionary.Remove(cacheKey);
+            AccessTokenCacheDictionary.Remove(cacheKey.ToString());
         }
 
+        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
+        {
+            RefreshTokenCacheDictionary.Remove(cacheKey.ToString());
+        }
+
+        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
+        {
+            IdTokenCacheDictionary.Remove(cacheKey.ToString());
+        }
+
+        public void DeleteAccount(MsalAccountCacheKey cacheKey)
+        {
+            AccountCacheDictionary.Remove(cacheKey.ToString());
+        }
+        
         public ICollection<string> GetAllAccessTokensAsString()
         {
             return
@@ -123,7 +158,7 @@ namespace Microsoft.Identity.Core
                 new ReadOnlyCollection<string>(
                    AccountCacheDictionary.Values.ToList());
         }
-
+        /*
         public ICollection<string> GetAllAccessTokenKeys()
         {
             return
@@ -151,58 +186,19 @@ namespace Microsoft.Identity.Core
                 new ReadOnlyCollection<string>(
                     AccountCacheDictionary.Keys.ToList());
         }
+        */
 
         public void Clear()
         {
-            foreach (var key in GetAllAccessTokenKeys())
-            {
-                DeleteAccessToken(key);
-            }
-
-            foreach (var key in GetAllRefreshTokenKeys())
-            {
-                DeleteRefreshToken(key);
-            }
-
-            foreach (var key in GetAllIdTokenKeys())
-            {
-                DeleteIdToken(key);
-            }
-
-            foreach (var key in GetAllAccountKeys())
-            {
-                DeleteAccount(key);
-            }
+            AccessTokenCacheDictionary.Clear();
+            RefreshTokenCacheDictionary.Clear();
+            IdTokenCacheDictionary.Clear();
+            AccountCacheDictionary.Clear();
         }
 
-        public string GetIdToken(string idTokenKey)
+        public void SetSecurityGroup(string securityGroup)
         {
-            if (!IdTokenCacheDictionary.ContainsKey(idTokenKey))
-            {
-                return null;
-            }
-
-            return IdTokenCacheDictionary[idTokenKey];
-        }
-
-        public string GetAccessToken(string accessTokenKey)
-        {
-            if (!AccessTokenCacheDictionary.ContainsKey(accessTokenKey))
-            {
-                return null;
-            }
-
-            return IdTokenCacheDictionary[accessTokenKey];
-        }
-
-        public string GetAccount(string accountKey)
-        {
-            if (!AccountCacheDictionary.ContainsKey(accountKey))
-            {
-                return null;
-            }
-
-            return AccountCacheDictionary[accountKey];
+            throw new System.NotImplementedException();
         }
     }
 }

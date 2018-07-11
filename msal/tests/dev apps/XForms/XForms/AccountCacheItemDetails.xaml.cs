@@ -19,7 +19,7 @@ namespace XForms
 
             authorityTypeLabel.Text = msalAccountCacheItem.AuthorityType;
             environmentLabel.Text = msalAccountCacheItem.Environment;
-            userIdentifierLabel.Text = msalAccountCacheItem.UserIdentifier;
+            userIdentifierLabel.Text = msalAccountCacheItem.HomeAccountId;
             preferredUsernameLabel.Text = msalAccountCacheItem.PreferredUsername;
 
             localAccountIdLabel.Text = msalAccountCacheItem.LocalAccountId;

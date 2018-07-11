@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Core.Cache
 {
     internal enum CredentialType
     {
-        IdToken,
-        AccessToken,
-        RefreshToken
+        idtoken,
+        accesstoken,
+        refreshtoken
     }
 }

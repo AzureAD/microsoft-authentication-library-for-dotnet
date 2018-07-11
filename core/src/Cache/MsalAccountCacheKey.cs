@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Core.Cache
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.Append(UserIdentifier + CacheKeyDelimiter);
+            stringBuilder.Append(HomeAccountId + CacheKeyDelimiter);
             stringBuilder.Append(Environment + CacheKeyDelimiter);
             stringBuilder.Append(TenantId);
 

@@ -40,30 +40,9 @@
                                     <Frame OutlineColor="Black" Padding="10">
                                         <StackLayout  Orientation="Vertical" VerticalOptions="FillAndExpand">
                                             <StackLayout Orientation="Horizontal">
-                                                <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                                <Label Text="Key " HorizontalOptions="Start" Font="Bold,13"/>
                                                 <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
                                             </StackLayout>
-                                            
-                                            <StackLayout Orientation="Horizontal">
-                                                <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                                                <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
-                                            </StackLayout>
-
-                                            <StackLayout Orientation="Horizontal">
-                                                <Label Text="Authority: " HorizontalOptions="Start" Font="Bold,13"/>
-                                                <Label Text="{Binding Value.Authority}" HorizontalOptions="CenterAndExpand"/>
-                                            </StackLayout>
-
-                                            <StackLayout Orientation="Horizontal">
-                                                <Label Text="ExpiresOn: " HorizontalOptions="Start" Font="Bold,13"/>
-                                                <Label Text="{Binding Value.DateTime, StringFormat='{0:MM/dd/yy H:mm:ss zzz}'}" HorizontalOptions="CenterAndExpand"/>
-                                            </StackLayout>
-
-                                            <StackLayout Orientation="Horizontal">
-                                                <Label Text="Scopes: " HorizontalOptions="Start" Font="Bold,13"/>
-                                                <Label Text="{Binding Value.Scopes}" HorizontalOptions="CenterAndExpand"/>
-                                            </StackLayout>
-
                                         </StackLayout>
                                     </Frame>
                                 </ContentView>
@@ -91,17 +70,9 @@
                                 <Frame OutlineColor="Black" Padding="10">
                                     <StackLayout VerticalOptions="FillAndExpand">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="Key " HorizontalOptions="Start" Font="Bold,13"/>
                                             <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
                                         </StackLayout>
-                                        
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
-                                        </StackLayout>
-
-                                        <Label Text="Secret: " HorizontalOptions="Start" Font="Bold,13"/>
-                                        <Label Text="{Binding Value.Secret, Converter={StaticResource stringShortenerConverter}}" HorizontalOptions="CenterAndExpand"/>
                                     </StackLayout>
                                 </Frame>
                             </ContentView>
@@ -128,17 +99,9 @@
                                 <Frame OutlineColor="Black" Padding="10">
                                     <StackLayout VerticalOptions="FillAndExpand">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="Key " HorizontalOptions="Start" Font="Bold,13"/>
                                             <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
                                         </StackLayout>
-                                        
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
-                                        </StackLayout>
-
-                                        <Label Text="Secret: " HorizontalOptions="Start" Font="Bold,13"/>
-                                        <Label Text="{Binding Value.Secret, Converter={StaticResource stringShortenerConverter}}" HorizontalOptions="CenterAndExpand"/>
                                     </StackLayout>
                                 </Frame>
                             </ContentView>
@@ -165,17 +128,12 @@
                                 <Frame OutlineColor="Black" Padding="10">
                                     <StackLayout VerticalOptions="FillAndExpand">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Text="Key: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="Key " HorizontalOptions="Start" Font="Bold,13"/>
                                             <Label Text="{Binding Key}" HorizontalOptions="CenterAndExpand"/>
-                                        </StackLayout>
-                                        
-                                        <StackLayout Orientation="Horizontal">
-                                            <Label Text="UserIdentifier: " HorizontalOptions="Start" Font="Bold,13"/>
-                                            <Label Text="{Binding Value.UserIdentifier}" HorizontalOptions="CenterAndExpand"/>
                                         </StackLayout>
 
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Text="PreferredUsername: " HorizontalOptions="Start" Font="Bold,13"/>
+                                            <Label Text="username " HorizontalOptions="Start" Font="Bold,13"/>
                                             <Label Text="{Binding Value.PreferredUsername}" HorizontalOptions="CenterAndExpand"/>
                                         </StackLayout>
                                     </StackLayout>

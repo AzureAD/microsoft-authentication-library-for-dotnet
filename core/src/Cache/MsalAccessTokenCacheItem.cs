@@ -41,68 +41,68 @@ namespace Microsoft.Identity.Core.Cache
     {
         internal MsalAccessTokenCacheItem()
         {
-            CredentialType = Cache.CredentialType.AccessToken.ToString();
+            CredentialType = Cache.CredentialType.accesstoken.ToString();
         }
 
         internal MsalAccessTokenCacheItem
-            (Authority authority, string clientId, MsalTokenResponse response, string tenantId){
+            (Authority authority, string clientId, MsalTokenResponse response, string tenantId) : 
+            
+            this(authority.Host, clientId, response.TokenType, response.Scope.AsLowerCaseSortedSet().AsSingleString(),
+                 tenantId, response.AccessToken, response.AccessTokenExpiresOn, response.ClientInfo)
+        {
+        }
 
-            CredentialType = Cache.CredentialType.AccessToken.ToString();
-
+        internal MsalAccessTokenCacheItem
+            (string environment, string clientId, string tokenType, string scopes,
+             string tenantId, string secret, DateTimeOffset accessTokenExpiresOn, string rawClientInfo) : this()
+        {
+            Environment = environment;
             ClientId = clientId;
-            TokenType = response.TokenType;
-            Scopes = response.Scope;
-            Authority = authority.CanonicalAuthority;
-
+            TokenType = tokenType;
+            Scopes = scopes;        
             TenantId = tenantId;
-            Environment = authority.Host;
-
-            Secret = response.AccessToken;
-            ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(response.AccessTokenExpiresOn);
+            Secret = secret;
+            ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(accessTokenExpiresOn);
             CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
+            RawClientInfo = rawClientInfo;
 
-            RawClientInfo = response.ClientInfo;
-            CreateDerivedProperties();
+            InitUserIdentifier();
         }
 
         [DataMember(Name = "realm")]
         internal string TenantId { get; set; }
 
         [DataMember(Name = "target", IsRequired = true)]
-        public string Scopes { get; internal set; }
+        internal string Scopes { get; set; }
 
         [DataMember(Name = "cached_at", IsRequired = true)]
         internal long CachedAt { get; set; }
 
         [DataMember(Name = "expires_on", IsRequired = true)]
-        public long ExpiresOnUnixTimestamp { get; internal set; }
-
-        /*
-        [DataMember(Name = "extended_expires_on")]
-        internal string ExtendedExpiresOn { get; set; }
-        */
+        internal long ExpiresOnUnixTimestamp { get; set; }
 
         [DataMember(Name = "user_assertion_hash")]
         public string UserAssertionHash { get; set; }
 
-        [DataMember(Name = "authority")]
-        public string Authority { get; internal set; }
-
         [DataMember(Name = "access_token_type")]
         internal string TokenType { get; set; }
 
-        internal SortedSet<string> ScopeSet { get; set; }
-
-        internal string GetAccessTokenItemKey()
+        internal string Authority
         {
-            return new MsalAccessTokenCacheKey(Environment, TenantId, UserIdentifier, ClientId, ScopeSet).ToString();
-        }
-        internal string GetIdTokenItemKey()
-        {
-            return new MsalIdTokenCacheKey(Environment, TenantId, UserIdentifier, ClientId).ToString();
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
+            }
         }
 
-        public DateTimeOffset ExpiresOn
+        internal SortedSet<string> ScopeSet
+        {
+            get
+            {
+                return Scopes.AsLowerCaseSortedSet();
+            }
+        }
+        internal DateTimeOffset ExpiresOn
         {
             get
             {
@@ -111,19 +111,13 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        internal void CreateDerivedProperties()
+        internal MsalAccessTokenCacheKey GetKey()
         {
-            ScopeSet = Scopes.AsSet();
-
-            InitRawClientInfoDerivedProperties();
+            return new MsalAccessTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId, Scopes);
         }
-
-        // This method is called after the object 
-        // is completely deserialized.
-        [OnDeserialized]
-        void OnDeserialized(StreamingContext context)
+        internal MsalIdTokenCacheKey GetIdTokenItemKey()
         {
-            CreateDerivedProperties();
+            return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
         }
     }
 }

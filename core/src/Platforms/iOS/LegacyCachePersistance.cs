@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Core.Cache
         const string NAME = "ADAL.PCL.iOS";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
-        byte[] ILegacyCachePersistance.LoadCache() { 
+        byte[] ILegacyCachePersistance.LoadCache() {
             try
             {
                 SecStatusCode res;
@@ -64,7 +64,6 @@ namespace Microsoft.Identity.Core.Cache
                 CoreLoggerBase.Default.ErrorPii(ex);
                 // Ignore as the cache seems to be corrupt
             }
-
             return null;
         }
 

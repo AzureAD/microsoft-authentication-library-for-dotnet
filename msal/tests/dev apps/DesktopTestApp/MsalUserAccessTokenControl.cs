@@ -2,6 +2,8 @@
 using System;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 
@@ -39,7 +41,9 @@ namespace DesktopTestApp
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)
         {
-            _cache.DeleteAccessToken(_item, null);
+            var requestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null));
+
+            _cache.DeleteAccessToken(_item, null, requestContext);
             RefreshViewDelegate?.Invoke();
         }
     }

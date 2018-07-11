@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
 
             int code = (int)resultCode;
 
-            if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview"))
+            if (data.Action != null && data.Action.Equals("ReturnFromEmbeddedWebview", StringComparison.OrdinalIgnoreCase))
             {
                 authorizationResult = ProcessFromEmbeddedWebview(requestCode, resultCode, data);
             }

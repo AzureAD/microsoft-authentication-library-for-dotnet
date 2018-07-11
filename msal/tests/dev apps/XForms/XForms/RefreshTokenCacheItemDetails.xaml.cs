@@ -39,8 +39,7 @@ namespace XForms
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class RefreshTokenCacheItemDetails : ContentPage
     {
-        internal RefreshTokenCacheItemDetails(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem, 
-            MsalAccountCacheItem MsalAccountCacheItem)
+        internal RefreshTokenCacheItemDetails(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem)
         {
             InitializeComponent();
 
@@ -48,7 +47,7 @@ namespace XForms
             clientIdLabel.Text = msalRefreshTokenCacheItem.ClientId;
 
             credentialTypeLabel.Text = msalRefreshTokenCacheItem.CredentialType;
-            userIdentifierLabel.Text = msalRefreshTokenCacheItem.UserIdentifier;
+            userIdentifierLabel.Text = msalRefreshTokenCacheItem.HomeAccountId;
             rawClientInfoLabel.Text = msalRefreshTokenCacheItem.RawClientInfo;
 
             clientInfoUniqueIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueIdentifier;

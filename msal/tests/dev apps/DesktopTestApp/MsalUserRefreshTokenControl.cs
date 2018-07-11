@@ -19,13 +19,15 @@ namespace DesktopTestApp
 
         public RefreshView RefreshViewDelegate { get; set; }
 
-        internal MsalUserRefreshTokenControl(TokenCache cache, MsalRefreshTokenCacheItem rtIitem, MsalAccountCacheItem accountItem) : this()
+        internal MsalUserRefreshTokenControl(TokenCache cache, MsalRefreshTokenCacheItem rtIitem) : this()
         {
             _cache = cache;
             _rtItem = rtIitem;
-            _accountItem = accountItem;
-            upnLabel.Text = accountItem.PreferredUsername;
-            invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue);
+
+            _accountItem = cache.GetAccount(rtIitem, new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+            upnLabel.Text = _accountItem.PreferredUsername;
+
+            invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);
         }
 
         public MsalUserRefreshTokenControl()
@@ -43,7 +45,7 @@ namespace DesktopTestApp
         private void signOutUserOneBtn_Click(object sender, System.EventArgs e)
         {
             _cache.Remove(
-                new User(_rtItem.UserIdentifier, _accountItem.PreferredUsername, _accountItem.Name), 
+                new User(_rtItem.HomeAccountId, _accountItem.PreferredUsername, _accountItem.Environment), 
                     new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
             RefreshViewDelegate?.Invoke();
         }

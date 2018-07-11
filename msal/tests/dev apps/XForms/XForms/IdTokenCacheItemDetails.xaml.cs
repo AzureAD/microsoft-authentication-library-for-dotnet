@@ -26,7 +26,7 @@ namespace XForms
             environmentLabel.Text = msalIdTokenCacheItem.Environment;
             tenantIdLabel.Text = msalIdTokenCacheItem.TenantId;
 
-            userIdentifierLabel.Text = msalIdTokenCacheItem.UserIdentifier;
+            userIdentifierLabel.Text = msalIdTokenCacheItem.HomeAccountId;
 
             secretLabel.Text = StringShortenerConverter.GetShortStr(msalIdTokenCacheItem.Secret, 100);
 

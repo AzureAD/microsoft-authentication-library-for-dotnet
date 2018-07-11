@@ -50,10 +50,10 @@ namespace Microsoft.Identity.Client
         {
             _msalAccessTokenCacheItem = msalAccessTokenCacheItem;
             _msalIdTokenCacheItem = msalIdTokenCacheItem;
-            if (_msalAccessTokenCacheItem.UserIdentifier != null)
+            if (_msalAccessTokenCacheItem.HomeAccountId != null)
             {
-                User = new User(_msalAccessTokenCacheItem.UserIdentifier,
-                    _msalIdTokenCacheItem.IdToken?.PreferredUsername, _msalIdTokenCacheItem.IdToken?.Name);
+                User = new User(_msalAccessTokenCacheItem.HomeAccountId,
+                    _msalIdTokenCacheItem?.IdToken?.PreferredUsername, _msalAccessTokenCacheItem.Environment);
             }
         }
 
