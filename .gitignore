@@ -155,7 +155,7 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings 
+# TODO: Comment the next line if you want to checkin your web deploy settings
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
@@ -239,3 +239,11 @@ _Pvt_Extensions
 project.lock.json
 *.project.lock.json
 msal/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
+
+# ignore Xamarin.Android Resource.Designer.cs files
+**/[Rr]esources/[Rr]esource.[Dd]esigner.cs
+**/*.Droid/**/[Rr]esource.[Dd]esigner.cs
+**/*.Android/**/[Rr]esource.[Dd]esigner.cs
+**/Android/**/[Rr]esource.[Dd]esigner.cs
+**/Droid/**/[Rr]esource.[Dd]esigner.cs
+
