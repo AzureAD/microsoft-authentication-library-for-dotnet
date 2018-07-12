@@ -106,16 +106,6 @@ namespace Microsoft.Identity.Core.Cache
 #endif
         }
 
-/*
-        public static List<MsalRefreshTokenCacheItem> GetAllAdalUsersForMsal(ILegacyCachePersistance legacyCachePersistance, 
-            string environment, string clientId)
-        {
-            //returns all the adal entries where client info is present
-            List<MsalRefreshTokenCacheItem> list = GetAllAdalEntriesForMsal(legacyCachePersistance, environment, clientId, null, null);
-            //TODO return distinct clientinfo only
-            return list.Where(p => !string.IsNullOrEmpty(p.RawClientInfo)).ToList();
-        }
-        */
         public static Dictionary<String, AdalUserInfo> GetAllAdalUsersForMsal(ILegacyCachePersistance legacyCachePersistance,
             string environment, string clientId)
         {
@@ -141,6 +131,40 @@ namespace Microsoft.Identity.Core.Cache
             catch (Exception ex)
             {
                 CoreLoggerBase.Default.Warning("GetAllAdalUsersForMsal falid due to Exception - " + ex);
+            }
+            return users;
+        }
+
+        public static Dictionary<String, AdalUserInfo> RemoveAdalUser(ILegacyCachePersistance legacyCachePersistance,
+            string displayableId, string environment, string identifier)
+        {
+            Dictionary<String, AdalUserInfo> users = new Dictionary<String, AdalUserInfo>();
+            try
+            {
+                IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
+                    AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+
+                List<AdalTokenCacheKey> keysToRemove = new List<AdalTokenCacheKey>();
+                foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> pair in dictionary)
+                {
+                    if ( environment.Equals(new Uri(pair.Key.Authority).Host) &&
+                         displayableId.Equals(pair.Key.DisplayableId) &&
+                         identifier.Equals(ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToUserIdentifier()) )
+                    {
+                        keysToRemove.Add(pair.Key);
+                    }
+                }
+
+                foreach (AdalTokenCacheKey key in keysToRemove)
+                {
+                    dictionary.Remove(key);
+                }
+
+                legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));
+            }
+            catch (Exception ex)
+            {
+                CoreLoggerBase.Default.Warning("RemoveAdalUser falid due to Exception - " + ex);
             }
             return users;
         }

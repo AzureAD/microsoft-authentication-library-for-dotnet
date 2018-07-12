@@ -33,7 +33,7 @@ namespace DesktopTestApp
 {
     static class TokenCacheHelper
     {
-        public static readonly TokenCache UsertokenCache = new TokenCache()
+        public static readonly TokenCache UserTokenCache = new TokenCache()
         {
             BeforeAccess = BeforeAccessNotification,
             AfterAccess = AfterAccessNotification
@@ -41,7 +41,7 @@ namespace DesktopTestApp
 
         public static TokenCache GetUserCache()
         {
-            return UsertokenCache;
+            return UserTokenCache;
         }
 
         public static string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + "msalcache.txt";

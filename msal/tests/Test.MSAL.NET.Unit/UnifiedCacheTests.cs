@@ -115,8 +115,11 @@ namespace Test.MSAL.NET.Unit
 
             Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-            // clear Msal cache
-            app.UserTokenCache.ClearCache();
+            var requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
+            foreach (IUser user in app.UserTokenCache.GetUsers(TestConstants.ProductionEnvironment, requestContext))
+            {
+                app.UserTokenCache.RemoveMsalUser(user, requestContext);
+            }
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {

@@ -57,7 +57,9 @@
                     <Label Text="Number of Accounts in the Cache:" HorizontalTextAlignment="Start"  Margin="5"/>
                     <Label x:Name="numOfAccountItems" Margin="5"/>
                 </StackLayout>
-                <Button  Text="ClearCache"  Clicked="OnClearCache" TextColor="Blue" Font="Bold,15"/>
+                <Button  Text="ClearAllCache"  Clicked="OnClearAllCache" TextColor="Blue" Font="Bold,15"/>
+                <Button  Text="ClearAdalCache"  Clicked="OnClearAdalCache" TextColor="Blue" Font="Bold,15"/>
+                <Button  Text="ClearMsalCache"  Clicked="OnClearMsalCache" TextColor="Blue" Font="Bold,15"/>
             </StackLayout>
         </Frame>
 

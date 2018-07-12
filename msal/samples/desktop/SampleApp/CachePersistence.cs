@@ -37,15 +37,15 @@ namespace SampleApp
 {
     class CachePersistence
     {
-        private static readonly TokenCache UsertokenCache = new TokenCache();
+        private static readonly TokenCache userTokenCache = new TokenCache();
 
         public static TokenCache GetUserCache()
         {
             lock (FileLock)
             {
-                UsertokenCache.SetBeforeAccess(BeforeAccessNotification);
-                UsertokenCache.SetAfterAccess(AfterAccessNotification);
-                return UsertokenCache;
+                userTokenCache.SetBeforeAccess(BeforeAccessNotification);
+                userTokenCache.SetAfterAccess(AfterAccessNotification);
+                return userTokenCache;
             }
         }
 

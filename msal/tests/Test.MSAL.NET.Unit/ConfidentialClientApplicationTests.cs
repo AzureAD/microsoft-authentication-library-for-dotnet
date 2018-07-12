@@ -231,12 +231,12 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
+            Assert.AreEqual(1, app.AppTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.AppTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 
@@ -248,12 +248,12 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
+            Assert.AreEqual(1, app.AppTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.AppTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
         }
 
         private ConfidentialClientApplication CreateConfidentialClient(ClientCredential cc)
@@ -301,12 +301,12 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
             //make sure user token cache is empty
-            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
 
             //check app token cache count to be 1
-            Assert.AreEqual(1, app.AppTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
+            Assert.AreEqual(1, app.AppTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(0, app.AppTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
 
             //assert client credential
             Assert.IsNotNull(cc.Assertion);
@@ -539,7 +539,7 @@ namespace Test.MSAL.NET.Unit
         public void ForceRefreshParameterFalseTestAsync()
         {
             var cache = new TokenCache();
-            TokenCacheHelper.PopulateCacheForClientCredential(cache.TokenCacheAccessor);
+            TokenCacheHelper.PopulateCacheForClientCredential(cache.tokenCacheAccessor);
 
             var authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
@@ -573,7 +573,7 @@ namespace Test.MSAL.NET.Unit
         public async Task ForceRefreshParameterTrueTestAsync()
         {
             var cache = new TokenCache();
-            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+            TokenCacheHelper.PopulateCache(cache.tokenCacheAccessor);
 
             var authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
@@ -649,8 +649,8 @@ namespace Test.MSAL.NET.Unit
 
             AuthenticationResult result = await app.AcquireTokenByAuthorizationCodeAsync("some-code", TestConstants.Scope).ConfigureAwait(false);
             Assert.IsNotNull(result);
-            Assert.AreEqual(1, app.UserTokenCache.TokenCacheAccessor.AccessTokenCacheDictionary.Count);
-            Assert.AreEqual(1, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(1, app.UserTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+            Assert.AreEqual(1, app.UserTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
 
             cache = new TokenCache()
             {

@@ -60,8 +60,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         {
             if (cache != null)
             {
-                cache.TokenCacheAccessor.AccessTokenCacheDictionary.Clear();
-                cache.TokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
+                cache.tokenCacheAccessor.AccessTokenCacheDictionary.Clear();
+                cache.tokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
             }
         }
 
@@ -120,7 +120,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 ClientId = TestConstants.ClientId
             };
-            TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+            TokenCacheHelper.PopulateCache(cache.tokenCacheAccessor);
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {

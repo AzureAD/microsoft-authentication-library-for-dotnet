@@ -73,11 +73,9 @@ namespace Test.ADAL.NET.Integration
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
 
-            //var adalTokenCache = new TokenCache();
-
             var adalTokenCache = TokenCache.DefaultShared;
 
-            var adalContext = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true/*, adalTokenCache*/);
+            var adalContext = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, true);
             var result =
                 await
                     adalContext.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
@@ -88,16 +86,11 @@ namespace Test.ADAL.NET.Integration
 
             IEnumerable<TokenCacheItem> tokenCacheItems = adalTokenCache.ReadItems();
 
-           // var legacyCachePersistance = Substitute.For<LegacyCachePersistance>();
-          //  legacyCachePersistance.LoadCache().Returns();
-
-
-
-            Assert.IsTrue(adalTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count == 0);
-            Assert.IsTrue(adalTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count > 0);
+            Assert.IsTrue(adalTokenCache.tokenCacheAccessor.GetAllAccessTokensAsString().Count == 0);
+            Assert.IsTrue(adalTokenCache.tokenCacheAccessor.GetAllRefreshTokensAsString().Count > 0);
 
             // clear Adal Cache
-            adalTokenCache.Clear();
+            adalTokenCache.ClearAdalCache();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
                 (TestConstants.GetTokenEndpoint(TestConstants.TenantSpecificAuthority))

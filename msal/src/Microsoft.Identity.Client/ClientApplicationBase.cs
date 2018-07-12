@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public abstract class ClientApplicationBase
     {
-        private TokenCache _userTokenCache;
+        private TokenCache userTokenCache;
 
         /// <Summary>
         /// Default Authority used for interactive calls.
@@ -114,13 +114,13 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         internal TokenCache UserTokenCache
         {
-            get { return _userTokenCache; }
+            get { return userTokenCache; }
             set
             {
-                _userTokenCache = value;
-                if (_userTokenCache != null)
+                userTokenCache = value;
+                if (userTokenCache != null)
                 {
-                    _userTokenCache.ClientId = ClientId;
+                    userTokenCache.ClientId = ClientId;
                 }
             }
         }
