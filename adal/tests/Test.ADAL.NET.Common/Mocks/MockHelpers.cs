@@ -154,12 +154,15 @@ namespace Test.ADAL.NET.Common.Mocks
             return responseMessage;
         }
 
-        public static HttpResponseMessage CreateSuccessDeviceCodeResponseMessage(string expirationTime = "900")
+        public static HttpResponseMessage CreateSuccessDeviceCodeResponseMessage(int expirationTimeInSeconds = 900, int retryInternvalInSeconds = 5)
         {
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
 
             HttpContent content = new StringContent(
-                "{\"user_code\":\"some-user-code\",\"device_code\":\"some-device-code\",\"verification_url\":\"some-URL\",\"expires_in\":\"" + expirationTime + "\",\"interval\":\"5\",\"message\":\"some-message\"}");
+                "{\"user_code\":\"some-user-code\",\"device_code\":\"some-device-code\",\"verification_url\":\"some-URL\"," +
+                "\"expires_in\":\"" + expirationTimeInSeconds.ToString() + "\"," +
+                "\"interval\":\"" + retryInternvalInSeconds.ToString() + "\"," +
+                "\"message\":\"some-message\"}");
             responseMessage.Content = content;
             return responseMessage;
         }
@@ -213,7 +216,7 @@ namespace Test.ADAL.NET.Common.Mocks
             {
                 responseMessage.Headers.Add(header.Key, header.Value);
             }
-            
+
             return responseMessage;
         }
 

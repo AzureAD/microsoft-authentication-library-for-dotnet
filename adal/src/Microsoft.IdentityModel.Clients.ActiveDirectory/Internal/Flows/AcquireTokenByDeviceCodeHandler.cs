@@ -49,9 +49,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             TimeSpan timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
             AdalResultWrapper resultEx = null;
-            //the interval is added so that the while loop does not end before aquiring the last response from the STS stating that the code has expired.
-            //Without it, resultEx will end up being null.
-            while (timeRemaining.TotalSeconds + deviceCodeResult.Interval > 0)
+
+            while (timeRemaining.TotalSeconds > 0)
             {
                 try
                 {
@@ -70,6 +69,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
             }
 
+            if (resultEx == null)
+            {
+                throw new AdalServiceException(
+                    AdalErrorEx.DeviceCodeAuthorizationCodeExpired, 
+                    AdalErrorMessageEx.DeviceCodeAuthorizationCodeExpired);
+            }
+           
             return resultEx;
         }
 
