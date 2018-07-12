@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -128,7 +129,7 @@ namespace XForms
 
         private string[] GetScopes()
         {
-            return ScopesEntry.Text.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            return ScopesEntry.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         private string GetSelectedUserId()
@@ -160,13 +161,9 @@ namespace XForms
 
                 acquireResponseLabel.Text = ToString(res);
             }
-            catch (MsalException exception)
-            {
-                acquireResponseLabel.Text = String.Format("MsalException -\nError Code: {0}\nMessage: {1}", exception.ErrorCode, exception.Message);
-            }
             catch (Exception exception)
             {
-                acquireResponseLabel.Text = "Exception - " + exception.Message;
+                CreateExceptionMessage(exception);
             }
         }
 
@@ -198,13 +195,9 @@ namespace XForms
                 acquireResponseLabel.Text = resText;
                 RefreshUsers();
             }
-            catch (MsalException exception)
-            {
-                acquireResponseLabel.Text = String.Format("MsalException -\nError Code: {0}\nMessage: {1}", exception.ErrorCode, exception.Message);
-            }
             catch (Exception exception)
             {
-                acquireResponseLabel.Text = "Exception - " + exception.Message;
+                CreateExceptionMessage(exception);
             }
         }
 
@@ -225,6 +218,19 @@ namespace XForms
 
             acquireResponseLabel.Text = "";
             acquireResponseTitleLabel.Text = "Result:";
+        }
+
+        private void CreateExceptionMessage(Exception exception)
+        {
+            if (exception is MsalException msalException)
+            {
+                acquireResponseLabel.Text = string.Format(CultureInfo.InvariantCulture, "MsalException -\nError Code: {0}\nMessage: {1}",
+                    msalException.ErrorCode, msalException.Message);
+            }
+            else
+            {
+                acquireResponseLabel.Text = "Exception - " + exception.Message;
+            }
         }
     }
 }
