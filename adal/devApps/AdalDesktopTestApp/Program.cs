@@ -50,11 +50,12 @@ namespace AdalDesktopTestApp
                 // display menu
                 // clear display
                 Console.Clear();
-
-                Console.WriteLine("\n\t1. Acquire Token\n\t2. Acquire Token with Pii logging enabled\n\t" +
-                                  "3. Acquire Token Conditional Access Policy\n\t0. Exit App");
-                Console.WriteLine("\n\tEnter your Selection: ");
-
+                Console.WriteLine(@"
+                        1. Acquire Token by Windows Integrated Auth
+                        2. Acquire Token by Windows Integrated Auth, with Pii logging enabled
+                        3. Acquire Token Conditional Access Policy
+                        0. Exit App
+                    Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
 
                 try
