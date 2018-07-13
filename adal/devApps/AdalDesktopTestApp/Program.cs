@@ -40,6 +40,11 @@ namespace AdalDesktopTestApp
         static void Main(string[] args)
         {
             LoggerCallbackHandler.LogCallback = AppLogger.Log;
+            string resource = "https://graph.windows.net";
+            string clientId = "<CLIENT_ID>";
+            string redirectUri = "<REDIRECT_URI>";
+            string user = "<USER>";
+            AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
             while (true)
             {
                 // display menu
@@ -54,24 +59,42 @@ namespace AdalDesktopTestApp
 
                 try
                 {
+                    Task<AuthenticationResult> task = null;
+                    LoggerCallbackHandler.PiiLoggingEnabled = false;
                     switch (selection)
                     {
                         case 1: // acquire token
-                            LoggerCallbackHandler.PiiLoggingEnabled = false;
-                            AcquireTokenAsync().Wait();
+                            task = context.AcquireTokenAsync(resource, clientId, new UserCredential(user));
                             break;
                         case 2: // acquire token with pii logging enabled
                             LoggerCallbackHandler.PiiLoggingEnabled = true;
-                            AcquireTokenAsync().Wait();
+                            task = context.AcquireTokenAsync(resource, clientId, new UserCredential(user));
                             break;
                         case 3: // acquire token with claims
-                            AcquireTokenWithClaimsAsync().Wait();
+                            string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
+                            task = context.AcquireTokenAsync(resource, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Auto),
+                                new UserIdentifier(user, UserIdentifierType.OptionalDisplayableId), null, claims);
                             break;
                         case 0:
                             return;
                         default:
                             break;
                     }
+                    task.Wait();
+                    string token = task.Result.AccessToken;
+                    string logMessage = "\n\n" + "Pii Logging Enabled: " +
+                                        LoggerCallbackHandler.PiiLoggingEnabled + "\n\n" +
+                                        AppLogger.GetAdalLogs();
+
+                    if (!LoggerCallbackHandler.PiiLoggingEnabled)
+                    {
+                        Console.WriteLine(token + "\n\n" + "====ADAL Logs====" + logMessage);
+                    }
+                    else
+                    {
+                        Console.WriteLine(token + "\n\n" + "====ADAL Logs Pii Enabled====" + logMessage);
+                    }
+
                 }
                 catch (AggregateException ae)
                 {
@@ -82,38 +105,6 @@ namespace AdalDesktopTestApp
                 Console.WriteLine("\n\nHit 'ENTER' to continue...");
                 Console.ReadLine();
             }
-        }
-
-        private static async Task AcquireTokenAsync()
-        {
-            AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
-            var result = await context.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>", new UserCredential("<USER>"));
-
-            string token = result.AccessToken;
-            string logMessage = "\n\n" + "Pii Logging Enabled: " +
-                                LoggerCallbackHandler.PiiLoggingEnabled + "\n\n" +
-                                AppLogger.GetAdalLogs();
-
-            if (!LoggerCallbackHandler.PiiLoggingEnabled)
-            {
-                Console.WriteLine(token + "\n\n" + "====ADAL Logs====" + logMessage);
-            }
-            else
-            {
-                Console.WriteLine(token + "\n\n" + "====ADAL Logs Pii Enabled====" + logMessage);
-            }
-        }
-
-        private static async Task AcquireTokenWithClaimsAsync()
-        {
-            string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
-
-            AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
-            var result = await context.AcquireTokenAsync("https://graph.windows.net", "<CLIENT_ID>",
-                new Uri("<REDIRECT_URI>"), new PlatformParameters(PromptBehavior.Auto), new UserIdentifier("<USER>", UserIdentifierType.OptionalDisplayableId), null, claims).ConfigureAwait(false);
-
-            string token = result.AccessToken;
-            Console.WriteLine(token + "\n");
         }
     }
 }
