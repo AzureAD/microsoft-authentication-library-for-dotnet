@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -47,9 +48,15 @@ namespace AdalDesktopTestApp
             AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
             while (true)
             {
-                // display menu
-                // clear display
                 Console.Clear();
+
+                Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "TokenCache contains {0} token(s)", context.TokenCache.Count));
+                foreach (var item in context.TokenCache.ReadItems())
+                {
+                    Console.WriteLine("  Cache item available for: " + item.DisplayableId + "\n");
+                }
+
+                // display menu
                 Console.WriteLine(@"
                         1. Acquire Token by Windows Integrated Auth
                         2. Acquire Token by Windows Integrated Auth, with Pii logging enabled
