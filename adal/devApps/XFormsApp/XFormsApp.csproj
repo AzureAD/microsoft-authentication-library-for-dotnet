@@ -19,6 +19,7 @@
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <DelaySign>True</DelaySign>
+    <CodeAnalysisRuleSet>../../../core/ConfigureAwaitDisable.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.91635" />

@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Core.Instance
         {
             if (ValidateAuthority)
             {
-                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, requestContext);
+                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, requestContext).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
                     throw new MsalServiceException(drsResponse.Error, drsResponse.ErrorDescription);

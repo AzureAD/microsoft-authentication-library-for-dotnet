@@ -127,6 +127,9 @@
     <Compile Include="Platforms\Android\**\*.cs" />
     <Compile Include="Features\NonWinCommon\**\*.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\src\Microsoft.Identity.Core.csproj" />
@@ -140,5 +143,10 @@
     <None Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
     <None Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
-  
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>../../../core/ConfigureAwait.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
+  </ItemGroup>
 </Project>

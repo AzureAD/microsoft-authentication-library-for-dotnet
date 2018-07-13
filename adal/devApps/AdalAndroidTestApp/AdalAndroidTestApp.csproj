@@ -19,6 +19,7 @@
     <AndroidUseLatestPlatformSdk>True</AndroidUseLatestPlatformSdk>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
     <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
+	<CodeAnalysisRuleSet>../../../core/ConfigureAwaitDisable.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Label="SonarQube analysis settings">
     <!-- These properties have no effect on how the project is built. -->

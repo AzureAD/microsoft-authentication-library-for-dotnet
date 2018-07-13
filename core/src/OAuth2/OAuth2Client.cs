@@ -68,17 +68,17 @@ namespace Microsoft.Identity.Core.OAuth2
 
         public async Task<TenantDiscoveryResponse> GetOpenIdConfiguration(Uri endPoint, RequestContext requestContext)
         {
-            return await ExecuteRequest<TenantDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext);
+            return await ExecuteRequest<TenantDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstance(Uri endPoint, RequestContext requestContext)
         {
-            return await ExecuteRequest<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext);
+            return await ExecuteRequest<InstanceDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         public async Task<MsalTokenResponse> GetToken(Uri endPoint, RequestContext requestContext)
         {
-            return await ExecuteRequest<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext);
+            return await ExecuteRequest<MsalTokenResponse>(endPoint, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
 
         internal async Task<T> ExecuteRequest<T>(Uri endPoint, HttpMethod method, RequestContext requestContext)
@@ -98,11 +98,11 @@ namespace Microsoft.Identity.Core.OAuth2
             {
                 if (method == HttpMethod.Post)
                 {
-                    response = await HttpRequest.SendPost(endpointUri, _headers, _bodyParameters, requestContext);
+                    response = await HttpRequest.SendPost(endpointUri, _headers, _bodyParameters, requestContext).ConfigureAwait(false);
                 }
                 else
                 {
-                    response = await HttpRequest.SendGet(endpointUri, _headers, requestContext);
+                    response = await HttpRequest.SendGet(endpointUri, _headers, requestContext).ConfigureAwait(false);
                 }
 
                 httpEvent.HttpResponseStatus = (int) response.StatusCode;

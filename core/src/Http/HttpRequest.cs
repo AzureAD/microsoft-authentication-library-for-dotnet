@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Core.Http
             HttpResponse response = null;
             try
             {
-                response = await Execute(endpoint, headers, bodyParameters, method);
+                response = await Execute(endpoint, headers, bodyParameters, method).ConfigureAwait(false);
 
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Core.Http
                     requestContext.Logger.Info(msg);
                     requestContext.Logger.InfoPii(msg);
                     await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                    return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, requestContext, false);
+                    return await ExecuteWithRetry(endpoint, headers, bodyParameters, method, requestContext, false).ConfigureAwait(false);
                 }
 
                 const string message = "Request retry failed.";

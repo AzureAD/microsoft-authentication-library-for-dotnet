@@ -41,14 +41,14 @@ namespace Microsoft.Identity.Client
             {
                 try
                 {
-                    taskCompletionSource.SetResult(await func());
+                    taskCompletionSource.SetResult(await func().ConfigureAwait(false));
                 }
                 catch (Exception ex)
                 {
                     taskCompletionSource.SetException(ex);
                 }
             });
-            return await taskCompletionSource.Task;
+            return await taskCompletionSource.Task.ConfigureAwait(false);
         }
     }
 }

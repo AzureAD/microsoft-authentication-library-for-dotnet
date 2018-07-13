@@ -35,9 +35,18 @@ using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Core.UI.SystemWebview
 {
-    internal class SystemWebUI : WebviewBase
+    internal class SystemWebUI : WebviewBase, IDisposable
     {
+        private nint taskId = UIApplication.BackgroundTaskInvalid;
+        private NSObject didEnterBackgroundNotification, willEnterForegroundNotification;
+
         public RequestContext RequestContext { get; set; }
+
+        public SystemWebUI()
+        {
+            this.didEnterBackgroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.DidEnterBackgroundNotification, OnMoveToBackground);
+            this.willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
+        }
 
         public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
@@ -90,6 +99,35 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                 returnedUriReady.Release();
             }
+        }
+
+        void OnMoveToBackground(NSNotification notification)
+        {
+            //After iOS 11.3, it is neccesary to keep a background task running while moving an app to the background in order to prevent the system from reclaiming network resources from the app. 
+            //This will prevent authentication from failing while the application is moved to the background while waiting for MFA to finish.
+            this.taskId = UIApplication.SharedApplication.BeginBackgroundTask(() => {
+                if (this.taskId != UIApplication.BackgroundTaskInvalid)
+                {
+                    UIApplication.SharedApplication.EndBackgroundTask(this.taskId);
+                    this.taskId = UIApplication.BackgroundTaskInvalid;
+                }
+            });
+        }
+
+        void OnMoveToForeground(NSNotification notification)
+        {
+            if (this.taskId != UIApplication.BackgroundTaskInvalid)
+            {
+                UIApplication.SharedApplication.EndBackgroundTask(this.taskId);
+                this.taskId = UIApplication.BackgroundTaskInvalid;
+            }
+        }
+
+        //Hiding NSObject.Dispose() with new to implement IDisposable interface
+        public new void Dispose()
+        {
+            this.didEnterBackgroundNotification.Dispose();
+            this.willEnterForegroundNotification.Dispose();
         }
     }
 }
