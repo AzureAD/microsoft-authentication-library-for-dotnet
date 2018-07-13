@@ -54,6 +54,7 @@ namespace AdalDesktopTestApp
                         1. Acquire Token by Windows Integrated Auth
                         2. Acquire Token by Windows Integrated Auth, with Pii logging enabled
                         3. Acquire Token Conditional Access Policy
+                        4. Acquire Token Interactively
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -75,6 +76,9 @@ namespace AdalDesktopTestApp
                             string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
                             task = context.AcquireTokenAsync(resource, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Auto),
                                 new UserIdentifier(user, UserIdentifierType.OptionalDisplayableId), null, claims);
+                            break;
+                        case 4: // acquire token interactive
+                            task = context.AcquireTokenAsync(resource, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Auto));
                             break;
                         case 0:
                             return;
