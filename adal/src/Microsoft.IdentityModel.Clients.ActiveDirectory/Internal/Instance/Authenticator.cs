@@ -105,6 +105,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
             {
                 var authorityUri = new Uri(this.Authority);
                 var host = authorityUri.Host;
+
+                // The authority could be https://{AzureAD host name}/{tenantid} OR https://{Dsts host name}/dstsv2/{tenantid}
+                // Detecting the tenantId using the last segment of the url
                 string tenant = authorityUri.Segments[authorityUri.Segments.Length - 1].TrimEnd('/');
                 if (this.AuthorityType == AuthorityType.AAD)
                 {

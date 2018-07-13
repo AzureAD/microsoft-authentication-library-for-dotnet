@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -224,7 +225,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
             {
-                this.Result = new AuthorizationResult(AuthorizationStatus.Success, GetAuthenticationCode(((CustomWebBrowser)sender).Document));
+                if (!(sender is CustomWebBrowser))
+                {
+                    throw new AdalException(AdalError.InvalidWebBrowserType,
+                    "Invalid web browser type. Expected CustomWebBrowser for the sender object type.");
+                }
+
+                if (((CustomWebBrowser)sender).Document == null)
+                {
+                    throw new AdalException(AdalError.InvalidWebPageResponse,
+                    "Invalid web page response type. WebPage should not be null in the response.");
+                }
+
+                this.Result = new AuthorizationResult(AuthorizationStatus.Success, GetUrlFromDocument(url, ((CustomWebBrowser)sender).Document));
                 canClose = true;
             }
 
@@ -251,25 +264,33 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             return canClose;
         }
 
-        private string GetAuthenticationCode(HtmlDocument document)
+        private string GetUrlFromDocument(Uri url, HtmlDocument document)
         {
-            string result = null;
+            UriBuilder uriBuilder = new UriBuilder(url);
+            List<string> parameters = new List<string>();
+
             HtmlElementCollection elems = document.GetElementsByTagName("input");
-            foreach(HtmlElement elem in elems)
+            foreach (HtmlElement elem in elems)
             {
                 string name = elem.GetAttribute("name");
-                if(!string.IsNullOrEmpty(name))
+                if (!string.IsNullOrEmpty(name))
                 {
-                    if(string.Equals(name, "code", StringComparison.OrdinalIgnoreCase))
+                    string value = elem.GetAttribute("value");
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        result = elem.GetAttribute("value");
-                        result = Constants.FormPostPrefix + result;
-                        break;
+                        parameters.Add($"{name}={elem.GetAttribute("value")}");
                     }
                 }
             }
 
-            return result;
+            if (parameters.Count == 0)
+            {
+                throw new AdalException(AdalError.FormPostParsingFailure,
+                    "Could not find any parameters during form post parsing. Invalid response from server.");
+            }
+
+            uriBuilder.Query = string.Join("&", parameters);
+            return uriBuilder.Uri.OriginalString;
         }
 
         private void StopWebBrowser()

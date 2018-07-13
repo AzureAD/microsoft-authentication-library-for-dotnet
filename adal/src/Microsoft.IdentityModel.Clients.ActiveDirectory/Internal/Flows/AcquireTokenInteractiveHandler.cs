@@ -207,7 +207,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
 #if DESKTOP
             // Added form_post as a way to request to ensure we can handle large requests for dsts scenarios
-            authorizationRequestParameters[OAuthParameter.ResponseMode] = OAuthResponseModeType.FormPost;
+            authorizationRequestParameters[OAuthParameter.ResponseMode] = OAuthResponseMode.FormPost;
 #endif
 
             if (!string.IsNullOrWhiteSpace(loginHint))

@@ -275,6 +275,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Claims step-up required.
         /// </summary>
         public const string InteractionRequired = "interaction_required";
+
+        /// <summary>
+        /// Invalid web browser type.
+        /// </summary>
+        public const string InvalidWebBrowserType = "invalid_web_browser_type";
+
+        /// <summary>
+        /// Invalid web page response
+        /// </summary>
+        public const string InvalidWebPageResponse = "invalid_web_page_response";
+
+        /// <summary>
+        /// Form post parsing failure
+        /// </summary>
+        public const string FormPostParsingFailure = "form_post_parsing_failure";
     }
 
 }

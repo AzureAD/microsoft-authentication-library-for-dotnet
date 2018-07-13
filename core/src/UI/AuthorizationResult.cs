@@ -87,13 +87,6 @@ namespace Microsoft.Identity.Core.UI
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
         {
-            if (!string.IsNullOrWhiteSpace(webAuthenticationResult) &&
-                webAuthenticationResult.StartsWith(Constants.FormPostPrefix, StringComparison.OrdinalIgnoreCase))
-            {
-                this.Code = webAuthenticationResult.Substring(Constants.FormPostPrefix.Length);
-                return;
-            }
-
             var resultUri = new Uri(webAuthenticationResult);
 
             // NOTE: The Fragment property actually contains the leading '#' character and that must be dropped

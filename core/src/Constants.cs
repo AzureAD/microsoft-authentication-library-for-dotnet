@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Core
         public const int ExpirationMarginInMinutes = 5;
         public const int CodeVerifierLength = 128;
         public const int CodeVerifierByteSize = 32;
-        public const string FormPostPrefix = "formpost://";
     }
 
 

@@ -57,6 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 
             if (message.Length < MaxUrlEncodingSize)
             {
+                // This optimization is done for most common scenarios where the message length will not exceed MaxUrlEncodingSize
                 message = Uri.EscapeDataString(message);
                 message = message.Replace("%20", "+");
             }

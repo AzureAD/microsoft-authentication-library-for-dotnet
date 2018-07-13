@@ -70,7 +70,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
         public const string Code = "code";
     }
 
-    internal static class OAuthResponseModeType
+    internal static class OAuthResponseMode
     {
         public const string FormPost = "form_post";
     }
