@@ -52,47 +52,31 @@ namespace AdalDesktopTestApp
 
                 int.TryParse(Console.ReadLine(), out var selection);
 
-                switch (selection)
+                try
                 {
-                    case 1: // acquire token
-                        try
-                        {
+                    switch (selection)
+                    {
+                        case 1: // acquire token
                             LoggerCallbackHandler.PiiLoggingEnabled = false;
                             AcquireTokenAsync().Wait();
-                        }
-                        catch (AggregateException ae)
-                        {
-                            Console.WriteLine(ae.InnerException.Message);
-                            Console.WriteLine(ae.InnerException.StackTrace);
-                        }
-                        break;
-                    case 2: // acquire token with pii logging enabled
-                        try
-                        {
+                            break;
+                        case 2: // acquire token with pii logging enabled
                             LoggerCallbackHandler.PiiLoggingEnabled = true;
                             AcquireTokenAsync().Wait();
-                        }
-                        catch (AggregateException ae)
-                        {
-                            Console.WriteLine(ae.InnerException.Message);
-                            Console.WriteLine(ae.InnerException.StackTrace);
-                        }
-                        break;
-                    case 3: // acquire token with claims
-                        try
-                        {
+                            break;
+                        case 3: // acquire token with claims
                             AcquireTokenWithClaimsAsync().Wait();
-                        }
-                        catch (AggregateException ae)
-                        {
-                            Console.WriteLine(ae.InnerException.Message);
-                            Console.WriteLine(ae.InnerException.StackTrace);
-                        }
-                        break;
-                    case 0:
-                        return;
-                    default:
-                        break;
+                            break;
+                        case 0:
+                            return;
+                        default:
+                            break;
+                    }
+                }
+                catch (AggregateException ae)
+                {
+                    Console.WriteLine(ae.InnerException.Message);
+                    Console.WriteLine(ae.InnerException.StackTrace);
                 }
 
                 Console.WriteLine("\n\nHit 'ENTER' to continue...");
