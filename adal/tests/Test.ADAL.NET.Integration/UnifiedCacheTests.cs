@@ -59,7 +59,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test unified token cache")]
-        public async Task UnifedCache_AdalStoresToAndReadRtFromMsalCache()
+        public async Task UnifedCache_AdalStoresToAndReadRtFromMsalCacheAsync()
         {
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(
                 TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));

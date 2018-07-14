@@ -311,7 +311,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        public async Task ResponseSizeAtLimitTest()
+        public async Task ResponseSizeAtLimitTestAsync()
         {
             var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var stringChars = new char[1048576];

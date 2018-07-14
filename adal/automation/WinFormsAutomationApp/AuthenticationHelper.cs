@@ -18,7 +18,7 @@ namespace WinFormsAutomationApp
     internal static class AuthenticationHelper
     {
         #region Public Methods      
-        public static async Task<string> AcquireToken(Dictionary<string, string> input)
+        public static async Task<string> AcquireTokenAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
@@ -88,7 +88,7 @@ namespace WinFormsAutomationApp
             return FromDictionaryToJson(res);
         }
 
-        public static async Task<string> AcquireTokenSilent(Dictionary<string, string> input)
+        public static async Task<string> AcquireTokenSilentAsync(Dictionary<string, string> input)
         {
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
             Dictionary<string, object> res = new Dictionary<string, object>();
@@ -104,7 +104,7 @@ namespace WinFormsAutomationApp
             return FromDictionaryToJson(res);
         }
 
-        public static async Task<string> ExpireAccessToken(Dictionary<string, string> input)
+        public static async Task<string> ExpireAccessTokenAsync(Dictionary<string, string> input)
         {
 
             Task<string> myTask = Task.Run(async () =>
@@ -121,7 +121,7 @@ namespace WinFormsAutomationApp
                     {
                         var updated = item;
                         updated.Value.Result.ExpiresOn = DateTime.UtcNow;
-                        await UpdateCache(item, updated).ConfigureAwait(false);
+                        await UpdateCacheAsync(item, updated).ConfigureAwait(false);
                     }
                 }
                 Dictionary<string, object> output = new Dictionary<string, object>();
@@ -134,7 +134,7 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        public static async Task<string> InvalidateRefreshToken(Dictionary<string, string> input)
+        public static async Task<string> InvalidateRefreshTokenAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> output = new Dictionary<string, object>();
             Task<string> myTask = Task.Run(async () =>
@@ -150,7 +150,7 @@ namespace WinFormsAutomationApp
                         var updated = item;
                         updated.Value.RefreshToken = "bad_refresh_token";
                         updated.Value.Result.ExpiresOn = DateTime.UtcNow;
-                        await UpdateCache(item, updated).ConfigureAwait(false);
+                        await UpdateCacheAsync(item, updated).ConfigureAwait(false);
                     }
                     //Send back error if userId or displayableId is not sent back to the user
                     output.Add("invalidated_refresh_token_count", CacheItems.Count.ToString());
@@ -165,7 +165,7 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        public static async Task<string> ReadCache()
+        public static async Task<string> ReadCacheAsync()
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
@@ -188,7 +188,7 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        public static async Task<string> ClearCache(Dictionary<string, string> input)
+        public static async Task<string> ClearCacheAsync(Dictionary<string, string> input)
         {
             Task<string> myTask = Task<string>.Factory.StartNew(() =>
             {
@@ -203,7 +203,7 @@ namespace WinFormsAutomationApp
             return await myTask.ConfigureAwait(false);
         }
 
-        public static async Task<string> AcquireTokenUsingDeviceProfile(Dictionary<string, string> input)
+        public static async Task<string> AcquireTokenUsingDeviceProfileAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
@@ -232,7 +232,7 @@ namespace WinFormsAutomationApp
             return FromDictionaryToJson(res);
         }
 
-        public static async Task<string> AcquireDeviceCode(Dictionary<string, string> input)
+        public static async Task<string> AcquireDeviceCodeAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
             AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
@@ -374,7 +374,7 @@ namespace WinFormsAutomationApp
             });
         }
 
-        private static async Task UpdateCache(KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> item, KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> updated)
+        private static async Task UpdateCacheAsync(KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> item, KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> updated)
         {
             NotifyBeforeAccessCache(item.Key.Resource, item.Key.ClientId, item.Value.Result.UserInfo.UniqueId, item.Value.Result.UserInfo.DisplayableId);
             TokenCache.DefaultShared.tokenCacheDictionary[updated.Key] = updated.Value;

@@ -36,11 +36,11 @@ namespace WinFormsAutomationApp
 
         private void acquireToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.AcquireToken;
+            _commandToRun = AuthenticationHelper.AcquireTokenAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
-
-        private async void requestGo_Click(object sender, EventArgs e)
+        
+        private async void RequestGo_Click(object sender, EventArgs e)
         {
              string output = await _commandToRun((AuthenticationHelper.CreateDictionaryFromJson(requestInfo.Text)));
             pageControl1.SelectedTab = resultPage;
@@ -57,25 +57,25 @@ namespace WinFormsAutomationApp
 
         private void acquireTokenSilent_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.AcquireTokenSilent;
+            _commandToRun = AuthenticationHelper.AcquireTokenSilentAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private void expireAccessToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.ExpireAccessToken;
+            _commandToRun = AuthenticationHelper.ExpireAccessTokenAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private void invalidateRefreshToken_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.InvalidateRefreshToken;
+            _commandToRun = AuthenticationHelper.InvalidateRefreshTokenAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private async void readCache_Click(object sender, EventArgs e)
         {
-            string output = await AuthenticationHelper.ReadCache(); ;
+            string output = await AuthenticationHelper.ReadCacheAsync(); ;
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
             resultLogs.Text = GetAdalLogs();
@@ -83,7 +83,7 @@ namespace WinFormsAutomationApp
 
         private async void clearCache_Click(object sender, EventArgs e)
         {
-            string output = await AuthenticationHelper.ClearCache(null);
+            string output = await AuthenticationHelper.ClearCacheAsync(null);
             pageControl1.SelectedTab = resultPage;
             resultInfo.Text = output;
             resultLogs.Text = GetAdalLogs();
@@ -91,13 +91,13 @@ namespace WinFormsAutomationApp
 
         private void acquireTokenDeviceProfile_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.AcquireTokenUsingDeviceProfile;
+            _commandToRun = AuthenticationHelper.AcquireTokenUsingDeviceProfileAsync;
             pageControl1.SelectedTab = dataInputPage;
         }
 
         private void acquireDeviceCode_Click(object sender, EventArgs e)
         {
-            _commandToRun = AuthenticationHelper.AcquireDeviceCode;
+            _commandToRun = AuthenticationHelper.AcquireDeviceCodeAsync;
             pageControl1.SelectedTab = dataInputPage;
         }        
     }

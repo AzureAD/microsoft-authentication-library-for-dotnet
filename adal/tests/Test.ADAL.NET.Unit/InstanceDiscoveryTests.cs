@@ -60,7 +60,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenAuthorityIsInvalidButValidationIsNotRequired_ShouldCacheTheProvidedAuthority()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsInvalidButValidationIsNotRequired_ShouldCacheTheProvidedAuthorityAsync()
         {
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
             {
@@ -88,7 +88,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenAuthorityIsValidButNoMetadataIsReturned_ShouldCacheTheProvidedAuthority()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsValidButNoMetadataIsReturned_ShouldCacheTheProvidedAuthorityAsync()
         {
             string host = "login.windows.net";  // A whitelisted host
             RequestContext requestContext =new RequestContext(new AdalLogger(new Guid()));
@@ -129,7 +129,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenAuthorityIsValidAndMetadataIsReturned_ShouldCacheAllReturnedAliases()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsValidAndMetadataIsReturned_ShouldCacheAllReturnedAliasesAsync()
         {
             string host = "login.windows.net";
             for (int i = 0; i < 2; i++) // Prepare 2 mock responses
@@ -170,7 +170,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenAuthorityIsAdfs_ShouldNotDoInstanceDiscovery()
+        public async Task TestInstanceDiscovery_WhenAuthorityIsAdfs_ShouldNotDoInstanceDiscoveryAsync()
         {
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
             var authenticator = new Authenticator("https://login.contoso.com/adfs", false);
@@ -180,7 +180,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestGetOrderedAliases_ShouldStartWithPreferredCacheAndGivenHost()
+        public async Task TestGetOrderedAliases_ShouldStartWithPreferredCacheAndGivenHostAsync()
         {
             string givenHost = "sts.microsoft.com";
             string preferredCache = "login.windows.net";
@@ -248,7 +248,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequest()
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequestAsync()
         {
             string host = "login.windows.net";
             string preferredNetwork = "login.microsoftonline.com";
@@ -281,7 +281,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForUserRealmDiscovery()
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForUserRealmDiscoveryAsync()
         {
             string host = "login.windows.net";
             string preferredNetwork = "login.microsoftonline.com";
@@ -316,7 +316,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForDeviceCodeRequest()
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForDeviceCodeRequestAsync()
         {
             string host = "login.windows.net";
             string preferredNetwork = "login.microsoftonline.com";

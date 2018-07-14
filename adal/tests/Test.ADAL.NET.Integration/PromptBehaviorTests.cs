@@ -96,7 +96,7 @@ namespace Test.ADAL.NET.Integration
         
         [TestMethod]
         [Description("Test for calling promptBehavior.Auto when cache already has an access token")]
-        public async Task AutoPromptBehaviorWithTokenInCacheTest()
+        public async Task AutoPromptBehaviorWithTokenInCacheTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
@@ -291,7 +291,7 @@ namespace Test.ADAL.NET.Integration
         
         [TestMethod]
         [Description("Test for Force Prompt with PromptBehavior.Never")]
-        public void ForcePromptForNeverPromptBehaviorTestAsync()
+        public void ForcePromptForNeverPromptBehaviorTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
 

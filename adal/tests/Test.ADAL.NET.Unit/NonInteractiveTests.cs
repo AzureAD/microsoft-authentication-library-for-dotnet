@@ -67,7 +67,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Get WsTrust Address from mex")]
-        public async Task MexParserGetWsTrustAddressTest()
+        public async Task MexParserGetWsTrustAddressTestAsync()
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
 
@@ -89,7 +89,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("User Realm Discovery Test")]
-        public async Task UserRealmDiscoveryTest()
+        public async Task UserRealmDiscoveryTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" 
                 + TestConstants.DefaultDisplayableId, new TokenCache());
@@ -151,7 +151,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Cloud Audience Urn Test")]
-        public async Task CloudAudienceUrnTest()
+        public async Task CloudAudienceUrnTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             await context.Authenticator.UpdateFromTemplateAsync(null);
@@ -203,7 +203,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Cloud Audience Urn Null Test")]
-        public async Task CloudAudienceUrnNullTest()
+        public async Task CloudAudienceUrnNullTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             await context.Authenticator.UpdateFromTemplateAsync(null);
@@ -253,7 +253,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
-        public async Task WsTrust2005AddressExtractionTest()
+        public async Task WsTrust2005AddressExtractionTestAsync()
         {
             await Task.Factory.StartNew(() =>
             {
@@ -275,7 +275,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("WS-Trust Request Test")]
-        public async Task WsTrustRequestTest()
+        public async Task WsTrustRequestTestAsync()
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
 
@@ -316,7 +316,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("WS-Trust Request Generic Cloud Urn Test")]
-        public async Task WsTrustRequestGenericCloudUrnTest()
+        public async Task WsTrustRequestGenericCloudUrnTestAsync()
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
 

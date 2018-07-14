@@ -63,7 +63,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Sovereign user use world wide authority")]
-        public async Task SovereignUserWorldWideAuthorityIntegrationTest()
+        public async Task SovereignUserWorldWideAuthorityIntegrationTestAsync()
         {
             // creating AuthenticationContext with common Authority
             var authenticationContext =

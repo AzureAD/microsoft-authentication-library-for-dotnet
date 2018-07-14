@@ -58,7 +58,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for inner exception in claims challenge exception")]
-        public void InnerExceptionIncludedWithAdalClaimsChallengeExceptionTestAsync()
+        public void InnerExceptionIncludedWithAdalClaimsChallengeExceptionTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -82,7 +82,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for claims challenge exception with client credential")]
-        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialWhenClaimsChallengeRequiredTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -103,7 +103,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for claims challenge exception with client credential and user assertion")]
-        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialUserAssertionWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAcquireTokenClientCredentialUserAssertionWhenClaimsChallengeRequiredTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -125,7 +125,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for claims challenge exception with client assertion")]
-        public void AdalClaimsChallengeExceptionThrownWithClientAssertionWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithClientAssertionWhenClaimsChallengeRequiredTest()
         {
             var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
@@ -147,7 +147,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for claims challenge exception with auth code")]
-        public void AdalClaimsChallengeExceptionThrownWithAuthCodeWhenClaimsChallengeRequiredTestAsync()
+        public void AdalClaimsChallengeExceptionThrownWithAuthCodeWhenClaimsChallengeRequiredTest()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             ClientAssertion clientAssertion = new ClientAssertion(TestConstants.DefaultClientId, "some-assertion");

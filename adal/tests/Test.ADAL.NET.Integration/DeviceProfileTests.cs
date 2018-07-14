@@ -60,7 +60,7 @@ namespace Test.ADAL.NET.Integration
         }
 
         [TestMethod]
-        public async Task PositiveTest()
+        public async Task PositiveTestAsync()
         {
             DeviceCodeResult dcr = new DeviceCodeResult()
             {
@@ -108,7 +108,7 @@ namespace Test.ADAL.NET.Integration
         }
 
         [TestMethod]
-        public async Task FullCoveragePositiveTest()
+        public async Task FullCoveragePositiveTestAsync()
         {
 
             MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
@@ -186,7 +186,7 @@ namespace Test.ADAL.NET.Integration
         }
 
         [TestMethod]
-        public async Task NegativeDeviceCodeTimeoutTest()
+        public async Task NegativeDeviceCodeTimeoutTestAsync()
         {
             MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
             {

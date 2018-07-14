@@ -50,6 +50,10 @@ namespace Microsoft.Identity.Client
         }
 
 #if iOS
+        /// <summary>
+        /// Constructor for iOS for implementing embedded webview
+        /// </summary>
+        /// <remarks>This method is likely to be removed before final release</remarks>
         public UIParent(bool useEmbeddedWebview) : this()
         {
             CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;

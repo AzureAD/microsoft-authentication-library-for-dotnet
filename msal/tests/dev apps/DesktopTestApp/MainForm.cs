@@ -135,7 +135,7 @@ namespace DesktopTestApp
         #endregion
 
         #region PublicClientApplication Acquire Token
-        private async void acquireTokenInteractive_Click(object sender, EventArgs e)
+        private async void AcquireTokenInteractive_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
             _publicClientHandler.LoginHint = loginHintTextBox.Text;
@@ -153,7 +153,7 @@ namespace DesktopTestApp
 
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractive(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
 
                 SetResultPageInfo(authenticationResult);
                 RefreshUserList();
@@ -163,7 +163,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-
+        
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
@@ -181,7 +181,7 @@ namespace DesktopTestApp
             try
             {
                 AuthenticationResult authenticationResult =
-                    await _publicClientHandler.AcquireTokenSilent(scopes.Text.AsArray());
+                    await _publicClientHandler.AcquireTokenSilentAsync(scopes.Text.AsArray());
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -190,7 +190,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-
+        
         private async void acquireTokenInteractiveAuthority_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
@@ -209,7 +209,7 @@ namespace DesktopTestApp
 
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthority(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
 
                 SetResultPageInfo(authenticationResult);
             }

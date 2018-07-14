@@ -115,7 +115,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test for AcquireToken with valid token in cache")]
-        public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedToken()
+        public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedTokenAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
@@ -144,7 +144,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test for AcquireToken for a user when a valid access token already exists in cache for another user.")]
-        public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsTokenFromService()
+        public async Task AcquireTokenWithValidAccessTokenInCacheForAnotherUser_GetsTokenFromServiceAsync()
         {
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(
             TestConstants.DefaultAuthorityCommonTenant + "userrealm/user2@id.com")
@@ -216,7 +216,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test case with expired access token and valid refresh token in cache. This should result in refresh token being used to get new AT instead of user creds")]
-        public async Task AcquireTokenWithExpiredAccessTokenAndValidRefreshToken_GetsATUsingRT()
+        public async Task AcquireTokenWithExpiredAccessTokenAndValidRefreshToken_GetsATUsingRTAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
@@ -280,7 +280,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [Description("Test case where user realm discovery fails.")]
-        public void UserRealmDiscoveryFailsTestAsync()
+        public void UserRealmDiscoveryFailsTest()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
 

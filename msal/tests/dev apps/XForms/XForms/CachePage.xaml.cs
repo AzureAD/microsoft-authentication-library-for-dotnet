@@ -153,7 +153,7 @@ namespace XForms
             RefreshCacheView();
         }
 
-        public async Task ShowAccessTokenDetails(object sender, EventArgs e)
+        public async Task ShowAccessTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem) sender;
             var accessTokenCacheItem = (MsalAccessTokenCacheItem) mi.CommandParameter;
@@ -162,7 +162,7 @@ namespace XForms
             await Navigation.PushAsync(new AccessTokenCacheItemDetails(accessTokenCacheItem, null));
         }
 
-        public async Task ShowRefreshTokenDetails(object sender, EventArgs e)
+        public async Task ShowRefreshTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var refreshTokenCacheItem = (MsalRefreshTokenCacheItem)mi.CommandParameter;
@@ -170,7 +170,7 @@ namespace XForms
             await Navigation.PushAsync(new RefreshTokenCacheItemDetails(refreshTokenCacheItem));
         }
 
-        public async Task ShowIdTokenDetails(object sender, EventArgs e)
+        public async Task ShowIdTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var idTokenCacheItem = (MsalIdTokenCacheItem)mi.CommandParameter;
@@ -179,7 +179,7 @@ namespace XForms
             await Navigation.PushAsync(new IdTokenCacheItemDetails(idTokenCacheItem));
         }
 
-        public async Task ShowAccountDetails(object sender, EventArgs e)
+        public async Task ShowAccountDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var accountCacheItem = (MsalAccountCacheItem)mi.CommandParameter;
