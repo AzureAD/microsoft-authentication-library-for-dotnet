@@ -48,7 +48,7 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
-        public async Task PositiveTest()
+        public async Task PositiveTestAsync()
         {
             DeviceCodeResult dcr = new DeviceCodeResult()
             {

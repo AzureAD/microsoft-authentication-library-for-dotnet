@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Core.Cache
             Environment = environment;
             PreferredUsername = preferredUsername;
             Name = name;
-            TenantId = TenantId;
+            TenantId = tenantId;
             LocalAccountId = localAccountId;
             RawClientInfo = rawClientInfo;
 

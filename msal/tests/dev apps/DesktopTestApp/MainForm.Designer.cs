@@ -501,7 +501,7 @@ namespace DesktopTestApp
             this.acquireTokenInteractive.TabIndex = 9;
             this.acquireTokenInteractive.Text = "Acquire Token Interactive";
             this.acquireTokenInteractive.UseVisualStyleBackColor = true;
-            this.acquireTokenInteractive.Click += new System.EventHandler(this.acquireTokenInteractive_Click);
+            this.acquireTokenInteractive.Click += new System.EventHandler(this.AcquireTokenInteractive_Click);
             // 
             // acquireTokenSilent
             // 

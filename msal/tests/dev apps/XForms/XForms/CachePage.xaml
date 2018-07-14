@@ -31,7 +31,7 @@
                     <DataTemplate>
                         <ViewCell>
                             <ViewCell.ContextActions>
-                                <MenuItem Clicked="ShowAccessTokenDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                                <MenuItem Clicked="ShowAccessTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
                                 <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding Value}" />
                                 <MenuItem Clicked="OnAtDelete" Text="Delete" CommandParameter="{Binding Value}" />
                             </ViewCell.ContextActions>
@@ -61,7 +61,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowRefreshTokenDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <MenuItem Clicked="ShowRefreshTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
                             <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding Value}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
@@ -91,7 +91,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowIdTokenDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <MenuItem Clicked="ShowIdTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
 
@@ -120,7 +120,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowAccountDetails" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <MenuItem Clicked="ShowAccountDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
 

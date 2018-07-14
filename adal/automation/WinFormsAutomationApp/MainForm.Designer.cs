@@ -190,7 +190,7 @@
             this.requestGo.TabIndex = 1;
             this.requestGo.Text = "GO!";
             this.requestGo.UseVisualStyleBackColor = true;
-            this.requestGo.Click += new System.EventHandler(this.requestGo_Click);
+            this.requestGo.Click += new System.EventHandler(this.RequestGo_Click);
             // 
             // requestInfo
             // 

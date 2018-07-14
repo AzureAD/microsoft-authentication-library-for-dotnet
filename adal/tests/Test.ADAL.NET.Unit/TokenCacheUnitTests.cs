@@ -58,9 +58,9 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
-        public async Task TestUniqueIdDisplayableIdLookup()
+        public async Task TestUniqueIdDisplayableIdLookupAsync()
         {
-            await TokenCacheTests.TestUniqueIdDisplayableIdLookup();
+            await TokenCacheTests.TestUniqueIdDisplayableIdLookupAsync();
         }
 
         [TestMethod]
@@ -74,9 +74,9 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Test for Token Cache Operations")]
         [TestCategory("AdalDotNetUnit")]
-        public async Task TokenCacheOperationsTest()
+        public async Task TokenCacheOperationsTestAsync()
         {
-            await TokenCacheTests.TokenCacheOperationsTest().ConfigureAwait(false);
+            await TokenCacheTests.TokenCacheOperationsTestAsync().ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -98,9 +98,9 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Test for Multiple User tokens found, hash fallback test")]
         [TestCategory("AdalDotNetUnit")]
-        public async Task MultipleUserAssertionHashTest()
+        public async Task MultipleUserAssertionHashTestAsync()
         {
-            await TokenCacheTests.MultipleUserAssertionHashTest().ConfigureAwait(false);
+            await TokenCacheTests.MultipleUserAssertionHashTestAsync().ConfigureAwait(false);
         }
 
         [TestMethod]

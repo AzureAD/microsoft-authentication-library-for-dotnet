@@ -72,7 +72,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserNoHashInCacheNoUsernamePassedInAssertionTest()
+        public async Task MultiUserNoHashInCacheNoUsernamePassedInAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -134,7 +134,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserNoHashInCacheMatchingUsernamePassedInAssertionTest()
+        public async Task MultiUserNoHashInCacheMatchingUsernamePassedInAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -197,7 +197,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserNoHashInCacheDifferentUsernamePassedInAssertionTest()
+        public async Task MultiUserNoHashInCacheDifferentUsernamePassedInAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -266,7 +266,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserWithHashInCacheNoUsernameAndMatchingAssertionTest()
+        public async Task MultiUserWithHashInCacheNoUsernameAndMatchingAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -316,7 +316,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserWithHashInCacheNoUsernameAndDifferentAssertionTest()
+        public async Task MultiUserWithHashInCacheNoUsernameAndDifferentAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -379,7 +379,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserWithHashInCacheMatchingUsernameAndMatchingAssertionTest()
+        public async Task MultiUserWithHashInCacheMatchingUsernameAndMatchingAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -432,7 +432,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task MultiUserWithHashInCacheMatchingUsernameAndDifferentAssertionTest()
+        public async Task MultiUserWithHashInCacheMatchingUsernameAndDifferentAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -494,7 +494,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserNoHashInCacheNoUsernamePassedInAssertionTest()
+        public async Task SingleUserNoHashInCacheNoUsernamePassedInAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -552,7 +552,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserNoHashInCacheMatchingUsernamePassedInAssertionTest()
+        public async Task SingleUserNoHashInCacheMatchingUsernamePassedInAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -611,7 +611,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserNoHashInCacheDifferentUsernamePassedInAssertionTest()
+        public async Task SingleUserNoHashInCacheDifferentUsernamePassedInAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -677,7 +677,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserWithHashInCacheNoUsernameAndMatchingAssertionTest()
+        public async Task SingleUserWithHashInCacheNoUsernameAndMatchingAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -727,7 +727,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserWithHashInCacheNoUsernameAndDifferentAssertionTest()
+        public async Task SingleUserWithHashInCacheNoUsernameAndDifferentAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -789,7 +789,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserWithHashInCacheMatchingUsernameAndMatchingAssertionTest()
+        public async Task SingleUserWithHashInCacheMatchingUsernameAndMatchingAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -839,7 +839,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserWithHashInCacheMatchingUsernameAndDifferentAssertionTest()
+        public async Task SingleUserWithHashInCacheMatchingUsernameAndDifferentAssertionTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
@@ -900,7 +900,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("OboFlowTests")]
-        public async Task SingleUserWithHashInCacheMatchingUsernameAndMatchingAssertionDifferentResourceTest()
+        public async Task SingleUserWithHashInCacheMatchingUsernameAndMatchingAssertionDifferentResourceTestAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";

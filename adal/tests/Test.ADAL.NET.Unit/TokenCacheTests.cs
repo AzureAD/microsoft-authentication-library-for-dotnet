@@ -177,7 +177,7 @@ namespace Test.ADAL.Common.Unit
         /// detected exception.
         /// </summary>
         /// <returns></returns>
-        public static async Task TestUniqueIdDisplayableIdLookup()
+        public static async Task TestUniqueIdDisplayableIdLookupAsync()
         {
 
             string authority = "https://www.gotjwt.com/";
@@ -335,7 +335,7 @@ namespace Test.ADAL.Common.Unit
             AdalResultWrapper value = CreateCacheValue(null, "user1");
         }
 
-        internal static async Task TokenCacheOperationsTest()
+        internal static async Task TokenCacheOperationsTestAsync()
         {
             var tokenCache = new TokenCache();
             var cacheDictionary = tokenCache.tokenCacheDictionary;
@@ -485,7 +485,7 @@ namespace Test.ADAL.Common.Unit
             Assert.AreEqual(0, cacheDictionary.Keys.Count);
         }
 
-        internal static async Task MultipleUserAssertionHashTest()
+        internal static async Task MultipleUserAssertionHashTestAsync()
         {
             AdalTokenCacheKey key = new AdalTokenCacheKey("https://localhost/MockSts/", "resource1", "client1",
                 TokenSubjectType.Client, null, "user1");

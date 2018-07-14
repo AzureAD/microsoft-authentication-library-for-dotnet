@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("GetAllAdalUsersForMsal falid due to Exception - " + ex);
+                CoreLoggerBase.Default.Warning("GetAllAdalUsersForMsal failed due to Exception - " + ex);
             }
             return users;
         }
@@ -164,7 +164,7 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("RemoveAdalUser falid due to Exception - " + ex);
+                CoreLoggerBase.Default.Warning("RemoveAdalUser failed due to Exception - " + ex);
             }
             return users;
         }
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("GetAllAdalEntriesForMsal falid due to Exception - " + ex);
+                CoreLoggerBase.Default.Warning("GetAllAdalEntriesForMsal failed due to Exception - " + ex);
 
                 return new List<MsalRefreshTokenCacheItem>();
             }

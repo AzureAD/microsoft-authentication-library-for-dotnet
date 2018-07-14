@@ -61,7 +61,7 @@ namespace DesktopTestApp
 
         #endregion
 
-        public async Task<AuthenticationResult> AcquireTokenInteractive(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
+        public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
         {
             CreatePublicClientApplication(InteractiveAuthority, ApplicationId);
 
@@ -84,7 +84,7 @@ namespace DesktopTestApp
             return result;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthority(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
+        public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthorityAsync(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
         {
             CreatePublicClientApplication(InteractiveAuthority, ApplicationId);
 
@@ -107,7 +107,7 @@ namespace DesktopTestApp
             return result;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenSilent(string[] scopes)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
         {
             return await PublicClientApplication.AcquireTokenSilentAsync(scopes, CurrentUser, AuthorityOverride,
                         false);

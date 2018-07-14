@@ -58,7 +58,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Json Web Token with client assertion and a X509 public certificate claim")]
-        public async Task JsonWebTokenWithX509PublicCertClaimTest()
+        public async Task JsonWebTokenWithX509PublicCertClaimTestAsync()
         {
             var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
@@ -94,7 +94,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Json Web Token with developer implemented client assertion")]
-        public async Task JsonWebTokenWithDeveloperImplementedClientAssertionTest()
+        public async Task JsonWebTokenWithDeveloperImplementedClientAssertionTestAsync()
         {
             var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionTestImplementation();

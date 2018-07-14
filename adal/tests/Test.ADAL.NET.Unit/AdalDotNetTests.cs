@@ -80,7 +80,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Positive Test for AcquireToken")]
         [TestCategory("AdalDotNet")]
-        public async Task SmokeTest()
+        public async Task SmokeTestAsync()
         {
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
@@ -109,7 +109,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Positive Test for AcquireToken with extended expires on support")]
         [TestCategory("AdalDotNet")]
-        public async Task SmokeTestWithExtendedExpiresOn()
+        public async Task SmokeTestWithExtendedExpiresOnAsync()
         {
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
@@ -138,7 +138,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Positive Test for ExtendedLife Feature")]
         [TestCategory("AdalDotNet")]
-        public async Task ExtendedLifetimeRetry()
+        public async Task ExtendedLifetimeRetryAsync()
         {
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                  TestConstants.DefaultRedirectUri + "?code=some-code"));
@@ -171,7 +171,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Positive Test for ExtendedLife Feature returning back a stale AT")]
         [TestCategory("AdalDotNet")]
-        public async Task ExtendedLifetimePositiveTest()
+        public async Task ExtendedLifetimePositiveTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -206,7 +206,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Expiry time test for ExtendedLife Feature not returning back a stale AT")]
         [TestCategory("AdalDotNet")]
-        public async Task ExtendedLifetimeExpiredTest()
+        public async Task ExtendedLifetimeExpiredTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -246,7 +246,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Test for returning back a stale AT")]
         [TestCategory("AdalDotNet")]
-        public async Task ExtendedLifetimeTokenTest()
+        public async Task ExtendedLifetimeTokenTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -292,7 +292,7 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         [Description("Test for returning back a stale AT in case of Network failure")]
         [TestCategory("AdalDotNet")]
-        public async Task ExtendedLifetimeRequestTimeoutTest()
+        public async Task ExtendedLifetimeRequestTimeoutTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -336,7 +336,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for ExtendedLifetime feature flag being set in normal(non-outage) for Client Credentials")]
-        public async Task ClientCredentialExtendedExpiryFlagSet()
+        public async Task ClientCredentialExtendedExpiryFlagSetAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -379,7 +379,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for ExtendedLifetime feature flag being not set in normal(non-outage) for Client Credentials")]
-        public async Task ClientCredentialExtendedExpiryFlagNotSet()
+        public async Task ClientCredentialExtendedExpiryFlagNotSetAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var credential = new ClientCredential(TestConstants.DefaultClientId, TestConstants.DefaultClientSecret);
@@ -422,7 +422,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for getting back access token when the extendedExpiresOn flag is set")]
-        public async Task ClientCredentialExtendedExpiryPositiveTest()
+        public async Task ClientCredentialExtendedExpiryPositiveTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -733,7 +733,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Negative Test for AcquireToken with invalid resource")]
-        public void AcquireTokenWithInvalidResourceTestAsync()
+        public void AcquireTokenWithInvalidResourceTest()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
@@ -785,7 +785,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Positive Test for AcquireToken testing default token cache")]
-        public async Task AcquireTokenPositiveWithNullCacheTest()
+        public async Task AcquireTokenPositiveWithNullCacheTestAsync()
         {
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
@@ -830,7 +830,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for acquring token using tenant specific endpoint")]
-        public async Task TenantSpecificAuthorityTest()
+        public async Task TenantSpecificAuthorityTestAsync()
         {
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                 TestConstants.DefaultRedirectUri + "?code=some-code"));
@@ -857,7 +857,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Positive Test for Confidential Client")]
-        public async Task ConfidentialClientWithX509Test()
+        public async Task ConfidentialClientWithX509TestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             var certificate = new ClientAssertionCertificate(TestConstants.DefaultClientId,
@@ -1005,7 +1005,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Client assertion with X509")]
-        public async Task ClientAssertionWithX509Test()
+        public async Task ClientAssertionWithX509TestAsync()
         {
             var certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(TestConstants.DefaultClientId, certificate);
@@ -1057,7 +1057,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for Confidential Client with self signed jwt")]
-        public async Task ConfidentialClientWithJwtTest()
+        public async Task ConfidentialClientWithJwtTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
 
@@ -1116,7 +1116,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
-        public async Task AcquireTokenOnBehalfAndClientCredentialTest()
+        public async Task AcquireTokenOnBehalfAndClientCredentialTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             string accessToken = "some-access-token";
@@ -1172,7 +1172,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
-        public async Task AcquireTokenOnBehalfAndClientCertificateCredentialTest()
+        public async Task AcquireTokenOnBehalfAndClientCertificateCredentialTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             string accessToken = "some-access-token";
@@ -1225,7 +1225,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for GetAuthorizationRequestURL")]
-        public async Task GetAuthorizationRequestUrlTest()
+        public async Task GetAuthorizationRequestUrlTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             Uri uri = null;
@@ -1250,7 +1250,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for GetAuthorizationRequestURL with claims")]
-        public async Task GetAuthorizationRequestUrlWithClaimsTest()
+        public async Task GetAuthorizationRequestUrlWithClaimsTestAsync()
         {
             context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
             Uri uri = null;
@@ -1343,7 +1343,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [Description("Test for ensuring ADAL returns the appropriate headers during a http failure.")]
-        public async Task HttpErrorResponseWithHeaders()
+        public async Task HttpErrorResponseWithHeadersAsync()
         {
             MockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                            TestConstants.DefaultRedirectUri + "?code=some-code"));

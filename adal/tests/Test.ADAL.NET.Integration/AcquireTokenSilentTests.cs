@@ -53,7 +53,7 @@ namespace Test.ADAL.NET.Integration
 
         [TestMethod]
         [TestCategory("AcquireTokenSilentTests")]
-        public void AcquireTokenSilentServiceErrorTestAsync()
+        public void AcquireTokenSilentServiceErrorTest()
         {
             TokenCache cache = new TokenCache();
             AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityCommonTenant,
@@ -77,7 +77,7 @@ namespace Test.ADAL.NET.Integration
                     });
                     await context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserIdentifier("unique_id", UserIdentifierType.UniqueId));
                 });
-            
+
             Assert.AreEqual(AdalError.FailedToAcquireTokenSilently, ex.ErrorCode);
             Assert.AreEqual(AdalErrorMessage.FailedToAcquireTokenSilently, ex.Message);
             Assert.IsNotNull(ex.InnerException);
@@ -92,7 +92,7 @@ namespace Test.ADAL.NET.Integration
         [TestMethod]
         [TestCategory("AcquireTokenSilentTests")]
         //292916 Ensure AcquireTokenSilent tests exist in ADAL.NET for public clients
-        public async Task AcquireTokenSilentTestWithValidTokenInCache()
+        public async Task AcquireTokenSilentTestWithValidTokenInCacheAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
@@ -137,7 +137,7 @@ namespace Test.ADAL.NET.Integration
         [TestMethod]
         [TestCategory("AcquireTokenSilentTests")]
         //292916 Ensure AcquireTokenSilent tests exist in ADAL.NET for public clients
-        public async Task ExpiredATValidRTInCache_GetNewATRTFromService()
+        public async Task ExpiredATValidRTInCache_GetNewATRTFromServiceAsync()
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
 

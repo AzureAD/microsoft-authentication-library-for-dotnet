@@ -51,8 +51,7 @@
     <MtouchArch>ARMv7, ARM64</MtouchArch>
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>True</MtouchDebug>
-    <CodesignEntitlements>
-    </CodesignEntitlements>
+    <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <IOSDebugOverWiFi>False</IOSDebugOverWiFi>
     <IOSDebuggerPort>10000</IOSDebuggerPort>
     <CodesignProvision />
@@ -98,6 +97,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Appveyor|iPhone'">
     <OutputPath>bin\iPhone\Appveyor\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <AppExtensionDebugBundleId />
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AcquirePageRenderer.cs" />

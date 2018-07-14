@@ -140,7 +140,7 @@ namespace XForms
             return UserNotSelected.Equals(selectedUserId, StringComparison.OrdinalIgnoreCase) ? null : selectedUserId;
         }
 
-        private async void OnAcquireSilentlyClicked(object sender, EventArgs e)
+        private async Task OnAcquireSilentlyClickedAsync(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "Starting silent token acquisition";
             await Task.Delay(700);
@@ -167,7 +167,7 @@ namespace XForms
             }
         }
 
-        private async void OnAcquireClicked(object sender, EventArgs e)
+        private async Task OnAcquireClickedAsync(object sender, EventArgs e)
         {
             try
             {
