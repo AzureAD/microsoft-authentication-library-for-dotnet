@@ -105,8 +105,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
             {
                 var authorityUri = new Uri(this.Authority);
                 var host = authorityUri.Host;
-                string path = authorityUri.AbsolutePath.Substring(1);
-                string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
+
+                // The authority could be https://{AzureAD host name}/{tenantid} OR https://{Dsts host name}/dstsv2/{tenantid}
+                // Detecting the tenantId using the last segment of the url
+                string tenant = authorityUri.Segments[authorityUri.Segments.Length - 1].TrimEnd('/');
                 if (this.AuthorityType == AuthorityType.AAD)
                 {
                     var metadata = await InstanceDiscovery.GetMetadataEntry(authorityUri, this.ValidateAuthority, requestContext).ConfigureAwait(false);

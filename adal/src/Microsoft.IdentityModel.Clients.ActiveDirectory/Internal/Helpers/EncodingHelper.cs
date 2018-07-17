@@ -40,6 +40,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
     /// </summary>
     internal static class EncodingHelper
     {
+        private const int MaxUrlEncodingSize = 2000;
+
         /// <summary>
         /// URL encode the given string.
         /// </summary>
@@ -53,8 +55,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
                 return message;
             }
 
-            message = Uri.EscapeDataString(message);
-            message = message.Replace("%20", "+");
+            if (message.Length < MaxUrlEncodingSize)
+            {
+                // This optimization is done for most common scenarios where the message length will not exceed MaxUrlEncodingSize
+                message = Uri.EscapeDataString(message);
+                message = message.Replace("%20", "+");
+            }
+            else
+            {
+                StringBuilder sb = new StringBuilder();
+                int loops = message.Length / MaxUrlEncodingSize;
+
+                for (int i = 0; i <= loops; i++)
+                {
+                    if (i < loops)
+                    {
+                        sb.Append(Uri.EscapeDataString(message.Substring(MaxUrlEncodingSize * i, MaxUrlEncodingSize)));
+                    }
+                    else
+                    {
+                        sb.Append(Uri.EscapeDataString(message.Substring(MaxUrlEncodingSize * i)));
+                    }
+                }
+
+                message = sb.ToString();
+                message = message.Replace("%20", "+");
+            }
 
             return message;
         }

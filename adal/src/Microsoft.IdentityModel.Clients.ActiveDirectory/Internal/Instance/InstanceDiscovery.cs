@@ -76,9 +76,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             "login.microsoftonline.com" // Microsoft Azure Worldwide
         });
 
+        private static HashSet<string> WhitelistedDomains = new HashSet<string>(new[]
+        {
+            "dsts.core.windows.net", 
+            "dsts.core.chinacloudapi.cn", 
+            "dsts.core.cloudapi.de",
+            "dsts.core.usgovcloudapi.net", 
+            "dsts.core.azure-test.net"
+        });
+
         internal static bool IsWhitelisted(string authorityHost)
         {
-            return WhitelistedAuthorities.Contains(authorityHost);
+            return WhitelistedAuthorities.Contains(authorityHost) || 
+                WhitelistedDomains.Any(domain => authorityHost.EndsWith(domain, StringComparison.OrdinalIgnoreCase));
         }
 
         // The following cache could be private, but we keep it public so that internal unit test can take a peek into it.
@@ -124,7 +134,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static string GetTenant(Uri uri)
         {
-            return uri.AbsolutePath.Split('/')[1];  // Will generate exception when tenant can not be determined
+            return uri.Segments[uri.Segments.Length - 1].TrimEnd('/');
+        }
+
+        private static string GetHost(Uri uri)
+        {
+            if (WhitelistedDomains.Any(domain => uri.Host.EndsWith(domain, StringComparison.OrdinalIgnoreCase)))
+            {
+                // Host + Virtual directory
+                return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", uri.Host, uri.Segments[1].TrimEnd('/'));
+            }
+            else
+            {
+                return uri.Host;
+            }
         }
 
         // No return value. Modifies InstanceCache directly.
@@ -133,7 +156,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             string instanceDiscoveryEndpoint = string.Format(
                 CultureInfo.InvariantCulture,
                 "https://{0}/common/discovery/instance?api-version=1.1&authorization_endpoint={1}",
-                WhitelistedAuthorities.Contains(authority.Host) ? authority.Host : DefaultTrustedAuthority,
+                IsWhitelisted(authority.Host) ? GetHost(authority) : DefaultTrustedAuthority,
                 FormatAuthorizeEndpoint(authority.Host, GetTenant(authority)));
             var client = new AdalHttpClient(instanceDiscoveryEndpoint, requestContext);
             InstanceDiscoveryResponse discoveryResponse = null;

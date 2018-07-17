@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -157,7 +158,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             // we cancel further processing, if we reached final URL.
             // Security issue: we prohibit navigation with auth code
             // if redirect URI is URN, then we prohibit navigation, to prevent random browser popup.
-            e.Cancel = this.CheckForClosingUrl(e.Url);
+            e.Cancel = this.CheckForClosingUrl(sender, e.Url);
 
             // check if the url scheme is of type browser://
             // this means we need to launch external browser
@@ -177,7 +178,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
-            this.CheckForClosingUrl(e.Url);
+            this.CheckForClosingUrl(sender, e.Url);
         }
 
         /// <summary>
@@ -217,14 +218,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             this.OnNavigationCanceled(e.StatusCode);
         }
 
-        private bool CheckForClosingUrl(Uri url)
+        private bool CheckForClosingUrl(object sender, Uri url)
         {
             // Make change here
             bool canClose = false;
             if (url.Authority.Equals(this.desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(this.desiredCallbackUri.AbsolutePath, StringComparison.OrdinalIgnoreCase))
             {
-                this.Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
+                if (!(sender is CustomWebBrowser))
+                {
+                    throw new AdalException(AdalError.InvalidWebBrowserType,
+                    "Invalid web browser type. Expected CustomWebBrowser for the sender object type.");
+                }
+
+                if (((CustomWebBrowser)sender).Document == null)
+                {
+                    throw new AdalException(AdalError.InvalidWebPageResponse,
+                    "Invalid web page response type. WebPage should not be null in the response.");
+                }
+
+                this.Result = new AuthorizationResult(AuthorizationStatus.Success, GetUrlFromDocument(url, ((CustomWebBrowser)sender).Document));
                 canClose = true;
             }
 
@@ -249,6 +262,35 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             }
 
             return canClose;
+        }
+
+        private string GetUrlFromDocument(Uri url, HtmlDocument document)
+        {
+            UriBuilder uriBuilder = new UriBuilder(url);
+            List<string> parameters = new List<string>();
+
+            HtmlElementCollection elems = document.GetElementsByTagName("input");
+            foreach (HtmlElement elem in elems)
+            {
+                string name = elem.GetAttribute("name");
+                if (!string.IsNullOrEmpty(name))
+                {
+                    string value = elem.GetAttribute("value");
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        parameters.Add($"{name}={elem.GetAttribute("value")}");
+                    }
+                }
+            }
+
+            if (parameters.Count == 0)
+            {
+                throw new AdalException(AdalError.FormPostParsingFailure,
+                    "Could not find any parameters during form post parsing. Invalid response from server.");
+            }
+
+            uriBuilder.Query = string.Join("&", parameters);
+            return uriBuilder.Uri.OriginalString;
         }
 
         private void StopWebBrowser()

@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         private readonly string uri;
         private int _timeoutInMilliSeconds = 30000;
         private readonly long _maxResponseSizeInBytes = 1048576;
+        private const string FormUrlEncoded = "application/x-www-form-urlencoded";
 
         public HttpClientWrapper(string uri, RequestContext requestContext)
         {
@@ -113,8 +114,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                         }
                         else
                         {
-                            content = new FormUrlEncodedContent(((DictionaryRequestParameters) this.BodyParameters)
-                                .ToList());
+                            content = new StringContent(this.BodyParameters.ToString(), Encoding.UTF8, 
+                                FormUrlEncoded);
                         }
 
                         requestMessage.Method = HttpMethod.Post;
