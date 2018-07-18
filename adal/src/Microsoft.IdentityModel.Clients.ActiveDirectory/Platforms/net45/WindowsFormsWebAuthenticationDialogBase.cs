@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -264,7 +263,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             return canClose;
         }
 
-        private string GetUrlFromDocument(Uri url, HtmlDocument document)
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal /* internal for test purposes only */ static string GetUrlFromDocument(Uri url, HtmlDocument document)
         {
             UriBuilder uriBuilder = new UriBuilder(url);
             List<string> parameters = new List<string>();
@@ -278,7 +278,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                     string value = elem.GetAttribute("value");
                     if (!string.IsNullOrEmpty(value))
                     {
-                        parameters.Add($"{name}={elem.GetAttribute("value")}");
+                        parameters.Add(string.Format(
+                            CultureInfo.InvariantCulture, 
+                            "{0}={1}",
+                            name,
+                            elem.GetAttribute("value")));
                     }
                 }
             }

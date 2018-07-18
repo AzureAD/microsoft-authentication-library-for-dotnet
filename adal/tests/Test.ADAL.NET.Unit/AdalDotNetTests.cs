@@ -1387,16 +1387,18 @@ namespace Test.ADAL.NET.Unit
         [TestMethod]
         public void WindowsFormsWebAuthenticationDialog_FormPostToUrlTest()
         {
+            // Arrange
             string htmlResponse = "<html><head><title>Working...</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"https://ResponseUri\"><input type=\"hidden\" name=\"code\" value=\"someAuthCodeValueInFormPost\" /><input type=\"hidden\" name=\"session_state\" value=\"9f0efc27-15c0-45e9-be87-d11d81d913a8\" /><noscript><p>Script is disabled. Click Submit to continue.</p><input type=\"submit\" value=\"Submit\" /></noscript></form><script language=\"javascript\">document.forms[0].submit();</script></body></html>";
-            var winForm = new WindowsFormsWebAuthenticationDialog(null);
-            var winFormBase = new PrivateType(typeof(WindowsFormsWebAuthenticationDialogBase));
-            var privateObject = new PrivateObject(winForm, winFormBase);
-
             WebBrowser browser = new WebBrowser();
             browser.DocumentText = htmlResponse;
             browser.Document.Write(htmlResponse);
 
-            string url = (string)privateObject.Invoke("GetUrlFromDocument", new object[] { new Uri("https://mocktest.net/callback"), browser.Document });
+            // Act 
+            string url = WindowsFormsWebAuthenticationDialogBase.GetUrlFromDocument(
+                new Uri("https://mocktest.net/callback"),
+                browser.Document);
+
+            // Assert
             var result = new AuthorizationResult(AuthorizationStatus.Success, url);
             Assert.AreEqual("someAuthCodeValueInFormPost", result.Code);
         }
