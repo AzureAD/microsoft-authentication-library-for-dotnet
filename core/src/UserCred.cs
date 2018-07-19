@@ -40,13 +40,13 @@ namespace Microsoft.Identity.Core
     /// Credential used for integrated authentication on domain-joined machines.
     /// The implementation is  here, and the ADAL UserCredential class will subclass this.
     /// </summary>
-    public class UserCred
+    public class UserCredential
     {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
         /// and it can only be used in domain joined scenarios.
         /// </summary>
-        public UserCred(): this(null, UserAuthType.IntegratedAuth)
+        public UserCredential(): this(null, UserAuthType.IntegratedAuth)
         {
         }
 
@@ -54,11 +54,11 @@ namespace Microsoft.Identity.Core
         /// Constructor to create credential with username
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCred(string userName) : this(userName, UserAuthType.IntegratedAuth)
+        public UserCredential(string userName) : this(userName, UserAuthType.IntegratedAuth)
         {
         }
 
-        internal UserCred(string userName, UserAuthType userAuthType)
+        internal UserCredential(string userName, UserAuthType userAuthType)
         {
             this.UserName = userName;
             this.UserAuthType = userAuthType;

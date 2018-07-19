@@ -56,7 +56,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
         public void WsTrustRequestXmlFormatTest()
         {
             // Arrange
-            var cred = new UserCred("user");
+            var cred = new UserCredential("user");
 
             // Act
             StringBuilder sb = WsTrustRequest.BuildMessage("https://appliesto",
@@ -152,7 +152,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                 }
             });
 
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCred("username"), null, "urn:federation:SomeAudience");
+            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(address, new UserCredential("username"), null, "urn:federation:SomeAudience");
             Assert.IsNotNull(wstResponse.Token);
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -185,7 +185,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
             try
             {
-                await WsTrustRequest.SendRequestAsync(address, new UserCred("username"), requestContext, "urn:federation:SomeAudience");
+                await WsTrustRequest.SendRequestAsync(address, new UserCredential("username"), requestContext, "urn:federation:SomeAudience");
                 Assert.Fail("We expect an exception to be thrown here");
             }
             catch (MsalException ex)

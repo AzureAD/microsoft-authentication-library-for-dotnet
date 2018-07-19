@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Newtonsoft.Json;
+using UserCredential = Microsoft.IdentityModel.Clients.ActiveDirectory.UserCredential;
 
 namespace WinFormsAutomationApp
 {

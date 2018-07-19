@@ -26,16 +26,18 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
+using Core = Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using UserAuthType = Microsoft.Identity.Core.UserAuthType;
+    using UserAuthType = Core.UserAuthType;
 
 
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
-    public class UserCredential: Microsoft.Identity.Core.UserCred {
+    public class UserCredential: Core.UserCredential
+    {
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
         /// and it can only be used in domain joined scenarios.

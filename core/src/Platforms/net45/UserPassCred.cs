@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Core
     /// <summary>
     /// Credential used for username/password authentication.
     /// </summary>
-    public class UserPasswordCred : UserCred
+    public class UserPasswordCred : UserCredential
     {
         /// <summary>
         /// Constructor to create credential with username and password

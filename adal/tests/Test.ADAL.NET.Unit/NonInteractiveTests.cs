@@ -47,6 +47,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
+using UserCredential = Microsoft.IdentityModel.Clients.ActiveDirectory.UserCredential;
 
 namespace Test.ADAL.NET.Unit
 {

@@ -44,6 +44,7 @@ using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.Au
 using HttpMessageHandlerFactory = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http.AdalHttpMessageHandlerFactory;
 using CoreHttpMessageHandlerFactory = Microsoft.Identity.Core.Http.HttpMessageHandlerFactory;
 using CoreHttpClientFactory = Microsoft.Identity.Core.Http.HttpClientFactory;
+using UserCredential = Microsoft.IdentityModel.Clients.ActiveDirectory.UserCredential;
 
 namespace Test.ADAL.NET.Integration
 {

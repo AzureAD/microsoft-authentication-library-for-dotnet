@@ -38,6 +38,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.NET.Common;
+using UserCredential = Microsoft.IdentityModel.Clients.ActiveDirectory.UserCredential;
 
 namespace Test.ADAL.Common.Unit
 {

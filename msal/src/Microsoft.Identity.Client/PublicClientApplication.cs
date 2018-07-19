@@ -425,7 +425,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the current login user</returns>
         public async Task<AuthenticationResult> AcquireTokenByWindowsIntegratedAuthAsync(IEnumerable<string> scopes)
         {
-            return await AcquireTokenByUserCredAsync(scopes, new UserCred()).ConfigureAwait(false);
+            return await AcquireTokenByUserCredentialAsync(scopes, new UserCredential()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -436,20 +436,20 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the specified login user</returns>
         public async Task<AuthenticationResult> AcquireTokenByWindowsIntegratedAuthAsync(IEnumerable<string> scopes, string username)
         {
-            return await AcquireTokenByUserCredAsync(scopes, new UserCred(username)).ConfigureAwait(false);
+            return await AcquireTokenByUserCredentialAsync(scopes, new UserCredential(username)).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Non-interactive request to acquire token via Windows Integrated Authentication.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
-        /// <param name="userCred">A UserCred representing the user account</param>
+        /// <param name="userCredential">A UserCredential representing the user account</param>
         /// <returns>Authentication result containing token</returns>
-        private async Task<AuthenticationResult> AcquireTokenByUserCredAsync(IEnumerable<string> scopes, UserCred userCred)
+        private async Task<AuthenticationResult> AcquireTokenByUserCredentialAsync(IEnumerable<string> scopes, UserCredential userCredential)
         {
             Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new NonInteractiveRequest(requestParams, userCred) { ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser };
+            var handler = new NonInteractiveRequest(requestParams, userCredential) { ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser };
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

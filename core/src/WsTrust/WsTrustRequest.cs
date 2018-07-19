@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Core.WsTrust
 
         private const string defaultAppliesTo = "urn:federation:MicrosoftOnline";
 
-        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCred credential, RequestContext requestContext, string cloudAudience)
+        public static async Task<WsTrustResponse> SendRequestAsync(WsTrustAddress wsTrustAddress, UserCredential credential, RequestContext requestContext, string cloudAudience)
         {
             var headers = new Dictionary<string, string>
             {
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Core.WsTrust
         }
 
         public static StringBuilder BuildMessage(string appliesTo, WsTrustAddress wsTrustAddress,
-            UserCred credential)
+            UserCredential credential)
         {
             // securityHeader will be empty string for Kerberos.
             StringBuilder securityHeaderBuilder = BuildSecurityHeader(credential);
@@ -144,7 +144,7 @@ namespace Microsoft.Identity.Core.WsTrust
             return escapeStr;
         }
 
-        private static StringBuilder BuildSecurityHeader(UserCred credential)
+        private static StringBuilder BuildSecurityHeader(UserCredential credential)
         {
             StringBuilder securityHeaderBuilder = new StringBuilder(MaxExpectedMessageSize);
 
