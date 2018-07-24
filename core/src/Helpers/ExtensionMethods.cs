@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Core.Helpers
 {
@@ -184,43 +184,6 @@ namespace Microsoft.Identity.Core.Helpers
                 return new SortedSet<string>();
             }
             return new SortedSet<string>(input);
-        }
-        internal static string GetPiiScrubbedDetails(this Exception ex)
-        {
-            string result = null;
-            if (ex != null)
-            {
-                var sb = new StringBuilder();
-
-                sb.Append(String.Format(CultureInfo.CurrentCulture, "Exception type: {0}", ex.GetType()));
-
-                if (ex is MsalException)
-                {
-                    MsalException msalException = (MsalException) ex;
-                    sb.Append(String.Format(CultureInfo.CurrentCulture, ", ErrorCode: {0}", msalException.ErrorCode));
-                }
-
-                if (ex is MsalServiceException)
-                {
-                    MsalServiceException msalServiceException = (MsalServiceException)ex;
-                    sb.Append(String.Format(CultureInfo.CurrentCulture, ", StatusCode: {0}",
-                        msalServiceException.StatusCode));
-                }
-
-                if (ex.InnerException != null)
-                {
-                    sb.Append("---> " + GetPiiScrubbedDetails(ex.InnerException) + Environment.NewLine +
-                              "=== End of inner exception stack trace ===");
-                }
-                if (ex.StackTrace != null)
-                {
-                    sb.Append(Environment.NewLine + ex.StackTrace);
-                }
-
-                result = sb.ToString();
-            }
-
-            return result;
         }
     }
 }

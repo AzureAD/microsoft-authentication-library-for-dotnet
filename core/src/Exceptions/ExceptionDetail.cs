@@ -24,45 +24,26 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-using Microsoft.Identity.Client;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
-namespace Test.Microsoft.Identity.Unit.PublicApi
+
+namespace Microsoft.Identity.Core
 {
-    [TestClass]
-    public class MsalExceptionTests
+    internal class ExceptionDetail
     {
-        [TestMethod]
-        [TestCategory("MsalExceptionTests")]
-        public void ExceptionsArePubliclyCreatable_MsalException()
-        {
-            var innerEx = new Exception();
-            var ex = new MsalException("code1", "msg1", innerEx);
+        /// <summary>
+        /// Gets the status code returned from http layer. This status code is either the HttpStatusCode in the inner
+        /// HttpRequestException response or
+        /// NavigateError Event Status Code in browser based flow (See
+        /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
+        /// You can use this code for purposes such as implementing retry logic or error investigation.
+        /// </summary>
+        public int StatusCode { get; set; } = 0;
 
-            Assert.AreEqual("code1", ex.ErrorCode);
-            Assert.AreEqual("msg1", ex.Message);
-            Assert.AreSame(innerEx, ex.InnerException);
-        }
-   
-        [TestMethod]
-        [TestCategory("MsalExceptionTests")]
-        public void ExceptionsArePubliclyCreatable_ServiceException()
-        {
-            var ex = new MsalServiceException("code1", "msg1");
+        public string Claims { get; set; }
 
-            Assert.AreEqual("code1", ex.ErrorCode);
-            Assert.AreEqual("msg1", ex.Message);
-            Assert.IsNull(ex.InnerException);
-        }
-
-        [TestMethod]
-        [TestCategory("MsalExceptionTests")]
-        public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
-        {
-            var ex = new MsalUiRequiredException(null, null);
-
-            Assert.IsNull(ex.InnerException);
-        }
+        /// <summary>
+        /// Raw response body received from the server.
+        /// </summary>
+        public string ResponseBody { get; set; }
     }
 }

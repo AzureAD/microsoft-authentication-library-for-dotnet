@@ -18,8 +18,8 @@
     <MinimumVisualStudioVersion>12</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>Platforms\winrt\ADAL.PCL.WinRT.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -101,6 +101,7 @@
     <Compile Include="Http\**\*.cs" />
     <Compile Include="Instance\**\*.cs" />
     <Compile Include="Helpers\**\*.cs" />
+    <Compile Include="Exceptions\**\*.cs" />
     <Compile Include="Telemetry\**\*.cs" />
     <Compile Include="OAuth2\**\*.cs" />
     <Compile Include="Cache\**\*.cs" />
