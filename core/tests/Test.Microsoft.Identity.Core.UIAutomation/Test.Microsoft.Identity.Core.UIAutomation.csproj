@@ -48,6 +48,10 @@
       <Project>{AECE489D-9ED4-442D-8D8F-0F383AEBB781}</Project>
       <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Core.csproj">
+      <Project>{3EEF5981-8F11-4F54-9DDF-2F63C574D028}</Project>
+      <Name>Microsoft.Identity.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppFactory.cs" />
