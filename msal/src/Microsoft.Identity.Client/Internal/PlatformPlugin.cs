@@ -45,21 +45,21 @@ namespace Microsoft.Identity.Client.Internal
 
         public static void InitializeByAssemblyDynamicLinking()
         {
+            CoreExceptionFactory.Instance = new MsalExceptionFactory();
 #if !FACADE
             CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
-            IWebUIFactory obj = null;
+            IWebUIFactory webUIFactory = null;
 
 #if ANDROID || iOS
-            obj = new Microsoft.Identity.Core.UI.WebUIFactory();
+            webUIFactory = new Microsoft.Identity.Core.UI.WebUIFactory();
 #else
-            obj = new Microsoft.Identity.Client.Internal.UI.WebUIFactory();
+            webUIFactory = new Microsoft.Identity.Client.Internal.UI.WebUIFactory();
 #endif
-            InjectDependecies(obj,
-                (PlatformInformationBase) new PlatformInformation());
+            InjectDependecies(webUIFactory, new PlatformInformation());
 #endif
         }
 
-        public static void InjectDependecies(IWebUIFactory webUIFactory,
+        private static void InjectDependecies(IWebUIFactory webUIFactory,
             PlatformInformationBase platformInformation)
         {
             WebUIFactory = webUIFactory;

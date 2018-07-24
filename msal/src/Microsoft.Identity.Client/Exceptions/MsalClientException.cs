@@ -26,8 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
@@ -105,6 +103,12 @@ namespace Microsoft.Identity.Client
         /// The intent to launch AuthenticationActivity is not resolvable by the OS or the intent.
         /// </summary>
         public const string UnresolvableIntentError = "unresolvable_intent";
+
+        /// <summary>
+        /// Failed to create shared preferences on the Android platform. Make sure the application is 
+        /// configured to use this platform feature.
+        /// </summary>
+        public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
 
 #endif
 

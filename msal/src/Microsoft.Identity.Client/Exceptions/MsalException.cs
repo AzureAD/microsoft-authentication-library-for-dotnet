@@ -28,15 +28,18 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// The exception type thrown when an error occurs during token acquisition.
     /// </summary>
+    /// <remarks>Avoid throwing this exception. Instead throw the more specialized <see cref="MsalClientException"/>
+    /// and <see cref="MsalServiceException"/>
+    /// </remarks>
     public class MsalException : Exception
     {
-
         /// <summary>
         /// Unknown Error occured.
         /// </summary>
@@ -46,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalException()
-            : base(MsalErrorMessage.Unknown)
+            : base(CoreErrorMessages.Unknown)
         {
             ErrorCode = UnknownError;
         }

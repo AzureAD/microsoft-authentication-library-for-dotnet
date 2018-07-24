@@ -32,7 +32,6 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.UI;
@@ -230,7 +229,7 @@ namespace Microsoft.Identity.Client.Internal.UI
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
                     Error = MsalClientException.NonHttpsRedirectNotSupported,
-                    ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
+                    ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported
                 };
                 readyToClose = true;
             }
