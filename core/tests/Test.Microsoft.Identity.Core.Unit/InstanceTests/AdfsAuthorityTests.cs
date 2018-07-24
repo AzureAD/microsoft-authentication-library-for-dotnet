@@ -389,9 +389,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                 }).GetAwaiter().GetResult();
                 Assert.Fail("validation should have failed here");
             }
-            catch (MsalClientException exc)
+            catch (TestServiceException exc)
             {
-                Assert.AreEqual(MsalClientException.TenantDiscoveryFailedError, exc.ErrorCode);
+                Assert.AreEqual(CoreErrorCodes.TenantDiscoveryFailedError, exc.ErrorCode);
             }
 
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);

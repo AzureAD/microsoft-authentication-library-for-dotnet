@@ -74,7 +74,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
             catch (Exception exc)
             {
                 Assert.IsInstanceOfType(exc, typeof(ArgumentException));
-                Assert.AreEqual(MsalErrorMessage.B2cAuthorityUriInvalidPath, exc.Message);
+                Assert.AreEqual(CoreErrorMessages.B2cAuthorityUriInvalidPath, exc.Message);
             }
         }
 
@@ -97,7 +97,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
             catch (Exception exc)
             {
                 Assert.IsInstanceOfType(exc, typeof(ArgumentException));
-                Assert.AreEqual(MsalErrorMessage.UnsupportedAuthorityValidation, exc.Message);
+                Assert.AreEqual(CoreErrorMessages.UnsupportedAuthorityValidation, exc.Message);
             }
         }
 

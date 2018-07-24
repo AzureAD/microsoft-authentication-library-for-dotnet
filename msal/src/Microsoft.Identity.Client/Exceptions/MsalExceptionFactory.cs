@@ -26,18 +26,11 @@ namespace Microsoft.Identity.Client
             string errorMessage, 
             Exception innerException = null)
         {
-            if (String.IsNullOrEmpty(errorCode))
-            {
-                throw new ArgumentNullException(nameof(errorCode));
-            }
-
-            if (String.IsNullOrEmpty(errorMessage))
-            {
-                throw new ArgumentNullException(nameof(errorMessage));
-            }
+            ValidateRequiredArgs(errorCode, errorMessage);
 
             return new MsalClientException(errorCode, errorMessage, innerException);
         }
+
 
         /// <summary>
         /// Throws an <see cref="MsalClientException"/> exception
@@ -48,6 +41,7 @@ namespace Microsoft.Identity.Client
             string errorCode,
             string errorMessage)
         {
+            ValidateRequiredArgs(errorCode, errorMessage);
             return GetServiceException(errorCode, errorMessage, null, null);
         }
 
@@ -62,6 +56,7 @@ namespace Microsoft.Identity.Client
             string errorMessage,
             ExceptionDetail exceptionDetail = null)
         {
+            ValidateRequiredArgs(errorCode, errorMessage);
             return GetServiceException(errorCode, errorMessage, null, exceptionDetail);
         }
 
@@ -74,11 +69,14 @@ namespace Microsoft.Identity.Client
             Exception innerException = null, 
             ExceptionDetail exceptionDetail = null)
         {
+            ValidateRequiredArgs(errorCode, errorMessage);
+
             return new MsalServiceException(
                  errorCode,
                  errorMessage,
                  innerException)
             {
+
                 Claims = exceptionDetail?.Claims,
                 ResponseBody = exceptionDetail?.ResponseBody,
                 StatusCode = exceptionDetail != null ? exceptionDetail.StatusCode : 0
@@ -94,6 +92,8 @@ namespace Microsoft.Identity.Client
             Exception innerException,
             ExceptionDetail exceptionDetail = null)
         {
+            ValidateRequiredArgs(errorCode, errorMessage);
+
             return new MsalUiRequiredException(errorCode, errorMessage, innerException)
             {
                 Claims = exceptionDetail?.Claims,
@@ -104,12 +104,10 @@ namespace Microsoft.Identity.Client
 
         public override string GetPiiScrubbedDetails(Exception ex)
         {
-            string result = null;
+            var sb = new StringBuilder();
             if (ex != null)
             {
-                var sb = new StringBuilder();
-
-                sb.Append(String.Format(CultureInfo.CurrentCulture, "Exception type: {0}", ex.GetType()));
+                sb.AppendLine(String.Format(CultureInfo.CurrentCulture, "Exception type: {0}", ex.GetType()));
 
                 if (ex is MsalException)
                 {
@@ -140,7 +138,21 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            return result;
+            return sb.ToString();
         }
+
+        private static void ValidateRequiredArgs(string errorCode, string errorMessage)
+        {
+            if (String.IsNullOrEmpty(errorCode))
+            {
+                throw new ArgumentNullException(nameof(errorCode));
+            }
+
+            if (String.IsNullOrEmpty(errorMessage))
+            {
+                throw new ArgumentNullException(nameof(errorMessage));
+            }
+        }
+
     }
 }
