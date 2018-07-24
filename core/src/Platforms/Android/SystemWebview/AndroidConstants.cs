@@ -27,37 +27,6 @@
 
 namespace Microsoft.Identity.Core.UI.SystemWebview
 {
-    internal static class MsalErrorAndroidEx
-    {
-        public const string InvalidRequest = "invalid_request";
-        public const string MissingPackagePermission = "missing_package_permission";
-        public const string CannotSwitchToBrokerFromThisApp = "cannot_switch_to_broker_from_this_app";
-        public const string IncorrectBrokerAccountType = "incorrect_broker_account_type";
-        public const string IncorrectBrokerAppSignature = "incorrect_broker_app_signature";
-        public const string FailedToGetBrokerAppSignature = "failed_to_get_broker_app_signature";
-        public const string MissingBrokerRelatedPackage = "missing_broker_related_package";
-        public const string MissingDigestShaAlgorithm = "missing_digest_sha_algorithm";
-        public const string SignatureVerificationFailed = "signature_verification_failed";
-        public const string NoBrokerAccountFound = "broker_account_not_found";
-        public const string BrokerApplicationRequired = "broker_application_required";
-    }
-
-    internal static class MsalErrorMessageAndroidEx
-    {
-        public const string MissingPackagePermissionTemplate = "Permission {0} is missing from package manifest";
-        public const string CannotSwitchToBrokerFromThisApp = "Cannot switch to broker from this app";
-        public const string IncorrectBrokerAccountType = "Incorrect broker account type";
-        public const string IncorrectBrokerAppSignate = "Incorrect broker app signature";
-        public const string FailedToGetBrokerAppSignature = "Failed to get broker app signature";
-        public const string MissingBrokerRelatedPackage = "Broker related package does not exist";
-        public const string MissingDigestShaAlgorithm = "Digest SHA algorithm does not exists";
-        public const string SignatureVerificationFailed = "Error in verifying broker app's signature";
-        public const string NoBrokerAccountFound = "No account found in broker app";
-
-        public const string BrokerApplicationRequired =
-            "Broker application must be installed to continue authentication";
-    }
-
     internal static class AndroidConstants
     {
         public const string RequestUrlKey = "com.microsoft.identity.request.url.key";

@@ -27,6 +27,7 @@
 
 using Foundation;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Core;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -87,7 +88,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
             }
             catch (Exception ex)
             {
-                throw new MsalException(MsalError.AuthenticationUiFailed, ex.ToString());
+                throw new CoreClientException(CoreErrorCodes.AuthenticationUiFailed, ex.ToString());
             }
         }
 

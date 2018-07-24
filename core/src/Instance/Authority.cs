@@ -35,6 +35,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Core.Instance
@@ -100,25 +101,25 @@ namespace Microsoft.Identity.Core.Instance
 
             if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authority));
+                throw new ArgumentException(CoreErrorMessages.AuthorityInvalidUriFormat, nameof(authority));
             }
             
             var authorityUri = new Uri(authority);
             if (authorityUri.Scheme != "https")
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
+                throw new ArgumentException(CoreErrorMessages.AuthorityUriInsecure, nameof(authority));
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
             if (string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
+                throw new ArgumentException(CoreErrorMessages.AuthorityUriInvalidPath, nameof(authority));
             }
 
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
             if (pathSegments == null || pathSegments.Length == 0)
             {
-                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
+                throw new ArgumentException(CoreErrorMessages.AuthorityUriInvalidPath);
             }
         }
 
@@ -132,7 +133,9 @@ namespace Microsoft.Identity.Core.Instance
 
             if (isAdfsAuthority)
             {
-                throw new MsalException(MsalError.InvalidAuthorityType, "ADFS is not a supported authority");
+                throw CoreExceptionFactory.Instance.GetServiceException(
+                    CoreErrorCodes.InvalidAuthorityType, 
+                    "ADFS is not a supported authority");
             }
 
             if (isB2CAuthority)
@@ -190,19 +193,19 @@ namespace Microsoft.Identity.Core.Instance
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
-                    throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
+                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
                         "Authorize endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.TokenEndpoint))
                 {
-                    throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
+                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
                         "Token endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.Issuer))
                 {
-                    throw new MsalClientException(MsalClientException.TenantDiscoveryFailedError,
+                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
                         "Issuer was not found in the openid configuration");
                 }
 

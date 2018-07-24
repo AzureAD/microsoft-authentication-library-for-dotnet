@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Exceptions;
+using Microsoft.Identity.Core;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

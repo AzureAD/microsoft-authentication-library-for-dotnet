@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using CoreFoundation;
 using Foundation;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using UIKit;
 using WebKit;
@@ -102,8 +103,8 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                 && !navigationAction.Request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             {
                 AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                result.Error = MsalError.NonHttpsRedirectNotSupported;
-                result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
+                result.Error = CoreErrorCodes.NonHttpsRedirectNotSupported;
+                result.ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported;
                 AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.callbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;

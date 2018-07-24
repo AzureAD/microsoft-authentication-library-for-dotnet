@@ -30,6 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Core;
 using Uri = System.Uri;
 
 namespace Microsoft.Identity.Core.UI.SystemWebview
@@ -62,7 +63,10 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
             {
                 requestContext.Logger.Error(ex);
                 requestContext.Logger.ErrorPii(ex);
-                throw new MsalClientException(MsalClientException.AuthenticationUiFailedError, "AuthenticationActivity failed to start", ex);
+                throw CoreExceptionFactory.Instance.GetClientException(
+                    CoreErrorCodes.AuthenticationUiFailedError, 
+                    "AuthenticationActivity failed to start", 
+                    ex);
             }
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);

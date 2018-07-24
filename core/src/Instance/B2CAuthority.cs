@@ -29,6 +29,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Core.Instance
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new [] { '/'}, StringSplitOptions.RemoveEmptyEntries);
             if (pathSegments.Length < 3)
             {
-                throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
+                throw new ArgumentException(CoreErrorMessages.B2cAuthorityUriInvalidPath);
             }
 
             CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Authority,
@@ -55,7 +56,7 @@ namespace Microsoft.Identity.Core.Instance
         {
             if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
             {
-                throw new ArgumentException(MsalErrorMessage.UnsupportedAuthorityValidation);
+                throw new ArgumentException(CoreErrorMessages.UnsupportedAuthorityValidation);
             }
 
             return await Task.Run(() => GetDefaultOpenIdConfigurationEndpoint()).ConfigureAwait(false);

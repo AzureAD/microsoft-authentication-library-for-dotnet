@@ -35,6 +35,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core.Http
 {
@@ -125,11 +126,17 @@ namespace Microsoft.Identity.Core.Http
                 requestContext.Logger.InfoPii(message);
                 if (toThrow != null)
                 {
-                    throw new MsalServiceException(MsalServiceException.RequestTimeout, "Request to the endpoint timed out.", toThrow);
+                    throw CoreExceptionFactory.Instance.GetServiceException(
+                        CoreErrorCodes.RequestTimeout,
+                        "Request to the endpoint timed out.",
+                        toThrow);
                 }
 
-                throw new MsalServiceException(MsalServiceException.ServiceNotAvailable,
-                    "Service is unavailable to process the request", (int) response.StatusCode);
+                throw CoreExceptionFactory.Instance.GetServiceException(
+                    CoreErrorCodes.ServiceNotAvailable,
+                    "Service is unavailable to process the request",
+                    null, 
+                    new ExceptionDetail { StatusCode = (int)response.StatusCode });
             }
 
             return response;

@@ -33,6 +33,7 @@ using Android.Content;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview
@@ -163,7 +164,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                 {
                     UriBuilder errorUri = new UriBuilder(callback);
                     errorUri.Query = string.Format(CultureInfo.InvariantCulture, "error={0}&error_description={1}",
-                        MsalError.NonHttpsRedirectNotSupported, MsalErrorMessage.NonHttpsRedirectNotSupported);
+                        CoreErrorCodes.NonHttpsRedirectNotSupported, CoreErrorMessages.NonHttpsRedirectNotSupported);
                     this.Finish(Activity, errorUri.ToString());
                     return true;
                 }

@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace Microsoft.Identity.Core.Exceptions
+namespace Microsoft.Identity.Core
 {
     /// <summary>
     /// Error codes attached to each exception.

@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace Microsoft.Identity.Core.Exceptions
+namespace Microsoft.Identity.Core
 {
     internal class CoreErrorMessages
     {
