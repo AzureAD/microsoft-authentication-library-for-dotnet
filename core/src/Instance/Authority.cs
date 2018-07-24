@@ -29,13 +29,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net.Http;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Core.Instance

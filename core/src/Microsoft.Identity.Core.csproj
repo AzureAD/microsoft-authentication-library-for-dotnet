@@ -54,17 +54,7 @@
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
-    <Compile Remove="CoreExceptionBase.cs" />
-    <None Remove="Cache\ILegacyCachePersistance.cs" />
-    <None Remove="Cache\MsalAccessTokenCacheKey.cs" />
-    <None Remove="Cache\MsalIdTokenCacheKey.cs" />
-    <None Remove="Cache\MsalRefreshTokenCacheKey.cs" />
     <None Remove="ConfigureAwait.ruleset" />
-    <None Remove="Exceptions\CoreClientException.cs" />
-    <None Remove="Exceptions\CoreErrorCodes.cs" />
-    <None Remove="Exceptions\CoreErrorMessages.cs" />
-    <None Remove="Exceptions\CoreServiceException.cs" />
-    <None Remove="Exceptions\ExceptionDetail.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
 

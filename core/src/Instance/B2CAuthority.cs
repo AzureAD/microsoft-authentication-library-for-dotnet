@@ -28,8 +28,6 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core.Instance
 {

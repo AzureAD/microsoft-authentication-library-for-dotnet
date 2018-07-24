@@ -86,7 +86,10 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
             {
                 requestContext.Logger.Error(ex);
                 requestContext.Logger.ErrorPii(ex);
-                throw new CoreClientException(CoreErrorCodes.AuthenticationUiFailedError, "Failed to invoke SFSafariViewController", ex);
+                throw CoreExceptionFactory.Instance.GetClientException(
+                    CoreErrorCodes.AuthenticationUiFailedError, 
+                    "Failed to invoke SFSafariViewController", 
+                    ex);
             }
         }
 
