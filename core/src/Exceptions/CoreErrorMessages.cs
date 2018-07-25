@@ -55,6 +55,11 @@ namespace Microsoft.Identity.Core
 
         public const string NonHttpsRedirectNotSupported = "Non-HTTPS url redirect is not supported in webview";
 
-        internal static readonly string UnresolvableIntentError;
+        public const string IDTokenMustHaveTwoParts = "ID Token must contain at least 2 parts.";
+        public const string FailedToParseIDToken = "Failed to parse the returned id token.";
+
+        public const string InvalidAuthroityOpenId = "invalid authority while getting the open id config endpoint";
+        public const string UpnRequiredForAuthroityValidation = "UPN is required for ADFS authority validation.";
+        public const string CannotFindTheAuthEndpont = "Cannot find the auth endpoint";
     }
 }

@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal
 
         public static void InitializeByAssemblyDynamicLinking()
         {
-            CoreExceptionFactory.Instance = new MsalExceptionFactory();
+            CoreExceptionService.Instance = new MsalExceptionFactory();
 #if !FACADE
             CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
             IWebUIFactory webUIFactory = null;

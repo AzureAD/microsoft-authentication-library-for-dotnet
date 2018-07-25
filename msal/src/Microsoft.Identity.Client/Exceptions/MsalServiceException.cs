@@ -46,9 +46,19 @@ namespace Microsoft.Identity.Client
         public const string RequestTimeout = "request_timeout";
 
         /// <summary>
-        /// Invalid grant error. 
+        /// Upn required
         /// </summary>
-        public const string InvalidGrantError = "invalid_grant";
+        public const string UpnRequired = "upn_required";
+
+        /// <summary>
+        /// No passive auth endpoint
+        /// </summary>
+        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
+
+        /// <summary>
+        /// Invalid authority
+        /// </summary>
+        public const string InvalidAuthroity = "invalid_authority";
 
         /// <summary>
         /// Initializes a new instance of the exception class with a specified

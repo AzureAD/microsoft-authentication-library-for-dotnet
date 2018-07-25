@@ -28,8 +28,6 @@
 using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -266,31 +264,6 @@ namespace Test.MSAL.NET.Unit
             _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             logger.VerbosePii("test message");
             Assert.AreEqual(4, counter);
-        }
-
-        [TestMethod()]
-        [TestCategory("LoggerTests")]
-        public void ScrubPiiExceptionsTest()
-        {
-            Exception ex = new Exception("test message");
-            var result = ex.GetPiiScrubbedDetails();
-            Assert.AreEqual("Exception type: System.Exception", result);
-
-            result = ((Exception) null).GetPiiScrubbedDetails();
-            Assert.AreEqual(null, result);
-
-            Exception innerException = new Exception("test message", new Exception("inner message"));
-            result = innerException.GetPiiScrubbedDetails();
-            Assert.AreEqual("Exception type: System.Exception---> Exception type: System.Exception\r\n=== End of inner exception stack trace ===",
-                result);
-
-            MsalException msalException = new MsalException("Msal Exception");
-            result = msalException.GetPiiScrubbedDetails();
-            Assert.AreEqual("Exception type: Microsoft.Identity.Client.MsalException, ErrorCode: Msal Exception", result);
-
-            MsalServiceException msalServiceException = new MsalServiceException("ErrorCode", "Msal Service Exception");
-            result = msalServiceException.GetPiiScrubbedDetails();
-            Assert.AreEqual("Exception type: Microsoft.Identity.Client.MsalServiceException, ErrorCode: ErrorCode, StatusCode: 0", result);
         }
     }
 }

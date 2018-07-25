@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
-    internal class TestExceptionFactory : CoreExceptionFactory
+    internal class TestExceptionFactory : CoreExceptionService
     {
         public override Exception GetClientException(string errorCode, string errorMessage, Exception innerException = null)
         {

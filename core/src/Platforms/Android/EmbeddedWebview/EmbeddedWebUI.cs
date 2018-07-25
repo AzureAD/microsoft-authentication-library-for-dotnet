@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
             }
             catch (Exception ex)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw CoreExceptionService.Instance.GetClientException(
                     CoreErrorCodes.AuthenticationUiFailedError, 
                     "AuthenticationActivity failed to start", 
                     ex);

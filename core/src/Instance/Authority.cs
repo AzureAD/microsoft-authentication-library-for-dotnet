@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Core.Instance
 
             if (isAdfsAuthority)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw CoreExceptionService.Instance.GetClientException(
                     CoreErrorCodes.InvalidAuthorityType, 
                     "ADFS is not a supported authority");
             }
@@ -188,19 +188,19 @@ namespace Microsoft.Identity.Core.Instance
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
+                    throw CoreExceptionService.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
                         "Authorize endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.TokenEndpoint))
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
+                    throw CoreExceptionService.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
                         "Token endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.Issuer))
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
+                    throw CoreExceptionService.Instance.GetClientException(CoreErrorCodes.TenantDiscoveryFailedError,
                         "Issuer was not found in the openid configuration");
                 }
 

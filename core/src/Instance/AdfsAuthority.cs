@@ -43,6 +43,8 @@ namespace Microsoft.Identity.Core.Instance
     internal class AdfsAuthority : Authority
     {
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
+        
+
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
         public AdfsAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
@@ -53,9 +55,9 @@ namespace Microsoft.Identity.Core.Instance
         {
             if (string.IsNullOrEmpty(userPrincipalName))
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    "upn_required",
-                    "UPN is required for ADFS authority validation.");
+                throw CoreExceptionService.Instance.GetClientException(
+                    CoreErrorCodes.UpnRequired,
+                    CoreErrorMessages.UpnRequiredForAuthroityValidation);
             }
 
             return ValidatedAuthorities.ContainsKey(CanonicalAuthority) &&
@@ -70,16 +72,16 @@ namespace Microsoft.Identity.Core.Instance
                 DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, requestContext).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
-                    CoreExceptionFactory.Instance.GetServiceException(
+                    CoreExceptionService.Instance.GetServiceException(
                         drsResponse.Error,
                         drsResponse.ErrorDescription);
                 }
 
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
-                    throw CoreExceptionFactory.Instance.GetServiceException(
-                        "missing_passive_auth_endpoint", 
-                        "missing_passive_auth_endpoint");
+                    throw CoreExceptionService.Instance.GetServiceException(
+                        CoreErrorCodes.MissingPassiveAuthEndpoint,
+                        CoreErrorMessages.CannotFindTheAuthEndpont);
                 }
 
                 string resource = string.Format(CultureInfo.InvariantCulture, CanonicalAuthority);
@@ -93,9 +95,9 @@ namespace Microsoft.Identity.Core.Instance
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw CoreExceptionFactory.Instance.GetServiceException(
-                        "invalid_authority",
-                        "authority validation failed.");
+                    throw CoreExceptionService.Instance.GetServiceException(
+                        CoreErrorCodes.InvalidAuthroity,
+                        CoreErrorMessages.AuthorityValidationFailed);
                 }
 
                 AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext,
@@ -106,9 +108,9 @@ namespace Microsoft.Identity.Core.Instance
                             (a.Rel.Equals(DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase))) == null)
                 {
-                    throw CoreExceptionFactory.Instance.GetServiceException(
-                        "invalid_authority", 
-                        "invalid authority while getting the open id config endpoint");
+                    throw CoreExceptionService.Instance.GetServiceException(
+                        CoreErrorCodes.InvalidAuthroity,
+                        CoreErrorMessages.InvalidAuthroityOpenId);
                 }
             }
 
@@ -145,7 +147,7 @@ namespace Microsoft.Identity.Core.Instance
             catch (Exception exc)
             {
                 const string msg = "On-Premise ADFS enrollment server endpoint lookup failed. Error - ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(exc);
+                string noPiiMsg = CoreExceptionService.Instance.GetPiiScrubbedDetails(exc);
                 requestContext.Logger.Info(msg + noPiiMsg);
                 requestContext.Logger.InfoPii(msg + exc);
             }

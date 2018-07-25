@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Core.OAuth2
                 if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error,
                     StringComparison.OrdinalIgnoreCase))
                 {
-                    throw CoreExceptionFactory.Instance.GetUiRequiredException(
+                    throw CoreExceptionService.Instance.GetUiRequiredException(
                         CoreErrorCodes.InvalidGrantError,
                         msalTokenResponse.ErrorDescription,
                         null,
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Core.OAuth2
                          });
                 }
 
-                serviceEx = CoreExceptionFactory.Instance.GetServiceException(
+                serviceEx = CoreExceptionService.Instance.GetServiceException(
                     msalTokenResponse.Error,
                     msalTokenResponse.ErrorDescription,
                     null,
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Core.OAuth2
             }
             catch (SerializationException)
             {
-                serviceEx = CoreExceptionFactory.Instance.GetServiceException(
+                serviceEx = CoreExceptionService.Instance.GetServiceException(
                     CoreErrorCodes.UnknownError,
                     response.Body,
                     new ExceptionDetail() { StatusCode = (int)response.StatusCode });

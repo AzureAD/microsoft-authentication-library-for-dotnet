@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Core
     /// Error codes attached to each exception.
     /// These need to be duplicated and publicly exposed in the MSAL and ADAL because users refer to them
     /// </summary>
-    internal class CoreErrorCodes //TODO: add a test that reflects over this class and the MSAL / ADAL ones
+    internal class CoreErrorCodes 
     {
         public const string JsonParseError = "json_parse_failed";
         public const string RequestTimeout = "request_timeout";
@@ -49,11 +49,16 @@ namespace Microsoft.Identity.Core
         public const string AuthenticationUiFailed = "authentication_ui_failed";
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
 
+        public const string UpnRequired = "upn_required";
+        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
+        public const string InvalidAuthroity = "invalid_authority";
+
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
         public const string ChromeNotInstalledError = "chrome_not_installed";
         public const string ChromeDisabledError = "chrome_disabled";
         public const string InvalidRequest = "invalid_request";
+        public const string UnresolvableIntentError = "unresolvable_intent";
 #endif
 
     }

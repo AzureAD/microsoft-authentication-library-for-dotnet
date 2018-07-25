@@ -52,7 +52,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             new TestPlatformInformation();
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
+            CoreExceptionService.Instance = new TestExceptionFactory();
             HttpMessageHandlerFactory.ClearMockHandlers();
         }
 

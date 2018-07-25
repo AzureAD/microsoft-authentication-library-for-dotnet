@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
             {
                 requestContext.Logger.Error(ex);
                 requestContext.Logger.ErrorPii(ex);
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw CoreExceptionService.Instance.GetClientException(
                     CoreErrorCodes.AuthenticationUiFailedError, 
                     "AuthenticationActivity failed to start", 
                     ex);

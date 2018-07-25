@@ -49,6 +49,8 @@ namespace Microsoft.Identity.Client.Internal
     [DataContract]
     internal class IdToken
     {
+
+
         [DataMember(Name = IdTokenClaim.Issuer, IsRequired = false)]
         public string Issuer { get; set; }
 
@@ -85,9 +87,9 @@ namespace Microsoft.Identity.Client.Internal
 
             if (idTokenSegments.Length < 2)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.InvalidJwtError, 
-                    "ID Token must contain at least 2 parts.");
+                throw CoreExceptionService.Instance.GetClientException(
+                    CoreErrorCodes.InvalidJwtError,
+                    CoreErrorMessages.IDTokenMustHaveTwoParts);
             }
 
             try
@@ -101,9 +103,9 @@ namespace Microsoft.Identity.Client.Internal
             }
             catch (Exception exc)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw CoreExceptionService.Instance.GetClientException(
                     CoreErrorCodes.JsonParseError,
-                    "Failed to parse the returned id token.", 
+                    CoreErrorMessages.FailedToParseIDToken, 
                     exc);
             }
 

@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Core.Instance
                             .ConfigureAwait(false);
                 if (discoveryResponse.TenantDiscoveryEndpoint == null)
                 {
-                    CoreExceptionFactory.Instance.GetServiceException(
+                    CoreExceptionService.Instance.GetServiceException(
                         discoveryResponse.Error,
                         discoveryResponse.ErrorDescription);
                 }

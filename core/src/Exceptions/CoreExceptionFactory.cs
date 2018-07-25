@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Core
     /// Abstract factory for spewing exceptions for Adal and Msal. Use the <see cref="Instance"/>
     /// singleton to access an actual implementation which will have been injected.
     /// </summary>
-    internal abstract class CoreExceptionFactory
+    internal abstract class CoreExceptionService
     {
-        public static CoreExceptionFactory Instance { get; set; }
+        public static CoreExceptionService Instance { get; set; }
 
         public abstract Exception GetClientException(
             string errorCode,
