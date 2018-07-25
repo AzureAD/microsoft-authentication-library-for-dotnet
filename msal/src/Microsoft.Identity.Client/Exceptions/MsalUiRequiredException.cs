@@ -39,24 +39,24 @@ namespace Microsoft.Identity.Client
         /// Standard OAuth2 protocol error code. It indicates to the libray that the user needs to go the UI for 
         /// getting a new token.
         /// </summary>
-        public static readonly string InvalidGrantError = "invalid_grant";
+        public const string InvalidGrantError = "invalid_grant";
 
         /// <summary>
         /// No tokens were found matching the criteria.
         /// </summary>
-        public static readonly string NoTokensFoundError = "no_tokens_found";
+        public const string NoTokensFoundError = "no_tokens_found";
 
         /// <summary>
         /// This error code comes back from AcquireTokenSilent calls when null user is 
         /// passed into AcquireTokenSilent calls.
         /// </summary>
-        public static readonly string UserNullError = "user_null";
+        public const string UserNullError = "user_null";
 
         /// <summary>
         /// This error code comes back from AcquireTokenSilent calls when null token cache reference 
         /// is passed into the application constructor
         /// </summary>
-        public static readonly string TokenCacheNullError = "token_cache_null";
+        public const string TokenCacheNullError = "token_cache_null";
 
         /// <summary>
         /// One of two conditions was encountered.
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
         /// 2. An error occurred during a silent web authentication that prevented the authentication
         /// flow from completing in a short enough time frame.
         /// </summary>
-        public static readonly string NoPromptFailedError = "no_prompt_failed";
+        public const string NoPromptFailedError = "no_prompt_failed";
 
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
