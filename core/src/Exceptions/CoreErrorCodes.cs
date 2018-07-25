@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Core
 
         public const string UpnRequired = "upn_required";
         public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
-        public const string InvalidAuthroity = "invalid_authority";
+        public const string InvalidAuthority = "invalid_authority";
 
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";

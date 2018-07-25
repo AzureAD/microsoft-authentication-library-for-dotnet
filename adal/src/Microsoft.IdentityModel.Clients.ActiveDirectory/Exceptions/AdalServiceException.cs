@@ -118,12 +118,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets the specific error codes that may be returned by the service.
         /// </summary>
-        public string[] ServiceErrorCodes { get; set; }
+        public string[] ServiceErrorCodes { get; private set; }
 
         /// <summary>
         /// Contains headers from the response that indicated an error
         /// </summary>
-        public HttpResponseHeaders Headers { get; internal set; }
+        public HttpResponseHeaders Headers { get; private set; }
 
         /// <summary>
         /// Creates and returns a string representation of the current exception.

@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Core
 {
     internal abstract class CoreLoggerBase
     {
-        public static CoreLoggerBase Default = null;
+        public static CoreLoggerBase Default { get; set; }
 
         public Guid CorrelationId { get; set; }
 

@@ -20,7 +20,7 @@ namespace Test.MSAL.NET.Unit
             ModuleInitializer.EnsureModuleInitialized();
 
             // Assert
-            MsalExceptionFactory factory = CoreExceptionService.Instance as MsalExceptionFactory;
+            MsalExceptionService factory = CoreExceptionService.Instance as MsalExceptionService;
             MsalLogger logger = CoreLoggerBase.Default as MsalLogger;
             Assert.IsNotNull(factory);
             Assert.IsNotNull(logger);

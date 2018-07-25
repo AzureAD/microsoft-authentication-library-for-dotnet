@@ -58,7 +58,6 @@
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
-    <None Remove="Internal\ModuleInitializer.cs" />
     <EmbeddedResource Include="Properties\Microsoft.IdentityModel.Clients.ActiveDirectory.rd.xml" />
   </ItemGroup>
   

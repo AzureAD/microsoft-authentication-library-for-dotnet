@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -36,12 +37,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class AdalException : Exception
     {
-        internal enum ErrorFormat
-        {
-            Json,
-            Other
-        }
-
         /// <summary>
         ///  Initializes a new instance of the exception class.
         /// </summary>

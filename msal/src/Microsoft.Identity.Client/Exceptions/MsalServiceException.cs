@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Invalid authority
         /// </summary>
-        public const string InvalidAuthroity = "invalid_authority";
+        public const string InvalidAuthority = "invalid_authority";
 
         /// <summary>
         /// Initializes a new instance of the exception class with a specified

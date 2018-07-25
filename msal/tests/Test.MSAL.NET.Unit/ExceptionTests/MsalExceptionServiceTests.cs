@@ -33,16 +33,16 @@ using Microsoft.Identity.Core;
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
-    public class MsalExceptionFactoryTests
+    public class MsalExceptionServiceTests
     {
         private const string exCode = "exCode";
         private const string exMessage = "exMessage";
-        private MsalExceptionFactory msalExceptionFactory;
+        private MsalExceptionService msalExceptionService;
 
         [TestInitialize]
         public void Init()
         {
-            msalExceptionFactory = new MsalExceptionFactory();
+            msalExceptionService = new MsalExceptionService();
         }
 
 
@@ -50,23 +50,23 @@ namespace Test.MSAL.NET.Unit
         public void ParamValidation()
         {
             AssertException.Throws<ArgumentNullException>(
-                () => msalExceptionFactory.GetClientException(null, exMessage));
+                () => msalExceptionService.GetClientException(null, exMessage));
 
             AssertException.Throws<ArgumentNullException>(
-                () => msalExceptionFactory.GetClientException("", exMessage));
+                () => msalExceptionService.GetClientException("", exMessage));
 
             AssertException.Throws<ArgumentNullException>(
-                () => msalExceptionFactory.GetServiceException(exCode, ""));
+                () => msalExceptionService.GetServiceException(exCode, ""));
 
             AssertException.Throws<ArgumentNullException>(
-                () => msalExceptionFactory.GetServiceException(exCode, null));
+                () => msalExceptionService.GetServiceException(exCode, null));
         }
 
         [TestMethod]
         public void MsalClientException_FromCoreException()
         {
             // Act
-            Exception msalException = msalExceptionFactory.GetClientException(exCode, exMessage);
+            Exception msalException = msalExceptionService.GetClientException(exCode, exMessage);
 
             // Assert
             var msalClientException = msalException as MsalClientException;
@@ -75,7 +75,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsNull(msalClientException.InnerException);
 
             // Act
-            string piiMessage = msalExceptionFactory.GetPiiScrubbedDetails(msalException);
+            string piiMessage = msalExceptionService.GetPiiScrubbedDetails(msalException);
 
             // Assert
             Assert.IsFalse(String.IsNullOrEmpty(piiMessage));
@@ -99,7 +99,7 @@ namespace Test.MSAL.NET.Unit
 
             // Act
             Exception msalException =
-                msalExceptionFactory.GetServiceException(
+                msalExceptionService.GetServiceException(
                     exCode,
                     exMessage,
                     innerException,
@@ -120,7 +120,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(statusCode, msalServiceException.StatusCode);
 
             // Act
-            string piiMessage = msalExceptionFactory.GetPiiScrubbedDetails(msalException);
+            string piiMessage = msalExceptionService.GetPiiScrubbedDetails(msalException);
 
             // Assert
             Assert.IsFalse(String.IsNullOrEmpty(piiMessage));
@@ -145,7 +145,7 @@ namespace Test.MSAL.NET.Unit
 
             // Act
             Exception msalException =
-                 msalExceptionFactory.GetUiRequiredException(exCode, exMessage, innerException);
+                 msalExceptionService.GetUiRequiredException(exCode, exMessage, innerException);
 
              // Assert
             var msalServiceException = msalException as MsalUiRequiredException;
@@ -157,7 +157,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(0, msalServiceException.StatusCode);
 
             // Act
-            string piiMessage = msalExceptionFactory.GetPiiScrubbedDetails(msalException);
+            string piiMessage = msalExceptionService.GetPiiScrubbedDetails(msalException);
 
             // Assert
             Assert.IsFalse(String.IsNullOrEmpty(piiMessage));

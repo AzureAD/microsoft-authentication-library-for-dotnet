@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal
         public override void Error(Exception ex)
         {
             Log(MsalLogLevel.Error,
-                MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex),
+                MsalExceptionService.GetPiiScrubbedExceptionDetails(ex),
                 false);
         }
 

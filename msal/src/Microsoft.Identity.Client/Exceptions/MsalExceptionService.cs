@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Implementation of the <see cref="CoreExceptionService"/> that throws <see cref="MsalException"/>
     /// </summary>
-    internal class MsalExceptionFactory : CoreExceptionService
+    internal class MsalExceptionService : CoreExceptionService
     {
         /// <summary>
         /// Throws an MsalClient exception
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetPiiScrubbedDetails(Exception ex)
         {
-            return MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
+            return MsalExceptionService.GetPiiScrubbedExceptionDetails(ex);
         }
 
         public static string GetPiiScrubbedExceptionDetails(Exception ex)

@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Core.Instance
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
                     throw CoreExceptionService.Instance.GetServiceException(
-                        CoreErrorCodes.InvalidAuthroity,
+                        CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.AuthorityValidationFailed);
                 }
 
@@ -109,8 +109,8 @@ namespace Microsoft.Identity.Core.Instance
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase))) == null)
                 {
                     throw CoreExceptionService.Instance.GetServiceException(
-                        CoreErrorCodes.InvalidAuthroity,
-                        CoreErrorMessages.InvalidAuthroityOpenId);
+                        CoreErrorCodes.InvalidAuthority,
+                        CoreErrorMessages.InvalidAuthorityOpenId);
                 }
             }
 

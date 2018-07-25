@@ -39,6 +39,11 @@ namespace Microsoft.Identity.Core
         /// </summary>
         public int StatusCode { get; set; } = 0;
 
+        /// <summary>
+        /// The specific error codes that may be returned by the service.
+        /// </summary>
+        public string[] ServiceErrorCodes { get; set; }
+
         public string Claims { get; set; }
 
         /// <summary>

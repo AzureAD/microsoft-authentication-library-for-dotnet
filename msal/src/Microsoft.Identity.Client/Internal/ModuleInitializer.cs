@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal
         {
             if (!isInitialized)
             {
-                CoreExceptionService.Instance = new MsalExceptionFactory();
+                CoreExceptionService.Instance = new MsalExceptionService();
 #if !FACADE
                 CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
 #endif
