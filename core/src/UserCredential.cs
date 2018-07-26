@@ -71,27 +71,6 @@ namespace Microsoft.Identity.Core
 
         internal UserAuthType UserAuthType { get; private set; }
 
-        // In order to reduce coupling, this internal function is being removed. Its logic will go inside AcquireTokenNonInteractiveHandler.
-        /*
-        internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
-        {
-        }
-
-            internal override void ApplyTo(DictionaryRequestParameters requestParameters)
-        {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
-            requestParameters[OAuthParameter.Username] = this.UserName;
-            requestParameters[OAuthParameter.Password] = new string(PasswordToCharArray());
-
-            if (SecurePassword != null && !SecurePassword.IsReadOnly())
-            {
-                SecurePassword.Clear();
-            }
-
-            SecurePassword = null;
-        }
-        */
-
         internal virtual char[] PasswordToCharArray()
         {
             return null;

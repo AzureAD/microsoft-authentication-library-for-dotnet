@@ -133,16 +133,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     UserAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
                 }
-                else if (string.Compare(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    /*
-                    // handle password grant flow for the managed user
-                    if (UserCredential.PasswordToCharArray() == null)
-                    {
-                        throw new MsalException(MsalError.PasswordRequiredForManagedUserError);
-                    }
-                    */
-                }
                 else
                 {
                     throw new MsalException(MsalError.UnknownUserType);
@@ -158,12 +148,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 client.AddBodyParameter(OAuth2Parameter.GrantType, UserAssertion.AssertionType);
                 client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(UserAssertion.Assertion)));
             }
-            /*
-            else
-            {
-                this.userCredential.ApplyTo(requestParameters);
-            }
-            */
         }
     }
 }
