@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,6 +40,11 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication
     {
+        static ConfidentialClientApplication()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         /// <summary>
         /// Constructor to create instance of the class
         /// </summary>

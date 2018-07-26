@@ -27,6 +27,7 @@
 
 using Android.App;
 using Microsoft.Identity.Core.UI;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using System;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -37,6 +38,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     [CLSCompliant(false)]
     public class PlatformParameters : IPlatformParameters
     {
+        static PlatformParameters()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         internal CoreUIParent CoreUIParent { get; private set; }
 
         /// <summary>

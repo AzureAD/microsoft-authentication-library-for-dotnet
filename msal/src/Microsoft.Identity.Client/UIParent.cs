@@ -30,6 +30,7 @@ using Android.App;
 using Android.Content.PM;
 #endif
 
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client
@@ -39,6 +40,11 @@ namespace Microsoft.Identity.Client
     /// </summary> 
     public sealed class UIParent
     {
+        static UIParent()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         internal CoreUIParent CoreUIParent { get; private set; }
 
         /// <summary>

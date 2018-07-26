@@ -45,6 +45,11 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed class TokenCache
     {
+        static TokenCache()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         private const int DefaultExpirationBufferInMinutes = 5;
 
         internal readonly TelemetryTokenCacheAccessor tokenCacheAccessor = new TelemetryTokenCacheAccessor();

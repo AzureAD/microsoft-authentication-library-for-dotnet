@@ -64,9 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         static TokenCache()
         {
-            // to do - consider other options
-            // init default logger
-            System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(AdalLogger).TypeHandle);
+            ModuleInitializer.EnsureModuleInitialized();
 
             DefaultShared = new TokenCache
             {

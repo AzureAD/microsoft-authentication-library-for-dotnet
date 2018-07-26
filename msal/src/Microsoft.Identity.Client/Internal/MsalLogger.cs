@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Internal
         }
 
 
-        internal static void ExecuteCallback(MsalLogLevel level, string message, bool containsPii)
+        private static void ExecuteCallback(MsalLogLevel level, string message, bool containsPii)
         {
             lock (MsalLoggerSettings.LockObj)
             {

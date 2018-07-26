@@ -42,6 +42,11 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
     {
+        static PublicClientApplication()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         /// <summary>
         /// Consutructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
         /// </summary>

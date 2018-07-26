@@ -41,8 +41,6 @@ namespace Microsoft.Identity.Client
     /// false then this value is always false.</param>
     public delegate void LogCallback(MsalLogLevel level, string message, bool containsPii);
 
-
-
     /// <summary>
     /// MSAL Log Levels
     /// </summary>
@@ -68,7 +66,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         Verbose = 3
     }
-
 
     /// <summary>
     /// MSAL logger settings class that allows developers to configure log level, configure callbacks etc.

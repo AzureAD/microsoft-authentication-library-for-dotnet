@@ -49,6 +49,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class AuthenticationContext
     {
+        static AuthenticationContext()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         internal Authenticator Authenticator;
 
         /// <summary>
