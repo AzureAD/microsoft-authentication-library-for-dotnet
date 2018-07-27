@@ -1011,8 +1011,8 @@ namespace Microsoft.Identity.Client
                 {
                     TokenCache = this,
                     ClientId = ClientId,
-                    User = new User(msalIdTokenCacheItem.HomeAccountId,
-                        msalIdTokenCacheItem?.IdToken?.PreferredUsername, msalAccessTokenCacheItem.Environment)
+                    User = msalIdTokenCacheItem != null ? new User(msalIdTokenCacheItem.HomeAccountId,
+                        msalIdTokenCacheItem.IdToken?.PreferredUsername, msalAccessTokenCacheItem.Environment) : null
                 };
 
                 try
