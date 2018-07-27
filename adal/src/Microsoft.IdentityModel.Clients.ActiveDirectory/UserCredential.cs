@@ -36,30 +36,54 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
-    public class UserCredential: Core.UserCredential
+    public class UserCredential
     {
+        internal Core.UserCredential _UserCredential;
+
+        /// <summary>
+        /// Gets identifier of the user.
+        /// </summary>
+        public string UserName
+        {
+            get { return _UserCredential.UserName; }
+            internal set { _UserCredential.UserName = value; }
+        }
+
+        internal UserAuthType UserAuthType
+        {
+            get { return _UserCredential.UserAuthType; }
+        }
+
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
         /// and it can only be used in domain joined scenarios.
         /// </summary>
-        public UserCredential():base()
+        public UserCredential()
         {
+            _UserCredential = new Core.UserCredential();
         }
 
         /// <summary>
         /// Constructor to create credential with username
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName) : base(userName)
+        public UserCredential(string userName)
         {
+            _UserCredential = new Core.UserCredential(userName);
         }
 
-        internal UserCredential(string userName, UserAuthType userAuthType):base(userName, userAuthType)
+        internal UserCredential(string userName, UserAuthType userAuthType)
         {
+            _UserCredential = new Core.UserCredential(userName, userAuthType);
         }
 
         internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
         {
+        }
+
+        internal virtual char[] PasswordToCharArray()
+        {
+            return null;
         }
     }
 }

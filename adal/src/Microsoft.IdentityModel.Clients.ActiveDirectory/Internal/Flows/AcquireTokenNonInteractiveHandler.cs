@@ -161,7 +161,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     WsTrustResponse wsTrustResponse;
                     try
                     {
-                        wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential, RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
+                        wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential._UserCredential, RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
                     }
                     catch (System.Xml.XmlException ex)
                     {
