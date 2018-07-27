@@ -34,9 +34,9 @@ using System.Text;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Implementation of the <see cref="CoreExceptionService"/> that throws <see cref="MsalException"/>
+    /// Implementation of the <see cref="CoreExceptionFactory"/> that throws <see cref="MsalException"/>
     /// </summary>
-    internal class MsalExceptionService : CoreExceptionService
+    internal class MsalExceptionFactory : CoreExceptionFactory
     {
         /// <summary>
         /// Throws an MsalClient exception
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetPiiScrubbedDetails(Exception ex)
         {
-            return MsalExceptionService.GetPiiScrubbedExceptionDetails(ex);
+            return MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
         }
 
         public static string GetPiiScrubbedExceptionDetails(Exception ex)

@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 if (string.IsNullOrEmpty(chromePackage))
                 {
                     const string chromeNotInstalledMessage = " Chrome is not installed on the device, cannot proceed with authentication";
-                    throw CoreExceptionService.Instance.GetClientException(
+                    throw CoreExceptionFactory.Instance.GetClientException(
                         CoreErrorCodes.ChromeNotInstalledError, 
                         chromeNotInstalledMessage);
                 }
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 catch (ActivityNotFoundException ex)
                 {
                     const string chromeDisabledMessage = "Chrome is disabled on the device, cannot proceed with authentication ";
-                    throw CoreExceptionService.Instance.GetClientException(
+                    throw CoreExceptionFactory.Instance.GetClientException(
                         CoreErrorCodes.ChromeDisabledError, 
                         chromeDisabledMessage + ex.InnerException);
                 }

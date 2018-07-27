@@ -39,12 +39,12 @@ namespace Test.ADAL.NET.Unit
         private const string exCode = "exCode";
         private const string exMessage = "exMessage";
 
-        AdalExceptionService adalExceptionFactory;
+        AdalEceptionFactory adalExceptionFactory;
 
         [TestInitialize]
         public void Init()
         {
-            adalExceptionFactory = new AdalExceptionService();
+            adalExceptionFactory = new AdalEceptionFactory();
         }
 
         [TestMethod]

@@ -33,11 +33,11 @@ using System.Text;
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Implementation of the <see cref="CoreExceptionService"/> that throws <see cref="AdalException"/>
+    /// Implementation of the <see cref="CoreExceptionFactory"/> that throws <see cref="AdalException"/>
     /// </summary>
     /// <remarks>Does not currently throw <see cref="AdalSilentTokenAcquisitionException"/> and 
     /// <see cref="AdalUserMismatchException"/></remarks>
-    internal class AdalExceptionService : CoreExceptionService
+    internal class AdalEceptionFactory : CoreExceptionFactory
     {
         public override Exception GetClientException(
             string errorCode, 

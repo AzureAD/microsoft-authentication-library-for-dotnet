@@ -49,7 +49,7 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
-            CoreExceptionService.Instance = new TestExceptionFactory();
+            CoreExceptionFactory.Instance = new TestExceptionFactory();
         }
 
         [TestMethod]

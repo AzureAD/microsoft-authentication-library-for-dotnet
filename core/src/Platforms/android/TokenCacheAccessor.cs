@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Core
             if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null
                 || _idTokenSharedPreference == null || _accountSharedPreference == null)
             {
-                throw CoreExceptionService.Instance.GetClientException(
+                throw CoreExceptionFactory.Instance.GetClientException(
                     CoreErrorCodes.FailedToCreateSharedPreference,
                     "Fail to create SharedPreference");
             }

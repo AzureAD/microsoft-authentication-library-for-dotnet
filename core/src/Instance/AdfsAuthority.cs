@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Core.Instance
         {
             if (string.IsNullOrEmpty(userPrincipalName))
             {
-                throw CoreExceptionService.Instance.GetClientException(
+                throw CoreExceptionFactory.Instance.GetClientException(
                     CoreErrorCodes.UpnRequired,
                     CoreErrorMessages.UpnRequiredForAuthroityValidation);
             }
@@ -72,14 +72,14 @@ namespace Microsoft.Identity.Core.Instance
                 DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, requestContext).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
-                    CoreExceptionService.Instance.GetServiceException(
+                    CoreExceptionFactory.Instance.GetServiceException(
                         drsResponse.Error,
                         drsResponse.ErrorDescription);
                 }
 
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
-                    throw CoreExceptionService.Instance.GetServiceException(
+                    throw CoreExceptionFactory.Instance.GetServiceException(
                         CoreErrorCodes.MissingPassiveAuthEndpoint,
                         CoreErrorMessages.CannotFindTheAuthEndpont);
                 }
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Core.Instance
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw CoreExceptionService.Instance.GetServiceException(
+                    throw CoreExceptionFactory.Instance.GetServiceException(
                         CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.AuthorityValidationFailed);
                 }
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Core.Instance
                             (a.Rel.Equals(DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase))) == null)
                 {
-                    throw CoreExceptionService.Instance.GetServiceException(
+                    throw CoreExceptionFactory.Instance.GetServiceException(
                         CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.InvalidAuthorityOpenId);
                 }
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Core.Instance
             catch (Exception exc)
             {
                 const string msg = "On-Premise ADFS enrollment server endpoint lookup failed. Error - ";
-                string noPiiMsg = CoreExceptionService.Instance.GetPiiScrubbedDetails(exc);
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(exc);
                 requestContext.Logger.Info(msg + noPiiMsg);
                 requestContext.Logger.InfoPii(msg + exc);
             }

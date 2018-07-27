@@ -37,12 +37,12 @@ namespace Test.MSAL.NET.Unit
     {
         private const string exCode = "exCode";
         private const string exMessage = "exMessage";
-        private MsalExceptionService msalExceptionService;
+        private MsalExceptionFactory msalExceptionService;
 
         [TestInitialize]
         public void Init()
         {
-            msalExceptionService = new MsalExceptionService();
+            msalExceptionService = new MsalExceptionFactory();
         }
 
 

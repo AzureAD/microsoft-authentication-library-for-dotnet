@@ -123,13 +123,13 @@ namespace Microsoft.Identity.Core.Http
                 requestContext.Logger.InfoPii(message);
                 if (toThrow != null)
                 {
-                    throw CoreExceptionService.Instance.GetServiceException(
+                    throw CoreExceptionFactory.Instance.GetServiceException(
                         CoreErrorCodes.RequestTimeout,
                         "Request to the endpoint timed out.",
                         toThrow);
                 }
 
-                throw CoreExceptionService.Instance.GetServiceException(
+                throw CoreExceptionFactory.Instance.GetServiceException(
                     CoreErrorCodes.ServiceNotAvailable,
                     "Service is unavailable to process the request",
                     null, 
