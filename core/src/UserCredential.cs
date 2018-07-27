@@ -25,17 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.InteropServices;
-using System.Security;
-
 namespace Microsoft.Identity.Core
 {
-    internal enum UserAuthType
-    {
-        IntegratedAuth,
-        UsernamePassword
-    }
-
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// The implementation is  here, and the ADAL UserCredential class will subclass this.
