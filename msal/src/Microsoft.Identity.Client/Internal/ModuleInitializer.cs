@@ -51,13 +51,16 @@ namespace Microsoft.Identity.Client.Internal
 
         public static void EnsureModuleInitialized()
         {
-            if (!isInitialized)
+            lock (lockObj)
             {
-                CoreExceptionFactory.Instance = new MsalExceptionFactory();
+                if (!isInitialized)
+                {
+                    CoreExceptionFactory.Instance = new MsalExceptionFactory();
 #if !FACADE
-                CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
+                    CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
 #endif
-                isInitialized = true;
+                    isInitialized = true;
+                }
             }
         }
     }
