@@ -39,6 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public const string SignatureVerificationFailed = "signature_verification_failed";
         public const string NoBrokerAccountFound = "broker_account_not_found";
         public const string BrokerApplicationRequired = "broker_application_required";
+        public const string IncorrectBrokerRedirectUri = "incorrect_broker_redirecturi";
     }
 
     internal static class AdalErrorMessageAndroidEx

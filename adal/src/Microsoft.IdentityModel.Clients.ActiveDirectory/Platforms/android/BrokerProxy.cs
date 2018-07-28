@@ -352,10 +352,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     null, new Handler(callerActivity.MainLooper));
 
                 // Making blocking request here
-                Bundle bundleResult = (Bundle) result.Result;
+                Bundle bundleResult = (Bundle)result.Result;
                 // Authenticator should throw OperationCanceledException if
                 // token is not available
-                intent = (Intent) bundleResult.GetParcelable(AccountManager.KeyIntent);
+                intent = (Intent)bundleResult.GetParcelable(AccountManager.KeyIntent);
 
                 // Add flag to this intent to signal that request is for broker
                 // logic
@@ -364,17 +364,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     intent.PutExtra(BrokerConstants.BrokerRequest, BrokerConstants.BrokerRequest);
                 }
             }
-            catch (OperationCanceledException e)
+            catch (AdalException)
+            {
+                throw;
+            }
+            catch(Exception e)
             {
                 RequestContext.Logger.Error(e);
                 RequestContext.Logger.ErrorPii(e);
-            }
-            catch (Exception e)
-            {
-                // Authenticator gets problem from webrequest or file read/write
-                var ex = new AdalException("Authenticator cancels the request", e);
-                RequestContext.Logger.Error(ex);
-                RequestContext.Logger.ErrorPii(ex);
             }
 
             return intent;
@@ -442,7 +439,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             if (!string.IsNullOrEmpty(request.RedirectUri) && !string.Equals(computedRedirectUri, request.RedirectUri, StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException("redirect uri for broker invocation should be set to " + computedRedirectUri);
+                throw new AdalException(AdalError.BrokerRedirectUriIncorrectFormat + computedRedirectUri);                
             }
 
             brokerOptions.PutString(BrokerConstants.AccountRedirect, request.RedirectUri);

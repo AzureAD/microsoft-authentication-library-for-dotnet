@@ -290,6 +290,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Form post parsing failure
         /// </summary>
         public const string FormPostParsingFailure = "form_post_parsing_failure";
-    }
 
+        /// <summary>
+        /// Broker redirectUri has incorrect format
+        /// </summary>
+        public const string BrokerRedirectUriIncorrectFormat = "broker_redirect_uri_incorrect_format ";
+    }
 }
