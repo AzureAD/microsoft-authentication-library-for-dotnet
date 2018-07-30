@@ -90,9 +90,9 @@ namespace Microsoft.Identity.Core.WsTrust
                 {
                     errorMessage = resp.Body;
                 }
-                throw new Client.MsalServiceException(
-                    MsalError.FederatedServiceReturnedError,
-                    string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage)
+                throw CoreExceptionFactory.Instance.GetServiceException(
+                    CoreErrorCodes.FederatedServiceReturnedError,
+                    string.Format(CultureInfo.CurrentCulture, CoreErrorMessages.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage)
                 );
             }
             return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustAddress.Version);

@@ -51,6 +51,12 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
     [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
     public class WsTrustTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            CoreExceptionFactory.Instance = new TestExceptionFactory();
+        }
+
         [TestMethod]
         [Description("WS-Trust Request Xml Format Test")]
         public void WsTrustRequestXmlFormatTest()
@@ -188,9 +194,9 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                 await WsTrustRequest.SendRequestAsync(address, new UserCredential("username"), requestContext, "urn:federation:SomeAudience");
                 Assert.Fail("We expect an exception to be thrown here");
             }
-            catch (MsalException ex)
+            catch (TestException ex)
             {
-                Assert.AreEqual(MsalError.FederatedServiceReturnedError, ex.ErrorCode);
+                Assert.AreEqual(CoreErrorCodes.FederatedServiceReturnedError, ex.ErrorCode);
             }
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

@@ -75,5 +75,6 @@ namespace Microsoft.Identity.Core
         public const string InternalErrorCacheEmptyUsername = "Internal error - trying to remove an ADAL user with an empty username. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
 
         public const string InternalErrorCacheEmptyIdentifier = "Internal error - trying to remove an ADAL user with an empty identifier. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
+        public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
     }
 }
