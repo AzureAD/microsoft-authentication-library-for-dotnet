@@ -37,6 +37,9 @@ using Windows.Storage;
 using Windows.System.UserProfile;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
+using Windows.System;
+using System.Collections.Generic;
+using Windows.Foundation.Collections;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -44,7 +47,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     {
         public override string GetProductName()
         {
-            return "PCL.WinRT";
+            return "PCL.UAP";
         }
 
         public override string GetEnvironmentVariable(string variable)
@@ -53,21 +56,69 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return localSettings.Values.ContainsKey(variable) ? localSettings.Values[variable].ToString() : null;
         }
 
+        /// <summary>
+        /// Get a principal name that can be used for WIA
+        /// </summary>
+        /// <remarks>
+        /// Win10 allows several identities to be logged in at once; 
+        /// select the first principal name that can be used
+        /// </remarks>
+        /// <returns></returns>
         public override async Task<string> GetUserPrincipalNameAsync()
         {
-            if (!UserInformation.NameAccessAllowed)
+            IReadOnlyList<User> users = await User.FindAllAsync();
+            if (users == null || !users.Any())
             {
-                throw new AdalException(AdalErrorEx.CannotAccessUserInformation, AdalErrorMessageEx.CannotAccessUserInformation);
+                throw new AdalException(
+                 AdalErrorEx.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorMessages.UapCannotFindDomainUser);
             }
 
-            try
+            var getUserDetailTasks = users.Select(async u =>
             {
-                return await UserInformation.GetPrincipalNameAsync().AsTask().ConfigureAwait(false);
-            }
-            catch (UnauthorizedAccessException ex)
+                object domainObj = await u.GetPropertyAsync(KnownUserProperties.DomainName);
+                string domainString = domainObj?.ToString();
+
+                object principalObject = await u.GetPropertyAsync(KnownUserProperties.PrincipalName);
+                string principalNameString = principalObject?.ToString();
+
+                return new { Domain = domainString, PrincipalName = principalNameString };
+            }).ToList();
+
+            var userDetails = await Task.WhenAll(getUserDetailTasks).ConfigureAwait(false);
+
+            // try to get a user that has both domain name and upn
+            var userDetailWithDomainAndPn = userDetails.FirstOrDefault(
+                d => !String.IsNullOrWhiteSpace(d.Domain) &&
+                !String.IsNullOrWhiteSpace(d.PrincipalName));
+
+            if (userDetailWithDomainAndPn != null)
             {
-                throw new AdalException(AdalErrorEx.UnauthorizedUserInformationAccess, AdalErrorMessageEx.UnauthorizedUserInformationAccess, ex);
+                return userDetailWithDomainAndPn.PrincipalName;
             }
+
+            // try to get a user that at least has upn
+            var userDetailWithPn = userDetails.FirstOrDefault(
+              d => !String.IsNullOrWhiteSpace(d.PrincipalName));
+
+            if (userDetailWithPn != null)
+            {
+                return userDetailWithPn.PrincipalName;
+            }
+
+            // user has domain name, but no upn -> missing Enterprise Auth capability
+            if (userDetails.Any(d => !String.IsNullOrWhiteSpace(d.Domain)))
+            {
+                throw new AdalException(
+                 AdalErrorEx.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorMessages.UapCannotFindUpn);
+            }
+
+            // no domain, no upn -> missing User Info capability
+            throw new AdalException(
+             AdalErrorEx.CannotAccessUserInformationOrUserNotDomainJoined,
+             CoreErrorMessages.UapCannotFindDomainUser);
+
         }
 
         public override string GetProcessorArchitecture()
@@ -90,33 +141,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
-            if (!UserInformation.NameAccessAllowed)
-            {
-                // The access is not allowed and we cannot determine whether this is a local user or not. So, we do NOT add form auth parameter.
-                // This is the case where we can advise customers to add extra query parameter if they want.
-
-                var msg =
-                    "Cannot access user information to determine whether it is a local user or not due to machine's privacy setting.";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
-
-                return false;
-            }
-
-            try
-            {
-                return string.IsNullOrEmpty(await UserInformation.GetDomainNameAsync().AsTask().ConfigureAwait(false));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                var msg = "Cannot try Windows Integrated Authentication due to lack of Enterprise capability.";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
-
-                // This mostly means Enterprise capability is missing, so WIA cannot be used and
-                // we return true to add form auth parameter in the caller.
-                return true;
-            }            
+            IReadOnlyList<User> users = await User.FindAllAsync();
+            return users.Any(u => u.Type == UserType.LocalGuest || u.Type == UserType.LocalGuest);
         }
 
         public override bool IsDomainJoined()
@@ -152,7 +178,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
         }
 
-
         public override bool GetCacheLoadPolicy(IPlatformParameters parameters)
         {
             PlatformParameters authorizationParameters = (parameters as PlatformParameters);
@@ -163,7 +188,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
 
-            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession && 
+            return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession &&
                    promptBehavior != PromptBehavior.SelectAccount;
         }
 
@@ -242,5 +267,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 public short wProcessorRevision;
             }
         }
+
+
     }
+
 }

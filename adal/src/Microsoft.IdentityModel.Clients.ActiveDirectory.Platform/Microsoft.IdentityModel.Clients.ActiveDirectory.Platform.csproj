@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
     <Product>Microsoft.IdentityModel.Clients.ActiveDirectory.Platform ($(TargetFramework))</Product>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
@@ -91,10 +91,6 @@
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.xml" />
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.pdb" />
     </ItemGroup>
-    <ItemGroup>
-      <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All"/>
-    </ItemGroup>
-
     <RemoveDir Directories="$(NugetPackageRootFolder)" />
     <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
     <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />

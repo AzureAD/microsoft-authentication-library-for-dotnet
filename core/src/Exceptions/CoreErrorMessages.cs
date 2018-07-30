@@ -61,5 +61,11 @@ namespace Microsoft.Identity.Core
         public const string InvalidAuthorityOpenId = "invalid authority while getting the open id config endpoint";
         public const string UpnRequiredForAuthroityValidation = "UPN is required for ADFS authority validation.";
         public const string CannotFindTheAuthEndpont = "Cannot find the auth endpoint";
+
+        public const string UapCannotFindUpn =
+           "Cannot find the principal name for the user, but found a domain the name. Possible cause: the application does not request the Enterprise Authentication capability.";
+
+        public const string UapCannotFindDomainUser =
+            "Cannot find the principal name for the user. Possible causes: the application does not request the User Account Information and the Enterprise Authentication capabilities or the user is not AD or AAD joined.";
     }
 }

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
     <Product>Microsoft.IdentityModel.Clients.ActiveDirectory ($(TargetFramework))</Product> 
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
@@ -35,7 +35,7 @@
  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
@@ -81,16 +81,12 @@
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\net45\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
-	<Compile Include="Features\CertificateAssertion\**\*.cs" />
+	  <Compile Include="Features\CertificateAssertion\**\*.cs" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
     <Compile Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
     <Compile Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
     <Compile Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
-    <Compile Include="Platforms\winrt\**\*.cs" />
-    <Compile Include="Features\WinCommon\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <Compile Include="Platforms\netstandard1.1\*.cs" />
@@ -101,6 +97,8 @@
 	<Compile Include="Features\CertificateAssertion\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+    <Compile Include="Platforms\uap\**\*.cs" />
+    <Compile Include="Features\WinCommon\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.3" />
     <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />

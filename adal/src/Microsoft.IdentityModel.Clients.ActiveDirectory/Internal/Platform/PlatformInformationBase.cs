@@ -50,7 +50,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public virtual string GetAssemblyFileVersionAttribute()
         {
-            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
+            var assemblyFileVersion = typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+            return assemblyFileVersion != null ? assemblyFileVersion.Version : "internal";
         }
 
         public async virtual Task<bool> IsUserLocalAsync(RequestContext requestContext)
