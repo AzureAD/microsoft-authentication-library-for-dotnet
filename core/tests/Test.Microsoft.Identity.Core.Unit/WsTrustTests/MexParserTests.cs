@@ -45,6 +45,12 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
     [DeploymentItem(@"Resources\TestMex2005.xml")]
     public class MexParserTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            CoreExceptionFactory.Instance = new TestExceptionFactory();
+        }
+
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         public void WsTrust2005AddressExtractionTest()
@@ -86,9 +92,9 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                 await MexParser.FetchWsTrustAddressFromMexAsync("http://somehost", UserAuthType.IntegratedAuth, requestContext);
                 Assert.Fail("We expect an exception to be thrown here");
             }
-            catch (MsalException ex)
+            catch (TestException ex)
             {
-                Assert.AreEqual(MsalError.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
+                Assert.AreEqual(CoreErrorCodes.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
             }
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }

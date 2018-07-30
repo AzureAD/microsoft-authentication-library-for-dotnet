@@ -80,10 +80,10 @@ namespace Microsoft.Identity.Core.WsTrust
             var uri = new UriBuilder(federationMetadataUrl);
             var httpResponse = await HttpRequest.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK) {
-                throw new Client.MsalException(
-                    MsalError.AccessingWsMetadataExchangeFailed,
+                throw CoreExceptionFactory.Instance.GetClientException(
+                    CoreErrorCodes.AccessingWsMetadataExchangeFailed,
                     string.Format(CultureInfo.CurrentCulture,
-                        MsalErrorMessage.HttpRequestUnsuccessful,
+                        CoreErrorMessages.HttpRequestUnsuccessful,
                         (int)httpResponse.StatusCode, httpResponse.StatusCode));
             }
             return XDocument.Parse(httpResponse.Body, LoadOptions.None);

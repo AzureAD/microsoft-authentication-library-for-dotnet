@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Core
     /// Error codes attached to each exception.
     /// These need to be duplicated and publicly exposed in the MSAL and ADAL because users refer to them
     /// </summary>
-    internal class CoreErrorCodes 
+    internal class CoreErrorCodes
     {
         public const string JsonParseError = "json_parse_failed";
         public const string RequestTimeout = "request_timeout";
@@ -55,6 +55,7 @@ namespace Microsoft.Identity.Core
 
         public const string PlatformNotSupported = "platform_not_supported";
         public const string InternalError = "internal_error";
+        public const string AccessingWsMetadataExchangeFailed = "accessing_ws_metadata_exchange_failed";
 
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";

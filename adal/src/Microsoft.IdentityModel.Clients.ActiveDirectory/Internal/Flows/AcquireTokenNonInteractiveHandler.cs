@@ -151,7 +151,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     {
                         throw new AdalException(AdalError.ParsingWsMetadataExchangeFailed, ex);
                     }
-                    catch (Identity.Client.MsalException ex)
+                    catch (AdalException ex)
                     {
                         throw new AdalException(AdalError.AccessingWsMetadataExchangeFailed, ex);
                     }

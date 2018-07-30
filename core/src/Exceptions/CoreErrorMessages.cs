@@ -30,6 +30,8 @@ namespace Microsoft.Identity.Core
 {
     internal class CoreErrorMessages
     {
+        public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}).";
+
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
 
         public const string AuthorityNotSupported = "'authority' is not supported";
