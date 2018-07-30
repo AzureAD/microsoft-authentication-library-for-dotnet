@@ -1,44 +1,20 @@
-﻿//----------------------------------------------------------------------
-//
-// Copyright (c) Microsoft Corporation.
-// All rights reserved.
-//
-// This code is licensed under the MIT License.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files(the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions :
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
-
+﻿using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace AdalUniversalTestApp
+namespace UAPTestApp
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private const string ClientId = "cd01dc27-9d3c-4812-beda-8229d5d4a8d5";
+        private const string ReturnUri = "https://MyDirectorySearcherApp";
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -48,18 +24,18 @@ namespace AdalUniversalTestApp
         {
             this.AccessToken.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
-            
+
             try
             {
                 AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net",
-                    "<CLIENT-ID>", new Uri("<REDIRECT-URI>"),
+                    ClientId, new Uri(ReturnUri),
                     new PlatformParameters(PromptBehavior.Auto, false));
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                     () =>
-                {
-                    AccessToken.Text = "Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken;
-                });
+                    {
+                        AccessToken.Text = "Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken;
+                    });
             }
             catch (Exception exc)
             {
@@ -110,17 +86,36 @@ namespace AdalUniversalTestApp
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-		private async void Button_Click_2(object sender, RoutedEventArgs e)
+        private async void Button_Click_2(object sender, RoutedEventArgs e)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-		{
+        {
             this.AccessToken.Text = string.Empty;
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-		private async void Button_Click_3(object sender, RoutedEventArgs e)
+        private async void AcquireTokenClientCred_Click(object sender, RoutedEventArgs e)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-		{
+        {
             this.AccessToken.Text = string.Empty;
+            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
+
+            try
+            {
+                AuthenticationResult result = await ctx.AcquireTokenAsync(
+                    "https://graph.windows.net",
+                    ClientId,
+                    new UserCredential());
+
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                    () =>
+                    {
+                        AccessToken.Text = "Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken;
+                    });
+            }
+            catch (Exception exc)
+            {
+                this.AccessToken.Text = exc.Message;
+            }
         }
     }
 }
