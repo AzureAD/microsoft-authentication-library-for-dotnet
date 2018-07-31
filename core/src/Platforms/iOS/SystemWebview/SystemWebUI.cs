@@ -84,7 +84,8 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
             }
             catch (Exception ex)
             {
-                requestContext.Logger.Error(ex);
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                requestContext.Logger.Error(noPiiMsg);
                 requestContext.Logger.ErrorPii(ex);
                 throw CoreExceptionFactory.Instance.GetClientException(
                     CoreErrorCodes.AuthenticationUiFailedError, 

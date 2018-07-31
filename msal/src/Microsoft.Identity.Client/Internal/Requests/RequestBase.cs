@@ -169,13 +169,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             catch (MsalException ex)
             {
                 apiEvent.ApiErrorCode = ex.ErrorCode;
-                AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
+                string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
+                AuthenticationRequestParameters.RequestContext.Logger.Error(noPiiMsg);
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                 throw;
             }
             catch (Exception ex)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Error(ex);
+                string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
+                AuthenticationRequestParameters.RequestContext.Logger.Error(noPiiMsg);
                 AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                 throw;
             }
@@ -206,15 +208,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier, StringComparison.OrdinalIgnoreCase) ||
                     !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier, StringComparison.OrdinalIgnoreCase))
                 {
+                    AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user" +
+                                                                                "identifier");
+
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(String.Format(
                         CultureInfo.InvariantCulture,
                         "Returned user identifiers (uid:{0} utid:{1}) does not meatch the sent user identifier (uid:{2} utid:{3})",
                         fromServer.UniqueIdentifier, fromServer.UniqueTenantIdentifier,
                         AuthenticationRequestParameters.ClientInfo.UniqueIdentifier,
                         AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier));
-
-                    AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user" +
-                                                                                "identifier");
 
                     throw new MsalServiceException("user_mismatch", "Returned user identifier does not match the sent user identifier");
                 }

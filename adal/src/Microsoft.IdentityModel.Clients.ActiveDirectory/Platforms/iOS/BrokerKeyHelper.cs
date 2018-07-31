@@ -78,7 +78,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 var result = SecKeyChain.Add(record);
                 if (result != SecStatusCode.Success)
                 {
-                    CoreLoggerBase.Default.Warning("Failed to save broker key: " + result);
+                    string msg = "Failed to save broker key. Security Keychain Status code: " + result ;
+                    CoreLoggerBase.Default.Warning(msg);
+                    CoreLoggerBase.Default.WarningPii(msg);
                 }
 
                 brokerKey = byteData.ToArray();

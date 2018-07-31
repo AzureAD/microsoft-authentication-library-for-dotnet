@@ -46,8 +46,11 @@ namespace Microsoft.Identity.Core.Cache
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
-                CoreLoggerBase.Default.Info(string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
-                    tokenCacheDictionary.Count));
+                string msg = string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
+                    tokenCacheDictionary.Count);
+                CoreLoggerBase.Default.Info(msg);
+                CoreLoggerBase.Default.InfoPii(msg);
+
                 writer.Write(tokenCacheDictionary.Count);
                 foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in tokenCacheDictionary)
                 {
@@ -83,7 +86,9 @@ namespace Microsoft.Identity.Core.Cache
                 int blobSchemaVersion = reader.ReadInt32();
                 if (blobSchemaVersion != SchemaVersion)
                 {
-                    CoreLoggerBase.Default.Warning("The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
+                    string msg = "The version of the persistent state of the cache does not match the current schema, so skipping deserialization.";
+                    CoreLoggerBase.Default.Warning(msg);
+                    CoreLoggerBase.Default.WarningPii(msg);
                     return dictionary;
                 }
                 
@@ -101,7 +106,9 @@ namespace Microsoft.Identity.Core.Cache
                     dictionary.Add(key, resultEx);
                 }
 
-                CoreLoggerBase.Default.Info(string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
+                string msg2 = string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count);
+                CoreLoggerBase.Default.Info(msg2);
+                CoreLoggerBase.Default.InfoPii(msg2);
             }
 
             return dictionary;

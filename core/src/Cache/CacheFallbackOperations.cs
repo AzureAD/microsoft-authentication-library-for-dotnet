@@ -40,21 +40,28 @@ namespace Microsoft.Identity.Core.Cache
             AdalResultWrapper resultWrapper, string authority, string clientId, string displayableId,
              string givenName, string familyName, string objectId)
         {
+            string msg;
             if (string.IsNullOrEmpty(resultWrapper.RawClientInfo))
             {
-                CoreLoggerBase.Default.Info("Client Info is missing. Skipping MSAL RT cache write");
+                msg = "Client Info is missing. Skipping MSAL refresh token cache write";
+                CoreLoggerBase.Default.Info(msg);
+                CoreLoggerBase.Default.InfoPii(msg);
                 return;
             }
 
             if (string.IsNullOrEmpty(resultWrapper.RefreshToken))
             {
-                CoreLoggerBase.Default.Info("Refresh Token is missing. Skipping MSAL RT cache write");
+                msg = "Refresh Token is missing. Skipping MSAL refresh token cache write";
+                CoreLoggerBase.Default.Info(msg);
+                CoreLoggerBase.Default.InfoPii(msg);
                 return;
             }
 
             if (string.IsNullOrEmpty(resultWrapper.Result.IdToken))
             {
-                CoreLoggerBase.Default.Info("Id Token is missing. Skipping MSAL RT cache write");
+                msg = "Id Token is missing. Skipping MSAL refresh token cache write";
+                CoreLoggerBase.Default.Info(msg);
+                CoreLoggerBase.Default.InfoPii(msg);
                 return;
             }
 
@@ -74,7 +81,9 @@ namespace Microsoft.Identity.Core.Cache
         {
             if (rtItem == null)
             {
-                CoreLoggerBase.Default.Info("rtItem is null. Skipping MSAL RT cache write");
+                string msg = "No refresh token available. Skipping MSAL refresh token cache write";
+                CoreLoggerBase.Default.Info(msg);
+                CoreLoggerBase.Default.InfoPii(msg);
                 return;
             }
 
@@ -131,7 +140,10 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("GetAllAdalUsersForMsal failed due to Exception - " + ex);
+                string msg = "An error occurred while searching and matching adal users in the msal cache. ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
             }
             return users;
         }
@@ -165,7 +177,10 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("RemoveAdalUser failed due to Exception - " + ex);
+                string msg = "Failed to removed ADAL user - Exception - ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
             }
             return users;
         }
@@ -228,7 +243,10 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("GetAllAdalEntriesForMsal failed due to Exception - " + ex);
+                string msg = "An error occurred while searching for valid MSAL cache entries in ADAL cache. ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
 
                 return new List<MsalRefreshTokenCacheItem>();
             }

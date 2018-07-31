@@ -387,7 +387,7 @@ namespace Test.ADAL.NET.Unit
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
-        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequest_WithDsts()
+        public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequest_WithDstsAsync()
         {
             string host = "uswest-dsts.dsts.core.windows.net/dstsv2";
             string preferredNetwork = "uswest-dsts.dsts.core.windows.net/dstsv2";

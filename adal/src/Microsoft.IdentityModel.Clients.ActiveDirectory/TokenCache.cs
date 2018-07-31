@@ -239,11 +239,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (toRemoveKey != null)
                 {
                     this.tokenCacheDictionary.Remove(toRemoveKey);
-                    CoreLoggerBase.Default.Info("One item removed successfully");
+                    string msg = "One item removed successfully";
+                    CoreLoggerBase.Default.Info(msg);
+                    CoreLoggerBase.Default.InfoPii(msg);
                 }
                 else
                 {
-                    CoreLoggerBase.Default.Info("Item not Present in the Cache");
+                    string msg = "Item not Present in the Cache";
+                    CoreLoggerBase.Default.Info(msg);
+                    CoreLoggerBase.Default.InfoPii(msg);
                 }
 
                 this.HasStateChanged = true;
@@ -269,10 +273,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
             this.OnBeforeWrite(args);
-            CoreLoggerBase.Default.Info(String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed",
-                this.tokenCacheDictionary.Count));
+            string msg = String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed",
+                this.tokenCacheDictionary.Count);
+            CoreLoggerBase.Default.Info(msg);
+            CoreLoggerBase.Default.InfoPii(msg);
             this.tokenCacheDictionary.Clear();
-            CoreLoggerBase.Default.Info("Successfully Cleared Cache");
+            msg = "Successfully Cleared Cache";
+            CoreLoggerBase.Default.Info(msg);
+            CoreLoggerBase.Default.InfoPii(msg);
             this.HasStateChanged = true;
             this.OnAfterAccess(args);
         }

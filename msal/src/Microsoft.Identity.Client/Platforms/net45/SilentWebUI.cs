@@ -134,7 +134,8 @@ namespace Microsoft.Identity.Client.Internal.UI
                     }
                     catch (Exception e)
                     {
-                        RequestContext.Logger.Error(e);
+                        string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
+                        RequestContext.Logger.Error(noPiiMsg);
                         RequestContext.Logger.ErrorPii(e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         uiException = e;

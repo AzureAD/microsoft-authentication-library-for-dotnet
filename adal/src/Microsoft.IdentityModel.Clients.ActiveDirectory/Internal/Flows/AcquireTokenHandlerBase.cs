@@ -212,8 +212,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 RequestContext.Logger.ErrorPii(ex);
                 if (client != null && client.Resiliency && extendedLifetimeResultEx != null)
                 {
-                    var msg = "Refreshing AT failed either due to one of these :- Internal Server Error,Gateway Timeout and Service Unavailable." +
-                                       "Hence returning back stale AT";
+                    var msg = "Refreshing access token failed due to one of these reasons:- Internal Server Error, Gateway Timeout and Service Unavailable. " +
+                                       "Hence returning back stale access token";
                     RequestContext.Logger.Info(msg);
                     RequestContext.Logger.InfoPii(msg);
 

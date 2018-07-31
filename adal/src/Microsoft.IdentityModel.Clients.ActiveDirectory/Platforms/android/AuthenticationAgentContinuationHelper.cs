@@ -51,7 +51,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public static void SetAuthenticationAgentContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             AuthorizationResult authorizationResult = null;
-            CoreLoggerBase.Default.Info(string.Format(CultureInfo.InvariantCulture,"Received Activity Result({0})", (int)resultCode));
+            string msg = string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode);
+            CoreLoggerBase.Default.Info(msg);
+            CoreLoggerBase.Default.InfoPii(msg);
+
             switch ((int)resultCode)
             {
                 case (int)Result.Ok:

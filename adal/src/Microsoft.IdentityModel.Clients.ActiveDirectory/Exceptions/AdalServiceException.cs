@@ -118,7 +118,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Gets the specific error codes that may be returned by the service.
         /// </summary>
-        public string[] ServiceErrorCodes { get; private set; }
+        public string[] ServiceErrorCodes { get; set; }
 
         /// <summary>
         /// Contains headers from the response that indicated an error

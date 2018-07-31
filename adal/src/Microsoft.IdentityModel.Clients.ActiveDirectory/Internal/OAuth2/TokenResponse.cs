@@ -202,9 +202,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
             // the value to 0.
             if (ExtendedExpiresIn < ExpiresIn)
             {
-                CoreLoggerBase.Default.Info(string.Format(CultureInfo.InvariantCulture,
+                string msg = string.Format(CultureInfo.InvariantCulture,
                         "ExtendedExpiresIn({0}) is less than ExpiresIn({1}). Set ExpiresIn as ExtendedExpiresIn",
-                        this.ExtendedExpiresIn, this.ExpiresIn));
+                        this.ExtendedExpiresIn, this.ExpiresIn);
+                CoreLoggerBase.Default.Info(msg);
+                CoreLoggerBase.Default.InfoPii(msg);
                 ExtendedExpiresIn = ExpiresIn;
             }
 

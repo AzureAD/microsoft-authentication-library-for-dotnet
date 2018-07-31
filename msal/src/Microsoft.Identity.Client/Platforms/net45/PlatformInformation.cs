@@ -118,7 +118,8 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning(ex.Message);
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(noPiiMsg);
                 CoreLoggerBase.Default.WarningPii(ex.Message);
                 // ignore the exception as the result is already set to false;
             }

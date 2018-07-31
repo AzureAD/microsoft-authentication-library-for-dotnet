@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetPiiScrubbedDetails(Exception ex)
         {
-            return MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
+            return GetPiiScrubbedExceptionDetails(ex);
         }
 
         public static string GetPiiScrubbedExceptionDetails(Exception ex)

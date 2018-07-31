@@ -256,7 +256,8 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 }
                 catch (PackageManager.NameNotFoundException exc)
                 {
-                    RequestContext.Logger.Error(exc);
+                    string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(exc);
+                    RequestContext.Logger.Error(noPiiMsg);
                     RequestContext.Logger.ErrorPii(exc);
                     // swallow this exception. If the package does not exist then exception will be thrown.
                 }

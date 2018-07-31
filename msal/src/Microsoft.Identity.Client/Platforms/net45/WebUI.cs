@@ -65,7 +65,8 @@ namespace Microsoft.Identity.Client.Internal.UI
                     }
                     catch (AggregateException ae)
                     {
-                        requestContext.Logger.Error(ae.InnerException);
+                        string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ae);
+                        requestContext.Logger.Error(noPiiMsg);
                         requestContext.Logger.ErrorPii(ae.InnerException);
                         // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
                         // actual exception as inner.

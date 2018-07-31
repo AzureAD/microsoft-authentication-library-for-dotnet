@@ -92,7 +92,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (challengeData.ContainsKey("CertAuthorities"))
             {
                 errMessage = "Cert Authorities:" + challengeData["CertAuthorities"];
-                CoreLoggerBase.Default.VerbosePii("Looking up certificate matching authorities:" + challengeData["CertAuthorities"]);
+                string msg = "Looking up certificate matching authorities:" + challengeData["CertAuthorities"];
+                CoreLoggerBase.Default.Verbose(msg);
+                CoreLoggerBase.Default.VerbosePii(msg);
                 string[] certAuthorities = challengeData["CertAuthorities"].Split(';');
                 foreach (var certAuthority in certAuthorities)
                 {
@@ -115,7 +117,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             else
             {
                 errMessage = "Cert Thumbprint:" + challengeData["CertThumbprint"];
-                CoreLoggerBase.Default.VerbosePii("Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"]);
+                string msg = "Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"];
+                CoreLoggerBase.Default.Verbose(msg);
+                CoreLoggerBase.Default.VerbosePii(msg);
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
                 certificates = await CertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
             }

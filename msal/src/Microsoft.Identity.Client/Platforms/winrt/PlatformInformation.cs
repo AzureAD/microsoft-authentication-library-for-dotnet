@@ -146,7 +146,8 @@ namespace Microsoft.Identity.Client
                 }
                 catch (Exception ex)
                 {
-                    CoreLoggerBase.Default.Warning(ex.Message);
+                    string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                    CoreLoggerBase.Default.Warning(noPiiMsg);
                     CoreLoggerBase.Default.WarningPii(ex.Message);
                     return "Unknown";
                 }

@@ -175,7 +175,8 @@ namespace Microsoft.Identity.Core.OAuth2
                     new ExceptionDetail() { StatusCode = (int)response.StatusCode });
             }
 
-            requestContext.Logger.Error(serviceEx);
+            string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(serviceEx);
+            requestContext.Logger.Error(noPiiMsg);
             requestContext.Logger.ErrorPii(serviceEx);
             throw serviceEx;
         }

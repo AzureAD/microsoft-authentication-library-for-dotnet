@@ -238,7 +238,7 @@ namespace Test.ADAL.NET.Integration
         }
 
         [TestMethod]
-        public async Task NegativeDeviceCodeTimeoutTest_WithZeroRetries()
+        public async Task NegativeDeviceCodeTimeoutTest_WithZeroRetriesAsync()
         {
             MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
             {

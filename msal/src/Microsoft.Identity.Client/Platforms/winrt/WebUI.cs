@@ -91,7 +91,8 @@ namespace Microsoft.Identity.Client.Internal.UI
 
             catch (Exception ex)
             {
-                requestContext.Logger.Error(ex);
+                string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
+                requestContext.Logger.Error(noPiiMsg);
                 requestContext.Logger.ErrorPii(ex);
                 throw new MsalException(MsalClientException.AuthenticationUiFailedError, "WAB authentication failed",
                     ex);

@@ -36,7 +36,8 @@ namespace Microsoft.Identity.Core.Cache
         const string NAME = "ADAL.PCL.iOS";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
-        byte[] ILegacyCachePersistance.LoadCache() {
+        byte[] ILegacyCachePersistance.LoadCache()
+        {
             try
             {
                 SecStatusCode res;
@@ -55,13 +56,15 @@ namespace Microsoft.Identity.Core.Cache
                 if (res == SecStatusCode.Success && match != null && match.ValueData != null)
                 {
                     return match.ValueData.ToArray();
-                    
+
                 }
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning("Failed to load cache: " + ex.Message);
-                CoreLoggerBase.Default.ErrorPii(ex);
+                string msg = "Failed to load adal cache: ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
                 // Ignore as the cache seems to be corrupt
             }
             return null;
@@ -69,40 +72,46 @@ namespace Microsoft.Identity.Core.Cache
 
         void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
         {
-                try
+            try
+            {
+                var s = new SecRecord(SecKind.GenericPassword)
                 {
-                    var s = new SecRecord(SecKind.GenericPassword)
-                    {
-                        Generic = NSData.FromString(LocalSettingsContainerName),
-	                    Accessible = SecAccessible.Always,
-                        Service = NAME + " Service",
-                        Account = NAME + " cache",
-                        Label = NAME + " Label",
-                        Comment = NAME + " Cache",
-                        Description = "Storage for cache"
-                    };
+                    Generic = NSData.FromString(LocalSettingsContainerName),
+                    Accessible = SecAccessible.Always,
+                    Service = NAME + " Service",
+                    Account = NAME + " cache",
+                    Label = NAME + " Label",
+                    Comment = NAME + " Cache",
+                    Description = "Storage for cache"
+                };
 
-                    var err = SecKeyChain.Remove(s);
+                var err = SecKeyChain.Remove(s);
+                if (err != SecStatusCode.Success)
+                {
+                    string msg = "Failed to remove adal cache record: ";
+                    CoreLoggerBase.Default.Warning(msg);
+                    CoreLoggerBase.Default.WarningPii(msg + err);
+                }
+
+                if (serializedCache != null && serializedCache.Length > 0)
+                {
+                    s.ValueData = NSData.FromArray(serializedCache);
+                    err = SecKeyChain.Add(s);
                     if (err != SecStatusCode.Success)
                     {
-                        CoreLoggerBase.Default.Warning("Failed to remove cache record: " + err);
-                    }
-
-                    if (serializedCache!=null && serializedCache.Length > 0)
-                    {
-                        s.ValueData = NSData.FromArray(serializedCache);
-                        err = SecKeyChain.Add(s);
-                        if (err != SecStatusCode.Success)
-                        {
-                            CoreLoggerBase.Default.Warning("Failed to save cache record: " + err);
-                        }
+                        string msg = "Failed to save adal cache record: ";
+                        CoreLoggerBase.Default.Warning(msg);
+                        CoreLoggerBase.Default.WarningPii(msg + err);
                     }
                 }
-                catch (Exception ex)
-                {
-                    CoreLoggerBase.Default.Warning("Failed to save cache: " + ex.Message);
-                    CoreLoggerBase.Default.ErrorPii(ex);
-                }
+            }
+            catch (Exception ex)
+            {
+                string msg = "Failed to save adal cache: ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
+            }
         }
     }
 }

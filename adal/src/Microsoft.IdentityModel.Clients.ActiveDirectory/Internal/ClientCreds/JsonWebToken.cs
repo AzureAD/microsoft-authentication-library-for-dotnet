@@ -220,7 +220,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
                 //Check to see if credential is our implementation or developer provided.
                 if (credential.GetType().ToString() != "Microsoft.IdentityModel.Clients.ActiveDirectory.ClientAssertionCertificate")
                 {
-                    CoreLoggerBase.Default.Warning("The implementation of IClientAssertionCertificate is developer provided and it should be replaced with library provided implementation.");
+                    string msg = "The implementation of IClientAssertionCertificate is developer provided and it should be replaced with library provided implementation.";
+                    CoreLoggerBase.Default.Warning(msg);
+                    CoreLoggerBase.Default.WarningPii(msg);
                     return;
                 }
 

@@ -101,7 +101,8 @@ namespace Microsoft.Identity.Core.Http
             }
             catch (TaskCanceledException exception)
             {
-                requestContext.Logger.Error(exception);
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(exception);
+                requestContext.Logger.Error(noPiiMsg);
                 requestContext.Logger.ErrorPii(exception);
                 isRetryable = true;
                 toThrow = exception;

@@ -29,8 +29,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
@@ -65,19 +63,6 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
-        }
-
-        public new static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
-        {
-            if (returnedUriReady != null)
-            {
-                authorizationResult = authorizationResultInput;
-                returnedUriReady.Release();
-            }
-            else
-            {
-                CoreLoggerBase.Default.Info("No pending request for response from web ui.");
-            }
         }
     }
 }

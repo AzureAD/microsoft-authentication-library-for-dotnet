@@ -72,7 +72,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
         }
 
-
         public async Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
         {
             mBrokerProxy.RequestContext = RequestContext;
@@ -85,7 +84,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch (Exception ex)
             {
-                RequestContext.Logger.Error(ex);
+                string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
+                RequestContext.Logger.Error(noPiiMsg);
                 RequestContext.Logger.ErrorPii(ex);
                 throw;
             }
@@ -206,7 +206,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     }
                     catch (ActivityNotFoundException e)
                     {
-                        RequestContext.Logger.Error(e);
+                        string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
+                        RequestContext.Logger.Error(noPiiMsg);
                         RequestContext.Logger.ErrorPii(e);
                     }
                 }

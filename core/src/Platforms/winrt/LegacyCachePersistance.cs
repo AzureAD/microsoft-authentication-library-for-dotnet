@@ -46,37 +46,41 @@ namespace Microsoft.Identity.Core.Cache
 
         byte[] ILegacyCachePersistance.LoadCache()
         {
-                    try
-                    {
-                        var localSettings = ApplicationData.Current.LocalSettings;
-                        localSettings.CreateContainer(LocalSettingsContainerName,
-                            ApplicationDataCreateDisposition.Always);
-                        return GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                    }
-                    catch (Exception ex)
-                    {
-                        CoreLoggerBase.Default.Warning("Failed to load cache: " + ex.Message);
-                        CoreLoggerBase.Default.ErrorPii(ex);
-                        // Ignore as the cache seems to be corrupt
-                    }
+            try
+            {
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.CreateContainer(LocalSettingsContainerName,
+                    ApplicationDataCreateDisposition.Always);
+                return GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
+            }
+            catch (Exception ex)
+            {
+                string msg = "Failed to load adal cache: ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
+                // Ignore as the cache seems to be corrupt
+            }
 
             return null;
         }
 
         void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
         {
-                try
-                {
-                    var localSettings = ApplicationData.Current.LocalSettings;
-                    localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                    SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, serializedCache);
-                    
-                }
-                catch (Exception ex)
-                {
-                    CoreLoggerBase.Default.Warning("Failed to save cache: " + ex.Message);
-                    CoreLoggerBase.Default.ErrorPii(ex);
-                }
+            try
+            {
+                var localSettings = ApplicationData.Current.LocalSettings;
+                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
+                SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, serializedCache);
+
+            }
+            catch (Exception ex)
+            {
+                string msg = "Failed to save adal cache: ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
+            }
         }
 
         internal static void SetCacheValue(IPropertySet containerValues, byte[] value)
