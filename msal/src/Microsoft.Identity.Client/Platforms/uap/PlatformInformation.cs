@@ -38,6 +38,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using System.Collections.Generic;
 using Windows.System;
+using Microsoft.Identity.Core.Platforms;
 
 namespace Microsoft.Identity.Client
 {
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture();
+            return WindowsNativeMethods.GetProcessorArchitecture();
         }
 
         public override string GetOperatingSystem()
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Client
         public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             IReadOnlyList<Windows.System.User> users = await Windows.System.User.FindAllAsync();
-            return users.Any(u => u.Type == UserType.LocalGuest || u.Type == UserType.LocalGuest);
+            return users.Any(u => u.Type == UserType.LocalUser || u.Type == UserType.LocalGuest);
         }
 
         public override bool IsDomainJoined()
@@ -88,65 +89,6 @@ namespace Microsoft.Identity.Client
             return ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri)
                 ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
                 : redirectUri.OriginalString;
-        }
-
-
-        private static class NativeMethods
-        {
-            private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
-            private const int PROCESSOR_ARCHITECTURE_ARM = 5;
-            private const int PROCESSOR_ARCHITECTURE_IA64 = 6;
-            private const int PROCESSOR_ARCHITECTURE_INTEL = 0;
-
-            [DllImport("kernel32.dll")]
-            private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
-
-            public static string GetProcessorArchitecture()
-            {
-                try
-                {
-                    SYSTEM_INFO systemInfo = new SYSTEM_INFO();
-                    GetNativeSystemInfo(ref systemInfo);
-                    switch (systemInfo.wProcessorArchitecture)
-                    {
-                        case PROCESSOR_ARCHITECTURE_AMD64:
-                        case PROCESSOR_ARCHITECTURE_IA64:
-                            return "x64";
-
-                        case PROCESSOR_ARCHITECTURE_ARM:
-                            return "ARM";
-
-                        case PROCESSOR_ARCHITECTURE_INTEL:
-                            return "x86";
-
-                        default:
-                            return "Unknown";
-                    }
-                }
-                catch (Exception ex)
-                {
-                    string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                    CoreLoggerBase.Default.Warning(noPiiMsg);
-                    CoreLoggerBase.Default.WarningPii(ex.Message);
-                    return "Unknown";
-                }
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            private struct SYSTEM_INFO
-            {
-                public readonly short wProcessorArchitecture;
-                public readonly short wReserved;
-                public readonly int dwPageSize;
-                public readonly IntPtr lpMinimumApplicationAddress;
-                public readonly IntPtr lpMaximumApplicationAddress;
-                public readonly IntPtr dwActiveProcessorMask;
-                public readonly int dwNumberOfProcessors;
-                public readonly int dwProcessorType;
-                public readonly int dwAllocationGranularity;
-                public readonly short wProcessorLevel;
-                public readonly short wProcessorRevision;
-            }
         }
     }
 }

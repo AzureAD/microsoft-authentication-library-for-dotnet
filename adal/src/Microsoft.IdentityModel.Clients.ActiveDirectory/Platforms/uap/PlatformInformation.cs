@@ -25,21 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using System;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Windows.Storage;
-using Windows.System.UserProfile;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Windows.System;
 using System.Collections.Generic;
-using Windows.Foundation.Collections;
+using Microsoft.Identity.Core.Platforms;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -123,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture();
+            return WindowsNativeMethods.GetProcessorArchitecture();
         }
 
         public override string GetOperatingSystem()
@@ -212,63 +209,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString :
                 redirectUri.OriginalString;
         }
-
-        private static class NativeMethods
-        {
-            private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
-            private const int PROCESSOR_ARCHITECTURE_ARM = 5;
-            private const int PROCESSOR_ARCHITECTURE_IA64 = 6;
-            private const int PROCESSOR_ARCHITECTURE_INTEL = 0;
-
-            [DllImport("kernel32.dll")]
-            private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
-
-            public static string GetProcessorArchitecture()
-            {
-                try
-                {
-                    SYSTEM_INFO systemInfo = new SYSTEM_INFO();
-                    GetNativeSystemInfo(ref systemInfo);
-                    switch (systemInfo.wProcessorArchitecture)
-                    {
-                        case PROCESSOR_ARCHITECTURE_AMD64:
-                        case PROCESSOR_ARCHITECTURE_IA64:
-                            return "x64";
-
-                        case PROCESSOR_ARCHITECTURE_ARM:
-                            return "ARM";
-
-                        case PROCESSOR_ARCHITECTURE_INTEL:
-                            return "x86";
-
-                        default:
-                            return "Unknown";
-                    }
-                }
-                catch
-                {
-                    return "Unknown";
-                }
-            }
-
-            [StructLayout(LayoutKind.Sequential)]
-            private struct SYSTEM_INFO
-            {
-                public short wProcessorArchitecture;
-                public short wReserved;
-                public int dwPageSize;
-                public IntPtr lpMinimumApplicationAddress;
-                public IntPtr lpMaximumApplicationAddress;
-                public IntPtr dwActiveProcessorMask;
-                public int dwNumberOfProcessors;
-                public int dwProcessorType;
-                public int dwAllocationGranularity;
-                public short wProcessorLevel;
-                public short wProcessorRevision;
-            }
-        }
-
-
     }
-
 }

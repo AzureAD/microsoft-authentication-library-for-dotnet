@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Platforms;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using System;
 using System.ComponentModel;
@@ -49,14 +50,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             {
                 const int NameUserPrincipal = 8;
                 uint userNameSize = 0;
-                NativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+                WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
                 if (userNameSize == 0)
                 {
                     throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
                 StringBuilder sb = new StringBuilder((int) userNameSize);
-                if (!NativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+                if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
                 {
                     throw new AdalException(AdalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
                 }
@@ -73,7 +74,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public override string GetProcessorArchitecture()
         {
-            return NativeMethods.GetProcessorArchitecture();
+            return WindowsNativeMethods.GetProcessorArchitecture();
         }
 
         public override string GetOperatingSystem()
@@ -107,16 +108,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             bool returnValue = false;
             try
             {
-                NativeMethods.NetJoinStatus status;
+                WindowsNativeMethods.NetJoinStatus status;
                 IntPtr pDomain;
-                int result = NativeMethods.NetGetJoinInformation(null, out pDomain, out status);
+                int result = WindowsNativeMethods.NetGetJoinInformation(null, out pDomain, out status);
                 if (pDomain != IntPtr.Zero)
                 {
-                    NativeMethods.NetApiBufferFree(pDomain);
+                    WindowsNativeMethods.NetApiBufferFree(pDomain);
                 }
 
-                returnValue = result == NativeMethods.ErrorSuccess &&
-                              status == NativeMethods.NetJoinStatus.NetSetupDomainName;
+                returnValue = result == WindowsNativeMethods.ErrorSuccess &&
+                              status == WindowsNativeMethods.NetJoinStatus.NetSetupDomainName;
             }
             catch (Exception)
             {
@@ -166,86 +167,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession &&
                    promptBehavior != PromptBehavior.SelectAccount;
-        }
-
-        private static class NativeMethods
-        {
-            private const int PROCESSOR_ARCHITECTURE_AMD64 = 9;
-            private const int PROCESSOR_ARCHITECTURE_ARM = 5;
-            private const int PROCESSOR_ARCHITECTURE_IA64 = 6;
-            private const int PROCESSOR_ARCHITECTURE_INTEL = 0;
-
-            [DllImport("kernel32.dll")]
-            private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
-
-            public static string GetProcessorArchitecture()
-            {
-                try
-                { 
-                    SYSTEM_INFO systemInfo = new SYSTEM_INFO();
-                    GetNativeSystemInfo(ref systemInfo);
-                    switch (systemInfo.wProcessorArchitecture)
-                    {
-                        case PROCESSOR_ARCHITECTURE_AMD64:
-                        case PROCESSOR_ARCHITECTURE_IA64:
-                            return "x64";
-
-                        case PROCESSOR_ARCHITECTURE_ARM:
-                            return "ARM";
-
-                        case PROCESSOR_ARCHITECTURE_INTEL:
-                            return "x86";
-
-                        default:
-                            return "Unknown";
-                    }
-                }
-                catch
-                {
-                    return "Unknown";
-                }
-            }
-
-            [DllImport("secur32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.U1)]
-            public static extern bool GetUserNameEx(int nameFormat, StringBuilder userName, ref uint userNameSize);
-
-            [StructLayout(LayoutKind.Sequential)]
-            private struct SYSTEM_INFO
-            {
-// Justifications: Fields are required to match native structure layout
-#pragma warning disable S1144 // Unused private types or members should be removed
-#pragma warning disable S3459 // Unassigned members should be removed
-                public short wProcessorArchitecture;
-                public short wReserved;
-                public int dwPageSize;
-                public IntPtr lpMinimumApplicationAddress;
-                public IntPtr lpMaximumApplicationAddress;
-                public IntPtr dwActiveProcessorMask;
-                public int dwNumberOfProcessors;
-                public int dwProcessorType;
-                public int dwAllocationGranularity;
-                public short wProcessorLevel;
-                public short wProcessorRevision;
-#pragma warning restore S1144 // Unused private types or members should be removed
-#pragma warning restore S3459 // Unassigned members should be removed
-            }
-
-            public const int ErrorSuccess = 0;
-
-            [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-            public static extern int NetGetJoinInformation(string server, out IntPtr domain, out NetJoinStatus status);
-
-            [DllImport("Netapi32.dll")]
-            public static extern int NetApiBufferFree(IntPtr Buffer);
-
-            public enum NetJoinStatus
-            {
-                NetSetupUnknownStatus = 0,
-                NetSetupUnjoined,
-                NetSetupWorkgroupName,
-                NetSetupDomainName
-            }
         }
     }
 }
