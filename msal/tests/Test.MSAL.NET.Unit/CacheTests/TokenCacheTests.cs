@@ -38,6 +38,7 @@ using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
@@ -61,13 +62,31 @@ namespace Test.MSAL.NET.Unit.CacheTests
             new TestPlatformInformation();
             cache = new TokenCache();
             new TestLogger(Guid.Empty);
+
+            HttpClientFactory.ReturnHttpClientForMocks = true;
+            HttpMessageHandlerFactory.ClearMockHandlers();
+
+            AadInstanceDiscovery.Instance.InstanceCache.Clear();
+
+            HttpMessageHandlerFactory.AddMockHandler(
+                MockHelpers.CreateInstanceDiscoveryMockHandler(
+                    TestConstants.GetDiscoveryEndpoint(TestConstants.AuthorityCommonTenant)));
+        }
+        
+        void AddHostToInstanceCache(String host)
+        {
+            AadInstanceDiscovery.Instance.InstanceCache.TryAdd(host, new InstanceDiscoveryMetadataEntry
+            {
+                PreferredNetwork = host,
+                PreferredCache = host,
+                Aliases = new string[] { host }
+            });
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            cache.tokenCacheAccessor.AccessTokenCacheDictionary.Clear();
-            cache.tokenCacheAccessor.RefreshTokenCacheDictionary.Clear();
+            cache.Clear();
         }
 
 
@@ -80,7 +99,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId
             };
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -102,7 +121,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false),
                 Scope = TestConstants.Scope,
                 User = TestConstants.User
-            });
+            }).Result;
 
             Assert.IsNotNull(item);
             Assert.AreEqual(atKey.ToString(), item.Secret);
@@ -118,7 +137,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -143,7 +162,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             param.Scope.Add("r1/scope1");
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param);
+            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
 
             Assert.IsNotNull(item);
             Assert.AreEqual(atKey.ToString(), item.Secret);
@@ -159,7 +178,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -191,7 +210,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             param.Scope.Add(TestConstants.Scope.First());
             param.Scope.Add("non-existant-scopes");
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param);
+            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
 
             //intersected scopes are not returned.
             Assert.IsNull(item);
@@ -207,7 +226,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -224,7 +243,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 ClientId = TestConstants.ClientId,
-                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false),
                 Scope = TestConstants.Scope,
                 User =
                     new User()
@@ -232,7 +251,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                         DisplayableId = TestConstants.DisplayableId,
                         Identifier = TestConstants.UserIdentifier
                     }
-            }));
+            }).Result);
         }
 
         [TestMethod]
@@ -245,7 +264,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -262,7 +281,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 ClientId = TestConstants.ClientId,
-                Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
+                Authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false),
                 Scope = TestConstants.Scope,
                 User =
                     new User()
@@ -270,7 +289,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                         DisplayableId = TestConstants.DisplayableId,
                         Identifier = TestConstants.UserIdentifier
                     }
-            }));
+            }).Result);
         }
 
         [TestMethod]
@@ -283,7 +302,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem
-                (TestConstants.ProductionEnvironment, TestConstants.ClientId, "someRT", MockHelpers.CreateClientInfo());
+                (TestConstants.ProductionPrefNetworkEnvironment, TestConstants.ClientId, "someRT", MockHelpers.CreateClientInfo());
 
             string rtKey = rtItem.GetKey().ToString();
             cache.tokenCacheAccessor.RefreshTokenCacheDictionary[rtKey] = JsonHelper.SerializeToJson(rtItem);
@@ -331,7 +350,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 Scope = TestConstants.Scope,
                 User = TestConstants.User
             };
-            Assert.IsNull(cache.FindRefreshToken(authParams));
+            var rt = cache.FindRefreshToken(authParams).Result;
+            Assert.IsNull(rt);
         }
 
         [TestMethod]
@@ -344,7 +364,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -367,7 +387,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId,
                 ClientCredential = TestConstants.CredentialWithSecret,
                 Scope = TestConstants.Scope
-            });
+            }).Result;
 
             Assert.IsNotNull(cacheItem);
             Assert.AreEqual(atItem.GetKey().ToString(), cacheItem.GetKey().ToString());
@@ -383,7 +403,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
         
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -407,7 +427,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 UserAssertion = new UserAssertion(CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(atKey.ToString()))
             };
 
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param);
+            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
 
             //cache lookup should fail because there was no userassertion hash in the matched
             //token cache item.
@@ -425,7 +445,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -451,7 +471,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 UserAssertion = new UserAssertion(atItem.UserAssertionHash + "-random")
             };
 
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param);
+            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
 
             // cache lookup should fail because there was userassertion hash did not match the one
             // stored in token cache item.
@@ -468,7 +488,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionEnvironment,
+                TestConstants.ProductionPrefNetworkEnvironment,
                 TestConstants.ClientId,
                 "Bearer",
                 TestConstants.Scope.AsSingleString(),
@@ -494,7 +514,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             cache.AfterAccess = AfterAccessNoChangeNotification;
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param);
+            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
 
             Assert.IsNotNull(item);
             Assert.AreEqual(atKey.ToString(), item.Secret);
@@ -522,8 +542,11 @@ namespace Test.MSAL.NET.Unit.CacheTests
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 Authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false),
-                ClientId = TestConstants.ClientId
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant
             };
+
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
@@ -559,6 +582,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant
             };
+
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
@@ -612,6 +637,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant
             };
 
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
+
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
             response = new MsalTokenResponse();
@@ -661,6 +688,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant
             };
+
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
@@ -712,6 +741,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityHomeTenant
             };
+
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
@@ -783,6 +814,8 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant
             };
 
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
+
             cache.SaveAccessAndRefreshToken(requestParams, response);
             byte[] serializedCache = cache.Serialize();
             cache.tokenCacheAccessor.AccessTokenCacheDictionary.Clear();
@@ -818,7 +851,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(response.RefreshToken, rtItem.Secret);
             Assert.AreEqual(TestConstants.ClientId, rtItem.ClientId);
             Assert.AreEqual(TestConstants.UserIdentifier, rtItem.HomeAccountId);
-            Assert.AreEqual(TestConstants.ProductionEnvironment, rtItem.Environment);
+            Assert.AreEqual(TestConstants.ProductionPrefNetworkEnvironment, rtItem.Environment);
         }
 
         [TestMethod]
@@ -846,7 +879,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             var upperCaseScope = scopeInCache.ToUpper();
             param.Scope.Add(upperCaseScope);
 
-            var item = tokenCache.FindAccessToken(param);
+            var item = tokenCache.FindAccessToken(param).Result;
 
             Assert.IsNotNull(item);
             Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));

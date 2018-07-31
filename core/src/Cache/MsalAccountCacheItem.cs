@@ -39,11 +39,11 @@ namespace Microsoft.Identity.Core.Cache
         internal MsalAccountCacheItem(){
             AuthorityType = Cache.AuthorityType.MSSTS.ToString();
         }
-        internal MsalAccountCacheItem(Authority authority, MsalTokenResponse response) : this()
+        internal MsalAccountCacheItem(string environment, MsalTokenResponse response) : this()
         {
             IdToken idToken = IdToken.Parse(response.IdToken);
 
-            Init(authority.Host, idToken?.ObjectId, response.ClientInfo, idToken.Name, idToken.PreferredUsername, idToken.TenantId);
+            Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, idToken.PreferredUsername, idToken.TenantId);
         }
 
         internal MsalAccountCacheItem(string environment, string localAccountId, string rawClientInfo,

@@ -58,8 +58,8 @@ namespace XForms
 
         private void RefreshUsers()
         {
-            var userIds = App.MsalPublicClient.Users.Select(x => x.DisplayableId)
-                .ToList();
+            var userIds = App.MsalPublicClient.GetUsers().Result.
+                Select(x => x.DisplayableId).ToList();
 
             userIds.Add(UserNotSelected);
             usersPicker.ItemsSource = userIds;
@@ -124,7 +124,8 @@ namespace XForms
 
         private IUser getUserByDisplayableId(string str)
         {
-            return string.IsNullOrWhiteSpace(str) ? null : App.MsalPublicClient.Users.FirstOrDefault(user => user.DisplayableId.Equals(str, StringComparison.OrdinalIgnoreCase));
+            return string.IsNullOrWhiteSpace(str) ? null : 
+                App.MsalPublicClient.GetUsers().Result.FirstOrDefault(user => user.DisplayableId.Equals(str, StringComparison.OrdinalIgnoreCase));
         }
 
         private string[] GetScopes()
@@ -207,13 +208,14 @@ namespace XForms
             acquireResponseTitleLabel.Text = "Result:";
         }
 
-        private void OnClearCacheClicked(object sender, EventArgs e)
+        private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = tokenCache.GetUsers(new Uri(App.Authority).Host, new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+            var users = await tokenCache.GetUsers
+                (new Uri(App.Authority).Host, true, new RequestContext(new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
             foreach (var user in users)
             {
-                tokenCache.Remove(user, new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+                await App.MsalPublicClient.Remove(user).ConfigureAwait(false);
             }
 
             acquireResponseLabel.Text = "";

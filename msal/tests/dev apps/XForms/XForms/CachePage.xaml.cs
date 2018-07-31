@@ -92,13 +92,14 @@ namespace XForms
             RefreshCacheView();
         }
 
-        private void OnClearClicked(object sender, EventArgs e)
+        private async Task OnClearClickedAsync(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = tokenCache.GetUsers(new Uri(App.Authority).Host, new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+            var users = await tokenCache.GetUsers
+                (new Uri(App.Authority).Host, true, new RequestContext(new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
             foreach (var user in users)
             {
-                tokenCache.Remove(user, new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+                await App.MsalPublicClient.Remove(user).ConfigureAwait(false);
             }
 
             RefreshCacheView();

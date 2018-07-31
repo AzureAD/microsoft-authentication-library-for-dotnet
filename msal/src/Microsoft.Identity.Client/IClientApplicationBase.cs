@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns a user-centric view over the cache that provides a list of all the available users in the cache.
         /// </summary>
-        IEnumerable<IUser> Users { get; }
+        Task<IEnumerable<IUser>> GetUsers();
 
         /// <summary>
         /// Sets or Gets the custom query parameters that may be sent to the STS for dogfood testing. This parameter should not be set by the 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
         /// Get user by identifier from users available in the cache.
         /// </summary>
         /// <param name="identifier">user identifier</param>
-        IUser GetUser(string identifier);
+        Task<IUser> GetUser(string identifier);
 
         /// <summary>
         /// Attempts to acquire the access token from cache. Access token is considered a match if it AT LEAST contains all the requested scopes.
@@ -110,6 +110,6 @@ namespace Microsoft.Identity.Client
         /// Removes all cached tokens for the specified user.
         /// </summary>
         /// <param name="user">instance of the user that needs to be removed</param>
-        void Remove(IUser user);
+        Task Remove(IUser user);
    }
 }

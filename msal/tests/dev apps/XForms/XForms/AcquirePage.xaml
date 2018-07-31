@@ -74,7 +74,7 @@
                 </Frame>
                 <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                     <Button  Text="Clear Result"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15" AutomationId="clearLog"/>
-                    <Button  Text="Clear Cache"  Clicked="OnClearCacheClicked" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>
+                    <Button  Text="Clear Cache"  Clicked="OnClearCacheClickedAsync" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>
                 </StackLayout>
             </StackLayout>
         </ScrollView>

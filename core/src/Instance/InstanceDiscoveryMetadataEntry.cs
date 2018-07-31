@@ -25,18 +25,25 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Core.OAuth2;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Instance
 {
     [DataContract]
-    internal sealed class InstanceDiscoveryResponse : OAuth2ResponseBase
+    internal sealed class InstanceDiscoveryMetadataEntry
     {
-        [DataMember(Name = "tenant_discovery_endpoint", IsRequired = false)]
-        public string TenantDiscoveryEndpoint { get; set; }
+        [DataMember(Name = "preferred_network")]
+        public string PreferredNetwork { get; set; }
 
-        [DataMember(Name = "metadata")]
-        public InstanceDiscoveryMetadataEntry[] Metadata { get; set; }
+        [DataMember(Name = "preferred_cache")]
+        public string PreferredCache { get; set; }
+
+        [DataMember(Name = "aliases")]
+        public string[] Aliases { get; set; }
     }
 }

@@ -54,6 +54,8 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             HttpClientFactory.ReturnHttpClientForMocks = true;
             CoreExceptionFactory.Instance = new TestExceptionFactory();
             HttpMessageHandlerFactory.ClearMockHandlers();
+
+            AadInstanceDiscovery.Instance.InstanceCache.Clear();
         }
 
         [TestCleanup]
@@ -73,7 +75,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                 Url = "https://login.microsoftonline.com/common/discovery/instance",
                 QueryParams = new Dictionary<string, string>
                 {
-                    {"api-version", "1.0"},
+                    {"api-version", "1.1"},
                     {"authorization_endpoint", "https%3A%2F%2Flogin.microsoftonline.in%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"},
                 },
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
@@ -149,7 +151,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                 Url = "https://login.microsoftonline.com/common/discovery/instance",
                 QueryParams = new Dictionary<string, string>
                 {
-                    {"api-version", "1.0"},
+                    {"api-version", "1.1"},
                     {"authorization_endpoint", "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"},
                 },
                 ResponseMessage =

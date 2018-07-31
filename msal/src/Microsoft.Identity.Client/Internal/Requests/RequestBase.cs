@@ -237,10 +237,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 MsalIdTokenItem = TokenCache.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey(), AuthenticationRequestParameters.RequestContext);
             }
             else{
-                MsalAccessTokenItem = new MsalAccessTokenCacheItem(AuthenticationRequestParameters.Authority,
+                MsalAccessTokenItem = new MsalAccessTokenCacheItem(AuthenticationRequestParameters.Authority.Host,
                     AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
 
-                MsalIdTokenItem = new MsalIdTokenCacheItem(AuthenticationRequestParameters.Authority,
+                MsalIdTokenItem = new MsalIdTokenCacheItem(AuthenticationRequestParameters.Authority.Host,
                     AuthenticationRequestParameters.ClientId, Response, idToken?.TenantId);
             }
         }
@@ -259,6 +259,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task ResolveAuthorityEndpoints()
         {
+            await AuthenticationRequestParameters.Authority.Init
+                (AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+
             await AuthenticationRequestParameters.Authority
                 .ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint,
                     AuthenticationRequestParameters.RequestContext)

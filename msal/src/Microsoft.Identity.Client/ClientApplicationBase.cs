@@ -134,30 +134,27 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache for the application.
         /// </summary>
-        public IEnumerable<IUser> Users
+        public async Task<IEnumerable<IUser>> GetUsers()
         {
-            get
+            RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
+            if (UserTokenCache == null)
             {
-                RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
-                if (UserTokenCache == null)
-                {
-                    const string msg = "Token cache is null or empty. Returning empty list of users.";
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
-                    return Enumerable.Empty<User>();
-                }
-
-                return UserTokenCache.GetUsers(new Uri(Authority).Host, requestContext);
+                const string msg = "Token cache is null or empty. Returning empty list of users.";
+                requestContext.Logger.Info(msg);
+                requestContext.Logger.InfoPii(msg);
+                return Enumerable.Empty<User>();
             }
+            return await UserTokenCache.GetUsers(Authority, ValidateAuthority, requestContext).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Get user by identifier from users available in the cache.
         /// </summary>
         /// <param name="identifier">user identifier</param>
-        public IUser GetUser(string identifier)
+        public async Task<IUser> GetUser(string identifier)
         {
-            return Users.FirstOrDefault(user => user.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase));
+            var users = await GetUsers().ConfigureAwait(false);
+            return users.FirstOrDefault(user => user.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -205,7 +202,7 @@ namespace Microsoft.Identity.Client
         /// Removes all cached tokens for the specified user.
         /// </summary>
         /// <param name="user">instance of the user that needs to be removed</param>
-        public void Remove(IUser user)
+        public async Task Remove(IUser user)
         {
             RequestContext requestContext = CreateRequestContext(Guid.Empty);
             if (user == null || UserTokenCache == null)
@@ -213,7 +210,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            UserTokenCache.Remove(user, requestContext);
+            await UserTokenCache.Remove(Authority, ValidateAuthority, user, requestContext).ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,

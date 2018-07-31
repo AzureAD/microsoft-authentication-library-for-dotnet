@@ -63,6 +63,16 @@ namespace Test.MSAL.NET.Unit
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
+        
+            AadInstanceDiscovery.Instance.InstanceCache.Clear();
+            AddMockResponseForInstanceDisovery();
+        }
+
+        internal void AddMockResponseForInstanceDisovery()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(
+                MockHelpers.CreateInstanceDiscoveryMockHandler(
+                    TestConstants.GetDiscoveryEndpoint(TestConstants.AuthorityCommonTenant)));
         }
 
         [TestMethod]
@@ -106,10 +116,10 @@ namespace Test.MSAL.NET.Unit
 
             users.Add(mockUser1);
             users.Add(mockUser2);
-            mockApp.Users.Returns(users);
+            mockApp.GetUsers().Returns(users);
 
             // Now call the substitute
-            IEnumerable<IUser> actualUsers = mockApp.Users;
+            IEnumerable<IUser> actualUsers = mockApp.GetUsers().Result;
 
             // Check the users property
             Assert.IsNotNull(actualUsers);
@@ -628,7 +638,7 @@ namespace Test.MSAL.NET.Unit
 
             ClientCredential cc =
                 new ClientCredential("secret");
-            var app = new ConfidentialClientApplication(TestConstants.ClientId, "https://" + TestConstants.ProductionEnvironment + "/tfp/home/policy",
+            var app = new ConfidentialClientApplication(TestConstants.ClientId, "https://" + TestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy",
                 TestConstants.RedirectUri, cc, cache, null)
             {
                 ValidateAuthority = false
@@ -658,13 +668,14 @@ namespace Test.MSAL.NET.Unit
                 AfterAccess = AfterCacheAccess
             };
 
-            app = new ConfidentialClientApplication(TestConstants.ClientId, "https://" + TestConstants.ProductionEnvironment + "/tfp/home/policy",
+            app = new ConfidentialClientApplication(TestConstants.ClientId, "https://" + TestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy",
                 TestConstants.RedirectUri, cc, cache, null)
             {
                 ValidateAuthority = false
             };
 
-            Assert.AreEqual(1, app.Users.Count());
+            var users = app.GetUsers().Result;
+            Assert.AreEqual(1, users.Count());
         }
 
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)

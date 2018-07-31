@@ -34,6 +34,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
+using System.Globalization;
 
 namespace Microsoft.Identity.Core.Cache
 {
@@ -44,15 +45,14 @@ namespace Microsoft.Identity.Core.Cache
         {
             CredentialType = Cache.CredentialType.idtoken.ToString();
         }
-        internal MsalIdTokenCacheItem(Authority authority, string clientId, MsalTokenResponse response, string tenantId)
-            : this(authority, clientId, response.IdToken, response.ClientInfo, tenantId)
+        internal MsalIdTokenCacheItem(string environment, string clientId, MsalTokenResponse response, string tenantId)
+            : this(environment, clientId, response.IdToken, response.ClientInfo, tenantId)
         {
         }
         internal MsalIdTokenCacheItem
-            (Authority authority, string clientId, string secret, string rawClientInfo, string tenantId) : this()
+            (string environment, string clientId, string secret, string rawClientInfo, string tenantId) : this()
         {
-            Authority = authority.CanonicalAuthority;
-            Environment = authority.Host;
+            Environment = environment;
             TenantId = tenantId;
             ClientId = clientId;
             Secret = secret;
@@ -64,8 +64,13 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "realm")]
         internal string TenantId { get; set; }
 
-        [DataMember(Name = "authority")]
-        internal string Authority { get; set; }
+        internal string Authority
+        {
+            get
+            {
+                return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
+            }
+        }
 
         internal IdToken IdToken {
             get

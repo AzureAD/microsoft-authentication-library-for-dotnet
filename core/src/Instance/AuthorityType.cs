@@ -25,46 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.OAuth2;
 
-namespace Microsoft.Identity.Client.Internal.Requests
+namespace Microsoft.Identity.Core.Instance
 {
-    internal class ClientCredentialRequest : RequestBase
+    internal enum AuthorityType
     {
-        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
-            : base(authenticationRequestParameters)
-        {
-            ForceRefresh = forceRefresh;
-        }
-
-        protected override SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
-        {
-            return inputScope;
-        }
-        
-        internal override async Task PreTokenRequest()
-        {
-            // look for access token in the cache first.
-            if (!ForceRefresh && LoadFromCache)
-            {
-                MsalAccessTokenItem
-                    = await TokenCache.FindAccessToken(AuthenticationRequestParameters).ConfigureAwait(false);
-            }
-        }
-        protected override async Task SendTokenRequestAsync()
-        {
-            if (MsalAccessTokenItem == null)
-            {
-                await ResolveAuthorityEndpoints().ConfigureAwait(false);
-                await base.SendTokenRequestAsync().ConfigureAwait(false);
-            }
-        }
-
-        protected override void SetAdditionalRequestParameters(OAuth2Client client)
-        {
-            client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.ClientCredentials);
-        }
+        Aad,
+        Adfs,
+        B2C
     }
 }

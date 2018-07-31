@@ -40,12 +40,12 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
         [TestCategory("AccessTokenCacheKeyTests")]
         public void ConstructorTest()
         {
-            MsalCredentialCacheKey key = new MsalAccessTokenCacheKey(TestConstants.ProductionEnvironment, TestConstants.Utid,
+            MsalCredentialCacheKey key = new MsalAccessTokenCacheKey(TestConstants.ProductionPrefNetworkEnvironment, TestConstants.Utid,
                 TestConstants.UserIdentifier, TestConstants.ClientId, TestConstants.ScopeStr);
 
             ValidateTokenCacheKey(key);
 
-            key = new MsalRefreshTokenCacheKey(TestConstants.ProductionEnvironment, TestConstants.ClientId,
+            key = new MsalRefreshTokenCacheKey(TestConstants.ProductionPrefNetworkEnvironment, TestConstants.ClientId,
                 TestConstants.UserIdentifier);
             
             Assert.IsNull(key.Scopes);
@@ -54,7 +54,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 
         private void ValidateTokenCacheKey(MsalCredentialCacheKey key)
         {
-            Assert.AreEqual(TestConstants.ProductionEnvironment, key.Environment);
+            Assert.AreEqual(TestConstants.ProductionPrefNetworkEnvironment, key.Environment);
             Assert.AreEqual(TestConstants.Utid, key.TenantId);
             Assert.AreEqual(TestConstants.UserIdentifier, key.HomeAccountId);
             Assert.AreEqual(CredentialType.accesstoken, key.CredentialType);

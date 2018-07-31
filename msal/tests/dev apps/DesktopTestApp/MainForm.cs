@@ -82,7 +82,7 @@ namespace DesktopTestApp
 
         public void RefreshUserList()
         {
-            List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.Users.ToList();
+            List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.GetUsers().Result.ToList();
             if (userListDataSource.Count > 0)
             {
                 userListDataSource.Insert(0, new User() { DisplayableId = string.Empty });
@@ -297,7 +297,7 @@ namespace DesktopTestApp
                 .GetAllRefreshTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null))))
             {
                 AddControlToCachePageTableLayout(
-                    new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache, rtItem)
+                    new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication, rtItem)
                     {
                         RefreshViewDelegate = LoadCacheTabPage
                     });

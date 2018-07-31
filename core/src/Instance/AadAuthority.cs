@@ -35,62 +35,50 @@ namespace Microsoft.Identity.Core.Instance
 {
     internal class AadAuthority : Authority
     {
-        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
-        private static readonly HashSet<string> TrustedHostList = new HashSet<string>()
+        internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
-            "login.windows.net", // Microsoft Azure Worldwide
+            "login.windows.net", // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list 
             "login.chinacloudapi.cn", // Microsoft Azure China
-            "login.cloudgovapi.us", // Microsoft Azure US Government
+            "login.microsoftonline.de", // Microsoft Azure Blackforest
+            "login-us.microsoftonline.com", // Microsoft Azure US Government - Legacy
             "login.microsoftonline.us", // Microsoft Azure US Government
             "login.microsoftonline.com", // Microsoft Azure Worldwide
-            "login.microsoftonline.de" // Microsoft Azure Blackforest
+            "login.cloudgovapi.us" // Microsoft Azure US Government
         };
 
-        public AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
+        public const string DefaultTrustedAuthority = "login.microsoftonline.com";
+
+        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
+
+        internal AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Aad;
-            UpdateCanonicalAuthority();
         }
 
-        protected void UpdateCanonicalAuthority()
+        protected async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
         {
-            UriBuilder uriBuilder = new UriBuilder(CanonicalAuthority);
-            // will not be needed after authority aliasses will be added
-            /*
-            if (uriBuilder.Host.Equals("login.windows.net", StringComparison.OrdinalIgnoreCase))
-            {
-                uriBuilder.Host = "login.microsoftonline.com";
-            }
-            */
-            CanonicalAuthority = uriBuilder.Uri.AbsoluteUri;
+            var metadata = await AadInstanceDiscovery.Instance.
+                GetMetadataEntryAsync(new Uri(CanonicalAuthority), this.ValidateAuthority, requestContext).ConfigureAwait(false);
+
+            CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName,
             RequestContext requestContext)
         {
+            var authorityUri = new Uri(CanonicalAuthority);
 
-            if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
+            if (ValidateAuthority && !IsInTrustedHostList(authorityUri.Host))
             {
-                OAuth2Client client = new OAuth2Client();
-                client.AddQueryParameter("api-version", "1.0");
-                client.AddQueryParameter("authorization_endpoint", CanonicalAuthority + "oauth2/v2.0/authorize");
-
                 InstanceDiscoveryResponse discoveryResponse =
-                    await
-                        client.DiscoverAadInstance(new Uri(AadInstanceDiscoveryEndpoint), requestContext)
-                            .ConfigureAwait(false);
-                if (discoveryResponse.TenantDiscoveryEndpoint == null)
-                {
-                    CoreExceptionFactory.Instance.GetServiceException(
-                        discoveryResponse.Error,
-                        discoveryResponse.ErrorDescription);
-                }
+                    await AadInstanceDiscovery.Instance.
+                    DoInstanceDiscoveryAndCacheAsync(authorityUri, true, requestContext).ConfigureAwait(false);
 
                 return discoveryResponse.TenantDiscoveryEndpoint;
             }
-
             return GetDefaultOpenIdConfigurationEndpoint();
         }
+
 
         protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
         {
@@ -113,6 +101,11 @@ namespace Microsoft.Identity.Core.Instance
             return
                 !string.IsNullOrEmpty(
                     TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
+        }
+
+        internal override async Task Init(RequestContext requestContext)
+        {
+            await UpdateCanonicalAuthorityAsync(requestContext).ConfigureAwait(false);
         }
     }
 }

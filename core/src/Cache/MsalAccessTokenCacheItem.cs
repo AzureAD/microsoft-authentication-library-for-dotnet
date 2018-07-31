@@ -45,9 +45,9 @@ namespace Microsoft.Identity.Core.Cache
         }
 
         internal MsalAccessTokenCacheItem
-            (Authority authority, string clientId, MsalTokenResponse response, string tenantId) : 
+            (string environment, string clientId, MsalTokenResponse response, string tenantId) : 
             
-            this(authority.Host, clientId, response.TokenType, response.Scope.AsLowerCaseSortedSet().AsSingleString(),
+            this(environment, clientId, response.TokenType, response.Scope.AsLowerCaseSortedSet().AsSingleString(),
                  tenantId, response.AccessToken, response.AccessTokenExpiresOn, response.ClientInfo)
         {
         }

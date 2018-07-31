@@ -35,13 +35,6 @@ using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Core.Instance
 {
-    internal enum AuthorityType
-    {
-        Aad,
-        Adfs,
-        B2C
-    }
-
     internal abstract class Authority
     {
         private static readonly HashSet<string> TenantlessTenantNames =
@@ -62,10 +55,10 @@ namespace Microsoft.Identity.Core.Instance
         {
             UriBuilder authorityUri = new UriBuilder(authority);
             Host = authorityUri.Host;
-            string[] pathSegments = authorityUri.Uri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
             CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authorityUri.Uri.Authority,
-                pathSegments[0]);
+                GetFirstPathSegment(authority));
+
             ValidateAuthority = validateAuthority;
         }
 
@@ -118,27 +111,50 @@ namespace Microsoft.Identity.Core.Instance
             }
         }
 
+        internal static string GetFirstPathSegment(string authority)
+        {
+            return new Uri(authority).Segments[1].TrimEnd('/');
+        } 
+
+        internal static AuthorityType GetAuthorityType(string authority)
+        {
+            var firstPathSegment = GetFirstPathSegment(authority);
+
+            if (string.Compare(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return AuthorityType.Adfs;
+            }
+            else if (string.Compare(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return AuthorityType.B2C;
+            }
+            else
+            {
+                return AuthorityType.Aad;
+            }
+        }
+
         private static Authority CreateInstance(string authority, bool validateAuthority)
         {
             authority = CanonicalizeUri(authority);
             ValidateAsUri(authority);
-            string[] pathSegments = new Uri(authority).AbsolutePath.Substring(1).Split('/');
-            bool isAdfsAuthority = string.Compare(pathSegments[0], "adfs", StringComparison.OrdinalIgnoreCase) == 0;
-            bool isB2CAuthority = string.Compare(pathSegments[0], B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase) == 0;
 
-            if (isAdfsAuthority)
+            switch (GetAuthorityType(authority))
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.InvalidAuthorityType, 
-                    "ADFS is not a supported authority");
-            }
+                case AuthorityType.Adfs:
+                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.InvalidAuthorityType,
+                       "ADFS is not a supported authority");
 
-            if (isB2CAuthority)
-            {
-                return new B2CAuthority(authority, validateAuthority);
-            }
+                case AuthorityType.B2C:
+                    return new B2CAuthority(authority, validateAuthority);
 
-            return new AadAuthority(authority, validateAuthority);
+                case AuthorityType.Aad:
+                    return new AadAuthority(authority, validateAuthority);
+
+                default:
+                    throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.InvalidAuthorityType,
+                     "Usupported authority type");
+            }
         }
 
         public async Task ResolveEndpointsAsync(string userPrincipalName, RequestContext requestContext)
@@ -244,6 +260,16 @@ namespace Microsoft.Identity.Core.Instance
             return authority;
         }
 
+        internal static string UpdateHost(string authority, string host)
+        {
+            UriBuilder uriBuilder = new UriBuilder(authority)
+            {
+                Host = host
+            };
+
+            return uriBuilder.Uri.AbsoluteUri;
+        }
+
         public static string CanonicalizeUri(string uri)
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
@@ -252,6 +278,11 @@ namespace Microsoft.Identity.Core.Instance
             }
 
             return uri.ToLowerInvariant();
+        }
+
+        internal virtual async Task Init(RequestContext requestContext)
+        {
+            await Task.FromResult(0).ConfigureAwait(false);
         }
     }
 }

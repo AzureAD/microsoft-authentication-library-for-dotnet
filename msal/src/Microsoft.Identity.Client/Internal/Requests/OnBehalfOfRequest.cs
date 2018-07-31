@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // like mfa etc.
             if (LoadFromCache)
             {
-                MsalAccessTokenItem
-                    = TokenCache.FindAccessToken(AuthenticationRequestParameters);
+                MsalAccessTokenItem = 
+                    await TokenCache.FindAccessToken(AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
 
