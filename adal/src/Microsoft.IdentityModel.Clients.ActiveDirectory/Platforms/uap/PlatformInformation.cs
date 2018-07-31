@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             IReadOnlyList<User> users = await User.FindAllAsync();
-            return users.Any(u => u.Type == UserType.LocalGuest || u.Type == UserType.LocalGuest);
+            return users.Any(u => u.Type == UserType.LocalUser || u.Type == UserType.LocalGuest);
         }
 
         public override bool IsDomainJoined()
