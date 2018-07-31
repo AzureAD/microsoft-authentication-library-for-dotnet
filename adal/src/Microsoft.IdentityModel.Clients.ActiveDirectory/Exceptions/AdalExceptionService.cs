@@ -37,7 +37,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     /// <remarks>Does not currently throw <see cref="AdalSilentTokenAcquisitionException"/> and 
     /// <see cref="AdalUserMismatchException"/></remarks>
-    internal class AdalEceptionFactory : CoreExceptionFactory
+    internal class AdalExceptionFactory : CoreExceptionFactory
     {
         public override Exception GetClientException(
             string errorCode, 

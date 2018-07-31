@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public override void Error(Exception ex)
         {
-            Log(LogLevel.Error, AdalEceptionFactory.GetPiiScrubbedExceptionDetails(ex), false);
+            Log(LogLevel.Error, AdalExceptionFactory.GetPiiScrubbedExceptionDetails(ex), false);
         }
 
         public override void ErrorPii(Exception ex)
