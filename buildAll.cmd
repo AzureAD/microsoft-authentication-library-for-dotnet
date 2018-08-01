@@ -25,4 +25,3 @@ echo Building debug all...
 START /W "Building debug all..." CMD /c buildVS2017.cmd %bconfig% b 1
 echo Done.
 
-echo Build WinRT using BuildVS2015.cmd from a VS2015 Dev Command Prompt! (Restore should be done from the VS2015 solution)

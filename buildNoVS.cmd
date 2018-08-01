@@ -1,6 +1,6 @@
 echo off
 echo To Build Non WinRT, you will need the Developer Prompt/MSBuild for VS2017!
-echo Usage: (Note: Building both the WinRT and non WinRT works best in a std. command-prompt)
+echo Usage: (Note: Building works best in a std. command-prompt)
 echo param1 (configuration options): debug(d), release(r) .. default is debug
 echo param2 (target options): build(b), restore (r), clean(c) .. default is build 
 echo param3 (include sample apps): blank=components and utests, not blank=everything
@@ -22,15 +22,8 @@ if '%3' NEQ '' (set bsampleapps=1)
 echo Building using: target: %btarget%, configuration: %bconfig%, sample: %bsampleapps%
 
 set msbuild15=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe
-set msbuild14=%ProgramFiles(x86)%\MSBuild\14.0\Bin\MSBuild.exe
 
-Rem -- WinRT
-pushd adal
-  Rem // msbuild14 doesn't support restore, thus for now only build is made available here...
-  "%msbuild14%" ADAL.NET.VS2015.sln /t:build /p:configuration=%bconfig%
-popd
-
-Rem -- The rest
+Rem 
 if %bsampleapps% EQU  1 (
   "%msbuild15%" msbuild Combined.NoWinRT.sln /t:%btarget% /p:configuration=%bconfig% 
  ) else (
