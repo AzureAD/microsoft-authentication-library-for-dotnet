@@ -28,8 +28,8 @@ namespace WinFormsAutomationApp
 
                 if (!input.ContainsKey("redirect_uri"))
                 {
-                    UserCredential userCred = new UserCredential();
-                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], userCred).ConfigureAwait(false);
+                    UserCredential userCredential = new UserCredential();
+                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], userCredential).ConfigureAwait(false);
                 }
                 else if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
                 {
