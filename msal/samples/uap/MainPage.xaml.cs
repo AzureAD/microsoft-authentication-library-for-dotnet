@@ -45,7 +45,8 @@ namespace MsalUAPTestApp
             AuthenticationResult authResult = null;
             try
             {
-                authResult = await PublicClientApp.AcquireTokenSilentAsync(scopes, PublicClientApp.Users.FirstOrDefault());
+                var users = await PublicClientApp.GetUsers();
+                authResult = await PublicClientApp.AcquireTokenSilentAsync(scopes, users.FirstOrDefault());
             }
             catch (MsalUiRequiredException ex)
             {
@@ -103,13 +104,14 @@ namespace MsalUAPTestApp
         /// <summary>
         /// Sign out the current user
         /// </summary>
-        private void SignOutButton_Click(object sender, RoutedEventArgs e)
+        private async void SignOutButton_Click(object sender, RoutedEventArgs e)
         {
-            if (PublicClientApp.Users.Any())
+            var users = await PublicClientApp.GetUsers();
+            if (users.Any())
             {
                 try
                 {
-                    PublicClientApp.Remove(PublicClientApp.Users.FirstOrDefault());
+                    await PublicClientApp.Remove(users.FirstOrDefault());
                     this.ResultText.Text = "User has signed-out";
                     this.CallGraphButton.Visibility = Visibility.Visible;
                     this.SignOutButton.Visibility = Visibility.Collapsed;
