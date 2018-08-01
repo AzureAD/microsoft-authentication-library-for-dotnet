@@ -79,7 +79,7 @@ namespace AutomationApp
         {
             EnsurePublicClientApplication(input);
 
-            _publicClientApplication.Remove(CurrentUser);
+            _publicClientApplication.RemoveAsync(CurrentUser);
         }
     }
 }

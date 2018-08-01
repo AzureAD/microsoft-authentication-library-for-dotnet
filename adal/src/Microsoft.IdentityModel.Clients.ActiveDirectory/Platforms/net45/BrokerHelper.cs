@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             get { return false; } 
         }
 
-        public Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public Task<AdalResultWrapper> AcquireTokenUsingBrokerAsync(IDictionary<string, string> brokerPayload)
         {
             throw new NotImplementedException();
         }

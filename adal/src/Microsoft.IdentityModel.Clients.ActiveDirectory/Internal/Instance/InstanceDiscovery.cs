@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         private static SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
-        public static async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntry(Uri authority, bool validateAuthority,
+        public static async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(Uri authority, bool validateAuthority,
             RequestContext requestContext)
         {
             if (authority == null)

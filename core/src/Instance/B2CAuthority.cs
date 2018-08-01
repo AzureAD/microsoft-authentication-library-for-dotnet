@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Core.Instance
             AuthorityType = AuthorityType.B2C;
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName, RequestContext requestContext)
         {
             if (ValidateAuthority && !IsInTrustedHostList(new Uri(CanonicalAuthority).Host))
             {

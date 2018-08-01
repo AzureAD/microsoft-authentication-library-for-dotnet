@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.RefreshToken, _msalRefreshTokenItem.Secret);
         }
 
-        internal override async Task PreTokenRequest()
+        internal override async Task PreTokenRequestAsync()
         {
             if (!LoadFromCache)
             {
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             //look for access token.
             MsalAccessTokenItem
-                = await TokenCache.FindAccessToken(AuthenticationRequestParameters).ConfigureAwait(false);
+                = await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
             if (MsalAccessTokenItem != null)
             {
                 MsalIdTokenItem = TokenCache.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey(), AuthenticationRequestParameters.RequestContext);
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (MsalAccessTokenItem == null)
             {
                 _msalRefreshTokenItem =
-                    await TokenCache.FindRefreshToken(AuthenticationRequestParameters).ConfigureAwait(false);
+                    await TokenCache.FindRefreshTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
 
                 if (_msalRefreshTokenItem == null)
                 {
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
 
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
-                await ResolveAuthorityEndpoints().ConfigureAwait(false);
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
 
                 if (Response.RefreshToken == null)

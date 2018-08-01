@@ -50,14 +50,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             get { return true; }
         }
 
-        public static async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public static async Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 
             Certificate certificate = null;
             try
             {
-                certificate = await FindCertificate(challengeData).ConfigureAwait(false);
+                certificate = await FindCertificateAsync(challengeData).ConfigureAwait(false);
             }
             catch (AdalException ex)
             {
@@ -83,7 +83,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
         }
 
-        private static async Task<Certificate> FindCertificate(IDictionary<string, string> challengeData)
+        private static async Task<Certificate> FindCertificateAsync(IDictionary<string, string> challengeData)
         {
             CertificateQuery query = new CertificateQuery();
             IReadOnlyList<Certificate> certificates = null;

@@ -220,7 +220,7 @@ namespace Test.ADAL.NET.Integration
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -259,7 +259,7 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(result.UserInfo);
 
             // Cache entry updated with new access token
-            var entry = await context.TokenCache.LoadFromCache(new CacheQueryData
+            var entry = await context.TokenCache.LoadFromCacheAsync(new CacheQueryData
             {
                 Authority = TestConstants.DefaultAuthorityHomeTenant,
                 Resource = TestConstants.DefaultResource,

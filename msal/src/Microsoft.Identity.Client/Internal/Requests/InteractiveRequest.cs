@@ -95,9 +95,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return _UIBehavior.PromptValue;
         }
 
-        internal override async Task PreTokenRequest()
+        internal override async Task PreTokenRequestAsync()
         {
-            await base.PreTokenRequest().ConfigureAwait(false);
+            await base.PreTokenRequestAsync().ConfigureAwait(false);
             await AcquireAuthorizationAsync().ConfigureAwait(false);
             VerifyAuthorizationResult();
         }
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task<Uri> CreateAuthorizationUriAsync()
         {
-            await AuthenticationRequestParameters.Authority.Init
+            await AuthenticationRequestParameters.Authority.InitAsync
                 (AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             //this method is used in confidential clients to create authorization URLs.

@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Core.Instance
             CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName,
+        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName,
             RequestContext requestContext)
         {
             var authorityUri = new Uri(CanonicalAuthority);
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Core.Instance
                     TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
         }
 
-        internal override async Task Init(RequestContext requestContext)
+        internal override async Task InitAsync(RequestContext requestContext)
         {
             await UpdateCanonicalAuthorityAsync(requestContext).ConfigureAwait(false);
         }

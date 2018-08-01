@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
         }
 
-        public async Task<AdalResultWrapper> AcquireTokenUsingBroker(IDictionary<string, string> brokerPayload)
+        public async Task<AdalResultWrapper> AcquireTokenUsingBrokerAsync(IDictionary<string, string> brokerPayload)
         {
             if (brokerPayload.ContainsKey(BrokerParameter.SilentBrokerFlow))
             {

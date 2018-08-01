@@ -72,9 +72,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             requestParameters[OAuthParameter.RedirectUri] = this.redirectUri.OriginalString;
         }
 
-        protected override async Task PostTokenRequest(AdalResultWrapper resultEx)
+        protected override async Task PostTokenRequestAsync(AdalResultWrapper resultEx)
         {
-            await base.PostTokenRequest(resultEx).ConfigureAwait(false);
+            await base.PostTokenRequestAsync(resultEx).ConfigureAwait(false);
             AdalUserInfo adalUserInfo = resultEx.Result.UserInfo;
             this.UniqueId = (adalUserInfo == null) ? null : adalUserInfo.UniqueId;
             this.DisplayableId = (adalUserInfo == null) ? null : adalUserInfo.DisplayableId;

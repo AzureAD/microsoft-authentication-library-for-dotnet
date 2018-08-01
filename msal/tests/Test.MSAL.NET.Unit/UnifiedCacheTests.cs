@@ -126,7 +126,7 @@ namespace Test.MSAL.NET.Unit
             Assert.IsTrue(adalCacheDictionary.Count == 1);
 
             var requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
-            var users = app.UserTokenCache.GetUsers(TestConstants.AuthorityCommonTenant, false, requestContext).Result;
+            var users = app.UserTokenCache.GetUsersAsync(TestConstants.AuthorityCommonTenant, false, requestContext).Result;
             foreach (IUser user in users)
             {
                 ISet<string> authorityHostAliases = new HashSet<string>();

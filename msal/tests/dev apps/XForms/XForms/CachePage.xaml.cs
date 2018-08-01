@@ -95,11 +95,11 @@ namespace XForms
         private async Task OnClearClickedAsync(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = await tokenCache.GetUsers
+            var users = await tokenCache.GetUsersAsync
                 (new Uri(App.Authority).Host, true, new RequestContext(new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
             foreach (var user in users)
             {
-                await App.MsalPublicClient.Remove(user).ConfigureAwait(false);
+                await App.MsalPublicClient.RemoveAsync(user).ConfigureAwait(false);
             }
 
             RefreshCacheView();

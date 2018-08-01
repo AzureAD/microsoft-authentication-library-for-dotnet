@@ -114,7 +114,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             atItem.Secret = atKey;
 
             cache.tokenCacheAccessor.AccessTokenCacheDictionary[atKey] = JsonHelper.SerializeToJson(atItem);
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(new AuthenticationRequestParameters()
+            MsalAccessTokenCacheItem item = cache.FindAccessTokenAsync(new AuthenticationRequestParameters()
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 ClientId = TestConstants.ClientId,
@@ -162,7 +162,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             param.Scope.Add("r1/scope1");
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
+            MsalAccessTokenCacheItem item = cache.FindAccessTokenAsync(param).Result;
 
             Assert.IsNotNull(item);
             Assert.AreEqual(atKey.ToString(), item.Secret);
@@ -210,7 +210,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
             param.Scope.Add(TestConstants.Scope.First());
             param.Scope.Add("non-existant-scopes");
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
+            MsalAccessTokenCacheItem item = cache.FindAccessTokenAsync(param).Result;
 
             //intersected scopes are not returned.
             Assert.IsNull(item);
@@ -239,7 +239,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             cache.tokenCacheAccessor.AccessTokenCacheDictionary[atItem.GetKey().ToString()] =
                 JsonHelper.SerializeToJson(atItem);
 
-            Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
+            Assert.IsNull(cache.FindAccessTokenAsync(new AuthenticationRequestParameters()
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 ClientId = TestConstants.ClientId,
@@ -277,7 +277,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             cache.tokenCacheAccessor.AccessTokenCacheDictionary[atItem.GetKey().ToString()] =
                 JsonHelper.SerializeToJson(atItem);
 
-            Assert.IsNull(cache.FindAccessToken(new AuthenticationRequestParameters()
+            Assert.IsNull(cache.FindAccessTokenAsync(new AuthenticationRequestParameters()
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 ClientId = TestConstants.ClientId,
@@ -314,12 +314,12 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 Scope = TestConstants.Scope,
                 User = TestConstants.User
             };
-            Assert.IsNotNull(cache.FindRefreshToken(authParams));
+            Assert.IsNotNull(cache.FindRefreshTokenAsync(authParams));
 
             // RT is stored by environment, client id and userIdentifier as index.
             // any change to authority (within same environment), uniqueid and displyableid will not 
             // change the outcome of cache look up.
-            Assert.IsNotNull(cache.FindRefreshToken(new AuthenticationRequestParameters()
+            Assert.IsNotNull(cache.FindRefreshTokenAsync(new AuthenticationRequestParameters()
             {
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 ClientId = TestConstants.ClientId,
@@ -350,7 +350,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 Scope = TestConstants.Scope,
                 User = TestConstants.User
             };
-            var rt = cache.FindRefreshToken(authParams).Result;
+            var rt = cache.FindRefreshTokenAsync(authParams).Result;
             Assert.IsNull(rt);
         }
 
@@ -379,7 +379,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             cache.tokenCacheAccessor.AccessTokenCacheDictionary[atItem.GetKey().ToString()] =
                 JsonHelper.SerializeToJson(atItem);
 
-            MsalAccessTokenCacheItem cacheItem = cache.FindAccessToken(new AuthenticationRequestParameters()
+            MsalAccessTokenCacheItem cacheItem = cache.FindAccessTokenAsync(new AuthenticationRequestParameters()
             {
                 IsClientCredentialRequest = true,
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
@@ -427,7 +427,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 UserAssertion = new UserAssertion(CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(atKey.ToString()))
             };
 
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
+            MsalAccessTokenCacheItem item = cache.FindAccessTokenAsync(param).Result;
 
             //cache lookup should fail because there was no userassertion hash in the matched
             //token cache item.
@@ -471,7 +471,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 UserAssertion = new UserAssertion(atItem.UserAssertionHash + "-random")
             };
 
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
+            MsalAccessTokenCacheItem item = cache.FindAccessTokenAsync(param).Result;
 
             // cache lookup should fail because there was userassertion hash did not match the one
             // stored in token cache item.
@@ -514,7 +514,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             };
 
             cache.AfterAccess = AfterAccessNoChangeNotification;
-            MsalAccessTokenCacheItem item = cache.FindAccessToken(param).Result;
+            MsalAccessTokenCacheItem item = cache.FindAccessTokenAsync(param).Result;
 
             Assert.IsNotNull(item);
             Assert.AreEqual(atKey.ToString(), item.Secret);
@@ -879,7 +879,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
             var upperCaseScope = scopeInCache.ToUpper();
             param.Scope.Add(upperCaseScope);
 
-            var item = tokenCache.FindAccessToken(param).Result;
+            var item = tokenCache.FindAccessTokenAsync(param).Result;
 
             Assert.IsNotNull(item);
             Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));

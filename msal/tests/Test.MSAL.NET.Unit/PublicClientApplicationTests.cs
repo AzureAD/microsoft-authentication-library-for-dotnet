@@ -470,7 +470,7 @@ namespace Test.MSAL.NET.Unit
                 && anEvent[ApiEvent.WasSuccessfulKey] == "false" && anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"
                 ));
 
-            var users = app.GetUsers().Result;
+            var users = app.GetUsersAsync().Result;
             Assert.AreEqual(1, users.Count());
             Assert.AreEqual(1, cache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
 
@@ -536,7 +536,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.CreateUserIdentifer(TestConstants.Uid, TestConstants.Utid + "more"),
                 result.User.Identifier);
             Assert.AreEqual(TestConstants.DisplayableId, result.User.DisplayableId);
-            var users = app.GetUsers().Result;
+            var users = app.GetUsersAsync().Result;
             Assert.AreEqual(2, users.Count());
             Assert.AreEqual(2, cache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -547,7 +547,7 @@ namespace Test.MSAL.NET.Unit
         public void GetUsersTest()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
-            IEnumerable<IUser> users = app.GetUsers().Result;
+            IEnumerable<IUser> users = app.GetUsersAsync().Result;
             Assert.IsNotNull(users);
             Assert.IsFalse(users.Any());
             cache = new TokenCache()
@@ -557,7 +557,7 @@ namespace Test.MSAL.NET.Unit
 
             app.UserTokenCache = cache;
             TokenCacheHelper.PopulateCache(cache.tokenCacheAccessor);
-            users = app.GetUsers().Result;
+            users = app.GetUsersAsync().Result;
             Assert.IsNotNull(users);
             Assert.AreEqual(1, users.Count());
 
@@ -601,7 +601,7 @@ namespace Test.MSAL.NET.Unit
 
 
             Assert.AreEqual(2, cache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
-            users = app.GetUsers().Result;
+            users = app.GetUsersAsync().Result;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
 
@@ -612,7 +612,7 @@ namespace Test.MSAL.NET.Unit
             cache.tokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetKey().ToString()] =
                 JsonHelper.SerializeToJson(rtItem);
             Assert.AreEqual(3, cache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
-            users = app.GetUsers().Result;
+            users = app.GetUsersAsync().Result;
             Assert.IsNotNull(users);
             Assert.AreEqual(2, users.Count());
         }
@@ -629,9 +629,9 @@ namespace Test.MSAL.NET.Unit
             };
             TokenCacheHelper.PopulateCache(cache.tokenCacheAccessor);
 
-            foreach (var user in app.GetUsers().Result)
+            foreach (var user in app.GetUsersAsync().Result)
             {
-                app.Remove(user);
+                app.RemoveAsync(user);
             }
 
             Assert.AreEqual(0, app.UserTokenCache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
@@ -1051,15 +1051,15 @@ namespace Test.MSAL.NET.Unit
         public void GetUserTest()
         {
             var app = new PublicClientApplication(TestConstants.ClientId);
-            var users = app.GetUsers().Result;
+            var users = app.GetUsersAsync().Result;
             Assert.IsNotNull(users);
             // no users in the cache
             Assert.AreEqual(0, users.Count());
 
-            var fetchedUser = app.GetUser(null).Result;
+            var fetchedUser = app.GetUserAsync(null).Result;
             Assert.IsNull(fetchedUser);
 
-            fetchedUser = app.GetUser("").Result;
+            fetchedUser = app.GetUserAsync("").Result;
             Assert.IsNull(fetchedUser);
 
             TokenCacheHelper.AddRefreshTokenToCache(app.UserTokenCache.tokenCacheAccessor, TestConstants.Uid,
@@ -1072,14 +1072,14 @@ namespace Test.MSAL.NET.Unit
             TokenCacheHelper.AddAccountToCache(app.UserTokenCache.tokenCacheAccessor, TestConstants.Uid + "1",
                 TestConstants.Utid);
 
-            users = app.GetUsers().Result;
+            users = app.GetUsersAsync().Result;
             Assert.IsNotNull(users);
             // two users in the cache
             Assert.AreEqual(2, users.Count());
 
             var userToFind = users.First();
 
-            fetchedUser = app.GetUser(userToFind.Identifier).Result;
+            fetchedUser = app.GetUserAsync(userToFind.Identifier).Result;
 
             Assert.AreEqual(userToFind.DisplayableId, fetchedUser.DisplayableId);
             Assert.AreEqual(userToFind.Identifier, fetchedUser.Identifier);

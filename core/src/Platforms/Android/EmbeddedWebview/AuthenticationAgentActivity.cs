@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                     }
 
                     Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                    string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+                    string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
                     Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
                     pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
                     view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);

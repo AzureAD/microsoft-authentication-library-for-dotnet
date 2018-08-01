@@ -44,20 +44,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return inputScope;
         }
         
-        internal override async Task PreTokenRequest()
+        internal override async Task PreTokenRequestAsync()
         {
             // look for access token in the cache first.
             if (!ForceRefresh && LoadFromCache)
             {
                 MsalAccessTokenItem
-                    = await TokenCache.FindAccessToken(AuthenticationRequestParameters).ConfigureAwait(false);
+                    = await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
         protected override async Task SendTokenRequestAsync()
         {
             if (MsalAccessTokenItem == null)
             {
-                await ResolveAuthorityEndpoints().ConfigureAwait(false);
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
                 await base.SendTokenRequestAsync().ConfigureAwait(false);
             }
         }

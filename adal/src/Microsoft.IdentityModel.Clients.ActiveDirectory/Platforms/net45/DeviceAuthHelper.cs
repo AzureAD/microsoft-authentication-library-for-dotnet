@@ -30,11 +30,9 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Native;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
@@ -46,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             get { return true; }
         }
 
-        public static async Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public static async Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {
             string authHeaderTemplate = "PKeyAuth {0}, Context=\"{1}\", Version=\"{2}\"";
 

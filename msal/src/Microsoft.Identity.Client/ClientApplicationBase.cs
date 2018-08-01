@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns a User centric view over the cache that provides a list of all the available users in the cache for the application.
         /// </summary>
-        public async Task<IEnumerable<IUser>> GetUsers()
+        public async Task<IEnumerable<IUser>> GetUsersAsync()
         {
             RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
             if (UserTokenCache == null)
@@ -144,16 +144,16 @@ namespace Microsoft.Identity.Client
                 requestContext.Logger.InfoPii(msg);
                 return Enumerable.Empty<User>();
             }
-            return await UserTokenCache.GetUsers(Authority, ValidateAuthority, requestContext).ConfigureAwait(false);
+            return await UserTokenCache.GetUsersAsync(Authority, ValidateAuthority, requestContext).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Get user by identifier from users available in the cache.
         /// </summary>
         /// <param name="identifier">user identifier</param>
-        public async Task<IUser> GetUser(string identifier)
+        public async Task<IUser> GetUserAsync(string identifier)
         {
-            var users = await GetUsers().ConfigureAwait(false);
+            var users = await GetUsersAsync().ConfigureAwait(false);
             return users.FirstOrDefault(user => user.Identifier.Equals(identifier, StringComparison.OrdinalIgnoreCase));
         }
 
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client
         /// Removes all cached tokens for the specified user.
         /// </summary>
         /// <param name="user">instance of the user that needs to be removed</param>
-        public async Task Remove(IUser user)
+        public async Task RemoveAsync(IUser user)
         {
             RequestContext requestContext = CreateRequestContext(Guid.Empty);
             if (user == null || UserTokenCache == null)
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            await UserTokenCache.Remove(Authority, ValidateAuthority, user, requestContext).ConfigureAwait(false);
+            await UserTokenCache.RemoveAsync(Authority, ValidateAuthority, user, requestContext).ConfigureAwait(false);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,

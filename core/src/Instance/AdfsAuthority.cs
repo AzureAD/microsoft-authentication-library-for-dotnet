@@ -62,11 +62,11 @@ namespace Microsoft.Identity.Core.Instance
                        GetDomainFromUpn(userPrincipalName));
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpoint(string userPrincipalName, RequestContext requestContext)
+        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName, RequestContext requestContext)
         {
             if (ValidateAuthority)
             {
-                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServer(userPrincipalName, requestContext).ConfigureAwait(false);
+                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServerAsync(userPrincipalName, requestContext).ConfigureAwait(false);
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
                     CoreExceptionFactory.Instance.GetServiceException(
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Core.Instance
                     DefaultRealm, resource);
 
                 HttpResponse httpResponse =
-                    await HttpRequest.SendGet(new Uri(webfingerUrl), null, requestContext).ConfigureAwait(false);
+                    await HttpRequest.SendGetAsync(new Uri(webfingerUrl), null, requestContext).ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
@@ -131,13 +131,13 @@ namespace Microsoft.Identity.Core.Instance
             ValidatedAuthorities[CanonicalAuthority] = authorityInstance;
         }
 
-        private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServer(string userPrincipalName,
+        private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(string userPrincipalName,
             RequestContext requestContext)
         {
             try
             {
                 //attempt to connect to on-premise enrollment server first.
-                return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
+                return await QueryEnrollmentServerEndpointAsync(string.Format(CultureInfo.InvariantCulture,
                     "https://enterpriseregistration.{0}/enrollmentserver/contract",
                     GetDomainFromUpn(userPrincipalName)), requestContext).ConfigureAwait(false);
             }
@@ -149,16 +149,16 @@ namespace Microsoft.Identity.Core.Instance
                 requestContext.Logger.InfoPii(msg + exc);
             }
 
-            return await QueryEnrollmentServerEndpoint(string.Format(CultureInfo.InvariantCulture,
+            return await QueryEnrollmentServerEndpointAsync(string.Format(CultureInfo.InvariantCulture,
                 "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
                 GetDomainFromUpn(userPrincipalName)), requestContext).ConfigureAwait(false);
         }
 
-        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpoint(string endpoint, RequestContext requestContext)
+        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(string endpoint, RequestContext requestContext)
         {
             OAuth2Client client = new OAuth2Client();
             client.AddQueryParameter("api-version", "1.0");
-            return await client.ExecuteRequest<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext).ConfigureAwait(false);
+            return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         private string GetDomainFromUpn(string upn)

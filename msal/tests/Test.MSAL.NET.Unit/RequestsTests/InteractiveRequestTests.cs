@@ -278,7 +278,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 (string) null, UIBehavior.ForceLogin, webUi);
             try
             {
-                request.PreTokenRequest().Wait();
+                request.PreTokenRequestAsync().Wait();
                 Assert.Fail("MsalException should have been thrown here");
             }
             catch (Exception exc)
@@ -299,7 +299,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             try
             {
-                request.PreTokenRequest().Wait();
+                request.PreTokenRequestAsync().Wait();
                 Assert.Fail("MsalException should have been thrown here");
             }
             catch (Exception exc)
@@ -343,7 +343,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             try
             {
-                request.PreTokenRequest().Wait();
+                request.PreTokenRequestAsync().Wait();
                 Assert.Fail("MsalException should be thrown here");
             }
             catch (Exception exc)

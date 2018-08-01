@@ -116,10 +116,10 @@ namespace Test.MSAL.NET.Unit
 
             users.Add(mockUser1);
             users.Add(mockUser2);
-            mockApp.GetUsers().Returns(users);
+            mockApp.GetUsersAsync().Returns(users);
 
             // Now call the substitute
-            IEnumerable<IUser> actualUsers = mockApp.GetUsers().Result;
+            IEnumerable<IUser> actualUsers = mockApp.GetUsersAsync().Result;
 
             // Check the users property
             Assert.IsNotNull(actualUsers);
@@ -674,7 +674,7 @@ namespace Test.MSAL.NET.Unit
                 ValidateAuthority = false
             };
 
-            var users = app.GetUsers().Result;
+            var users = app.GetUsersAsync().Result;
             Assert.AreEqual(1, users.Count());
         }
 

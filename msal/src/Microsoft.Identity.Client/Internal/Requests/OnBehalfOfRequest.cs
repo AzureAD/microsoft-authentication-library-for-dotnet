@@ -42,9 +42,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal override async Task PreTokenRequest()
+        internal override async Task PreTokenRequestAsync()
         {
-            await base.PreTokenRequest().ConfigureAwait(false);
+            await base.PreTokenRequestAsync().ConfigureAwait(false);
 
             // look for access token in the cache first.
             // no access token is found, then it means token does not exist
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (LoadFromCache)
             {
                 MsalAccessTokenItem = 
-                    await TokenCache.FindAccessToken(AuthenticationRequestParameters).ConfigureAwait(false);
+                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
 

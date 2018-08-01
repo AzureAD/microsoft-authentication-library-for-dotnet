@@ -80,7 +80,7 @@ namespace Test.ADAL.NET.Unit
             foreach (var cachenoise in _cacheNoise)
             {
                 //cache entry has no user assertion hash
-                await context.TokenCache.StoreToCache(new AdalResultWrapper
+                await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -142,7 +142,7 @@ namespace Test.ADAL.NET.Unit
             foreach (var cachenoise in _cacheNoise)
             {
                 //cache entry has no user assertion hash
-                await context.TokenCache.StoreToCache(new AdalResultWrapper
+                await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -325,7 +325,7 @@ namespace Test.ADAL.NET.Unit
 
             foreach (var cachenoise in _cacheNoise)
             {
-                await context.TokenCache.StoreToCache(new AdalResultWrapper
+                await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -440,7 +440,7 @@ namespace Test.ADAL.NET.Unit
             string tokenInCache = "obo-access-token";
             foreach (var cachenoise in _cacheNoise)
             {
-                await context.TokenCache.StoreToCache(new AdalResultWrapper
+                await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
                 {
                     RefreshToken = cachenoise + "some-rt",
                     ResourceInResponse = TestConstants.DefaultResource,
@@ -498,7 +498,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -556,7 +556,7 @@ namespace Test.ADAL.NET.Unit
         {
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -732,7 +732,7 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
             string tokenInCache = "obo-access-token";
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -844,7 +844,7 @@ namespace Test.ADAL.NET.Unit
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, new TokenCache());
             string accessToken = "access-token";
             string tokenInCache = "obo-access-token";
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,

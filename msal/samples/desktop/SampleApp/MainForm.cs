@@ -43,7 +43,7 @@ namespace SampleApp
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
-            user = _msalHelper.Application.GetUsers().Result.FirstOrDefault();
+            user = _msalHelper.Application.GetUsersAsync().Result.FirstOrDefault();
             tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 
             signInPage.BackColor = Color.FromArgb(255, 67, 143, 255);

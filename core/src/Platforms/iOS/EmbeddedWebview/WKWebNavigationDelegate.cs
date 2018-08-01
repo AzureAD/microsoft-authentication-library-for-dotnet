@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                 }
 
                 Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
-                string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponse(keyPair).Result;
+                string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
 
                 NSMutableUrlRequest newRequest = (NSMutableUrlRequest)navigationAction.Request.MutableCopy();
                 newRequest.Url = new NSUrl(keyPair["SubmitUrl"]);

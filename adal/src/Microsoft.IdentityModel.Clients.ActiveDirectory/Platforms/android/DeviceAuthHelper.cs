@@ -38,7 +38,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             get { return false; }
         }
 
-        public static Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public static Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {
             return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallangeResponseContext], challengeData[BrokerConstants.ChallangeResponseVersion]));
         }

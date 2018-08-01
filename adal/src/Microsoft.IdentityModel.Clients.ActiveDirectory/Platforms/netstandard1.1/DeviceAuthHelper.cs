@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     {
         public static bool CanHandleDeviceAuthChallenge { get { return false; } }
 
-        public static Task<string> CreateDeviceAuthChallengeResponse(IDictionary<string, string> challengeData)
+        public static Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {
             throw new NotImplementedException();
         }

@@ -134,7 +134,7 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -187,7 +187,7 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -241,7 +241,7 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -333,7 +333,7 @@ namespace Test.ADAL.NET.Integration
 
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,

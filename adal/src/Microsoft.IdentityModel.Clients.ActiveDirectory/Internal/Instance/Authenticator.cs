@@ -66,7 +66,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
             Init(authority, validateAuthority);
         }
 
-        public async Task UpdateAuthority(string authority, RequestContext requestContext)
+        public async Task UpdateAuthorityAsync(string authority, RequestContext requestContext)
         {
             Init(authority, this.ValidateAuthority);
 
@@ -111,7 +111,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance
                 string tenant = authorityUri.Segments[authorityUri.Segments.Length - 1].TrimEnd('/');
                 if (this.AuthorityType == AuthorityType.AAD)
                 {
-                    var metadata = await InstanceDiscovery.GetMetadataEntry(authorityUri, this.ValidateAuthority, requestContext).ConfigureAwait(false);
+                    var metadata = await InstanceDiscovery.GetMetadataEntryAsync(authorityUri, this.ValidateAuthority, requestContext).ConfigureAwait(false);
                     host = metadata.PreferredNetwork;
                     // All the endpoints will use this updated host, and it affects future network calls, as desired.
                     // The Authority remains its original host, and will be used in TokenCache later.

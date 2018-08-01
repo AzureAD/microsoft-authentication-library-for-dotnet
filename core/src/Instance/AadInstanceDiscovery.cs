@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Core.Instance
 
             InstanceDiscoveryResponse discoveryResponse =
                 await
-                    client.DiscoverAadInstance(new Uri(instanceDiscoveryEndpoint), requestContext)
+                    client.DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
                         .ConfigureAwait(false);
 
             return discoveryResponse;

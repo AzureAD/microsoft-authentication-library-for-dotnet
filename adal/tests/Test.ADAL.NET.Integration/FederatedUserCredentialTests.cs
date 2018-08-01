@@ -295,7 +295,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
             await context.Authenticator.UpdateFromTemplateAsync(null);
 
-            await context.TokenCache.StoreToCache(new AdalResultWrapper
+            await context.TokenCache.StoreToCacheAsync(new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
                 ResourceInResponse = TestConstants.DefaultResource,
@@ -335,7 +335,7 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(1, context.TokenCache.Count);
 
             // Cache entry updated with new access token
-            var entry = await context.TokenCache.LoadFromCache(new CacheQueryData
+            var entry = await context.TokenCache.LoadFromCacheAsync(new CacheQueryData
             {
                 Authority = TestConstants.DefaultAuthorityCommonTenant,
                 Resource = TestConstants.DefaultResource,

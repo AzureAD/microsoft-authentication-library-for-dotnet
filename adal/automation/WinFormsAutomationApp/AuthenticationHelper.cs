@@ -378,7 +378,7 @@ namespace WinFormsAutomationApp
         {
             NotifyBeforeAccessCache(item.Key.Resource, item.Key.ClientId, item.Value.Result.UserInfo.UniqueId, item.Value.Result.UserInfo.DisplayableId);
             TokenCache.DefaultShared.tokenCacheDictionary[updated.Key] = updated.Value;
-            await TokenCache.DefaultShared.StoreToCache(
+            await TokenCache.DefaultShared.StoreToCacheAsync(
                 updated.Value, updated.Key.Authority, updated.Key.Resource, updated.Key.ClientId, updated.Key.TokenSubjectType, new RequestContext(new AdalLogger(Guid.Empty))
                 ).ConfigureAwait(false);
             NotifyAfterAccessCache(updated.Key.Resource, updated.Key.ClientId, updated.Value.Result.UserInfo.UniqueId, updated.Value.Result.UserInfo.DisplayableId);
