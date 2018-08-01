@@ -33,8 +33,8 @@ namespace WinFormsAutomationApp
                 }
                 else if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
                 {
-                    UserPasswordCredential user = new UserPasswordCredential(input["user_identifier"], input["password"]);
-                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], user).ConfigureAwait(false);
+                    UserPasswordCredential userPasswordCredential = new UserPasswordCredential(input["user_identifier"], input["password"]);
+                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], userPasswordCredential).ConfigureAwait(false);
                 }
                 else if (input.ContainsKey("user_identifier") && input.ContainsKey("user_identifier_type"))
                 {
