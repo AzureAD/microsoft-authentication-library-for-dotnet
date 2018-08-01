@@ -96,7 +96,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
         {
             try
             {
-                return XDocument.Load(responseStream, LoadOptions.None);
+                return XDocument.Load(responseStream, LoadOptions.PreserveWhitespace);
             }
             catch (XmlException ex)
             {
@@ -149,9 +149,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.WsTrust
                     {
                         continue;
                     }
-                    
-                    tokenResponseDictionary.Add(tokenTypeElement.Value,
-                        requestedSecurityToken.FirstNode.ToString(SaveOptions.DisableFormatting));
+
+                    var token = new System.Text.StringBuilder();
+                    foreach (var node in requestedSecurityToken.Nodes())
+                    {
+                        // Since we moved from XDocument.Load(..., LoadOptions.None) to Load(..., LoadOptions.PreserveWhitespace),
+                        // requestedSecurityToken can contain multiple nodes, and the first node is possibly just whitespaces e.g. "\n   ",
+                        // so we concatenate all the sub-nodes to include everything
+                        token.Append(node.ToString(SaveOptions.DisableFormatting));
+                    }
+
+                    tokenResponseDictionary.Add(tokenTypeElement.Value, token.ToString());
                 }
             }
             catch (XmlException ex)
