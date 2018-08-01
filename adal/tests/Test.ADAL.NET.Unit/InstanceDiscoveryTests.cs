@@ -313,7 +313,7 @@ namespace Test.ADAL.NET.Unit
             };
             var privateObject = new PrivateObject(new AcquireTokenNonInteractiveHandler(
                 requestData, new UserPasswordCredential("johndoe@contoso.com", "fakepassword")));
-            await (Task)privateObject.Invoke("PreTokenRequest");
+            await (Task)privateObject.Invoke("PreTokenRequestAsync");
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount()); // This validates that all the mock handlers have been consumed
         }
