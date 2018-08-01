@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Core.Telemetry

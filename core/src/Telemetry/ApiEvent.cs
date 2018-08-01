@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Telemetry

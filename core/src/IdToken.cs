@@ -29,10 +29,9 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Core
 {
     internal class IdTokenClaim
     {
@@ -49,8 +48,6 @@ namespace Microsoft.Identity.Client.Internal
     [DataContract]
     internal class IdToken
     {
-
-
         [DataMember(Name = IdTokenClaim.Issuer, IsRequired = false)]
         public string Issuer { get; set; }
 

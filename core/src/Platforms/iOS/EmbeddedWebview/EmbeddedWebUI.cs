@@ -26,8 +26,6 @@
 //------------------------------------------------------------------------------
 
 using Foundation;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

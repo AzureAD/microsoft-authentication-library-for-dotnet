@@ -29,8 +29,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
 using Uri = System.Uri;
 
 namespace Microsoft.Identity.Core.UI.SystemWebview

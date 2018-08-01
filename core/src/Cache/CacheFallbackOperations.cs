@@ -28,8 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Cache

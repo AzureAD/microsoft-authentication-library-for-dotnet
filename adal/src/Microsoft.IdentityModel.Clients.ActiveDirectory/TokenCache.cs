@@ -29,7 +29,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
@@ -37,7 +36,6 @@ using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
@@ -532,7 +530,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 //store ADAL RT in MSAL cache for user tokens where authority is AAD
                 if (subjectType == TokenSubjectType.User && Authenticator.DetectAuthorityType(authority) == Internal.Instance.AuthorityType.AAD)
                 {
-                    IdToken idToken = IdToken.Parse(result.Result.IdToken);
+                    Identity.Core.IdToken idToken = Identity.Core.IdToken.Parse(result.Result.IdToken);
                     
                     CacheFallbackOperations.WriteMsalRefreshToken(tokenCacheAccessor, result, authority, clientId, displayableId,
                         result.Result.UserInfo.GivenName,

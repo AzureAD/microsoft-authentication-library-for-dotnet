@@ -28,8 +28,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Http;
@@ -104,7 +104,7 @@ namespace Test.Microsoft.Identity.Core.Unit
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryInternalApiSample()
-        {
+        { 
             Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);

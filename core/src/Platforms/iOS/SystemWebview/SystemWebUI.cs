@@ -31,8 +31,6 @@ using System.Threading.Tasks;
 using SafariServices;
 using UIKit;
 using System.Threading;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core.UI.SystemWebview
 {

@@ -31,7 +31,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;

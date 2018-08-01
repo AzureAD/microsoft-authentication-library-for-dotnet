@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;

@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 
 namespace Microsoft.Identity.Core.Cache
 {

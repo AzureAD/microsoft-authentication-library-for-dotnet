@@ -29,7 +29,6 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Core
 {

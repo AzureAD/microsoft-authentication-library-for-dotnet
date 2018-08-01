@@ -23,11 +23,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.Identity.Core;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using Windows.Storage;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;

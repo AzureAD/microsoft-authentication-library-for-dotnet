@@ -25,10 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
-using System;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Core.Cache
