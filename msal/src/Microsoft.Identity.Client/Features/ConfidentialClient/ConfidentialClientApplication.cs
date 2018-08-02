@@ -38,7 +38,8 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Class to be used for confidential client applications like Web Apps/API.
     /// </summary>
-    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication
+    public sealed class 
+        ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication
     {
         static ConfidentialClientApplication()
         {
@@ -51,8 +52,8 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client Id of the application. REQUIRED.</param>
         /// <param name="redirectUri">Redirect URI of the application. REQUIRED.</param>
         /// <param name="clientCredential">Client credential for the application. Could be a certificate or a secret. REQUIRED.</param>
-        /// <param name="userTokenCache">Token cache for saving user tokens. OPTIONAL.</param>
-        /// <param name="appTokenCache">Token cache for saving application/client tokens. OPTIONAL.</param>
+        /// <param name="userTokenCache">Token cache for saving user tokens. Can be set to null. REQUIRED</param>
+        /// <param name="appTokenCache">Token cache for saving application/client tokens. Can be set to null. REQUIRED</param>
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(clientId, DefaultAuthority, redirectUri, clientCredential, userTokenCache, appTokenCache)
@@ -66,8 +67,8 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Authority to be used for the client application. REQUIRED.</param>
         /// <param name="redirectUri">Redirect URI of the application. REQUIRED.</param>
         /// <param name="clientCredential">Client credential for the application. Could be a certificate or a secret. REQUIRED.</param>
-        /// <param name="userTokenCache">Token cache for saving user tokens. OPTIONAL.</param>
-        /// <param name="appTokenCache">Token cache for saving application/client tokens. OPTIONAL.</param>
+        /// <param name="userTokenCache">Token cache for saving user tokens. Can be set to null. REQUIRED</param>
+        /// <param name="appTokenCache">Token cache for saving application/client tokens. Can be set to null. REQUIRED</param>
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : base(clientId, authority, redirectUri, true)
