@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
 
 #if WINRT
 /// <summary>
-/// 
+/// flag to enable logged in user authentication
 /// </summary>
         public bool UseCorporateNetwork { get; set; }
 #endif
