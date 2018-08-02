@@ -72,7 +72,8 @@ namespace Microsoft.Identity.Client
 
 #if WINRT
 /// <summary>
-/// flag to enable logged in user authentication
+/// Flag to enable logged in user authentication.
+/// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
 /// </summary>
         public bool UseCorporateNetwork { get; set; }
 #endif
