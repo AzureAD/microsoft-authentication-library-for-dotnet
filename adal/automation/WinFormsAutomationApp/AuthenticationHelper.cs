@@ -21,20 +21,20 @@ namespace WinFormsAutomationApp
         public static async Task<string> AcquireTokenAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
-            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            AuthenticationContext authenticationContext = new AuthenticationContext(input["authority"]);
             try
             {
                 AuthenticationResult result = null;
 
                 if (!input.ContainsKey("redirect_uri"))
                 {
-                    UserCredential userCred = new UserCredential();
-                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], userCred).ConfigureAwait(false);
+                    UserCredential userCredential = new UserCredential();
+                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], userCredential).ConfigureAwait(false);
                 }
                 else if (input.ContainsKey("user_identifier") && input.ContainsKey("password"))
                 {
-                    UserPasswordCredential user = new UserPasswordCredential(input["user_identifier"], input["password"]);
-                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], user).ConfigureAwait(false);
+                    UserPasswordCredential userPasswordCredential = new UserPasswordCredential(input["user_identifier"], input["password"]);
+                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], userPasswordCredential).ConfigureAwait(false);
                 }
                 else if (input.ContainsKey("user_identifier") && input.ContainsKey("user_identifier_type"))
                 {
@@ -60,14 +60,14 @@ namespace WinFormsAutomationApp
 
                     if (input.ContainsKey("claims"))
                     {
-                        result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                        result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
                         GetPlatformParametersInstance(prompt),
                         new UserIdentifier(input["user_identifier"], userIdentifierType), null, input["claims"])
                         .ConfigureAwait(false);
                     }
                     else
                     {
-                        result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                        result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
                         GetPlatformParametersInstance(prompt),
                         new UserIdentifier(input["user_identifier"], userIdentifierType))
                         .ConfigureAwait(false);
@@ -76,7 +76,7 @@ namespace WinFormsAutomationApp
                 else
                 {
                     string prompt = input.ContainsKey("prompt_behavior") ? input["prompt_behavior"] : null;
-                    result = await ctx.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
+                    result = await authenticationContext.AcquireTokenAsync(input["resource"], input["client_id"], new Uri(input["redirect_uri"]),
                     GetPlatformParametersInstance(prompt)).ConfigureAwait(false);
                 }
                 res = ProcessResult(result, input);
@@ -90,11 +90,11 @@ namespace WinFormsAutomationApp
 
         public static async Task<string> AcquireTokenSilentAsync(Dictionary<string, string> input)
         {
-            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            AuthenticationContext authenticationContext = new AuthenticationContext(input["authority"]);
             Dictionary<string, object> res = new Dictionary<string, object>();
             try
             {
-                AuthenticationResult result = await ctx.AcquireTokenSilentAsync(input["resource"], input["client_id"]).ConfigureAwait(false);
+                AuthenticationResult result = await authenticationContext.AcquireTokenSilentAsync(input["resource"], input["client_id"]).ConfigureAwait(false);
                 res = ProcessResult(result, input);
             }
             catch (Exception exc)
@@ -206,7 +206,7 @@ namespace WinFormsAutomationApp
         public static async Task<string> AcquireTokenUsingDeviceProfileAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
-            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            AuthenticationContext authenticationContext = new AuthenticationContext(input["authority"]);
 
             try
             {
@@ -220,7 +220,7 @@ namespace WinFormsAutomationApp
                 deviceCodeResult.ExpiresOn = DateTime.Parse(input["expires_on"]);
 
                 //Try to get access token form given device code.
-                AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(deviceCodeResult);
+                AuthenticationResult result = await authenticationContext.AcquireTokenByDeviceCodeAsync(deviceCodeResult);
                 res.Add("unique_id", result.UserInfo.UniqueId);
                 res.Add("access_token", result.AccessToken);
                 res.Add("tenant_id", result.TenantId);
@@ -235,11 +235,11 @@ namespace WinFormsAutomationApp
         public static async Task<string> AcquireDeviceCodeAsync(Dictionary<string, string> input)
         {
             Dictionary<string, object> res = new Dictionary<string, object>();
-            AuthenticationContext ctx = new AuthenticationContext(input["authority"]);
+            AuthenticationContext authenticationContext = new AuthenticationContext(input["authority"]);
             DeviceCodeResult result;
             try
             {
-                result = await ctx.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
+                result = await authenticationContext.AcquireDeviceCodeAsync(input["resource"], input["client_id"]);
                 res.Add("device_code", result.DeviceCode);
                 res.Add("verification_url", result.VerificationUrl);
                 res.Add("user_code", result.UserCode);
