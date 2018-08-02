@@ -38,8 +38,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Class to be used for confidential client applications like Web Apps/API.
     /// </summary>
-    public sealed class 
-        ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication
+    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication
     {
         static ConfidentialClientApplication()
         {
