@@ -39,7 +39,7 @@ sn.exe -Vr Microsoft.IdentityModel.Clients.ActiveDirectory.dll
 sn.exe -Vr Microsoft.Identity.Core.dll
 popd
 
-set gotoFolder=adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\%bconfig%\netcore45
+set gotoFolder=adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\bin\%bconfig%\uap10.0
 pushd %gotoFolder%
 sn.exe -Vr Microsoft.IdentityModel.Clients.ActiveDirectory.dll
 sn.exe -Vr Microsoft.Identity.Core.dll
@@ -77,7 +77,7 @@ sn.exe -Vr Microsoft.IdentityModel.Clients.ActiveDirectory.dll
 sn.exe -Vr Microsoft.Identity.Core.dll
 popd
 
-set gotoFolder=msal\src\Microsoft.Identity.Client\bin\%bconfig%\netcore45
+set gotoFolder=msal\src\Microsoft.Identity.Client\bin\%bconfig%\uap10.0
 pushd %gotoFolder%
 sn.exe -Vr Microsoft.IdentityModel.Clients.ActiveDirectory.dll
 sn.exe -Vr Microsoft.Identity.Core.dll
