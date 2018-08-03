@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace Microsoft.Identity.Core.Http
 {
@@ -43,6 +44,9 @@ namespace Microsoft.Identity.Core.Http
             {
                 MaxResponseContentBufferSize = MaxResponseContentBufferSizeInBytes
             };
+
+            httpClient.DefaultRequestHeaders.Accept.Clear();
+            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             return httpClient;
         }

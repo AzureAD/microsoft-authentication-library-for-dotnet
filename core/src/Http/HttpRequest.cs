@@ -31,7 +31,6 @@ using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Http
@@ -144,8 +143,6 @@ namespace Microsoft.Identity.Core.Http
             Dictionary<string, string> bodyParameters, HttpMethod method)
         {
             HttpClient client = HttpClientFactory.GetHttpClient();
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
