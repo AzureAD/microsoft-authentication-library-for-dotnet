@@ -26,10 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,6 +47,15 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
         {
             HttpClientFactory.ReturnHttpClientForMocks = false;
             Assert.AreEqual(1024 * 1024, HttpClientFactory.GetHttpClient().MaxResponseContentBufferSize);
+        }
+
+        [TestMethod]
+        [TestCategory("HttpClientFactoryTests")]
+        public void GetHttpClient_DefaultHeadersSetToJson()
+        {
+            var client = HttpClientFactory.GetHttpClient();
+            Assert.IsNotNull(client.DefaultRequestHeaders.Accept);
+            Assert.IsTrue(client.DefaultRequestHeaders.Accept.Any<MediaTypeWithQualityHeaderValue>(x => x.MediaType == "application/json"));
         }
     }
 }
