@@ -67,13 +67,13 @@ namespace Microsoft.Identity.Client
                 WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
                 if (userNameSize == 0)
                 {
-                    throw new MsalException(MsalError.GetUserNameFailed, MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                    throw new MsalClientException(MsalError.GetUserNameFailed, MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
                 StringBuilder sb = new StringBuilder((int)userNameSize);
                 if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
                 {
-                    throw new MsalException(MsalError.GetUserNameFailed, MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
+                    throw new MsalClientException(MsalError.GetUserNameFailed, MsalError.GetUserNameFailed, new Win32Exception(Marshal.GetLastWin32Error()));
                 }
 
                 return sb.ToString();
