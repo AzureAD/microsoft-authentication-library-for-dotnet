@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Core
         public const string UnexpectedAuthorityValidList = "Unexpected list of valid addresses";
 
         public const string UnknownUser = "Could not identify logged in user";
-        public const string UnsupportedUserType = "Unsupported User Type";
+        public const string UnsupportedUserType = "Unsupported User Type '{0}'";
 
         public const string UnsupportedMultiRefreshToken =
             "This authority does not support refresh token for multiple resources. Pass null as a resource";

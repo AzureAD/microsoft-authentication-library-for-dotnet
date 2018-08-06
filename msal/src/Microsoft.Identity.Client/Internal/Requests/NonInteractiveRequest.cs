@@ -135,7 +135,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    throw new MsalException(MsalError.UnknownUserType);
+                    throw new MsalException(MsalError.UnknownUserType,
+                        string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.UnsupportedUserType, userRealmResponse.AccountType));
                 }
             }
             await base.SendTokenRequestAsync().ConfigureAwait(false);
