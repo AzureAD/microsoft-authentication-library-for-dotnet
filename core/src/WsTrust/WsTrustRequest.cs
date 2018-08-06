@@ -95,7 +95,15 @@ namespace Microsoft.Identity.Core.WsTrust
                     string.Format(CultureInfo.CurrentCulture, CoreErrorMessages.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage)
                 );
             }
-            return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustAddress.Version);
+            try
+            {
+                return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustAddress.Version);
+            }
+            catch (System.Xml.XmlException ex)
+            {
+                throw CoreExceptionFactory.Instance.GetServiceException(
+                    CoreErrorCodes.ParsingWsTrustResponseFailed, CoreErrorCodes.ParsingWsTrustResponseFailed, ex);
+            }
         }
 
         public static StringBuilder BuildMessage(string appliesTo, WsTrustAddress wsTrustAddress,

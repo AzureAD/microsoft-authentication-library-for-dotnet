@@ -109,16 +109,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'",
                             wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
 
-                    WsTrustResponse wsTrustResponse;
-                    try
-                    {
-                        wsTrustResponse = await WsTrustRequest.SendRequestAsync(
-                            wsTrustAddress, UserCredential, AuthenticationRequestParameters.RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
-                    }
-                    catch (System.Xml.XmlException ex)
-                    {
-                        throw new MsalException(MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
-                    }
+                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(
+                        wsTrustAddress, UserCredential, AuthenticationRequestParameters.RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
                     if (wsTrustResponse == null)
                     {
                         throw new MsalException(MsalError.ParsingWsTrustResponseFailed);

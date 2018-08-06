@@ -163,10 +163,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     {
                         wsTrustResponse = await WsTrustRequest.SendRequestAsync(wsTrustAddress, this.userCredential._UserCredential, RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
                     }
-                    catch (System.Xml.XmlException ex)
-                    {
-                        throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex);
-                    }
                     catch (AdalServiceException ex)
                     {
                         throw new AdalException(AdalError.ParsingWsTrustResponseFailed, ex.Message, ex);
