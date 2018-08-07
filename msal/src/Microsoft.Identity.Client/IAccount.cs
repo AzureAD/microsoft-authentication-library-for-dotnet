@@ -25,28 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains information of a single user. This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
+    /// Contains information of a single account and can be used to perform an AcquireTokenSilentAsync operation. The same user
+    /// can be present in different tenants, i.e. a user can have multiple accounts.
     /// </summary>
-    public interface IUser
+    public interface IAccount
     {
         /// <summary>
-        /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
+        /// Gets a displayable value in UserPrincipalName (UPN) format, e.g. "john.doe@contoso.com"
         /// </summary>
-        string DisplayableId { get; }
+        /// <remarks>Can be null</remarks>
+        string Username { get; }
 
         /// <summary>
-        /// Gets user`s environment.
+        /// Gets the identity provider for this account, e.g. "login.microsoftonline.com"
         /// </summary>
+        /// <remarks>Can be null</remarks>
         string Environment { get; }
 
         /// <summary>
-        /// Gets an identifier for the user that is used by the library and the service as a strong handle to user identity. Cannot be null.
+        /// Gets an identifier for the user that is used by the library and the service as a strong handle to user identity. 
         /// </summary>
-        string Identifier { get; }
+        /// <remarks>Can be null</remarks>
+        AccountId HomeAccountId { get; }
    }
 }

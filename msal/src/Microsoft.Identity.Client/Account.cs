@@ -25,48 +25,47 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
 using System;
+using System.Globalization;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains information of a single user. This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
+    /// Contains information of a single account. A user can be present in multiple directorie and thus have multiple accounts.
+    /// This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
     /// </summary>
-    internal sealed class User: IUser
+    internal sealed class Account: IAccount
     {
-        public User()
+        public Account()
         {
         }
 
-        internal User(User other)
+        public Account(AccountId homeAccountId, string username, string environment)
         {
-            DisplayableId = other.DisplayableId;
-            Identifier = other.Identifier;
-            Environment = other.Environment;
-        }
-
-        public User(string identifier, string displayableId, string environment)
-        {
-            if (string.IsNullOrWhiteSpace(identifier))
+            if (homeAccountId == null)
             {
-                throw new ArgumentNullException(nameof(identifier));
+                throw new ArgumentNullException(nameof(homeAccountId));
             }
 
-            DisplayableId = displayableId;
+            Username = username;
             Environment = environment;
-            Identifier = identifier;
+            HomeAccountId = homeAccountId;
         }
 
-        /// <summary>
-        /// Gets a displayable value in UserPrincipalName (UPN) format. The value can be null.
-        /// </summary>
-        public string DisplayableId { get; internal set; }
+        public string Username { get; internal set; }
 
-        /// <summary>
-        /// Gets given name of the user if provided by the service. If not, the value is null.
-        /// </summary>
         public string Environment { get; internal set; }
 
-        public string Identifier { get; internal set; }
+        public AccountId HomeAccountId { get; internal set; }
+
+        public override string ToString()
+        {
+            return String.Format(
+                CultureInfo.CurrentCulture,
+                "Account username: {0} environment {1} home account id: {2}",
+                Username, Environment, HomeAccountId.ToString());
+
+        }
     }
 }

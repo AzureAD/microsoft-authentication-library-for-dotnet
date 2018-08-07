@@ -120,7 +120,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires security token from the authority using authorization code previously received.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IUser)"/>.
+        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scopes">Array of scopes requested for resource</param>
@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scopes, IUser user, TokenCache cache)
+        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scopes, IAccount user, TokenCache cache)
         {
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
             parameters.ClientId = ClientId;

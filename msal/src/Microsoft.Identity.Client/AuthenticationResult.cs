@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client
             _msalIdTokenCacheItem = msalIdTokenCacheItem;
             if (_msalAccessTokenCacheItem.HomeAccountId != null)
             {
-                User = new User(_msalAccessTokenCacheItem.HomeAccountId,
+                Account = new Account(AccountId.FromClientInfo(_msalAccessTokenCacheItem.ClientInfo),
                     _msalIdTokenCacheItem?.IdToken?.PreferredUsername, _msalAccessTokenCacheItem.Environment);
             }
         }
@@ -81,10 +81,10 @@ namespace Microsoft.Identity.Client
         public virtual string TenantId => _msalIdTokenCacheItem?.IdToken?.TenantId;
 
         /// <summary>
-        /// Gets the user object. Some elements in User might be null if not returned by the
-        /// service. It can be passed back in some API overloads to identify which user should be used.
+        /// Gets the account object. Some elements in Account might be null if not returned by the
+        /// service. It can be passed back in some API overloads to identify which account should be used.
         /// </summary>
-        public virtual IUser User { get; internal set; }
+        public virtual IAccount Account { get; internal set; }
 
         /// <summary>
         /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.

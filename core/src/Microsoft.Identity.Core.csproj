@@ -55,9 +55,6 @@
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
     <None Remove="ConfigureAwait.ruleset" />
-    <None Remove="Instance\AadInstanceDiscovery.cs" />
-    <None Remove="Instance\AuthorityType.cs" />
-    <None Remove="Instance\InstanceDiscoveryMetadataEntry.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
 

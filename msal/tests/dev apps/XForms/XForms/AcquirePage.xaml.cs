@@ -58,8 +58,8 @@ namespace XForms
 
         private void RefreshUsers()
         {
-            var userIds = App.MsalPublicClient.GetUsersAsync().Result.
-                Select(x => x.DisplayableId).ToList();
+            var userIds = App.MsalPublicClient.GetAccountsAsync().Result.
+                Select(x => x.Username).ToList();
 
             userIds.Add(UserNotSelected);
             usersPicker.ItemsSource = userIds;
@@ -96,11 +96,11 @@ namespace XForms
             return ExtraQueryParametersEntry.Text.Trim();
         }
 
-        private string ToString(IUser user)
+        private string ToString(IAccount user)
         {
             var sb = new StringBuilder();
 
-            sb.AppendLine("user.DisplayableId : " + user.DisplayableId);
+            sb.AppendLine("user.DisplayableId : " + user.Username);
             //sb.AppendLine("user.IdentityProvider : " + user.IdentityProvider);
             sb.AppendLine("user.Environment : " + user.Environment);
 
@@ -117,15 +117,15 @@ namespace XForms
             sb.AppendLine("TenantId : " + result.TenantId);
             sb.AppendLine("Scope : " + string.Join(",", result.Scopes));
             sb.AppendLine("User :");
-            sb.Append(ToString(result.User));
+            sb.Append(ToString(result.Account));
 
             return sb.ToString();
         }
 
-        private IUser getUserByDisplayableId(string str)
+        private IAccount getUserByDisplayableId(string str)
         {
             return string.IsNullOrWhiteSpace(str) ? null : 
-                App.MsalPublicClient.GetUsersAsync().Result.FirstOrDefault(user => user.DisplayableId.Equals(str, StringComparison.OrdinalIgnoreCase));
+                App.MsalPublicClient.GetAccountsAsync().Result.FirstOrDefault(user => user.Username.Equals(str, StringComparison.OrdinalIgnoreCase));
         }
 
         private string[] GetScopes()
@@ -211,7 +211,7 @@ namespace XForms
         private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = await tokenCache.GetUsersAsync
+            var users = await tokenCache.GetAccountsAsync
                 (new Uri(App.Authority).Host, true, new RequestContext(new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
             foreach (var user in users)
             {

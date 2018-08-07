@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Core.Telemetry
             }
         }
 
-        public string UserId
+        public string AccountId
         {
             set
             {

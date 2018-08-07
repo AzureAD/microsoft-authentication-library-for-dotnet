@@ -106,27 +106,27 @@ namespace Test.MSAL.NET.Unit
         {
             // Setup up a confidential client application with mocked users
             var mockApp = Substitute.For<IConfidentialClientApplication>();
-            IList<IUser> users = new List<IUser>();
+            IList<IAccount> users = new List<IAccount>();
 
-            IUser mockUser1 = Substitute.For<IUser>();
-            mockUser1.DisplayableId.Returns("DisplayableId_1");
+            IAccount mockUser1 = Substitute.For<IAccount>();
+            mockUser1.Username.Returns("DisplayableId_1");
 
-            IUser mockUser2 = Substitute.For<IUser>();
-            mockUser2.DisplayableId.Returns("DisplayableId_2");
+            IAccount mockUser2 = Substitute.For<IAccount>();
+            mockUser2.Username.Returns("DisplayableId_2");
 
             users.Add(mockUser1);
             users.Add(mockUser2);
-            mockApp.GetUsersAsync().Returns(users);
+            mockApp.GetAccountsAsync().Returns(users);
 
             // Now call the substitute
-            IEnumerable<IUser> actualUsers = mockApp.GetUsersAsync().Result;
+            IEnumerable<IAccount> actualUsers = mockApp.GetAccountsAsync().Result;
 
             // Check the users property
             Assert.IsNotNull(actualUsers);
             Assert.AreEqual(2, actualUsers.Count());
 
-            Assert.AreEqual("DisplayableId_1", users.First().DisplayableId);
-            Assert.AreEqual("DisplayableId_2", users.Last().DisplayableId);
+            Assert.AreEqual("DisplayableId_1", users.First().Username);
+            Assert.AreEqual("DisplayableId_2", users.Last().Username);
         }
 
         [TestMethod]
@@ -674,7 +674,7 @@ namespace Test.MSAL.NET.Unit
                 ValidateAuthority = false
             };
 
-            var users = app.GetUsersAsync().Result;
+            var users = app.GetAccountsAsync().Result;
             Assert.AreEqual(1, users.Count());
         }
 

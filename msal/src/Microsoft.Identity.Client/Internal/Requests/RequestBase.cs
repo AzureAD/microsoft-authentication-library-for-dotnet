@@ -133,11 +133,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             //this method is the common entrance for all token requests, so it is a good place to put the generic Telemetry logic here
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = Telemetry.GetInstance().GenerateNewRequestId();
+            string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
             var apiEvent = new ApiEvent()
             {
                 ApiId = ApiId,
                 ValidationStatus = AuthenticationRequestParameters.ValidateAuthority.ToString(),
-                UserId = AuthenticationRequestParameters.User != null ? AuthenticationRequestParameters.User.Identifier : "",
+                AccountId = accountId ?? "",
                 CorrelationId = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString(),
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 IsConfidentialClient = IsConfidentialClient,
@@ -162,7 +163,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 await PostRunAsync(result).ConfigureAwait(false);
 
                 apiEvent.TenantId = result.TenantId;
-                apiEvent.UserId = result.UniqueId;
+                apiEvent.AccountId = result.UniqueId;
                 apiEvent.WasSuccessful = true;
                 return result;
             }
@@ -205,7 +206,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (fromServer!= null && AuthenticationRequestParameters.ClientInfo != null)
             {
-                if (!fromServer.UniqueIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueIdentifier, StringComparison.OrdinalIgnoreCase) ||
+                if (!fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier, StringComparison.OrdinalIgnoreCase) ||
                     !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user" +
@@ -214,8 +215,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(String.Format(
                         CultureInfo.InvariantCulture,
                         "Returned user identifiers (uid:{0} utid:{1}) does not meatch the sent user identifier (uid:{2} utid:{3})",
-                        fromServer.UniqueIdentifier, fromServer.UniqueTenantIdentifier,
-                        AuthenticationRequestParameters.ClientInfo.UniqueIdentifier,
+                        fromServer.UniqueObjectIdentifier, fromServer.UniqueTenantIdentifier,
+                        AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier,
                         AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier));
 
                     throw new MsalServiceException("user_mismatch", "Returned user identifier does not match the sent user identifier");

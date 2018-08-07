@@ -48,12 +48,12 @@ namespace SampleApp
                 CachePersistence.GetUserCache());
         }
 
-        public async Task<IUser> SignInAsync()
+        public async Task<IAccount> SignInAsync()
         {
             try
             {
                 AuthenticationResult result = await Application.AcquireTokenAsync(new[] {"user.read", "calendars.read"}).ConfigureAwait(false);
-                return result.User;
+                return result.Account;
             }
             catch (Exception exc)
             {
@@ -63,7 +63,7 @@ namespace SampleApp
             return null;
         }
 
-        public async Task<string> GetTokenForCurrentUserAsync(IEnumerable<string> scopes, IUser user)
+        public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount user)
         {
             AuthenticationResult result = null;
             Exception exception = null;

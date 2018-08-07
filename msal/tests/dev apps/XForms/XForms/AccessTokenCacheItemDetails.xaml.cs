@@ -55,7 +55,7 @@ namespace XForms
             cachedAtLabel.Text = CoreHelpers.UnixTimestampToDateTime(msalAccessTokenCacheItem.CachedAt).ToString();
 
             rawClientInfoLabel.Text = msalAccessTokenCacheItem.RawClientInfo;
-            clientInfoUniqueIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueIdentifier;
+            clientInfoUniqueIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueObjectIdentifier;
             clientInfoUniqueTenantIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
             secretLabel.Text = StringShortenerConverter.GetShortStr(msalAccessTokenCacheItem.Secret, 100);

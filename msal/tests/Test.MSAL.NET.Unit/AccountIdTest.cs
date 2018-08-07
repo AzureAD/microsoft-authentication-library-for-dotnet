@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,26 +25,41 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+
+namespace Test.MSAL.NET.Unit
 {
-    /// <summary>
-    /// Contains parameters used by the MSAL call accessing the cache.
-    /// </summary>
-    public sealed class TokenCacheNotificationArgs
+    [TestClass]
+    public class AccountIdTest
     {
-        /// <summary>
-        /// Gets the TokenCache
-        /// </summary>
-        public TokenCache TokenCache { get; internal set; }
+        [TestMethod]
+        public void EqualityTest()
+        {
+            // Arrange
+            AccountId accountId1 = new AccountId("a.b", "a", "b");
+            AccountId accountId2 = new AccountId("a.b", "a", "b");
 
-        /// <summary>
-        /// Gets the ClientId
-        /// </summary>
-        public string ClientId { get; internal set; }
+            // Act Assert
+            Assert.AreEqual(accountId1, accountId2);
+        }
 
-        /// <summary>
-        /// Gets the account associated with this notification
-        /// </summary>
-        public IAccount Account { get; internal set; }
+        [TestMethod]
+        public void FromClientInfo()
+        {
+            // Arrange
+            ClientInfo ci = new ClientInfo() { UniqueObjectIdentifier = "a", UniqueTenantIdentifier = "b" };
+
+            // Act
+            var accountId = AccountId.FromClientInfo(ci);
+
+            // Assert
+            Assert.AreEqual("a.b", accountId.Identifier);
+            Assert.AreEqual("a", accountId.ObjectId);
+            Assert.AreEqual("b", accountId.TenantId);
+        }
     }
 }

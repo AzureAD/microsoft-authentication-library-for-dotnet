@@ -45,8 +45,8 @@ namespace MsalUAPTestApp
             AuthenticationResult authResult = null;
             try
             {
-                var users = await PublicClientApp.GetUsersAsync();
-                authResult = await PublicClientApp.AcquireTokenSilentAsync(scopes, users.FirstOrDefault());
+                var accounts = await PublicClientApp.GetAccountsAsync();
+                authResult = await PublicClientApp.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault());
             }
             catch (MsalUiRequiredException ex)
             {
@@ -106,12 +106,12 @@ namespace MsalUAPTestApp
         /// </summary>
         private async void SignOutButton_Click(object sender, RoutedEventArgs e)
         {
-            var users = await PublicClientApp.GetUsersAsync();
-            if (users.Any())
+            var accounts = await PublicClientApp.GetAccountsAsync();
+            if (accounts.Any())
             {
                 try
                 {
-                    await PublicClientApp.RemoveAsync(users.FirstOrDefault());
+                    await PublicClientApp.RemoveAsync(accounts.FirstOrDefault());
                     this.ResultText.Text = "User has signed-out";
                     this.CallGraphButton.Visibility = Visibility.Visible;
                     this.SignOutButton.Visibility = Visibility.Collapsed;
@@ -131,9 +131,9 @@ namespace MsalUAPTestApp
             TokenInfoText.Text = "";
             if (authResult != null)
             {
-                TokenInfoText.Text += $"Identifier: {authResult.User.Identifier}" + Environment.NewLine;
-                TokenInfoText.Text += $"Env: {authResult.User.Environment}" + Environment.NewLine;
-                TokenInfoText.Text += $"Username: {authResult.User.DisplayableId}" + Environment.NewLine;
+                TokenInfoText.Text += $"Identifier: {authResult.Account.HomeAccountId}" + Environment.NewLine;
+                TokenInfoText.Text += $"Env: {authResult.Account.Environment}" + Environment.NewLine;
+                TokenInfoText.Text += $"Username: {authResult.Account.Username}" + Environment.NewLine;
                 TokenInfoText.Text += $"Token Expires: {authResult.ExpiresOn.ToLocalTime()}" + Environment.NewLine;
                 TokenInfoText.Text += $"Access Token: {authResult.AccessToken}" + Environment.NewLine;
             }

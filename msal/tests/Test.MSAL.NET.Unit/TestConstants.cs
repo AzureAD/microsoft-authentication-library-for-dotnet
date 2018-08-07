@@ -60,30 +60,27 @@ namespace Test.MSAL.NET.Unit
         public static readonly string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
 
-        public static readonly string UserIdentifier = CreateUserIdentifer();
+        public static readonly AccountId UserIdentifier = CreateUserIdentifer();
 
         public static string GetDiscoveryEndpoint(string Authority)
         {
             return Authority + DiscoveryEndPoint;
         }
 
-        public static string CreateUserIdentifer()
+        public static AccountId CreateUserIdentifer()
         {
             return CreateUserIdentifer(Uid, Utid);
         }
 
-        public static string CreateUserIdentifer(string uid, string utid)
+        public static AccountId CreateUserIdentifer(string uid, string utid)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
-                //Base64UrlHelpers.Encode(uid),
-                //Base64UrlHelpers.Encode(utid));
-                uid, utid);
+            return new AccountId(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid), uid, utid);
         }
 
-        public static readonly User User = new User
+        public static readonly Account User = new Account
         {
-            DisplayableId = DisplayableId,
-            Identifier = UserIdentifier,
+            Username = DisplayableId,
+            HomeAccountId = UserIdentifier,
             Environment = ProductionPrefNetworkEnvironment,
         };
 
@@ -99,10 +96,10 @@ namespace Test.MSAL.NET.Unit
         public static readonly string OnPremiseUid = "my-OnPremise-UID";
         public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
         public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
-        public static readonly User OnPremiseUser = new User
+        public static readonly Account OnPremiseUser = new Account
         {
-            DisplayableId = OnPremiseDisplayableId,
-            Identifier = OnPremiseHomeObjectId
+            Username = OnPremiseDisplayableId,
+            HomeAccountId = new AccountId(OnPremiseHomeObjectId, "", "")
         };
     }
 }

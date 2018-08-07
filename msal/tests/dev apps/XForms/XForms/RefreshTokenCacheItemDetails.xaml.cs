@@ -50,7 +50,7 @@ namespace XForms
             userIdentifierLabel.Text = msalRefreshTokenCacheItem.HomeAccountId;
             rawClientInfoLabel.Text = msalRefreshTokenCacheItem.RawClientInfo;
 
-            clientInfoUniqueIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueIdentifier;
+            clientInfoUniqueIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueObjectIdentifier;
             clientInfoUniqueTenantIdentifierLabel.Text = msalRefreshTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
             secretLabel.Text = StringShortenerConverter.GetShortStr(msalRefreshTokenCacheItem.Secret, 100);

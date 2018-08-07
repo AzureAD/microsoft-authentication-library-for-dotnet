@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public string ExtraQueryParameters { get; set; }
 
-        public IUser User { get; set; }
+        public IAccount Account { get; set; }
 
         public ClientInfo ClientInfo { get; set; }
 
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
             builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("User provided? - " + (User != null));
+            builder.AppendLine("User provided? - " + (Account != null));
             var dict = CoreHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
             dict = CoreHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("User provided? - " + (User != null));
+            builder.AppendLine("User provided? - " + (Account != null));
             dict = CoreHelpers.ParseKeyValueList(ExtraQueryParameters, '&', true, RequestContext);
             builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
             dict = CoreHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);

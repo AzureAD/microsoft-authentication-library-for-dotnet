@@ -303,7 +303,7 @@ namespace Test.Microsoft.Identity.Core.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, UserId = UserId };
+                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -343,7 +343,7 @@ namespace Test.Microsoft.Identity.Core.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, UserId = UserId };
+                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;

@@ -82,13 +82,13 @@ namespace DesktopTestApp
 
         public void RefreshUserList()
         {
-            List<IUser> userListDataSource = _publicClientHandler.PublicClientApplication.GetUsersAsync().Result.ToList();
-            if (userListDataSource.Count > 0)
+            List<IAccount> accounts = _publicClientHandler.PublicClientApplication.GetAccountsAsync().Result.ToList();
+            if (accounts.Count > 0)
             {
-                userListDataSource.Insert(0, new User() { DisplayableId = string.Empty });
+                accounts.Insert(0, new Account() { Username = string.Empty });
             }
 
-            userList.DataSource = userListDataSource;
+            userList.DataSource = accounts;
             userList.DisplayMember = "DisplayableId";
             userList.Refresh();
         }
@@ -102,7 +102,7 @@ namespace DesktopTestApp
 
         private void userList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            _publicClientHandler.CurrentUser = (IUser)userList.SelectedItem;
+            _publicClientHandler.CurrentUser = (IAccount)userList.SelectedItem;
         }
 
         private void overriddenAuthority_TextChanged(object sender, EventArgs e)
@@ -148,7 +148,7 @@ namespace DesktopTestApp
             }
             else
             {
-                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+                _publicClientHandler.CurrentUser = userList.SelectedItem as Account;
             }
 
             try
@@ -175,7 +175,7 @@ namespace DesktopTestApp
             }
             else
             {
-                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+                _publicClientHandler.CurrentUser = userList.SelectedItem as Account;
             }
 
             try
@@ -204,7 +204,7 @@ namespace DesktopTestApp
             }
             else
             {
-                _publicClientHandler.CurrentUser = userList.SelectedItem as User;
+                _publicClientHandler.CurrentUser = userList.SelectedItem as Account;
             }
 
             try
@@ -273,7 +273,7 @@ namespace DesktopTestApp
             callResult.Text = @"Access Token: " + authenticationResult.AccessToken + Environment.NewLine +
                               @"Expires On: " + authenticationResult.ExpiresOn + Environment.NewLine +
                               @"Tenant Id: " + authenticationResult.TenantId + Environment.NewLine +
-                              @"User: " + authenticationResult.User.DisplayableId + Environment.NewLine +
+                              @"User: " + authenticationResult.Account.Username + Environment.NewLine +
                               @"Id Token: " + authenticationResult.IdToken;
         }
         

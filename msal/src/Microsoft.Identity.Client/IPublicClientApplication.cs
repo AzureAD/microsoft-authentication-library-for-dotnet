@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
-            IUser user);
+            IAccount user);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
-            IUser user,
+            IAccount user,
             UIBehavior behavior,
             string extraQueryParameters);
 
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
-            IUser user,
+            IAccount user,
             UIBehavior behavior,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
-            IUser user, UIParent parent);
+            IAccount user, UIParent parent);
 
         /// <summary>
         /// Interactive request to acquire token. 
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
-            IUser user,
+            IAccount user,
             UIBehavior behavior,
             string extraQueryParameters, UIParent parent);
 
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user</returns>
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
-            IUser user,
+            IAccount user,
             UIBehavior behavior,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,

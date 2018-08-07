@@ -34,7 +34,7 @@ namespace AutomationApp
     public class TokenHandler
     {
         #region Properties
-        public IUser CurrentUser { get; set; }
+        public IAccount CurrentUser { get; set; }
 
         private PublicClientApplication _publicClientApplication;
         #endregion
@@ -58,7 +58,7 @@ namespace AutomationApp
                 await
                     _publicClientApplication.AcquireTokenAsync(scope)
                         .ConfigureAwait(false);
-            CurrentUser = result.User;
+            CurrentUser = result.Account;
             return result;
         }
 

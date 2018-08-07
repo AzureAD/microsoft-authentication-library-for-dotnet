@@ -33,7 +33,7 @@ namespace XForms
             idTokenLabel.Text = JsonHelper.SerializeToJson(msalIdTokenCacheItem.IdToken);
 
             rawClientInfoLabel.Text = msalIdTokenCacheItem.RawClientInfo;
-            clientInfoUniqueIdentifierLabel.Text = msalIdTokenCacheItem.ClientInfo.UniqueIdentifier;
+            clientInfoUniqueIdentifierLabel.Text = msalIdTokenCacheItem.ClientInfo.UniqueObjectIdentifier;
             clientInfoUniqueTenantIdentifierLabel.Text = msalIdTokenCacheItem.ClientInfo.UniqueTenantIdentifier;
 
 

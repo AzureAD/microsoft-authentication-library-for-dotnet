@@ -111,7 +111,7 @@ namespace AutomationApp
             accessTokenResult.Text = authenticationResult.AccessToken;
             expiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
             tenantIdResult.Text = authenticationResult.TenantId;
-            userResult.Text = authenticationResult.User.DisplayableId;
+            userResult.Text = authenticationResult.Account.Username;
             idTokenResult.Text = authenticationResult.IdToken;
             scopeResult.DataSource = authenticationResult.Scopes;
         }

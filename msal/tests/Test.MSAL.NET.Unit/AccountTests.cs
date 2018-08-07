@@ -32,27 +32,29 @@ using System;
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
-    public class UserTests
+    public class AccountTests
     {
         [TestMethod]
         [TestCategory("UserTests")]
         public void Constructor_IdIsRequired()
         {
             // 1. Id is required
-            AssertException.Throws<ArgumentNullException>(() => new User(null, "d", "n"));
+            AssertException.Throws<ArgumentNullException>(() => new Account(null, "d", "n"));
 
             // 2. Other properties are optional
-            new User("id", null, null);
+            new Account(new AccountId("a.b", "a", "b"), null, null);
         }
 
         [TestMethod]
         [TestCategory("UserTests")]
         public void Constructor_PropertiesSet()
         {
-            User actual = new User("id", "disp", "env");
+            Account actual = new Account(new AccountId("a.b", "a", "b"), "disp", "env");
 
-            Assert.AreEqual("id", actual.Identifier);
-            Assert.AreEqual("disp", actual.DisplayableId);
+            Assert.AreEqual("a.b", actual.HomeAccountId.Identifier);
+            Assert.AreEqual("a", actual.HomeAccountId.ObjectId);
+            Assert.AreEqual("b", actual.HomeAccountId.TenantId);
+            Assert.AreEqual("disp", actual.Username);
             Assert.AreEqual("env", actual.Environment);
         }
     }

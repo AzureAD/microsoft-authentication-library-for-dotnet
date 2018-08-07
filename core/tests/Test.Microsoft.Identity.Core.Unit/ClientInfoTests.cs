@@ -39,7 +39,7 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
             ClientInfo clientInfo = ClientInfo.CreateFromJson("eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9");
             Assert.IsNotNull(clientInfo);
-            Assert.AreEqual(TestConstants.Uid, clientInfo.UniqueIdentifier);
+            Assert.AreEqual(TestConstants.Uid, clientInfo.UniqueObjectIdentifier);
             Assert.AreEqual(TestConstants.Utid, clientInfo.UniqueTenantIdentifier);
         }
     }

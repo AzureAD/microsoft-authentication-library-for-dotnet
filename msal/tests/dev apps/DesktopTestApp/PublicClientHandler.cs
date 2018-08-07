@@ -55,7 +55,7 @@ namespace DesktopTestApp
 
         public string LoginHint { get; set; }
 
-        public IUser CurrentUser { get; set; }
+        public IAccount CurrentUser { get; set; }
 
         public PublicClientApplication PublicClientApplication { get; set; }
 
@@ -80,7 +80,7 @@ namespace DesktopTestApp
                         uiParent);
             }
 
-            CurrentUser = result.User;
+            CurrentUser = result.Account;
             return result;
         }
 
@@ -103,7 +103,7 @@ namespace DesktopTestApp
                         uiParent);
             }
 
-            CurrentUser = result.User;
+            CurrentUser = result.Account;
             return result;
         }
 

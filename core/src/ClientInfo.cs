@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Core
     internal class ClientInfo
     {
         [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
-        public string UniqueIdentifier { get; set; }
+        public string UniqueObjectIdentifier { get; set; }
 
         [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
         public string UniqueTenantIdentifier { get; set; }
@@ -74,31 +74,11 @@ namespace Microsoft.Identity.Core
             return Base64UrlHelpers.Encode(JsonHelper.SerializeToJson<ClientInfo>(this));
         }
 
-        public string ToUserIdentifier()
+        public string ToAccountIdentifier()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", UniqueIdentifier, UniqueTenantIdentifier);
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", UniqueObjectIdentifier, UniqueTenantIdentifier);
         }
 
-        public static ClientInfo CreateFromUserIdentifier(string userIdentifier)
-        {
-            if (string.IsNullOrEmpty(userIdentifier))
-            {
-                return null;
-            }
-
-            string[] artifacts = userIdentifier.Split('.');
-
-            if (artifacts.Length == 0)
-            {
-                return null;
-            }
-
-            return new ClientInfo()
-            {
-                UniqueIdentifier = artifacts[0],
-                UniqueTenantIdentifier = artifacts[1]
-            };
-        }
         public static ClientInfo CreateFromEncodedString(string encodedUserIdentiier)
         {
             if (string.IsNullOrEmpty(encodedUserIdentiier))
@@ -115,7 +95,7 @@ namespace Microsoft.Identity.Core
 
             return new ClientInfo()
             {
-                UniqueIdentifier = Base64UrlHelpers.DecodeToString(artifacts[0]),
+                UniqueObjectIdentifier = Base64UrlHelpers.DecodeToString(artifacts[0]),
                 UniqueTenantIdentifier = Base64UrlHelpers.DecodeToString(artifacts[1]),
             };
         }

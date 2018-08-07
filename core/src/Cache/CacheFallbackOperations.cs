@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Core.Cache
                 {
                     if (authorityHostAliases.Contains(new Uri(pair.Key.Authority).Host) &&
                          displayableId.Equals(pair.Key.DisplayableId) &&
-                         identifier.Equals(ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToUserIdentifier()))
+                         identifier.Equals(ClientInfo.CreateFromJson(pair.Value.RawClientInfo).ToAccountIdentifier()))
                     {
                         keysToRemove.Add(pair.Key);
                     }

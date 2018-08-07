@@ -25,7 +25,7 @@ namespace XForms
             localAccountIdLabel.Text = msalAccountCacheItem.LocalAccountId;
 
             rawClientInfoLabel.Text = msalAccountCacheItem.RawClientInfo;
-            clientInfoUniqueIdentifierLabel.Text = msalAccountCacheItem.ClientInfo.UniqueIdentifier;
+            clientInfoUniqueIdentifierLabel.Text = msalAccountCacheItem.ClientInfo.UniqueObjectIdentifier;
             clientInfoUniqueTenantIdentifierLabel.Text = msalAccountCacheItem.ClientInfo.UniqueTenantIdentifier;
         }
 	}

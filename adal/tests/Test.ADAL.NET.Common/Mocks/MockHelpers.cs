@@ -139,7 +139,7 @@ namespace Test.ADAL.NET.Common.Mocks
 
             var clientInfo = new ClientInfo
             {
-                UniqueIdentifier = TestConstants.DefaultUniqueIdentifier,
+                UniqueObjectIdentifier = TestConstants.DefaultUniqueIdentifier,
                 UniqueTenantIdentifier = TestConstants.DefaultUniqueTenantIdentifier
             };
             var base64EncodedSerializedClientInfo = Base64UrlEncoder.Encode(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers.JsonHelper.EncodeToJson<ClientInfo>(clientInfo));

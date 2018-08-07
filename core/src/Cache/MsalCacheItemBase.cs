@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Core.Cache
         {
             if (ClientInfo != null)
             {
-                HomeAccountId = ClientInfo.ToUserIdentifier();
+                HomeAccountId = ClientInfo.ToAccountIdentifier();
             }
         }
     }

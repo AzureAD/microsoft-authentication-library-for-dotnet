@@ -36,18 +36,18 @@ namespace SampleApp
     public partial class MainForm : Form
     {
         private readonly MsalAuthHelper _msalHelper = new MsalAuthHelper("11744750-bfe5-4818-a1c0-655455f68fa7");
-        private IUser user = null;
+        private IAccount account = null;
         public MainForm()
         {
             InitializeComponent();
             tabControl1.Appearance = TabAppearance.FlatButtons;
             tabControl1.ItemSize = new Size(0, 1);
             tabControl1.SizeMode = TabSizeMode.Fixed;
-            user = _msalHelper.Application.GetUsersAsync().Result.FirstOrDefault();
+            account = _msalHelper.Application.GetAccountsAsync().Result.FirstOrDefault();
             tabControl1.SelectedIndexChanged += TabControl1_SelectedIndexChanged;
 
             signInPage.BackColor = Color.FromArgb(255, 67, 143, 255);
-            if (user != null)
+            if (account != null)
             {
                 tabControl1.SelectedTab = calendarPage;
             }
@@ -57,7 +57,7 @@ namespace SampleApp
         {
             if((sender as TabControl).TabIndex == 1)
             {
-                string token = await _msalHelper.GetTokenForCurrentUserAsync(new[] {"user.read"}, user)
+                string token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] {"user.read"}, account)
                     .ConfigureAwait(false);
                 DisplayUserInformationFromGraph(token);
             }
@@ -65,8 +65,8 @@ namespace SampleApp
         
         private async void pictureBox1_Click(object sender, EventArgs e)
         {
-            user = await _msalHelper.SignInAsync().ConfigureAwait(false);
-            if (user!=null)
+            account = await _msalHelper.SignInAsync().ConfigureAwait(false);
+            if (account!=null)
             {
                 tabControl1.SelectedTab = calendarPage;
             }
