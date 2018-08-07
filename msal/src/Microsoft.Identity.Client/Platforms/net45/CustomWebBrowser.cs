@@ -261,5 +261,5 @@ namespace Microsoft.Identity.Client.Internal.UI
 
     /// <summary>
     /// </summary>
-    public delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
+    internal delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
 }
