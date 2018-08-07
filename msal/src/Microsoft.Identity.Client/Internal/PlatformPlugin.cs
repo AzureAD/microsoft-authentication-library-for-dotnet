@@ -46,7 +46,6 @@ namespace Microsoft.Identity.Client.Internal
 
         private static void InitializeWebFactoryAndPlatform()
         {
-#if !FACADE
             IWebUIFactory webUIFactory = null;
 
 #if ANDROID || iOS
@@ -56,10 +55,8 @@ namespace Microsoft.Identity.Client.Internal
 #endif
             WebUIFactory = webUIFactory;
             PlatformInformation = new PlatformInformation();
-#endif
         }
 
-#if !FACADE
         public static void LogMessage(MsalLogLevel logLevel, string formattedMessage)
         {
             switch (logLevel)
@@ -78,6 +75,5 @@ namespace Microsoft.Identity.Client.Internal
                     break;
             }
         }
-#endif
     }
 }

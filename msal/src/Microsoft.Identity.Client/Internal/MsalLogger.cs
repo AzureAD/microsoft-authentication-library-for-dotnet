@@ -144,9 +144,7 @@ namespace Microsoft.Identity.Client.Internal
 
             if (MsalLoggerSettings.DefaultLoggingEnabled)
             {
-#if !FACADE
                 PlatformPlugin.LogMessage(MsalLoggerSettings.Level, log);
-#endif
             }
 
             ExecuteCallback(msalLogLevel, log, containsPii);
