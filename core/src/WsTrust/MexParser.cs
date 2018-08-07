@@ -97,16 +97,10 @@ namespace Microsoft.Identity.Core.WsTrust
         internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, RequestContext requestContext)
         {
             WsTrustAddress address = null;
-            MexPolicy policy = null;
-
             Dictionary<string, MexPolicy> policies = ReadPolicies(mexDocument);
             Dictionary<string, MexPolicy> bindings = ReadPolicyBindings(mexDocument, policies);
             SetPolicyEndpointAddresses(mexDocument, bindings);
-            Random random = new Random();
-            //try ws-trust 1.3 first
-            policy = policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).OrderBy(p => random.Next()).FirstOrDefault() ??
-                        policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).OrderBy(p => random.Next()).FirstOrDefault();
-
+            MexPolicy policy = SelectPolicy(policies, userAuthType);
             if (policy != null)
             {
                 address = new WsTrustAddress();
@@ -114,6 +108,13 @@ namespace Microsoft.Identity.Core.WsTrust
                 address.Version = policy.Version;
             }
             return address;
+        }
+
+        private static MexPolicy SelectPolicy(IReadOnlyDictionary<string, MexPolicy> policies, UserAuthType userAuthType)
+        {
+            //try ws-trust 1.3 first
+            return policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).FirstOrDefault() ??
+                        policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).FirstOrDefault();
         }
 
         internal static Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
