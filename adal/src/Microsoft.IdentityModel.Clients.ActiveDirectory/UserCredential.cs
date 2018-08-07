@@ -38,20 +38,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class UserCredential
     {
-        internal Core.UserCredential _UserCredential;
+        private Core.UserCredential userCredential;
+        internal Core.UserCredential GetUserCredential()
+        {
+            return userCredential;
+        }
 
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
         public string UserName
         {
-            get { return _UserCredential.UserName; }
-            internal set { _UserCredential.UserName = value; }
+            get { return userCredential.UserName; }
+            internal set { userCredential.UserName = value; }
         }
 
         internal UserAuthType UserAuthType
         {
-            get { return _UserCredential.UserAuthType; }
+            get { return userCredential.UserAuthType; }
         }
 
         /// <summary>
@@ -60,7 +64,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public UserCredential()
         {
-            _UserCredential = new Core.UserCredential();
+            userCredential = new Core.UserCredential();
         }
 
         /// <summary>
@@ -69,12 +73,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
         {
-            _UserCredential = new Core.UserCredential(userName);
+            userCredential = new Core.UserCredential(userName);
         }
 
         internal UserCredential(string userName, UserAuthType userAuthType)
         {
-            _UserCredential = new Core.UserCredential(userName, userAuthType);
+            userCredential = new Core.UserCredential(userName, userAuthType);
         }
 
         internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
