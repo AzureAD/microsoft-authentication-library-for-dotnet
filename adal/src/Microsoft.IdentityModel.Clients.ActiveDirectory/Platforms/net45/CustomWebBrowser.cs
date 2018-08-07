@@ -267,5 +267,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     /// </summary>
     /// <param name="sender">object type</param>
     /// <param name="e">WebBrowserNavigateErrorEventArgs type</param>
-    public delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
+    internal delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
 }
