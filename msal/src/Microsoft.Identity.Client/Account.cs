@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
 using System;
 using System.Globalization;
 
@@ -35,12 +34,8 @@ namespace Microsoft.Identity.Client
     /// Contains information of a single account. A user can be present in multiple directorie and thus have multiple accounts.
     /// This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
     /// </summary>
-    internal sealed class Account: IAccount
+    internal sealed class Account : IAccount
     {
-        public Account()
-        {
-        }
-
         public Account(AccountId homeAccountId, string username, string environment)
         {
             if (homeAccountId == null)
@@ -62,10 +57,9 @@ namespace Microsoft.Identity.Client
         public override string ToString()
         {
             return String.Format(
-                CultureInfo.CurrentCulture,
-                "Account username: {0} environment {1} home account id: {2}",
-                Username, Environment, HomeAccountId.ToString());
-
+            CultureInfo.CurrentCulture,
+            "Account username: {0} environment {1} home account id: {2}",
+            Username, Environment, HomeAccountId);
         }
     }
 }

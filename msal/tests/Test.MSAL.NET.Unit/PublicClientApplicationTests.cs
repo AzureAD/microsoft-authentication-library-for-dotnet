@@ -606,7 +606,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(2, users.Count());
 
             // another cache entry for different environment. user count should still be 2. Sovereign cloud user must not be returned
-            rtItem = new MsalRefreshTokenCacheItem(TestConstants.SovereignEnvironment, TestConstants.ClientId, "someRT", 
+            rtItem = new MsalRefreshTokenCacheItem(TestConstants.SovereignEnvironment, TestConstants.ClientId, "someRT",
                 MockHelpers.CreateClientInfo(TestConstants.Uid + "more1", TestConstants.Utid));
 
             cache.tokenCacheAccessor.RefreshTokenCacheDictionary[rtItem.GetKey().ToString()] =
@@ -657,12 +657,7 @@ namespace Test.MSAL.NET.Unit
             try
             {
                 AuthenticationResult result = await app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
-                        new Account()
-                        {
-                            Username = TestConstants.DisplayableId,
-                            HomeAccountId = TestConstants.UserIdentifier,
-                        })
-                    .ConfigureAwait(false);
+                        new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null)).ConfigureAwait(false);
             }
             catch (MsalUiRequiredException exc)
             {
@@ -694,12 +689,7 @@ namespace Test.MSAL.NET.Unit
             try
             {
                 AuthenticationResult result = await app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
-                        new Account()
-                        {
-                            Username = TestConstants.DisplayableId,
-                            HomeAccountId = TestConstants.UserIdentifier,
-                        })
-                    .ConfigureAwait(false);
+                        new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null)).ConfigureAwait(false);
             }
             catch (MsalClientException exc)
             {
@@ -749,11 +739,8 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.ClientId,
                 TestConstants.ScopeForAnotherResourceStr).ToString());
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(), new Account()
-            {
-                Username = TestConstants.DisplayableId,
-                HomeAccountId = TestConstants.UserIdentifier,
-            });
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
+                new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null));
 
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -786,11 +773,9 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.ClientId,
                 TestConstants.ScopeForAnotherResourceStr).ToString());
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new Account()
-            {
-                Username = TestConstants.DisplayableId,
-                HomeAccountId = TestConstants.UserIdentifier,
-            });
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
+                new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null));
+
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
@@ -821,11 +806,8 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.ClientId,
                 TestConstants.ScopeForAnotherResourceStr).ToString());
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new Account()
-            {
-                Username = TestConstants.DisplayableId,
-                HomeAccountId = TestConstants.UserIdentifier,
-            });
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), 
+                new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null));
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
@@ -856,11 +838,8 @@ namespace Test.MSAL.NET.Unit
                 TestConstants.ClientId,
                 TestConstants.ScopeForAnotherResourceStr).ToString());
 
-            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(), new Account()
-            {
-                Username = TestConstants.DisplayableId,
-                HomeAccountId = TestConstants.UserIdentifier,
-            }, app.Authority, false);
+            Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
+                new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null), app.Authority, false);
 
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -911,11 +890,8 @@ namespace Test.MSAL.NET.Unit
             });
 
             Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(TestConstants.Scope.ToArray(),
-                new Account()
-                {
-                    Username = TestConstants.DisplayableId,
-                    HomeAccountId = TestConstants.UserIdentifier,
-                }, null, true);
+                new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null), null, true);
+
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DisplayableId, result.Account.Username);
@@ -964,11 +940,8 @@ namespace Test.MSAL.NET.Unit
             {
                 Task<AuthenticationResult> task =
                     app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
-                        new Account()
-                        {
-                            Username = TestConstants.DisplayableId,
-                            HomeAccountId = TestConstants.UserIdentifier,
-                        }, app.Authority, false);
+                        new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null), app.Authority, false);
+
                 AuthenticationResult result = task.Result;
                 Assert.Fail("MsalUiRequiredException was expected");
             }
