@@ -224,7 +224,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             IdToken idToken = IdToken.Parse(Response.IdToken);
-            // todo throw Exception when IdToken or client_info in null
+
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = Authority.UpdateTenantId(
                 AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
 
@@ -234,10 +234,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
                 AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
 
-                // todo should we return idToken from SaveAccessAndRefreshToken as well ?
-                // problem - if AT is not stored we will fail  ?
-                MsalAccessTokenItem = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
-                MsalIdTokenItem = TokenCache.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey(), AuthenticationRequestParameters.RequestContext);
+                var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
+                MsalAccessTokenItem = tuple.Item1;
+                MsalIdTokenItem = tuple.Item2;
             }
             else{
                 MsalAccessTokenItem = new MsalAccessTokenCacheItem(AuthenticationRequestParameters.Authority.Host,
@@ -262,7 +261,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task ResolveAuthorityEndpointsAsync()
         {
-            await AuthenticationRequestParameters.Authority.InitAsync
+            await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync
                 (AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             await AuthenticationRequestParameters.Authority
@@ -280,8 +279,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 SaveTokenResponseToCache();
             }
-
-            //MsalIdTokenCacheItem msalIdTokenCacheItem = TokenCache?.GetIdTokenCacheItem(MsalAccessTokenItem.GetIdTokenItemKey());
 
             return new AuthenticationResult(MsalAccessTokenItem, MsalIdTokenItem);
         }

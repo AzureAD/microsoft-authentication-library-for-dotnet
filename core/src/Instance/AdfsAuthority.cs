@@ -170,5 +170,10 @@ namespace Microsoft.Identity.Core.Instance
 
             return upn.Split('@')[1];
         }
+
+        internal override string GetTenantId()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

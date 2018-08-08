@@ -80,6 +80,11 @@ namespace Microsoft.Identity.Core.Instance
 
         public string Host { get; set; }
 
+        internal virtual async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
+        {
+            await Task.FromResult(0).ConfigureAwait(false);
+        }
+
         public static void ValidateAsUri(string authority)
         {
             if (string.IsNullOrWhiteSpace(authority))
@@ -120,11 +125,11 @@ namespace Microsoft.Identity.Core.Instance
         {
             var firstPathSegment = GetFirstPathSegment(authority);
 
-            if (string.Compare(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(firstPathSegment, "adfs", StringComparison.OrdinalIgnoreCase))
             {
                 return AuthorityType.Adfs;
             }
-            else if (string.Compare(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase) == 0)
+            else if (string.Equals(firstPathSegment, B2CAuthority.Prefix, StringComparison.OrdinalIgnoreCase))
             {
                 return AuthorityType.B2C;
             }
@@ -236,6 +241,8 @@ namespace Microsoft.Identity.Core.Instance
 
         protected abstract string GetDefaultOpenIdConfigurationEndpoint();
 
+        internal abstract string GetTenantId();
+
         private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(string openIdConfigurationEndpoint,
             RequestContext requestContext)
         {
@@ -278,11 +285,6 @@ namespace Microsoft.Identity.Core.Instance
             }
 
             return uri.ToLowerInvariant();
-        }
-
-        internal virtual async Task InitAsync(RequestContext requestContext)
-        {
-            await Task.FromResult(0).ConfigureAwait(false);
         }
     }
 }

@@ -40,17 +40,17 @@ namespace Microsoft.Identity.Core.Instance
 
         public static AadInstanceDiscovery Instance { get; } = new AadInstanceDiscovery();
 
-        internal readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> InstanceCache =
+        internal readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> Cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(Uri authority, bool validateAuthority,
             RequestContext requestContext)
         {
             InstanceDiscoveryMetadataEntry entry = null;
-            if (!InstanceCache.TryGetValue(authority.Host, out entry))
+            if (!Cache.TryGetValue(authority.Host, out entry))
             {
                 await DoInstanceDiscoveryAndCacheAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
-                InstanceCache.TryGetValue(authority.Host, out entry);
+                Cache.TryGetValue(authority.Host, out entry);
             }
 
             return entry;
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Core.Instance
 
             var discoveryHost = AadAuthority.IsInTrustedHostList(authority.Host) ?
                 authority.Host :
-                AadAuthority.DefaultTrustedAuthority;
+                AadAuthority.DefaultTrustedHost;
 
             string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost);
 
@@ -121,11 +121,11 @@ namespace Microsoft.Identity.Core.Instance
             {
                 foreach (var aliasedAuthority in entry?.Aliases ?? Enumerable.Empty<string>())
                 {
-                    InstanceCache.TryAdd(aliasedAuthority, entry);
+                    Cache.TryAdd(aliasedAuthority, entry);
                 }
             }
 
-            InstanceCache.TryAdd(host, new InstanceDiscoveryMetadataEntry
+            Cache.TryAdd(host, new InstanceDiscoveryMetadataEntry
                 {
                     PreferredNetwork = host,
                     PreferredCache = host,

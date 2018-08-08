@@ -58,5 +58,10 @@ namespace Microsoft.Identity.Core.Instance
 
             return await Task.Run(() => GetDefaultOpenIdConfigurationEndpoint()).ConfigureAwait(false);
         }
+        
+        internal override string GetTenantId()
+        {
+            return new Uri(CanonicalAuthority).Segments[2].TrimEnd('/');
+        }
     }
 }

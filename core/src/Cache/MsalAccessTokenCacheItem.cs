@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Core.Cache
                 return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
             }
         }
-
+        
         internal SortedSet<string> ScopeSet
         {
             get

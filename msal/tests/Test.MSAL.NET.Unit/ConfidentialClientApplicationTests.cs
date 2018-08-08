@@ -64,7 +64,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.ClearMockHandlers();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
         
-            AadInstanceDiscovery.Instance.InstanceCache.Clear();
+            AadInstanceDiscovery.Instance.Cache.Clear();
             AddMockResponseForInstanceDisovery();
         }
 

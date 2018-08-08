@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Core.Instance
             "login.cloudgovapi.us" // Microsoft Azure US Government
         };
 
-        public const string DefaultTrustedAuthority = "login.microsoftonline.com";
+        public const string DefaultTrustedHost = "login.microsoftonline.com";
 
         private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
 
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Core.Instance
             AuthorityType = AuthorityType.Aad;
         }
 
-        protected async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
+        internal override async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
         {
             var metadata = await AadInstanceDiscovery.Instance.
                 GetMetadataEntryAsync(new Uri(CanonicalAuthority), this.ValidateAuthority, requestContext).ConfigureAwait(false);
@@ -102,10 +102,11 @@ namespace Microsoft.Identity.Core.Instance
                 !string.IsNullOrEmpty(
                     TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
         }
-
-        internal override async Task InitAsync(RequestContext requestContext)
+        
+        internal override string GetTenantId()
         {
-            await UpdateCanonicalAuthorityAsync(requestContext).ConfigureAwait(false);
+            return GetFirstPathSegment(CanonicalAuthority);
         }
+        
     }
 }

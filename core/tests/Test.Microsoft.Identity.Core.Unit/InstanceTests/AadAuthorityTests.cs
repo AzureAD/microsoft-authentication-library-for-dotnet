@@ -54,7 +54,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             CoreExceptionFactory.Instance = new TestExceptionFactory();
             HttpMessageHandlerFactory.ClearMockHandlers();
 
-            AadInstanceDiscovery.Instance.InstanceCache.Clear();
+            AadInstanceDiscovery.Instance.Cache.Clear();
         }
 
         [TestCleanup]

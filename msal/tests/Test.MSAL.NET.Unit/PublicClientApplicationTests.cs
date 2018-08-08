@@ -64,7 +64,7 @@ namespace Test.MSAL.NET.Unit
             HttpMessageHandlerFactory.ClearMockHandlers();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
 
-            AadInstanceDiscovery.Instance.InstanceCache.Clear();
+            AadInstanceDiscovery.Instance.Cache.Clear();
             AddMockResponseForInstanceDisovery();
         }
 
@@ -939,9 +939,9 @@ namespace Test.MSAL.NET.Unit
             try
             {
                 Task<AuthenticationResult> task =
-                    app.AcquireTokenSilentAsync(TestConstants.ScopeForAnotherResource.ToArray(),
-                        new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null), app.Authority, false);
-
+                    app.AcquireTokenSilentAsync(TestConstants.CacheMissScope,
+                        new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null),
+                        app.Authority, false);
                 AuthenticationResult result = task.Result;
                 Assert.Fail("MsalUiRequiredException was expected");
             }

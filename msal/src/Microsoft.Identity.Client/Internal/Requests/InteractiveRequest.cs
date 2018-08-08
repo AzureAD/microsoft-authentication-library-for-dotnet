@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task<Uri> CreateAuthorizationUriAsync()
         {
-            await AuthenticationRequestParameters.Authority.InitAsync
+            await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync
                 (AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             //this method is used in confidential clients to create authorization URLs.

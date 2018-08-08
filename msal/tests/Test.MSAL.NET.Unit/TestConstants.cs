@@ -38,6 +38,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public static readonly string ScopeStr = "r1/scope1 r1/scope2";
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
+        public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public static readonly string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public static readonly string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public static readonly string ProductionPrefCacheEnvironment = "login.windows.net";
