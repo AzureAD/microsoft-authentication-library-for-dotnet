@@ -200,10 +200,5 @@ namespace Microsoft.Identity.Core
         {
             return _accountSharedPreference.GetString(accountKey.ToString(), null);
         }
-
-        public void SetSecurityGroup(string securityGroup)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

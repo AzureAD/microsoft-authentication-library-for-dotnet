@@ -72,7 +72,9 @@ namespace Microsoft.Identity.Core.Cache
 
         ICollection<string> GetAllAccountKeys();
         */
-        void SetSecurityGroup(string securityGroup);
+#if iOS
+        void SetKeychainSecurityGroup(string keychainSecurityGroup);
+#endif
 
         void Clear();
     }

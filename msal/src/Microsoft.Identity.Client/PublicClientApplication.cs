@@ -69,12 +69,25 @@ namespace Microsoft.Identity.Client
             };
         }
 
+#if iOS
+        /// <summary>
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
+        /// If you provide this key, you MUST add the capability to your Application Entitlement.
+        /// For more details, please see https://aka.ms/msal-net-sharing-cache-on-ios
+        /// </summary>
+        /// <remarks>This API may change in future release.</remarks>
+        public string KeychainSecurityGroup
+        {
+            get { return this.KeychainSecurityGroup; }
+            set => UserTokenCache.tokenCacheAccessor.SetKeychainSecurityGroup(value);
+        }
+#endif
 
 #if WINRT
-/// <summary>
-/// Flag to enable logged in user authentication.
-/// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
-/// </summary>
+        /// <summary>
+        /// Flag to enable logged in user authentication.
+        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// </summary>
         public bool UseCorporateNetwork { get; set; }
 #endif
 
@@ -366,7 +379,8 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParams, extraScopesToConsent, loginHint, behavior,
-                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
+                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext))
+                { ApiId = apiId };
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -377,7 +391,7 @@ namespace Microsoft.Identity.Client
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
 #if iOS || ANDROID
-            if(!parent.CoreUIParent.UseEmbeddedWebview)
+            if (!parent.CoreUIParent.UseEmbeddedWebview)
             {
                 PlatformPlugin.PlatformInformation.ValidateRedirectUri(requestParams.RedirectUri, requestParams.RequestContext);
             }
@@ -385,7 +399,8 @@ namespace Microsoft.Identity.Client
 
             var handler =
                 new InteractiveRequest(requestParams, extraScopesToConsent, behavior,
-                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext)){ApiId = apiId};
+                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext))
+                { ApiId = apiId };
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

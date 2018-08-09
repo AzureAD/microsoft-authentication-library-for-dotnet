@@ -195,10 +195,5 @@ namespace Microsoft.Identity.Core
             IdTokenCacheDictionary.Clear();
             AccountCacheDictionary.Clear();
         }
-
-        public void SetSecurityGroup(string securityGroup)
-        {
-            throw new System.NotImplementedException();
-        }
     }
 }

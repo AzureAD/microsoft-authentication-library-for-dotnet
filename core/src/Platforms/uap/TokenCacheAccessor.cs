@@ -288,10 +288,5 @@ namespace Microsoft.Identity.Core
             _idTokenContainer.Values.Clear();
             _accountContainer.Values.Clear();
         }
-
-        public void SetSecurityGroup(string securityGroup)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

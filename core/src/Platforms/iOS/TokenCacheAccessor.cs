@@ -69,15 +69,15 @@ namespace Microsoft.Identity.Core
             return NSBundle.MainBundle.BundleIdentifier;
         }
    
-        public void SetSecurityGroup(string securityGroup)
+        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
         {
-            if (securityGroup == null)
+            if (keychainSecurityGroup == null)
             {
                 keychainGroup = GetBundleId();
             }
             else
             {
-                keychainGroup = securityGroup;
+                keychainGroup = keychainSecurityGroup;
             }
         }
 
