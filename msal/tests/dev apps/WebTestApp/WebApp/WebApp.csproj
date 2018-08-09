@@ -6,7 +6,6 @@
     <AssemblyName>WebApp</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>WebApp</PackageId>
-    <RuntimeFrameworkVersion>1.0.4</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;dnxcore50;portable-net45+win8</PackageTargetFallback>
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>

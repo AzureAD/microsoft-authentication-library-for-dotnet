@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Core.Cache
                 ResourceInResponse = scope
             };
 
-#if !FACADE && !NETSTANDARD1_3
+#if !FACADE && !NETSTANDARD1_3 || !NET_CORE
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
             dictionary[key] = wrapper;
             legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));

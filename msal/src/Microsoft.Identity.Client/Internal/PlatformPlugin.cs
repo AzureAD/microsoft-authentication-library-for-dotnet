@@ -25,9 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal

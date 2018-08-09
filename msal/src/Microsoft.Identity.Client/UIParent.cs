@@ -124,11 +124,11 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if DESKTOP || WINRT
+#if DESKTOP || WINDOWS_APP
         //hidden webview can be used in both WinRT and desktop applications.
         internal bool UseHiddenBrowser { get { return CoreUIParent.UseHiddenBrowser; } set { CoreUIParent.UseHiddenBrowser = value; } }
 
-#if WINRT
+#if WINDOWS_APP
         internal bool UseCorporateNetwork { get { return CoreUIParent.UseCorporateNetwork; } set { CoreUIParent.UseCorporateNetwork = value; } }
 
 #endif

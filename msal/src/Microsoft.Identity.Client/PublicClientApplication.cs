@@ -68,6 +68,8 @@ namespace Microsoft.Identity.Client
                 ClientId = clientId
             };
         }
+// netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
+#if !NET_CORE
 
 #if iOS
         /// <summary>
@@ -83,7 +85,7 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if WINRT
+#if WINDOWS_APP
         /// <summary>
         /// Flag to enable logged in user authentication.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
@@ -352,10 +354,10 @@ namespace Microsoft.Identity.Client
                 parent = new UIParent();
             }
 
-#if WINRT || DESKTOP
+#if WINDOWS_APP || DESKTOP
             //hidden webview can be used in both WinRT and desktop applications.
             parent.UseHiddenBrowser = behavior.Equals(UIBehavior.Never);
-#if WINRT
+#if WINDOWS_APP
             parent.UseCorporateNetwork = UseCorporateNetwork;
 #endif
 #endif
@@ -410,5 +412,8 @@ namespace Microsoft.Identity.Client
             AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
             return parameters;
         }
+
+// endif for !NET_CORE
+#endif
     }
 }

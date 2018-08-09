@@ -30,7 +30,15 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Indicates how AcquireToken should prompt the user.
     /// </summary>
-    public partial struct UIBehavior
+
+    //TODO: This should be completely removed for platforms that do not support UI, however 
+    // at present it used for ConfidentialClientApplication.GetAuthorizationRequestUrlAsync
+#if !NET_CORE
+    public
+#else
+    internal 
+#endif    
+        struct UIBehavior
     {
         /// <summary>
         /// AcquireToken will send prompt=select_account to authorize endpoint 
@@ -52,7 +60,7 @@ namespace Microsoft.Identity.Client
         public static readonly UIBehavior Consent = new UIBehavior("consent");
 
 
-#if NET45 || WINRT
+#if DESKTOP || WINDOWS_APP
         /// <summary>
         /// Only available on .NET platform. AcquireToken will send prompt=attempt_none to 
         /// authorize endpoint and the library uses a hidden webview to authenticate the user.

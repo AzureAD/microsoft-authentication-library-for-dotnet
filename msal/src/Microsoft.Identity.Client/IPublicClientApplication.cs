@@ -37,7 +37,9 @@ namespace Microsoft.Identity.Client
     public interface IPublicClientApplication : IClientApplicationBase
     {
 
-#if WINRT
+#if !NET_CORE
+
+#if WINDOWS_APP
         /// <summary>
         /// 
         /// </summary>
@@ -236,5 +238,6 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
             string authority, UIParent parent);
+#endif
     }
 }

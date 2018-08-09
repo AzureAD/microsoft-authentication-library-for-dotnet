@@ -63,20 +63,20 @@ namespace SampleApp
             return null;
         }
 
-        public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount user)
+        public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount account)
         {
             AuthenticationResult result = null;
             Exception exception = null;
             try
             {
-                result = await Application.AcquireTokenAsync(scopes, user).ConfigureAwait(false);
+                result = await Application.AcquireTokenAsync(scopes, account).ConfigureAwait(false);
                 return result.AccessToken;
             }
             catch (MsalUiRequiredException)
             {
                 try
                 {
-                    result = await Application.AcquireTokenAsync(scopes, user)
+                    result = await Application.AcquireTokenAsync(scopes, account)
                         .ConfigureAwait(false);
                     return result.AccessToken;
                 }
