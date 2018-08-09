@@ -800,6 +800,7 @@ namespace Microsoft.Identity.Client
 
             var environmentAliases = GetEnvironmentAliases(authority, instanceDiscoveryMetadataEntry);
 
+            var environment = new Uri(authority).Host;
             lock (LockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
@@ -814,7 +815,7 @@ namespace Microsoft.Identity.Client
                 ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
                 OnAfterAccess(args);
 
-                IDictionary<string, Account> allUsers = new Dictionary<string, Account>();
+                IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
                 foreach (MsalRefreshTokenCacheItem rtItem in tokenCacheItems)
                 {
                     if (environmentAliases.Contains(rtItem.Environment))
@@ -824,30 +825,43 @@ namespace Microsoft.Identity.Client
                             if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase) &&
                                 environmentAliases.Contains(account.Environment))
                             {
-                                Account user = new Account(AccountId.FromClientInfo(account.ClientInfo), account.PreferredUsername, new Uri(authority).Host);
-                                allUsers[rtItem.HomeAccountId] = user;
+                                clientInfoToAccountMap[rtItem.HomeAccountId] = new Account
+                                    (AccountId.FromClientInfo(account.ClientInfo), account.PreferredUsername, environment);
                                 break;
                             }
                         }
                     }
                 }
 
-                foreach (KeyValuePair<string, AdalUserInfo> pair in CacheFallbackOperations.GetAllAdalUsersForMsal(
-                    legacyCachePersistance, environmentAliases, ClientId))
+                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(legacyCachePersistance, environmentAliases, ClientId);
+                Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
+                List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
+
+                foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)
                 {
                     ClientInfo clientInfo = ClientInfo.CreateFromJson(pair.Key);
-                    string userIdentifier = clientInfo.ToAccountIdentifier();
+                    string accountIdentifier = clientInfo.ToAccountIdentifier();
 
-                    if (!allUsers.ContainsKey(userIdentifier))
+                    if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
                     {
-                        allUsers[userIdentifier] = new Account(
-                             AccountId.FromClientInfo(clientInfo), 
-                            pair.Value.DisplayableId, 
-                            new Uri(authority).Host);
+                        clientInfoToAccountMap[accountIdentifier] = new Account(
+                             AccountId.FromClientInfo(clientInfo), pair.Value.DisplayableId, environment);
                     }
                 }
 
-                return allUsers.Values;
+                var accounts = clientInfoToAccountMap.Values;
+
+                List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
+
+                foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
+                {
+                    if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
+                    {
+                        accounts.Add(new Account(null, user.DisplayableId, environment));
+                        uniqueUserNames.Add(user.DisplayableId);
+                    }
+                }
+                return accounts;
             }
         }
 

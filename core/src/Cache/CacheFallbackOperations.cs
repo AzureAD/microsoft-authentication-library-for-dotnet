@@ -113,10 +113,11 @@ namespace Microsoft.Identity.Core.Cache
 #endif
         }
 
-        public static Dictionary<String, AdalUserInfo> GetAllAdalUsersForMsal(ILegacyCachePersistance legacyCachePersistance,
-            ISet<string> environments, string clientId)
+        public static Tuple<Dictionary<String, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
+            (ILegacyCachePersistance legacyCachePersistance, ISet<string> environments, string clientId)
         {
-            Dictionary<String, AdalUserInfo> users = new Dictionary<String, AdalUserInfo>();
+            Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = new Dictionary<String, AdalUserInfo>();
+            List<AdalUserInfo> adalUsersWithoutClientInfo = new List<AdalUserInfo>();
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
@@ -132,7 +133,11 @@ namespace Microsoft.Identity.Core.Cache
                 {
                     if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
                     {
-                        users.Add(pair.Value.RawClientInfo, pair.Value.Result.UserInfo);
+                        clientInfoToAdalUserMap.Add(pair.Value.RawClientInfo, pair.Value.Result.UserInfo);
+                    }
+                    else
+                    {
+                        adalUsersWithoutClientInfo.Add(pair.Value.Result.UserInfo);
                     }
                 }
             }
@@ -143,7 +148,7 @@ namespace Microsoft.Identity.Core.Cache
                 CoreLoggerBase.Default.Warning(msg + noPiiMsg);
                 CoreLoggerBase.Default.WarningPii(msg + ex);
             }
-            return users;
+            return Tuple.Create(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
         }
 
         public static Dictionary<String, AdalUserInfo> RemoveAdalUser(ILegacyCachePersistance legacyCachePersistance,
