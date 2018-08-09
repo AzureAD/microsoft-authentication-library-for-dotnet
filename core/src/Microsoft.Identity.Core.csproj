@@ -106,7 +106,7 @@
     <Compile Include="Platforms\iOS\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All"/>
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
@@ -124,4 +124,6 @@
       <Version>27.0.2</Version>
     </PackageReference>
   </ItemGroup>
+	  <Target Name="ProjectReferenceSolution" BeforeTargets="ResolveAssemblyReferences" DependsOnTargets="ResolveProjectReferences">
+  </Target>
 </Project>

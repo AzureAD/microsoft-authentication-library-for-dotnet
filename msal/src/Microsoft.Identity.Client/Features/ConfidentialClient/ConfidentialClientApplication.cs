@@ -30,8 +30,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client
 {

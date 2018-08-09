@@ -39,11 +39,10 @@ using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Test.Microsoft.Identity.Core.Unit;
+using Microsoft.Identity.Core.Telemetry;
 using Test.MSAL.NET.Unit.Mocks;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 

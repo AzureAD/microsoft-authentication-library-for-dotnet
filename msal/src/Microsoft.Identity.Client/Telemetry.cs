@@ -25,18 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Telemetry;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// 
     /// </summary>
-    public class Telemetry
+    public class Telemetry : ITelemetry
     {
         /// <summary>
         /// 
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
             _receiver = r;
         }
 
-        private static readonly Telemetry Singleton = new Telemetry();
+        private static readonly ITelemetry Instance = new Telemetry();
 
         internal Telemetry(){}  // This is an internal constructor to build isolated unit test instance
 
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
         /// <returns></returns>
         public static Telemetry GetInstance()
         {
-            return Singleton;
+            return Instance as Telemetry;
         }
 
         /// <summary>
@@ -202,6 +202,16 @@ namespace Microsoft.Identity.Client
                 }
             }
             return orphanedEvents;
+        }
+
+        void ITelemetry.StartEvent(string requestId, EventBase eventToStart)
+        {
+            StartEvent(requestId, eventToStart);
+        }
+
+        void ITelemetry.StopEvent(string requestId, EventBase eventToStop)
+        {
+            StopEvent(requestId, eventToStop);
         }
 
         internal string ClientId { get; set; }

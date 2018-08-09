@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using System;
 
@@ -57,6 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 if (!isInitialized)
                 {
                     CoreLoggerBase.Default = new AdalLogger(Guid.Empty);
+                    CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
                     isInitialized = true;
                 }
             }

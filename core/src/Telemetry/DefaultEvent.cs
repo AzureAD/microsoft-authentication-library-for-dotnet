@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
+
 namespace Microsoft.Identity.Core.Telemetry
 {
     internal class DefaultEvent : EventBase

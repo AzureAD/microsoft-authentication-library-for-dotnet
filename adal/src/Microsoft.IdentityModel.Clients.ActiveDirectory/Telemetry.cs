@@ -25,43 +25,48 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Telemetry;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
     /// <summary>
-    /// Initializes the MSAL module. This can be considered an entry point into MSAL
-    /// for initialization purposes. 
+    /// Facilitates the acquisition of telemtry data
     /// </summary>
     /// <remarks>
-    /// The CLR defines a module initializer, however this is not implemented in C# and to 
-    /// use this it would require IL weaving, which does not seem to work on all target frameworks.
-    /// Instead, call <see cref="EnsureModuleInitialized"/> from static ctors of public entry points.
+    /// This blank class used as a place holder for CoreTelemetryService.Instance to avaoid null reference exceptions in core. No implementation is present at this time.
     /// </remarks>
-    internal class ModuleInitializer
+    internal class Telemetry : ITelemetry
     {
-        private static bool isInitialized = false;
-        private static object lockObj;
+        private static readonly ITelemetry Instance = new Telemetry();
 
-        static ModuleInitializer()
+        public static Telemetry GetInstance()
         {
-            lockObj = new object();
+            return Instance as Telemetry;
         }
 
-        public static void EnsureModuleInitialized()
-        {            
-            lock (lockObj)
-            {
-                if (!isInitialized)
-                {
-                    CoreExceptionFactory.Instance = new MsalExceptionFactory();
-                    CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
-                    CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
-                    isInitialized = true;
-                }
-            }
+        /// <summary>
+        /// Starts Telemetry event
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="eventToStart"></param>
+        public void StartEvent(string requestId, EventBase eventToStart)
+        {
+            
+        }
+
+        /// <summary>
+        /// Stops Telemetry event
+        /// </summary>
+        /// <param name="requestId"></param>
+        /// <param name="eventToStop"></param>
+        public void StopEvent(string requestId, EventBase eventToStop)
+        {
+            
         }
     }
 }

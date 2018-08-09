@@ -25,43 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Telemetry;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Core.Telemetry
 {
-    /// <summary>
-    /// Initializes the MSAL module. This can be considered an entry point into MSAL
-    /// for initialization purposes. 
-    /// </summary>
-    /// <remarks>
-    /// The CLR defines a module initializer, however this is not implemented in C# and to 
-    /// use this it would require IL weaving, which does not seem to work on all target frameworks.
-    /// Instead, call <see cref="EnsureModuleInitialized"/> from static ctors of public entry points.
-    /// </remarks>
-    internal class ModuleInitializer
+    internal interface ITelemetry
     {
-        private static bool isInitialized = false;
-        private static object lockObj;
+        void StartEvent(string requestId, EventBase eventToStart);
 
-        static ModuleInitializer()
-        {
-            lockObj = new object();
-        }
-
-        public static void EnsureModuleInitialized()
-        {            
-            lock (lockObj)
-            {
-                if (!isInitialized)
-                {
-                    CoreExceptionFactory.Instance = new MsalExceptionFactory();
-                    CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
-                    CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
-                    isInitialized = true;
-                }
-            }
-        }
+        void StopEvent(string requestId, EventBase eventToStop);
     }
 }

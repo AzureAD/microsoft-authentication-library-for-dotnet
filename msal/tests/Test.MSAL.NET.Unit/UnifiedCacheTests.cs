@@ -37,7 +37,6 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.MSAL.NET.Unit.Mocks;
 using System.Net.Http;

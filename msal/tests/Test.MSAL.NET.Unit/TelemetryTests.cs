@@ -33,8 +33,9 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Http;
+using Test.Microsoft.Identity.Core.Unit;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Test.MSAL.NET.Unit
 {
     public class MyReceiver
     {
@@ -63,13 +64,11 @@ namespace Test.Microsoft.Identity.Core.Unit
     [TestClass]
     public class TelemetryTests
     {
-        private static TestPlatformInformation _testPlatformInformation;
         private readonly MyReceiver _myReceiver = new MyReceiver();
 
         [TestInitialize]
         public void Initialize()
         {
-            _testPlatformInformation = new TestPlatformInformation();
             Authority.ValidatedAuthorities.Clear();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
@@ -104,7 +103,7 @@ namespace Test.Microsoft.Identity.Core.Unit
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryInternalApiSample()
-        { 
+        {
             Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);
