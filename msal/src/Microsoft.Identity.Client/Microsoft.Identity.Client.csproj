@@ -62,6 +62,7 @@
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
+    <None Remove="Features\ConfidentialClient\IConfidentialClientApplicationWithCertificate.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">

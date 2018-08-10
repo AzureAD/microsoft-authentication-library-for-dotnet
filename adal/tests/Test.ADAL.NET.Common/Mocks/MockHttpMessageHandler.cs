@@ -41,6 +41,11 @@ namespace Test.ADAL.NET.Common.Mocks
         public MockHttpMessageHandler()
         {
         }
+
+        public MockHttpMessageHandler(Action<HttpRequestMessage> AdditionalRequestValidation)
+        {
+            this.AdditionalRequestValidation = AdditionalRequestValidation;
+        }
         public HttpResponseMessage ResponseMessage { get; set; }
 
         public string Url { get; set; }

@@ -164,7 +164,6 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(TestConstants.ClientSecret, app.ClientCredential.Secret);
             Assert.IsNull(app.ClientCredential.Certificate);
             Assert.IsNull(app.ClientCredential.Assertion);
-            Assert.AreEqual(0, app.ClientCredential.ValidTo);
 
             app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.AuthorityGuestTenant,
@@ -264,7 +263,7 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(0, app.AppTokenCache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count); //no refresh tokens are returned
         }
 
-        private ConfidentialClientApplication CreateConfidentialClient(ClientCredential cc)
+        private ConfidentialClientApplication CreateConfidentialClient(ClientCredential cc, int tokenResponses)
         {
             ConfidentialClientApplication app = new ConfidentialClientApplication(TestConstants.ClientId,
                 TestConstants.RedirectUri, cc, new TokenCache(),
@@ -280,17 +279,14 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
             });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            for (int i = 0; i < tokenResponses; i++)
             {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
-            });
-
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
-            });
+                HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    Method = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
+                });
+            }
             return app;
         }
 
@@ -300,7 +296,7 @@ namespace Test.MSAL.NET.Unit
         {
             ClientCredential cc =
                 new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile")));
-            var app = CreateConfidentialClient(cc);
+            var app = CreateConfidentialClient(cc, 3);
 
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
@@ -330,6 +326,10 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(cacheValidTo, cc.ValidTo);
             Assert.AreEqual(cachedAssertion, cc.Assertion);
 
+            //validate the send x5c forces a refresh of the cached client assertion
+            (app as IConfidentialClientApplicationWithCertificate).AcquireTokenForClientWithCertificateAsync(TestConstants.Scope.ToArray(), true);
+            Assert.AreNotEqual(cachedAssertion, cc.Assertion);
+
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
@@ -339,7 +339,7 @@ namespace Test.MSAL.NET.Unit
         {
             ClientCredential cc =
                 new ClientCredential(new ClientAssertionCertificate(new X509Certificate2("valid.crtfile")));
-            var app = CreateConfidentialClient(cc);
+            var app = CreateConfidentialClient(cc, 2);
             Task<AuthenticationResult> task = app.AcquireTokenForClientAsync(TestConstants.Scope.ToArray());
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent => // Expect finding such an event
@@ -481,7 +481,7 @@ namespace Test.MSAL.NET.Unit
                 new ConfidentialClientApplication(TestConstants.ClientId, TestConstants.AuthorityGuestTenant,
                     TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
                     new TokenCache(), new TokenCache())
-                {ValidateAuthority = false};
+                { ValidateAuthority = false };
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler

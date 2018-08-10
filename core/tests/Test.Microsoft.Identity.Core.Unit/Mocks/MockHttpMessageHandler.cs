@@ -53,6 +53,8 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public Exception ExceptionToThrow { get; set; }
 
+        public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
 
@@ -108,6 +110,8 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
                     Assert.AreEqual(PostData[key], requestPostDataPairs[key]);
                 }
             }
+
+            AdditionalRequestValidation?.Invoke(request);
 
             return new TaskFactory().StartNew(() => ResponseMessage, cancellationToken);
         }

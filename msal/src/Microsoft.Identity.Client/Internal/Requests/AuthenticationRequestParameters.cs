@@ -66,7 +66,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public UserAssertion UserAssertion { get; set; }
 
         public bool IsClientCredentialRequest { get; set; } = false;
+
         public string SliceParameters { get; set; }
+
+        public bool SendCertificate { get; set; }
 
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
         public ClientCredential ClientCredential { get; set; }
@@ -86,20 +89,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
                     if (ClientCredential.Assertion == null || ClientCredential.ValidTo != 0)
                     {
-                        bool assertionNearExpiry = (ClientCredential.ValidTo <=
-                                                    Jwt.JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
-                                                                                    TimeSpan.FromMinutes(
-                                                                                    Constants 
-                                                                                    .ExpirationMarginInMinutes)));
-                        if (assertionNearExpiry)
+                        if (!RequestValidationHelper.ValidateClientAssertion(this))
                         {
                             const string msg = "Client Assertion does not exist or near expiry.";
                             RequestContext.Logger.Info(msg);
                             RequestContext.Logger.InfoPii(msg);
                             Jwt.JsonWebToken jwtToken = new Jwt.JsonWebToken(ClientId,
                                 Authority.SelfSignedJwtAudience);
-                            ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate);
+                            ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate, SendCertificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
+                            ClientCredential.ContainsX5C = SendCertificate;
+                            ClientCredential.Audience = Authority.SelfSignedJwtAudience;
                         }
                         else
                         {

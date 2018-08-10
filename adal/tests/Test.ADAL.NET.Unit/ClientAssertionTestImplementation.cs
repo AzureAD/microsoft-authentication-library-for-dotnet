@@ -25,45 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using Test.ADAL.NET.Common;
 
-namespace Microsoft.Identity.Client
+namespace Test.ADAL.NET.Unit
 {
     /// <summary>
-    /// Meant to be used in confidential client applications. Allows developers to 
-    /// pass either client secret or client assertion certificate of their application.
+    /// Test implementation of IClientAssertionCertificate.
     /// </summary>
-    public sealed class ClientCredential
+    [DeploymentItem("valid_cert.pfx")]
+    public class ClientAssertionTestImplementation : IClientAssertionCertificate
     {
-        /// <summary>
-        /// Constructor provide client assertion certificate
-        /// </summary>
-        /// <param name="certificate">certificate of the client requesting the token.</param>
-        public ClientCredential(ClientAssertionCertificate certificate)
+        public string ClientId { get { return TestConstants.DefaultClientId; } }
+
+        public string Thumbprint { get { return TestConstants.DefaultThumbprint; } }
+
+        public byte[] Sign(string message)
         {
-            Certificate = certificate;
+            return SigningHelper.SignWithCertificate(message, this.Certificate);
         }
 
-        internal ClientAssertionCertificate Certificate { get; private set; }
-        internal string Assertion { get; set; }
-        internal long ValidTo { get; set; }
-        internal bool ContainsX5C { get; set; }
-        internal string Audience { get; set; }
+        public X509Certificate2 Certificate { get; }
 
-        /// <summary>
-        /// Constructor to provide client secret
-        /// </summary>
-        /// <param name="secret">Secret of the client requesting the token.</param>
-        public ClientCredential(string secret)
+        public ClientAssertionTestImplementation()
         {
-            if (string.IsNullOrWhiteSpace(secret))
-            {
-                throw new ArgumentNullException(nameof(secret));
-            }
-
-            Secret = secret;
+            this.Certificate = new X509Certificate2("valid_cert.pfx", TestConstants.DefaultPassword);
         }
-
-        internal string Secret { get; private set; }
     }
 }

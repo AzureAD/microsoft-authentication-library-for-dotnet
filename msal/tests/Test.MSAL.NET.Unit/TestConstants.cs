@@ -56,10 +56,14 @@ namespace Test.MSAL.NET.Unit
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly string DefaultPassword = "password";
         public static readonly string Uid = "my-uid";
         public static readonly string Utid = "my-utid";
         public static readonly string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
+        public static readonly string DefaultAuthorizationCode = "DefaultAuthorizationCode";
+        public static readonly string DefaultAccessToken = "DefaultAccessToken";
+        public static readonly string DefaultClientAssertion = "DefaultClientAssertion";
 
         public static readonly AccountId UserIdentifier = CreateUserIdentifer();
 

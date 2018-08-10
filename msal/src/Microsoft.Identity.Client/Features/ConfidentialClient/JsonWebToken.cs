@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Jwt
             public const string Algorithm = "alg";
             public const string Type = "typ";
             public const string X509CertificateThumbprint = "kid";
+            public const string X509CertificatePublicCertValue = "x5c";
         }
     }
 
@@ -86,10 +87,10 @@ namespace Microsoft.Identity.Client.Internal.Jwt
             };
         }
 
-        public string Sign(ClientAssertionCertificate credential)
+        public string Sign(ClientAssertionCertificate credential, bool sendCertificate)
         {
             // Base64Url encoded header and claims
-            string token = Encode(credential);
+            string token = Encode(credential, sendCertificate);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
@@ -110,9 +111,9 @@ namespace Microsoft.Identity.Client.Internal.Jwt
             return Base64UrlHelpers.Encode(segment);
         }
 
-        private static string EncodeHeaderToJson(ClientAssertionCertificate credential)
+        private static string EncodeHeaderToJson(ClientAssertionCertificate credential, bool sendCertificate)
         {
-            JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential);
+            JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendCertificate);
             return JsonHelper.SerializeToJson(header);
         }
 
@@ -123,10 +124,10 @@ namespace Microsoft.Identity.Client.Internal.Jwt
             return (long) (diff.TotalSeconds);
         }
 
-        private string Encode(ClientAssertionCertificate credential)
+        private string Encode(ClientAssertionCertificate credential, bool sendCertificate)
         {
             // Header segment
-            string jsonHeader = EncodeHeaderToJson(credential);
+            string jsonHeader = EncodeHeaderToJson(credential, sendCertificate);
 
             string encodedHeader = EncodeSegment(jsonHeader);
 
@@ -203,25 +204,27 @@ namespace Microsoft.Identity.Client.Internal.Jwt
         [DataContract]
         internal sealed class JWTHeaderWithCertificate : JWTHeader
         {
-            public JWTHeaderWithCertificate(ClientAssertionCertificate credential)
+            public JWTHeaderWithCertificate(ClientAssertionCertificate credential, bool sendCertificate)
                 : base(credential)
             {
+                X509CertificateThumbprint = this.Credential.Thumbprint;
+                X509CertificatePublicCertValue = null;
+
+                if (!sendCertificate)
+                    return;
+
+#if NET45
+                    X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
+#elif NETSTANDARD1_3
+                    X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
+#endif
             }
 
             [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificateThumbprint)]
-            public string X509CertificateThumbprint
-            {
-                get
-                {
-                    // Thumbprint should be url encoded
-                    return Credential.Thumbprint;
-                }
+            public string X509CertificateThumbprint { get; set; }
 
-                set
-                {
-                    // This setter is required by DataContractJsonSerializer
-                }
-            }
+            [DataMember(Name = JsonWebTokenConstants.ReservedHeaderParameters.X509CertificatePublicCertValue, EmitDefaultValue = false)]
+            public string X509CertificatePublicCertValue { get; set; }
         }
     }
 }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
 
 namespace NetCoreTestApp
@@ -34,17 +35,31 @@ namespace NetCoreTestApp
     {
         static void Main(string[] args)
         {
-            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(new System.Security.Cryptography.X509Certificates.X509Certificate2("cert.pfx")));
+            ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(GetCertificateByThumbprint("<THUMBPRINT>")));
             ConfidentialClientApplication app = new ConfidentialClientApplication("<client-id>", "http://localhost", cc, new TokenCache(), new TokenCache());
             try
             {
-                AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }).Result;
+                AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }, true).Result;
             }
             catch (Exception exc)
             {
                 Console.WriteLine(exc.Message);
             }
             finally { Console.ReadKey(); }
+        }
+
+        private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
+        {
+            using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+                if (certs.Count > 0)
+                {
+                    return certs[0];
+                }
+                throw new Exception($"Cannot find certificate with thumbprint '{thumbprint}'");
+            }
         }
     }
 }

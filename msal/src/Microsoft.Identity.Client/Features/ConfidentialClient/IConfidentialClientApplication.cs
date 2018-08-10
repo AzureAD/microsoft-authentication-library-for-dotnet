@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client
     public interface IConfidentialClientApplication : IClientApplicationBase
     {
         /// <summary>
-        /// Acquires token using On-Behalf-Of flow.
+        /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client
             UserAssertion userAssertion);
 
         /// <summary>
-        /// Acquires token using On-Behalf-Of flow.
+        /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
