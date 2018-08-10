@@ -18,17 +18,47 @@ ADAL.NET takes advantage of Windows Server Active Directory and Azure Active Dir
         <tags>Active Directory Authentication Library, ADAL, Active Directory, Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store, Xamarin iOS, Xamarin Android</tags>
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
 
-    <dependencies>
-		<group targetFramework="netstandard1.4">
-			<dependency id="NETStandard.Library" version="1.6" />
-			<dependency id="System.Runtime.Serialization.Json" version="4.3.0" />
-			<dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" />
-		</group>
-		<group targetFramework="netcore45"/>
-		<group targetFramework="net45"/>
-		<group targetFramework="portable-net45+win8"/>
-		<group targetFramework="MonoAndroid10"/>
-		<group targetFramework=" Xamarin.iOS10"/>
+ <dependencies>
+      <group targetFramework=".NETFramework4.5">
+      </group>
+      <group targetFramework=".NETStandard1.1">
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework=".NETStandard1.3">
+        <dependency id="NETStandard.Library" version="1.6.1" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="MonoAndroid8.1">
+      </group>
+      <group targetFramework="UAP10.0">
+        <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.8" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Json" version="4.0.3" exclude="Build,Analyzers" />
+        <dependency id="System.Runtime.Serialization.Primitives" version="4.1.1" exclude="Build,Analyzers" />
+        <dependency id="System.Xml.XDocument" version="4.0.11" exclude="Build,Analyzers" />
+      </group>
+      <group targetFramework="Xamarin.iOS1.0">
+      </group>
     </dependencies>
+    <frameworkAssemblies>
+      <frameworkAssembly assemblyName="Java.Interop" targetFramework="MonoAndroid8.1" />
+      <frameworkAssembly assemblyName="System.Core" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.IdentityModel" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Net.Http" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Runtime.Serialization" targetFramework="MonoAndroid8.1, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Xml" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="System.Xml.Linq" targetFramework="MonoAndroid8.1, .NETFramework4.5, Xamarin.iOS1.0" />
+      <frameworkAssembly assemblyName="Microsoft.CSharp" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Data.DataSetExtensions" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Data" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Drawing" targetFramework=".NETFramework4.5" />
+      <frameworkAssembly assemblyName="System.Windows.Forms" targetFramework=".NETFramework4.5" />
+    </frameworkAssemblies>
     </metadata>
 </package>
