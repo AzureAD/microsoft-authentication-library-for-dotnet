@@ -15,7 +15,7 @@ ADAL.NET takes advantage of Windows Server Active Directory and Azure Active Dir
         <summary>This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Azure Active Directory.</summary>
         <language>en-US</language>
         <owners>Microsoft Open Technologies</owners>
-        <tags>Active Directory Authentication Library, ADAL, Active Directory, Azure Active Directory, AD, AAD, Identity, Authentication, .NET, Windows Store, Xamarin iOS, Xamarin Android</tags>
+        <tags>Active Directory Authentication Library ADAL ActiveDirectory AD AAD Identity Authentication .NET Android iOS UWP NetCore Xamarin</tags>
         <copyright>© Microsoft Corporation. All rights reserved.</copyright>
 
  <dependencies>
