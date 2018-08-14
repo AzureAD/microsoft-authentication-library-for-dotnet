@@ -56,7 +56,7 @@ namespace WebApi.Controllers
 
         static UserProfileController()
         {
-            MsalLoggerSettings.LogCallback = delegate(MsalLogLevel level, string message, bool containsPii)
+            Logger.LogCallback = delegate(MsalLogLevel level, string message, bool containsPii)
             {
                 lock (LogStringBuilder)
                 {
@@ -64,8 +64,8 @@ namespace WebApi.Controllers
                                                 message);
                 }
             };
-            MsalLoggerSettings.Level = MsalLogLevel.Verbose;
-            MsalLoggerSettings.PiiLoggingEnabled = true;
+            Logger.Level = MsalLogLevel.Verbose;
+            Logger.PiiLoggingEnabled = true;
         }
 
         private static void ClearLog()

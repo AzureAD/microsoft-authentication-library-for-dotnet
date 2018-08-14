@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// MSAL logger settings class that allows developers to configure log level, configure callbacks etc.
     /// </summary>
-    public sealed class MsalLoggerSettings
+    public sealed class Logger
     {
         internal static readonly object LockObj = new object();
 

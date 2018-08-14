@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal
                 Component = string.Format(CultureInfo.InvariantCulture, " ({0})", component);
             }
 
-            PiiLoggingEnabled = MsalLoggerSettings.PiiLoggingEnabled;
+            PiiLoggingEnabled = Logger.PiiLoggingEnabled;
         }
 
         internal string Component { get; set; }
@@ -102,15 +102,15 @@ namespace Microsoft.Identity.Client.Internal
 
         private static void ExecuteCallback(MsalLogLevel level, string message, bool containsPii)
         {
-            lock (MsalLoggerSettings.LockObj)
+            lock (Logger.LockObj)
             {
-                MsalLoggerSettings.LogCallback?.Invoke(level, message, containsPii);
+                Logger.LogCallback?.Invoke(level, message, containsPii);
             }
         }
 
         private void Log(MsalLogLevel msalLogLevel, string logMessage, bool containsPii)
         {
-            if ((msalLogLevel > MsalLoggerSettings.Level) || (!MsalLoggerSettings.PiiLoggingEnabled && containsPii))
+            if ((msalLogLevel > Logger.Level) || (!Logger.PiiLoggingEnabled && containsPii))
             {
                 return;
             }
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Client.Internal
                 MsalIdHelper.GetMsalIdParameters()[MsalIdParameter.Product],
                 os, DateTime.UtcNow, correlationId, Component, logMessage);
 
-            if (MsalLoggerSettings.PiiLoggingEnabled && containsPii)
+            if (Logger.PiiLoggingEnabled && containsPii)
             {
                 const string piiLogMsg = "(True) ";
                 log = piiLogMsg + log;
@@ -142,9 +142,9 @@ namespace Microsoft.Identity.Client.Internal
                 log = noPiiLogMsg + log;
             }
 
-            if (MsalLoggerSettings.DefaultLoggingEnabled)
+            if (Logger.DefaultLoggingEnabled)
             {
-                PlatformPlugin.LogMessage(MsalLoggerSettings.Level, log);
+                PlatformPlugin.LogMessage(Logger.Level, log);
             }
 
             ExecuteCallback(msalLogLevel, log, containsPii);

@@ -43,7 +43,7 @@ namespace Test.MSAL.NET.Unit
         public static void ClassInit(TestContext context)
         {
             _callback = Substitute.For<LogCallback>();
-            MsalLoggerSettings.LogCallback = _callback;
+            Logger.LogCallback = _callback;
         }
         
         [TestMethod()]
@@ -62,7 +62,7 @@ namespace Test.MSAL.NET.Unit
         {
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Error;
+            Logger.Level = MsalLogLevel.Error;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error("test message");
@@ -87,7 +87,7 @@ namespace Test.MSAL.NET.Unit
         {
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Warning;
+            Logger.Level = MsalLogLevel.Warning;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error(new Exception("test message"));
@@ -113,7 +113,7 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Info;
+            Logger.Level = MsalLogLevel.Info;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error(new Exception("test message"));
@@ -139,7 +139,7 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Verbose;
+            Logger.Level = MsalLogLevel.Verbose;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error(new Exception("test message"));
@@ -165,8 +165,8 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Error;
-            MsalLoggerSettings.PiiLoggingEnabled = true;
+            Logger.Level = MsalLogLevel.Error;
+            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
@@ -192,8 +192,8 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Warning;
-            MsalLoggerSettings.PiiLoggingEnabled = true;
+            Logger.Level = MsalLogLevel.Warning;
+            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
@@ -219,8 +219,8 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Info;
-            MsalLoggerSettings.PiiLoggingEnabled = true;
+            Logger.Level = MsalLogLevel.Info;
+            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
@@ -246,8 +246,8 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            MsalLoggerSettings.Level = MsalLogLevel.Verbose;
-            MsalLoggerSettings.PiiLoggingEnabled = true;
+            Logger.Level = MsalLogLevel.Verbose;
+            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));

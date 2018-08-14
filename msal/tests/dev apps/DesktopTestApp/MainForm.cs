@@ -53,7 +53,7 @@ namespace DesktopTestApp
             logLevel.SelectedIndex = logLevel.Items.Count - 1;
 
             LoadSettings();
-            MsalLoggerSettings.LogCallback = LogDelegate;
+            Logger.LogCallback = LogDelegate;
         }
 
         public void LogDelegate(MsalLogLevel level, string message, bool containsPii)
@@ -346,8 +346,8 @@ namespace DesktopTestApp
             _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
             Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
 
-            MsalLoggerSettings.Level = (MsalLogLevel)Enum.Parse(typeof(MsalLogLevel), (string)logLevel.SelectedItem);
-            MsalLoggerSettings.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
+            Logger.Level = (MsalLogLevel)Enum.Parse(typeof(MsalLogLevel), (string)logLevel.SelectedItem);
+            Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
         }
 
         #endregion
