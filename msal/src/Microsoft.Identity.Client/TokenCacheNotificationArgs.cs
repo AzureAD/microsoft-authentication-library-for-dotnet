@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains parameters used by the MSAL call accessing the cache.
     /// </summary>
-    public sealed class TokenCacheNotificationArgs
+    public sealed partial class TokenCacheNotificationArgs
     {
         /// <summary>
         /// Gets the TokenCache

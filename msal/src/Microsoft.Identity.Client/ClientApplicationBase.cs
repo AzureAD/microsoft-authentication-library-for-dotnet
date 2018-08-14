@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
     /// <Summary>
     /// Abstract class containing common API methods and properties. Both PublicClientApplication and ConfidentialClientApplication extend this class.
     /// </Summary>
-    public abstract class ClientApplicationBase
+    public abstract partial class ClientApplicationBase
     {
         private TokenCache userTokenCache;
 

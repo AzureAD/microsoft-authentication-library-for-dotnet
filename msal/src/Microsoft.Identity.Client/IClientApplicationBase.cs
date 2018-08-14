@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Component containing common validation methods
     /// </summary>
-    public interface IClientApplicationBase
+    public partial interface IClientApplicationBase
     {
         /// <summary>
         /// Identifier of the component consuming MSAL and it is intended for libraries/SDKs that consume MSAL. This will allow for 

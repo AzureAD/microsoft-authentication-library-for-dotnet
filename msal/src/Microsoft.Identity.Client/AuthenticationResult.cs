@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains the results of one token acquisition operation.
     /// </summary>
-    public class AuthenticationResult
+    public partial class AuthenticationResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly MsalAccessTokenCacheItem _msalAccessTokenCacheItem;
