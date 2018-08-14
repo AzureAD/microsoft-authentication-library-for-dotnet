@@ -9,8 +9,8 @@
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>MSAL.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>..\..\..\..\..\build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <DelaySign>True</DelaySign>
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>
   <ItemGroup>

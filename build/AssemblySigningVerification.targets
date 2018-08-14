@@ -38,7 +38,8 @@
 
   </Target>
 
-  <Target Name="LocateSnExe">
+  <Target Name="LocateSnExe">     
+
     <!-- Locating sn.exe isn't necessary when running from a developer command prompt, but
          it is necessary when running on a build agent.
          We're not sure what will be installed on the build agent so try multiple locations. -->

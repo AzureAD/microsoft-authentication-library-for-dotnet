@@ -1,18 +1,10 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/1.5.4">
 
-  <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
-  <!-- NB this property has no effect on the assemblies that are built - it is only to tell the VSTS SonarQube analysis tasks
-       which assembly to analyse. -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
-    <SonarQubeExclude>true</SonarQubeExclude>
-    <Configurations>Debug;Release</Configurations>
-  </PropertyGroup>
-
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../../build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
     <DebugType>full</DebugType>
     <DelaySign>true</DelaySign>
   </PropertyGroup>
@@ -181,6 +173,7 @@
     <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
     <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
   </Target>
+ 
   <PropertyGroup>
     <CodeAnalysisRuleSet>../../../core/ConfigureAwait.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
