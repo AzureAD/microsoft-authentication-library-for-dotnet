@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -108,6 +108,11 @@ namespace AutomationApp
 
         private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
+            if (!String.IsNullOrWhiteSpace(authenticationResult.AccessToken))
+                testResultBox.Text = "Result: Success";
+            else
+                testResultBox.Text = "Result: Failure";
+
             accessTokenResult.Text = authenticationResult.AccessToken;
             expiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
             tenantIdResult.Text = authenticationResult.TenantId;
