@@ -49,42 +49,42 @@ namespace Microsoft.Identity.Client.Internal
 
         public override void InfoPii(string message)
         {
-            Log(MsalLogLevel.Info, message, true);
+            Log(LogLevel.Info, message, true);
         }
 
         public override void Verbose(string message)
         {
-            Log(MsalLogLevel.Verbose, message, false);
+            Log(LogLevel.Verbose, message, false);
         }
 
         public override void VerbosePii(string message)
         {
-            Log(MsalLogLevel.Verbose, message, true);
+            Log(LogLevel.Verbose, message, true);
         }
 
         public override void ErrorPii(string message)
         {
-            Log(MsalLogLevel.Error, message, true);
+            Log(LogLevel.Error, message, true);
         }
 
         public override void Warning(string message)
         {
-            Log(MsalLogLevel.Warning, message, false);
+            Log(LogLevel.Warning, message, false);
         }
 
         public override void WarningPii(string message)
         {
-            Log(MsalLogLevel.Warning, message, true);
+            Log(LogLevel.Warning, message, true);
         }
 
         public override void Info(string message)
         {
-            Log(MsalLogLevel.Info, message, false);
+            Log(LogLevel.Info, message, false);
         }
 
         public override void Error(Exception ex)
         {
-            Log(MsalLogLevel.Error,
+            Log(LogLevel.Error,
                 MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex),
                 false);
         }
@@ -96,11 +96,11 @@ namespace Microsoft.Identity.Client.Internal
 
         public override void Error(string message)
         {
-            Log(MsalLogLevel.Error, message, false);
+            Log(LogLevel.Error, message, false);
         }
 
 
-        private static void ExecuteCallback(MsalLogLevel level, string message, bool containsPii)
+        private static void ExecuteCallback(LogLevel level, string message, bool containsPii)
         {
             lock (Logger.LockObj)
             {
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        private void Log(MsalLogLevel msalLogLevel, string logMessage, bool containsPii)
+        private void Log(LogLevel msalLogLevel, string logMessage, bool containsPii)
         {
             if ((msalLogLevel > Logger.Level) || (!Logger.PiiLoggingEnabled && containsPii))
             {

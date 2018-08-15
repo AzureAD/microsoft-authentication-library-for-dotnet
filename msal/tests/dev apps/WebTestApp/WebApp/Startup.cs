@@ -98,7 +98,7 @@ namespace WebApp
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             // Add the console logger.
-            loggerFactory.AddConsole(LogLevel.Debug);
+            loggerFactory.AddConsole(Microsoft.Extensions.Logging.LogLevel.Debug);
 
             // Configure error handling middleware.
             app.UseExceptionHandler("/Home/Error");

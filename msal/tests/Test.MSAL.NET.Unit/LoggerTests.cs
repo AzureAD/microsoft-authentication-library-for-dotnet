@@ -62,21 +62,21 @@ namespace Test.MSAL.NET.Unit
         {
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
             var counter = 0;
-            Logger.Level = MsalLogLevel.Error;
+            Logger.Level = LogLevel.Error;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Warning("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Info("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Verbose("test message");
             Assert.AreEqual(1, counter);
         }
@@ -87,21 +87,21 @@ namespace Test.MSAL.NET.Unit
         {
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
             var counter = 0;
-            Logger.Level = MsalLogLevel.Warning;
+            Logger.Level = LogLevel.Warning;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Info("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Verbose("test message");
             Assert.AreEqual(2, counter);
         }
@@ -113,21 +113,21 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            Logger.Level = MsalLogLevel.Info;
+            Logger.Level = LogLevel.Info;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Info("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Verbose("test message");
             Assert.AreEqual(3, counter);
         }
@@ -139,21 +139,21 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            Logger.Level = MsalLogLevel.Verbose;
+            Logger.Level = LogLevel.Verbose;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Warning("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Info("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Verbose("test message");
             Assert.AreEqual(4, counter);
         }
@@ -165,22 +165,22 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            Logger.Level = MsalLogLevel.Error;
+            Logger.Level = LogLevel.Error;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             logger.WarningPii("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             logger.InfoPii("test message");
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             logger.VerbosePii("test message");
             Assert.AreEqual(1, counter);
         }
@@ -192,22 +192,22 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            Logger.Level = MsalLogLevel.Warning;
+            Logger.Level = LogLevel.Warning;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             logger.InfoPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             logger.VerbosePii("test message");
             Assert.AreEqual(2, counter);
         }
@@ -219,22 +219,22 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            Logger.Level = MsalLogLevel.Info;
+            Logger.Level = LogLevel.Info;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             logger.InfoPii("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             logger.VerbosePii("test message");
             Assert.AreEqual(3, counter);
         }
@@ -246,22 +246,22 @@ namespace Test.MSAL.NET.Unit
             MsalLogger logger = new MsalLogger(Guid.Empty, null);
 
             var counter = 0;
-            Logger.Level = MsalLogLevel.Verbose;
+            Logger.Level = LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
 
-            _callback.When(x => x(MsalLogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
-            _callback.When(x => x(MsalLogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
             logger.WarningPii("test message");
             Assert.AreEqual(2, counter);
 
-            _callback.When(x => x(MsalLogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
             logger.InfoPii("test message");
             Assert.AreEqual(3, counter);
 
-            _callback.When(x => x(MsalLogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
             logger.VerbosePii("test message");
             Assert.AreEqual(4, counter);
         }

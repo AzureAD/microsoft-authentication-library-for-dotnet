@@ -34,7 +34,7 @@ namespace AutomationApp
     {
         private readonly StringBuilder _logCollector = new StringBuilder();
 
-        public void Log(MsalLogLevel level, string message, bool containsPii)
+        public void Log(LogLevel level, string message, bool containsPii)
         {
             _logCollector.Append(message);
         }

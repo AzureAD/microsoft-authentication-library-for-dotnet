@@ -54,20 +54,20 @@ namespace Microsoft.Identity.Client.Internal
             PlatformInformation = new PlatformInformation();
         }
 
-        public static void LogMessage(MsalLogLevel logLevel, string formattedMessage)
+        public static void LogMessage(LogLevel logLevel, string formattedMessage)
         {
             switch (logLevel)
             {
-                case MsalLogLevel.Error:
+                case LogLevel.Error:
                     PlatformLogger.Error(formattedMessage);
                     break;
-                case MsalLogLevel.Warning:
+                case LogLevel.Warning:
                     PlatformLogger.Warning(formattedMessage);
                     break;
-                case MsalLogLevel.Info:
+                case LogLevel.Info:
                     PlatformLogger.Information(formattedMessage);
                     break;
-                case MsalLogLevel.Verbose:
+                case LogLevel.Verbose:
                     PlatformLogger.Verbose(formattedMessage);
                     break;
             }
