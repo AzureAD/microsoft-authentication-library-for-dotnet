@@ -78,10 +78,21 @@ namespace Microsoft.Identity.Client
         /// For more details, please see https://aka.ms/msal-net-sharing-cache-on-ios
         /// </summary>
         /// <remarks>This API may change in future release.</remarks>
+        
+        private string keychainSecurityGroup;
+
         public string KeychainSecurityGroup
         {
-            get { return this.KeychainSecurityGroup; }
-            set => UserTokenCache.tokenCacheAccessor.SetKeychainSecurityGroup(value);
+            get 
+            { 
+                return keychainSecurityGroup; 
+            }
+            set 
+            { 
+                keychainSecurityGroup = value;
+                UserTokenCache.tokenCacheAccessor.SetKeychainSecurityGroup(value);
+                UserTokenCache.legacyCachePersistance.SetKeychainSecurityGroup(value);
+            }
         }
 #endif
 

@@ -63,15 +63,6 @@ namespace Microsoft.Identity.Core.Cache
 
         ICollection<string> GetAllAccountsAsString();
 
-        /*
-        ICollection<string> GetAllAccessTokenKeys();
-
-        ICollection<string> GetAllRefreshTokenKeys();
-
-        ICollection<string> GetAllIdTokenKeys();
-
-        ICollection<string> GetAllAccountKeys();
-        */
 #if iOS
         void SetKeychainSecurityGroup(string keychainSecurityGroup);
 #endif

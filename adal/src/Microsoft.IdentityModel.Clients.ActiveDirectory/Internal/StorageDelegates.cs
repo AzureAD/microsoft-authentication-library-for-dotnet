@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Cache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,15 +49,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 #endif
     internal static class StorageDelegates
     {
+        internal static readonly ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
+
         public static void BeforeAccess(TokenCacheNotificationArgs args)
         {
 #if ANDROID || iOS || WINDOWS_APP
             if (args != null && args.TokenCache != null)
             {
-                ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
                 args.TokenCache.Deserialize(legacyCachePersistance.LoadCache());
             }
-
 #endif
         }
 
@@ -65,7 +66,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 #if ANDROID || iOS || WINDOWS_APP
             if (args != null && args.TokenCache != null && args.TokenCache.HasStateChanged)
             {
-                ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
                 legacyCachePersistance.WriteCache(args.TokenCache.Serialize());
                 args.TokenCache.HasStateChanged = false;
             }

@@ -160,10 +160,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// For more details, please see https://aka.ms/adal-net-sharing-cache-on-ios
         /// </summary>
         /// <remarks>This API may change in future release.</remarks>
+        
+        private string keychainSecurityGroup;
+
         public string KeychainSecurityGroup
         {
-            get { return this.KeychainSecurityGroup; }
-            set => TokenCache.tokenCacheAccessor.SetKeychainSecurityGroup(value);
+            get 
+            { 
+                return keychainSecurityGroup; 
+            }
+            set 
+            { 
+                keychainSecurityGroup = value;
+                StorageDelegates.legacyCachePersistance.SetKeychainSecurityGroup(value);
+                TokenCache.tokenCacheAccessor.SetKeychainSecurityGroup(value); 
+            }
         }
 #endif
 

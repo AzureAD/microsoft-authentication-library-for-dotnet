@@ -36,6 +36,25 @@ namespace Microsoft.Identity.Core.Cache
         const string NAME = "ADAL.PCL.iOS";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
+        private string keychainGroup;
+
+        private string GetBundleId()
+        {
+            return NSBundle.MainBundle.BundleIdentifier;
+        }
+
+        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            if (keychainSecurityGroup == null)
+            {
+                keychainGroup = GetBundleId();
+            }
+            else
+            {
+                keychainGroup = keychainSecurityGroup;
+            }
+        }
+
         byte[] ILegacyCachePersistance.LoadCache()
         {
             try
@@ -51,6 +70,11 @@ namespace Microsoft.Identity.Core.Cache
                     Comment = NAME + " Cache",
                     Description = "Storage for cache"
                 };
+
+                if (keychainGroup != null)
+                {
+                    rec.AccessGroup = keychainGroup;
+                }
 
                 var match = SecKeyChain.QueryAsRecord(rec, out res);
                 if (res == SecStatusCode.Success && match != null && match.ValueData != null)
@@ -84,6 +108,11 @@ namespace Microsoft.Identity.Core.Cache
                     Comment = NAME + " Cache",
                     Description = "Storage for cache"
                 };
+
+                if (keychainGroup != null)
+                {
+                    s.AccessGroup = keychainGroup;
+                }
 
                 var err = SecKeyChain.Remove(s);
                 if (err != SecStatusCode.Success)
