@@ -62,7 +62,7 @@
     <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' or '$(TargetFramework)' == 'netcoreapp1.0'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -82,15 +82,13 @@
     <Compile Include="Features\Cache\**\*.cs" />
     <Compile Include="Platforms\net45\**\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
-    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">   
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <Compile Include="Platforms\netcore\**\*.cs" />
     <Compile Include="Features\Cache\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <Compile Include="Platforms\uap\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
@@ -100,11 +98,6 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
     <Compile Include="Features\Cache\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.1.1" />
-    <PackageReference Include="System.Runtime.Serialization.Json" Version="4.0.3" />
-    <PackageReference Include="System.Xml.XDocument" Version="4.0.11" />
   </ItemGroup>
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
