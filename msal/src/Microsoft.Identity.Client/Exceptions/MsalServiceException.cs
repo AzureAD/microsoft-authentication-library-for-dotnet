@@ -31,32 +31,48 @@ using System.Globalization;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// The exception type thrown when service returns and error response or other networking errors occur.
+    /// Exception type thrown when service returns an error response or other networking errors occur.
+    ///  For more details, see https://aka.ms/msal-net-exceptions
     /// </summary>
     public class MsalServiceException : MsalException
     {
         /// <summary>
-        /// Service is unavailable and returned HTTP error code within the range of 500-599.
+        /// Service is unavailable and returned HTTP error code within the range of 500-599
+        /// <para>Mitigation</para> you can retry after a delay. Note that the retry-after header is not yet
+        /// surface in MSAL.NET (on the backlog)
         /// </summary>
         public const string ServiceNotAvailable = "service_not_available";
 
         /// <summary>
-        /// Http Request timed out.
+        /// The Http Request to the STS timed out.
+        /// <para>Mitigation</para> you can retry after a delay.
         /// </summary>
         public const string RequestTimeout = "request_timeout";
 
         /// <summary>
         /// Upn required
+        /// <para>What happens?</para> An override of a token acquisition operation was called in <see cref="T:PublicClientApplication"/> which
+        /// takes a <c>loginHint</c> as a parameters, but this login hint was not using the UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c> 
+        /// expected by the service
+        /// <para>Remediation</para> Make sure in your code that you enforce <c>loginHint</c> to be a UPN
         /// </summary>
         public const string UpnRequired = "upn_required";
 
         /// <summary>
-        /// No passive auth endpoint
+        /// No passive auth endpoint was found in the OIDC configuration of the authority
+        /// <para>What happens?</para> When the libraries goes to the authority and gets its open id connect configuration
+        /// it expects to find a Passive Auth Endpoint entry, and could not find it.
+        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
+        /// supporting authority override is correct
         /// </summary>
         public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
 
         /// <summary>
         /// Invalid authority
+        /// <para>What happens</para> When the library attempts to discover the authority and get the endpoints it needs to
+        /// acquire a token, it got an un-authorize HTTP code or an unexpected response
+        /// <para>remediation</para> Check that the authority configured for the application, or passed on some overrides of token acquisition tokens
+        /// supporting authority override is correct
         /// </summary>
         public const string InvalidAuthority = "invalid_authority";
 
@@ -163,16 +179,26 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the status code returned from http layer. This status code is either the HttpStatusCode in the inner
-        /// HttpRequestException response or
-        /// NavigateError Event Status Code in browser based flow (See
+        /// Gets the status code returned from http layer. This status code is either the <c>HttpStatusCode</c>  in the inner
+        /// <see cref="T:System.Net.Http.HttpRequestException"/> response or the the NavigateError Event Status Code in a browser based flow (See
         /// http://msdn.microsoft.com/en-us/library/bb268233(v=vs.85).aspx).
         /// You can use this code for purposes such as implementing retry logic or error investigation.
         /// </summary>
         public int StatusCode { get; internal set; } = 0;
 
         /// <summary>
-        /// 
+        /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to 
+        /// provide additional claims, such as doing two factor authentication. The are two cases:
+        /// <list type="bullent">
+        /// <item>
+        /// If your application is a <see cref="T:PublicClientApplication"/>, you should just call and <see cref="M:PublicClientApplication.AcquireTokenAsync"/>
+        /// override of <see cref="T:PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
+        /// to the extraQueryParameters, where ex is an instance of this exception.
+        /// </item>
+        /// <item>If you application is a <see cref="T:ConfidentialClientApplication"/>, (therefore doing the On behalf of flow), you should throw an Http unauthorize 
+        /// exception wuth a message containing the claims</item>
+        /// </list>
+        /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
         public string Claims { get; internal set; }
         

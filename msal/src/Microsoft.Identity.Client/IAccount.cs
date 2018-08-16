@@ -29,25 +29,29 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains information of a single account and can be used to perform an AcquireTokenSilentAsync operation. The same user
-    /// can be present in different tenants, i.e. a user can have multiple accounts.
+    /// The IAccount interface represents information about a single account. 
+    /// The same user can be present in different tenants, that is, a user can have multiple accounts.
+    /// An <c>IAccount</c> is returned in <see cref="AuthenticationResult.Account"/>, and can be used as parameters
+    /// of PublicClientApplication and ConfidentialClientApplication methods acquiring tokens such as <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
     /// </summary>
     public interface IAccount
     {
         /// <summary>
-        /// Gets a displayable value in UserPrincipalName (UPN) format, e.g. "john.doe@contoso.com"
+        /// Gets a string containing the displayable value in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c>. 
+        /// This can be null.        
         /// </summary>
-        /// <remarks>Can be null</remarks>
+        /// <remarks>This property replaces the <c>DisplayableId</c> property of <c>IUser</c> in previous versions of MSAL.NET</remarks>
         string Username { get; }
 
         /// <summary>
-        /// Gets the identity provider for this account, e.g. "login.microsoftonline.com"
+        /// Gets a string containing the identity provider for this account, e.g. <c>login.microsoftonline.com</c>.
         /// </summary>
-        /// <remarks>Can be null</remarks>
+        /// <remarks>This property replaces the <c>IdentityProvider</c> property of <c>IUser</c> in previous versions of MSAL.NET
+        /// except that IdentityProvider was a URL with information about the tenant (in addition to the cloud environment), whereas Environement is only the <see cref="System.Uri.Host"/></remarks>
         string Environment { get; }
 
         /// <summary>
-        /// Gets an identifier for the user that is used by the library and the service as a strong handle to user identity. 
+        /// AccountId of the home account for the user. This uniquely identifies the user across AAD tenants. 
         /// </summary>
         /// <remarks>Can be null</remarks>
         AccountId HomeAccountId { get; }

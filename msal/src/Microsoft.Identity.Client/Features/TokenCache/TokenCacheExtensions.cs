@@ -36,45 +36,59 @@ using Microsoft.Identity.Core.Helpers;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// Extension methods used to subscribe to cache serialization events, and to effectively serialize and deserialize the cache
     /// </summary>
     public static class TokenCacheExtensions
     {
         /// <summary>
-        /// 
+        /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
+        /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="tokencache"></param>
-        /// <param name="beforeAccess"></param>
+        /// <param name="tokencache">Token cache that will be accessed</param>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
+        /// <remarks>In the case where the delegate is used to deserialize the cache, it might
+        /// want to call <see cref="Deserialize(TokenCache, byte[])"/></remarks>
         public static void SetBeforeAccess(this TokenCache tokencache, TokenCache.TokenCacheNotification beforeAccess)
         {
             tokencache.BeforeAccess = beforeAccess;
         }
 
         /// <summary>
-        /// 
+        /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
+        /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
         /// </summary>
-        /// <param name="tokencache"></param>
-        /// <param name="afterAccess"></param>
+        /// <param name="tokencache">Token cache that was accessed</param>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
+        /// member of the cache is <c>true</c></param>
+        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
+        /// want to call <see cref="Serialize(TokenCache)"/></remarks>
         public static void SetAfterAccess(this TokenCache tokencache, TokenCache.TokenCacheNotification afterAccess)
         {
             tokencache.AfterAccess = afterAccess;
         }
 
         /// <summary>
-        /// 
+        /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
+        /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
+        /// registered with <see cref="SetAfterAccess(TokenCache, TokenCache.TokenCacheNotification)"/>
         /// </summary>
-        /// <param name="tokencache"></param>
-        /// <param name="beforeWrite"></param>
+        /// <param name="tokencache">Token cache that will be accessed</param>
+        /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
         public static void SetBeforeWrite(this TokenCache tokencache, TokenCache.TokenCacheNotification beforeWrite)
         {
             tokencache.BeforeWrite = beforeWrite;
         }
 
         /// <summary>
-        /// 
+        /// Deserializes the token cache from a serialization blob
         /// </summary>
-        /// <param name="tokenCache"></param>
-        /// <param name="state"></param>
+        /// <param name="tokenCache">Token cache to deserialize (to fill-in from the state)</param>
+        /// <param name="state">array of bytes containing serialized cache data</param>
+        /// <remarks>
+        /// <paramref name="state"/> is a Json blob containing access tokens, refresh tokens, id tokens and accounts information
+        /// </remarks>
         public static void Deserialize(this TokenCache tokenCache, byte[] state)
         {
             lock (tokenCache.LockObject)
@@ -138,10 +152,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// 
+        /// Serializes the entiere token cache
         /// </summary>
-        /// <param name="tokenCache"></param>
-        /// <returns></returns>
+        /// <param name="tokenCache">Token cache to serialize</param>
+        /// <returns>array of bytes containing the serialized cache</returns>
         public static byte[] Serialize(this TokenCache tokenCache)
         {
             // reads the underlying in-memory dictionary and dumps out the content as a JSON

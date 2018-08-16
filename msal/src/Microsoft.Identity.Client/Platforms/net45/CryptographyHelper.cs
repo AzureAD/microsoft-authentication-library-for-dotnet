@@ -36,8 +36,17 @@ using Microsoft.Identity.Core;
 
 namespace Microsoft.Identity.Client
 {
+    /// <summary>
+    /// Helper class for cryptographic operations
+    /// </summary>
     internal class CryptographyHelper
     {
+        /// <summary>
+        /// Signs a message with a provided certificate
+        /// </summary>
+        /// <param name="message">Message to sign</param>
+        /// <param name="certificate">X509 certificate to use</param>
+        /// <returns>Signed message</returns>
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
             if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)

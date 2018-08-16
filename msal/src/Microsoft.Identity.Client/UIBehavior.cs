@@ -28,8 +28,10 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Indicates how AcquireToken should prompt the user.
+    /// Stucture containing static members that you can use to specify how the interactive overrides 
+    /// of AcquireTokenAsync in <see cref="PublicClientApplication"/> should prompt the user.
     /// </summary>
+    /// <remarks>Only the .NET Framework platforms allows <c>UIBehavior.Never</c></remarks>
 
     //TODO: This should be completely removed for platforms that do not support UI, however 
     // at present it used for ConfidentialClientApplication.GetAuthorizationRequestUrlAsync
@@ -41,29 +43,30 @@ namespace Microsoft.Identity.Client
         struct UIBehavior
     {
         /// <summary>
-        /// AcquireToken will send prompt=select_account to authorize endpoint 
-        /// and would show a list of users from which one can be selected for 
+        /// AcquireToken will send <c>prompt=select_account</c> to Azure AD's'authorize endpoint 
+        /// which would present to the user a list of accounts from which one can be selected for 
         /// authentication.
         /// </summary>
         public static readonly UIBehavior SelectAccount = new UIBehavior("select_account");
 
         /// <summary>
         /// The user will be prompted for credentials by the service. It is achieved
-        /// by sending prompt=login to the service.
+        /// by <c>prompt=login</c>sending to the Azure AD service.
         /// </summary>
         public static readonly UIBehavior ForceLogin = new UIBehavior("login");
 
         /// <summary>
         /// The user will be prompted to consent even if consent was granted before. It is achieved
-        /// by sending prompt=consent to the service.
+        /// by sending <c>prompt=consent</c> to Azure AD.
         /// </summary>
         public static readonly UIBehavior Consent = new UIBehavior("consent");
 
 
 #if DESKTOP || WINDOWS_APP
         /// <summary>
-        /// Only available on .NET platform. AcquireToken will send prompt=attempt_none to 
-        /// authorize endpoint and the library uses a hidden webview to authenticate the user.
+        /// Only available on .NET platform. AcquireToken will send <c>prompt=attempt_none</c> to 
+        /// Azure AD'sauthorize endpoint and the library will use a hidden webview (and its cookies) to authenticate the user.
+        /// This can fail, and in that case a <see cref="MsalUiRequiredException"/> will be thrown.
         /// </summary>
         public static readonly UIBehavior Never = new UIBehavior("attempt_none");
 #endif

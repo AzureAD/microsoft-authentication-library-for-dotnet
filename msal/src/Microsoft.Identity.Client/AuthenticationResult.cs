@@ -33,8 +33,10 @@ using Microsoft.Identity.Core.Helpers;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains the results of one token acquisition operation.
+    /// Contains the results of one token acquisition operation in <see cref="T:PublicClientApplication"/>
+    /// or <see cref="T:ConfidentialClientApplication"/>
     /// </summary>
+    /// <remarks>For details see https://aka.ms/msal-net-authenticationresult </remarks>
     public partial class AuthenticationResult
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
@@ -58,12 +60,13 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Gets the Access Token requested.
+        /// Gets the Access Token.
         /// </summary>
         public virtual string AccessToken => _msalAccessTokenCacheItem.Secret;
 
         /// <summary>
-        /// Gets the Unique Id of the user.
+        /// Gets the Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is it's ID, that
+        /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.
         /// </summary>
         public virtual string UniqueId => _msalIdTokenCacheItem?.IdToken?.GetUniqueId();
 
@@ -75,31 +78,42 @@ namespace Microsoft.Identity.Client
         public virtual DateTimeOffset ExpiresOn => _msalAccessTokenCacheItem.ExpiresOn;
 
         /// <summary>
-        /// Gets an identifier for the tenant the token was acquired from. This property will be null if tenant information is
+        /// Gets an identifier for the Azure AD tenant from which the token was acquired. This property will be null if tenant information is
         /// not returned by the service.
         /// </summary>
         public virtual string TenantId => _msalIdTokenCacheItem?.IdToken?.TenantId;
 
         /// <summary>
-        /// Gets the account object. Some elements in Account might be null if not returned by the
-        /// service. It can be passed back in some API overloads to identify which account should be used.
+        /// Gets the account information. Some elements in <see cref="IAccount"/> might be null if not returned by the
+        /// service. The account can be passed back in some API overloads to identify which account should be used such 
+        /// as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/> or
+        /// <see cref="IClientApplicationBase.RemoveAsync(IAccount)"/> for instance
         /// </summary>
         public virtual IAccount Account { get; internal set; }
 
         /// <summary>
-        /// Gets the entire Id Token if returned by the service or null if no Id Token is returned.
+        /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
         public virtual string IdToken => _msalIdTokenCacheItem.Secret;
 
         /// <summary>
-        /// Gets the scope values returned from the service.
+        /// Gets the granted scope values returned by the service.
         /// </summary>
         public virtual IEnumerable<string> Scopes => _msalAccessTokenCacheItem.ScopeSet.AsArray();
 
         /// <summary>
-        /// Creates authorization header from authentication result.
+        /// Creates the content for an HTTP authorization header from this authentication result, so
+        /// that you can call a protected API
         /// </summary>
-        /// <returns>Created authorization header</returns>
+        /// <returns>Created authorization header of the form "Bearer {AccessToken}"</returns>
+        /// <example>
+        /// Here is how you can call a protected API from this authentication result:
+        /// <code>
+        /// HttpClient client = new HttpClient();
+        /// client.DefaultRequestHeaders.Add("Authorization", result.CreateAuthorizationHeader());
+        /// HttpResponseMessage r = await client.GetAsync(urlOfTheProtectedApi);
+        /// </code>
+        /// </example>
         public virtual string CreateAuthorizationHeader()
         {
             return Oauth2AuthorizationHeader + AccessToken;

@@ -34,22 +34,25 @@ using System.Linq;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// 
+    /// Handler enabling your application to send telemetry to your telemetry service or subscription (for instance Microsoft Application Insights).
+    /// To enable telemetry in your application, you get the singleton instance of <c>Telemetry</c> by using <see cref="M:Telemetry.GetInstance()"/>, you set the delegate that will 
+    /// process the telemetry events by calling <see cref="RegisterReceiver(Telemetry.Receiver)"/>, and you decide if you want to reveive telemetry
+    /// events only in case of failture or all the time, by setting the <see cref="TelemetryOnFailureOnly"/> boolean.
     /// </summary>
     public class Telemetry : ITelemetry
     {
         /// <summary>
-        /// 
+        /// Delegate telling the signature of your callbacks that will send telemetry information to your telemetry service
         /// </summary>
-        /// <param name="events"></param>
+        /// <param name="events">Dictionary of key/values pair</param>
         public delegate void Receiver(List<Dictionary<string, string>> events);
 
         private Receiver _receiver = null;
 
         /// <summary>
-        /// 
+        /// Registers one deletage that will send telemetry information to your telemetry service
         /// </summary>
-        /// <param name="r"></param>
+        /// <param name="r">Receiver delegate. See <see cref="Receiver"/></param>
         public void RegisterReceiver(Receiver r)
         {
             _receiver = r;
@@ -60,16 +63,17 @@ namespace Microsoft.Identity.Client
         internal Telemetry(){}  // This is an internal constructor to build isolated unit test instance
 
         /// <summary>
-        /// 
+        /// Get the instance of the Telemetry helper for MSAL.NET
         /// </summary>
-        /// <returns></returns>
+        /// <returns>a unique instance of <see cref="Telemetry"/></returns>
         public static Telemetry GetInstance()
         {
             return Instance as Telemetry;
         }
 
         /// <summary>
-        /// 
+        /// Gets or sets a boolean that indicates if telemetry should be generated on failures only (<c>true</c>) or
+        /// all the time (<c>false</c>)
         /// </summary>
         public bool TelemetryOnFailureOnly { get; set; }
 

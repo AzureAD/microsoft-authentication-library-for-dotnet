@@ -31,39 +31,53 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// This exception class is to inform developers that UI interaction is required for authentication to 
-    /// succeed.
+    /// succeed. It's thrown when calling <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> or one
+    /// of its overides, and when the token does not exists in the cache, or the user needs to provide more content, or perform multiple factor authentication based
+    /// on Azure AD policies, etc..
+    /// For more details, see https://aka.ms/msal-net-exceptions
     /// </summary>
     public class MsalUiRequiredException : MsalServiceException
     {
         /// <summary>
-        /// Standard OAuth2 protocol error code. It indicates to the libray that the user needs to go the UI for 
-        /// getting a new token.
+        /// Standard OAuth2 protocol error code. It indicates to the libray that the application needs to expose the UI to the user  
+        /// so that the user does an interactive action in order to get a new token.
+        /// <para>Mitigation:</para> If your application is a <see cref="T:PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides to 
+        /// perform an interactive authentication. If your application is a <see cref="T:ConfidentialClientApplication"/> chances are that the Claims member
+        /// of the exception is not empty. See <see cref="P:MsalServiceException.Claims"/> for the right mitigation
         /// </summary>
         public const string InvalidGrantError = "invalid_grant";
 
         /// <summary>
-        /// No tokens were found matching the criteria.
+        /// <para>Mitigation:</para> If your application is a <see cref="T:PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides so
+        /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>. If it's a Web App
+        /// you should have previoulsy called <see cref="M:ConfidentialClientApplication.AcquireTokenByAuthorizationCodeAsync(string, System.Collections.Generic.IEnumerable{string})"/>
+        /// as described in https://aka.ms/msal-net-authorization-code. This error should not happen in Web APIs
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
 
         /// <summary>
-        /// This error code comes back from AcquireTokenSilent calls when null user is 
-        /// passed into AcquireTokenSilent calls.
+        /// This error code comes back from <see cref="M:ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 
+        /// passed as the <c>account</c> parameter.
         /// </summary>
         public const string UserNullError = "user_null";
 
         /// <summary>
-        /// This error code comes back from AcquireTokenSilent calls when null token cache reference 
-        /// is passed into the application constructor
+        /// This error code comes back from <see cref="M:ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
+        /// the user cache had not been set in the application constructor
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
 
         /// <summary>
-        /// One of two conditions was encountered.
-        /// 1. The PromptBehavior.Never flag was passed and but the constraint could not be honored
-        /// because user interaction was required.
-        /// 2. An error occurred during a silent web authentication that prevented the authentication
-        /// flow from completing in a short enough time frame.
+        /// One of two conditions was encountered:
+        /// <list type="bullet">
+        /// <item>The <c>UIBehavior.Never</c> UI behavior was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
+        /// for instance because the user needs to re-sign-in, consent for more scopes, or perform multiple factor authentication.
+        /// </item>
+        /// <item>
+        /// An error occurred during a silent web authentication that prevented the authentication flow from completing in a short enough time frame
+        /// </item>
+        /// </list>
+        /// <para>Remediation:</para>call one of the <c>AcquireTokenAsync</c> overrides so that the user of your application signs-in and accepts consent. 
         /// </summary>
         public const string NoPromptFailedError = "no_prompt_failed";
 

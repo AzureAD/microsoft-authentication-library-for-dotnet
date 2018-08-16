@@ -42,7 +42,11 @@ using Microsoft.Identity.Core.Telemetry;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Token cache class used by ConfidentialClientApplication and PublicClientApplication to store access and refresh tokens.
+    /// Token cache storing access and refresh tokens for accounts 
+    /// This class used in the constuctors of <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>.
+    /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
+    /// token cache (in the case of applications using the client credential flows)
+    /// See also <see cref="T:TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
     /// </summary>
     public sealed class TokenCache
     {
@@ -58,7 +62,8 @@ namespace Microsoft.Identity.Client
         internal ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
 
         /// <summary>
-        /// Notification for certain token cache interactions during token acquisition.
+        /// Notification for certain token cache interactions during token acquisition. This delegate is 
+        /// used in particular to provide a custom token cache serialization
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
@@ -75,8 +80,8 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Notification method called before any library method writes to the cache. This notification can be used to reload
-        /// the cache state from a row in database and lock that row. That database row can then be unlocked in
-        /// AfterAccess notification.
+        /// the cache state from a row in database and lock that row. That database row can then be unlocked in the
+        /// <see cref="AfterAccess"/>notification.
         /// </summary>
         internal TokenCacheNotification BeforeWrite { get; set; }
 
@@ -86,9 +91,9 @@ namespace Microsoft.Identity.Client
         internal TokenCacheNotification AfterAccess { get; set; }
 
         /// <summary>
-        /// Gets or sets the flag indicating whether cache state has changed.
+        /// Gets or sets the flag indicating whether the state of the cache has changed.
         /// MSAL methods set this flag after any change.
-        /// Caller application should reset the flag after serializing and persisting the state of the cache.
+        /// Caller applications should reset the flag after serializing and persisting the state of the cache.
         /// </summary>
         public bool HasStateChanged
         {

@@ -57,13 +57,15 @@ namespace Microsoft.Identity.Client
 
 #if iOS
         /// <summary>
-        /// Constructor for iOS for implementing embedded webview
+        /// Constructor for iOS for directing the application to use the embedded webview instead of the
+        /// system browser. See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
-        /// <remarks>This method is likely to be removed before final release</remarks>
+        /// <remarks>This method is likely to be removed (replaced) before final release</remarks>
         public UIParent(bool useEmbeddedWebview) : this()
         {
             CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;
         }
+
 #endif
 
 #if ANDROID
@@ -83,8 +85,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Initializes an instance for a provided activity with flag for enabling 
-        /// embedded webview.
+        /// Initializes an instance for a provided activity with flag directing the application
+        /// to use the embedded webview instead of the system browser. See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
         {
@@ -96,6 +98,14 @@ namespace Microsoft.Identity.Client
         /// Returns true if chrome package for launching system webview is enabled on device.
         /// Returns false if chrome package is not found.
         /// </summary>
+        /// <example>
+        /// The following code decides, in a Xamarin.Forms app, which browser to use based on the presence of the
+        /// required packages.
+        /// <code>
+        /// bool useSystemBrowser = UIParent.IsSystemWebviewAvailable();
+        /// App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity, !useSystemBrowser);
+        /// </code>
+        /// </example>
         public static bool IsSystemWebviewAvailable()
         {
             PackageManager packageManager = Application.Context.PackageManager;
@@ -139,7 +149,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Initializes an instance for a provided parent window.
         /// </summary>
-        /// <param name="ownerWindow">Parent window object reference. OPTIONAL.</param>
+        /// <param name="ownerWindow">Parent window object reference. OPTIONAL. The expected parent window
+        /// are either of type <see cref="System.Windows.Forms.IWin32Window"/> or <see cref="System.IntPtr"/> (for window handle)</param>
         public UIParent(object ownerWindow)
         {
             CoreUIParent = new CoreUIParent(ownerWindow);

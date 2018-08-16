@@ -31,8 +31,8 @@ using System.Globalization;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains information of a single account. A user can be present in multiple directorie and thus have multiple accounts.
-    /// This information is used for token cache lookup and enforcing the user session on STS authorize endpont.
+    /// Contains information of a single account. A user can be present in multiple directories and thus have multiple accounts.
+    /// This information is used for token cache lookup and enforcing the user session on STS authorize endpoint.
     /// </summary>
     internal sealed class Account : IAccount
     {
