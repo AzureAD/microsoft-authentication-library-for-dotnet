@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// The request could not be preformed because the network is down.
-        /// <para>Mitigation [App developement]</para> in the application you could either inform the user that there are network issues
+        /// <para>Mitigation [App development]</para> in the application you could either inform the user that there are network issues
         /// or retry later
         /// </summary>
         public const string NetworkNotAvailableError = "network_not_available";
@@ -65,18 +65,18 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para> You have used <see cref="ClientApplicationBase.SliceParameters"/> or the <c>extraQueryParameter</c> of overrides
         /// of token acquisition operations in public client and confidential client application and are passing a parameter which is already present in the
         /// URL (either because you had it in another way, or the library added it).
-        /// <para>Mitigation [App Developement]</para> Remove the duplicate parameter from <see cref="ClientApplicationBase.SliceParameters"/> or the token acquisition override.
+        /// <para>Mitigation [App Development]</para> Remove the duplicate parameter from <see cref="ClientApplicationBase.SliceParameters"/> or the token acquisition override.
         /// </summary>
         /// <seealso cref="P:ClientApplicationBase.SliceParameters"/>
         /// <seealso cref="M:ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
         public const string DuplicateQueryParameterError = "duplicate_query_parameter";
 
         /// <summary>
-        /// The request could not be preformed because of a failure in the UI flow.
+        /// The request could not be performed because of a failure in the UI flow.
         /// <para>What happens?</para>The library failed to invoke the Web View required to perform interactive authentication.
         /// The exception might include the reason
         /// <para>Mitigation</para>If the exception includes the reason, you could inform the user. This might be, for instance, a browser
-        /// impmlenenting chrome tabs is missing on the Android phone (that's only an example: this exception can apply to other
+        /// implementing chrome tabs is missing on the Android phone (that's only an example: this exception can apply to other
         /// platforms as well)
         /// </summary>
         public const string AuthenticationUiFailedError = "authentication_ui_failed";
@@ -84,15 +84,15 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Authentication canceled.
         /// <para>What happens?</para>The user had canceled the authentication, for instance by closing the authentication dialog
-        /// <para>Mitigation</para>. None, you cannot get a token to call the protected API. You might want to inform the user
+        /// <para>Mitigation</para>None, you cannot get a token to call the protected API. You might want to inform the user
         /// </summary>
         public const string AuthenticationCanceledError = "authentication_canceled";
         
         /// <summary>
         /// JSON parsing failed.
         /// <para>What happens?</para>A Json blob read from the token cache or received from the STS was not parseable. 
-        /// This can for instance happen when reading the token cache, or receiving an IDToken from the STS.
-        /// <para>Mitigation</para>Make sure that the token cache was not temptered
+        /// This can happen when reading the token cache, or receiving an IDToken from the STS.
+        /// <para>Mitigation</para>Make sure that the token cache was not tampered
         /// </summary>
         public const string JsonParseError = "json_parse_failed";
 
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client
         /// JWT was invalid.
         /// <para>What happens?</para>The library expected a JWT (for instance a token from the cache, or received from the STS), but
         /// the format is invalid
-        /// <para>Mitigation</para>Make sure that the token cache was not temptered
+        /// <para>Mitigation</para>Make sure that the token cache was not tampered
         /// </summary>
         public const string InvalidJwtError = "invalid_jwt";
 
@@ -124,20 +124,20 @@ namespace Microsoft.Identity.Client
 #if ANDROID
 
         /// <summary>
-        /// Xamarin.Android specific. This error indicates that chrome, or a browser implementing chrome tabs is not installed on the device. 
-        /// The library sdk uses chrome custom tab for authorize request if applicable or fall back to chrome browser.
+        /// Xamarin.Android specific. This error indicates that chrome, or a browser implementing chrome tabs, is not installed on the device. 
+        /// The library sdk uses chrome custom tab for authorize request if applicable or falls back to chrome browser.
         /// <para>Mitigation</para>If you really need to use the System web browser (for instance to get SSO with the browser), notify the end 
         /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. 
         /// Otherwise you can also use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a required browser is available on the device
-        /// and require the library to use the embedded web view if it is not by setting the boolean to <c>true </c> in the following
+        /// and require the library to use the embedded web view if it is not by setting the boolean to <c>true</c> in the following
         /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
         /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         public const string ChromeNotInstalledError = "chrome_not_installed";
 
         /// <summary>
-        /// Xamarin.Android specific. This error indicates that chromeis installed on the device but disabled. The sdk uses chrome custom tab for
-        /// authorize request if applicable or fall back to chrome browser.
+        /// Xamarin.Android specific. This error indicates that chrome is installed on the device but disabled. The sdk uses chrome custom tab for
+        /// authorize request if applicable or falls back to chrome browser.
         /// <para>Mitigation</para>If you really need to use the System web browser (for instance to get SSO with the browser), notify the end 
         /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. 
         /// Otherwise you can also use <see cref="M:UIParent.IsSystemWebviewAvailable"/> to check if a required browser is available on the device

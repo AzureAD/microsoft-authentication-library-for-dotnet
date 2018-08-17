@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
     {
         /// <summary>
         /// Unknown Error occured.
-        /// <para>Mitigation</para> None. you might want to inform the end user
+        /// <para>Mitigation</para> None. You might want to inform the end user.
         /// </summary>
         public const string UnknownError = "unknown_error";
 

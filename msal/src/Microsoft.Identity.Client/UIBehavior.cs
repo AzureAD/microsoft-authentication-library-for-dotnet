@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         struct UIBehavior
     {
         /// <summary>
-        /// AcquireToken will send <c>prompt=select_account</c> to Azure AD's'authorize endpoint 
+        /// AcquireToken will send <c>prompt=select_account</c> to Azure AD's authorize endpoint 
         /// which would present to the user a list of accounts from which one can be selected for 
         /// authentication.
         /// </summary>
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// The user will be prompted for credentials by the service. It is achieved
-        /// by <c>prompt=login</c>sending to the Azure AD service.
+        /// by sending <c>prompt=login</c> to the Azure AD service.
         /// </summary>
         public static readonly UIBehavior ForceLogin = new UIBehavior("login");
 
@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
 #if DESKTOP || WINDOWS_APP
         /// <summary>
         /// Only available on .NET platform. AcquireToken will send <c>prompt=attempt_none</c> to 
-        /// Azure AD'sauthorize endpoint and the library will use a hidden webview (and its cookies) to authenticate the user.
+        /// Azure AD's authorize endpoint and the library will use a hidden webview (and its cookies) to authenticate the user.
         /// This can fail, and in that case a <see cref="MsalUiRequiredException"/> will be thrown.
         /// </summary>
         public static readonly UIBehavior Never = new UIBehavior("attempt_none");

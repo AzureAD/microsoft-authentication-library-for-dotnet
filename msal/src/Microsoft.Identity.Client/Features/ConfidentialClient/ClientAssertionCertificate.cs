@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client
     public sealed class ClientAssertionCertificate
     {
         /// <summary>
-        /// Constructor to certificate information used in <see cref="ClientCredential.ClientCredential(ClientAssertionCertificate)"/>
-        /// to instanciate a <see cref="ClientCredential"/> used in the constructors of <see cref="ConfidentialClientApplication"/>
+        /// Constructor to create certificate information used in <see cref="ClientCredential.ClientCredential(ClientAssertionCertificate)"/>
+        /// to instantiate a <see cref="ClientCredential"/> used in the constructors of <see cref="ConfidentialClientApplication"/>
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)

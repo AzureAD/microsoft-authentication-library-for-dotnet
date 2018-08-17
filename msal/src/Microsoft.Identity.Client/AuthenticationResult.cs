@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
         public virtual string AccessToken => _msalAccessTokenCacheItem.Secret;
 
         /// <summary>
-        /// Gets the Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is it's ID, that
+        /// Gets the Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
         /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.
         /// </summary>
         public virtual string UniqueId => _msalIdTokenCacheItem?.IdToken?.GetUniqueId();

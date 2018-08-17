@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
     /// <param name="level">Log level of the log message to process</param>
     /// <param name="message">Pre-formatted log message</param>
     /// <param name="containsPii">Indicates if the log message contains Organizational Identifiable Information (OII)
-    /// or Personal Identifiable Information (PII) nor not. 
+    /// or Personally Identifiable Information (PII) nor not. 
     /// If <see cref="Logger.PiiLoggingEnabled"/> is set to <c>false</c> then this value is always false.
     /// Otherwise it will be <c>true</c> when the message contains PII.</param>
     /// <seealso cref="Logger"/>
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client
 
     /// <summary>
     /// static class that allows application developers to set a callback to handle logs, specify the level
-    /// of logs desired and if they accept to log Personal Identifiable Informaiton (PII) or not
+    /// of logs desired and if they accept to log Personally Identifiable Information (PII) or not
     /// </summary>
     /// <example>
     /// <code>
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Enables you to configure the level of logging you want. The default value is <see cref="LogLevel.Info"/>.`Setting it to <see cref="LogLevel.Error"/> will only get errors
+        /// Enables you to configure the level of logging you want. The default value is <see cref="LogLevel.Info"/>. Setting it to <see cref="LogLevel.Error"/> will only get errors
         /// Setting it to <see cref="LogLevel.Warning"/> will get errors and warning, etc..
         /// </summary>
         public static LogLevel Level { get; set; } = LogLevel.Info;

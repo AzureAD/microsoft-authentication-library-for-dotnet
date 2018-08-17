@@ -85,9 +85,9 @@ namespace Microsoft.Identity.Client
         /// Deserializes the token cache from a serialization blob
         /// </summary>
         /// <param name="tokenCache">Token cache to deserialize (to fill-in from the state)</param>
-        /// <param name="state">array of bytes containing serialized cache data</param>
+        /// <param name="state">Array of bytes containing serialized cache data</param>
         /// <remarks>
-        /// <paramref name="state"/> is a Json blob containing access tokens, refresh tokens, id tokens and accounts information
+        /// <paramref name="state"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information
         /// </remarks>
         public static void Deserialize(this TokenCache tokenCache, byte[] state)
         {
@@ -99,7 +99,9 @@ namespace Microsoft.Identity.Client
                     .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(state);
                 if (cacheDict == null || cacheDict.Count == 0)
                 {
-                    //TODO log about empty cache
+                    string msg = "Cache is empty.";
+                    CoreLoggerBase.Default.Info(msg);
+                    CoreLoggerBase.Default.InfoPii(msg);
                     return;
                 }
 

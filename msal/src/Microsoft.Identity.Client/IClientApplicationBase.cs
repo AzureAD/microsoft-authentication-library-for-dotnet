@@ -43,20 +43,20 @@ namespace Microsoft.Identity.Client
         string Component { get; set; }
 
         /// <Summary>
-        /// Gets the URL of the authority, or Security Token service (STS) from which MSAL.NET will acquire security tokens
+        /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
         /// The return value of this propety is either the value provided by the developer in the constructor of the application, or otherwise 
         /// the value of the <see cref="ClientApplicationBase.Authority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </Summary>
         string Authority { get; }
 
         /// <summary>
-        /// Gets the Client ID (also named Application ID) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
-        /// and as passed in the constructor of the application
+        /// Gets the Client ID (also known as Application ID) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
+        /// and as passed in the constructor of the application.
         /// </summary>
         string ClientId { get; }
 
         /// <summary>
-        /// The redirect URI (also named Reply URI), is the URI at which Azure AD will contact back the application with the tokens. 
+        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
@@ -93,24 +93,23 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
         /// </summary>
-        /// <param name="identifier">account identifier. The value of the identifier will probably have been stored value from the
+        /// <param name="identifier">Account identifier. The value of the identifier will probably have been stored value from the
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>. 
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property></param>
         Task<IAccount> GetAccountAsync(string identifier);
 
         /// <summary>
-        /// Attempts to acquire and access token for the <paramref name="account"/> from the user token cache. 
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache. 
         /// </summary> 
-        /// <param name="scopes">scopes requested to access a protected API</param>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
         /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application, 
         /// for instance so that the user consents, or re-signs-in (for instance if the password expirred), or performs two factor authentication</exception>
         /// <remarks>
-        /// The access token is considered a match if it AT LEAST contains all the requested scopes.
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
         /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or 
         /// close to expiration (within 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
-        /// 
         /// See https://aka.ms/msal-net-acuiretokensilent for more details
         /// </remarks>
         Task<AuthenticationResult> AcquireTokenSilentAsync(
@@ -118,9 +117,9 @@ namespace Microsoft.Identity.Client
             IAccount account);
 
         /// <summary>
-        /// Attempts to acquire and access token for the <paramref name="account"/> from the user token cache, with advanced parametersking a network call.
+        /// Attempts to acquire and access token for the <paramref name="account"/> from the user token cache, with advanced parameters making a network call.
         /// </summary>
-        /// <param name="scopes">scopes requested to access a protected API</param>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
         /// narrows down the selection of tenants for which to get a tenant, but does not change the configured value</param>
@@ -132,10 +131,9 @@ namespace Microsoft.Identity.Client
         /// for instance, if no refresh token was in the cache, or the user needs to consents, or re-sign-in (for instance if the password expirred), 
         /// or performs two factor authentication</exception>
         /// <remarks>
-        /// The access token is considered a match if it contains <b>at least</b>all the requested scopes. This means that an access token with more scopes than 
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than 
         /// requested could be returned as well. If the access token is expired or close to expiration (within 5 minute window), 
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
-        /// 
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </remarks>
         Task<AuthenticationResult> AcquireTokenSilentAsync(

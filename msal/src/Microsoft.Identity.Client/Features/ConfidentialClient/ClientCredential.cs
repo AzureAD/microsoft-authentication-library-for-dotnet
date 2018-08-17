@@ -32,9 +32,9 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Meant to be used in confidential client applications, an instance of <c>ClientCredential</c> is passed 
     /// to the constructors of (<see cref="ConfidentialClientApplication"/>)
-    /// as credentials proving that the application (the client) is what it claims it is. This credentials can be
+    /// as credentials proving that the application (the client) is what it claims it is. These credentials can be
     /// either a client secret (an application password) or or a certificate. 
-    /// These crendentials are added in the application registration portal (in the secret section)
+    /// These crendentials are added in the application registration portal (in the secret section).
     /// This class has one constructor for each case.
     /// </summary>
     public sealed class ClientCredential
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
         /// Constructor of client (application) credentials from a <see cref="ClientAssertionCertificate"/>
         /// </summary>
         /// <param name="certificate">contains information about the certificate previously shared with AAD at application
-        /// registration to prove the identity of the application (= the client) requesting the tokens.</param>
+        /// registration to prove the identity of the application (the client) requesting the tokens.</param>
         public ClientCredential(ClientAssertionCertificate certificate)
         {
             Certificate = certificate;
@@ -56,10 +56,10 @@ namespace Microsoft.Identity.Client
         internal string Audience { get; set; }
 
         /// <summary>
-        /// Constructor of client (application) credentials from a client secret, also named application password.
+        /// Constructor of client (application) credentials from a client secret, also known as the application password.
         /// </summary>
         /// <param name="secret">Secret string previously shared with AAD at application registration to prove the identity
-        /// of the application (= the client) requesting the tokens.</param>
+        /// of the application (the client) requesting the tokens.</param>
         public ClientCredential(string secret)
         {
             if (string.IsNullOrWhiteSpace(secret))

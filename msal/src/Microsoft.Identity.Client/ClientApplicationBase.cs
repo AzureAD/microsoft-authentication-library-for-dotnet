@@ -63,9 +63,9 @@ namespace Microsoft.Identity.Client
         /// <list type="bullet">
         /// <item><c>https://login.microsoftonline.com/tenant/</c>, where <c>tenant</c> is the tenant ID of the Azure AD tenant
         /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</item>
-        /// <item><c>https://login.microsoftonline.com/common/</c> to signing users with any work and school accounts or Microsoft personal account</item>
-        /// <item><c>https://login.microsoftonline.com/organizations/</c> to signing users with any work and school accounts</item>
-        /// <item><c>https://login.microsoftonline.com/consumers/</c> to signing users with only personal Microsoft account (live)</item>
+        /// <item><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</item>
+        /// <item><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</item>
+        /// <item><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</item>
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client
         public string ClientId { get; }
 
         /// <summary>
-        /// The redirect URI (also named Reply URI), is the URI at which Azure AD will contact back the application with the tokens. 
+        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will reply back to the application with the tokens. 
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Attempts to acquire and access token for the <paramref name="account"/> from the user token cache. 
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache. 
         /// </summary> 
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
@@ -227,13 +227,13 @@ namespace Microsoft.Identity.Client
         /// to applications managing several accounts (like a mail client with several mailboxes)</param>
         /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the cache and attempt to acquire new access token 
         /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
-        /// sure that conditional access policies are applies immediately, rather than after the expiration of the access token</param>
+        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
         /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application, 
-        /// for instance, if no refresh token was in the cache, or the user needs to consents, or re-sign-in (for instance if the password expired), 
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired), 
         /// or performs two factor authentication</exception>
         /// <remarks>
-        /// The access token is considered a match if it contains <b>at least</b>all the requested scopes. This means that an access token with more scopes than 
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than 
         /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window), 
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// 
