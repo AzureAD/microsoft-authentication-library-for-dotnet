@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Client
 {
@@ -20,6 +18,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-2-released for more details
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use IAccount.Username instead (See https://aka.ms/msal-net-2-released)", true)]
         string DisplayableId { get; }
 
@@ -28,6 +27,7 @@ namespace Microsoft.Identity.Client
         /// some claims). From MSAL 2.x rather use <see cref="IAccount.Username"/>. See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use IAccount.Username instead (See https://aka.ms/msal-net-2-released)", true)]
         string Name { get; }
 
@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use IAccount.Environment instead to get the Identity Provider host (See https://aka.ms/msal-net-2-released)", true)]
         string IdentityProvider { get; }
 
@@ -46,6 +47,7 @@ namespace Microsoft.Identity.Client
         /// the user identifier (globally unique accross tenants). See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use IAccount.HomeAccountId.Identifier instead to get the user identifier (See https://aka.ms/msal-net-2-released)", true)]
         string Identifier { get; }
     }
@@ -57,6 +59,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use GetAccountsAsync instead (See https://aka.ms/msal-net-2-released)", true)]
         IEnumerable<IUser> Users { get; }
 
@@ -87,6 +90,7 @@ namespace Microsoft.Identity.Client
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use GetAccountsAsync instead (See https://aka.ms/msal-net-2-released)", true)]
         public IEnumerable<IUser> Users { get { throw new NotImplementedException(); } }
 
@@ -117,6 +121,7 @@ namespace Microsoft.Identity.Client
         /// rather use <see cref="Account"/> instead. See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use Account instead (See https://aka.ms/msal-net-2-released)", true)]
         public IUser User { get { throw new NotImplementedException(); } }
     }
@@ -128,6 +133,7 @@ namespace Microsoft.Identity.Client
         /// rather use <see cref="Account"/> instead. See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use Account instead (See https://aka.ms/msal-net-2-released)", true)]
         public IUser User { get { throw new NotImplementedException(); } }
     }
