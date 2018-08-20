@@ -26,15 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core.Cache;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-#if ANDROID || iOS || WINDOWS_APP
-using Microsoft.Identity.Core.Cache;
-#endif
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 {
