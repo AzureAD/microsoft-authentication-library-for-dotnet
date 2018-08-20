@@ -1,7 +1,7 @@
  # Active Directory Authentication Library (ADAL) for .NET, Windows Store, .NET Core, Xamarin iOS and Xamarin Android.
 
-| [Conceptual documentation](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki#documentation) | [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev)
-| --- | --- | --- | --- |
+| [Conceptual documentation](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki#documentation) | [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev) | [API Reference](https://docs.microsoft.com/en-us/dotnet/api/microsoft.identitymodel.clients.activedirectory?view=azure-dotnet)
+| --- | --- | --- | --- | --- |
 
 Active Directory Authentication Library for .NET (ADAL.NET) is an easy to use authentication library. You can use ADAL.NET to acquire **security tokens to access protected Web APIs**, for instance Microsoft Graph, or another Web APIs. ADAL.NET is available on various .NET Desktop/Mobile platforms to acquire a token for the signed-in user ( Windows desktop, UWP, Windows 8.1, Xamarin iOS and Xamarin Android). It can also be used in Web applications and Web APIs (ASP.NET, .NET Core, ASP.NET Core) that call other Web APIs in the name of a user, or without a user. ADAL.NET takes advantage of Windows Server Active Directory and Windows Azure Active Directory.
 
