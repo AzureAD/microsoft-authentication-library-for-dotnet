@@ -20,17 +20,10 @@
         android:layout_height="wrap_content"
         android:id="@+id/acquireTokenSilentButton" />
     <Button
-        android:text="CLEAR CACHE!"
+        android:text="CLEAR CACHE"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/clearCacheButton"
-        android:layout_marginBottom="5.6dp"
-        android:layout_marginTop="0.0dp" />
-    <Button
-        android:text="CONDITIONAL ACCESS"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/conditionalAccessButton"
         android:layout_marginBottom="5.6dp"
         android:layout_marginTop="0.0dp" />
     <TextView

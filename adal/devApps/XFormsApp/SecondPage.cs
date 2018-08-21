@@ -56,7 +56,7 @@ namespace XFormsApp
         public IPlatformParameters Parameters { get; set; }
 
         public IPlatformParameters BrokerParameters { get; set; }
-        
+
         public SecondPage()
         {
             var acquireTokenButton = new Button
@@ -69,12 +69,6 @@ namespace XFormsApp
             {
                 Text = "Acquire Token Silent",
                 AutomationId = "acquireTokenSilent"
-            };
-
-            var conditionalAccessButton = new Button
-            {
-                Text = "Conditional Access",
-                AutomationId = "conditionalAccess"
             };
 
             var clearAllCacheButton = new Button
@@ -95,7 +89,7 @@ namespace XFormsApp
                 AutomationId = "acquireTokenSilentWithBroker"
             };
 
-             testResult = new Label()
+            testResult = new Label()
             {
                 Text = "Success:",
                 VerticalOptions = LayoutOptions.FillAndExpand,
@@ -123,16 +117,19 @@ namespace XFormsApp
 
             acquireTokenButton.Clicked += AcquireTokenButton_Clicked;
             acquireTokenSilentButton.Clicked += AcquireTokenSilentButton_Clicked;
-            conditionalAccessButton.Clicked += ConditionalAccessButton_Clicked;
             clearAllCacheButton.Clicked += ClearAllCacheButton_Clicked;
             acquireTokenWithBrokerButton.Clicked += AcquireTokenWithBrokerButton_Clicked;
             acquireTokenSilentWithBrokerButton.Clicked += AcquireTokenSilentWithBrokerButton_Clicked;
 
             Thickness padding;
+
             switch (Device.RuntimePlatform)
             {
                 case Device.iOS:
                     padding = new Thickness(0, 40, 0, 0);
+                    break;
+                case Device.UWP:
+                    padding = new Thickness(0, 20, 0, 0);
                     break;
                 default:
                     padding = new Thickness(0, 0, 0, 0);
@@ -146,7 +143,6 @@ namespace XFormsApp
                 Children = {
                     acquireTokenButton,
                     acquireTokenSilentButton,
-                    conditionalAccessButton,
                     clearAllCacheButton,
                     acquireTokenWithBrokerButton,
                     acquireTokenSilentWithBrokerButton,
@@ -219,7 +215,39 @@ namespace XFormsApp
             }
         }
 
-        private async void AcquireTokenWithBrokerButton_Clicked(object sender, EventArgs e)
+        private void AcquireTokenWithBrokerButton_Clicked(object sender, EventArgs e)
+        {
+            switch (Device.RuntimePlatform)
+            {
+                case Device.iOS:
+                    AcquireTokenWithBroker();
+                    break;
+                case Device.Android:
+                    AcquireTokenWithBroker();
+                    break;
+                default:
+                    this.result.Text = "UWP does not support broker. Use iOS or Android.";
+                    break;
+            }
+        }
+
+        private void AcquireTokenSilentWithBrokerButton_Clicked(object sender, EventArgs e)
+        {
+            switch (Device.RuntimePlatform)
+            {
+                case Device.iOS:
+                    AcquireTokenSilentWithBroker();
+                    break;
+                case Device.Android:
+                    AcquireTokenSilentWithBroker();
+                    break;
+                default:
+                    this.result.Text = "UWP does not support broker. Use iOS or Android.";
+                    break;
+            }
+        }
+
+        private async void AcquireTokenWithBroker()
         {
             this.result.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
@@ -253,7 +281,7 @@ namespace XFormsApp
             }
         }
 
-        private async void AcquireTokenSilentWithBrokerButton_Clicked(object sender, EventArgs e)
+        private async void AcquireTokenSilentWithBroker()
         {
             this.result.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
@@ -293,36 +321,6 @@ namespace XFormsApp
                     throw new NotImplementedException();
             }
             return RedirectURI;
-        }
-
-        private async void ConditionalAccessButton_Clicked(object sender, EventArgs e)
-        {
-            this.result.Text = string.Empty;
-            AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
-            string output = string.Empty;
-            string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
-
-            try
-            {
-                AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net", ClientId,
-                        new Uri(IOSBrokerRedirectURI),
-                        Parameters, new UserIdentifier(User, UserIdentifierType.OptionalDisplayableId), null, claims).ConfigureAwait(false);
-                output = "Access Token: " + result.AccessToken;
-            }
-
-            catch (Exception exc)
-            {
-                output = exc.Message;
-            }
-            finally
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    this.result.Text += "Result : " + output;
-
-                    this.result.Text += "Logs : " + DrainLogs();
-                });
-            }
         }
 
         void ClearAllCacheButton_Clicked(object sender, EventArgs e)

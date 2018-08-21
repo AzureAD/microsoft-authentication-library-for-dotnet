@@ -60,10 +60,9 @@ namespace AdalDesktopTestApp
                 Console.WriteLine(@"
                         1. Acquire Token by Windows Integrated Auth
                         2. Acquire Token by Windows Integrated Auth, with Pii logging enabled
-                        3. Acquire Token Conditional Access Policy
-                        4. Acquire Token Interactively
-                        5. Acquire Token with Username and Password
-                        9. Acquire Token Silently
+                        3. Acquire Token Interactively
+                        4. Acquire Token with Username and Password
+                        5. Acquire Token Silently
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -81,19 +80,14 @@ namespace AdalDesktopTestApp
                             LoggerCallbackHandler.PiiLoggingEnabled = true;
                             task = context.AcquireTokenAsync(resource, clientId, new UserCredential(user));
                             break;
-                        case 3: // acquire token with claims
-                            string claims = "{\"access_token\":{\"polids\":{\"essential\":true,\"values\":[\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\"]}}}";
-                            task = context.AcquireTokenAsync(resource, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Auto),
-                                new UserIdentifier(user, UserIdentifierType.OptionalDisplayableId), null, claims);
-                            break;
-                        case 4: // acquire token interactive
+                        case 3: // acquire token interactive
                             task = context.AcquireTokenAsync(resource, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Auto));
                             break;
-                        case 5: // acquire token with username and password
+                        case 4: // acquire token with username and password
                             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Enter password for user {0} :", user));
                             task = context.AcquireTokenAsync(resource, clientId, new UserPasswordCredential(user, Console.ReadLine()));
                             break;
-                        case 9: // acquire token silent
+                        case 5: // acquire token silent
                             task = context.AcquireTokenSilentAsync(resource, clientId);
                             break;
                         case 0:
