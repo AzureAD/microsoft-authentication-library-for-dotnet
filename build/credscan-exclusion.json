@@ -26,6 +26,10 @@
       "_justification": "Legitimate UWP app certificate file with private key required for the app to function. this is sample test app."
     },
     {
+      "file": "XFormsApp.UWP_TemporaryKey.pfx.pfx", 
+       "_justification": "Legitimate UWP app certificate file with private key required for the app to function. this is sample test app."
+     },
+    {
       "file": "UAPTestApp_TemporaryKey.pfx", 
        "_justification": "Legitimate UWP app certificate file with private key required for the app to function. this is sample test app."
      },
