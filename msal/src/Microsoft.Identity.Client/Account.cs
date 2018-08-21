@@ -36,13 +36,12 @@ namespace Microsoft.Identity.Client
     /// </summary>
     internal sealed class Account : IAccount
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="homeAccountId">an object and tenant scoped id; can be null, for example when migrating the ADAL v3 cache</param>
         public Account(AccountId homeAccountId, string username, string environment)
         {
-            if (homeAccountId == null)
-            {
-                throw new ArgumentNullException(nameof(homeAccountId));
-            }
-
             Username = username;
             Environment = environment;
             HomeAccountId = homeAccountId;

@@ -861,8 +861,7 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                var accounts = clientInfoToAccountMap.Values;
-
+                ICollection<Account> accounts = new List<Account>(clientInfoToAccountMap.Values);
                 List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
                 foreach (AdalUserInfo user in adalUsersWithoutClientInfo)

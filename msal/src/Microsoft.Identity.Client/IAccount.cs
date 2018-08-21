@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// AccountId of the home account for the user. This uniquely identifies the user across AAD tenants. 
         /// </summary>
-        /// <remarks>Can be null</remarks>
+        /// <remarks>Can be null, for example with users migrating from ADAL v3</remarks>
         AccountId HomeAccountId { get; }
    }
 }

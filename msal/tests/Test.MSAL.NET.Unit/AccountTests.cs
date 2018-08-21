@@ -36,12 +36,12 @@ namespace Test.MSAL.NET.Unit
     {
         [TestMethod]
         [TestCategory("UserTests")]
-        public void Constructor_IdIsRequired()
+        public void Constructor_IdIsNotRequired()
         {
-            // 1. Id is required
-            AssertException.Throws<ArgumentNullException>(() => new Account(null, "d", "n"));
+            // 1. Id not is required
+            new Account(null, "d", "n");
 
-            // 2. Other properties are optional
+            // 2. Other properties are optional too
             new Account(new AccountId("a.b", "a", "b"), null, null);
         }
 
