@@ -63,54 +63,72 @@ namespace Microsoft.Identity.Core.Cache
                 return;
             }
 
-            var rtItem = new MsalRefreshTokenCacheItem
-                (new Uri(authority).Host, clientId, resultWrapper.RefreshToken, resultWrapper.RawClientInfo);
+            try
+            {
+                var rtItem = new MsalRefreshTokenCacheItem
+                    (new Uri(authority).Host, clientId, resultWrapper.RefreshToken, resultWrapper.RawClientInfo);
+                tokenCacheAccessor.SaveRefreshToken(rtItem);
 
-            tokenCacheAccessor.SaveRefreshToken(rtItem);
-
-            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
-                (new Uri(authority).Host, objectId, resultWrapper.RawClientInfo, null, displayableId, resultWrapper.Result.TenantId);
-
-            tokenCacheAccessor.SaveAccount(accountCacheItem);
+                MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
+                    (new Uri(authority).Host, objectId, resultWrapper.RawClientInfo, null, displayableId, resultWrapper.Result.TenantId);
+                tokenCacheAccessor.SaveAccount(accountCacheItem);
+            }
+            catch (Exception ex)
+            {
+                msg = "An error occurred while writing ADAL refresh token to the cache in MSAL format. " +
+                      "For details please see https://aka.ms/net-cache-persistence-errors. ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
+            }
         }
 
-        public static void WriteAdalRefreshToken(ILegacyCachePersistance legacyCachePersistance, MsalRefreshTokenCacheItem rtItem, MsalIdTokenCacheItem idItem,
-            string authority, string uniqueId, string scope)
+        public static void WriteAdalRefreshToken(ILegacyCachePersistance legacyCachePersistance, 
+            MsalRefreshTokenCacheItem rtItem, MsalIdTokenCacheItem idItem, string authority, string uniqueId, string scope)
         {
-            if (rtItem == null)
+            try
             {
-                string msg = "No refresh token available. Skipping MSAL refresh token cache write";
-                CoreLoggerBase.Default.Info(msg);
-                CoreLoggerBase.Default.InfoPii(msg);
-                return;
-            }
-
-            //Using scope instead of resource becaue that value does not exist. STS should return it.
-            AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
-                uniqueId, idItem.IdToken.PreferredUsername);
-            AdalResultWrapper wrapper = new AdalResultWrapper()
-            {
-                Result = new AdalResult(null, null, DateTimeOffset.MinValue)
+                if (rtItem == null)
                 {
-                    UserInfo = new AdalUserInfo()
-                    {
-                        UniqueId = uniqueId,
-                        DisplayableId = idItem.IdToken.PreferredUsername
-                    }
-                },
-                RefreshToken = rtItem.Secret,
-                RawClientInfo = rtItem.RawClientInfo,
-                //ResourceInResponse is needed to treat RT as an MRRT. See IsMultipleResourceRefreshToken 
-                //property in AdalResultWrapper and its usage. Stronger design would be for the STS to return resource
-                //for which the token was issued as well on v2 endpoint.
-                ResourceInResponse = scope
-            };
+                    string msg = "No refresh token available. Skipping MSAL refresh token cache write";
+                    CoreLoggerBase.Default.Info(msg);
+                    CoreLoggerBase.Default.InfoPii(msg);
+                    return;
+                }
 
-#if !FACADE && !NETSTANDARD1_3 || !NET_CORE
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
-            dictionary[key] = wrapper;
-            legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));
-#endif
+                //Using scope instead of resource becaue that value does not exist. STS should return it.
+                AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
+                    uniqueId, idItem.IdToken.PreferredUsername);
+                AdalResultWrapper wrapper = new AdalResultWrapper()
+                {
+                    Result = new AdalResult(null, null, DateTimeOffset.MinValue)
+                    {
+                        UserInfo = new AdalUserInfo()
+                        {
+                            UniqueId = uniqueId,
+                            DisplayableId = idItem.IdToken.PreferredUsername
+                        }
+                    },
+                    RefreshToken = rtItem.Secret,
+                    RawClientInfo = rtItem.RawClientInfo,
+                    //ResourceInResponse is needed to treat RT as an MRRT. See IsMultipleResourceRefreshToken 
+                    //property in AdalResultWrapper and its usage. Stronger design would be for the STS to return resource
+                    //for which the token was issued as well on v2 endpoint.
+                    ResourceInResponse = scope
+                };
+
+                IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+                dictionary[key] = wrapper;
+                legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));
+            }
+            catch (Exception ex)
+            {
+                string msg = "An error occurred while writing MSAL refresh token to the cache in ADAL format. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
+            }
         }
 
         public static Tuple<Dictionary<String, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
@@ -143,18 +161,20 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while searching and matching adal users in the msal cache. ";
+                string msg = "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
                 string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
                 CoreLoggerBase.Default.Warning(msg + noPiiMsg);
                 CoreLoggerBase.Default.WarningPii(msg + ex);
+
+                return Tuple.Create(new Dictionary<String, AdalUserInfo>(), new List<AdalUserInfo>());
             }
             return Tuple.Create(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
         }
 
-        public static Dictionary<String, AdalUserInfo> RemoveAdalUser(ILegacyCachePersistance legacyCachePersistance,
+        public static void RemoveAdalUser(ILegacyCachePersistance legacyCachePersistance,
             string displayableId, ISet<string> environmentAliases, string identifier)
         {
-            Dictionary<String, AdalUserInfo> users = new Dictionary<String, AdalUserInfo>();
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
@@ -180,12 +200,12 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "Failed to removed ADAL user - Exception - ";
+                string msg = "An error occurred while deleting account in ADAL format from the cache. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
                 string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
                 CoreLoggerBase.Default.Warning(msg + noPiiMsg);
                 CoreLoggerBase.Default.WarningPii(msg + ex);
             }
-            return users;
         }
 
         public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(ILegacyCachePersistance legacyCachePersistance, 
@@ -246,7 +266,8 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while searching for valid MSAL cache entries in ADAL cache. ";
+                string msg = "An error occurred while searching for refresh tokens in ADAL format in the cache for MSAL. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
                 string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
                 CoreLoggerBase.Default.Warning(msg + noPiiMsg);
                 CoreLoggerBase.Default.WarningPii(msg + ex);
@@ -276,45 +297,58 @@ namespace Microsoft.Identity.Core.Cache
         public static AdalResultWrapper FindMsalEntryForAdal(ITokenCacheAccessor tokenCacheAccessor, string authority,
             string clientId, string upn, RequestContext requestContext)
         {
-            var environment = new Uri(authority).Host;
-
-            List<MsalAccountCacheItem> accounts = new List<MsalAccountCacheItem>();
-            foreach (string accountStr in tokenCacheAccessor.GetAllAccountsAsString())
+            try
             {
-                var accountItem = JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountStr, requestContext);
-                if (accountItem != null && accountItem.Environment.Equals(environment, StringComparison.OrdinalIgnoreCase))
-                {
-                    accounts.Add(accountItem);
-                }
-            }
-            if (accounts.Count > 0)
-            {
-                foreach (var rtString in tokenCacheAccessor.GetAllRefreshTokensAsString())
-                {
-                    var rtCacheItem =
-                        JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(rtString, requestContext);
+                var environment = new Uri(authority).Host;
 
-                    //TODO - authority check needs to be updated for alias check
-                    if (rtCacheItem != null && environment.Equals(rtCacheItem.Environment, StringComparison.OrdinalIgnoreCase)
-                        && rtCacheItem.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase))
+                List<MsalAccountCacheItem> accounts = new List<MsalAccountCacheItem>();
+                foreach (string accountStr in tokenCacheAccessor.GetAllAccountsAsString())
+                {
+                    var accountItem = JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountStr, requestContext);
+                    if (accountItem != null && accountItem.Environment.Equals(environment, StringComparison.OrdinalIgnoreCase))
                     {
-                        // join refresh token cache item to corresponding account cache item to get upn
-                        foreach (MsalAccountCacheItem accountCacheItem in accounts)
+                        accounts.Add(accountItem);
+                    }
+                }
+                if (accounts.Count > 0)
+                {
+                    foreach (var rtString in tokenCacheAccessor.GetAllRefreshTokensAsString())
+                    {
+                        var rtCacheItem =
+                            JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(rtString, requestContext);
+
+                        //TODO - authority check needs to be updated for alias check
+                        if (rtCacheItem != null && environment.Equals(rtCacheItem.Environment, StringComparison.OrdinalIgnoreCase)
+                            && rtCacheItem.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (rtCacheItem.HomeAccountId.Equals(accountCacheItem.HomeAccountId, StringComparison.OrdinalIgnoreCase)
-                                && accountCacheItem.PreferredUsername.Equals(upn, StringComparison.OrdinalIgnoreCase))
+                            // join refresh token cache item to corresponding account cache item to get upn
+                            foreach (MsalAccountCacheItem accountCacheItem in accounts)
                             {
-                                return new AdalResultWrapper
+                                if (rtCacheItem.HomeAccountId.Equals(accountCacheItem.HomeAccountId, StringComparison.OrdinalIgnoreCase)
+                                    && accountCacheItem.PreferredUsername.Equals(upn, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    Result = new AdalResult(null, null, DateTimeOffset.MinValue),
-                                    RefreshToken = rtCacheItem.Secret,
-                                    RawClientInfo = rtCacheItem.RawClientInfo
-                                };
+                                    return new AdalResultWrapper
+                                    {
+                                        Result = new AdalResult(null, null, DateTimeOffset.MinValue),
+                                        RefreshToken = rtCacheItem.Secret,
+                                        RawClientInfo = rtCacheItem.RawClientInfo
+                                    };
+                                }
                             }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                string msg = "An error occurred while searching for refresh tokens in MSAL format in the cache for ADAL. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+
+                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
+                CoreLoggerBase.Default.WarningPii(msg + ex);
+            }
+
             return null;
         }
     }
