@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Core.Cache
         {
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                 new Dictionary<AdalTokenCacheKey, AdalResultWrapper>();
-            if (state == null)
+            if (state == null || state.Length == 0)
             {
                 return dictionary;
             }

@@ -163,7 +163,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Serializes current state of the cache as a blob. Caller application can persist the blob and update the state of the cache later by 
         /// passing that blob back in constructor or by calling method Deserialize.
         /// </summary>
-        /// <returns>Current state of the cache as a blob</returns>
+        /// <returns>Current state of the Adal V3+ cache as a blob</returns>
         public byte[] Serialize()
         {
             lock (cacheLock)
@@ -173,18 +173,53 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
+        /// Serializes current state of the cache as a blob. Caller application can persist the blob and update the state of the cache later by 
+        /// passing that blob back in constructor or by calling method Deserialize.
+        /// </summary>
+        /// <returns>Serialized token cache <see cref="CacheData"/></returns>
+        public CacheData SerializeAdalAndUnifiedCache()
+        {
+            lock (cacheLock)
+            {
+                var serializedAdalCache = AdalCacheOperations.Serialize(tokenCacheDictionary);
+                var serializedUnifiedCache = TokenCacheSerializeHelper.SerializeUnifiedCache(tokenCacheAccessor);
+
+                return new CacheData()
+                {
+                    AdalV3State = serializedAdalCache,
+                    UnifiedState = serializedUnifiedCache
+                };
+            }
+        }
+
+        /// <summary>
         /// Deserializes state of the cache. The state should be the blob received earlier by calling the method Serialize.
         /// </summary>
-        /// <param name="state">State of the cache as a blob</param>
-        public void Deserialize(byte[] state)
+        /// <param name="adalState">State of the cache in Adal V3+ format as a blob</param>
+        public void Deserialize(byte[] adalState)
         {
             lock (cacheLock)
             {
                 tokenCacheDictionary.Clear();
-                foreach (var entry in AdalCacheOperations.Deserialize(state))
+                foreach (var entry in AdalCacheOperations.Deserialize(adalState))
                 {
                     tokenCacheDictionary.Add(entry.Key, entry.Value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Deserializes state of the cache. The state should be the blob received earlier by calling the method Serialize.
+        /// </summary>
+        /// <param name="cacheData">Serialized token cache <see cref="CacheData"</param>
+        public void DeserializeAdalAndUnifiedCache(CacheData cacheData)
+        {
+            lock (cacheLock)
+            {
+                Deserialize(cacheData.AdalV3State);
+
+                RequestContext requestContext = new RequestContext(new AdalLogger(Guid.Empty));
+                TokenCacheSerializeHelper.DeserializeUnifiedCache(tokenCacheAccessor, cacheData.UnifiedState, requestContext);
             }
         }
 

@@ -195,7 +195,6 @@ namespace Microsoft.Identity.Client
                         requestParams.RequestContext.Logger.InfoPii(msg);
                         tokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem, requestParams.RequestContext);
                     }
-                    OnAfterAccess(args);
 
                     //save RT in ADAL cache for public clients
                     if (!requestParams.IsClientCredentialRequest)
@@ -205,6 +204,9 @@ namespace Microsoft.Identity.Client
                             Authority.UpdateHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
                             msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
                     }
+
+                    OnAfterAccess(args);
+
                     return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
                 }
                 finally
@@ -556,58 +558,62 @@ namespace Microsoft.Identity.Client
                     preferredEnvironmentHost, requestParam.ClientId, requestParam.Account?.HomeAccountId?.Identifier);
 
                 OnBeforeAccess(args);
-                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =
+                try
+                {
+                    MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =
                     JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(
                         tokenCacheAccessor.GetRefreshToken(key), requestParam.RequestContext);
-                OnAfterAccess(args);
 
-                // trying to find rt by authority aliases
-                if (msalRefreshTokenCacheItem == null)
-                {
-                    OnBeforeAccess(args);
-                    var refreshTokensStr = tokenCacheAccessor.GetAllRefreshTokensAsString();
-                    OnAfterAccess(args);
-
-                    foreach (var refreshTokenStr in refreshTokensStr)
+                    // trying to find rt by authority aliases
+                    if (msalRefreshTokenCacheItem == null)
                     {
-                        MsalRefreshTokenCacheItem msalRefreshToken =
-                            JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenStr, requestParam.RequestContext);
+                        var refreshTokensStr = tokenCacheAccessor.GetAllRefreshTokensAsString();
 
-                        if (msalRefreshToken != null &&
-                            msalRefreshToken.ClientId.Equals(requestParam.ClientId, StringComparison.OrdinalIgnoreCase) &&
-                            environmentAliases.Contains(msalRefreshToken.Environment) &&
-                            requestParam.Account?.HomeAccountId.Identifier == msalRefreshToken.HomeAccountId)
+                        foreach (var refreshTokenStr in refreshTokensStr)
                         {
-                            msalRefreshTokenCacheItem = msalRefreshToken;
-                            continue;
+                            MsalRefreshTokenCacheItem msalRefreshToken =
+                                JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenStr, requestParam.RequestContext);
+
+                            if (msalRefreshToken != null &&
+                                msalRefreshToken.ClientId.Equals(requestParam.ClientId, StringComparison.OrdinalIgnoreCase) &&
+                                environmentAliases.Contains(msalRefreshToken.Environment) &&
+                                requestParam.Account?.HomeAccountId.Identifier == msalRefreshToken.HomeAccountId)
+                            {
+                                msalRefreshTokenCacheItem = msalRefreshToken;
+                                continue;
+                            }
                         }
                     }
+
+                    msg = "Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null);
+                    requestParam.RequestContext.Logger.Info(msg);
+                    requestParam.RequestContext.Logger.InfoPii(msg);
+
+                    if (msalRefreshTokenCacheItem != null)
+                    {
+                        return msalRefreshTokenCacheItem;
+                    }
+
+                    requestParam.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
+                    requestParam.RequestContext.Logger.InfoPii("Checking ADAL cache for matching RT");
+
+                    if (requestParam.Account == null)
+                    {
+                        return null;
+                    }
+                    return CacheFallbackOperations.GetAdalEntryForMsal(
+                        legacyCachePersistance,
+                        preferredEnvironmentHost,
+                        environmentAliases,
+                        requestParam.ClientId,
+                        requestParam.LoginHint,
+                        requestParam.Account.HomeAccountId?.Identifier,
+                        null);
                 }
-
-                msg = "Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null);
-                requestParam.RequestContext.Logger.Info(msg);
-                requestParam.RequestContext.Logger.InfoPii(msg);
-
-                if (msalRefreshTokenCacheItem != null)
+                finally
                 {
-                    return msalRefreshTokenCacheItem;
+                    OnAfterAccess(args);
                 }
-
-                requestParam.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
-                requestParam.RequestContext.Logger.InfoPii("Checking ADAL cache for matching RT");
-
-                if (requestParam.Account == null)
-                {
-                    return null;
-                }
-                return CacheFallbackOperations.GetAdalEntryForMsal(
-                    legacyCachePersistance,
-                    preferredEnvironmentHost,
-                    environmentAliases, 
-                    requestParam.ClientId, 
-                    requestParam.LoginHint, 
-                    requestParam.Account.HomeAccountId?.Identifier, 
-                    null);
             }
         }
 
@@ -818,6 +824,8 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
                 ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
+
+                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(legacyCachePersistance, environmentAliases, ClientId);
                 OnAfterAccess(args);
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -838,7 +846,6 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(legacyCachePersistance, environmentAliases, ClientId);
                 Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
                 List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
 
@@ -986,19 +993,6 @@ namespace Microsoft.Identity.Client
                 requestContext.Logger.Info(msg);
                 requestContext.Logger.InfoPii(msg);
 
-                RemoveMsalAccount(account, environmentAliases, requestContext);
-                RemoveAdalUser(account, environmentAliases);
-            }
-        }
-
-        internal void RemoveMsalAccount(IAccount account, ISet<string> environmnetAliases, RequestContext requestContext)
-        {
-            lock (LockObject)
-            {
-                var msg = "Removing user from cache..";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
-
                 try
                 {
                     TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
@@ -1010,56 +1004,9 @@ namespace Microsoft.Identity.Client
 
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
-                    IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
-                        .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                                       environmnetAliases.Contains(item.Environment))
-                        .ToList();
-                    foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
-                    {
-                        tokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey(), requestContext);
-                    }
 
-                    msg = "Deleted refresh token count - " + allRefreshTokens.Count;
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
-                    IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
-                        .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                                       environmnetAliases.Contains(item.Environment))
-                        .ToList();
-                    foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
-                    {
-                        tokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetKey(), requestContext);
-                    }
-             
-                    msg = "Deleted access token count - " + allAccessTokens.Count;
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
-
-                    IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
-                        .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                                       environmnetAliases.Contains(item.Environment))
-                        .ToList();
-                    foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
-                    {
-                        tokenCacheAccessor.DeleteIdToken(idTokenCacheItem.GetKey(), requestContext);
-                    }
-
-                    msg = "Deleted Id token count - " + allIdTokens.Count;
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
-
-                    IList<MsalAccountCacheItem> allAccounts = GetAllAccounts(requestContext)
-                        .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                                       environmnetAliases.Contains(item.Environment))
-                        .ToList();
-                    foreach (MsalAccountCacheItem accountCacheItem in allAccounts)
-                    {
-                        tokenCacheAccessor.DeleteAccount(accountCacheItem.GetKey(), requestContext);
-                    }
-
-                    msg = "Deleted Account count - " + allIdTokens.Count;
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
+                    RemoveMsalAccount(account, environmentAliases, requestContext);
+                    RemoveAdalUser(account, environmentAliases);
 
                     OnAfterAccess(args);
                 }
@@ -1068,6 +1015,60 @@ namespace Microsoft.Identity.Client
                     HasStateChanged = false;
                 }
             }
+        }
+
+        internal void RemoveMsalAccount(IAccount account, ISet<string> environmnetAliases, RequestContext requestContext)
+        {
+            IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                               environmnetAliases.Contains(item.Environment))
+                .ToList();
+            foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
+            {
+                tokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey(), requestContext);
+            }
+
+            var msg = "Deleted refresh token count - " + allRefreshTokens.Count;
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
+            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                               environmnetAliases.Contains(item.Environment))
+                .ToList();
+            foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
+            {
+                tokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetKey(), requestContext);
+            }
+            
+            msg = "Deleted access token count - " + allAccessTokens.Count;
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
+
+            IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                               environmnetAliases.Contains(item.Environment))
+                .ToList();
+            foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
+            {
+                tokenCacheAccessor.DeleteIdToken(idTokenCacheItem.GetKey(), requestContext);
+            }
+
+            msg = "Deleted Id token count - " + allIdTokens.Count;
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
+
+            IList<MsalAccountCacheItem> allAccounts = GetAllAccounts(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                               environmnetAliases.Contains(item.Environment))
+                .ToList();
+            foreach (MsalAccountCacheItem accountCacheItem in allAccounts)
+            {
+                tokenCacheAccessor.DeleteAccount(accountCacheItem.GetKey(), requestContext);
+            }
+
+            msg = "Deleted Account count - " + allIdTokens.Count;
+            requestContext.Logger.Info(msg);
+            requestContext.Logger.InfoPii(msg);
         }
 
         internal void RemoveAdalUser(IAccount account, ISet<string> environmentAliases)
