@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 #if ANDROID
+using System;
 using Android.App;
 using Android.Content.PM;
 #endif
@@ -78,6 +79,7 @@ namespace Microsoft.Identity.Client
         /// Initializes an instance for a provided activity.
         /// </summary>
         /// <param name="activity">parent activity for the call. REQUIRED.</param>
+        [CLSCompliant(false)]
         public UIParent(Activity activity)
         {
             Activity = activity;
@@ -88,6 +90,7 @@ namespace Microsoft.Identity.Client
         /// Initializes an instance for a provided activity with flag directing the application
         /// to use the embedded webview instead of the system browser. See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
+        [CLSCompliant(false)]
         public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
         {
             CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;

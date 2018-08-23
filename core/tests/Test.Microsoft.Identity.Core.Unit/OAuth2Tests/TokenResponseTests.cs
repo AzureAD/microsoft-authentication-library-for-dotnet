@@ -29,7 +29,6 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
@@ -48,7 +47,7 @@ namespace Test.Microsoft.Identity.Unit.OAuth2Tests
             new TestPlatformInformation();
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
-            CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance());
+            CoreTelemetryService.InitializeCoreTelemetryService(new TestTelemetry());
         }
 
         [TestMethod]

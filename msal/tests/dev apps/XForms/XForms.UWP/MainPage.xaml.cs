@@ -39,6 +39,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Xamarin.Forms;
 
 namespace XForms.UWP
 {
@@ -48,7 +49,7 @@ namespace XForms.UWP
         {
             InitializeComponent();
 
-            LoadApplication(new XForms.App());
+            LoadApplication(new XForms.App());            
         }
     }
 }

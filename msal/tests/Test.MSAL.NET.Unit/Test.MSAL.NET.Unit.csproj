@@ -24,6 +24,11 @@
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />
     <None Include="Resources\**" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\Mocks\**\*.cs" LinkBase="CoreUT\Mocks" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestConstants.cs"  LinkBase="CoreUT" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestPlatformInformation.cs"  LinkBase="CoreUT" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestLogger.cs"  LinkBase="CoreUT" />
+
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,8 +51,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\core\src\Microsoft.Identity.Core.csproj" />
-    <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\Test.Microsoft.Identity.Core.Unit.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>

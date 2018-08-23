@@ -59,6 +59,14 @@
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
     <EmbeddedResource Include="Properties\Microsoft.IdentityModel.Clients.ActiveDirectory.rd.xml" />
+
+    <!-- Include Core as files, not as a project reference -->
+    <Compile Include="..\..\..\core\src\**\*.cs" Exclude="..\..\..\core\src\obj\**\*.*" LinkBase="Core" />
+    <None Include="..\..\..\core\src\Platforms\**\*.cs" LinkBase="Core\Platforms" />
+    <None Include="..\..\..\core\src\Features\**\*.cs" LinkBase="Core\Features" />
+    <None Include="..\..\..\core\src\*.md" LinkBase="Core" />
+    <Compile Remove="..\..\..\core\src\Platforms\**\*.*" />
+    <Compile Remove="..\..\..\core\src\Features\**\*.*" />
   </ItemGroup>
   
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
@@ -82,6 +90,8 @@
     <Compile Include="Platforms\net45\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
 	  <Compile Include="Features\CertificateAssertion\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\net45\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
     <Compile Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
@@ -89,15 +99,20 @@
     <Compile Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
-    <Compile Include="Platforms\netstandard1.1\*.cs" />
+    <Compile Include="Platforms\netstandard1.1\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\netstandard1.1\**\*.cs" LinkBase="Core\Platforms"/>
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features"/>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
+    <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms"/>
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features"/>
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
 	<Compile Include="Features\CertificateAssertion\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\uap\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms" />
     <Compile Include="Features\WinCommon\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -114,6 +129,7 @@
     <Reference Include="System.Xml.Linq" />
     <Compile Include="Platforms\iOS\**\*.cs" />
     <Compile Include="Features\NonWinCommon\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\iOS\**\*.cs" LinkBase="Core\Platforms" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
     <Reference Include="System" />
@@ -123,17 +139,16 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
     <Compile Include="Platforms\Android\**\*.cs" />
     <Compile Include="Features\NonWinCommon\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\Android\**\*.cs" LinkBase="Core\Platforms" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\core\src\Microsoft.Identity.Core.csproj" />
-  </ItemGroup>
-  
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
   <ItemGroup>
     <None Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
@@ -148,4 +163,21 @@
   <ItemGroup>
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
   </ItemGroup>
+
+  <Target Name="LayoutNuGet">
+    <PropertyGroup>
+      <NugetPackageRootFolder Condition="'$(NugetPackageRootFolder)' == ''">$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..",".nugetlayout"))</NugetPackageRootFolder>
+      <NuspecFilePath>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", "..", "build", "Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"))</NuspecFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" />
+      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" />
+    </ItemGroup>
+
+    <RemoveDir Directories="$(NugetPackageRootFolder)" />
+    <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
+    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
+  </Target>
+  
 </Project>

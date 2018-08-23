@@ -39,6 +39,7 @@
         <dependency id="System.Runtime.Serialization.Json" version="4.0.3" exclude="Build,Analyzers" />
         <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.NameResolution" version="4.3.0" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="Xamarin.iOS1.0">
       </group>

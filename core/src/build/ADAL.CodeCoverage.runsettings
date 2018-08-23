@@ -22,8 +22,7 @@ Included items must then not match any entries in the exclude list to remain inc
             <!-- Match assembly file paths: -->  
             <ModulePaths>  
               <Include>  
-                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.dll$</ModulePath>  
-                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.platform.dll$</ModulePath>  
+                <ModulePath>.*\microsoft.identitymodel.clients.activedirectory.dll$</ModulePath>                  
               </Include>  
               <Exclude>  
               </Exclude>  

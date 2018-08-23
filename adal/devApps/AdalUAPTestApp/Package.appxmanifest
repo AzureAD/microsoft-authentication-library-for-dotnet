@@ -24,6 +24,7 @@
   </Applications>
   <Capabilities>
     <Capability Name="internetClient" />
+    <Capability Name="privateNetworkClientServer" />
     <uap:Capability Name="userAccountInformation" />
     <uap:Capability Name="enterpriseAuthentication" />
   </Capabilities>

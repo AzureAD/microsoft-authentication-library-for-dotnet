@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Client
         /// <param name="requestCode">Request response code</param>
         /// <param name="resultCode">Result code from authentication</param>
         /// <param name="data">Response data from authentication</param>
+        [CLSCompliant(false)]
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
             RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));

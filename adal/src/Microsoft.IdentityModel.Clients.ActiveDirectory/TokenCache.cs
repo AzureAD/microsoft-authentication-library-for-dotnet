@@ -211,7 +211,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Deserializes state of the cache. The state should be the blob received earlier by calling the method Serialize.
         /// </summary>
-        /// <param name="cacheData">Serialized token cache <see cref="CacheData"</param>
+        /// <param name="cacheData">Serialized token cache <see cref="CacheData"></see></param>
         public void DeserializeAdalAndUnifiedCache(CacheData cacheData)
         {
             lock (cacheLock)

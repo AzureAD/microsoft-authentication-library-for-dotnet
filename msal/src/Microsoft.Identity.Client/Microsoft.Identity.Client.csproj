@@ -47,26 +47,39 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\core\src\Microsoft.Identity.Core.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
-    <None Remove="Features\ConfidentialClient\IConfidentialClientApplicationWithCertificate.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Client.rd.xml" />
+
+    <!-- Include Core as files, not as a project reference -->
+    <Compile Include="..\..\..\core\src\**\*.cs" Exclude="..\..\..\core\src\obj\**\*.*;..\..\..\core\src\properties\**\*.*" LinkBase="Core" />
+    <None Include="..\..\..\core\src\Platforms\**\*.cs" LinkBase="Core\Platforms" />
+    <None Include="..\..\..\core\src\Features\**\*.cs" LinkBase="Core\Features" />
+    <None Include="..\..\..\core\src\*.md" LinkBase="Core" />
+    <Compile Remove="..\..\..\core\src\Platforms\**\*.*" />
+    <Compile Remove="..\..\..\core\src\Features\**\*.*" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <Compile Include="Platforms\netstandard1.3\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
+    <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\ConfidentialClient\**\*.cs" />
+    <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\TokenCache\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" Condition="'$(TargetFramework)' != 'netstandard1.1'" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
     <!-- Remove UI specific logic as it is not supported yet -->
     <Compile Remove="UIParent.cs" />
-    <Compile Include="Platforms\netcore\*.cs" />
+    <Compile Include="Platforms\netcore\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\netcore\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
     <Compile Include="Features\TokenCache\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
@@ -76,6 +89,19 @@
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+    <Compile Include="Platforms\net45\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\net45\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
+    <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\TokenCache\**\*.cs" />
+    <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\*.cs" />
+    <Compile Include="Features\ConfidentialClient\**\*.cs" />
+    <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
+    <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
+    <Compile Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
+    <Compile Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
+    <Compile Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -87,37 +113,21 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Compile Include="Platforms\net45\*.cs" />
-    <Compile Include="Features\EventSource\**\*.cs" />
-    <Compile Include="Features\TokenCache\**\*.cs" />
-    <Compile Include="Features\PublicClient\**\*.cs" />
-    <Compile Include="Features\*.cs" />
-    <Compile Include="Features\ConfidentialClient\**\*.cs" />
-    <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
-    <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
-    <Compile Update="Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
-    <Compile Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
-    <Compile Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
-    <Compile Include="Platforms\uap\*.cs" />
+    <Compile Include="Platforms\uap\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms" />    
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
     <Compile Include="Features\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
-    <Compile Include="Platforms\netstandard1.3\**\*.cs" />
-    <Compile Include="Features\PublicClient\**\*.cs" />
-    <Compile Include="Features\ConfidentialClient\**\*.cs" />
-    <Compile Include="Features\EventSource\**\*.cs" />
-    <Compile Include="Features\TokenCache\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
+    <Compile Include="Platforms\iOS\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\iOS\**\*.cs" LinkBase="Core\Platforms" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -125,9 +135,10 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Compile Include="Platforms\iOS\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
+    <Compile Include="Platforms\Android\**\*.cs" />
+    <Compile Include="..\..\..\core\src\Platforms\Android\**\*.cs" LinkBase="Core\Platforms" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -135,13 +146,11 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <PackageReference Include="Xamarin.Android.Support.CustomTabs">
-      <Version>27.0.2</Version>
-    </PackageReference>
-    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat">
-      <Version>27.0.2</Version>
-    </PackageReference>
-    <Compile Include="Platforms\Android\**\*.cs" />
+    <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="27.0.2" />
+    <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
@@ -164,9 +173,6 @@
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.dll" />
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.xml" />
       <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.pdb" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.dll" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.xml" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Core.pdb" />
     </ItemGroup>
 
     <RemoveDir Directories="$(NugetPackageRootFolder)" />

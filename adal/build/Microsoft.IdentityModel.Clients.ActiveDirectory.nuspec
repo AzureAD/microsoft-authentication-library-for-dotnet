@@ -42,6 +42,7 @@ ADAL.NET takes advantage of Windows Server Active Directory and Azure Active Dir
         <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.0.8" exclude="Build,Analyzers" />
         <dependency id="System.Runtime.Serialization.Json" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="System.Runtime.Serialization.Primitives" version="4.3.0" exclude="Build,Analyzers" />
+        <dependency id="System.Net.NameResolution" version="4.3.0" exclude="Build,Analyzers" />
         <dependency id="System.Xml.XDocument" version="4.3.0" exclude="Build,Analyzers" />
       </group>
       <group targetFramework="Xamarin.iOS1.0">

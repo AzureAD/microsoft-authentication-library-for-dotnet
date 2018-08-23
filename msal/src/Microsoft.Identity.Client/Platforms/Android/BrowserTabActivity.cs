@@ -29,6 +29,7 @@ using Android.App;
 using Android.Content;
 using Android.OS;
 using Microsoft.Identity.Core.UI.SystemWebview;
+using System;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client
     /// and the BrowserTabActivity will be launched.
     /// </summary>
     //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
+    [CLSCompliant(false)]
     public class BrowserTabActivity : Activity
     {
         /// <summary>
