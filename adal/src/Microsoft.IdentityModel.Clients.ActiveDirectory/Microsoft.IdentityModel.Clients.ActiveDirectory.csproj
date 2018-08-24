@@ -27,7 +27,7 @@
     <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
     <Version>$(AdalClientSemVer)</Version>
 
-    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
     <Product>Active Directory Authentication Library</Product>
   </PropertyGroup>
