@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
-    <Product>Microsoft.IdentityModel.Clients.ActiveDirectory ($(TargetFramework))</Product> 
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>
+    <Product>Microsoft.IdentityModel.Clients.ActiveDirectory ($(TargetFramework))</Product>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-	  <DelaySign>true</DelaySign>
+    <DelaySign>true</DelaySign>
     <!-- Workaround until Xamarin supports PPDB -->
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <DebugType>full</DebugType>
@@ -27,12 +27,13 @@
     <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
     <Version>$(AdalClientSemVer)</Version>
 
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
     <Product>Active Directory Authentication Library</Product>
   </PropertyGroup>
-  
- <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
@@ -44,7 +45,7 @@
     <CodeAnalysisAdditionalOptions>/assemblyCompareMode:StrongNameIgnoringVersion</CodeAnalysisAdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
@@ -52,7 +53,7 @@
     <DefineConstants>$(DefineConstants);iOS</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
@@ -68,7 +69,7 @@
     <Compile Remove="..\..\..\core\src\Platforms\**\*.*" />
     <Compile Remove="..\..\..\core\src\Features\**\*.*" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -89,7 +90,7 @@
     <Reference Include="System.Xml" />
     <Compile Include="Platforms\net45\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
-	  <Compile Include="Features\CertificateAssertion\**\*.cs" />
+    <Compile Include="Features\CertificateAssertion\**\*.cs" />
     <Compile Include="..\..\..\core\src\Platforms\net45\**\*.cs" LinkBase="Core\Platforms" />
     <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
@@ -108,7 +109,7 @@
     <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features"/>
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
-	<Compile Include="Features\CertificateAssertion\**\*.cs" />
+    <Compile Include="Features\CertificateAssertion\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\uap\**\*.cs" />
@@ -179,5 +180,5 @@
     <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
     <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
   </Target>
-  
+
 </Project>

@@ -17,6 +17,7 @@
     <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
     <Version>$(MsalClientSemVer)</Version>
 
+    <!-- Copyright needs to be in the form of © not (c) to be compliant -->
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
     <Product>Microsoft Authentication Library</Product>
@@ -117,7 +118,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\uap\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms" />    
+    <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
     <Compile Include="Features\*.cs" />

@@ -11,7 +11,7 @@
     <projectUrl>https://go.microsoft.com/fwlink/?linkid=844761</projectUrl>
     <description>MSAL makes it easy to obtain tokens from Azure AD v2 (work &amp; school accounts, MSA) and Azure AD B2C, gaining access to Microsoft Cloud API and any other API secured by Microsoft identities. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.</description>
     <summary>This package contains the binaries of the Microsoft Authentication Library (MSAL).</summary>
-    <copyright>(C) Microsoft Corporation. All rights reserved.</copyright>
+    <copyright>© Microsoft Corporation. All rights reserved.</copyright>
     <tags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</tags>
     <dependencies>
       <group targetFramework=".NETCoreApp1.0">
