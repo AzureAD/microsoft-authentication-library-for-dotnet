@@ -6,6 +6,11 @@
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>
 
+    <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0" />
   </ItemGroup>

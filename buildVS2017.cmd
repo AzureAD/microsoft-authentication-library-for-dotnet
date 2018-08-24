@@ -26,8 +26,8 @@ if '%3' NEQ '' (set bsampleapps=1)
 echo Building using: target: %btarget%, configuration: %bconfig%, sample: %bsampleapps%
 
 if %bsampleapps% EQU  1 (
-    msbuild Combined.NoWinRT.sln /m /t:%btarget% /p:configuration=%bconfig% 
+    msbuild LibsAndSamples.sln /m /t:%btarget% /p:configuration=%bconfig% 
  ) else (
-    msbuild CoreAndUTests.sln /m /t:%btarget% /p:configuration=%bconfig%
+    msbuild LibsNoSamples.sln /m /t:%btarget% /p:configuration=%bconfig%
   )
 )

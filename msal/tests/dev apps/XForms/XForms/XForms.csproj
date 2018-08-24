@@ -8,9 +8,8 @@
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\..\..\build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>True</DelaySign>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\..\build/MSAL.snk</AssemblyOriginatorKeyFile>
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>
   <ItemGroup>

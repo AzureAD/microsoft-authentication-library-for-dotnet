@@ -4,9 +4,10 @@
     <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../../build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <DebugType>full</DebugType>
-    <DelaySign>true</DelaySign>
+    <!-- The MSAL.snk has both private and public keys -->
+    <DelaySign>false</DelaySign>
   </PropertyGroup>
 
   <PropertyGroup Label="GenerateAssemblyInfo inputs">
