@@ -64,11 +64,11 @@ namespace Microsoft.Identity.Client
         /// <param name="userTokenCache">Token cache for saving user tokens. Can be set to null if the confidential client 
         /// application only uses the Client Credentials grants (that is requests token in its own name and not in the name of users).
         /// Otherwise should be provided. REQUIRED</param>
-        /// <param name="appTokenCache">Token cache for saving application (that is clientà token). Can be set to <c>null</c> except if the application
+        /// <param name="appTokenCache">Token cache for saving application (that is client token). Can be set to <c>null</c> except if the application
         /// uses the client credentials grants</param>
         /// <remarks>
         /// See https://aka.ms/msal-net-client-applications for a description of confidential client applications (and public client applications)
-        /// Client credential grands are overrides of <see cref="ConfidentialClientApplication.AcquireTokenForClientAsync(IEnumerable{string})"/>
+        /// Client credential grants are overrides of <see cref="ConfidentialClientApplication.AcquireTokenForClientAsync(IEnumerable{string})"/>
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication.ConfidentialClientApplication(string, string, string, ClientCredential, TokenCache, TokenCache)"/> which 
         /// enables app developers to specify the authority
@@ -83,14 +83,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientId">Client ID (also named Application ID) of the application as registered in the 
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
-        /// <param name="authority">Authority of the Security service token (STS) from which MSAL.NET will acquire the tokens.
+        /// <param name="authority">Authority of the secure token service (STS) from which MSAL.NET will acquire the tokens.
         /// Usual authorities are:
         /// <list type="bullet">
         /// <item><c>https://login.microsoftonline.com/tenant/</c>, where <c>tenant</c> is the tenant ID of the Azure AD tenant
-        /// or a domain associated with this Azure AD tenant, in order to sign-in user of a specific organization only</item>
-        /// <item><c>https://login.microsoftonline.com/common/</c> to signing users with any work and school accounts or Microsoft personal account</item>
-        /// <item><c>https://login.microsoftonline.com/organizations/</c> to signing users with any work and school accounts</item>
-        /// <item><c>https://login.microsoftonline.com/consumers/</c> to signing users with only personal Microsoft account (live)</item>
+        /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</item>
+        /// <item><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal accounts</item>
+        /// <item><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</item>
+        /// <item><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts(live)</item>
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal 
         /// </param>
@@ -100,11 +100,11 @@ namespace Microsoft.Identity.Client
         /// <param name="userTokenCache">Token cache for saving user tokens. Can be set to null if the confidential client 
         /// application only uses the Client Credentials grants (that is requests token in its own name and not in the name of users).
         /// Otherwise should be provided. REQUIRED</param>
-        /// <param name="appTokenCache">Token cache for saving application (that is clientà token). Can be set to <c>null</c> except if the application
+        /// <param name="appTokenCache">Token cache for saving application (that is client token). Can be set to <c>null</c> except if the application
         /// uses the client credentials grants</param>
         /// <remarks>
         /// See https://aka.ms/msal-net-client-applications for a description of confidential client applications (and public client applications)
-        /// Client credential grands are overrides of <see cref="ConfidentialClientApplication.AcquireTokenForClientAsync(IEnumerable{string})"/>
+        /// Client credential grants are overrides of <see cref="ConfidentialClientApplication.AcquireTokenForClientAsync(IEnumerable{string})"/>
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication.ConfidentialClientApplication(string, string, ClientCredential, TokenCache, TokenCache)"/> which 
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client
         /// another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of). 
         /// This confidential client application was itself called with a token which will be provided in the 
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
-        /// This override sends the certificate, which helps certificates rotation in Azure AD
+        /// This override sends the certificate, which helps certificate rotation in Azure AD
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="userAssertion">Instance of <see cref="UserAssertion"/> containing credential information about

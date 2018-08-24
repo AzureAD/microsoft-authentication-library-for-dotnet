@@ -85,17 +85,17 @@ namespace Microsoft.Identity.Client
         /// Deserializes the token cache from a serialization blob
         /// </summary>
         /// <param name="tokenCache">Token cache to deserialize (to fill-in from the state)</param>
-        /// <param name="unifiedCacheState">Array of bytes containing serialized Msal cache data</param>
+        /// <param name="unifiedState">Array of bytes containing serialized Msal cache data</param>
         /// <remarks>
-        /// <paramref name="unifiedCacheState"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information
+        /// <paramref name="unifiedState"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information
         /// </remarks>
-        public static void Deserialize(this TokenCache tokenCache, byte[] unifiedCacheState)
+        public static void Deserialize(this TokenCache tokenCache, byte[] unifiedState)
         {
             lock (tokenCache.LockObject)
             {
                 RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
 
-                TokenCacheSerializeHelper.DeserializeUnifiedCache(tokenCache.tokenCacheAccessor, unifiedCacheState, requestContext);
+                TokenCacheSerializeHelper.DeserializeUnifiedCache(tokenCache.tokenCacheAccessor, unifiedState, requestContext);
             }
         }
 
