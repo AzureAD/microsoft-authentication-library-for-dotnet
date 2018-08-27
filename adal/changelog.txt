@@ -1,3 +1,76 @@
+Version 4.0.0-preview
+==============
+This release includes:
+- Support MonoAndroid8.1 and Uap10.0 (Windows 10 applications)
+- Remove support for Windows 8 and Windows Phone 8, as well as Portable-net45+win (PCL)
+- Remove `Microsoft.Identity.Models.Clients.ActiveDirectory.Platform.dll` which only contained type forwarding to be binary compatible
+- To preserve the single-sign-on (SSO) state, the new versions of ADAL(v4) and MSAL(v2) share the same token cache, are capable of reading the ADAL 3.x token cache 
+   and are capable of writing the ADAL 3.x token cache in addition to the new cache format (named unified cache), see https://aka.ms/adal-net-to-msal-net.
+   Note that on mobile platforms (UWP, Xamarin.iOS, Xamarin.Android), you will benefit automatically from the token cache sharing between ADAL and MSAL as the library handles the serialization
+   to the container of choice of the platform (respectively isolated storage, iOS key chain, and Android shared preferences).
+- In the Xamarin.iOS platform, AuthenticationContext has a new property named KeychainSecurityGroup. This Xamarin iOS specific property enables you to direct the application to share the 
+   token cache with other applications sharing the same keychain security group. If you provide this key, you must add the capability to your Application Entitlement. 
+   For more info, see https://aka.ms/adal-net-sharing-cache-on-ios. This API may change in a future release.
+- For more info on the release, checkout https://aka.ms/msal-net-2-released
+
+Version 3.19.8
+==============
+This hotfix release includes:
+- Increasing API Surface for Subject Issuer Auth(#1091)
+
+Version 3.19.7
+==============
+This hotfix release includes:
+- No longer clear SecurePassword after the username password grant flow (#1087)
+- Keep whitespaces inside a SAML token. This will bring better interoperability with other federated IDPs. (#1087)
+
+Version 3.19.6
+==============
+This hotfix release includes:
+- Updated ADAL to follow the Public Key Authentication spec when running on a non workplace joined device (#1058)
+
+Version 3.19.5
+==============
+This hotfix release includes:
+- Resolved issue with iOS 11.3 where network resources are reclaimed by the system when sending the app to the background (#1053)
+
+Version 3.19.4
+==============
+This hotfix release includes:
+- X5c claim added to AcquireTokenByAuthorizationCodeAsync for easy certificate rollover (#1043)
+- Filter logs for AdalEventSource based on log level in default log (#1039)
+
+Version 3.19.3
+==============
+This hotfix release includes:
+- Fix for an issue with CoreCLR library writing to console by default (#1028)
+
+Version 3.19.2
+==============
+This hotfix release includes:
+- Fix for an issue with web UI failure on UWP platform
+
+Version 3.19.1
+==============
+This hotfix release includes:
+- Fix deadlock issue when calling with UI context without specifying ConfigureAwait(false)
+
+Version 3.19.0
+==============
+- Adding new Api to acquire a security token from the authority while enabling simplified Azure AD certificate roll-over (#959)
+- Fixing issues related to sending incorrect parameters in broker requests (#960)
+
+Version 3.18.0
+==============
+This release includes
+- Complicance with GDPR
+	- Add PiiLoggingEnabled flag (#877)
+- Include Sovereign Cloud support (#884)
+
+Version 3.17.3
+==============
+- Fix an issue with IOS broker - changing the type of UserIdentifier.AnyUser from UniqueId to OptionalDisplayableId (#905)
+
 Version 3.17.2
 ==============
 - Re-enable binary compatibility by re-adding the platform specific assemblies containing public types and adding TypeForwardedTo attributes (#887)
