@@ -31,9 +31,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// Component containing common validation methods
-    /// </summary>
+    /// <Summary>
+    /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/> 
+    /// extend this class. For details see https://aka.ms/msal-net-client-applications
+    /// </Summary>
     public partial interface IClientApplicationBase
     {
         /// <summary>
@@ -60,15 +61,17 @@ namespace Microsoft.Identity.Client
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
-        /// <item><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</item>
-        /// <item><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
+        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
+        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
         /// platforms to call back the application)
-        /// </item>
+        /// </description></item>
         /// </list>
-        /// In <see cref="T:ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
+        /// These default URIs could change in the future.
+        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
-        /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
+        /// you then need to add the reply URL of the deployed application in the application registration portal.
+        /// </remarks>
         string RedirectUri { get; set; }
 
         /// <summary>

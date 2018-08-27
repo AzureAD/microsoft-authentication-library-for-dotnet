@@ -38,6 +38,8 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Extension methods used to subscribe to cache serialization events, and to effectively serialize and deserialize the cache
     /// </summary>
+    /// <remarks>New in MSAL.NET 2.x: it's now possible to deserialize the token cache in two formats, the ADAL V3 legacy token cache
+    /// format, and the new unified cache format, common to ADAL.NET, MSAL.NET, and other libraries on the same platform (MSAL.objc, on iOS)</remarks>
     public static class TokenCacheExtensions
     {
         /// <summary>
@@ -82,7 +84,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Deserializes the token cache from a serialization blob
+        /// Deserializes the token cache from a serialization blob in the unified cache format
         /// </summary>
         /// <param name="tokenCache">Token cache to deserialize (to fill-in from the state)</param>
         /// <param name="unifiedState">Array of bytes containing serialized Msal cache data</param>
@@ -100,7 +102,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Deserializes the token cache from a serialization blob
+        /// Deserializes the token cache from a serialization blob in both format (ADAL V3 format, and unified cache format)
         /// </summary>
         /// <param name="tokenCache">Token cache to deserialize (to fill-in from the state)</param>
         /// <param name="cacheData">Array of bytes containing serialicache data</param>
@@ -117,7 +119,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Serializes the entire token cache
+        /// Serializes the entire token cache, in the unified cache format only
         /// </summary>
         /// <param name="tokenCache">Token cache to serialize</param>
         /// <returns>array of bytes containing the serialized unified cache</returns>
@@ -131,7 +133,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Serializes the entire token cache
+        /// Serializes the entire token cache in both the ADAL V3 and unified cache formats.
         /// </summary>
         /// <param name="tokenCache">Token cache to serialize</param>
         /// <returns>Serialized token cache <see cref="CacheData"/></returns>

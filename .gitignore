@@ -247,3 +247,5 @@ msal/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
 **/Android/**/[Rr]esource.[Dd]esigner.cs
 **/Droid/**/[Rr]esource.[Dd]esigner.cs
 
+/msal/src/Microsoft.Identity.Client/docfx_project
+/msal/src/Microsoft.Identity.Client/_api

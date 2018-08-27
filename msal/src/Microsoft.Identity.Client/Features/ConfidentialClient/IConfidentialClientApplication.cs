@@ -32,7 +32,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Component to be used for confidential client applications like Web Apps/API.
+    /// Component to be used with confidential client applications like Web Apps/API.
     /// </summary>
     public interface IConfidentialClientApplication : IClientApplicationBase
     {

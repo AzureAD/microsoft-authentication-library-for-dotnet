@@ -190,13 +190,13 @@ namespace Microsoft.Identity.Client
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to 
         /// provide additional claims, such as doing two factor authentication. The are two cases:
         /// <list type="bullent">
-        /// <item>
-        /// If your application is a <see cref="T:PublicClientApplication"/>, you should just call and <see cref="M:PublicClientApplication.AcquireTokenAsync"/>
-        /// override of <see cref="T:PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
+        /// <item><description>
+        /// If your application is a <see cref="PublicClientApplication"/>, you should just call and <see cref="PublicClientApplication.AcquireTokenAsync"/>
+        /// override of <see cref="PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
         /// to the extraQueryParameters, where ex is an instance of this exception.
-        /// </item>
-        /// <item>If your application is a <see cref="T:ConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize 
-        /// exception with a message containing the claims</item>
+        /// </description></item>
+        /// <item>><description>If your application is a <see cref="ConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize 
+        /// exception with a message containing the claims</description></item>
         /// </list>
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>

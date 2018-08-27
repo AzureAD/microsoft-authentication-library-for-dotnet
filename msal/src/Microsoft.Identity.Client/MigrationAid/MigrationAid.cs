@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client
         string Name { get; }
 
         /// <summary>
-        /// In MSAL.NET 1.x was the URL of the identity provider (e.g. https://login.microsoftonline.com/tenantId)
+        /// In MSAL.NET 1.x was the URL of the identity provider (e.g. https://login.microsoftonline.com/tenantId).
         /// From MSAL.NET 2.x use <see cref="IAccount.Environment"/> which retrieves the host only (e.g. login.microsoftonline.com).
         /// See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         string IdentityProvider { get; }
 
         /// <summary>
-        /// In MSAL.NET 1.x was an identifier for the user in the guest tenant
+        /// In MSAL.NET 1.x was an identifier for the user in the guest tenant.
         /// From MSAL.NET 2.x, use <see cref="IAccount.HomeAccountId"/><see cref="AccountId.Identifier"/> to get
         /// the user identifier (globally unique accross tenants). See https://aka.ms/msal-net-2-released for more details.
         /// </summary>
@@ -52,6 +52,10 @@ namespace Microsoft.Identity.Client
         string Identifier { get; }
     }
 
+    /// <Summary>
+    /// Interface defining common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/> 
+    /// extend this class. For details see https://aka.ms/msal-net-client-applications
+    /// </Summary>
     public partial interface IClientApplicationBase
     {
         /// <summary>
@@ -83,6 +87,10 @@ namespace Microsoft.Identity.Client
         void Remove(IUser user);
     }
 
+    /// <Summary>
+    /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/> 
+    /// extend this class. For details see https://aka.ms/msal-net-client-applications
+    /// </Summary>
     public partial class ClientApplicationBase
     {
         /// <summary>

@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="x">first value</param>
         /// <param name="y">second value</param>
-        /// <returns>true if the object are equal</returns>
+        /// <returns>true if the objects are equal</returns>
         public static bool operator ==(UIBehavior x, UIBehavior y)
         {
             return x.PromptValue == y.PromptValue;
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="x">first value</param>
         /// <param name="y">second value</param>
-        /// <returns>true if the object are not equal</returns>
+        /// <returns>true if the objects are not equal</returns>
         public static bool operator !=(UIBehavior x, UIBehavior y)
         {
             return !(x == y);

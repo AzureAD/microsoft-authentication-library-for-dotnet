@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// The IAccount interface represents information about a single account. 
     /// The same user can be present in different tenants, that is, a user can have multiple accounts.
-    /// An <c>IAccount</c> is returned in <see cref="AuthenticationResult.Account"/>, and can be used as parameters
+    /// An <c>IAccount</c> is returned in the <see cref="AuthenticationResult"/>.<see cref="AuthenticationResult.Account"/> property, and can be used as parameters
     /// of PublicClientApplication and ConfidentialClientApplication methods acquiring tokens such as <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>
     /// </summary>
     public interface IAccount

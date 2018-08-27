@@ -43,10 +43,10 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Token cache storing access and refresh tokens for accounts 
-    /// This class used in the constuctors of <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/>.
+    /// This class is used in the constuctors of <see cref="PublicClientApplication"/> and <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
-    /// token cache (in the case of applications using the client credential flows)
-    /// See also <see cref="T:TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
+    /// token cache (in the case of applications using the client credential flows).
+    /// See also <see cref="Microsoft.Identity.Client.TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
     /// </summary>
     public sealed class TokenCache
     {

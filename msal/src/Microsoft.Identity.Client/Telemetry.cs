@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Handler enabling your application to send telemetry to your telemetry service or subscription (for instance Microsoft Application Insights).
-    /// To enable telemetry in your application, you get the singleton instance of <c>Telemetry</c> by using <see cref="M:Telemetry.GetInstance()"/>, you set the delegate that will 
+    /// To enable telemetry in your application, you get the singleton instance of <c>Telemetry</c> by using <see cref="Telemetry.GetInstance()"/>, you set the delegate that will 
     /// process the telemetry events by calling <see cref="RegisterReceiver(Telemetry.Receiver)"/>, and you decide if you want to reveive telemetry
     /// events only in case of failture or all the time, by setting the <see cref="TelemetryOnFailureOnly"/> boolean.
     /// </summary>
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         private Receiver _receiver = null;
 
         /// <summary>
-        /// Registers one deletage that will send telemetry information to your telemetry service
+        /// Registers one delegate that will send telemetry information to your telemetry service
         /// </summary>
         /// <param name="r">Receiver delegate. See <see cref="Receiver"/></param>
         public void RegisterReceiver(Receiver r)

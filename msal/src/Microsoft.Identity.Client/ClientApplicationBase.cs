@@ -40,7 +40,7 @@ using Microsoft.Identity.Core.Telemetry;
 namespace Microsoft.Identity.Client
 {
     /// <Summary>
-    /// Abstract class containing common API methods and properties. Both <see cref="T:PublicClientApplication"/> and <see cref="T:ConfidentialClientApplication"/> 
+    /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/> 
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public abstract partial class ClientApplicationBase
@@ -55,21 +55,21 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Constructor of the base application
         /// </summary>
-        /// <param name="clientId">Client ID (also known as 'App ID') of the application as registered in the 
+        /// <param name="clientId">Client ID (also known as <i>Application ID</i>) of the application as registered in the 
         /// application registration portal (https://aka.ms/msal-net-register-app)</param>
-        /// <param name="authority">URL of the security service token (STS) from which MSAL.NET will acquire the tokens.
+        /// <param name="authority">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
         /// 
         /// Usual authorities endpoints for the Azure public Cloud are:
         /// <list type="bullet">
-        /// <item><c>https://login.microsoftonline.com/tenant/</c>, where <c>tenant</c> is the tenant ID of the Azure AD tenant
-        /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</item>
-        /// <item><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</item>
-        /// <item><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</item>
-        /// <item><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</item>
+        /// <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
+        /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
-        /// <param name="redirectUri">URL where the STS will call back the application with the security token. For details see https://aka.ms/msal-net-client-applications</param>
+        /// <param name="redirectUri">also named <i>Reply URI</i>, the redirect URI is the URI where the STS will call back the application with the security token. For details see https://aka.ms/msal-net-client-applications</param>
         /// <param name="validateAuthority">Boolean telling MSAL.NET if the authority needs to be verified against a list of known authorities. 
         /// This should be set to <c>false</c> for Azure AD B2C authorities as those are customer specific (a list of known B2C authorities
         /// cannot be maintained by MSAL.NET</param>
@@ -110,34 +110,33 @@ namespace Microsoft.Identity.Client
         public string Authority { get; }
 
         /// <summary>
-        /// Gets the Client ID (also knwon as App ID) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
+        /// Gets the Client ID (also knwon as <i>Application ID</i>) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
         /// and as passed in the constructor of the application
         /// </summary>
         public string ClientId { get; }
 
         /// <summary>
-        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will reply back to the application with the tokens. 
-        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
+        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
+        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
         /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
         /// <list type="bullet">
-        /// <item><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</item>
-        /// <item><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
+        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
+        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
         /// platforms to call back the application)
-        /// </item>
+        /// </description></item>
         /// </list>
         /// These default URIs could change in the future.
-        /// In <see cref="T:ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
+        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
-        /// you then need to add the reply URL of the deployed application in the application registration portal.
-        /// For details, see https://aka.ms/msal-net-client-applications </remarks>
+        /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
         public string RedirectUri { get; set; }
 
         /// <summary>
         /// Sets or Gets a custom query parameters that may be sent to the STS for dogfood testing or debugging. This is a string of segments
         /// of the form <c>key=value</c> separated by an ampersand character.
-        /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
-        /// This property is also contatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
+        /// Unless requested otherwise by Microsoft support, this parameter should not be set by application developers as it may have adverse effect on the application.
+        /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
         /// </summary>
         public string SliceParameters { get; set; }
 
@@ -185,7 +184,7 @@ namespace Microsoft.Identity.Client
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
         /// </summary>
         /// <param name="accountId">Account identifier. The identifier is typically
-        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>. 
+        /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>.
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property>
         /// </param>
         public async Task<IAccount> GetAccountAsync(string accountId)
@@ -203,11 +202,11 @@ namespace Microsoft.Identity.Client
         /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application, 
         /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
         /// <remarks>
-        /// The access token is considered a match if it AT LEAST contains all the requested scopes.
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
         /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or 
         /// close to expiration (within a 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// 
-        /// See https://aka.ms/msal-net-acuiretokensilent for more details
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </remarks>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
         {

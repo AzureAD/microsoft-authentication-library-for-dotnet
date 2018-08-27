@@ -83,14 +83,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientId">Client ID (also named Application ID) of the application as registered in the 
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
-        /// <param name="authority">Authority of the secure token service (STS) from which MSAL.NET will acquire the tokens.
+        /// <param name="authority">Authority of the security token service (STS) from which MSAL.NET will acquire the tokens.
         /// Usual authorities are:
         /// <list type="bullet">
-        /// <item><c>https://login.microsoftonline.com/tenant/</c>, where <c>tenant</c> is the tenant ID of the Azure AD tenant
-        /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</item>
-        /// <item><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal accounts</item>
-        /// <item><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</item>
-        /// <item><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts(live)</item>
+        /// <item><description><c>https://login.microsoftonline.com/tenant/</c>, where <c>tenant</c> is the tenant ID of the Azure AD tenant
+        /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal accounts</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
+        /// <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts(live)</description></item>
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal 
         /// </param>
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires an access token for this application (usually a Web API) from the authority configured in the applicaiton, in order to access 
+        /// Acquires an access token for this application (usually a Web API) from the authority configured in the application, in order to access 
         /// another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of). 
         /// This confidential client application was itself called with a token which will be provided in the 
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires an access token for this application (usually a Web API) from the authority configured in the applicaiton, in order to access 
+        /// Acquires an access token for this application (usually a Web API) from the authority configured in the application, in order to access 
         /// another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of). 
         /// This confidential client application was itself called with a token which will be provided in the 
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Client
         /// Acquires an access token for this application (usually a Web API) from a specific authority, in order to access 
         /// another downstream protected Web API on behalf of a user (See https://aka.ms/msal-net-on-behalf-of). 
         /// This confidential client application was itself called with a token which will be provided in the 
-        /// This override sends the certificate, which helps certificates rotation in Azure AD
+        /// This override sends the certificate, which helps certificate rotation in Azure AD
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -212,9 +212,9 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires a security token from the authority configured in the app using the authorization code previously received from the STS. It uses
-        /// the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code)
+        /// the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
         /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users, and therefore receive an authorization code.
-        /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods 
+        /// This method does not lookup the token cache, but stores the result in it, so it can be looked up using other methods 
         /// such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
@@ -230,14 +230,14 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires token from the authority configured in the app, for the confidential client itself (in the name of no user)
+        /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
         /// using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// </summary>
         /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
         /// should be of the form "{ResourceIdUri/.default}" for instance <c>https://management.azure.net/.default</c> or, for Microsoft
         /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are really defined statically at application registration 
         /// in the portal, and cannot be overriden in the application. See also </param>
-        /// <returns>Authentication result containing token of the user for the requested scopes</returns>
+        /// <returns>Authentication result containing the token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes)
         {
             return
@@ -245,7 +245,7 @@ namespace Microsoft.Identity.Client
                     AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, false).ConfigureAwait(false);
         }
         /// <summary>
-        /// Acquires token from the authority configured in the app, for the confidential client itself (in the name of no user)
+        /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
         /// using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API. For this flow (client credentials), the scopes
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires token from the service for the confidential client using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
-        /// This method enables application developers to achieve easy certificates roll-over
+        /// This method enables application developers to achieve easy certificate roll-over
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover
@@ -282,7 +282,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Acquires token from the service for the confidential client using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// This method attempts to look up valid access token in the cache unless<paramref name="forceRefresh"/> is true
-        /// This method enables application developers to achieve easy certificates roll-over
+        /// This method enables application developers to achieve easy certificate roll-over
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
         /// This saves the application admin from the need to explicitly manage the certificate rollover

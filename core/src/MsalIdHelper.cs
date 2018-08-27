@@ -74,10 +74,10 @@ namespace Microsoft.Identity.Core
                 [MsalIdParameter.Version] = GetMsalVersion()
             };
 
-            var processorInofrmation = CorePlatformInformationBase.Instance.GetProcessorArchitecture();
-            if (processorInofrmation != null)
+            var processorInformation = CorePlatformInformationBase.Instance.GetProcessorArchitecture();
+            if (processorInformation != null)
             {
-                parameters[MsalIdParameter.CpuPlatform] = processorInofrmation;
+                parameters[MsalIdParameter.CpuPlatform] = processorInformation;
             }
 
             var osInformation = CorePlatformInformationBase.Instance.GetOperatingSystem();

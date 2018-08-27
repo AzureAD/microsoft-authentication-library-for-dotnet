@@ -37,7 +37,8 @@ using Microsoft.Identity.Core.UI;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Contains UI properties for interactive flows
+    /// Contains UI properties for interactive flows, such as the parent window (on Windows), or the parent activity (on Xamarin.Android), and 
+    /// which browser to use (on Xamarin.Android and Xamarin.iOS)
     /// </summary> 
     public sealed class UIParent
     {

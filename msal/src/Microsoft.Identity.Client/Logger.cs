@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client
     }
 
     /// <summary>
-    /// static class that allows application developers to set a callback to handle logs, specify the level
+    /// Static class that allows application developers to set a callback to handle logs, specify the level
     /// of logs desired and if they accept to log Personally Identifiable Information (PII) or not
     /// </summary>
     /// <example>

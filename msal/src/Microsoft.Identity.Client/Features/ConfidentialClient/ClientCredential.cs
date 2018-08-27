@@ -33,9 +33,9 @@ namespace Microsoft.Identity.Client
     /// Meant to be used in confidential client applications, an instance of <c>ClientCredential</c> is passed 
     /// to the constructors of (<see cref="ConfidentialClientApplication"/>)
     /// as credentials proving that the application (the client) is what it claims it is. These credentials can be
-    /// either a client secret (an application password) or or a certificate. 
-    /// These crendentials are added in the application registration portal (in the secret section).
+    /// either a client secret (an application password) or a certificate. 
     /// This class has one constructor for each case.
+    /// These crendentials are added in the application registration portal (in the secret section).
     /// </summary>
     public sealed class ClientCredential
     {
