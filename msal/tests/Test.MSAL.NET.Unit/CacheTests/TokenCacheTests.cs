@@ -780,6 +780,9 @@ namespace Test.MSAL.NET.Unit.CacheTests
                 ClientId = TestConstants.ClientId
             };
 
+            // Backward compatibility with MSAL 1.x, this should not throw
+            cache.Deserialize(null);
+
             MsalTokenResponse response = new MsalTokenResponse();
             response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
             response.ClientInfo = MockHelpers.CreateClientInfo();
