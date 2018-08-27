@@ -72,7 +72,7 @@ This is obviously the first diagnostic.  We try to provide helpful error message
 In order to configure logging, see the [wiki](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Logging-in-ADAL.Net) page for implementation details.
 
 ### Using brokers
-See [everaging brokers on Android and iOS](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/leveraging-brokers-on-Android-and-iOS)
+See [Leveraging brokers on Android and iOS](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/leveraging-brokers-on-Android-and-iOS)
 
 ### Network Traces
 
