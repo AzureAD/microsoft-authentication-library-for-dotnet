@@ -258,6 +258,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     MsalErrorMessage.NoPromptFailedErrorMessage);
             }
 
+            if (_authorizationResult.Status == AuthorizationStatus.UserCancel)
+            {
+                throw new MsalClientException(_authorizationResult.Error,
+                _authorizationResult.ErrorDescription);
+            }
+
             if (_authorizationResult.Status != AuthorizationStatus.Success)
             {
                 throw new MsalServiceException(_authorizationResult.Error,

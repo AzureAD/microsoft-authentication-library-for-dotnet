@@ -136,7 +136,15 @@ namespace Microsoft.Identity.Client
                 browserIntent.SetData(Uri.Parse(_requestUrl));
                 browserIntent.SetPackage(chromePackage);
                 browserIntent.AddCategory(Intent.CategoryBrowsable);
-                StartActivity(browserIntent);
+                try
+                {
+                    StartActivity(browserIntent);
+                }
+                catch (ActivityNotFoundException ex)
+                {
+                    throw new MsalClientException(MsalClientException.ChromeDisabledError,
+                        "Chrome is disabled on the device, cannot proceed with authentication " + ex.Message);
+                }
             }
             else
             {

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid7;Xamarin.iOS10</TargetFrameworks>        
+    <TargetFrameworks>net45;netstandard1.1;netstandard1.3;win81;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>        
     <Authors>Microsoft</Authors>
     <PackageTitle>Microsoft Authentication Library</PackageTitle>
     <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
@@ -33,7 +33,7 @@
   <PropertyGroup Condition="'$(TargetFramework)' == 'win81' or '$(TargetFramework)' == 'uap10.0' ">
     <DefineConstants>$(DefineConstants);WINRT</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
     <DefineConstants>$(DefineConstants);ANDROID</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
@@ -62,7 +62,7 @@
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.1.0-preview.2.build.8" PrivateAssets="All" />
     <PackageReference Include="GitVersionTask" Version="4.0.0-beta0011" PrivateAssets="All" />
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" />
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -131,7 +131,7 @@
     <Reference Include="Xamarin.iOS" />
     <Compile Include="Platforms\iOS\**\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid7' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
     <Reference Include="System.Collections" />
@@ -165,12 +165,12 @@
   </ItemGroup>
   
   <!-- CustomTabs and AppCompat must reference the same version -->
-  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid7'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
     <PackageReference Include="Xamarin.Android.Support.CustomTabs">
-      <Version>25.4.0.2</Version>
+      <Version>27.0.2</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat">
-      <Version>25.4.0.2</Version>
+      <Version>27.0.2</Version>
     </PackageReference>
   </ItemGroup>
 </Project>
