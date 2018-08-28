@@ -30,7 +30,6 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.WsTrust;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
