@@ -1,29 +1,33 @@
- # Active Directory Authentication Library (ADAL) for .NET, Windows Store, .NET Core, Xamarin iOS and Xamarin Android.
+# Active Directory Authentication Library (ADAL) for .NET, Windows Store, .NET Core, Xamarin iOS and Xamarin Android
 
-| [Conceptual documentation](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki#documentation) | [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev) | [API Reference](https://docs.microsoft.com/en-us/dotnet/api/microsoft.identitymodel.clients.activedirectory?view=azure-dotnet)
-| --- | --- | --- | --- | --- |
+| [Conceptual documentation](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki#documentation) | [Code Samples](https://github.com/azure-samples?utf8=✓&q=active-directory-dotnet) | [Reference Docs](https://docs.microsoft.com/active-directory/adal/microsoft.identitymodel.clients.activedirectory) | [Developer Guide](https://aka.ms/aaddev) | [API Reference](https://docs.microsoft.com/en-us/dotnet/api/microsoft.identitymodel.clients.activedirectory?view=azure-dotnet) |
+| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 
 Active Directory Authentication Library for .NET (ADAL.NET) is an easy to use authentication library. You can use ADAL.NET to acquire **security tokens to access protected Web APIs**, for instance Microsoft Graph, or another Web APIs. ADAL.NET is available on various .NET Desktop/Mobile platforms to acquire a token for the signed-in user ( Windows desktop, UWP, Windows 8.1, Xamarin iOS and Xamarin Android). It can also be used in Web applications and Web APIs (ASP.NET, .NET Core, ASP.NET Core) that call other Web APIs in the name of a user, or without a user. ADAL.NET takes advantage of Windows Server Active Directory and Windows Azure Active Directory.
 
-
-| Release | Location |
-| ------------- | ------------- |
-| Stable  | [![NuGet](https://img.shields.io/nuget/v/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/) 
-
+| Release | Location                                                                                                                                                                                                      |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stable  | [![NuGet](https://img.shields.io/nuget/v/Microsoft.IdentityModel.Clients.ActiveDirectory.svg?style=flat-square&label=nuget)](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/) |
 
 ## Build status
-| dev  | adalV3/dev |
-| ------------- | ------------- |
-| [![Build status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/556/badge)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=556) | [![Build status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/187/badge)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=187)
 
+| dev                                                                                                                                                                                                                                  | adalV3/dev                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [![Build status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/556/badge)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=556) | [![Build status](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/187/badge)](https://identitydivision.visualstudio.com/IDDP/IDDP%20Team/_build/index?definitionId=187) |
+
+## Branches
+
+**dev**: Contains newest development of both ADAL (v4+) and MSAL (v2+). This is where all current and future development of ADAL and MSAL takes place.  
+**adalV3/dev** : Holds the v3 branch. Only security fixes will make it to v3.
 
 ## Versions
+
 Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
 Minimum recommended version - 2.29.0
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/changelog.txt).
 
-## Security Issue in Multiple Versions of ADAL .Net ###
+## Security Issue in Multiple Versions of ADAL .Net
 
 A defect in ADAL .Net can result in an elevation of privilege in specific problem scenarios. The problem scenarios involve the On Behalf Of protocol flow and specific use cases of a ClientAssertion/ClientAssertionCertificate/ClientCredential and UserAssertion being passed to the AcquireToken* API. Multiple versions of the library are affected. Affected versions are listed below.
 
@@ -72,6 +76,7 @@ This is obviously the first diagnostic.  We try to provide helpful error message
 In order to configure logging, see the [wiki](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Logging-in-ADAL.Net) page for implementation details.
 
 ### Using brokers
+
 See [Leveraging brokers on Android and iOS](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/leveraging-brokers-on-Android-and-iOS)
 
 ### Network Traces
