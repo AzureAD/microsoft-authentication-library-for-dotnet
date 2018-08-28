@@ -1,12 +1,7 @@
 # Microsoft Authentication Library (MSAL) Preview for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
 
-<<<<<<< HEAD
 | [Conceptual documentation](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) | [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-windowsdesktop-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [Library Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support) |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
-=======
-| [Conceptual documentation](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki) | [Getting Started](https://docs.microsoft.com/azure/active-directory/develop/guidedsetups/active-directory-mobileanddesktopapp-windowsdesktop-intro) | [Sample Code](https://github.com/Azure-Samples/active-directory-dotnet-desktop-msgraph-v2) | [Library Reference](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-v2-libraries) | [API Reference](https://docs.microsoft.com/en-us/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support)
-| --- | --- | --- | --- | --- | --- |
->>>>>>> ba8c85192d97cbb31e50ba53a27be7f7575a46fc
 
 The MSAL library for .NET gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
@@ -16,7 +11,6 @@ Released     | Nightly
 -----------------------------|-------------------------
  [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.Identity.Client.svg?style=flat-square&label=myget&colorB=ff0000)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.Identity.Client)
 
-<<<<<<< HEAD
 ## Where is the source code
 
 The [ADAL GitHub repo](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet) is used for future development of MSAL and ADAL.
@@ -27,11 +21,6 @@ Read more about this change and the announced in the [msal.net 2 preview release
 ## Where do I find docs and file issues
 
 This is the correct repo to file issues and to search for documentation related to MSAL.
-=======
-| Branch  | Status | Notes |
-| ------------- | ------------- |  ------------- | 
-| dev (VSTS) | ![](https://identitydivision.visualstudio.com/_apis/public/build/definitions/a7934fdd-dcde-4492-a406-7fad6ac00e17/10/badge)  | Builds the entire MSAL solution |
->>>>>>> ba8c85192d97cbb31e50ba53a27be7f7575a46fc
 
 ## Important Note about the MSAL Preview
 
