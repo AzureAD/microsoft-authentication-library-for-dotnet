@@ -59,6 +59,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
                 {
                     CoreLoggerBase.Default = new AdalLogger(Guid.Empty);
                     CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
+                    // Several statics in the library depends on platform information being timely initialized. 
+                    // The static initializer on PlatformInformationBase will ensure this gets done.
+                    new PlatformInformation();
                     isInitialized = true;
                 }
             }

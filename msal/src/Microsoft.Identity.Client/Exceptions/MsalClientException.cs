@@ -121,6 +121,10 @@ namespace Microsoft.Identity.Client
         /// /// </summary>
         public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
 
+        /// <summary>
+        /// The library is loaded on a platform which is not supported.
+        /// </summary>
+        public const string PlatformNotSupported = "platform_not_supported";
 #if ANDROID
 
         /// <summary>

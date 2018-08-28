@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Core
         public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
         public const string InvalidAuthority = "invalid_authority";
 
+        public const string PlatformNotSupported = "platform_not_supported";
+
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
         public const string ChromeNotInstalledError = "chrome_not_installed";

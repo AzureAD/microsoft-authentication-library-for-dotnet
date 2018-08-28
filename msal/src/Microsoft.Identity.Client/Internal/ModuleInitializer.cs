@@ -59,6 +59,9 @@ namespace Microsoft.Identity.Client.Internal
                     CoreExceptionFactory.Instance = new MsalExceptionFactory();
                     CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
                     CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
+                    // Several statics in the library depends on platform information being timely initialized. 
+                    // The static initializer on PlatformInformationBase will ensure this gets done.
+                    new PlatformInformation();
                     isInitialized = true;
                 }
             }

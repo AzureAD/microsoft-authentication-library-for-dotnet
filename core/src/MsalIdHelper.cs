@@ -66,27 +66,38 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal static class MsalIdHelper
     {
+        private static CorePlatformInformationBase corePlatformInformationBaseInstance;
+
+        static MsalIdHelper()
+        {
+            corePlatformInformationBaseInstance = CorePlatformInformationBase.Instance;
+        }
+
         public static IDictionary<string, string> GetMsalIdParameters()
         {
+            if (corePlatformInformationBaseInstance == null)
+            {
+                throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.PlatformNotSupported, CoreErrorMessages.PlatformNotSupported);
+            }
             var parameters = new Dictionary<string, string>
             {
-                [MsalIdParameter.Product] = CorePlatformInformationBase.Instance.GetProductName(),
+                [MsalIdParameter.Product] = corePlatformInformationBaseInstance.GetProductName(),
                 [MsalIdParameter.Version] = GetMsalVersion()
             };
 
-            var processorInformation = CorePlatformInformationBase.Instance.GetProcessorArchitecture();
+            var processorInformation = corePlatformInformationBaseInstance.GetProcessorArchitecture();
             if (processorInformation != null)
             {
                 parameters[MsalIdParameter.CpuPlatform] = processorInformation;
             }
 
-            var osInformation = CorePlatformInformationBase.Instance.GetOperatingSystem();
+            var osInformation = corePlatformInformationBaseInstance.GetOperatingSystem();
             if (osInformation != null)
             {
                 parameters[MsalIdParameter.OS] = osInformation;
             }
 
-            var deviceInformation = CorePlatformInformationBase.Instance.GetDeviceModel();
+            var deviceInformation = corePlatformInformationBaseInstance.GetDeviceModel();
             if (deviceInformation != null)
             {
                 parameters[MsalIdParameter.DeviceModel] = deviceInformation;
@@ -111,7 +122,7 @@ namespace Microsoft.Identity.Core
 
         public static string GetAssemblyFileVersion()
         {
-            return CorePlatformInformationBase.Instance.GetAssemblyFileVersionAttribute();
+            return corePlatformInformationBaseInstance.GetAssemblyFileVersionAttribute();
         }
 
         public static string GetAssemblyInformationalVersion()

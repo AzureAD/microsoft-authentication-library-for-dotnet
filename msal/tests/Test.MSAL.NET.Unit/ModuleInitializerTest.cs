@@ -32,6 +32,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,6 +44,10 @@ namespace Test.MSAL.NET.Unit
         [TestMethod]
         public void InitializesExceptionsAndLogs()
         {
+            // EnsureModuleInitilizerIsCleared
+            var field = typeof(ModuleInitializer).GetField("isInitialized", BindingFlags.Static | BindingFlags.NonPublic);
+            field.SetValue(null, false);
+
             // Act
             ModuleInitializer.EnsureModuleInitialized();
 
