@@ -1,7 +1,6 @@
 @echo off
 echo Info:
 echo To Build Non WinRT, you will need the Developer Prompt/MSBuild for VS2017!
-echo To Build WinRT, you will need the Developer Prompt/MSBuild for VS2015 (and point to the vs2015 build script)!
 echo .
 echo Usage:
 echo   %%1  (configuration options): debug(d), release(r) .. default is debug

@@ -38,10 +38,7 @@ using Microsoft.Identity.Core.Helpers;
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
     [Activity(Label = "Sign in")]
-    [CLSCompliant(false)]
-#pragma warning disable CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
     internal class AuthenticationAgentActivity : Activity
-#pragma warning restore CS3019 // CLS compliance checking will not be performed because it is not visible from outside this assembly
     {
         private const string AboutBlankUri = "about:blank";
 
