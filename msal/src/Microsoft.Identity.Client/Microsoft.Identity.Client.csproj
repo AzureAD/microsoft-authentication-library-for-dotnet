@@ -10,18 +10,30 @@
     <DelaySign>false</DelaySign>
   </PropertyGroup>
 
-  <PropertyGroup Label="GenerateAssemblyInfo inputs">
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!-- This should be passed from the VSTS build -->
-    <MsalClientSemVer Condition="'$(MsalClientSemVer)' == ''">1.0.0-localbuild</MsalClientSemVer>
-
+    <AdalClientSemVer Condition="'$(MsalClientSemVer)' == ''">1.0.0-localbuild</AdalClientSemVer>
     <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
     <Version>$(MsalClientSemVer)</Version>
 
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>Microsoft Authentication Library for .NET</Title>
+    <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
+    <Company>Microsoft Corporation</Company>
+    <Authors>Microsoft</Authors>
+    <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=844762</PackageLicenseUrl>
+    <PackageProjectUrl>https://go.microsoft.com/fwlink/?linkid=844761</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>
+      This package contains the binaries of the Microsoft Authentication Library (MSAL).
+      MSAL makes it easy to obtain tokens from Azure AD v2 (work &amp; school accounts, MSA) and Azure AD B2C, gaining access to Microsoft Cloud API and any other API secured by Microsoft identities. This version supports adding authentication functionality to your .NET based client on Windows desktop (.NET 4.5+), UWP, .NET Core, Xamarin iOS and Xamarin Android.
+    </Description>
+    <PackageTags>Microsoft Authentication Library MSA MSAL B2C Azure Active Directory AAD Identity Authentication .NET Windows Store Xamarin iOS Android</PackageTags>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
     <Product>Microsoft Authentication Library</Product>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
   </PropertyGroup>

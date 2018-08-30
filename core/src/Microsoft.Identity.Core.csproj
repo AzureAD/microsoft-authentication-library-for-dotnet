@@ -1,13 +1,5 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/1.5.4">
 
-  <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
-  <!-- NB this property has no effect on the assemblies that are built - it is only to tell the VSTS SonarQube analysis tasks
-       which assembly to analyse. -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
-    <SonarQubeExclude>true</SonarQubeExclude>
-    <Configurations>Debug;Release</Configurations>
-  </PropertyGroup>
-
   <PropertyGroup>
     <AssemblyName>Microsoft.Identity.Core</AssemblyName>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
@@ -19,17 +11,9 @@
     <CodeAnalysisRuleSet>../ConfigureAwait.ruleset</CodeAnalysisRuleSet>
 </PropertyGroup>
 
-  <PropertyGroup Label="GenerateAssemblyInfo inputs">
-    <!-- This should be passed from the VSTS build -->
-    <CoreSemVer Condition="'$(CoreSemVer)' == '1.0.0-privatebuild'"></CoreSemVer>
-
-    <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
-    <Version>$(CoreSemVer)</Version>
-
-    <Copyright>Copyright (c) Microsoft Corporation. All rights reserved.</Copyright>
-    <Company>Microsoft Corporation</Company>
-  </PropertyGroup>
-
+<!-- Important note: this assembly should not be shipped to customers; it acts only as a placeholder for files that are included
+in ADAL and MSAL and to ease unit testing. No projects should take a dependency on Core.dll either -->
+  
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>

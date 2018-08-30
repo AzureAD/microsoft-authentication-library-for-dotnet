@@ -1,13 +1,5 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras/1.5.4">
 
-  <!-- Exclude the analysis of this framework type: workaround for https://jira.sonarsource.com/browse/SONARMSBRU-317 -->
-  <!-- NB this property has no effect on the assemblies that are built - it is only to tell the VSTS SonarQube analysis tasks
-       which assembly to analyse. -->
-  <PropertyGroup Condition="'$(TargetFramework)' != 'net45' ">
-    <SonarQubeExclude>true</SonarQubeExclude>
-    <Configurations>Debug;Release;Appveyor</Configurations>
-  </PropertyGroup>
-
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.1;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10</TargetFrameworks>
     <Product>Microsoft.IdentityModel.Clients.ActiveDirectory ($(TargetFramework))</Product>
@@ -20,17 +12,27 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Label="GenerateAssemblyInfo inputs">
+  <PropertyGroup Label="NuGet and AssemblyInfo metadata">
     <!-- This should be passed from the VSTS build -->
     <AdalClientSemVer Condition="'$(AdalClientSemVer)' == ''">1.0.0-localbuild</AdalClientSemVer>
-
     <!-- This will generate AssemblyVersion, AssemblyFileVersion and AssemblyInformationVersion -->
     <Version>$(AdalClientSemVer)</Version>
 
     <!-- Copyright needs to be in the form of © not (c) to be compliant -->
+    <Title>Active Directory Authentication Library</Title>
     <Copyright>© Microsoft Corporation. All rights reserved.</Copyright>
     <Company>Microsoft Corporation</Company>
     <Product>Active Directory Authentication Library</Product>
+    <Authors>Microsoft</Authors>
+    <PackageLicenseUrl>https://go.microsoft.com/fwlink/?linkid=841311</PackageLicenseUrl>
+    <PackageProjectUrl>https://aka.ms/adalnet</PackageProjectUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>
+      This package contains the binaries of the Active Directory Authentication Library (ADAL). ADAL provides easy to use authentication functionality for your .NET based client by taking advantage of Windows Server Active Directory and Azure Active Directory.
+      ADAL.NET enables you to acquire a security token to access protected Web APIs, for instance Microsoft Graph or your own Web API.
+      ADAL.NET is built against multiple platforms, including .net desktop, .net standard, .net core, UWP, Xamarin iOS and Xamarin Android. It can  be called from applications and Web APIs (ASP.NET, .NET Core, ASP.NET Core) that call other Web APIs in the name of a user, or without a user.
+    </Description>
+    <PackageTags>Active Directory Authentication Library ADAL ActiveDirectory AD AAD Identity Authentication .NET Android iOS UWP NetCore Xamarin</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">

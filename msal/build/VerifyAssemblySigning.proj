@@ -39,8 +39,8 @@
          Dynamically-created item groups are not available to other targets until the target that
          created them has finished, which is why this item group is created in a separate target. -->
     <ItemGroup>
-      <AssembliesToCheck Include="$(SignedBinariesFolder)\**\*.dll"/>
-      <AssembliesToCheck Include="$(SignedBinariesFolder)\**\*.exe"/>
+      <AssembliesToCheck Include="$(SignedBinariesFolder)\**\bin\**\Microsoft.IdentityModel.Clients.ActiveDirectory.dll"/>
+      <AssembliesToCheck Include="$(SignedBinariesFolder)\**\bin\**\Microsoft.Identity.Client.dll"/>
     </ItemGroup>
 
     <Message Importance="normal" Text="Binaries to verify:" />
