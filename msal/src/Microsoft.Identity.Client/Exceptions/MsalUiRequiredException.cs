@@ -47,6 +47,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string InvalidGrantError = "invalid_grant";
 
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
         /// <summary>
         /// <para>Mitigation:</para> If your application is a <see cref="PublicClientApplication"/> call one of the <c>AcquireTokenAsync</c> overrides so
         /// that the user of your application signs-in and accepts consent. If your application is a <see cref="T:ConfidentialClientApplication"/>. If it's a Web App
@@ -54,6 +57,7 @@ namespace Microsoft.Identity.Client
         /// as described in https://aka.ms/msal-net-authorization-code. This error should not happen in Web APIs.
         /// </summary>
         public const string NoTokensFoundError = "no_tokens_found";
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when a null user is 

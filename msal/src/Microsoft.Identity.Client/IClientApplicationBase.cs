@@ -56,6 +56,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string ClientId { get; }
 
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
         /// <summary>
         /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
@@ -73,6 +76,7 @@ namespace Microsoft.Identity.Client
         /// you then need to add the reply URL of the deployed application in the application registration portal.
         /// </remarks>
         string RedirectUri { get; set; }
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// Gets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default

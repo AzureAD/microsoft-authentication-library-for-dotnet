@@ -186,13 +186,16 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public int StatusCode { get; internal set; } = 0;
 
+#if !DESKTOP
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
         /// <summary>
         /// Additional claims requested by the service. When this property is not null or empty, this means that the service requires the user to 
         /// provide additional claims, such as doing two factor authentication. The are two cases:
         /// <list type="bullent">
         /// <item><description>
-        /// If your application is a <see cref="PublicClientApplication"/>, you should just call and <see cref="PublicClientApplication.AcquireTokenAsync"/>
-        /// override of <see cref="PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
+        /// If your application is a <see cref="PublicClientApplication"/>, you should just call an override of <see cref="PublicClientApplication.AcquireTokenAsync(System.Collections.Generic.IEnumerable{string}, string, UIBehavior, string, System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// in <see cref="PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
         /// to the extraQueryParameters, where ex is an instance of this exception.
         /// </description></item>
         /// <item>><description>If your application is a <see cref="ConfidentialClientApplication"/>, (therefore doing the On-Behalf-Of flow), you should throw an Http unauthorize 
@@ -201,6 +204,7 @@ namespace Microsoft.Identity.Client
         /// For more details see https://aka.ms/msal-net-claim-challenge
         /// </summary>
         public string Claims { get; internal set; }
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
         
         /// <summary>
         /// Raw response body received from the server.

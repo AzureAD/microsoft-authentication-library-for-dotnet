@@ -60,6 +60,9 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string NetworkNotAvailableError = "network_not_available";
 
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
         /// <summary>
         /// Duplicate query parameter was found in extraQueryParameters.
         /// <para>What happens?</para> You have used <see cref="ClientApplicationBase.SliceParameters"/> or the <c>extraQueryParameter</c> of overrides
@@ -70,6 +73,7 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="P:ClientApplicationBase.SliceParameters"/>
         /// <seealso cref="ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
         public const string DuplicateQueryParameterError = "duplicate_query_parameter";
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
         /// The request could not be performed because of a failure in the UI flow.

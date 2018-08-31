@@ -37,6 +37,9 @@ using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client
 {
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
     /// <summary>
     /// Class to be used to acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
     /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only 
@@ -53,6 +56,7 @@ namespace Microsoft.Identity.Client
     /// </list>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         static PublicClientApplication()
         {

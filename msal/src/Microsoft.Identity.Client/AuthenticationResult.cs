@@ -32,11 +32,15 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client
 {
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
     /// <summary>
     /// Contains the results of one token acquisition operation in <see cref="PublicClientApplication"/>
-    /// or <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>. For details see https://aka.ms/msal-net-authenticationresult
-    /// </summary>
+    /// or <see cref="T:ConfidentialClientApplication"/>. For details see https://aka.ms/msal-net-authenticationresult
+    /// </summary> 
     public partial class AuthenticationResult
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         private const string Oauth2AuthorizationHeader = "Bearer ";
         private readonly MsalAccessTokenCacheItem _msalAccessTokenCacheItem;

@@ -42,14 +42,18 @@ using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client
 {
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
     /// <summary>
     /// Token cache storing access and refresh tokens for accounts 
-    /// This class is used in the constuctors of <see cref="PublicClientApplication"/> and <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>.
+    /// This class is used in the constuctors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
-    /// See also <see cref="Microsoft.Identity.Client.TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
+    /// See also <see cref="TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
     /// </summary>
     public sealed class TokenCache
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         static TokenCache()
         {
