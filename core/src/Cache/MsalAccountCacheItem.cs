@@ -43,6 +43,13 @@ namespace Microsoft.Identity.Core.Cache
             Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, idToken.PreferredUsername, idToken.TenantId);
         }
 
+        internal MsalAccountCacheItem(string environment, MsalTokenResponse response, string preferredUsername, string tenantID) : this()
+        {
+            IdToken idToken = IdToken.Parse(response.IdToken);
+
+            Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, preferredUsername, tenantID);
+        }
+
         internal MsalAccountCacheItem(string environment, string localAccountId, string rawClientInfo,
             string name, string preferredUsername, string tenantId) : this()
         {

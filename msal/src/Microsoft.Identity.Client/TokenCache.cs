@@ -55,6 +55,8 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCache
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
+        private const string preferred_usernameNotInIdtoken = "preferred_username not in idtoken";
+
         static TokenCache()
         {
             ModuleInitializer.EnsureModuleInitialized();
@@ -128,6 +130,12 @@ namespace Microsoft.Identity.Client
             var tenantId = Authority.CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority, false)
                 .GetTenantId();
 
+            IdToken idToken = IdToken.Parse(response.IdToken);
+
+            //The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema. 
+            //It will be set to "preferred_username not in idtoken" 
+            var preferredUsername = !String.IsNullOrWhiteSpace(idToken?.PreferredUsername)? idToken.PreferredUsername : preferred_usernameNotInIdtoken;
+
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
 
             var environmentAliases = GetEnvironmentAliases(requestParams.TenantUpdatedCanonicalAuthority,
@@ -135,8 +143,6 @@ namespace Microsoft.Identity.Client
 
             var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParams.Authority.Host,
                 instanceDiscoveryMetadataEntry);
-
-            IdToken idToken = IdToken.Parse(response.IdToken);
 
             var msalAccessTokenCacheItem =
                 new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId)
@@ -150,13 +156,7 @@ namespace Microsoft.Identity.Client
             if (idToken != null)
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem
-                    (preferredEnvironmentHost, requestParams.ClientId, response, idToken?.TenantId);
-            }
-
-            if (!requestParams.IsClientCredentialRequest && 
-                !ContainsClaimsRequiredToStoreInCache(idToken, requestParams.RequestContext))
-            {
-                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
+                    (preferredEnvironmentHost, requestParams.ClientId, response, tenantId);
             }
 
             lock (LockObject)
@@ -169,7 +169,7 @@ namespace Microsoft.Identity.Client
                         ClientId = ClientId,
                         Account = msalAccessTokenCacheItem.HomeAccountId != null ?
                                     new Account(AccountId.FromClientInfo(msalAccessTokenCacheItem.ClientInfo),
-                                    idToken?.PreferredUsername, preferredEnvironmentHost) : 
+                                    preferredUsername, preferredEnvironmentHost) : 
                                     null
                     };
 
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client
                     {
                         tokenCacheAccessor.SaveIdToken(msalIdTokenCacheItem, requestParams.RequestContext);
 
-                        var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response);
+                        var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
 
                         tokenCacheAccessor.SaveAccount(msalAccountCacheItem, requestParams.RequestContext);
                     }
@@ -220,6 +220,7 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
+
         private void DeleteAccessTokensWithIntersectingScopes(AuthenticationRequestParameters requestParams,
            ISet<string> environmentAliases, string tenantId, SortedSet<string> scopeSet, string homeAccountId)
         {
@@ -268,29 +269,6 @@ namespace Microsoft.Identity.Client
             {
                 tokenCacheAccessor.DeleteAccessToken(cacheItem.GetKey(), requestParams.RequestContext);
             }
-        }
-
-        private bool ContainsClaimsRequiredToStoreInCache(IdToken idToken, RequestContext requestContext)
-        {
-            if (idToken == null || string.IsNullOrEmpty(idToken.TenantId) || string.IsNullOrEmpty(idToken.PreferredUsername))
-            {
-                string msg;
-                if (idToken == null)
-                {
-                    msg = "Skipping storing tokens in the cache - no IdToken in token response";
-                }
-                else
-                {
-                    msg = string.Format(CultureInfo.InvariantCulture, "Skipping storing tokens in the cache - " +
-                        "IdToken does not contain required claims of {0} or {1}. Please see " +
-                        "https://aka.ms/msal-net-token-cache-index-keys for more information.", IdTokenClaim.TenantId, IdTokenClaim.PreferredUsername);
-                }
-                requestContext.Logger.Warning(msg);
-                requestContext.Logger.WarningPii(msg);
-
-                return false;
-            }
-            return true;
         }
 
         internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
