@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.OAuth2;
@@ -49,6 +50,8 @@ namespace Microsoft.Identity.Core.Instance
         public const string DefaultTrustedHost = "login.microsoftonline.com";
 
         private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
+
+        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
         internal AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
@@ -107,6 +110,13 @@ namespace Microsoft.Identity.Core.Instance
         {
             return GetFirstPathSegment(CanonicalAuthority);
         }
-        
+
+        internal override void UpdateTenantId(string tenantId)
+        {
+            Uri authorityUri = new Uri(CanonicalAuthority);
+
+            CanonicalAuthority = 
+                string.Format(CultureInfo.InvariantCulture, AADCanonicalAuthorityTemplate, authorityUri.Authority, tenantId);
+        }
     }
 }

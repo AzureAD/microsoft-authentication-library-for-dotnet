@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Core.Instance
     internal class B2CAuthority : AadAuthority
     {
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
+        public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
 
         internal B2CAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
         {
@@ -44,8 +45,9 @@ namespace Microsoft.Identity.Core.Instance
                 throw new ArgumentException(CoreErrorMessages.B2cAuthorityUriInvalidPath);
             }
 
-            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Authority,
+            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate, authorityUri.Authority,
                 pathSegments[0], pathSegments[1], pathSegments[2]);
+
             AuthorityType = AuthorityType.B2C;
         }
 
@@ -62,6 +64,18 @@ namespace Microsoft.Identity.Core.Instance
         internal override string GetTenantId()
         {
             return new Uri(CanonicalAuthority).Segments[2].TrimEnd('/');
+        }
+
+        internal override void UpdateTenantId(string tenantId)
+        {
+            Uri authorityUri = new Uri(CanonicalAuthority);
+            var segments = authorityUri.Segments;
+
+            var b2cPrefix = segments[1].TrimEnd('/');
+            var b2cPolicy = segments[3].TrimEnd('/');
+
+            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate, 
+                authorityUri.Authority, b2cPrefix, tenantId, b2cPolicy);
         }
     }
 }

@@ -303,9 +303,21 @@ namespace Microsoft.Identity.Client
         private MsalAccessTokenCacheItem FindAccessTokenCommon
             (AuthenticationRequestParameters requestParams, string preferredEnvironmentAlias, ISet<string> environmentAliases)
         {
+            string msg;
+
+            //no authority passed
+            if (environmentAliases.Count == 0)
+            {
+                msg = "No authority provided. Skipping cache lookup ";
+                requestParams.RequestContext.Logger.Warning(msg);
+                requestParams.RequestContext.Logger.WarningPii(msg);
+
+                return null;
+            }
+
             lock (LockObject)
             {
-                string msg = "Looking up access token in the cache..";
+                msg = "Looking up access token in the cache.";
                 requestParams.RequestContext.Logger.Info(msg);
                 requestParams.RequestContext.Logger.InfoPii(msg);
                 MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
@@ -366,113 +378,50 @@ namespace Microsoft.Identity.Client
                 IEnumerable<MsalAccessTokenCacheItem> filteredItems =
                     tokenCacheItems.Where(
                             item =>
-                                item.ScopeSet.ScopeContains(requestParams.Scope))
-                        .ToList();
+                                item.ScopeSet.ScopeContains(requestParams.Scope));
 
                 msg = "Matching entry count after filtering by scopes - " + filteredItems.Count();
                 requestParams.RequestContext.Logger.Info(msg);
                 requestParams.RequestContext.Logger.InfoPii(msg);
-                //no authority passed
-                if (environmentAliases.Count == 0)
+
+                //filter by authority
+                IEnumerable<MsalAccessTokenCacheItem> filteredByPrefferedAlias =
+                    filteredItems.Where
+                    (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase));
+
+                if (filteredByPrefferedAlias.Any())
                 {
-                    msg = "No authority provided..";
-                    requestParams.RequestContext.Logger.Info(msg);
-                    requestParams.RequestContext.Logger.InfoPii(msg);
-                    
-                    //if only one cached token found
-                    if (filteredItems.Count() == 1)
-                    {
-                        msalAccessTokenCacheItem = filteredItems.First();
-                        requestParams.Authority =
-                            Authority.CreateAuthority(msalAccessTokenCacheItem.Authority, requestParams.ValidateAuthority);
-
-                        msg = "1 matching entry found.Authority may be used for refreshing access token.";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
-                    }
-                    else if (filteredItems.Count() > 1)
-                    {
-                        msg = "Multiple authorities found for same client_id, user and scopes";
-                        requestParams.RequestContext.Logger.Error(msg);
-                        requestParams.RequestContext.Logger.ErrorPii(msg + " :- " + filteredItems
-                                .Select(tci => tci.Authority)
-                                .AsSingleString());
-                        throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
-                            MsalErrorMessage.MultipleTokensMatched);
-                    }
-                    else
-                    {
-                        msg = "No tokens found for matching client_id, user and scopes.";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
-
-                        msg = "Check if the tokens are for the same authority for given client_id and user.";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
-                        //no match found. check if there was a single authority used
-                        IEnumerable<string> authorityList = tokenCacheItems.Select(tci => tci.Authority).Distinct();
-                        if (authorityList.Count() > 1)
-                        {
-                            msg = "Multiple authorities found for same client_id and user.";
-                            requestParams.RequestContext.Logger.Error(msg);
-                            requestParams.RequestContext.Logger.ErrorPii(msg + " :- " + authorityList.AsSingleString());
-
-                            throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
-                                "Multiple authorities found in the cache. Pass in authority in the API overload.");
-                        }
-
-                        msg = "Distinct Authority found. Use it for refresh token grant call";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
-                        requestParams.Authority = Authority.CreateAuthority(authorityList.First(), requestParams.ValidateAuthority);
-                    }
+                    filteredItems = filteredByPrefferedAlias;
                 }
                 else
                 {
-                    msg = "Authority provided..";
+                    filteredItems = filteredItems.Where(
+                        item => environmentAliases.Contains(item.Environment) &&
+                        item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
+                }
+
+                //no match
+                if (!filteredItems.Any())
+                {
+                    msg = "No tokens found for matching authority, client_id, user and scopes.";
                     requestParams.RequestContext.Logger.Info(msg);
                     requestParams.RequestContext.Logger.InfoPii(msg);
+                    return null;
+                }
 
-                    //authority was passed in the API
-                    IEnumerable<MsalAccessTokenCacheItem> filteredByPrefferedAlias = 
-                        filteredItems.Where
-                        (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase))
-                        .ToList();
+                //if only one cached token found
+                if (filteredItems.Count() == 1)
+                {
+                    msalAccessTokenCacheItem = filteredItems.First();
+                }
+                else
+                {
+                    msg = "Multiple tokens found for matching authority, client_id, user and scopes.";
+                    requestParams.RequestContext.Logger.Error(msg);
+                    requestParams.RequestContext.Logger.ErrorPii(msg);
 
-                    if (filteredByPrefferedAlias.Any())
-                    {
-                        filteredItems = filteredByPrefferedAlias;
-                    }
-                    else
-                    {
-                        filteredItems = filteredItems.Where(
-                            item => environmentAliases.Contains(item.Environment) && 
-                            item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)).ToList();
-                    }
-
-                    //no match
-                    if (!filteredItems.Any())
-                    {
-                        msg = "No tokens found for matching authority, client_id, user and scopes.";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
-                        return null;
-                    }
-
-                    //if only one cached token found
-                    if (filteredItems.Count() == 1)
-                    {
-                        msalAccessTokenCacheItem = filteredItems.First();
-                    }
-                    else
-                    {
-                        msg = "Multiple tokens found for matching authority, client_id, user and scopes.";
-                        requestParams.RequestContext.Logger.Error(msg);
-                        requestParams.RequestContext.Logger.ErrorPii(msg);
-                        
-                        throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
-                            MsalErrorMessage.MultipleTokensMatched);
-                    }
+                    throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                        MsalErrorMessage.MultipleTokensMatched);
                 }
 
                 if (msalAccessTokenCacheItem != null && msalAccessTokenCacheItem.ExpiresOn >

@@ -277,6 +277,17 @@ namespace Microsoft.Identity.Client
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
+            if (authority == null)
+            {
+                authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+                var tenantId = authority.GetTenantId();
+
+                if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId))
+                {
+                    authority.UpdateTenantId(account.HomeAccountId.TenantId);
+                }
+            }
+
             var handler = new SilentRequest(
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 forceRefresh)

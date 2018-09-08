@@ -870,7 +870,7 @@ namespace Test.MSAL.NET.Unit
 
             HttpMessageHandlerFactory.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(
-                    TestConstants.GetDiscoveryEndpoint(TestConstants.PrefCacheAuthorityCommonTenant)));
+                    TestConstants.GetDiscoveryEndpoint(TestConstants.AuthorityCommonTenant)));
 
             //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler

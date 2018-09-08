@@ -175,5 +175,10 @@ namespace Microsoft.Identity.Core.Instance
         {
             throw new NotImplementedException();
         }
+
+        internal override void UpdateTenantId(string tenantId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
