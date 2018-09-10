@@ -73,8 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (AuthenticationRequestParameters.Authority.AuthorityType != Core.Instance.AuthorityType.Adfs)
             {
                 var userRealmResponse = await this.commonNonInteractiveHandler
-                   //.QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.Host)
-                   .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUri)
+                   .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
                    .ConfigureAwait(false);
 
                 if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))

@@ -105,6 +105,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                 instance.TokenEndpoint);
             Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
                 instance.SelfSignedJwtAudience);
+            Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.UserRealmUriPrefix);
             Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
         }
 

@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             VerifyAuthorizationResult();
         }
 
-        internal async Task AcquireAuthorizationAsync()
+        private async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = CreateAuthorizationUri(true, true);
 

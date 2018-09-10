@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -300,10 +301,18 @@ namespace DesktopTestApp
             {
                 cachePageTableLayout.Controls[0].Dispose();
             }
+            
+            // Bring the cache back into memory
+            var acc = _publicClientHandler.PublicClientApplication.GetAccountsAsync().Result;
+            Trace.WriteLine("Accounts: " + acc.Count());
 
             cachePageTableLayout.RowCount = 0;
-            foreach (MsalRefreshTokenCacheItem rtItem in _publicClientHandler.PublicClientApplication.UserTokenCache
-                .GetAllRefreshTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null))))
+            var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
+                .GetAllRefreshTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+            var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
+                    .GetAllAccessTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+
+            foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {
                 AddControlToCachePageTableLayout(
                     new MsalUserRefreshTokenControl(_publicClientHandler.PublicClientApplication, rtItem)
@@ -311,8 +320,7 @@ namespace DesktopTestApp
                         RefreshViewDelegate = LoadCacheTabPage
                     });
 
-                foreach (MsalAccessTokenCacheItem atItem in _publicClientHandler.PublicClientApplication.UserTokenCache
-                    .GetAllAccessTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null))))
+                foreach (MsalAccessTokenCacheItem atItem in allAccessTokens)
                 {
                     if (atItem.HomeAccountId.Equals(rtItem.HomeAccountId, StringComparison.OrdinalIgnoreCase))
                     {
@@ -325,6 +333,8 @@ namespace DesktopTestApp
                     }
                 }
             }
+
+            
         }
 
         private void AddControlToCachePageTableLayout(Control ctl)

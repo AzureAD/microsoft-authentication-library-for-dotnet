@@ -90,16 +90,12 @@ namespace Microsoft.Identity.Core.WsTrust
                 wsTrustAddress).ConfigureAwait(false);
         }
 
-        public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUri)
+        public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUriPrefix)
         {
             var logger = this.requestContext.Logger;
 
-            //var userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(
-            //    string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", userRealmUri),
-            //    usernameInput.UserName, requestContext).ConfigureAwait(false);
-
             var userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(
-                userRealmUri,
+                userRealmUriPrefix,
                 usernameInput.UserName,
                 requestContext).ConfigureAwait(false);
 

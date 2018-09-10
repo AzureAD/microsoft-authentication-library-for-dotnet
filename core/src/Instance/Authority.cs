@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Core.Instance
 
         public string SelfSignedJwtAudience { get; set; }
 
-        public string UserRealmUri { get; private set; }
+        public string UserRealmUriPrefix { get; private set; }
 
         public string Host { get; set; }
 
@@ -182,6 +182,8 @@ namespace Microsoft.Identity.Core.Instance
                 requestContext.Logger.Info(msg);
                 requestContext.Logger.InfoPii(msg);
 
+                UserRealmUriPrefix = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", this.Host);
+
                 if (ExistsInValidatedAuthorityCache(userPrincipalName))
                 {
                     msg = "Authority found in validated authority cache";
@@ -230,7 +232,6 @@ namespace Microsoft.Identity.Core.Instance
                 AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);
                 TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
                 SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
-                this.UserRealmUri = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", this.Host);
 
                 _resolved = true;
 
