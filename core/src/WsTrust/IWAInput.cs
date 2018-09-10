@@ -27,44 +27,30 @@
 
 namespace Microsoft.Identity.Core
 {
-    /// <summary>
-    /// Credential used for integrated authentication on domain-joined machines.
-    /// The implementation is  here, and the ADAL UserCredential class will subclass this.
-    /// </summary>
-    internal class UserCredential
+    internal interface IUsernameInput
     {
-        /// <summary>
-        /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
-        /// and it can only be used in domain joined scenarios.
-        /// </summary>
-        public UserCredential(): this(null, UserAuthType.IntegratedAuth)
-        {
-        }
+        string UserName { get; }
+    }
 
-        /// <summary>
-        /// Constructor to create credential with username
-        /// </summary>
-        /// <param name="userName">Identifier of the user application requests token on behalf.</param>
-        public UserCredential(string userName) : this(userName, UserAuthType.IntegratedAuth)
-        {
-        }
-
-        internal UserCredential(string userName, UserAuthType userAuthType)
-        {
-            this.UserName = userName;
-            this.UserAuthType = userAuthType;
-        }
-
+    /// <summary>
+    /// Integrated Windows Authentication request data object. Used in the IWA workflow.
+    /// </summary>
+    internal class IWAInput : IUsernameInput
+    {
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
-        public string UserName { get; internal set; }
+        public string UserName { get; set; }
 
-        internal UserAuthType UserAuthType { get; private set; }
-
-        internal virtual char[] PasswordToCharArray()
+        public IWAInput()
         {
-            return null;
+            this.UserName = null;
         }
+
+        public IWAInput(string userName)
+        {
+            this.UserName = userName;
+        }       
+    
     }
 }

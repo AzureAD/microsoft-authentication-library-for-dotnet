@@ -399,7 +399,7 @@ namespace Test.MSAL.NET.Unit
             });
 
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
-            AuthenticationResult result = await app.AcquireTokenByWindowsIntegratedAuthAsync(TestConstants.Scope, TestConstants.User.Username).ConfigureAwait(false);
+            AuthenticationResult result = await app.AcquireTokenByIntegratedWindowsAuthAsync(TestConstants.Scope, TestConstants.User.Username).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);

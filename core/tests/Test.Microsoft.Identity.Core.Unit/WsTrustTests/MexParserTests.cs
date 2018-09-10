@@ -44,16 +44,21 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
     [DeploymentItem(@"Resources\TestMex2005.xml")]
     public class MexParserTests
     {
+        RequestContext requestContext;
+
         [TestInitialize]
         public void TestInitialize()
         {
             CoreExceptionFactory.Instance = new TestExceptionFactory();
+            requestContext = new RequestContext(new TestLogger(Guid.NewGuid()));
         }
 
         [TestMethod]
         [Description("WS-Trust Address Extraction Test")]
         public void WsTrust2005AddressExtractionTest()
         {
+            // Arrange
+            
             XDocument mexDocument = null;
             using (Stream stream = new FileStream("TestMex2005.xml", FileMode.Open))
             {
@@ -61,12 +66,19 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             }
             Assert.IsNotNull(mexDocument);
 
-            WsTrustAddress wsTrustAddress;
-            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.IntegratedAuth, null);
+            // Act
+            MexParser mexParser = new MexParser(UserAuthType.IntegratedAuth, requestContext);
+            WsTrustAddress wsTrustAddress = mexParser.ExtractWsTrustAddressFromMex(mexDocument);
+
+            // Assert
             Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/windowstransport", wsTrustAddress.Uri.AbsoluteUri);
             Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
 
-            wsTrustAddress = MexParser.ExtractWsTrustAddressFromMex(mexDocument, UserAuthType.UsernamePassword, null);
+            // Act
+            mexParser = new MexParser(UserAuthType.UsernamePassword, requestContext);
+            wsTrustAddress = mexParser.ExtractWsTrustAddressFromMex(mexDocument);
+
+            // Assert
             Assert.AreEqual("https://sts.usystech.net/adfs/services/trust/2005/usernamemixed", wsTrustAddress.Uri.AbsoluteUri);
             Assert.AreEqual(wsTrustAddress.Version, WsTrustVersion.WsTrust2005);
         }
@@ -85,10 +97,11 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                     Content = new StringContent("Not found")
                 }
             });
-            var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
+
             try
             {
-                await MexParser.FetchWsTrustAddressFromMexAsync("http://somehost", UserAuthType.IntegratedAuth, requestContext);
+                MexParser mexParser = new MexParser(UserAuthType.IntegratedAuth, requestContext);
+                await mexParser.FetchWsTrustAddressFromMexAsync("http://somehost");
                 Assert.Fail("We expect an exception to be thrown here");
             }
             catch (TestException ex)
@@ -115,7 +128,8 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
             try
             {
-                await MexParser.FetchWsTrustAddressFromMexAsync("http://somehost", UserAuthType.IntegratedAuth, requestContext);
+                MexParser mexParser = new MexParser(UserAuthType.IntegratedAuth, requestContext);
+                await mexParser.FetchWsTrustAddressFromMexAsync("http://somehost");
                 Assert.Fail("We expect an exception to be thrown here");
             }
             catch (System.Xml.XmlException)

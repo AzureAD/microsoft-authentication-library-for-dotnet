@@ -25,38 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
-using Core = Microsoft.Identity.Core;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using UserAuthType = Core.UserAuthType;
-
 
     /// <summary>
     /// Credential used for integrated authentication on domain-joined machines.
     /// </summary>
     public class UserCredential
     {
-        private Core.UserCredential userCredential;
-        internal Core.UserCredential GetUserCredential()
-        {
-            return userCredential;
-        }
-
-        /// <summary>
-        /// Gets identifier of the user.
-        /// </summary>
-        public string UserName
-        {
-            get { return userCredential.UserName; }
-            internal set { userCredential.UserName = value; }
-        }
-
-        internal UserAuthType UserAuthType
-        {
-            get { return userCredential.UserAuthType; }
-        }
+        internal IWAInput IWAInput  { get;} 
 
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
@@ -64,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public UserCredential()
         {
-            userCredential = new Core.UserCredential();
+            IWAInput = new IWAInput();
         }
 
         /// <summary>
@@ -73,21 +53,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
         {
-            userCredential = new Core.UserCredential(userName);
+            IWAInput = new IWAInput(userName);
         }
 
-        internal UserCredential(string userName, UserAuthType userAuthType)
+        /// <summary>
+        /// Gets identifier of the user.
+        /// </summary>
+        public string UserName
         {
-            userCredential = new Core.UserCredential(userName, userAuthType);
-        }
-
-        internal virtual void ApplyTo(DictionaryRequestParameters requestParameters)
-        {
-        }
-
-        internal virtual char[] PasswordToCharArray()
-        {
-            return null;
+            get { return IWAInput.UserName; }
         }
     }
 }

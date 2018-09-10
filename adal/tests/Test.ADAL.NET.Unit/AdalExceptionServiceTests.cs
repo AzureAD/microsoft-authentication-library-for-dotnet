@@ -78,6 +78,31 @@ namespace Test.ADAL.NET.Unit
         }
 
         [TestMethod]
+        public void ServiceHandesExceptionDetails()
+        {
+            // Arrange
+            int statusCode = 511;
+            string exMessage = "exMessage";
+            string exErrorCode = "exCode";
+
+            // Act
+            var adalEx = adalExceptionFactory.GetServiceException(exErrorCode, exMessage, new ExceptionDetail()
+            {
+                StatusCode = statusCode,
+            });
+
+            // Assert
+            var adalServiceEx = adalEx as AdalServiceException;
+            Assert.IsNull(adalServiceEx.InnerException);
+            Assert.AreEqual(exCode, adalServiceEx.ErrorCode);
+            Assert.IsNull(adalServiceEx.ServiceErrorCodes);
+            Assert.IsNull(adalServiceEx.Headers);
+            Assert.AreEqual(exMessage, adalServiceEx.Message);
+
+
+        }
+
+        [TestMethod]
         public void AdalServiceException_FromCoreException()
         {
             // Arrange

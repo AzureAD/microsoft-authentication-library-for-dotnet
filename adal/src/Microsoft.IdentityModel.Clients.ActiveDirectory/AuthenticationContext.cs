@@ -27,6 +27,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.UI;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
@@ -442,8 +443,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             return WebUIFactoryProvider.WebUIFactory.CreateAuthenticationDialog(parameters.GetCoreUIParent(), null);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId,
-            UserCredential userCredential)
+        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
+           string resource,
+           string clientId,
+           UsernamePasswordInput upInput)
         {
             RequestData requestData = new RequestData
             {
@@ -453,11 +456,32 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientKey = new ClientKey(clientId),
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
             };
-            var handler = new AcquireTokenNonInteractiveHandler(requestData, userCredential);
+
+            var handler = new AcquireTokenUsernamePasswordHandler(requestData, upInput);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(string resource, string clientId,
+        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
+            string resource, 
+            string clientId,
+            IWAInput iwaInput)
+        {
+            RequestData requestData = new RequestData
+            {
+                Authenticator = this.Authenticator,
+                TokenCache = this.TokenCache,
+                Resource = resource,
+                ClientKey = new ClientKey(clientId),
+                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
+            };
+
+            var handler = new AcquireTokenIWAHandler(requestData, iwaInput);
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+
+        internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
+            string resource, 
+            string clientId,
             UserAssertion userAssertion)
         {
             RequestData requestData = new RequestData
@@ -468,7 +492,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ClientKey = new ClientKey(clientId),
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled,
             };
-            var handler = new AcquireTokenNonInteractiveHandler(requestData, userAssertion);
+            var handler = new AcquireTokenUserAssertionHandler(requestData, userAssertion);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

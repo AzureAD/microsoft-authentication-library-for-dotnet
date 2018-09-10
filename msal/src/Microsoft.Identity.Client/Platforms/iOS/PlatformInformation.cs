@@ -67,13 +67,15 @@ namespace Microsoft.Identity.Client
             return typeof (MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
         }
 
-        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             base.ValidateRedirectUri(redirectUri, requestContext);
 
             if (PlatformInformationBase.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
                 throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + PlatformInformationBase.DefaultRedirectUri +
                                         " can not be used on iOS platform");
+
+            return redirectUri;
         }
 
         public override string GetDefaultRedirectUri(string clientId)

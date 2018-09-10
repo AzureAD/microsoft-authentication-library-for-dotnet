@@ -47,11 +47,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         protected static readonly Task CompletedTask = Task.FromResult(false);
-        internal readonly AuthenticationRequestParameters AuthenticationRequestParameters;
-        internal readonly TokenCache TokenCache;
-        protected MsalTokenResponse Response;
-        protected MsalAccessTokenCacheItem MsalAccessTokenItem;
-        protected MsalIdTokenCacheItem MsalIdTokenItem;
+        internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
+        internal TokenCache TokenCache { get; }
+        protected MsalTokenResponse Response { get; set; }
+        protected MsalAccessTokenCacheItem MsalAccessTokenItem { get; set; }
+        protected MsalIdTokenCacheItem MsalIdTokenItem { get; set; }
 
         public ApiEvent.ApiIds ApiId { get; set; }
         public bool IsConfidentialClient { get; set; }

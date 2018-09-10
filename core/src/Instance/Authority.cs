@@ -78,6 +78,8 @@ namespace Microsoft.Identity.Core.Instance
 
         public string SelfSignedJwtAudience { get; set; }
 
+        public string UserRealmUri { get; private set; }
+
         public string Host { get; set; }
 
         internal virtual async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
@@ -228,6 +230,7 @@ namespace Microsoft.Identity.Core.Instance
                 AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);
                 TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
                 SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
+                this.UserRealmUri = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", this.Host);
 
                 _resolved = true;
 

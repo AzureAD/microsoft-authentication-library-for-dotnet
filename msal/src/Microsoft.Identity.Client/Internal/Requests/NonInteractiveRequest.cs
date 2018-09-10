@@ -30,100 +30,68 @@ using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
+    /// <summary>
+    /// Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth.
+    /// </summary>
     internal class NonInteractiveRequest : RequestBase
     {
-        protected UserCredential UserCredential;
-        public UserAssertion UserAssertion;
+        private IWAInput iwaInput;
+        private UserAssertion userAssertion;
+        private CommonNonInteractiveHandler commonNonInteractiveHandler;
 
-        public NonInteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters, UserCredential userCredential)
+        public NonInteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters, IWAInput iwaInput)
             : base(authenticationRequestParameters)
         {
-            UserCredential = userCredential;
+            if (iwaInput == null)
+            {
+                throw new ArgumentNullException(nameof(iwaInput));
+            }
+
+            this.iwaInput = iwaInput;
+            this.commonNonInteractiveHandler = new CommonNonInteractiveHandler(
+                authenticationRequestParameters.RequestContext,
+                this.iwaInput);
         }
 
         protected override async Task SendTokenRequestAsync()
         {
-            if (UserCredential != null)
-            {
-                if (string.IsNullOrWhiteSpace(UserCredential.UserName))
-                {
-                    UserCredential.UserName = await PlatformPlugin.PlatformInformation.GetUserPrincipalNameAsync().ConfigureAwait(false);
-                    string msg;
-                    if (string.IsNullOrWhiteSpace(UserCredential.UserName))
-                    {
-                        msg = "Could not find UPN for logged in user";
-                        AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-                        AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+            await UpdateUsernameAsync().ConfigureAwait(false);
 
-                        throw new MsalException(MsalError.UnknownUser);
-                    }
+            await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
 
-                    msg = "Logged in user detected";
-                    AuthenticationRequestParameters.RequestContext.Logger.Verbose(msg);
+            await base.SendTokenRequestAsync().ConfigureAwait(false);
+        }
 
-                    var piiMsg = msg + string.Format(CultureInfo.CurrentCulture, " with user name '{0}'",
-                                     UserCredential.UserName);
-                    AuthenticationRequestParameters.RequestContext.Logger.VerbosePii(piiMsg);
-                }
-            }
+        private async Task FetchAssertionFromWsTrustAsync()
+        {
             if (AuthenticationRequestParameters.Authority.AuthorityType != Core.Instance.AuthorityType.Adfs)
             {
-                var userRealmResponse = await Core.Realm.UserRealmDiscoveryResponse.CreateByDiscoveryAsync(
-                    string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", AuthenticationRequestParameters.Authority.Host),
-                    this.UserCredential.UserName, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
-                if (userRealmResponse == null)
+                var userRealmResponse = await this.commonNonInteractiveHandler
+                   //.QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.Host)
+                   .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUri)
+                   .ConfigureAwait(false);
+
+                if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new MsalException(MsalError.UserRealmDiscoveryFailed);
-                }
 
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture,
-                    " User with user name '{0}' detected as '{1}'", UserCredential.UserName,
-                    userRealmResponse.AccountType));
-
-                if (string.Compare(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
-                    {
-                        throw new MsalException(MsalError.MissingFederationMetadataUrl);
-                    }
-
-                    WsTrustAddress wsTrustAddress = null;
-                    try
-                    {
-                        wsTrustAddress = await MexParser.FetchWsTrustAddressFromMexAsync(
-                            userRealmResponse.FederationMetadataUrl, UserCredential.UserAuthType, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
-                        if (wsTrustAddress == null)
+                    WsTrustResponse wsTrustResponse = await this.commonNonInteractiveHandler.QueryWsTrustAsync(
+                        new MexParser(UserAuthType.IntegratedAuth, this.AuthenticationRequestParameters.RequestContext),
+                        userRealmResponse,
+                        (cloudAudience, trustAddress, userName) =>
                         {
-                            throw new MsalException(MsalError.WsTrustEndpointNotFoundInMetadataDocument);
-                        }
-                    }
-                    catch (System.Xml.XmlException ex)
-                    {
-                        throw new MsalException(MsalError.ParsingWsMetadataExchangeFailed, MsalError.ParsingWsMetadataExchangeFailed, ex);
-                    }
-                    AuthenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'",
-                            wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl));
-
-                    WsTrustResponse wsTrustResponse = await WsTrustRequest.SendRequestAsync(
-                        wsTrustAddress, UserCredential, AuthenticationRequestParameters.RequestContext, userRealmResponse.CloudAudienceUrn).ConfigureAwait(false);
-                    if (wsTrustResponse == null)
-                    {
-                        throw new MsalException(MsalError.ParsingWsTrustResponseFailed);
-                    }
-
-
-                    var msg = string.Format(CultureInfo.CurrentCulture,
-                        " Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType);
-                    AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-                    AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (IWAInput)userName);
+                        }).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    UserAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
+                    userAssertion = new UserAssertion(
+                        wsTrustResponse.Token,
+                        (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
                 }
                 else
                 {
@@ -131,15 +99,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.UnsupportedUserType, userRealmResponse.AccountType));
                 }
             }
-            await base.SendTokenRequestAsync().ConfigureAwait(false);
+        }
+
+        private async Task UpdateUsernameAsync()
+        {
+            if (string.IsNullOrWhiteSpace(iwaInput.UserName))
+            {
+                string platformUsername = await this.commonNonInteractiveHandler.GetPlatformUserAsync()
+                    .ConfigureAwait(false);
+
+                this.iwaInput.UserName = platformUsername;
+            }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            if (UserAssertion != null)
+            if (userAssertion != null)
             {
-                client.AddBodyParameter(OAuth2Parameter.GrantType, UserAssertion.AssertionType);
-                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(UserAssertion.Assertion)));
+                client.AddBodyParameter(OAuth2Parameter.GrantType, userAssertion.AssertionType);
+                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(userAssertion.Assertion)));
             }
         }
     }

@@ -243,12 +243,12 @@ namespace Test.ADAL.NET.Integration
             });
 
             // Call acquire token
-            var result = AssertException.TaskThrows<AdalException>(() =>
+            var result = AssertException.TaskThrows<AdalServiceException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                 new UserCredential(TestConstants.DefaultDisplayableId)));
 
             // Check inner exception
-            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.InnerException.Message);
+            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);
@@ -398,12 +398,13 @@ namespace Test.ADAL.NET.Integration
             });
 
             // Call acquire token, Mex parser fails
-            var result = AssertException.TaskThrows<Exception>(() =>
+            var result = AssertException.TaskThrows<AdalException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                 new UserCredential(TestConstants.DefaultDisplayableId)));
 
             // Check exception message
-            Assert.AreEqual("parsing_ws_metadata_exchange_failed: Parsing WS metadata exchange failed", result.Message);
+            Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
+            Assert.AreEqual("parsing_ws_metadata_exchange_failed", result.ErrorCode);
 
             // There should be no cached entries.
             Assert.AreEqual(0, context.TokenCache.Count);

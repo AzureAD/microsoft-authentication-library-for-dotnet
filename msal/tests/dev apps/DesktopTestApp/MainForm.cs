@@ -164,7 +164,7 @@ namespace DesktopTestApp
             try
             {
                 var app = new PublicClientApplication(publicClientId, authority.Text);
-                AuthenticationResult authenticationResult = await app.AcquireTokenByWindowsIntegratedAuthAsync(scopes.Text.AsArray());
+                AuthenticationResult authenticationResult = await app.AcquireTokenByIntegratedWindowsAuthAsync(scopes.Text.AsArray());
                 SetResultPageInfo(authenticationResult);
             }
             catch (Exception exc)

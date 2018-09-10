@@ -30,6 +30,8 @@ namespace Microsoft.Identity.Core
 {
     internal class CoreErrorMessages
     {
+        public const string UnknownUser = "Could not identify logged in user";
+
         public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}).";
 
         public const string AuthorityInvalidUriFormat = "'authority' should be in Uri format";
@@ -76,5 +78,16 @@ namespace Microsoft.Identity.Core
 
         public const string InternalErrorCacheEmptyIdentifier = "Internal error - trying to remove an ADAL user with an empty identifier. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
         public const string FederatedServiceReturnedErrorTemplate = "Federated service at {0} returned error: {1}";
+        public const string UserRealmDiscoveryFailed = "User realm discovery failed";
+        public const string MissingFederationMetadataUrl =
+         "Federation Metadata Url is missing for federated user. This user type is unsupported.";
+        public const string WsTrustEndpointNotFoundInMetadataDocument =
+           "WS-Trust endpoint not found in metadata document";
+        public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
+        public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
+        public const string UnknownUserType = "Unknown User Type";
+
+
+
     }
 }

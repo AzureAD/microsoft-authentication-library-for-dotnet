@@ -63,7 +63,7 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
 
             HttpResponse response =
                 HttpRequest.SendPostAsync(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    null, (HttpContent)null, null).Result;
+                    null, (IDictionary<string, string>)null, null).Result;
 
             Assert.IsNotNull(response);
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
@@ -120,7 +120,7 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
-
+        
         [TestMethod]
         [TestCategory("HttpRequestTests")]
         public async Task TestSendGetWithHttp500TypeFailure()
@@ -170,8 +170,11 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
 
             try
             {
-                var msalHttpResponse = await HttpRequest.SendPostAsync(new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), (HttpContent)null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                var msalHttpResponse = await HttpRequest.SendPostAsync(
+                    new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    new Dictionary<string, string>(), 
+                    (IDictionary<string, string>)null, 
+                    new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }
             catch (TestServiceException exc)

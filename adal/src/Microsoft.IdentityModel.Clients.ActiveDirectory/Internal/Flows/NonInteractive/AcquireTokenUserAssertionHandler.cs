@@ -26,45 +26,52 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
-    internal abstract class PlatformInformationBase : CorePlatformInformationBase
+    internal class AcquireTokenUserAssertionHandler : AcquireTokenHandlerBase
     {
-        public abstract Task<string> GetUserPrincipalNameAsync();
+        private UserAssertion userAssertion;
 
-        public override string GetAssemblyFileVersionAttribute()
-        {
-            var assemblyFileVersion = typeof(AdalIdParameter).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            return assemblyFileVersion != null ? assemblyFileVersion.Version : "internal";
-        }
 
-        public async override Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public AcquireTokenUserAssertionHandler(RequestData requestData, UserAssertion userAssertion)
+            : base(requestData)
         {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
-        }
-
-        public virtual void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
-        {
-            authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-        }
-
-        public virtual bool GetCacheLoadPolicy(IPlatformParameters parameters)
-        {
-            return true;
-        }
-
-        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
-        {
-            if (redirectUri == null)
+            if (userAssertion == null)
             {
-                throw new ArgumentNullException(nameof(redirectUri));
+                throw new ArgumentNullException("userAssertion");
             }
+
+            if (string.IsNullOrWhiteSpace(userAssertion.AssertionType))
+            {
+                throw new ArgumentException(AdalErrorMessage.UserCredentialAssertionTypeEmpty, "userAssertion");
+            }
+            this.userAssertion = userAssertion;
         }
+
+        protected override async Task PreRunAsync()
+        {
+            await base.PreRunAsync().ConfigureAwait(false);
+            this.DisplayableId = userAssertion.UserName;
+        }
+
+        protected override async Task PreTokenRequestAsync()
+        {
+            await base.PreTokenRequestAsync().ConfigureAwait(false);
+        }
+
+        protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
+        {
+            requestParameters[OAuthParameter.GrantType] = this.userAssertion.AssertionType;
+            requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
+
+
+            // To request id_token in response
+            requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
+        }
+
     }
 }

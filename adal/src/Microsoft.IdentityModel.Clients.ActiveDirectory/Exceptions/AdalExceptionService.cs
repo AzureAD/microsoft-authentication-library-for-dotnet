@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
         public override Exception GetServiceException(string errorCode, string errorMessage, ExceptionDetail exceptionDetail = null)
         {
-            return GetServiceException(errorCode, errorMessage, null, null);
+            return GetServiceException(errorCode, errorMessage, null, exceptionDetail);
         }
 
         public override Exception GetServiceException(

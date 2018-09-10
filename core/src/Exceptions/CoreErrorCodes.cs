@@ -59,6 +59,18 @@ namespace Microsoft.Identity.Core
         public const string FederatedServiceReturnedError = "federated_service_returned_error";
         public const string ParsingWsTrustResponseFailed = "parsing_wstrust_response_failed";
 
+        public const string UnknownUser = "unknown_user";
+        public const string UserRealmDiscoveryFailed = "user_realm_discovery_failed";
+        /// <summary>
+        /// Federation Metadata Url is missing for federated user.
+        /// </summary>
+        public const string MissingFederationMetadataUrl = "missing_federation_metadata_url";
+        public const string WsTrustEndpointNotFoundInMetadataDocument = "wstrust_endpoint_not_found";
+        public const string ParsingWsMetadataExchangeFailed = "parsing_ws_metadata_exchange_failed";
+        public const string UnknownUserType = "unknown_user_type";
+
+
+
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
         public const string ChromeNotInstalledError = "chrome_not_installed";

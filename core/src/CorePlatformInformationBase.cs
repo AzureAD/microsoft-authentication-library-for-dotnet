@@ -51,12 +51,14 @@ namespace Microsoft.Identity.Core
             return false;
         }
 
-        public virtual void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public virtual Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
                 throw new ArgumentNullException(nameof(redirectUri));
             }
+
+            return redirectUri;
         }
 
         public virtual string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)

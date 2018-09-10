@@ -42,10 +42,20 @@ namespace AdalDesktopTestApp
         {
             LoggerCallbackHandler.LogCallback = AppLogger.Log;
             string resource = "https://graph.windows.net";
+
             string clientId = "<CLIENT_ID>";
             string redirectUri = "<REDIRECT_URI>";
-            string user = "<USER>";
+            string user = "<USER>"; // can also be empty string for testing IWA and U/P
+               
             AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
+
+            if (clientId == "<CLIENT_ID>")
+            {
+                Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Please confgure the app first!! Press any key to exit"));
+                Console.Read();
+                return;
+            }
+
             while (true)
             {
                 Console.Clear();

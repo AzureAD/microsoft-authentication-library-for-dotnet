@@ -59,34 +59,33 @@ namespace Microsoft.Identity.Core.WsTrust
         public Uri Url { get; set; }
     }
 
-    internal static class MexParser
+    internal enum UserAuthType 
+    {
+        IntegratedAuth,
+        UsernamePassword
+    }
+
+    internal class MexParser
     {
         private const string WsTrustSoapTransport = "http://schemas.xmlsoap.org/soap/http";
+        private readonly UserAuthType userAuthType;
+        private readonly RequestContext requestContext;
+
+        public MexParser(UserAuthType userAuthType, RequestContext requestContext)
+        {
+            this.userAuthType = userAuthType;
+            this.requestContext = requestContext;
+        }
 
         /// <summary>
         /// Fetch federation metadata, parse it, and returns relevant WsTrustAddress.
         /// </summary>
         /// <returns>Returns WsTrustAddress, or returns null if the wanted policy is not found in mexDocument.</returns>
-        /// <exception cref="Client.MsalException">If unable to access mex endpoint.</exception>
         /// <remarks>It could also potentially throw XmlException or http-relevant exceptions.</remarks>
-        public static async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl, UserAuthType userAuthType, RequestContext requestContext)
+        public async Task<WsTrustAddress> FetchWsTrustAddressFromMexAsync(string federationMetadataUrl)
         {
-            XDocument mexDocument = await FetchMexAsync(federationMetadataUrl, requestContext).ConfigureAwait(false);
-            return ExtractWsTrustAddressFromMex(mexDocument, userAuthType, requestContext);
-        }
-
-        internal static async Task<XDocument> FetchMexAsync(string federationMetadataUrl, RequestContext requestContext)
-        {
-            var uri = new UriBuilder(federationMetadataUrl);
-            var httpResponse = await HttpRequest.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
-            if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK) {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.AccessingWsMetadataExchangeFailed,
-                    string.Format(CultureInfo.CurrentCulture,
-                        CoreErrorMessages.HttpRequestUnsuccessful,
-                        (int)httpResponse.StatusCode, httpResponse.StatusCode));
-            }
-            return XDocument.Parse(httpResponse.Body, LoadOptions.None);
+            XDocument mexDocument = await FetchMexAsync(federationMetadataUrl).ConfigureAwait(false);
+            return ExtractWsTrustAddressFromMex(mexDocument);
         }
 
         /// <summary>
@@ -94,13 +93,13 @@ namespace Microsoft.Identity.Core.WsTrust
         /// </summary>
         /// <returns>Returns WsTrustAddress, or returns null if the wanted policy is not found in mexDocument.</returns>
         /// <exception cref="System.Xml.XmlException">If unable to parse mex document.</exception>
-        internal static WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument, UserAuthType userAuthType, RequestContext requestContext)
+        public /* public for test purposes */ WsTrustAddress ExtractWsTrustAddressFromMex(XDocument mexDocument)
         {
             WsTrustAddress address = null;
             Dictionary<string, MexPolicy> policies = ReadPolicies(mexDocument);
             Dictionary<string, MexPolicy> bindings = ReadPolicyBindings(mexDocument, policies);
             SetPolicyEndpointAddresses(mexDocument, bindings);
-            MexPolicy policy = SelectPolicy(policies, userAuthType);
+            MexPolicy policy = SelectPolicy(policies);
             if (policy != null)
             {
                 address = new WsTrustAddress();
@@ -110,14 +109,34 @@ namespace Microsoft.Identity.Core.WsTrust
             return address;
         }
 
-        private static MexPolicy SelectPolicy(IReadOnlyDictionary<string, MexPolicy> policies, UserAuthType userAuthType)
+        private async Task<XDocument> FetchMexAsync(string federationMetadataUrl)
+        {
+            var uri = new UriBuilder(federationMetadataUrl);
+            var httpResponse = await HttpRequest.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
+            if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw CoreExceptionFactory.Instance.GetServiceException(
+                    CoreErrorCodes.AccessingWsMetadataExchangeFailed,
+                    string.Format(CultureInfo.CurrentCulture,
+                        CoreErrorMessages.HttpRequestUnsuccessful,
+                        (int)httpResponse.StatusCode, httpResponse.StatusCode), 
+                    new ExceptionDetail() {
+                        StatusCode = (int)httpResponse.StatusCode,
+                        ServiceErrorCodes = new[] { httpResponse.StatusCode.ToString()} });
+              
+
+            }
+            return XDocument.Parse(httpResponse.Body, LoadOptions.None);
+        }
+
+        private MexPolicy SelectPolicy(IReadOnlyDictionary<string, MexPolicy> policies)
         {
             //try ws-trust 1.3 first
             return policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType && p.Version == WsTrustVersion.WsTrust13).FirstOrDefault() ??
                         policies.Values.Where(p => p.Url != null && p.AuthType == userAuthType).FirstOrDefault();
         }
 
-        internal static Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
+        private Dictionary<string, MexPolicy> ReadPolicies(XContainer mexDocument)
         {
             var policies = new Dictionary<string, MexPolicy>();
             IEnumerable<XElement> policyElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsp + "Policy");
@@ -176,7 +195,7 @@ namespace Microsoft.Identity.Core.WsTrust
             return policies;
         }
 
-        private static Dictionary<string, MexPolicy> ReadPolicyBindings(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> policies)
+        private Dictionary<string, MexPolicy> ReadPolicyBindings(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> policies)
         {
             var bindings = new Dictionary<string, MexPolicy>();
             IEnumerable<XElement> bindingElements = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "binding");
@@ -239,7 +258,7 @@ namespace Microsoft.Identity.Core.WsTrust
             return bindings;
         }
 
-        private static void SetPolicyEndpointAddresses(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> bindings)
+        private void SetPolicyEndpointAddresses(XContainer mexDocument, IReadOnlyDictionary<string, MexPolicy> bindings)
         {
             XElement serviceElement = mexDocument.Elements().First().Elements(XmlNamespace.Wsdl + "service").First();
             IEnumerable<XElement> portElements = serviceElement.Elements(XmlNamespace.Wsdl + "port");
@@ -272,7 +291,7 @@ namespace Microsoft.Identity.Core.WsTrust
             }
         }
 
-        private static void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy, UserAuthType policyAuthType)
+        private void AddPolicy(IDictionary<string, MexPolicy> policies, XElement policy, UserAuthType policyAuthType)
         {
             XElement binding = policy.Descendants(XmlNamespace.Sp + "TransportBinding").FirstOrDefault()
                           ?? policy.Descendants(XmlNamespace.Sp2005 + "TransportBinding").FirstOrDefault();

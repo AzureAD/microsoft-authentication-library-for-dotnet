@@ -419,37 +419,45 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Non-interactive request to acquire token via Windows Integrated Authentication.
+        /// Non-interactive request to acquire token via Kerberos / Windows Integrated Authentication.
+        /// The username for which the flow is executed is pulled from the operating system, as the current user principal name
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the current login user</returns>
-        public async Task<AuthenticationResult> AcquireTokenByWindowsIntegratedAuthAsync(IEnumerable<string> scopes)
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
         {
-            return await AcquireTokenByUserCredentialAsync(scopes, new UserCredential()).ConfigureAwait(false);
+            //TODO: make it platform specific
+            return await AcquireTokenByIWAAsync(scopes, new IWAInput()).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Non-interactive request to acquire token via Windows Integrated Authentication.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
-        /// <param name="username">Username</param>
+        /// <param name="username">Username for which to run the flow</param>
         /// <returns>Authentication result containing token of the specified login user</returns>
-        public async Task<AuthenticationResult> AcquireTokenByWindowsIntegratedAuthAsync(IEnumerable<string> scopes, string username)
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+            IEnumerable<string> scopes, 
+            string username)
         {
-            return await AcquireTokenByUserCredentialAsync(scopes, new UserCredential(username)).ConfigureAwait(false);
+            return await AcquireTokenByIWAAsync(scopes, new IWAInput(username)).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Non-interactive request to acquire token via Windows Integrated Authentication.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
-        /// <param name="userCredential">A UserCredential representing the user account</param>
+        /// <param name="iwaInput">Integrated Windows Auth input</param>
         /// <returns>Authentication result containing token</returns>
-        private async Task<AuthenticationResult> AcquireTokenByUserCredentialAsync(IEnumerable<string> scopes, UserCredential userCredential)
+        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IWAInput iwaInput)
         {
             Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new NonInteractiveRequest(requestParams, userCredential) { ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser };
+            var handler = new NonInteractiveRequest(requestParams, iwaInput)
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
+            };
+
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

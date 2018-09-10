@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using System;
@@ -33,21 +34,22 @@ using System.Security;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
-    using UserAuthType = Microsoft.Identity.Core.UserAuthType;
-
     /// <summary>
     /// Credential used for username/password authentication.
     /// </summary>
     public sealed class UserPasswordCredential : UserCredential
     {
+        internal UsernamePasswordInput UserPasswordInput { get; }
+
         /// <summary>
         /// Constructor to create credential with username and password
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         /// <param name="password">User password.</param>
-        public UserPasswordCredential(string userName, string password):base(userName, UserAuthType.UsernamePassword)
+        public UserPasswordCredential(string userName, string password)
         {
-            this.Password = password;
+            UserPasswordInput = new UsernamePasswordInput(userName, password);
+            
         }
 
         /// <summary>
@@ -55,38 +57,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         /// <param name="securePassword">User password.</param>
-        public UserPasswordCredential(string userName, SecureString securePassword) : base(userName, UserAuthType.UsernamePassword)
+        public UserPasswordCredential(string userName, SecureString securePassword) 
         {
-            this.SecurePassword = securePassword;
-        }
-
-        internal SecureString SecurePassword { get; private set; }
-
-        internal string Password { get; }
-
-        internal override char[] PasswordToCharArray()
-        {
-            if (SecurePassword != null)
-            {
-                var output = new char[SecurePassword.Length];
-                IntPtr secureStringPtr = Marshal.SecureStringToCoTaskMemUnicode(SecurePassword);
-                for (int i = 0; i < SecurePassword.Length; i++)
-                {
-                    output[i] = (char)Marshal.ReadInt16(secureStringPtr, i * 2);
-                }
-
-                Marshal.ZeroFreeCoTaskMemUnicode(secureStringPtr);
-                return output;
-            }
-
-            return (this.Password != null) ? this.Password.ToCharArray() : null;
-        }
-
-        internal override void ApplyTo(DictionaryRequestParameters requestParameters)
-        {
-            requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
-            requestParameters[OAuthParameter.Username] = this.UserName;
-            requestParameters[OAuthParameter.Password] = new string(PasswordToCharArray());
+            UserPasswordInput = new UsernamePasswordInput(userName, securePassword);
         }
     }
 }

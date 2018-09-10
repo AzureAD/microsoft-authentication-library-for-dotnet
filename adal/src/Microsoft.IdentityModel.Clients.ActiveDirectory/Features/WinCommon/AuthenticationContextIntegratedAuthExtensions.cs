@@ -34,7 +34,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// Extension class to support username/password flow.
     /// </summary>
     public static class AuthenticationContextIntegratedAuthExtensions
-	{
+    {
 
         /// <summary>
         /// Acquires security token from the authority.
@@ -45,9 +45,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="clientId">Identifier of the client requesting the token.</param>
         /// <param name="userCredential">The user credential to use for token acquisition.</param>
         /// <returns>It contains Access Token, its expiration time, user information.</returns>
-        public static async Task<AuthenticationResult> AcquireTokenAsync(this AuthenticationContext ctx, string resource, string clientId, UserCredential userCredential)
+        public static async Task<AuthenticationResult> AcquireTokenAsync(
+            this AuthenticationContext ctx,
+            string resource,
+            string clientId,
+            UserCredential userCredential)
         {
-            return await ctx.AcquireTokenCommonAsync(resource, clientId, userCredential).ConfigureAwait(false);
+#if DESKTOP
+            if (userCredential is UserPasswordCredential)
+            {
+                var userPasswordCredential = userCredential as UserPasswordCredential;
+
+                return await ctx.AcquireTokenCommonAsync(
+                     resource,
+                     clientId,
+                     userPasswordCredential.UserPasswordInput).ConfigureAwait(false);
+            }
+#endif
+            return await ctx.AcquireTokenCommonAsync(resource, clientId, userCredential.IWAInput).ConfigureAwait(false);
         }
     }
 
