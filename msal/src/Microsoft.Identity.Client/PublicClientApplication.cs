@@ -418,56 +418,8 @@ namespace Microsoft.Identity.Client
                         behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Non-interactive request to acquire token via Kerberos / Windows Integrated Authentication.
-        /// The username for which the flow is executed is pulled from the operating system, as the current user principal name
-        /// </summary>
-        /// <param name="scopes">Array of scopes requested for resource</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
-        {
-            //TODO: make it platform specific
-            return await AcquireTokenByIWAAsync(scopes, new IWAInput()).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Non-interactive request to acquire a security token for the signed-in user in Windows, 
-        /// via Integrated Windows Authentication. See https://aka.ms/msal-net-iwa. 
-        /// This overrides enables the application developer to provide a hint about the logged-in user, 
-        /// as on some windows installation the windows administrator might have prevented the applications 
-        /// from accessing the identity of the logged-in user
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
-        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
-            IEnumerable<string> scopes, 
-            string username)
-        {
-            return await AcquireTokenByIWAAsync(scopes, new IWAInput(username)).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
-        /// See https://aka.ms/msal-net-iwa.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="iwaInput">Integrated Windows Auth input</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IWAInput iwaInput)
-        {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new NonInteractiveRequest(requestParams, iwaInput)
-            {
-                ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
-            };
-
-            return await handler.RunAsync().ConfigureAwait(false);
-        }
-
+      
+     
         internal IWebUI CreateWebAuthenticationDialog(UIParent parent, UIBehavior behavior, RequestContext requestContext)
         {
             //create instance of UIParent and assign useCorporateNetwork to UIParent 
@@ -535,7 +487,62 @@ namespace Microsoft.Identity.Client
             return parameters;
         }
 
-// endif for !NET_CORE
+        // endif for !NET_CORE
+#endif
+
+        // .net core does not support getting the upn from Windows
+#if WINDOWS_APP || DESKTOP
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <remarks>
+        /// On Windows Universal Platform, the following capabilities need to be provided:
+        /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
+        /// </remarks>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
+        {
+            return await AcquireTokenByIWAAsync(scopes, new IWAInput()).ConfigureAwait(false);
+        }
+#endif
+
+
+#if WINDOWS_APP || DESKTOP || NET_CORE
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+            IEnumerable<string> scopes,
+            string username)
+        {
+            return await AcquireTokenByIWAAsync(scopes, new IWAInput(username)).ConfigureAwait(false);
+        }
+
+
+        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IWAInput iwaInput)
+        {
+            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
+            var handler = new NonInteractiveRequest(requestParams, iwaInput)
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
+            };
+
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+
+
 #endif
     }
 }

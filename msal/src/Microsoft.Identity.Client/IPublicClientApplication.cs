@@ -168,6 +168,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> extraScopesToConsent,
             string authority);
 
+        // endif !ANDROID
 #endif
 
         /// <summary>
@@ -284,6 +285,40 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
             string authority, UIParent parent);
+        // endif !NOT_CORE
+#endif
+
+        // .net core does not yet support getting the upn from Windows
+#if WINDOWS_APP || DESKTOP
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <remarks>
+        /// On Windows Universal Platform, the following capabilities need to be provided:
+        /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
+        /// </remarks>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes);
+#endif
+
+#if WINDOWS_APP || DESKTOP || NET_CORE
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+            IEnumerable<string> scopes,
+            string username);
 #endif
     }
 }
