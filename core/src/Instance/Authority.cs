@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Core.Instance
     internal abstract class Authority
     {
         internal static readonly HashSet<string> TenantlessTenantNames =
-            new HashSet<string>(new[] {"common", "organizations"});
+            new HashSet<string>(new[] {"common", "organizations", "consumers"});
         private bool _resolved;
 
         internal static readonly ConcurrentDictionary<string, Authority> ValidatedAuthorities =

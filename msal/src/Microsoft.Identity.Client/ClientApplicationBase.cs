@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client
         /// <Summary>
         /// Default Authority used for interactive calls.
         /// </Summary>
-        protected const string DefaultAuthority = "https://login.microsoftonline.com/common/";
+        internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         /// <summary>
         /// Constructor of the base application
@@ -274,6 +274,20 @@ namespace Microsoft.Identity.Client
             await UserTokenCache.RemoveAsync(Authority, ValidateAuthority, account, requestContext).ConfigureAwait(false);
         }
 
+        internal Authority GetAuthority(IAccount account)
+        {
+            var authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            var tenantId = authority.GetTenantId();
+
+            if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId)
+                && account.HomeAccountId?.TenantId != null)
+            {
+                authority.UpdateTenantId(account.HomeAccountId.TenantId);
+            }
+
+            return authority;
+        }
+
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
             IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
@@ -284,13 +298,7 @@ namespace Microsoft.Identity.Client
 
             if (authority == null)
             {
-                authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
-                var tenantId = authority.GetTenantId();
-
-                if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId))
-                {
-                    authority.UpdateTenantId(account.HomeAccountId.TenantId);
-                }
+                authority = GetAuthority(account);
             }
 
             var handler = new SilentRequest(
