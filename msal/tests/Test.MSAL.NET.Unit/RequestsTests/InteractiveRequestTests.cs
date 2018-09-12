@@ -57,11 +57,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            cache = new TokenCache();
-            Authority.ValidatedAuthorities.Clear();
-            HttpClientFactory.ReturnHttpClientForMocks = true;
-            HttpMessageHandlerFactory.ClearMockHandlers();
+            RequestTestsCommon.InitializeRequestTests();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
+
+            cache = new TokenCache();
         }
 
         [TestCleanup]
@@ -92,12 +91,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 }
             };
 
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
-            });
+            RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest();
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
@@ -137,6 +131,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
+
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
@@ -167,12 +162,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     TestConstants.AuthorityHomeTenant + "?code=some-code")
             };
 
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
-            });
+            RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest();
 
             MockHttpMessageHandler mockHandler = new MockHttpMessageHandler();
             mockHandler.Method = HttpMethod.Post;
@@ -185,7 +175,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
                 Scope = TestConstants.Scope,
-                TokenCache = cache, 
+                TokenCache = cache,
                 RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null))
             };
 
@@ -234,7 +224,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 parameters.ExtraQueryParameters = "extra=qp";
 
                 new InteractiveRequest(parameters, TestConstants.ScopeForAnotherResource.ToArray(),
-                    (string) null, UIBehavior.ForceLogin, new MockWebUI()
+                    (string)null, UIBehavior.ForceLogin, new MockWebUI()
                     );
                 Assert.Fail("ArgumentException should be thrown here");
             }
@@ -250,16 +240,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
 
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
-            });
+            RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest();
 
-            MockWebUI webUi = new MockWebUI();
-            webUi.MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
-                TestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired);
+            MockWebUI webUi = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.ErrorHttp,
+                TestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired)
+            };
 
             AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
             {
@@ -274,8 +261,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             parameters.ExtraQueryParameters = "extra=qp";
 
             InteractiveRequest request = new InteractiveRequest(parameters,
-                TestConstants.ScopeForAnotherResource.ToArray(), 
-                (string) null, UIBehavior.ForceLogin, webUi);
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                (string)null, UIBehavior.ForceLogin, webUi);
             try
             {
                 request.PreTokenRequestAsync().Wait();
@@ -284,7 +271,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalUiRequiredException);
-                Assert.AreEqual(MsalUiRequiredException.NoPromptFailedError, ((MsalUiRequiredException) exc.InnerException).ErrorCode);
+                Assert.AreEqual(MsalUiRequiredException.NoPromptFailedError, ((MsalUiRequiredException)exc.InnerException).ErrorCode);
             }
 
 
@@ -295,7 +282,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
-                (string) null, UIBehavior.ForceLogin, webUi);
+                (string)null, UIBehavior.ForceLogin, webUi);
 
             try
             {
@@ -305,8 +292,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual("invalid_request", ((MsalException) exc.InnerException).ErrorCode);
-                Assert.AreEqual("some error description", ((MsalException) exc.InnerException).Message);
+                Assert.AreEqual("invalid_request", ((MsalException)exc.InnerException).ErrorCode);
+                Assert.AreEqual("some error description", ((MsalException)exc.InnerException).Message);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -330,12 +317,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             parameters.RedirectUri = new Uri("some://uri");
             parameters.ExtraQueryParameters = "extra=qp&prompt=login";
 
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
-            });
+            RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest();
 
             InteractiveRequest request = new InteractiveRequest(parameters,
                 TestConstants.ScopeForAnotherResource.ToArray(),
@@ -349,7 +331,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             catch (Exception exc)
             {
                 Assert.IsTrue(exc.InnerException is MsalException);
-                Assert.AreEqual(MsalClientException.DuplicateQueryParameterError, ((MsalException) exc.InnerException).ErrorCode);
+                Assert.AreEqual(MsalClientException.DuplicateQueryParameterError, ((MsalException)exc.InnerException).ErrorCode);
             }
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");

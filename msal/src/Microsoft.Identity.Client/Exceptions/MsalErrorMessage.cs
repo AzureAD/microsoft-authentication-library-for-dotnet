@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Core
             "Loading an assembly required for the platform failed. Make sure assembly for the correct platform '{0}' exists";
 
         public const string AuthenticationUiFailed = "The browser based authentication dialog failed to complete";
-        
+
         public const string DeprecatedAuthorityError = "login.windows.net has been deprecated. Use login.microsoftonline.com instead.";
 
         public const string CertificateKeySizeTooSmallTemplate =
@@ -131,6 +131,8 @@ namespace Microsoft.Identity.Core
 
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters";
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
+        public const string MsalUiRequiredMessage =
+            "Null account was passed in AcquiretokenSilent API. Pass in an account object or call acquireToken to authenticate.";
     }
 
 }

@@ -58,7 +58,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
             : base(requestData)
         {
-            this.redirectUri = platformInformation.ValidateRedirectUri(redirectUri, RequestContext);
+            platformInformation.ValidateRedirectUri(redirectUri, RequestContext);
+            this.redirectUri = redirectUri;
 
             if (!string.IsNullOrWhiteSpace(this.redirectUri.Fragment))
             {

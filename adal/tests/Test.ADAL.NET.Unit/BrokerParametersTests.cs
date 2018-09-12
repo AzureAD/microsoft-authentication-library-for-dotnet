@@ -67,6 +67,12 @@ namespace Test.ADAL.NET.Unit
             ExtendedLifeTimeEnabled = false
         };
 
+        [TestInitialize]
+        public void Initialize()
+        {
+            ModuleInitializer.ForceModuleInitializationTestOnly();
+        }
+
         [TestMethod]
         [Description("Test setting of brokerParameters by AcquireTokenInteractiveHandler constructor")]
         public void AcquireTokenInteractiveHandlerConstructor_InitializeBrokerParameters()

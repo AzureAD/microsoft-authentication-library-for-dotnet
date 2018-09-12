@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Core.Cache
                     return;
                 }
 
-                //Using scope instead of resource becaue that value does not exist. STS should return it.
+                //Using scope instead of resource because that value does not exist. STS should return it.
                 AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
                     uniqueId, idItem.IdToken.PreferredUsername);
                 AdalResultWrapper wrapper = new AdalResultWrapper()
@@ -131,10 +131,10 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        public static Tuple<Dictionary<String, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
+        public static Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
             (ILegacyCachePersistance legacyCachePersistance, ISet<string> environments, string clientId)
         {
-            Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = new Dictionary<String, AdalUserInfo>();
+            Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
             List<AdalUserInfo> adalUsersWithoutClientInfo = new List<AdalUserInfo>();
             try
             {
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Core.Cache
                 {
                     if (!string.IsNullOrEmpty(pair.Value.RawClientInfo))
                     {
-                        clientInfoToAdalUserMap.Add(pair.Value.RawClientInfo, pair.Value.Result.UserInfo);
+                        clientInfoToAdalUserMap[pair.Value.RawClientInfo] = pair.Value.Result.UserInfo;
                     }
                     else
                     {
@@ -167,7 +167,7 @@ namespace Microsoft.Identity.Core.Cache
                 CoreLoggerBase.Default.Warning(msg + noPiiMsg);
                 CoreLoggerBase.Default.WarningPii(msg + ex);
 
-                return Tuple.Create(new Dictionary<String, AdalUserInfo>(), new List<AdalUserInfo>());
+                return Tuple.Create(new Dictionary<string, AdalUserInfo>(), new List<AdalUserInfo>());
             }
             return Tuple.Create(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
         }

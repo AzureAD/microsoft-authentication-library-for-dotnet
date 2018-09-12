@@ -189,7 +189,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                    promptBehavior != PromptBehavior.SelectAccount;
         }
 
-        public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             if (redirectUri == null)
             {
@@ -199,8 +199,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 requestContext.Logger.Verbose(msg);
                 requestContext.Logger.VerbosePii(msg);
             }
-
-            return redirectUri;
         }
 
         public override string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)

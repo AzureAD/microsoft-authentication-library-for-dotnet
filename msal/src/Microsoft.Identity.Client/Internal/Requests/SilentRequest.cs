@@ -39,12 +39,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public SilentRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
             : base(authenticationRequestParameters)
         {
-            if (authenticationRequestParameters.Account == null)
-            {
-                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, "Null user was passed in AcquiretokenSilent API. Pass in " +
-                                                                                         "a user object or call acquireToken authenticate.");
-            }
-
             ForceRefresh = forceRefresh;
         }
 

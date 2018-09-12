@@ -43,28 +43,46 @@ namespace Microsoft.Identity.Client.Internal
     internal class ModuleInitializer
     {
         private static bool isInitialized = false;
-        private static object lockObj;
+        private static readonly object lockObj = new object();
 
-        static ModuleInitializer()
-        {
-            lockObj = new object();
-        }
-
+        /// <summary>
+        /// Handle all the initialization of singletons, factories, statics etc. Initialization will only happen once.
+        /// </summary>
         public static void EnsureModuleInitialized()
-        {            
-            lock (lockObj)
+        {
+            // double check locking instead locking first to improve performace
+            if (!isInitialized)
             {
-                if (!isInitialized)
+                lock (lockObj)
                 {
-                    CoreExceptionFactory.Instance = new MsalExceptionFactory();
-                    CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
-                    CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
-                    // Several statics in the library depends on platform information being timely initialized. 
-                    // The static initializer on PlatformInformationBase will ensure this gets done.
-                    new PlatformInformation();
-                    isInitialized = true;
+                    if (!isInitialized)
+                    {
+                        InitializeModule();
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// Force initialization of the module, ignoring any previous initializations. Only TESTS should call this method.
+        /// </summary>
+        /// <remarks>Tests can access the internals of the module and modify the initialization pattern, so it is 
+        /// acceptable for tests to reinitialize the module. </remarks>
+        public static void ForceModuleInitializationTestOnly()
+        {
+            lock (lockObj)
+            {
+                InitializeModule();
+            }
+        }
+
+        private static void InitializeModule()
+        {
+            CoreExceptionFactory.Instance = new MsalExceptionFactory();
+            CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
+            CoreLoggerBase.Default = new MsalLogger(Guid.Empty, null);
+            CorePlatformInformationBase.Instance = new PlatformInformation();
+            isInitialized = true;
         }
     }
 }
