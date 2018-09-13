@@ -61,10 +61,28 @@ namespace Microsoft.Identity.Core.Http
                         .ConfigureAwait(false);
         }
 
-        public static async Task<HttpResponse> SendGetAsync(Uri endpoint, Dictionary<string, string> headers,
+        public static async Task<HttpResponse> SendGetAsync(
+            Uri endpoint, 
+            Dictionary<string, string> headers,
             RequestContext requestContext)
         {
             return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, requestContext).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, RequestContext)"/>
+        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="IHttpWebResponse"/> associated
+        /// with the request.
+        /// </summary>
+        public static async Task<IHttpWebResponse> SendPostForceResponseAsync(
+            Uri uri, 
+            Dictionary<string, string> headers, 
+            StringContent body, 
+            RequestContext requestContext)
+        {
+            return await
+                     ExecuteWithRetryAsync(uri, headers, body, HttpMethod.Post, requestContext, doNotThrow: true)
+                         .ConfigureAwait(false);
         }
 
         private static HttpRequestMessage CreateRequestMessage(Uri endpoint, IDictionary<string, string> headers)
@@ -82,9 +100,14 @@ namespace Microsoft.Identity.Core.Http
             return requestMessage;
         }
 
-        private static async Task<HttpResponse> ExecuteWithRetryAsync(Uri endpoint, IDictionary<string, string> headers,
-            HttpContent body, HttpMethod method,
-            RequestContext requestContext, bool retry = true)
+        private static async Task<HttpResponse> ExecuteWithRetryAsync(
+            Uri endpoint, 
+            IDictionary<string, string> headers,
+            HttpContent body, 
+            HttpMethod method,
+            RequestContext requestContext, 
+            bool doNotThrow = false,
+            bool retry = true)
         {
             Exception toThrow = null;
             bool isRetryable = false;
@@ -133,7 +156,14 @@ namespace Microsoft.Identity.Core.Http
                     requestContext.Logger.Info(msg);
                     requestContext.Logger.InfoPii(msg);
                     await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-                    return await ExecuteWithRetryAsync(endpoint, headers, body, method, requestContext, false).ConfigureAwait(false);
+                    return await ExecuteWithRetryAsync(
+                        endpoint, 
+                        headers, 
+                        body, 
+                        method, 
+                        requestContext, 
+                        doNotThrow, 
+                        retry: false).ConfigureAwait(false);
                 }
 
                 const string message = "Request retry failed.";
@@ -147,11 +177,21 @@ namespace Microsoft.Identity.Core.Http
                         toThrow);
                 }
 
+                if (doNotThrow)
+                {
+                    return response;
+                }
+
                 throw CoreExceptionFactory.Instance.GetServiceException(
-                    CoreErrorCodes.ServiceNotAvailable,
-                    "Service is unavailable to process the request",
-                    null,
-                    new ExceptionDetail { StatusCode = (int)response.StatusCode });
+                        CoreErrorCodes.ServiceNotAvailable,
+                        "Service is unavailable to process the request",
+                        null,
+                        new ExceptionDetail
+                        {
+                            StatusCode = (int)response.StatusCode,
+                            ResponseBody = response.Body,
+                            HttpHeaders = response.HeadersAsDictionary
+                        });
             }
 
             return response;
@@ -191,7 +231,7 @@ namespace Microsoft.Identity.Core.Http
 
             return new HttpResponse
             {
-                Headers = headers,
+                Headers = response.Headers,
                 Body = await response.Content.ReadAsStringAsync().ConfigureAwait(false),
                 StatusCode = response.StatusCode
             };

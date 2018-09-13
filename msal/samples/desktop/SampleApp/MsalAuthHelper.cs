@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -37,30 +38,16 @@ namespace SampleApp
 {
     class MsalAuthHelper
     {
-        private string _clientId;
+        private readonly string _clientId;
+        private readonly string user = ""; //can be empty for IWA and U/P
 
         public PublicClientApplication Application { get; private set; }
 
         public MsalAuthHelper(string clientId)
         {
             _clientId = clientId;
-            Application = new PublicClientApplication(_clientId, "https://login.microsoftonline.com/common/",
+            Application = new PublicClientApplication(_clientId, "https://login.microsoftonline.com/organizations/",
                 CachePersistence.GetUserCache());
-        }
-
-        public async Task<IAccount> SignInAsync()
-        {
-            try
-            {
-                AuthenticationResult result = await Application.AcquireTokenAsync(new[] {"user.read", "calendars.read"}).ConfigureAwait(false);
-                return result.Account;
-            }
-            catch (Exception exc)
-            {
-                MessageBox.Show(exc.Message, "Sign in failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            return null;
         }
 
         public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount account)
@@ -69,18 +56,17 @@ namespace SampleApp
             Exception exception = null;
             try
             {
-                result = await Application.AcquireTokenAsync(scopes, account).ConfigureAwait(false);
+                result = await Application.AcquireTokenSilentAsync(scopes, account).ConfigureAwait(false);
                 return result.AccessToken;
             }
             catch (MsalUiRequiredException)
             {
                 try
                 {
-                    result = await Application.AcquireTokenAsync(scopes, account)
-                        .ConfigureAwait(false);
+                    result = await Application.AcquireTokenAsync(scopes).ConfigureAwait(false);
                     return result.AccessToken;
                 }
-                catch (Exception ex)
+                catch (MsalServiceException ex)
                 {
                     exception = ex;
                 }
@@ -98,5 +84,60 @@ namespace SampleApp
             return null;
         }
 
+        public async Task<string> GetTokenWithUsernamePasswordAsync(IEnumerable<string> scopes, string password)
+        {
+            AuthenticationResult result = null;
+            Exception exception = null;
+
+            try
+            {
+                result = await Application.AcquireTokenByUsernamePasswordAsync(scopes, user, password).ConfigureAwait(false);
+                return result.AccessToken;
+            }
+            catch (MsalServiceException ex)
+            {
+                exception = ex;
+            }
+
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception != null)
+            {
+                MessageBox.Show(exception.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            return null;
+        }
+
+        internal async Task<string> GetTokenWithIWAAsync(string[] scopes, string user)
+        {
+            AuthenticationResult result = null;
+            Exception exception = null;
+
+            try
+            {
+                result = await Application.AcquireTokenByIntegratedWindowsAuthAsync(scopes, user).ConfigureAwait(false);
+                return result.AccessToken;
+            }
+            catch (MsalServiceException ex)
+            {
+                exception = ex;
+            }
+
+            catch (Exception ex)
+            {
+                exception = ex;
+            }
+
+            if (exception != null)
+            {
+                MessageBox.Show(exception.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            return null;
+        }
     }
 }

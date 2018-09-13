@@ -147,5 +147,10 @@ namespace Microsoft.Identity.Client
         /// Failed to get user name.
         /// </summary>
         public const string GetUserNameFailed = "get_user_name_failed";
+
+        /// <summary>
+        /// Password is required for managed user.
+        /// </summary>
+        public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
     }
 }

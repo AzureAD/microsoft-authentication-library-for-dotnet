@@ -32,6 +32,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
@@ -147,14 +148,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             try
             {
                 IHttpClient request = new HttpClientWrapper(resourceUrl.AbsoluteUri, null);
-                using (await request.GetResponseAsync().ConfigureAwait(false))
-                {
-                    var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                    string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                    CoreLoggerBase.Default.Error(noPiiMsg);
-                    CoreLoggerBase.Default.ErrorPii(ex);
-                    throw ex;
-                }
+                await request.GetResponseAsync().ConfigureAwait(false);
+
+                var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
+                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
+                CoreLoggerBase.Default.Error(noPiiMsg);
+                CoreLoggerBase.Default.ErrorPii(ex);
+                throw ex;
+
             }
             catch (HttpRequestWrapperException ex)
             {

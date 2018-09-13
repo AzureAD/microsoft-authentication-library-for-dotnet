@@ -35,6 +35,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
@@ -141,7 +142,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                         string.Format(CultureInfo.CurrentCulture,
                             "Response status code does not indicate success: {0} ({1}).",
                             (int) webResponse.StatusCode, webResponse.StatusCode),
-                        new AdalException(webResponse.ResponseString)));
+                        new AdalException(webResponse.Body)));
                 }
 
                 if (addCorrelationId)

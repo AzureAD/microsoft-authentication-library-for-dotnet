@@ -53,19 +53,9 @@ namespace Microsoft.Identity.Core.OAuth2
             _queryParameters[key] = value;
         }
 
-        public void AddHeader(string key, string value)
-        {
-            _headers[key] = value;
-        }
-
         public void AddBodyParameter(string key, string value)
         {
             _bodyParameters[key] = value;
-        }
-
-        public async Task<TenantDiscoveryResponse> GetOpenIdConfigurationAsync(Uri endPoint, RequestContext requestContext)
-        {
-            return await ExecuteRequestAsync<TenantDiscoveryResponse>(endPoint, HttpMethod.Get, requestContext).ConfigureAwait(false);
         }
 
         public async Task<InstanceDiscoveryResponse> DiscoverAadInstanceAsync(Uri endPoint, RequestContext requestContext)
@@ -127,7 +117,7 @@ namespace Microsoft.Identity.Core.OAuth2
 
             if (addCorrelationId)
             {
-                VerifyCorrelationIdHeaderInReponse(response.Headers, requestContext);
+                VerifyCorrelationIdHeaderInResponse(response.HeadersAsDictionary, requestContext);
             }
 
             return JsonHelper.DeserializeFromJson<T>(response.Body);
@@ -178,7 +168,7 @@ namespace Microsoft.Identity.Core.OAuth2
             throw serviceEx;
         }
 
-        internal Uri CreateFullEndpointUri(Uri endPoint)
+        private Uri CreateFullEndpointUri(Uri endPoint)
         {
             UriBuilder endpointUri = new UriBuilder(endPoint);
             string extraQp = _queryParameters.ToQueryParameter();
@@ -187,7 +177,7 @@ namespace Microsoft.Identity.Core.OAuth2
             return endpointUri.Uri;
         }
 
-        private static void VerifyCorrelationIdHeaderInReponse(Dictionary<string, string> headers, RequestContext requestContext)
+        private static void VerifyCorrelationIdHeaderInResponse(IDictionary<string, string> headers, RequestContext requestContext)
         {
             foreach (string reponseHeaderKey in headers.Keys)
             {

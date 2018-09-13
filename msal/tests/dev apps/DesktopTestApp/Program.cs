@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Net;
 using System.Windows.Forms;
 
 namespace DesktopTestApp
@@ -40,6 +41,9 @@ namespace DesktopTestApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Ssl3;
+
             Application.Run(new MainForm());
         }
     }

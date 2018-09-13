@@ -33,6 +33,8 @@ using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 {
@@ -123,7 +125,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <summary>
         /// Contains headers from the response that indicated an error
         /// </summary>
-        public HttpResponseHeaders Headers { get; private set; }
+        public HttpResponseHeaders Headers { get; set; }
 
         /// <summary>
         /// Creates and returns a string representation of the current exception.

@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Core
             this.UserName = userName;
         }
 
-        #if DESKTOP 
+#if DESKTOP
         public UsernamePasswordInput(string userName, SecureString securePassword)
         {
             this.securePassword = securePassword;
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Core
 #if DESKTOP
             hasSecurePassword = this.securePassword != null;
 #endif
-            bool hasPlainPassowrd = !String.IsNullOrEmpty(password);
+            bool hasPlainPassowrd = !string.IsNullOrEmpty(password);
 
             return hasSecurePassword || hasPlainPassowrd;
         }

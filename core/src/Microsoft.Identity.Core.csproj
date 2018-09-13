@@ -43,6 +43,8 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
     <None Remove="ConfigureAwait.ruleset" />
+    <None Remove="Exceptions\HttpRequestWrapperException.cs" />
+    <None Remove="Http\IHttpWebResponse.cs" />
     <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
 

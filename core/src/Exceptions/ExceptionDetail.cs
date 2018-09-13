@@ -26,6 +26,9 @@
 //------------------------------------------------------------------------------
 
 
+using System.Collections.Generic;
+using System.Net.Http.Headers;
+
 namespace Microsoft.Identity.Core
 {
     internal class ExceptionDetail
@@ -50,5 +53,8 @@ namespace Microsoft.Identity.Core
         /// Raw response body received from the server.
         /// </summary>
         public string ResponseBody { get; set; }
+
+        public IDictionary<string, string> HttpHeaders { get; set; }
+
     }
 }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Core.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal

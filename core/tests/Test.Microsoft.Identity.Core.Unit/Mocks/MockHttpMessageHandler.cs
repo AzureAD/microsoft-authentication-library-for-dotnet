@@ -47,6 +47,8 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public IDictionary<string, string> PostData { get; set; }
 
+        public IDictionary<string, object> PostDataObject { get; set; }
+
         public IDictionary<string, string> Headers { get; set; }
 
         public HttpMethod Method { get; set; }

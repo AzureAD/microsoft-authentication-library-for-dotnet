@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,32 +40,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
     /// <summary>
     /// Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth.
     /// </summary>
-    internal class NonInteractiveRequest : RequestBase
+    internal class UsernamePasswordRequest : RequestBase
     {
-        private IWAInput iwaInput;
+        private UsernamePasswordInput usernamePasswordInput;
         private UserAssertion userAssertion;
+
         private CommonNonInteractiveHandler commonNonInteractiveHandler;
 
-        public NonInteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters, IWAInput iwaInput)
-            : base(authenticationRequestParameters)
+        public UsernamePasswordRequest(AuthenticationRequestParameters authenticationRequestParameters, UsernamePasswordInput usernamePasswordInput)
+       : base(authenticationRequestParameters)
         {
-            if (iwaInput == null)
+            if (usernamePasswordInput == null)
             {
-                throw new ArgumentNullException(nameof(iwaInput));
+                throw new ArgumentNullException(nameof(usernamePasswordInput));
             }
 
-            this.iwaInput = iwaInput;
+            this.usernamePasswordInput = usernamePasswordInput;
             this.commonNonInteractiveHandler = new CommonNonInteractiveHandler(
-                authenticationRequestParameters.RequestContext,
-                this.iwaInput);
+                authenticationRequestParameters.RequestContext, usernamePasswordInput);
         }
 
         protected override async Task SendTokenRequestAsync()
         {
             await UpdateUsernameAsync().ConfigureAwait(false);
-
             await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-
             await base.SendTokenRequestAsync().ConfigureAwait(false);
         }
 
@@ -80,17 +79,25 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 {
 
                     WsTrustResponse wsTrustResponse = await this.commonNonInteractiveHandler.QueryWsTrustAsync(
-                        new MexParser(UserAuthType.IntegratedAuth, this.AuthenticationRequestParameters.RequestContext),
+                        new MexParser(UserAuthType.UsernamePassword, this.AuthenticationRequestParameters.RequestContext),
                         userRealmResponse,
                         (cloudAudience, trustAddress, userName) =>
                         {
-                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (IWAInput)userName);
+                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (UsernamePasswordInput)userName);
                         }).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     userAssertion = new UserAssertion(
                         wsTrustResponse.Token,
                         (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
+                }
+                else if (string.Equals(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase))
+                {
+                    // handle grant flow
+                    if (!this.usernamePasswordInput.HasPassword())
+                    {
+                        throw new MsalException(MsalError.PasswordRequiredForManagedUserError);
+                    }
                 }
                 else
                 {
@@ -102,22 +109,37 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (string.IsNullOrWhiteSpace(iwaInput.UserName))
+            if (usernamePasswordInput != null)
             {
-                string platformUsername = await this.commonNonInteractiveHandler.GetPlatformUserAsync()
-                    .ConfigureAwait(false);
-
-                this.iwaInput.UserName = platformUsername;
+                if (string.IsNullOrWhiteSpace(usernamePasswordInput.UserName))
+                {
+                    string platformUsername = await this.commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
+                    this.usernamePasswordInput.UserName = platformUsername;
+                }
             }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            if (userAssertion != null)
+            if (this.userAssertion != null)
             {
-                client.AddBodyParameter(OAuth2Parameter.GrantType, userAssertion.AssertionType);
-                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(userAssertion.Assertion)));
+                client.AddBodyParameter(OAuth2Parameter.GrantType, this.userAssertion.AssertionType);
+                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion)));
             }
+            else
+            {
+                client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.Password);
+                client.AddBodyParameter(OAuth2Parameter.Username, this.usernamePasswordInput.UserName);
+                client.AddBodyParameter(OAuth2Parameter.Password, new string(this.usernamePasswordInput.PasswordToCharArray()));
+            }
+
+            SortedSet<string> unionScope =
+                new SortedSet<string>() { OAuth2Value.ScopeOpenId, OAuth2Value.ScopeOfflineAccess, OAuth2Value.ScopeProfile };
+
+            unionScope.UnionWith(this.AuthenticationRequestParameters.Scope);
+
+            // To request id_token in response
+            client.AddBodyParameter(OAuth2Parameter.Scope, unionScope.AsSingleString());
         }
     }
 }

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Net.Http;
 using System.Text;
@@ -43,8 +44,8 @@ namespace Microsoft.Identity.Core.WsTrust
         private const int ExpiryInMinutes = 10;
 
         public static async Task<WsTrustResponse> SendRequestAsync(
-            WsTrustAddress wsTrustAddress, 
-            string wsTrustRequest, 
+            WsTrustAddress wsTrustAddress,
+            string wsTrustRequest,
             RequestContext requestContext)
         {
             var headers = new Dictionary<string, string>
@@ -55,7 +56,11 @@ namespace Microsoft.Identity.Core.WsTrust
             var body = new StringContent(
                 wsTrustRequest,
                 Encoding.UTF8, headers["ContentType"]);
-            var resp = await HttpRequest.SendPostAsync(wsTrustAddress.Uri, headers, body, requestContext).ConfigureAwait(false);
+
+            IHttpWebResponse resp = null;
+            resp = await HttpRequest.SendPostForceResponseAsync(wsTrustAddress.Uri, headers, body, requestContext)
+               .ConfigureAwait(false);
+
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string errorMessage = null;
@@ -67,11 +72,14 @@ namespace Microsoft.Identity.Core.WsTrust
                 {
                     errorMessage = resp.Body;
                 }
+
                 throw CoreExceptionFactory.Instance.GetServiceException(
                     CoreErrorCodes.FederatedServiceReturnedError,
                     string.Format(CultureInfo.CurrentCulture, CoreErrorMessages.FederatedServiceReturnedErrorTemplate, wsTrustAddress.Uri, errorMessage)
                 );
             }
+
+
             try
             {
                 return WsTrustResponse.CreateFromResponse(resp.Body, wsTrustAddress.Version);

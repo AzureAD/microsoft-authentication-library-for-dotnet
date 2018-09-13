@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 

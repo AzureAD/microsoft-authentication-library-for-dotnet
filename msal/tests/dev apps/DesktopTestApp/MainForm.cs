@@ -173,6 +173,23 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
+               
+        private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
+        {
+            ClearResultPageInfo();
+            try
+            {
+                string username = ""; //Can be blank for U/P
+                string password = "";
+                var app = new PublicClientApplication(publicClientId, authority.Text);
+                AuthenticationResult authResult = await app.AcquireTokenByUsernamePasswordAsync(scopes.Text.AsArray(), username, password);
+                SetResultPageInfo(authResult);
+            }
+            catch(Exception exc)
+            {
+                CreateException(exc);
+            }
+        }
 
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {

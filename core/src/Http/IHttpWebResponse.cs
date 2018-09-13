@@ -25,20 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http.Headers;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
+namespace Microsoft.Identity.Core.Http
 {
-    internal interface IHttpWebResponse : IDisposable
+    internal interface IHttpWebResponse 
     {
         HttpStatusCode StatusCode { get; }
 
         HttpResponseHeaders Headers { get; }
 
-        string ResponseString { get; }
+        string Body { get; }
     }
 }

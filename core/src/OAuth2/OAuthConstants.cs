@@ -101,6 +101,9 @@ namespace Microsoft.Identity.Core.OAuth2
     {
         public static readonly string[] ReservedScopes = {"openid", "profile", "offline_access"};
         public const string CodeChallengeMethodValue = "S256";
+        public const string ScopeOpenId = "openid";
+        public const string ScopeOfflineAccess = "offline_access";
+        public const string ScopeProfile = "profile";
     }
 
     internal class PromptValue

@@ -28,6 +28,8 @@
 using System;
 using System.Drawing;
 using System.Linq;
+using System.Security;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 
@@ -35,8 +37,10 @@ namespace SampleApp
 {
     public partial class MainForm : Form
     {
-        private readonly MsalAuthHelper _msalHelper = new MsalAuthHelper("11744750-bfe5-4818-a1c0-655455f68fa7");
+        private readonly MsalAuthHelper _msalHelper = new MsalAuthHelper("1950a258-227b-4e31-a9cf-717495945fc2");
         private IAccount account = null;
+        private string token;
+
         public MainForm()
         {
             InitializeComponent();
@@ -52,31 +56,70 @@ namespace SampleApp
                 tabControl1.SelectedTab = calendarPage;
             }
         }
-        
+
         private async void TabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if((sender as TabControl).TabIndex == 1)
+            if ((sender as TabControl).TabIndex == 1)
             {
-                string token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] {"user.read"}, account)
+                string token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] { "user.read" }, account)
                     .ConfigureAwait(false);
-                DisplayUserInformationFromGraph(token);
             }
         }
-        
-        private async void pictureBox1_Click(object sender, EventArgs e)
+
+        private void pictureBox1_Click(object sender, EventArgs e)
         {
-            account = await _msalHelper.SignInAsync().ConfigureAwait(false);
-            if (account!=null)
+            AcquireTokenAsync().Wait();
+            UpdateResponse(token);
+        }
+
+        private async Task AcquireTokenAsync()
+        {
+            token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] { "user.read" }, account).ConfigureAwait(false);
+        }
+
+        private async void acquireTokenUsernamePasswordButton_Click(object sender, EventArgs e)
+        {
+            tokenResultBox.Text = string.Format("");
+            string password = tokenResultBox.Text;
+
+            token = await _msalHelper.GetTokenWithUsernamePasswordAsync(new[] { "user.read" }, password).ConfigureAwait(false);
+        }
+
+        private void UpdateResponse(string token)
+        {
+            if (token != null)
             {
-                tabControl1.SelectedTab = calendarPage;
+                tokenResultBox.Text = "Result:\n" + token;
+            }
+            else
+            {
+                tokenResultBox.Text = "Authentication failed. No access token returned";
             }
         }
 
-
-        private void DisplayUserInformationFromGraph(string token)
+        private async void signOutButton1_Click(object sender, EventArgs e)
         {
-            
+            var accounts = await _msalHelper.Application.GetAccountsAsync();
+
+            if (accounts.Any())
+            {
+                try
+                {
+                    await _msalHelper.Application.RemoveAsync(accounts.FirstOrDefault());
+                    tokenResultBox.Text = "User has signed-out";
+                }
+                catch (MsalException ex)
+                {
+                    tokenResultBox.Text = $"Error signing-out user: {ex.Message}";
+                }
+            }
+
         }
 
+        private async void acquireTokenWIAButton_Click(object sender, EventArgs e)
+        {
+            string user = "";
+            token = await _msalHelper.GetTokenWithIWAAsync(new[] { "user.read" }, user).ConfigureAwait(false);
+        }
     }
 }

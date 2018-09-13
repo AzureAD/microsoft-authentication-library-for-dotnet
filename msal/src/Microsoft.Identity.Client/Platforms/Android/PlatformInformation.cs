@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using System.Collections.Generic;
 using Microsoft.Identity.Core;
@@ -75,20 +74,18 @@ namespace Microsoft.Identity.Client
             return Android.OS.Build.Model;
         }
 
-        public override Uri ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
         {
             base.ValidateRedirectUri(redirectUri, requestContext);
 
-            if (PlatformInformationBase.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            if (DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
                 throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + PlatformInformationBase.DefaultRedirectUri +
                                         " can not be used on Android platform");
-
-            return redirectUri; 
         }
 
         public override string GetDefaultRedirectUri(string clientId)
         {
-            return String.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
+            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
         }
     }
 }

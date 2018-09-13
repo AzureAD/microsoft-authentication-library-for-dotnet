@@ -77,8 +77,8 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms" />
-    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
+    <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="Features\PublicClient\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
@@ -92,8 +92,8 @@
     <!-- Remove UI specific logic as it is not supported yet -->
     <Compile Remove="UIParent.cs" />
     <Compile Include="Platforms\netcore\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\netcore\**\*.cs" LinkBase="Core\Platforms" />
-    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
+    <Compile Include="..\..\..\core\src\Platforms\netcore\**\*.cs" LinkBase="Core\Platforms\netcore" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="Features\TokenCache\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
@@ -104,8 +104,8 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Compile Include="Platforms\net45\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\net45\**\*.cs" LinkBase="Core\Platforms" />
-    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features" />
+    <Compile Include="..\..\..\core\src\Platforms\net45\**\*.cs" LinkBase="Core\Platforms\net45" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
@@ -130,7 +130,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\uap\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms\uap" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\PublicClient\**\*.cs" />
     <Compile Include="Features\*.cs" />
@@ -141,7 +141,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Compile Include="Platforms\iOS\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\iOS\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Platforms\iOS\**\*.cs" LinkBase="Core\Platforms\iOS" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -152,7 +152,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
     <Compile Include="Platforms\Android\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\Android\**\*.cs" LinkBase="Core\Platforms" />
+    <Compile Include="..\..\..\core\src\Platforms\Android\**\*.cs" LinkBase="Core\Platforms\" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -164,6 +164,7 @@
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Internal\Requests\UsernamePasswordRequest.cs" />
     <None Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 

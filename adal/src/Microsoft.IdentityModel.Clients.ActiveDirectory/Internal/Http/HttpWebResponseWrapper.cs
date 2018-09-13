@@ -25,9 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
+using Microsoft.Identity.Core.Http;
 using System.Net;
 using System.Net.Http.Headers;
 
@@ -37,7 +35,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
     {
         public HttpWebResponseWrapper(string responseString, HttpResponseHeaders headers, HttpStatusCode statusCode)
         {
-            this.ResponseString = responseString;
+            this.Body = responseString;
             this.Headers = headers;
             this.StatusCode = statusCode;
         }
@@ -46,12 +44,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
 
         public HttpResponseHeaders Headers { get; private set; }
 
-        public string ResponseString { get; private set; }
+        public string Body { get; private set; }
 
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
-        }
 
     }
 }

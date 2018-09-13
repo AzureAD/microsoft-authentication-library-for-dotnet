@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
@@ -120,7 +121,7 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
 
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
-        
+
         [TestMethod]
         [TestCategory("HttpRequestTests")]
         public async Task TestSendGetWithHttp500TypeFailure()
@@ -154,6 +155,33 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
 
         [TestMethod]
         [TestCategory("HttpRequestTests")]
+        public async Task TestSendGetWithHttp500TypeFailure2()
+        {
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.BadGateway)
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateResiliencyMessage(HttpStatusCode.BadGateway)
+            });
+
+            var msalHttpResponse = await HttpRequest.SendPostForceResponseAsync(
+                new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
+                new Dictionary<string, string>(),
+                new StringContent("body"),
+                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+
+            Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+
+        [TestMethod]
+        [TestCategory("HttpRequestTests")]
         public async Task TestSendPostWithHttp500TypeFailure()
         {
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -172,8 +200,8 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
             {
                 var msalHttpResponse = await HttpRequest.SendPostAsync(
                     new Uri(TestConstants.AuthorityHomeTenant + "oauth2/token"),
-                    new Dictionary<string, string>(), 
-                    (IDictionary<string, string>)null, 
+                    new Dictionary<string, string>(),
+                    (IDictionary<string, string>)null,
                     new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                 Assert.Fail("request should have failed");
             }

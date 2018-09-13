@@ -27,17 +27,38 @@
 
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Linq;
+
 
 namespace Microsoft.Identity.Core.Http
 {
-    internal class HttpResponse
+    internal class HttpResponse : IHttpWebResponse
     {
-        public Dictionary<string, string> Headers { get; set; }
+        public HttpResponseHeaders Headers { get; set; }
 
-        public string Body { get; set; }
+        public IDictionary<string, string> HeadersAsDictionary {
+            get
+            {
+                var headers = new Dictionary<string, string>();
+
+                if (this.Headers != null)
+                {
+                    foreach (var kvp in this.Headers)
+                    {
+                        headers[kvp.Key] = kvp.Value.First();
+                    }
+                }
+
+                return headers;
+            }
+        }
 
         public HttpStatusCode StatusCode { get; set; }
 
         public string UserAgent { get; set; }
+
+        public string Body { get; set; }
+
     }
 }

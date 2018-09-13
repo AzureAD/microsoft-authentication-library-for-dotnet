@@ -508,6 +508,48 @@ namespace Microsoft.Identity.Client
         {
             return await AcquireTokenByIWAAsync(scopes, new IWAInput()).ConfigureAwait(false);
         }
+
+
+#if DESKTOP
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
+        {
+            UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, password);
+            return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, System.Security.SecureString password)
+        {
+            UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, password);
+
+            return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, UsernamePasswordInput usernamePasswordInput)
+        {
+            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
+            var handler = new UsernamePasswordRequest(requestParams, usernamePasswordInput)
+            {
+                ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
+            };
+
+            return await handler.RunAsync().ConfigureAwait(false);
+        }
+#endif
 #endif
 
 
@@ -534,7 +576,7 @@ namespace Microsoft.Identity.Client
         {
             Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new NonInteractiveRequest(requestParams, iwaInput)
+            var handler = new IWARequest(requestParams, iwaInput)
             {
                 ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
             };

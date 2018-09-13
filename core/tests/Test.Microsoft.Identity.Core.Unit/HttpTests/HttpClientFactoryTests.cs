@@ -45,6 +45,7 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
         [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_MaxRespContentBuffSizeSetTo1Mb()
         {
+            HttpMessageHandlerFactory.ClearMockHandlers();
             HttpClientFactory.ReturnHttpClientForMocks = false;
             Assert.AreEqual(1024 * 1024, HttpClientFactory.GetHttpClient().MaxResponseContentBufferSize);
         }
@@ -53,7 +54,11 @@ namespace Test.Microsoft.Identity.Unit.HttpTests
         [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_DefaultHeadersSetToJson()
         {
+            HttpMessageHandlerFactory.ClearMockHandlers();
+            HttpClientFactory.ReturnHttpClientForMocks = false;
+
             var client = HttpClientFactory.GetHttpClient();
+
             Assert.IsNotNull(client.DefaultRequestHeaders.Accept);
             Assert.IsTrue(client.DefaultRequestHeaders.Accept.Any<MediaTypeWithQualityHeaderValue>(x => x.MediaType == "application/json"));
         }

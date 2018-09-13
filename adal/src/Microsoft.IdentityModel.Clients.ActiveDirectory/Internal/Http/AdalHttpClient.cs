@@ -31,6 +31,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
@@ -69,7 +70,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         private async Task<T> GetResponseAsync<T>(bool respondToDeviceAuthChallenge)
         {
             T typedResponse = default(T);
-            IHttpWebResponse response;
 
             try
             {
@@ -78,12 +78,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                 {
                     this.Client.Headers[kvp.Key] = kvp.Value;
                 }
+
                 //add pkeyauth header
                 this.Client.Headers[DeviceAuthHeaderName] = DeviceAuthHeaderValue;
-                using (response = await this.Client.GetResponseAsync().ConfigureAwait(false))
-                {
-                    typedResponse = EncodingHelper.DeserializeResponse<T>(response.ResponseString);
-                }
+                IHttpWebResponse response = await this.Client.GetResponseAsync().ConfigureAwait(false);
+                typedResponse = EncodingHelper.DeserializeResponse<T>(response.Body);
             }
             catch (HttpRequestWrapperException ex)
             {
@@ -108,7 +107,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     _requestContext.Logger.Info("HttpStatus code: " + ex.WebResponse.StatusCode + ", Exception type: " + ex.InnerException?.GetType());
 
                     _requestContext.Logger.InfoPii("HttpStatus code: " + ex.WebResponse.StatusCode + ", Exception message: " + ex.InnerException?.Message);
-                    
+
                     Resiliency = true;
                 }
 
@@ -129,11 +128,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     _requestContext.Logger.Info("Retry Failed, Exception type: " + ex.InnerException?.GetType());
                     _requestContext.Logger.InfoPii("Retry Failed, Exception message: " + ex.InnerException?.Message);
                 }
-                
+
                 if (!this.IsDeviceAuthChallenge(ex.WebResponse, respondToDeviceAuthChallenge))
                 {
                     TokenResponse tokenResponse = TokenResponse.CreateFromErrorResponse(ex.WebResponse);
-                    string[] errorCodes = tokenResponse.ErrorCodes ?? new[] {ex.WebResponse.StatusCode.ToString()};
+                    string[] errorCodes = tokenResponse.ErrorCodes ?? new[] { ex.WebResponse.StatusCode.ToString() };
                     AdalServiceException serviceEx = new AdalServiceException(tokenResponse.Error,
                         tokenResponse.ErrorDescription,
                         errorCodes, ex);
@@ -150,7 +149,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                 //attempt device auth
                 return await HandleDeviceAuthChallengeAsync<T>(ex.WebResponse).ConfigureAwait(false);
             }
-            
+
             return typedResponse;
         }
 
