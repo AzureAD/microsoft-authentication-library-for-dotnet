@@ -194,14 +194,8 @@ namespace Microsoft.Identity.Core.Cache
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
                 AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
 
-                if (!string.IsNullOrEmpty(identifier))
-                {
-                    RemoveEntriesWithMatchingId(environmentAliases, identifier, adalCache);
-                }
-                else
-                {
-                    RemoveEntriesWithMatchingName(environmentAliases, displayableId, adalCache);
-                }
+                RemoveEntriesWithMatchingId(environmentAliases, identifier, adalCache);
+                RemoveEntriesWithMatchingName(environmentAliases, displayableId, adalCache);
 
                 legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(adalCache));
             }
@@ -222,9 +216,8 @@ namespace Microsoft.Identity.Core.Cache
         {
             if (String.IsNullOrEmpty(displayableId))
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.InternalError,
-                    CoreErrorMessages.InternalErrorCacheEmptyUsername);
+                CoreLoggerBase.Default.Info(CoreErrorMessages.InternalErrorCacheEmptyUsername);
+                return;
             }
 
             List<AdalTokenCacheKey> keysToRemove = new List<AdalTokenCacheKey>();
@@ -252,6 +245,12 @@ namespace Microsoft.Identity.Core.Cache
             string identifier,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
         {
+            if (string.IsNullOrEmpty(identifier))
+            {
+                CoreLoggerBase.Default.Info(CoreErrorMessages.InternalErrorCacheEmptyIdentifier);
+                return;
+            }
+
             List<AdalTokenCacheKey> keysToRemove = new List<AdalTokenCacheKey>();
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
