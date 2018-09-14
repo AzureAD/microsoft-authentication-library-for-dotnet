@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -46,11 +48,13 @@ namespace DesktopTestApp
 
         private async void signOutUserOneBtn_Click(object sender, System.EventArgs e)
         {
-            await publicClient.RemoveAsync(
-                new Account(
-                    AccountId.FromClientInfo(rtItem.ClientInfo), 
-                    accountItem.PreferredUsername, 
-                    accountItem.Environment)).ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await publicClient.GetAccountsAsync();
+
+            while (accounts.Any())
+            {
+                await publicClient.RemoveAsync(accounts.FirstOrDefault());
+                accounts = await publicClient.GetAccountsAsync();
+            }
 
             RefreshViewDelegate?.Invoke();
         }

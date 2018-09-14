@@ -392,6 +392,46 @@ namespace Test.MSAL.NET.Unit.CacheTests
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
+        public void DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTest()
+        {
+            TokenCache cache = new TokenCache()
+            {
+                ClientId = TestConstants.ClientId
+            };
+
+            MsalTokenResponse response = new MsalTokenResponse();
+            response.IdToken = MockHelpers.CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId);
+            response.AccessToken = "access-token";
+            response.ClientInfo = MockHelpers.CreateClientInfo();
+            response.ExpiresIn = 3599;
+            response.CorrelationId = "correlation-id";
+            response.RefreshToken = "refresh-token";
+            response.Scope = TestConstants.Scope.AsSingleString();
+            response.TokenType = "Bearer";
+            AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
+            {
+                RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
+                Authority = Authority.CreateAuthority(TestConstants.B2CAuthority, false),
+                ClientId = TestConstants.ClientId,
+                TenantUpdatedCanonicalAuthority = TestConstants.AuthorityTestTenant
+            };
+
+            AddHostToInstanceCache(TestConstants.ProductionPrefNetworkEnvironment);
+
+            cache.SaveAccessAndRefreshToken(requestParams, response);
+
+            Assert.AreEqual(1, cache.tokenCacheAccessor.RefreshTokenCacheDictionary.Count);
+            Assert.AreEqual(1, cache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(cache.legacyCachePersistance.LoadCache());
+            cache.legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));
+
+            // ADAL cache is empty because B2C scenario is only for MSAL
+            Assert.AreEqual(0, dictionary.Count);
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
         public void GetAccessTokenNoUserAssertionInCacheTest()
         {
             TokenCache cache = new TokenCache()

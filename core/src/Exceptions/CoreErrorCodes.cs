@@ -54,6 +54,7 @@ namespace Microsoft.Identity.Core
         public const string InvalidAuthority = "invalid_authority";
 
         public const string PlatformNotSupported = "platform_not_supported";
+        public const string InternalError = "internal_error";
 
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";

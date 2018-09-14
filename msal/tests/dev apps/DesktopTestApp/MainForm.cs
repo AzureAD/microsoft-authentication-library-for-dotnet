@@ -41,6 +41,7 @@ namespace DesktopTestApp
     public partial class MainForm : Form
     {
         private const string publicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+
         private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(publicClientId);
 
         public MainForm()
@@ -81,14 +82,8 @@ namespace DesktopTestApp
         public void RefreshUserList()
         {
             List<IAccount> accounts = _publicClientHandler.PublicClientApplication.GetAccountsAsync().Result.ToList();
-            if (accounts.Count > 0)
-            {
-                accounts.Insert(0, new Account(_publicClientHandler.CurrentUser.HomeAccountId, 
-                    _publicClientHandler.CurrentUser.Username, _publicClientHandler.CurrentUser.Environment));
-            }
 
             userList.DataSource = accounts;
-            userList.DisplayMember = "DisplayableId";
             userList.Refresh();
         }
 
@@ -162,7 +157,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-        
+
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
@@ -189,7 +184,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-        
+
         private async void acquireTokenInteractiveAuthority_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
@@ -275,7 +270,7 @@ namespace DesktopTestApp
                               @"User: " + authenticationResult.Account.Username + Environment.NewLine +
                               @"Id Token: " + authenticationResult.IdToken;
         }
-        
+
         public void ClearResultPageInfo()
         {
             callResult.Text = string.Empty;

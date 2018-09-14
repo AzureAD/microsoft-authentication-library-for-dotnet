@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCache
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        private const string preferred_usernameNotInIdtoken = "preferred_username not in idtoken";
+        internal const string NullPreferredUsernameDisplayLabel = "preferred_username not in id_token";
 
         static TokenCache()
         {
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
 
             //The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema. 
             //It will be set to "preferred_username not in idtoken" 
-            var preferredUsername = !String.IsNullOrWhiteSpace(idToken?.PreferredUsername)? idToken.PreferredUsername : preferred_usernameNotInIdtoken;
+            var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername)? idToken.PreferredUsername : NullPreferredUsernameDisplayLabel;
 
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
 
@@ -202,7 +202,8 @@ namespace Microsoft.Identity.Client
                     }
 
                     //save RT in ADAL cache for public clients
-                    if (!requestParams.IsClientCredentialRequest)
+                    //do not save RT in ADAL cache for MSAL B2C scenarios
+                    if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Core.Instance.AuthorityType.B2C))
                     {
                         CacheFallbackOperations.WriteAdalRefreshToken
                             (legacyCachePersistance, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
@@ -385,13 +386,13 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.InfoPii(msg);
 
                 //filter by authority
-                IEnumerable<MsalAccessTokenCacheItem> filteredByPrefferedAlias =
+                IEnumerable<MsalAccessTokenCacheItem> filteredByPreferredAlias =
                     filteredItems.Where
                     (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase));
 
-                if (filteredByPrefferedAlias.Any())
+                if (filteredByPreferredAlias.Any())
                 {
-                    filteredItems = filteredByPrefferedAlias;
+                    filteredItems = filteredByPreferredAlias;
                 }
                 else
                 {
@@ -950,11 +951,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void RemoveMsalAccount(IAccount account, ISet<string> environmnetAliases, RequestContext requestContext)
+        internal void RemoveMsalAccount(IAccount account, ISet<string> environmentAliases, RequestContext requestContext)
         {
             IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmnetAliases.Contains(item.Environment))
+                               environmentAliases.Contains(item.Environment))
                 .ToList();
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
             {
@@ -966,7 +967,7 @@ namespace Microsoft.Identity.Client
             requestContext.Logger.InfoPii(msg);
             IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmnetAliases.Contains(item.Environment))
+                               environmentAliases.Contains(item.Environment))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
             {
@@ -979,7 +980,7 @@ namespace Microsoft.Identity.Client
 
             IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmnetAliases.Contains(item.Environment))
+                               environmentAliases.Contains(item.Environment))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
             {
@@ -992,7 +993,7 @@ namespace Microsoft.Identity.Client
 
             IList<MsalAccountCacheItem> allAccounts = GetAllAccounts(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmnetAliases.Contains(item.Environment))
+                               environmentAliases.Contains(item.Environment))
                 .ToList();
             foreach (MsalAccountCacheItem accountCacheItem in allAccounts)
             {

@@ -92,5 +92,10 @@ namespace Microsoft.Identity.Client
         /// Non https redirect failed
         /// </summary>
         public const string NonHttpsRedirectNotSupported = "non_https_redirect_failed";
+
+        /// <summary>
+        /// Internal error
+        /// </summary>
+        public const string InternalError = "internal_error";
     }
 }

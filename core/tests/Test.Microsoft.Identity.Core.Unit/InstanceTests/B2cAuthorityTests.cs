@@ -54,7 +54,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
         }
 
-
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
         public void NotEnoughPathSegmentsTest()
@@ -82,7 +81,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void ValidationEnabledNotSupportedTest()
         {
-            Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/tfp/tenant/policy", true);
+            Authority instance = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
             try
@@ -105,8 +104,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
-            const string uriNoPort = "https://login.microsoftonline.in/tfp/tenant/policy";
-            const string uriNoPortTailSlash = "https://login.microsoftonline.in/tfp/tenant/policy/";
+            const string uriNoPort = TestConstants.B2CAuthority;
+            const string uriNoPortTailSlash = TestConstants.B2CAuthority;
 
             const string uriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
 

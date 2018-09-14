@@ -49,6 +49,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public static readonly string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
         public static readonly string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
+        public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public static readonly string ClientId = "client_id";
         public static readonly string UniqueId = "unique_id";
         public static readonly string IdentityProvider = "my-idp";
@@ -67,6 +68,7 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DefaultClientAssertion = "DefaultClientAssertion";
         public const string RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
+        public enum AuthorityType { B2C};
 
         public static readonly AccountId UserIdentifier = CreateUserIdentifer();
 
