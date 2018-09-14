@@ -1,3 +1,12 @@
+2.0.1-preview
+=============
+This release contains bug fixes on top of MSAL 2.0.0-preview:
+- When using MSAL 2.0.0-preview with Azure AD B2C, the cache was never hit. (See MSAL#[604](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/604)), 
+   and the accounts were not removed correctly (See MSAL #[613](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/613))
+- The TokenCacheExtensions.Deserialize was throwing if a null array of bytes was passed as arguments instead of silently not doing anything.
+   (See MSAL #[603](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/603))
+- When migrating a token cache from ADAL v3 or ADAL v4 to MSAL 2.0, the override of acquire token silent without authority used to work incorrectly (cache was missed)
+
 2.0.0-preview
 =============
 This release contains:
