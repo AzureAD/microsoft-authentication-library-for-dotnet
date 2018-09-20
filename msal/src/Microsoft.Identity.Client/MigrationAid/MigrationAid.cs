@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
@@ -144,5 +145,27 @@ namespace Microsoft.Identity.Client
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use Account instead (See https://aka.ms/msal-net-2-released)", true)]
         public IUser User { get { throw new NotImplementedException(); } }
+    }
+
+    /// <Summary>
+    /// Abstract class containing common API methods and properties. 
+    /// For details see https://aka.ms/msal-net-client-applications
+    /// </Summary>
+    public partial class PublicClientApplication
+    {
+        /// <summary>
+        /// In ADAL.NET 3.x, acquires security token from the authority, used for username/password authentication.
+        /// See https://aka.ms/msal-net-up for more details.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user application requests token on behalf.</param>
+        /// <param name="password">User password.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-up)", true)]
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
+        {
+            { throw new NotImplementedException(); }
+        }
     }
 }

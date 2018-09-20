@@ -94,8 +94,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
                 else
                 {
-                    throw new MsalException(MsalError.UnknownUserType,
-                        string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.UnsupportedUserType, userRealmResponse.AccountType));
+                    throw new MsalException(
+                        MsalError.UnknownUserType,
+                        string.Format(
+                            CultureInfo.CurrentCulture, 
+                            MsalErrorMessage.UnsupportedUserType, 
+                            userRealmResponse.AccountType, 
+                            this.iwaInput.UserName));
                 }
             }
         }

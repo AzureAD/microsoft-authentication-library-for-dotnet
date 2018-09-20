@@ -30,6 +30,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Security;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -162,11 +164,15 @@ namespace DesktopTestApp
         private async void acquireTokenByWindowsIntegratedAuth_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+
+            string username = loginHintTextBox.Text; // Can be blank 
+
             try
             {
                 var app = new PublicClientApplication(publicClientId, authority.Text);
-                AuthenticationResult authenticationResult = await app.AcquireTokenByIntegratedWindowsAuthAsync(scopes.Text.AsArray());
+                AuthenticationResult authenticationResult = await app.AcquireTokenByIntegratedWindowsAuthAsync(scopes.Text.AsArray(), username);
                 SetResultPageInfo(authenticationResult);
+                
             }
             catch (Exception exc)
             {
@@ -177,10 +183,13 @@ namespace DesktopTestApp
         private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+
+            string username = loginHintTextBox.Text; //Can be blank for U/P
+            var password = Microsoft.VisualBasic.Interaction.InputBox("Password?");
+
             try
             {
-                string username = ""; //Can be blank for U/P
-                string password = "";
+                // SecureString secureString = new SecureString()
                 var app = new PublicClientApplication(publicClientId, authority.Text);
                 AuthenticationResult authResult = await app.AcquireTokenByUsernamePasswordAsync(scopes.Text.AsArray(), username, password);
                 SetResultPageInfo(authResult);

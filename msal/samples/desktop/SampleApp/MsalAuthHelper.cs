@@ -27,9 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
@@ -53,7 +51,6 @@ namespace SampleApp
         public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount account)
         {
             AuthenticationResult result = null;
-            Exception exception = null;
             try
             {
                 result = await Application.AcquireTokenSilentAsync(scopes, account).ConfigureAwait(false);
@@ -61,52 +58,29 @@ namespace SampleApp
             }
             catch (MsalUiRequiredException)
             {
-                try
-                {
-                    result = await Application.AcquireTokenAsync(scopes).ConfigureAwait(false);
-                    return result.AccessToken;
-                }
-                catch (MsalServiceException ex)
-                {
-                    exception = ex;
-                }
+                result = await Application.AcquireTokenAsync(scopes).ConfigureAwait(false);
+                return result.AccessToken;
             }
             catch (Exception ex)
             {
-                exception = ex;
-            }
-
-            if (exception != null)
-            {
-                MessageBox.Show(exception.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return null;
         }
 
-        public async Task<string> GetTokenWithUsernamePasswordAsync(IEnumerable<string> scopes, string password)
+        public async Task<string> GetTokenWithUsernamePasswordAsync(IEnumerable<string> scopes, SecureString password)
         {
             AuthenticationResult result = null;
-            Exception exception = null;
 
             try
             {
                 result = await Application.AcquireTokenByUsernamePasswordAsync(scopes, user, password).ConfigureAwait(false);
                 return result.AccessToken;
             }
-            catch (MsalServiceException ex)
-            {
-                exception = ex;
-            }
-
             catch (Exception ex)
             {
-                exception = ex;
-            }
-
-            if (exception != null)
-            {
-                MessageBox.Show(exception.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return null;
@@ -115,26 +89,15 @@ namespace SampleApp
         internal async Task<string> GetTokenWithIWAAsync(string[] scopes, string user)
         {
             AuthenticationResult result = null;
-            Exception exception = null;
 
             try
             {
                 result = await Application.AcquireTokenByIntegratedWindowsAuthAsync(scopes, user).ConfigureAwait(false);
                 return result.AccessToken;
             }
-            catch (MsalServiceException ex)
-            {
-                exception = ex;
-            }
-
             catch (Exception ex)
             {
-                exception = ex;
-            }
-
-            if (exception != null)
-            {
-                MessageBox.Show(exception.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Failed to get token", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
             return null;

@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Core.OAuth2
 
     internal class OAuth2Value
     {
-        public static readonly string[] ReservedScopes = {"openid", "profile", "offline_access"};
+        public static readonly string[] ReservedScopes = { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
         public const string CodeChallengeMethodValue = "S256";
         public const string ScopeOpenId = "openid";
         public const string ScopeOfflineAccess = "offline_access";

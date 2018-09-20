@@ -96,12 +96,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     // handle grant flow
                     if (!this.usernamePasswordInput.HasPassword())
                     {
-                        throw new MsalException(MsalError.PasswordRequiredForManagedUserError);
+                        throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
                     }
                 }
                 else
                 {
-                    throw new MsalException(MsalError.UnknownUserType,
+                    throw new MsalClientException(MsalError.UnknownUserType,
                         string.Format(CultureInfo.CurrentCulture, MsalErrorMessage.UnsupportedUserType, userRealmResponse.AccountType));
                 }
             }
@@ -126,6 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 client.AddBodyParameter(OAuth2Parameter.GrantType, this.userAssertion.AssertionType);
                 client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion)));
             }
+            // This is hit if the account is managed, as no userAssertion is created for a managed account
             else
             {
                 client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.Password);
@@ -133,8 +134,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 client.AddBodyParameter(OAuth2Parameter.Password, new string(this.usernamePasswordInput.PasswordToCharArray()));
             }
 
-            SortedSet<string> unionScope =
-                new SortedSet<string>() { OAuth2Value.ScopeOpenId, OAuth2Value.ScopeOfflineAccess, OAuth2Value.ScopeProfile };
+            ISet<string> unionScope =
+                new HashSet<string>() { OAuth2Value.ScopeOpenId, OAuth2Value.ScopeOfflineAccess, OAuth2Value.ScopeProfile };
 
             unionScope.UnionWith(this.AuthenticationRequestParameters.Scope);
 
