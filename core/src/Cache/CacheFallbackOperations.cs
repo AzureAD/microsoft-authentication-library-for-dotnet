@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Core.Helpers;
 
@@ -83,8 +84,13 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        public static void WriteAdalRefreshToken(ILegacyCachePersistance legacyCachePersistance,
-            MsalRefreshTokenCacheItem rtItem, MsalIdTokenCacheItem idItem, string authority, string uniqueId, string scope)
+        public static void WriteAdalRefreshToken(
+            ILegacyCachePersistance legacyCachePersistance,
+            MsalRefreshTokenCacheItem rtItem, 
+            MsalIdTokenCacheItem idItem, 
+            string authority, 
+            string uniqueId, 
+            string scope)
         {
             try
             {
@@ -95,6 +101,14 @@ namespace Microsoft.Identity.Core.Cache
                     CoreLoggerBase.Default.InfoPii(msg);
                     return;
                 }
+
+                Debug.Assert(
+                    String.Equals(rtItem?.Environment, idItem?.Environment, StringComparison.OrdinalIgnoreCase),
+                    "Not expecting the RT and IdT to have different env when adding to legacy cache");
+
+                Debug.Assert(
+                 String.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase),
+                 "Not expecting authority to have a different env than the RT and IdT");
 
                 //Using scope instead of resource because that value does not exist. STS should return it.
                 AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
@@ -131,6 +145,12 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
+        /// <summary>
+        /// Returns a tuple where
+        /// 
+        /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo 
+        /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
+        /// </summary>
         public static Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
             (ILegacyCachePersistance legacyCachePersistance, ISet<string> environments, string clientId)
         {
@@ -186,16 +206,25 @@ namespace Microsoft.Identity.Core.Cache
         /// (nor will GetAccounts / RemoveAccount work)
         /// 
         /// </summary>
-        public static void RemoveAdalUser(ILegacyCachePersistance legacyCachePersistance,
-            string displayableId, ISet<string> environmentAliases, string identifier)
+        public static void RemoveAdalUser(
+            ILegacyCachePersistance legacyCachePersistance,
+            ISet<string> environmentAliases,
+            string displayableId,
+            string accountOrUserId)
         {
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
                 AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
 
-                RemoveEntriesWithMatchingId(environmentAliases, identifier, adalCache);
-                RemoveEntriesWithMatchingName(environmentAliases, displayableId, adalCache);
+                if (!string.IsNullOrEmpty(accountOrUserId))
+                {
+                    RemoveEntriesWithMatchingId(environmentAliases, accountOrUserId, adalCache);
+                }
+                else
+                {
+                    RemoveEntriesWithMatchingName(environmentAliases, displayableId, adalCache);
+                }
 
                 legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(adalCache));
             }
@@ -216,7 +245,8 @@ namespace Microsoft.Identity.Core.Cache
         {
             if (String.IsNullOrEmpty(displayableId))
             {
-                CoreLoggerBase.Default.Info(CoreErrorMessages.InternalErrorCacheEmptyUsername);
+                CoreLoggerBase.Default.Error(CoreErrorMessages.InternalErrorCacheEmptyUsername);
+                CoreLoggerBase.Default.ErrorPii(CoreErrorMessages.InternalErrorCacheEmptyUsername);
                 return;
             }
 
@@ -242,27 +272,27 @@ namespace Microsoft.Identity.Core.Cache
 
         private static void RemoveEntriesWithMatchingId(
             ISet<string> environmentAliases,
-            string identifier,
+            string accountOrUserId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
         {
-            if (string.IsNullOrEmpty(identifier))
-            {
-                CoreLoggerBase.Default.Info(CoreErrorMessages.InternalErrorCacheEmptyIdentifier);
-                return;
-            }
-
             List<AdalTokenCacheKey> keysToRemove = new List<AdalTokenCacheKey>();
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
-                string environment = new Uri(kvp.Key.Authority).Host;
-                string cachedAccountId = ClientInfo.CreateFromJson(kvp.Value.RawClientInfo).ToAccountIdentifier();
+                string rawClientInfo = kvp.Value.RawClientInfo;
 
-                if (environmentAliases.Contains(environment, StringComparer.OrdinalIgnoreCase) &&
-                    string.Equals(identifier, cachedAccountId, StringComparison.OrdinalIgnoreCase))
+                if (!String.IsNullOrEmpty(rawClientInfo))
                 {
-                    keysToRemove.Add(kvp.Key);
+                    string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
+                    string environment = new Uri(kvp.Key.Authority).Host;
+
+                    if (environmentAliases.Contains(environment, StringComparer.OrdinalIgnoreCase) &&
+                        string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        keysToRemove.Add(kvp.Key);
+                    }
                 }
+                
             }
 
             foreach (AdalTokenCacheKey key in keysToRemove)

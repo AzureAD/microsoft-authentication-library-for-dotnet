@@ -111,21 +111,6 @@ namespace Microsoft.Identity.Core.Cache
         internal AdalResultWrapper Clone()
         {
             return Deserialize(Serialize());
-
-/*            return new AdalResultWrapper
-            {
-                UserAssertionHash = this.UserAssertionHash,
-                Exception = this.Exception,
-                RefreshToken = this.RefreshToken,
-                ResourceInResponse = this.ResourceInResponse,
-                Result = new AuthenticationResult(this.Result.AccessTokenType, this.Result.AccessToken, this.Result.ExpiresOn, this.Result.ExtendedExpiresOn)
-                {
-                    ExtendedLifeTimeToken = this.Result.ExtendedLifeTimeToken,
-                    IdToken = this.Result.IdToken,
-                    TenantId = this.Result.TenantId,
-                    UserInfo = new UserInfo(this.Result.UserInfo)
-                }
-            };*/
         }
     }
 }

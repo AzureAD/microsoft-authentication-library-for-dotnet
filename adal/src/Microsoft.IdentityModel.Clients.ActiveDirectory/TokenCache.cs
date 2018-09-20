@@ -139,7 +139,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Gets the nunmber of items in the cache.
+        /// Gets the number of items in the cache.
         /// </summary>
         public int Count
         {
@@ -376,7 +376,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         private static string GetHost(string uri)
         {
             // The following line serves as a validation for uri. Relevant exceptions will be thrown.
-            new Uri(uri); //NOSONAR
+            new Uri(uri);
 
             // Note: host is supposed to be case insensitive, and would be normalized to lowercase by: new Uri(uri).Host
             // but we would like to preserve its case to match a previously cached token

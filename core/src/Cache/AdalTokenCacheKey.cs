@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace Microsoft.Identity.Core.Cache
 {
@@ -51,6 +53,7 @@ namespace Microsoft.Identity.Core.Cache
     /// <summary>
     /// <see cref="AdalTokenCacheKey"/> can be used with Linq to access items from the TokenCache dictionary.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class AdalTokenCacheKey
     {
         internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
@@ -147,6 +150,14 @@ namespace Microsoft.Identity.Core.Cache
         internal bool DisplayableIdEquals(string otherDisplayableId)
         {
             return (string.Compare(otherDisplayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) == 0);
+        }
+
+        private string DebuggerDisplay
+        {
+            get { return string.Format(
+                CultureInfo.InvariantCulture, 
+                "AdalTokenCacheKey: {0} {1} {2} {3} {4}", 
+                Authority, Resource, ClientId, UniqueId, DisplayableId); }
         }
     }
 }

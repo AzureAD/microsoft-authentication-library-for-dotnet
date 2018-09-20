@@ -35,6 +35,11 @@ namespace Microsoft.Identity.Core
 
         public Guid CorrelationId { get; set; }
 
+        protected CoreLoggerBase()
+        {
+            CorrelationId = Guid.Empty;
+        }
+
         protected CoreLoggerBase(Guid correlationId)
         {
             CorrelationId = correlationId;
