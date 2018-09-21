@@ -44,7 +44,7 @@ using Test.MSAL.NET.Unit.Mocks;
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
-    public class IWAUsernamePasswordTests
+    public class IntegratedWindowsAuthAndUsernamePasswordTests
     {
         TokenCache cache;
         private MyReceiver _myReceiver = new MyReceiver();
@@ -180,7 +180,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
         [DeploymentItem(@"Resources\WsTrustResponse13.xml", "MsalResource")]
         public async Task AcquireTokenByIntegratedWindowsAuthTest()
@@ -259,7 +259,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
         [DeploymentItem(@"Resources\WsTrustResponse.xml", "MsalResource")]
         public async Task FederatedUsernamePasswordWithSecureStringAcquireTokenTest()
@@ -279,7 +279,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
         public void MexEndpointFailsToResolveTest()
         {
@@ -342,7 +342,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
         public void MexDoesNotReturnAuthEndpointTest()
         {
@@ -415,7 +415,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         public void MexParsingFailsTest()
         {
             MockWebUI ui = new MockWebUI()
@@ -476,7 +476,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
         [DeploymentItem(@"Resources\WsTrustResponse.xml", "MsalResource")]
         public void FederatedUsernameNullPasswordTest()
@@ -552,7 +552,141 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordWithCommonTests")]
+        [DeploymentItem(@"Resources\TestMex.xml", "MsalResource")]
+        [DeploymentItem(@"Resources\WsTrustResponse.xml", "MsalResource")]
+        public void FederatedUsernamePasswordCommonAuthorityTest()
+        {
+            MockWebUI ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
+                TestConstants.AuthorityCommonTenant + "?code=some-code")
+            };
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityCommonTenant)
+            });
+
+            // user realm discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                }
+            });
+
+            // MEX
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Url = "https://msft.sts.microsoft.com/adfs/services/trust/mex",
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText(@"MsalResource\TestMex.xml"))
+                }
+            });
+
+            // WsTrust
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Url = "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed",
+                Method = HttpMethod.Post,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText(@"MsalResource\WsTrustResponse.xml"))
+                }
+            });
+
+            // AAD
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Url = "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
+            });
+
+            cache.ClientId = TestConstants.ClientId;
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
+            {
+                UserTokenCache = cache
+            };
+
+            // Call acquire token
+            var result = AssertException.TaskThrows<MsalException>(async () =>
+                await app.AcquireTokenByUsernamePasswordAsync(TestConstants.Scope, TestConstants.User.Username, secureString).ConfigureAwait(false));
+
+            // Check inner exception
+            Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
+
+            // There should be no cached entries.
+            Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordWithCommonTests")]
+        public void ManagedUsernamePasswordCommonAuthorityTest()
+        {
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityCommonTenant)
+            });
+
+            // user realm discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content =
+                        new StringContent("{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
+                },
+                QueryParams = new Dictionary<string, string>()
+                {
+                    {"api-version", "1.0"}
+                }
+            });
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Post,
+                ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage(),
+
+            });
+
+            cache.ClientId = TestConstants.ClientId;
+            PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId)
+            {
+                UserTokenCache = cache
+            };
+
+            // Call acquire token
+            var result = AssertException.TaskThrows<MsalException>(async () =>
+                await app.AcquireTokenByUsernamePasswordAsync(TestConstants.Scope, TestConstants.User.Username, secureString).ConfigureAwait(false));
+
+            // Check inner exception
+            Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
+
+            // There should be no cached entries.
+            Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCacheDictionary.Count);
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         public async Task ManagedUsernameSecureStringPasswordAcquireTokenTest()
         {
             AddMockResponseforManagedAccounts();
@@ -582,7 +716,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         public void ManagedUsernameNoPasswordAcquireTokenTest()
         {
             AddMockResponseforManagedAccounts();
@@ -609,7 +743,7 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("IWAUsernamePasswordTests")]
+        [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         public void ManagedUsernameIncorrectPasswordAcquireTokenTest()
         {
             AddMockResponseforManagedAccounts();

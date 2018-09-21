@@ -44,11 +44,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
     /// </summary>
     internal class AcquireTokenIWAHandler : AcquireTokenHandlerBase
     {
-        private IWAInput iwaInput;
+        private IntegratedWindowsAuthInput iwaInput;
         private UserAssertion userAssertion;
         private CommonNonInteractiveHandler commonNonInteractiveHandler;
 
-        public AcquireTokenIWAHandler(RequestData requestData, IWAInput iwaInput)
+        public AcquireTokenIWAHandler(RequestData requestData, IntegratedWindowsAuthInput iwaInput)
             : base(requestData)
         {
             if (iwaInput == null)
@@ -98,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                          userRealmResponse,
                          (cloudAudience, trustAddress, userName) =>
                          {
-                             return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (IWAInput)userName);
+                             return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (IntegratedWindowsAuthInput)userName);
                          }).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2

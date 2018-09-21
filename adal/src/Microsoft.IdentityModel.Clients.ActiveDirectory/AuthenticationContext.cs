@@ -464,7 +464,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
             string resource, 
             string clientId,
-            IWAInput iwaInput)
+            IntegratedWindowsAuthInput iwaInput)
         {
             RequestData requestData = new RequestData
             {

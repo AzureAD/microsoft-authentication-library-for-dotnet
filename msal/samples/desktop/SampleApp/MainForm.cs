@@ -80,9 +80,20 @@ namespace SampleApp
         private async void acquireTokenUsernamePasswordButton_Click(object sender, EventArgs e)
         {
             tokenResultBox.Text = string.Format("");
-            string password = tokenResultBox.Text;
+            SecureString securePassword = ConvertToSecureString(tokenResultBox);
+            token = await _msalHelper.GetTokenWithUsernamePasswordAsync(new[] { "user.read" }, securePassword).ConfigureAwait(false);
+        }
 
-            token = await _msalHelper.GetTokenWithUsernamePasswordAsync(new[] { "user.read" }, password).ConfigureAwait(false);
+        private SecureString ConvertToSecureString(TextBox textBox)
+        {
+            if (tokenResultBox.Text.Length > 0)
+            {
+                SecureString securePassword = new SecureString();
+                tokenResultBox.Text.ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
+                securePassword.MakeReadOnly();
+                return securePassword;
+            }
+            return null;
         }
 
         private void UpdateResponse(string token)

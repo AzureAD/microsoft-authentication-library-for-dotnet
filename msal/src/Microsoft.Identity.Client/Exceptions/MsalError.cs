@@ -152,5 +152,10 @@ namespace Microsoft.Identity.Client
         /// Password is required for managed user.
         /// </summary>
         public const string PasswordRequiredForManagedUserError = "password_required_for_managed_user";
+
+        /// <summary>
+        /// Request is invalid.
+        /// </summary>
+        public const string InvalidRequest = "invalid_request";
     }
 }

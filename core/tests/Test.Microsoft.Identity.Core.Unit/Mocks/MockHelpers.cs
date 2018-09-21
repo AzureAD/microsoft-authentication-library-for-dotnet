@@ -132,6 +132,19 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
                 "\"04bb0cae-580b-49ac-9a10-b6c3316b1eaa\"}");
         }
 
+        public static HttpResponseMessage CreateInvalidRequestTokenResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.BadRequest,
+                "{\"error\":\"invalid_request\",\"error_description\":\"AADSTS90010: " +
+                "The grant type is not supported over the /common or /consumers endpoints. " +
+                "Please use the /organizations or tenant-specific endpoint." +
+                "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
+                "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
+                "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
+                "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
+                "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+        }
+
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()
         {
             return CreateSuccessfulClientCredentialTokenResponseMessage("header.payload.signature");

@@ -55,6 +55,7 @@ namespace DesktopTestApp
             tabControl1.SizeMode = TabSizeMode.Fixed;
             tabControl1.Selecting += TabControl1_Selecting;
             logLevel.SelectedIndex = logLevel.Items.Count - 1;
+            userPasswordTextBox.PasswordChar = '*';
 
             LoadSettings();
             Logger.LogCallback = LogDelegate;
@@ -172,32 +173,50 @@ namespace DesktopTestApp
                 var app = new PublicClientApplication(publicClientId, authority.Text);
                 AuthenticationResult authenticationResult = await app.AcquireTokenByIntegratedWindowsAuthAsync(scopes.Text.AsArray(), username);
                 SetResultPageInfo(authenticationResult);
-                
+
             }
             catch (Exception exc)
             {
                 CreateException(exc);
             }
         }
-               
-        private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
+
+        private void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
             ClearResultPageInfo();
+            userPasswordTextBox.PasswordChar = '*';
 
-            string username = loginHintTextBox.Text; //Can be blank for U/P
-            var password = Microsoft.VisualBasic.Interaction.InputBox("Password?");
+            string username = loginHintTextBox.Text; //Can be blank for U/P 
+            SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
+           
+            AcquireTokenByUsernamePassword(username, securePassword);
+        }
 
+        private async void AcquireTokenByUsernamePassword(string username, SecureString password)
+        {
             try
             {
-                // SecureString secureString = new SecureString()
-                var app = new PublicClientApplication(publicClientId, authority.Text);
-                AuthenticationResult authResult = await app.AcquireTokenByUsernamePasswordAsync(scopes.Text.AsArray(), username, password);
+                _publicClientHandler.PublicClientApplication = new PublicClientApplication(publicClientId, "https://login.microsoftonline.com/organizations");
+                AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication.AcquireTokenByUsernamePasswordAsync(
+                    scopes.Text.AsArray(), username, password);
                 SetResultPageInfo(authResult);
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 CreateException(exc);
             }
+        }
+
+        private SecureString ConvertToSecureString(TextBox textBox)
+        {
+            if(userPasswordTextBox.Text.Length > 0)
+            {
+                SecureString securePassword = new SecureString();
+                userPasswordTextBox.Text.ToCharArray().ToList().ForEach(p => securePassword.AppendChar(p));
+                securePassword.MakeReadOnly();
+                return securePassword;                
+            }
+            return null;
         }
 
         private async void acquireTokenSilent_Click(object sender, EventArgs e)
@@ -327,7 +346,7 @@ namespace DesktopTestApp
             {
                 cachePageTableLayout.Controls[0].Dispose();
             }
-            
+
             // Bring the cache back into memory
             var acc = _publicClientHandler.PublicClientApplication.GetAccountsAsync().Result;
             Trace.WriteLine("Accounts: " + acc.Count());
@@ -360,7 +379,7 @@ namespace DesktopTestApp
                 }
             }
 
-            
+
         }
 
         private void AddControlToCachePageTableLayout(Control ctl)

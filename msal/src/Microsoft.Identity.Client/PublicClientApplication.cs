@@ -506,7 +506,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
         public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
         {
-            return await AcquireTokenByIWAAsync(scopes, new IWAInput()).ConfigureAwait(false);
+            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput()).ConfigureAwait(false);
         }
 
 
@@ -555,15 +555,15 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string username)
         {
-            return await AcquireTokenByIWAAsync(scopes, new IWAInput(username)).ConfigureAwait(false);
+            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput(username)).ConfigureAwait(false);
         }
 
 
-        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IWAInput iwaInput)
+        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IntegratedWindowsAuthInput iwaInput)
         {
             Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new IWARequest(requestParams, iwaInput)
+            var handler = new IntegratedWindowsAuthRequest(requestParams, iwaInput)
             {
                 ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
             };

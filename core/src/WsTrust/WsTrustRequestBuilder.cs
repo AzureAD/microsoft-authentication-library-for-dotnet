@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Core.WsTrust
         public static StringBuilder BuildMessage(
             string cloudAudience,
             WsTrustAddress wsTrustAddress,
-            IWAInput iwaInput)
+            IntegratedWindowsAuthInput iwaInput)
         {
           
             StringBuilder securityHeaderBuilder = BuildKerberosSecurityHeader(iwaInput);
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Core.WsTrust
             return messageBuilder;
         }
 
-        private static StringBuilder BuildKerberosSecurityHeader(IWAInput iwaInput)
+        private static StringBuilder BuildKerberosSecurityHeader(IntegratedWindowsAuthInput iwaInput)
         {
             return new StringBuilder();
         }

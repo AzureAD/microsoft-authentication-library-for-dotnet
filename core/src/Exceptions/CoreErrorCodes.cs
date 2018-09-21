@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Core
         public const string InvalidAuthorityType = "invalid_authority_type";
         public const string AuthenticationUiFailedError = "authentication_ui_failed";
         public const string InvalidGrantError = "invalid_grant";
+        public const string InvalidRequest = "invalid_request";
         public const string UnknownError = "unknown_error";
         public const string AuthenticationCanceledError = "authentication_canceled";
         public const string AuthenticationFailed = "authentication_failed";
@@ -75,7 +76,6 @@ namespace Microsoft.Identity.Core
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
         public const string ChromeNotInstalledError = "chrome_not_installed";
         public const string ChromeDisabledError = "chrome_disabled";
-        public const string InvalidRequest = "invalid_request";
         public const string UnresolvableIntentError = "unresolvable_intent";
 #endif
 

@@ -30,22 +30,21 @@ using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     /// <summary>
-    /// Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth.
+    /// Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth (IWA).
     /// </summary>
-    internal class IWARequest : RequestBase
+    internal class IntegratedWindowsAuthRequest : RequestBase
     {
-        private IWAInput iwaInput;
+        private IntegratedWindowsAuthInput iwaInput;
         private UserAssertion userAssertion;
         private CommonNonInteractiveHandler commonNonInteractiveHandler;
 
-        public IWARequest(AuthenticationRequestParameters authenticationRequestParameters, IWAInput iwaInput)
+        public IntegratedWindowsAuthRequest(AuthenticationRequestParameters authenticationRequestParameters, Core.IntegratedWindowsAuthInput iwaInput)
             : base(authenticationRequestParameters)
         {
             if (iwaInput == null)
@@ -84,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         userRealmResponse,
                         (cloudAudience, trustAddress, userName) =>
                         {
-                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (IWAInput)userName);
+                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (Core.IntegratedWindowsAuthInput)userName);
                         }).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2

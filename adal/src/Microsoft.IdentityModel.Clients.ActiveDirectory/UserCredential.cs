@@ -36,7 +36,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public class UserCredential
     {
-        internal IWAInput IWAInput  { get;} 
+        internal IntegratedWindowsAuthInput IWAInput  { get;} 
 
         /// <summary>
         /// Constructor to create user credential. Using this constructor would imply integrated authentication with logged in user
@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public UserCredential()
         {
-            IWAInput = new IWAInput();
+            IWAInput = new IntegratedWindowsAuthInput();
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="userName">Identifier of the user application requests token on behalf.</param>
         public UserCredential(string userName)
         {
-            IWAInput = new IWAInput(userName);
+            IWAInput = new IntegratedWindowsAuthInput(userName);
         }
 
         /// <summary>

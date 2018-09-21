@@ -59,7 +59,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
         public void WsTrustRequestXmlFormatTest()
         {
             // Arrange
-            var cred = new IWAInput("user");
+            var cred = new IntegratedWindowsAuthInput("user");
 
             // Act
             StringBuilder sb = WsTrustRequestBuilder.BuildMessage("https://appliesto",

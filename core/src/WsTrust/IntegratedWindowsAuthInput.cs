@@ -35,19 +35,19 @@ namespace Microsoft.Identity.Core
     /// <summary>
     /// Integrated Windows Authentication request data object. Used in the IWA workflow.
     /// </summary>
-    internal class IWAInput : IUsernameInput
+    internal class IntegratedWindowsAuthInput : IUsernameInput
     {
         /// <summary>
         /// Gets identifier of the user.
         /// </summary>
         public string UserName { get; set; }
 
-        public IWAInput()
+        public IntegratedWindowsAuthInput()
         {
             this.UserName = null;
         }
 
-        public IWAInput(string userName)
+        public IntegratedWindowsAuthInput(string userName)
         {
             this.UserName = userName;
         }       
