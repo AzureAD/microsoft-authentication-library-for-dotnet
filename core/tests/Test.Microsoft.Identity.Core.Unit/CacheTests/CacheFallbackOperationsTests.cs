@@ -14,13 +14,14 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
     public class CacheFallbackOperationsTests
     {
         private TokenCacheAccessor tokenCacheAccessor;
-        private ILegacyCachePersistance legacyCachePersistance;
+        private InMemoryLegacyCachePersistance legacyCachePersistance;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            // do not initialize CoreExceptionFactory because all cache operations are silent
-            // so the tests would at least fail with null reference when the logic throws
+            // Methods in CacheFallbackOperations silently catch all exceptions and log them;
+            // By setting this to null, logging will fail, making the test fail.
+            CoreExceptionFactory.Instance = null; 
             CoreLoggerBase.Default = Substitute.For<CoreLoggerBase>();
             AadInstanceDiscovery.Instance.Cache.Clear();
 
@@ -31,7 +32,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 
 
         [TestMethod]
-        public void GetAllAdalUsersForMsal_ScopedBy_ClientId_And_Env()
+        public void GetAllAdalUsersForMsal_ScopedBy_ClientIdAndEnv()
         {
             // Arrange
             PopulateLegacyCache(legacyCachePersistance);
@@ -42,13 +43,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment, "bogus" },
                 TestConstants.ClientId);
 
-            // Assert
-            var usersWithClientInfo = userTuple.Item1.Values;
-            var usersWithoutClientInfo = userTuple.Item2;
-
-            AssertUsersByDisplayName(new[] { "user1", "user2" }, usersWithClientInfo,
-                "Expecting only user1 and user2 because the other users either have no ClientInfo or have a different env or clientid");
-            AssertUsersByDisplayName(new[] { "no_client_info_user3", "no_client_info_user4" }, usersWithoutClientInfo);
+            AssertByUsername(
+                userTuple,
+                expectedUsersWithClientInfo: new[] { "user1", "user2" },
+                expectedUsersWithoutClientInfo: new[] { "no_client_info_user3", "no_client_info_user4" });
 
             // Act - query users for different clientId and env
             userTuple = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -57,11 +55,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                "other_client_id");
 
             // Assert
-            usersWithClientInfo = userTuple.Item1.Values;
-            usersWithoutClientInfo = userTuple.Item2;
-
-            AssertUsersByDisplayName(new[] { "user6" }, usersWithClientInfo);
-            AssertUsersByDisplayName(Enumerable.Empty<string>(), usersWithoutClientInfo);
+            AssertByUsername(
+               userTuple,
+               expectedUsersWithClientInfo: new[] { "user6" },
+               expectedUsersWithoutClientInfo: Enumerable.Empty<string>());
         }
 
         [TestMethod]
@@ -70,13 +67,13 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             // Arrange
             PopulateLegacyCache(legacyCachePersistance);
 
-            PopulateLegacyWithRtAndId( //same id, different clientId -> should be deleted
+            PopulateLegacyWithRtAndId( //different clientId -> should not be deleted
                legacyCachePersistance,
                "other_client_id",
                TestConstants.ProductionPrefNetworkEnvironment,
                "uid1", "tenantId1", "user1_other_client_id");
 
-            PopulateLegacyWithRtAndId( // same id, different env -> should not be deleted
+            PopulateLegacyWithRtAndId( //different env -> should not be deleted
                 legacyCachePersistance,
                 TestConstants.ClientId,
                 "other_env",
@@ -85,7 +82,8 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             // Act - delete with id and displayname
             CacheFallbackOperations.RemoveAdalUser(
                 legacyCachePersistance,
-                new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment }, // this should be ignored when deleting 
+                new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment },
+                TestConstants.ClientId,
                 "username_does_not_matter",
                 "uid1.tenantId1");
 
@@ -95,11 +93,11 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment, "other_env" },
                 TestConstants.ClientId);
 
-            var usersWithClientInfo = userTuple.Item1.Values;
-            var usersWithoutClientInfo = userTuple.Item2;
+            AssertByUsername(
+                userTuple,
+                expectedUsersWithClientInfo: new[] { "user2", "user1_other_env" },
+                expectedUsersWithoutClientInfo: new[] { "no_client_info_user3", "no_client_info_user4" });
 
-            AssertUsersByDisplayName(new[] { "user2", "user1_other_env" }, usersWithClientInfo, "user2 should have been deleted");
-            AssertUsersByDisplayName(new[] { "no_client_info_user3", "no_client_info_user4" }, usersWithoutClientInfo);
 
         }
 
@@ -109,39 +107,43 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             // Arrange
             PopulateLegacyCache(legacyCachePersistance);
 
-            // ClientInfo is null -> we cannot differentiate between these entries so they are overwritten
             PopulateLegacyWithRtAndId(
                  legacyCachePersistance,
                  "other_client_id",
                  TestConstants.ProductionPrefNetworkEnvironment,
                  null,
                  null,
-                 "no_client_info_user3"); // no client info, different client id 
+                 "no_client_info_user3"); // no client info, different client id -> won't be deleted
 
             PopulateLegacyWithRtAndId(
                 legacyCachePersistance,
-                "yet_another_client_id",
+                TestConstants.ClientId,
                 "other_env",
                 null,
                 null,
-                "no_client_info_user3"); // no client info, different env 
+                "no_client_info_user3"); // no client info, different env -> won't be deleted
+
+            AssertCacheEntryCount(8);
 
             Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> userTuple = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 legacyCachePersistance,
                 new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment, "other_env" },
                 TestConstants.ClientId);
 
-            var usersWithoutClientInfo = userTuple.Item2;
-            AssertUsersByDisplayName(new[] { "no_client_info_user3", "no_client_info_user4" }, usersWithoutClientInfo);
-
-            Assert.AreEqual(2, usersWithoutClientInfo.Count);
+            AssertByUsername(
+                userTuple,
+                expectedUsersWithClientInfo: new[] { "user2", "user1" },
+                expectedUsersWithoutClientInfo: new[] { "no_client_info_user3", "no_client_info_user3", "no_client_info_user4" });
 
             // Act - delete with no client info -> displayable id is used
             CacheFallbackOperations.RemoveAdalUser(
                 legacyCachePersistance,
                 new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment },
+                TestConstants.ClientId,
                 "no_client_info_user3",
                 "");
+
+            AssertCacheEntryCount(7);
 
             // Assert 
             userTuple = CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -149,10 +151,18 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment, "other_env" },
                 TestConstants.ClientId);
 
-            usersWithoutClientInfo = userTuple.Item2;
-            usersWithoutClientInfo = userTuple.Item2;
-            AssertUsersByDisplayName(new[] {"no_client_info_user4" }, usersWithoutClientInfo);
+            AssertByUsername(
+                userTuple,
+                expectedUsersWithClientInfo: new[] { "user2", "user1" },
+                expectedUsersWithoutClientInfo: new[] { "no_client_info_user3", "no_client_info_user4" });
 
+        }
+
+        private void AssertCacheEntryCount(int expectedEntryCount)
+        {
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> cache =
+                AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+            Assert.AreEqual(expectedEntryCount, cache.Count);
         }
 
         [TestMethod]
@@ -168,13 +178,12 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             CacheFallbackOperations.RemoveAdalUser(
                 legacyCachePersistance,
                 new HashSet<string> { TestConstants.ProductionPrefNetworkEnvironment },
+                TestConstants.ClientId,
                 "",
                 "");
 
             // Assert 
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheAfterDelete =
-                AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
-            Assert.AreEqual(6, adalCacheBeforeDelete.Count);
+            AssertCacheEntryCount(6);
 
             CoreLoggerBase.Default.Received().Error(
                 Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
@@ -182,6 +191,43 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             CoreLoggerBase.Default.Received().ErrorPii(
                 Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
 
+        }
+
+        [TestMethod]
+        public void WriteAdalRefreshToken_ErrorLog()
+        {
+            // Arrange
+            legacyCachePersistance.ThrowOnWrite = true;
+            CoreExceptionFactory.Instance = new TestExceptionFactory(); 
+
+            MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
+              TestConstants.ProductionPrefNetworkEnvironment,
+              TestConstants.ClientId,
+              "someRT",
+              MockHelpers.CreateClientInfo("u1", "ut1"));
+
+            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
+               TestConstants.ProductionPrefCacheEnvironment, // different env
+               TestConstants.ClientId,
+               MockHelpers.CreateIdToken("u1", "username"),
+               MockHelpers.CreateClientInfo("u1", "ut1"),
+               "ut1");
+
+            // Act
+            CacheFallbackOperations.WriteAdalRefreshToken(
+                legacyCachePersistance,
+                rtItem,
+                idTokenCacheItem,
+                "https://some_env.com/common", // yet another env
+                "uid",
+                "scope1");
+
+            // Assert
+            CoreLoggerBase.Default.Received().Error(
+                Arg.Is<string>(CacheFallbackOperations.DifferentAuthorityError));
+
+            CoreLoggerBase.Default.Received().Error(
+                Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
         }
 
 
@@ -246,7 +292,15 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             string uniqueTenantId,
             string username)
         {
-            var clientInfoString = MockHelpers.CreateClientInfo(uid, uniqueTenantId);
+            string clientInfoString;
+            if (String.IsNullOrEmpty(uid) || String.IsNullOrEmpty(uniqueTenantId))
+            {
+                clientInfoString = null;
+            }
+            else
+            {
+                clientInfoString = MockHelpers.CreateClientInfo(uid, uniqueTenantId);
+            }
 
             MsalRefreshTokenCacheItem rtItem = new MsalRefreshTokenCacheItem(
                 env,
@@ -269,11 +323,29 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 "uid",
                 "scope1");
         }
+
+
+        private static void AssertByUsername(
+            Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> userTuple,
+            IEnumerable<string> expectedUsersWithClientInfo,
+            IEnumerable<string> expectedUsersWithoutClientInfo)
+        {
+            // Assert
+            var usersWithClientInfo = userTuple.Item1.Values;
+            var usersWithoutClientInfo = userTuple.Item2;
+
+            AssertUsersByDisplayName(expectedUsersWithClientInfo, usersWithClientInfo,
+                "Expecting only user1 and user2 because the other users either have no ClientInfo or have a different env or clientid");
+            AssertUsersByDisplayName(expectedUsersWithoutClientInfo, usersWithoutClientInfo);
+        }
+
     }
 
-    class InMemoryLegacyCachePersistance : ILegacyCachePersistance
+    public class InMemoryLegacyCachePersistance : ILegacyCachePersistance
     {
         private byte[] data;
+        public bool ThrowOnWrite { get; set; } = false;
+
         public byte[] LoadCache()
         {
             return data;
@@ -281,6 +353,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 
         public void WriteCache(byte[] serializedCache)
         {
+            if (ThrowOnWrite)
+            {
+                throw new Exception();
+            }
             data = serializedCache;
         }
     }

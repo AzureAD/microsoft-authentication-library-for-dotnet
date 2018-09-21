@@ -35,6 +35,11 @@ namespace Microsoft.Identity.Core.Cache
 {
     internal class CacheFallbackOperations
     {
+        internal /* internal for testing only */ const string DifferentEnvError = 
+            "Not expecting the RT and IdT to have different env when adding to legacy cache";
+        internal /* internal for testing only */ const string DifferentAuthorityError = 
+            "Not expecting authority to have a different env than the RT and IdT";
+
         public static void WriteMsalRefreshToken(ITokenCacheAccessor tokenCacheAccessor,
             AdalResultWrapper resultWrapper, string authority, string clientId, string displayableId,
              string givenName, string familyName, string objectId)
@@ -86,10 +91,10 @@ namespace Microsoft.Identity.Core.Cache
 
         public static void WriteAdalRefreshToken(
             ILegacyCachePersistance legacyCachePersistance,
-            MsalRefreshTokenCacheItem rtItem, 
-            MsalIdTokenCacheItem idItem, 
-            string authority, 
-            string uniqueId, 
+            MsalRefreshTokenCacheItem rtItem,
+            MsalIdTokenCacheItem idItem,
+            string authority,
+            string uniqueId,
             string scope)
         {
             try
@@ -102,17 +107,9 @@ namespace Microsoft.Identity.Core.Cache
                     return;
                 }
 
-                Debug.Assert(
-                    String.Equals(rtItem?.Environment, idItem?.Environment, StringComparison.OrdinalIgnoreCase),
-                    "Not expecting the RT and IdT to have different env when adding to legacy cache");
-
-                Debug.Assert(
-                 String.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase),
-                 "Not expecting authority to have a different env than the RT and IdT");
-
                 //Using scope instead of resource because that value does not exist. STS should return it.
                 AdalTokenCacheKey key = new AdalTokenCacheKey(authority, scope, rtItem.ClientId, TokenSubjectType.User,
-                    uniqueId, idItem.IdToken.PreferredUsername);
+                uniqueId, idItem.IdToken.PreferredUsername);
                 AdalResultWrapper wrapper = new AdalResultWrapper()
                 {
                     Result = new AdalResult(null, null, DateTimeOffset.MinValue)
@@ -137,6 +134,18 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
+                if (!String.Equals(rtItem?.Environment, idItem?.Environment, StringComparison.OrdinalIgnoreCase))
+                {
+                    CoreLoggerBase.Default.Error(DifferentEnvError);
+                    CoreLoggerBase.Default.ErrorPii(DifferentEnvError);
+                }
+
+                if (!String.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase))
+                {
+                    CoreLoggerBase.Default.Error(DifferentAuthorityError);
+                    CoreLoggerBase.Default.ErrorPii(DifferentAuthorityError);
+                }
+
                 string msg = "An error occurred while writing MSAL refresh token to the cache in ADAL format. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ";
                 string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
@@ -195,9 +204,10 @@ namespace Microsoft.Identity.Core.Cache
         /// <summary>
         /// Algorithm to delete: 
         /// 
-        /// Invariant: displayableId is not null 
+        /// DisplayableId cannot be null 
+        /// Removal is scoped by enviroment and clientId;
         /// 
-        /// if identifier != null then delete everything with the same client info and env
+        /// If accountId != null then delete everything with the same clientInfo
         /// otherwise, delete everything with the same displayableId
         /// 
         /// Notes: 
@@ -209,6 +219,7 @@ namespace Microsoft.Identity.Core.Cache
         public static void RemoveAdalUser(
             ILegacyCachePersistance legacyCachePersistance,
             ISet<string> environmentAliases,
+            string clientId,
             string displayableId,
             string accountOrUserId)
         {
@@ -219,11 +230,11 @@ namespace Microsoft.Identity.Core.Cache
 
                 if (!string.IsNullOrEmpty(accountOrUserId))
                 {
-                    RemoveEntriesWithMatchingId(environmentAliases, accountOrUserId, adalCache);
+                    RemoveEntriesWithMatchingId(environmentAliases, clientId, accountOrUserId, adalCache);
                 }
                 else
                 {
-                    RemoveEntriesWithMatchingName(environmentAliases, displayableId, adalCache);
+                    RemoveEntriesWithMatchingName(environmentAliases, clientId, displayableId, adalCache);
                 }
 
                 legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(adalCache));
@@ -240,6 +251,7 @@ namespace Microsoft.Identity.Core.Cache
 
         private static void RemoveEntriesWithMatchingName(
             ISet<string> environmentAliases,
+            string clientId,
             string displayableId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
         {
@@ -254,11 +266,13 @@ namespace Microsoft.Identity.Core.Cache
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
-                string environment = new Uri(kvp.Key.Authority).Host;
+                string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
                 string cachedAcccountDisplayableId = kvp.Key.DisplayableId;
+                string cachedClientId = kvp.Key.ClientId;
 
-                if (environmentAliases.Contains(environment, StringComparer.OrdinalIgnoreCase) &&
-                    string.Equals(displayableId, cachedAcccountDisplayableId, StringComparison.OrdinalIgnoreCase))
+                if (environmentAliases.Contains(cachedEnvironment, StringComparer.OrdinalIgnoreCase) &&
+                    string.Equals(displayableId, cachedAcccountDisplayableId, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase))
                 {
                     keysToRemove.Add(kvp.Key);
                 }
@@ -272,6 +286,7 @@ namespace Microsoft.Identity.Core.Cache
 
         private static void RemoveEntriesWithMatchingId(
             ISet<string> environmentAliases,
+            string clientId,
             string accountOrUserId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
         {
@@ -284,15 +299,17 @@ namespace Microsoft.Identity.Core.Cache
                 if (!String.IsNullOrEmpty(rawClientInfo))
                 {
                     string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
-                    string environment = new Uri(kvp.Key.Authority).Host;
+                    string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
+                    string cachedClientId = kvp.Key.ClientId;
 
-                    if (environmentAliases.Contains(environment, StringComparer.OrdinalIgnoreCase) &&
-                        string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase))
+                    if (environmentAliases.Contains(cachedEnvironment, StringComparer.OrdinalIgnoreCase) &&
+                        string.Equals(accountOrUserId, cachedAccountId, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase))
                     {
                         keysToRemove.Add(kvp.Key);
                     }
                 }
-                
+
             }
 
             foreach (AdalTokenCacheKey key in keysToRemove)

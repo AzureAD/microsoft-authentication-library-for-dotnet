@@ -74,6 +74,7 @@
     <None Include="..\..\..\core\src\*.md" LinkBase="Core" />
     <Compile Remove="..\..\..\core\src\Platforms\**\*.*" />
     <Compile Remove="..\..\..\core\src\Features\**\*.*" />
+    <Compile Remove="..\..\..\core\src\Properties\**\*.*" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />

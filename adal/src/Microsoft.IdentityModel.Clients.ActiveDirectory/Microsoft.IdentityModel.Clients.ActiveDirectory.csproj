@@ -72,6 +72,7 @@
     <!-- remove here, add back in certain platforms-->
     <Compile Remove="..\..\..\core\src\Platforms\**\*.*" />
     <Compile Remove="..\..\..\core\src\Features\**\*.*" />
+    <Compile Remove="..\..\..\core\src\Properties\**\*.*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3'">

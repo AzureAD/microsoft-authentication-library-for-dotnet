@@ -78,26 +78,5 @@ namespace Microsoft.Identity.Core
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", UniqueObjectIdentifier, UniqueTenantIdentifier);
         }
-
-        public static ClientInfo CreateFromEncodedString(string encodedUserIdentiier)
-        {
-            if (string.IsNullOrEmpty(encodedUserIdentiier))
-            {
-                return null;
-            }
-
-            string[] artifacts = encodedUserIdentiier.Split('.');
-
-            if (artifacts.Length == 0)
-            {
-                return null;
-            }
-
-            return new ClientInfo()
-            {
-                UniqueObjectIdentifier = Base64UrlHelpers.DecodeToString(artifacts[0]),
-                UniqueTenantIdentifier = Base64UrlHelpers.DecodeToString(artifacts[1]),
-            };
-        }
     }
 }

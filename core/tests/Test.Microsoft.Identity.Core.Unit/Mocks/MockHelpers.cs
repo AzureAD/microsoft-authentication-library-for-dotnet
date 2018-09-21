@@ -60,11 +60,6 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public static string CreateClientInfo(string uid, string utid)
         {
-            if (String.IsNullOrEmpty(uid) && String.IsNullOrEmpty(utid))
-            {
-                return null;
-            }
-
             return Base64UrlHelpers.Encode("{\"uid\":\"" + uid + "\",\"utid\":\"" + utid + "\"}");
         }
 
