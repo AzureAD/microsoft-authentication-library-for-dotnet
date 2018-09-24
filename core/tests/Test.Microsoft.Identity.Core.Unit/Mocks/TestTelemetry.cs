@@ -18,5 +18,10 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
         {
             
         }
+
+        public void Flush(string requestId)
+        {
+
+        }
     }
 }

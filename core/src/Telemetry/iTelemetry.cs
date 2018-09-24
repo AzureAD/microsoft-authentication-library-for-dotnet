@@ -38,5 +38,7 @@ namespace Microsoft.Identity.Core.Telemetry
         void StartEvent(string requestId, EventBase eventToStart);
 
         void StopEvent(string requestId, EventBase eventToStop);
+
+        void Flush(string requestId);
     }
 }

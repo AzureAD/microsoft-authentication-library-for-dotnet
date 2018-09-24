@@ -36,113 +36,73 @@ namespace Microsoft.Identity.Core.Telemetry
         // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
         public void SaveAccessToken(MsalAccessTokenCacheItem item, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT }))
             {
                 SaveAccessToken(item);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT }))
             {
                 SaveRefreshToken(item);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ID };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ID }))
             {
                 SaveIdToken(item);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void SaveAccount(MsalAccountCacheItem item, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ACCOUNT };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ACCOUNT }))
             {
                 SaveAccount(item);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.AT };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.AT }))
             {
                 DeleteAccessToken(cacheKey);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT }))
             {
                 DeleteRefreshToken(cacheKey);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void DeleteIdToken(MsalIdTokenCacheKey cacheKey, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ID };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ID }))
             {
                 DeleteIdToken(cacheKey);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
         public void DeleteAccount(MsalAccountCacheKey cacheKey, RequestContext requestContext)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ACCOUNT };
-            CoreTelemetryService.GetInstance().StartEvent(requestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ACCOUNT }))
             {
                 DeleteAccount(cacheKey);
-            }
-            finally
-            {
-                CoreTelemetryService.GetInstance().StopEvent(requestContext.TelemetryRequestId, cacheEvent);
             }
         }
     }

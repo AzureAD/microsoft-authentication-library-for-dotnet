@@ -13,7 +13,7 @@
 
 <!-- Important note: this assembly should not be shipped to customers; it acts only as a placeholder for files that are included
 in ADAL and MSAL and to ease unit testing. No projects should take a dependency on Core.dll either -->
-  
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>
@@ -36,7 +36,7 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <DefineConstants>$(DefineConstants);iOS</DefineConstants>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
@@ -66,7 +66,7 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <Compile Include="Features\Cache\**\*.cs" />
     <Compile Include="Platforms\net45\**\*.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">   
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
     <Compile Include="Platforms\netcore\**\*.cs" />
     <Compile Include="Features\Cache\**\*.cs" />
@@ -83,7 +83,7 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
     <Compile Include="Features\Cache\**\*.cs" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -97,7 +97,7 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
   <ItemGroup>
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
   </ItemGroup>
-  
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
     <Reference Include="System" />
     <Reference Include="System.IdentityModel" />

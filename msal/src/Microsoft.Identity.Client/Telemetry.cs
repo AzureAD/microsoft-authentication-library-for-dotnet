@@ -218,6 +218,11 @@ namespace Microsoft.Identity.Client
             StopEvent(requestId, eventToStop);
         }
 
+        void ITelemetry.Flush(string requestId)
+        {
+            Flush(requestId);
+        }
+
         internal string ClientId { get; set; }
     }
 }

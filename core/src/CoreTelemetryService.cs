@@ -26,11 +26,6 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core.Telemetry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core
 {
@@ -46,6 +41,15 @@ namespace Microsoft.Identity.Core
         public static ITelemetry GetInstance()
         {
             return instance;
+        }
+
+        public static TelemetryHelper CreateTelemetryHelper(
+            string requestId,
+            EventBase eventToStart,
+            EventBase eventToEnd = null,
+            bool shouldFlush = false)
+        {
+            return new TelemetryHelper(GetInstance(), requestId, eventToStart, eventToEnd ?? eventToStart, shouldFlush);
         }
     }
 }

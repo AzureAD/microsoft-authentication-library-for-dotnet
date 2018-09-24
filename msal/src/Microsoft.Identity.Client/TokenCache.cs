@@ -274,9 +274,8 @@ namespace Microsoft.Identity.Client
 
         internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT };
-            Telemetry.GetInstance().StartEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT }))
             {   
                 ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 string preferredEnvironmentAlias = null;
@@ -294,10 +293,6 @@ namespace Microsoft.Identity.Client
 
                 return FindAccessTokenCommon
                     (requestParams, preferredEnvironmentAlias, environmentAliases);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
             }
         }
 
@@ -448,15 +443,10 @@ namespace Microsoft.Identity.Client
 
         internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)
         {
-            var cacheEvent = new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT };
-            Telemetry.GetInstance().StartEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId,
+                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
             {
                 return await FindRefreshTokenCommonAsync(requestParams).ConfigureAwait(false);
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(requestParams.RequestContext.TelemetryRequestId, cacheEvent);
             }
         }
 

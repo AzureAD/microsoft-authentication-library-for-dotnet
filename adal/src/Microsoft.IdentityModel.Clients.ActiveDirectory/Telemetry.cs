@@ -68,5 +68,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="requestId"></param>
+        public void Flush(string requestId)
+        {
+
+        }
     }
 }

@@ -105,9 +105,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task AcquireAuthorizationAsync()
         {
             Uri authorizationUri = CreateAuthorizationUri(true, true);
+
             var uiEvent = new UiEvent();
-            Telemetry.GetInstance().StartEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
-            try
+            using (CoreTelemetryService.CreateTelemetryHelper(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent))
             {
                 _authorizationResult = await
                     _webUi.AcquireAuthorizationAsync(authorizationUri, AuthenticationRequestParameters.RedirectUri,
@@ -115,10 +115,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         .ConfigureAwait(false);
                 uiEvent.UserCancelled = _authorizationResult.Status == AuthorizationStatus.UserCancel;
                 uiEvent.AccessDenied = _authorizationResult.Status == AuthorizationStatus.ProtocolError;
-            }
-            finally
-            {
-                Telemetry.GetInstance().StopEvent(AuthenticationRequestParameters.RequestContext.TelemetryRequestId, uiEvent);
             }
         }
 
@@ -219,13 +215,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 GetDecoratedScope(
                     new SortedSet<string>(AuthenticationRequestParameters.Scope.Union(_extraScopesToConsent)));
 
-            Dictionary<string, string> authorizationRequestParameters = new Dictionary<string, string>();
-            authorizationRequestParameters[OAuth2Parameter.Scope] = unionScope.AsSingleString();
-            authorizationRequestParameters[OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code;
+            var authorizationRequestParameters = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.Scope] = unionScope.AsSingleString(),
+                [OAuth2Parameter.ResponseType] = OAuth2ResponseType.Code,
 
-            authorizationRequestParameters[OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId;
-            authorizationRequestParameters[OAuth2Parameter.RedirectUri] =
-                AuthenticationRequestParameters.RedirectUri.OriginalString;
+                [OAuth2Parameter.ClientId] = AuthenticationRequestParameters.ClientId,
+                [OAuth2Parameter.RedirectUri] =
+                AuthenticationRequestParameters.RedirectUri.OriginalString
+            };
 
             if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.LoginHint))
             {
@@ -237,8 +235,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString();
             }
 
-            IDictionary<string, string> adalIdParameters = MsalIdHelper.GetMsalIdParameters();
-            foreach (KeyValuePair<string, string> kvp in adalIdParameters)
+            foreach (var kvp in MsalIdHelper.GetMsalIdParameters())
             {
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
