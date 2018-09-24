@@ -63,7 +63,7 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
         {
-            CreatePublicClientApplication(InteractiveAuthority, ApplicationId);
+            CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
 
             AuthenticationResult result;
             if (CurrentUser != null)
@@ -86,7 +86,7 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthorityAsync(string[] scopes, UIBehavior uiBehavior, string extraQueryParams, UIParent uiParent)
         {
-            CreatePublicClientApplication(InteractiveAuthority, ApplicationId);
+            CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
 
             AuthenticationResult result;
             if (CurrentUser != null)
@@ -109,11 +109,14 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(string[] scopes)
         {
-            return await PublicClientApplication.AcquireTokenSilentAsync(scopes, CurrentUser, AuthorityOverride,
-                        false);
+            return await PublicClientApplication.AcquireTokenSilentAsync(
+                scopes, 
+                CurrentUser, 
+                AuthorityOverride,
+                false);
         }
 
-        private void CreatePublicClientApplication(string interactiveAuthority, string applicationId)
+        public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)
         {
             if (string.IsNullOrEmpty(interactiveAuthority))
             {

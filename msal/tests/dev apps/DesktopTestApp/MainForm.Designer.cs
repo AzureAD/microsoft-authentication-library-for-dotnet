@@ -85,6 +85,8 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.IgnoreUserCbx = new System.Windows.Forms.CheckBox();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -390,6 +392,8 @@ namespace DesktopTestApp
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.progressBar1);
+            this.publicClientTabPage.Controls.Add(this.IgnoreUserCbx);
             this.publicClientTabPage.Controls.Add(this.passwordLabel);
             this.publicClientTabPage.Controls.Add(this.userPasswordTextBox);
             this.publicClientTabPage.Controls.Add(this.acquireTokenByUPButton);
@@ -432,6 +436,7 @@ namespace DesktopTestApp
             // 
             this.userPasswordTextBox.Location = new System.Drawing.Point(257, 198);
             this.userPasswordTextBox.Name = "userPasswordTextBox";
+            this.userPasswordTextBox.PasswordChar = '*';
             this.userPasswordTextBox.Size = new System.Drawing.Size(241, 20);
             this.userPasswordTextBox.TabIndex = 33;
             // 
@@ -475,11 +480,12 @@ namespace DesktopTestApp
             // authority
             // 
             this.authority.AccessibleName = "authority";
-            this.authority.Location = new System.Drawing.Point(256, 19);
+            this.authority.Location = new System.Drawing.Point(256, 20);
             this.authority.Name = "authority";
             this.authority.Size = new System.Drawing.Size(352, 20);
             this.authority.TabIndex = 16;
             this.authority.Text = "https://login.microsoftonline.com/common";
+            this.authority.Leave += new System.EventHandler(this.authority_FocusLeave);
             // 
             // scopes
             // 
@@ -501,9 +507,9 @@ namespace DesktopTestApp
             // 
             // loginHintTextBox
             // 
-            this.loginHintTextBox.Location = new System.Drawing.Point(256, 175);
+            this.loginHintTextBox.Location = new System.Drawing.Point(257, 175);
             this.loginHintTextBox.Name = "loginHintTextBox";
-            this.loginHintTextBox.Size = new System.Drawing.Size(352, 20);
+            this.loginHintTextBox.Size = new System.Drawing.Size(351, 20);
             this.loginHintTextBox.TabIndex = 6;
             this.loginHintTextBox.TextChanged += new System.EventHandler(this.loginHint_TextChanged);
             // 
@@ -596,7 +602,7 @@ namespace DesktopTestApp
             this.userList.FormattingEnabled = true;
             this.userList.Location = new System.Drawing.Point(256, 224);
             this.userList.Name = "userList";
-            this.userList.Size = new System.Drawing.Size(352, 21);
+            this.userList.Size = new System.Drawing.Size(242, 21);
             this.userList.TabIndex = 12;
             this.userList.SelectedIndexChanged += new System.EventHandler(this.userList_SelectedIndexChanged);
             // 
@@ -646,9 +652,9 @@ namespace DesktopTestApp
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.875F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label6.Location = new System.Drawing.Point(8, 177);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(55, 13);
+            this.label6.Size = new System.Drawing.Size(195, 13);
             this.label6.TabIndex = 5;
-            this.label6.Text = "Login Hint";
+            this.label6.Text = "Login Hint (Username for IWA and U/P)";
             // 
             // label4
             // 
@@ -682,6 +688,23 @@ namespace DesktopTestApp
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
             this.tabControl1.TabIndex = 0;
+            // 
+            // IgnoreUserCbx
+            // 
+            this.IgnoreUserCbx.AutoSize = true;
+            this.IgnoreUserCbx.Location = new System.Drawing.Point(505, 224);
+            this.IgnoreUserCbx.Name = "IgnoreUserCbx";
+            this.IgnoreUserCbx.Size = new System.Drawing.Size(56, 17);
+            this.IgnoreUserCbx.TabIndex = 36;
+            this.IgnoreUserCbx.Text = "Ignore";
+            this.IgnoreUserCbx.UseVisualStyleBackColor = true;
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(15, 759);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(645, 23);
+            this.progressBar1.TabIndex = 37;
             // 
             // MainForm
             // 
@@ -772,6 +795,8 @@ namespace DesktopTestApp
         private Button acquireTokenByUPButton;
         private TextBox userPasswordTextBox;
         private Label passwordLabel;
+        private CheckBox IgnoreUserCbx;
+        private ProgressBar progressBar1;
     }
 }
 
