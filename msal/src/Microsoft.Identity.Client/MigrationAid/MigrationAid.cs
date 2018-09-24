@@ -153,8 +153,13 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public partial class PublicClientApplication
     {
+        #pragma warning disable 1998
         /// <summary>
-        /// In ADAL.NET 3.x, acquires security token from the authority, used for username/password authentication.
+        /// In ADAL.NET, acquires security token from the authority, using the username/password authentication, 
+        /// with the password sent in clear. 
+        /// In MSAL 2.x, only the method that accepts a <see cref="System.Security.SecureString"/>
+        /// parameter is supported.
+        /// 
         /// See https://aka.ms/msal-net-up for more details.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -167,5 +172,6 @@ namespace Microsoft.Identity.Client
         {
             { throw new NotImplementedException(); }
         }
+        #pragma warning restore 1998
     }
 }

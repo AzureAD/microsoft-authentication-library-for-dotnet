@@ -512,10 +512,12 @@ namespace Microsoft.Identity.Client
 
 #if DESKTOP
         /// <summary>
-        /// Acquires security token from the authority, used for username/password authentication.
+        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
+        /// See https://aka.ms/msal-net-up.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.</param>
+        /// <param name="username">Identifier of the user application requests token on behalf.
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <param name="securePassword">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, System.Security.SecureString securePassword)
