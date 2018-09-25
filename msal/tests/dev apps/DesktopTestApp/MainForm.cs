@@ -224,6 +224,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
+                userPasswordTextBox.PasswordChar = '*';
 
                 string username = loginHintTextBox.Text; //Can be blank for U/P 
                 SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
@@ -236,6 +237,8 @@ namespace DesktopTestApp
         {
             try
             {
+                _publicClientHandler.PublicClientApplication = new PublicClientApplication(publicClientId, "https://login.microsoftonline.com/organizations");
+
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication.AcquireTokenByUsernamePasswordAsync(
                     scopes.Text.AsArray(),
                     username,

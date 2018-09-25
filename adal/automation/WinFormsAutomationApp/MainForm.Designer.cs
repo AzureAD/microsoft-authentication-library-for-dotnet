@@ -46,6 +46,7 @@
             this.resultLogs = new System.Windows.Forms.TextBox();
             this.resultDone = new System.Windows.Forms.Button();
             this.resultInfo = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.pageControl1.SuspendLayout();
             this.mainPage.SuspendLayout();
             this.dataInputPage.SuspendLayout();
@@ -203,6 +204,7 @@
             // 
             // resultPage
             // 
+            this.resultPage.Controls.Add(this.button1);
             this.resultPage.Controls.Add(this.label1);
             this.resultPage.Controls.Add(this.resultLogs);
             this.resultPage.Controls.Add(this.resultDone);
@@ -254,8 +256,19 @@
             this.resultInfo.Multiline = true;
             this.resultInfo.Name = "resultInfo";
             this.resultInfo.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.resultInfo.Size = new System.Drawing.Size(536, 280);
+            this.resultInfo.Size = new System.Drawing.Size(536, 250);
             this.resultInfo.TabIndex = 0;
+            // 
+            // button1
+            // 
+            this.button1.AccessibleName = "generateDataFile";
+            this.button1.Location = new System.Drawing.Point(28, 283);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(536, 32);
+            this.button1.TabIndex = 4;
+            this.button1.Text = "Generate Data File";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.writeToFile_Click);
             // 
             // MainForm
             // 
@@ -297,6 +310,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox resultLogs;
         private System.Windows.Forms.Button acquireDeviceCode;
+        private System.Windows.Forms.Button button1;
     }
 }
 
