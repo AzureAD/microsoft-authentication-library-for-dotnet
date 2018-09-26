@@ -153,7 +153,8 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public partial class PublicClientApplication
     {
-        #pragma warning disable 1998
+#if DESKTOP || NET_CORE
+#pragma warning disable 1998
         /// <summary>
         /// In ADAL.NET, acquires security token from the authority, using the username/password authentication, 
         /// with the password sent in clear. 
@@ -171,6 +172,7 @@ namespace Microsoft.Identity.Client
         {
             { throw new NotImplementedException(); }
         }
-        #pragma warning restore 1998
+#pragma warning restore 1998
+#endif
     }
 }

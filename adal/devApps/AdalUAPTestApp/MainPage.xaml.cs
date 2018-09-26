@@ -42,6 +42,7 @@ namespace UAPTestApp
     public sealed partial class MainPage : Page
     {
         private const string ClientId = "cd01dc27-9d3c-4812-beda-8229d5d4a8d5";
+
         private const string ReturnUri = "https://MyDirectorySearcherApp";
 
         public MainPage()
@@ -68,7 +69,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                this.AccessToken.Text = exc.Message;
+                await ShowError(exc);
             }
         }
 
@@ -87,7 +88,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                this.AccessToken.Text = exc.Message;
+                await ShowError(exc);
             }
         }
 
@@ -105,7 +106,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                this.AccessToken.Text = exc.Message;
+                await ShowError(exc);
             }
         }
 
@@ -128,7 +129,7 @@ namespace UAPTestApp
                 AuthenticationResult result = await ctx.AcquireTokenAsync(
                     "https://graph.windows.net",
                     ClientId,
-                    new UserCredential());
+                    new UserCredential()); // can add a
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                     () =>
@@ -138,7 +139,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                this.AccessToken.Text = exc.Message;
+                await ShowError(exc);
             }
         }
 
@@ -158,7 +159,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                this.AccessToken.Text = "Auth failed: " + exc.Message;
+                await ShowError(exc);
             }
         }
 
@@ -175,7 +176,7 @@ namespace UAPTestApp
             {
                 AuthenticationResult authResult = await context.AcquireTokenAsync(
                     "https://graph.microsoft.com",
-                    ClientId, new UserCredential("bogavril@microsoft.com"))
+                    ClientId, new UserCredential())
                         .ConfigureAwait(false);
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
@@ -186,16 +187,17 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
-                      () =>
-                      {
-                          this.AccessToken.Text = "Auth failed: " + exc.Message;
-                      });
+                await ShowError(exc);
             }
-
-
         }
 
-
+        private async System.Threading.Tasks.Task ShowError(Exception exc)
+        {
+            await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                  () =>
+                  {
+                      this.AccessToken.Text = "Auth failed: " + exc.Message;
+                  });
+        }
     }
 }

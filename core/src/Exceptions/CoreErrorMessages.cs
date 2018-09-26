@@ -67,10 +67,10 @@ namespace Microsoft.Identity.Core
         public const string CannotFindTheAuthEndpont = "Cannot find the auth endpoint";
 
         public const string UapCannotFindUpn =
-           "Cannot find the principal name for the user, but found a domain the name. Possible cause: the application does not request the Enterprise Authentication capability.";
+           "Cannot find the user logged into Windows, but found a domain the name. Possible cause: the UWP application does not request the Enterprise Authentication capability.";
 
         public const string UapCannotFindDomainUser =
-            "Cannot find the principal name for the user. Possible causes: the application does not request the User Account Information and the Enterprise Authentication capabilities or the user is not AD or AAD joined.";
+            "Cannot find the user logged into Windows. Possible causes: the application does not request the User Account Information, Enterprise Authentication and Private Networks (Client & Server) capabilities or the user is not AD or AAD joined.";
 
         public const string PlatformNotSupported = "Platform Not Supported";
 
