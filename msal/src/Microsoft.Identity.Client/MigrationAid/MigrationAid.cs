@@ -157,8 +157,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// In ADAL.NET, acquires security token from the authority, using the username/password authentication, 
         /// with the password sent in clear. 
-        /// In MSAL 2.x, only the method that accepts a <see cref="System.Security.SecureString"/>
-        /// parameter is supported.
+        /// In MSAL 2.x, only the method that accepts a SecureString parameter is supported.
         /// 
         /// See https://aka.ms/msal-net-up for more details.
         /// </summary>

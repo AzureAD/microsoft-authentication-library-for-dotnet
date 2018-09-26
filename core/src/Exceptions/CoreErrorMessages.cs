@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Core
 {
     internal class CoreErrorMessages
     {
-        public const string UnknownUser = "Could not identify logged in user";
+        public const string UnknownUser = "Could not identify the user logged into the OS. See http://aka.ms/msal-net-iwa for details.";
 
         public const string HttpRequestUnsuccessful = "Response status code does not indicate success: {0} ({1}).";
 

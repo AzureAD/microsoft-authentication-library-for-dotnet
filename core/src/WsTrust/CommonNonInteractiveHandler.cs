@@ -56,9 +56,9 @@ namespace Microsoft.Identity.Core.WsTrust
             string msg;
             if (string.IsNullOrWhiteSpace(platformUsername))
             {
-                msg = "Could not find UPN for logged in user";
-                logger.Info(msg);
-                logger.InfoPii(msg);
+                msg = "Could not find UPN for logged in user.";
+                logger.Error(msg);
+                logger.ErrorPii(msg);
 
                 throw CoreExceptionFactory.Instance.GetClientException(
                     CoreErrorCodes.UnknownUser,

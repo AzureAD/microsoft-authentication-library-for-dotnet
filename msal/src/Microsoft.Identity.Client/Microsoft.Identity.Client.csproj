@@ -79,7 +79,7 @@
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
     <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3" />
     <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
-    <Compile Include="Features\PublicClient\**\*.cs" />
+    <Compile Include="Features\PublicClientWithTokenCache\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
@@ -94,13 +94,15 @@
     <Compile Include="Platforms\netcore\**\*.cs" />
     <Compile Include="..\..\..\core\src\Platforms\netcore\**\*.cs" LinkBase="Core\Platforms\netcore" />
     <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
-    <Compile Include="Features\TokenCache\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
+    <Compile Include="Features\UsernamePassword\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Compile Include="Platforms\net45\**\*.cs" />
@@ -108,8 +110,9 @@
     <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
-    <Compile Include="Features\PublicClient\**\*.cs" />
-    <Compile Include="Features\*.cs" />
+    <Compile Include="Features\PublicClientWithTokenCache\**\*.cs" />
+    <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
+    <Compile Include="Features\UsernamePassword\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
@@ -132,8 +135,8 @@
     <Compile Include="Platforms\uap\**\*.cs" />
     <Compile Include="..\..\..\core\src\Platforms\uap\**\*.cs" LinkBase="Core\Platforms\uap" />
     <Compile Include="Features\EventSource\**\*.cs" />
-    <Compile Include="Features\PublicClient\**\*.cs" />
-    <Compile Include="Features\*.cs" />
+    <Compile Include="Features\PublicClientWithTokenCache\**\*.cs" />
+    <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -162,10 +165,6 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Internal\Requests\UsernamePasswordRequest.cs" />
-    <None Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <!-- This is here to workaround designer issues so VS sees them appropriately -->

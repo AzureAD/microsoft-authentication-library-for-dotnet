@@ -141,8 +141,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 new HashSet<string>() { OAuth2Value.ScopeOpenId, OAuth2Value.ScopeOfflineAccess, OAuth2Value.ScopeProfile };
 
             unionScope.UnionWith(this.AuthenticationRequestParameters.Scope);
-
-            // To request id_token in response
             client.AddBodyParameter(OAuth2Parameter.Scope, unionScope.AsSingleString());
         }
     }

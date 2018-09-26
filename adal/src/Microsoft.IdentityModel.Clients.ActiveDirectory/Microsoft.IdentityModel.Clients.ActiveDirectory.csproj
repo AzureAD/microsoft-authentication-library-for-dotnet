@@ -105,15 +105,16 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1'">
     <Compile Include="Platforms\netstandard1.1\**\*.cs" />
-    <Compile Include="..\..\..\core\src\Platforms\netstandard1.1\**\*.cs" LinkBase="Core\Platforms\netstandard1.1"/>
-    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache"/>
+    <Compile Include="..\..\..\core\src\Platforms\netstandard1.1\**\*.cs" LinkBase="Core\Platforms\netstandard1.1" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3' ">
-    <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3"/>
-    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache"/>
+    <Compile Include="..\..\..\core\src\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3" />
+    <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="Platforms\netstandard1.3\**\*.cs" />
     <Compile Include="Features\WinCommon\**\*.cs" />
     <Compile Include="Features\CertificateAssertion\**\*.cs" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="Platforms\uap\**\*.cs" />

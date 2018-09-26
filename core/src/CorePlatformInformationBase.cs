@@ -36,7 +36,11 @@ namespace Microsoft.Identity.Core
 
         public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public abstract string GetProductName();
-        public virtual Task<string> GetUserPrincipalNameAsync() { return null; }
+        public virtual Task<string> GetUserPrincipalNameAsync()
+        {
+            return Task.FromResult<string>(null);
+        }
+
         public abstract string GetEnvironmentVariable(string variable);
         public abstract string GetProcessorArchitecture();
         public abstract string GetOperatingSystem();

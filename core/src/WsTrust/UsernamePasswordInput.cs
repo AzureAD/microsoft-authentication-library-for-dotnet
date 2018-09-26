@@ -25,11 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-// TODO: move to features ?
+#if DESKTOP
+using System.Security;
+using static System.Runtime.InteropServices.Marshal;
+#endif
+
+#if NET_CORE
+using System.Security;
+using static System.Security.SecureStringMarshal;
+using static System.Runtime.InteropServices.Marshal;
+#endif
+
 
 using System;
-using System.Runtime.InteropServices;
-using System.Security;
 
 namespace Microsoft.Identity.Core
 {
@@ -37,8 +45,7 @@ namespace Microsoft.Identity.Core
     internal sealed class UsernamePasswordInput : IUsernameInput
     {
         public string UserName { get; set; }
-
-#if DESKTOP 
+#if DESKTOP || NET_CORE
         private SecureString securePassword;
 #endif
         private string password;
@@ -50,7 +57,7 @@ namespace Microsoft.Identity.Core
             this.UserName = userName;
         }
 
-#if DESKTOP
+#if DESKTOP || NET_CORE
         public UsernamePasswordInput(string userName, SecureString securePassword)
         {
             this.securePassword = securePassword;
@@ -58,21 +65,24 @@ namespace Microsoft.Identity.Core
         }
 #endif
 
-        public char[] PasswordToCharArray() //TODO: bogavril - make the entire handler #if DESKTOP
+        public char[] PasswordToCharArray() 
         {
-#if DESKTOP 
+            
+#if DESKTOP || NET_CORE
             if (securePassword != null)
             {
                 var output = new char[securePassword.Length];
-                IntPtr secureStringPtr = Marshal.SecureStringToCoTaskMemUnicode(securePassword);
+
+                IntPtr secureStringPtr = SecureStringToCoTaskMemUnicode(securePassword);
                 for (int i = 0; i < securePassword.Length; i++)
                 {
-                    output[i] = (char)Marshal.ReadInt16(secureStringPtr, i * 2);
+                    output[i] = (char)ReadInt16(secureStringPtr, i * 2);
                 }
 
-                Marshal.ZeroFreeCoTaskMemUnicode(secureStringPtr);
+                ZeroFreeCoTaskMemUnicode(secureStringPtr);
                 return output;
             }
+
 #endif
             return (this.password != null) ? this.password.ToCharArray() : null;
         }
@@ -81,7 +91,7 @@ namespace Microsoft.Identity.Core
         {
 
             bool hasSecurePassword = false;
-#if DESKTOP
+#if DESKTOP || NET_CORE
             hasSecurePassword = this.securePassword != null;
 #endif
             bool hasPlainPassowrd = !string.IsNullOrEmpty(password);

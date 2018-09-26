@@ -70,6 +70,7 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
     <Compile Include="Platforms\netcore\**\*.cs" />
     <Compile Include="Features\Cache\**\*.cs" />
   </ItemGroup>
