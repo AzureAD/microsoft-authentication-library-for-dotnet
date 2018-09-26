@@ -45,7 +45,6 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <None Remove="ConfigureAwait.ruleset" />
     <None Remove="Exceptions\HttpRequestWrapperException.cs" />
     <None Remove="Http\IHttpWebResponse.cs" />
-    <EmbeddedResource Include="Properties\Microsoft.Identity.Core.rd.xml" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' or '$(TargetFramework)' == 'netcoreapp1.0'">
