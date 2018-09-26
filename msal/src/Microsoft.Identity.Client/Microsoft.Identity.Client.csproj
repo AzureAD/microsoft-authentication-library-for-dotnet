@@ -96,7 +96,8 @@
     <Compile Include="..\..\..\core\src\Platforms\netcore\**\*.cs" LinkBase="Core\Platforms\netcore" />
     <Compile Include="..\..\..\core\src\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
-    <Compile Include="Features\EventSource\**\*.cs" />
+    <Compile Include="Features\TokenCache\**\*.cs" />
+    <Compile Include="Features\EventSource\**\*.cs" /> 
     <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
     <Compile Include="Features\UsernamePassword\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />

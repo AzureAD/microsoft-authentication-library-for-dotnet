@@ -25,18 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-    public sealed partial class PublicClientApplication : ClientApplicationBase
+    /// <summary>
+    /// Interface to be used with desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
+    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only 
+    /// (they only support public client flows). For details see https://aka.ms/msal-net-client-applications
+    /// </summary>
+    public partial interface IPublicClientApplication : IClientApplicationBase
     {
-// .net core does not support getting the upn from the OS, although it can be made to pull it from a Windows OS
+
+
+        // .net core does not support getting the upn from the OS, although it can be made to pull it from a Windows OS
 #if !NET_CORE
 
         /// <summary>
@@ -47,14 +51,10 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// On Windows Universal Platform, the following capabilities need to be provided:
         /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
-        /// Supported on .net desktop and UWP
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
-        {
-            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput()).ConfigureAwait(false);
-        }
+        Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes);
 #endif
 
         /// <summary>
@@ -66,24 +66,9 @@ namespace Microsoft.Identity.Client
         /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+        Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
             IEnumerable<string> scopes,
-            string username)
-        {
-            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput(username)).ConfigureAwait(false);
-        }
+            string username);
 
-
-        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IntegratedWindowsAuthInput iwaInput)
-        {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new IntegratedWindowsAuthRequest(requestParams, iwaInput)
-            {
-                ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
-            };
-
-            return await handler.RunAsync().ConfigureAwait(false);
-        }
     }
 }

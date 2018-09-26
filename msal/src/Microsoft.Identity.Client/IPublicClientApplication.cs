@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client
     /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only 
     /// (they only support public client flows). For details see https://aka.ms/msal-net-client-applications
     /// </summary>
-    public interface IPublicClientApplication : IClientApplicationBase
+    public partial interface IPublicClientApplication : IClientApplicationBase
     {
 
 #if !NET_CORE
@@ -288,53 +288,5 @@ namespace Microsoft.Identity.Client
         // endif !NOT_CORE
 #endif
 
-        // .net core does not yet support getting the upn from Windows
-#if WINDOWS_APP || DESKTOP
-
-        /// <summary>
-        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
-        /// See https://aka.ms/msal-net-iwa.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name
-        /// </summary>
-        /// <remarks>
-        /// On Windows Universal Platform, the following capabilities need to be provided:
-        /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
-        /// </remarks>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes);
-#endif
-
-#if WINDOWS_APP || DESKTOP || NET_CORE
-
-        /// <summary>
-        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
-        /// See https://aka.ms/msal-net-iwa.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
-        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
-            IEnumerable<string> scopes,
-            string username);
-#endif
-
-#if DESKTOP
-        /// <summary>
-        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-        /// See https://aka.ms/msal-net-up.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.
-        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <param name="securePassword">User password.</param>
-        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
-            IEnumerable<string> scopes,
-            string username,
-            System.Security.SecureString securePassword);
-#endif
     }
 }
