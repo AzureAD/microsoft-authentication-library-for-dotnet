@@ -27,8 +27,10 @@
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
+using System.Collections.Generic;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.Web.Http;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -107,11 +109,6 @@ namespace UAPTestApp
             }
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            this.AccessToken.Text = string.Empty;
-        }
-
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async void Button_Click_2(object sender, RoutedEventArgs e)
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
@@ -164,5 +161,41 @@ namespace UAPTestApp
                 this.AccessToken.Text = "Auth failed: " + exc.Message;
             }
         }
+
+
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
+        private async void AcquireTokenIWA_Click(object sender, RoutedEventArgs e) // make sure to use a client id that is configured, such as the one from the .net sample
+        {
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+
+            this.AccessToken.Text = string.Empty;
+            AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common");
+            try
+            {
+                AuthenticationResult authResult = await context.AcquireTokenAsync(
+                    "https://graph.microsoft.com",
+                    ClientId, new UserCredential("bogavril@microsoft.com"))
+                        .ConfigureAwait(false);
+
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                       () =>
+                       {
+                           AccessToken.Text = "Acquire Token Silent:\nSigned in User - " + authResult.UserInfo.DisplayableId + "\nAccessToken: \n" + authResult.AccessToken;
+                       });
+            }
+            catch (Exception exc)
+            {
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+                      () =>
+                      {
+                          this.AccessToken.Text = "Auth failed: " + exc.Message;
+                      });
+            }
+
+
+        }
+
+
     }
 }

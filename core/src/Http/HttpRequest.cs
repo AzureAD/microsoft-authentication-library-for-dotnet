@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -114,13 +115,14 @@ namespace Microsoft.Identity.Core.Http
             HttpResponse response = null;
             try
             {
-                HttpContent clonedBody = null;
+                HttpContent clonedBody = body;
                 if (body != null)
                 {
                     // Since HttpContent would be disposed by underlying client.SendAsync(),
                     // we duplicate it so that we will have a copy in case we would need to retry
-                    clonedBody = await Helpers.CoreHelpers.DeepCopyAsync(body).ConfigureAwait(false);
+                    clonedBody = await CloneHttpContentAsync(body).ConfigureAwait(false);
                 }
+
                 response = await ExecuteAsync(endpoint, headers, clonedBody, method).ConfigureAwait(false);
 
                 if (response.StatusCode == HttpStatusCode.OK)
@@ -235,6 +237,33 @@ namespace Microsoft.Identity.Core.Http
                 Body = await response.Content.ReadAsStringAsync().ConfigureAwait(false),
                 StatusCode = response.StatusCode
             };
+        }
+
+
+        private static async Task<HttpContent> CloneHttpContentAsync(HttpContent httpContent)
+        {
+            var temp = new MemoryStream();
+            await httpContent.CopyToAsync(temp).ConfigureAwait(false);
+            temp.Position = 0;
+            
+            var clone = new StreamContent(temp);
+            if (httpContent.Headers != null)
+            {
+                foreach (var h in httpContent.Headers)
+                {
+                    clone.Headers.Add(h.Key, h.Value);
+                }
+            }
+
+            // WORKAROUND 
+            // On UWP there is a bug in the Http stack that causes an exception to be thrown when moving around a stream.
+            // https://stackoverflow.com/questions/31774058/postasync-throwing-irandomaccessstream-error-when-targeting-windows-10-uwp
+            // LoadIntoBufferAsync is necessary to buffer content for multiple reads - see https://stackoverflow.com/questions/26942514/multiple-calls-to-httpcontent-readasasync
+            // Documentation is sparse, but it looks like loading the buffer into memory avoids the bug, without 
+            // replacing the System.Net.HttpClient with Windows.Web.Http.HttpClient, which is not exactly a drop in replacement
+            await clone.LoadIntoBufferAsync().ConfigureAwait(false);
+            
+            return clone;
         }
     }
 }
