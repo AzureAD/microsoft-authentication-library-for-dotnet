@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,45 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using LabInfrastructure;
-using NUnit.Framework;
-using Test.Microsoft.Identity.Core.UIAutomation;
-using Xamarin.UITest;
-
-namespace Test.MSAL.NET.UIAutomation
+namespace LabInfrastructure
 {
-    /// <summary>
-    /// Configures environment for core/android tests to run
-    /// </summary>
-    [TestFixture(Platform.Android)]
-    class XamarinMSALDroidTests
+    public enum FederationProvider
     {
-        IApp app;
-        Platform platform;
-        ITestController xamarinController;
-
-        public XamarinMSALDroidTests(Platform platform)
-        {
-            this.platform = platform;
-        }
-
-        /// <summary>
-        /// Initializes app and test controller before each test
-        /// </summary>
-        [SetUp]
-        public void InitializeBeforeTest()
-        {
-            app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
-            xamarinController = new XamarinUITestController(app);
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenTest()
-        {
-            CoreMobileMSALTests.AcquireTokenTest(xamarinController);
-        }
+        Unknown = 0,
+        None = 1,
+        AdfsV2 = 2,
+        AdfsV3 = 3,
+        AdfsV4 = 4,
+        PingFederateV83 = 5,
+        Shibboleth = 6
     }
 }

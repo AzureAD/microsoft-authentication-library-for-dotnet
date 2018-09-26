@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,45 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-using LabInfrastructure;
-using NUnit.Framework;
-using Test.Microsoft.Identity.Core.UIAutomation;
-using Xamarin.UITest;
-
-namespace Test.MSAL.NET.UIAutomation
+namespace LabInfrastructure
 {
-    /// <summary>
-    /// Configures environment for core/android tests to run
-    /// </summary>
-    [TestFixture(Platform.Android)]
-    class XamarinMSALDroidTests
+    public class KeyVaultConfiguration
     {
-        IApp app;
-        Platform platform;
-        ITestController xamarinController;
-
-        public XamarinMSALDroidTests(Platform platform)
-        {
-            this.platform = platform;
-        }
+        /// <summary>
+        /// The URL of the Key Vault instance.
+        /// </summary>
+        public string Url { get; set; }
 
         /// <summary>
-        /// Initializes app and test controller before each test
+        /// The authentication type to use to communicate with the Key Vault.
         /// </summary>
-        [SetUp]
-        public void InitializeBeforeTest()
-        {
-            app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
-            xamarinController = new XamarinUITestController(app);
-        }
+        public KeyVaultAuthenticationType AuthType { get; set; }
 
         /// <summary>
-        /// Runs through the standard acquire token flow
+        /// The ID of the test harness client.
         /// </summary>
-        [Test]
-        public void AcquireTokenTest()
-        {
-            CoreMobileMSALTests.AcquireTokenTest(xamarinController);
-        }
+        /// <remarks>
+        /// This should be configured as having access to the Key Vault instance specified at <see cref="Url"/>.
+        /// </remarks>
+        public string ClientId { get; set; }
+
+        /// <summary>
+        /// The thumbprint of the <see cref="System.Security.Cryptography.X509Certificates.X509Certificate2"/> to use when
+        /// <see cref="AuthType"/> is <see cref="KeyVaultAuthenticationType.ClientCertificate"/>.
+        /// </summary>
+        public string CertThumbprint { get; set; }
+    }
+
+    public enum KeyVaultAuthenticationType
+    {
+        ClientCertificate,
+        UserCredential
     }
 }

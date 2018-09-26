@@ -2,9 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Threading;
+using LabInfrastructure;
 using NUnit.Framework;
 using Test.Microsoft.Identity.Core.UIAutomation;
-using Test.Microsoft.Identity.Core.UIAutomation.infrastructure;
 using Xamarin.UITest;
 using Xamarin.UITest.Queries;
 

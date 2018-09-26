@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -26,44 +26,19 @@
 //------------------------------------------------------------------------------
 
 using LabInfrastructure;
-using NUnit.Framework;
-using Test.Microsoft.Identity.Core.UIAutomation;
-using Xamarin.UITest;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
-namespace Test.MSAL.NET.UIAutomation
+namespace Test.MSAL.NET.Integration.Infrastructure
 {
-    /// <summary>
-    /// Configures environment for core/android tests to run
-    /// </summary>
-    [TestFixture(Platform.Android)]
-    class XamarinMSALDroidTests
+    public class AuthHelper
     {
-        IApp app;
-        Platform platform;
-        ITestController xamarinController;
-
-        public XamarinMSALDroidTests(Platform platform)
+        public IUser GetUser(UserQueryParameters query)
         {
-            this.platform = platform;
-        }
-
-        /// <summary>
-        /// Initializes app and test controller before each test
-        /// </summary>
-        [SetUp]
-        public void InitializeBeforeTest()
-        {
-            app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
-            xamarinController = new XamarinUITestController(app);
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenTest()
-        {
-            CoreMobileMSALTests.AcquireTokenTest(xamarinController);
+            ILabService _labService = new LabServiceApi();
+            var availableUsers = _labService.GetUsers(query);
+            Assert.AreNotEqual(0, availableUsers.Count(), "Found no users for the given query.");
+            return availableUsers.First();
         }
     }
 }

@@ -40,6 +40,10 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\LabInfrastructure\LabInfrastructure.csproj">
+      <Project>{8af6b089-8aea-41c9-8890-c94b3e8876a0}</Project>
+      <Name>LabInfrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
       <Name>Microsoft.Identity.Client</Name>
@@ -51,17 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppFactory.cs" />
-    <Compile Include="Infrastructure\CertificateHelper.cs" />
-    <Compile Include="Infrastructure\FederationProvider.cs" />
-    <Compile Include="Infrastructure\ILabService.cs" />
-    <Compile Include="Infrastructure\IUser.cs" />
-    <Compile Include="Infrastructure\KeyVaultConfiguration.cs" />
-    <Compile Include="Infrastructure\KeyVaultSecretsProvider.cs" />
-    <Compile Include="Infrastructure\ITestController.cs" />
-    <Compile Include="Infrastructure\LabServiceApi.cs" />
-    <Compile Include="Infrastructure\LabUser.cs" />
-    <Compile Include="Infrastructure\UserQueryParameters.cs" />
-    <Compile Include="Infrastructure\UserType.cs" />
+    <Compile Include="ITestController.cs" />
     <Compile Include="PlatformNotSupportedException.cs" />
     <Compile Include="XamarinUITestController.cs" />
   </ItemGroup>

@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,45 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-using LabInfrastructure;
-using NUnit.Framework;
-using Test.Microsoft.Identity.Core.UIAutomation;
-using Xamarin.UITest;
+using System.Collections.Generic;
 
-namespace Test.MSAL.NET.UIAutomation
+namespace LabInfrastructure
 {
-    /// <summary>
-    /// Configures environment for core/android tests to run
-    /// </summary>
-    [TestFixture(Platform.Android)]
-    class XamarinMSALDroidTests
+    public class UserQueryParameters
     {
-        IApp app;
-        Platform platform;
-        ITestController xamarinController;
-
-        public XamarinMSALDroidTests(Platform platform)
-        {
-            this.platform = platform;
-        }
-
-        /// <summary>
-        /// Initializes app and test controller before each test
-        /// </summary>
-        [SetUp]
-        public void InitializeBeforeTest()
-        {
-            app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
-            xamarinController = new XamarinUITestController(app);
-        }
-
-        /// <summary>
-        /// Runs through the standard acquire token flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenTest()
-        {
-            CoreMobileMSALTests.AcquireTokenTest(xamarinController);
-        }
+        public FederationProvider? FederationProvider { get; set; }
+        public bool? IsMamUser { get; set; }
+        public bool? IsMfaUser { get; set; }
+        public ISet<string> Licenses { get; set; }
+        public bool? IsFederatedUser { get; set; }
+        public UserType? IsUserType { get; set; }
+        public bool? IsExternalUser { get; set; }
     }
 }
