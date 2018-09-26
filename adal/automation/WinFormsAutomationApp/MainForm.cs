@@ -23,6 +23,9 @@ namespace WinFormsAutomationApp
         private Command _commandToRun = null;
         private const string AuthResultFile = "AuthResult.txt";
 
+        //This is the location of the automation app during UI Testing on the test agents
+        private const string AuthResultFile = "C:\\UITest\\AuthResult.txt";
+
         public MainForm()
         {
             DeleteCache.CleanCookies();
