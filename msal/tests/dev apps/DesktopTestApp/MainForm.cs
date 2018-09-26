@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Security;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -212,14 +213,10 @@ namespace DesktopTestApp
                 {
                     CreateException(exc);
                 }
-                finally
-                {
-
-                }
             }
         }
 
-        private void acquireTokenByUPButton_Click(object sender, EventArgs e)
+        private async void acquireTokenByUPButton_Click(object sender, EventArgs e)
         {
             using (new UIProgressScope(this))
             {
@@ -229,11 +226,11 @@ namespace DesktopTestApp
                 string username = loginHintTextBox.Text; //Can be blank for U/P 
                 SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
 
-                AcquireTokenByUsernamePassword(username, securePassword);
+                await AcquireTokenByUsernamePasswordAsync(username, securePassword);
             }
         }
 
-        private async void AcquireTokenByUsernamePassword(string username, SecureString password)
+        private async Task AcquireTokenByUsernamePasswordAsync(string username, SecureString password)
         {
             try
             {
