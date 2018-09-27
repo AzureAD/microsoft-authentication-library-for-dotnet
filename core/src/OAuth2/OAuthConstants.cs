@@ -95,6 +95,8 @@ namespace Microsoft.Identity.Core.OAuth2
     internal class OAuth2Error
     {
         public const string LoginRequired = "login_required";
+        public const string AuthorizationPending = "authorization_pending";
+        public const string CodeExpired = "code_expired";
     }
 
     internal class OAuth2Value

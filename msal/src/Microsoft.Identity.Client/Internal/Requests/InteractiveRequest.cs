@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
@@ -95,9 +96,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return _UIBehavior.PromptValue;
         }
 
-        internal override async Task PreTokenRequestAsync()
+        internal override async Task PreTokenRequestAsync(CancellationToken cancellationToken)
         {
-            await base.PreTokenRequestAsync().ConfigureAwait(false);
+            await base.PreTokenRequestAsync(cancellationToken).ConfigureAwait(false);
             await AcquireAuthorizationAsync().ConfigureAwait(false);
             VerifyAuthorizationResult();
         }

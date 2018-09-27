@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.OAuth2;
 
@@ -42,9 +43,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal override async Task PreTokenRequestAsync()
+        internal override async Task PreTokenRequestAsync(CancellationToken cancellationToken)
         {
-            await base.PreTokenRequestAsync().ConfigureAwait(false);
+            await base.PreTokenRequestAsync(cancellationToken).ConfigureAwait(false);
 
             // look for access token in the cache first.
             // no access token is found, then it means token does not exist
@@ -58,11 +59,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        protected override async Task SendTokenRequestAsync()
+        protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
         {
             if (MsalAccessTokenItem == null)
             {
-                await base.SendTokenRequestAsync().ConfigureAwait(false);
+                await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 

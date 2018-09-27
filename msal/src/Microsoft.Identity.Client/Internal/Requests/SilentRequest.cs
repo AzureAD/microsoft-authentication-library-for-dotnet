@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.OAuth2;
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.RefreshToken, _msalRefreshTokenItem.Secret);
         }
 
-        internal override async Task PreTokenRequestAsync()
+        internal override async Task PreTokenRequestAsync(CancellationToken cancellationToken)
         {
             if (!LoadFromCache)
             {
@@ -72,7 +73,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await CompletedTask.ConfigureAwait(false);
         }
 
-        protected override async Task SendTokenRequestAsync()
+        protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
         {
             if (MsalAccessTokenItem == null)
             {
@@ -91,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
                 await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-                await base.SendTokenRequestAsync().ConfigureAwait(false);
+                await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
 
                 if (Response.RefreshToken == null)
                 {

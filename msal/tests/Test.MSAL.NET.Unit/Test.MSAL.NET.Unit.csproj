@@ -29,6 +29,7 @@
     <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestConstants.cs" LinkBase="CoreUT" />
     <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestPlatformInformation.cs" LinkBase="CoreUT" />
     <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestLogger.cs" LinkBase="CoreUT" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\CoreAssert.cs" LinkBase="CoreUT" />
 
   </ItemGroup>
   <ItemGroup>

@@ -27,6 +27,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -126,7 +127,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             });
 
             SilentRequest request = new SilentRequest(parameters, false);
-            Task<AuthenticationResult> task = request.RunAsync();
+            Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -158,7 +159,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             try
             {
                 SilentRequest request = new SilentRequest(parameters, false);
-                Task<AuthenticationResult> task = request.RunAsync();
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 var authenticationResult = task.Result;
                 Assert.Fail("MsalUiRequiredException should be thrown here");
             }
@@ -195,7 +196,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             try
             {
                 SilentRequest request = new SilentRequest(parameters, false);
-                Task<AuthenticationResult> task = request.RunAsync();
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 var authenticationResult = task.Result;
                 Assert.Fail("MsalUiRequiredException should be thrown here");
             }

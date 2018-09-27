@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
@@ -60,11 +61,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.RequestContext, usernamePasswordInput);
         }
 
-        protected override async Task SendTokenRequestAsync()
+        protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
         {
             await UpdateUsernameAsync().ConfigureAwait(false);
             await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            await base.SendTokenRequestAsync().ConfigureAwait(false);
+            await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
         }
 
         private async Task FetchAssertionFromWsTrustAsync()

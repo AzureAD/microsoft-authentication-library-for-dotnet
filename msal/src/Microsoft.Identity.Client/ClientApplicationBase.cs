@@ -36,6 +36,7 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Telemetry;
+using System.Threading;
 
 namespace Microsoft.Identity.Client
 {
@@ -305,7 +306,7 @@ namespace Microsoft.Identity.Client
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 forceRefresh)
             { ApiId = apiId };
-            return await handler.RunAsync().ConfigureAwait(false);
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority,

@@ -84,6 +84,7 @@
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\TokenCache\**\*.cs" />
+    <Compile Include="Features\DeviceCode\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -100,6 +101,7 @@
     <Compile Include="Features\EventSource\**\*.cs" /> 
     <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
     <Compile Include="Features\UsernamePassword\**\*.cs" />
+    <Compile Include="Features\DeviceCode\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -115,6 +117,7 @@
     <Compile Include="Features\PublicClientWithTokenCache\**\*.cs" />
     <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
     <Compile Include="Features\UsernamePassword\**\*.cs" />
+    <Compile Include="Features\DeviceCode\**\*.cs" />
     <Compile Include="Features\ConfidentialClient\**\*.cs" />
     <Compile Update="Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
@@ -139,6 +142,7 @@
     <Compile Include="Features\EventSource\**\*.cs" />
     <Compile Include="Features\PublicClientWithTokenCache\**\*.cs" />
     <Compile Include="Features\IntegratedWindowsAuth\**\*.cs" />
+    <Compile Include="Features\DeviceCode\**\*.cs" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />

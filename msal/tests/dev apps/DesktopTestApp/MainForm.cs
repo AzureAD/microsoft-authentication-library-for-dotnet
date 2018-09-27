@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
@@ -73,6 +74,7 @@ namespace DesktopTestApp
         private const string publicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
 
         private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(publicClientId);
+        private CancellationTokenSource _cancellationTokenSource;
 
         public MainForm()
         {
@@ -471,7 +473,38 @@ namespace DesktopTestApp
             _publicClientHandler.CreateOrUpdatePublicClientApp(this.authority.Text, publicClientId);
         }
 
+        private void acquireTokenDeviceCode_Click(object sender, EventArgs e)
+        {
+            ClearResultPageInfo();
+
+            try
+            {
+                _cancellationTokenSource = new CancellationTokenSource();
+
+                // TODO: re-enable when public API re-enabled.
+                //AuthenticationResult authenticationResult = 
+                //    await _publicClientHandler.PublicClientApplication.AcquireTokenWithDeviceCodeAsync(
+                //        scopes.Text.AsArray(),
+                //        string.Empty,  // extra query parameters
+                //        dcr =>
+                //        {
+                //            BeginInvoke(new MethodInvoker(() => callResult.Text = dcr.Message));
+                //            return Task.FromResult(0);
+                //        },
+                //        _cancellationTokenSource.Token);
+
+                //SetResultPageInfo(authenticationResult);
+            }
+            catch (Exception ex)
+            {
+                CreateException(ex);
+            }
+        }
+
+        private void cancelOperationButton_Click(object sender, EventArgs e)
+        {
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource = null;
+        }
     }
-
-
 }

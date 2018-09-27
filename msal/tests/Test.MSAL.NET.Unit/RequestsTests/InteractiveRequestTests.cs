@@ -45,6 +45,7 @@ using Microsoft.Identity.Core.OAuth2;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Microsoft.Identity.Core.UI;
+using System.Threading;
 
 namespace Test.MSAL.NET.Unit.RequestsTests
 {
@@ -120,7 +121,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TestConstants.ScopeForAnotherResource.ToArray(),
                 TestConstants.DisplayableId,
                 UIBehavior.SelectAccount, ui);
-            Task<AuthenticationResult> task = request.RunAsync();
+            Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
             task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -186,7 +187,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 TestConstants.ScopeForAnotherResource.ToArray(),
                  TestConstants.DisplayableId,
                 UIBehavior.SelectAccount, ui);
-            Task<AuthenticationResult> task = request.RunAsync();
+            Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
             task.Wait();
             AuthenticationResult result = task.Result;
             Assert.IsNotNull(result);
@@ -265,7 +266,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 (string)null, UIBehavior.ForceLogin, webUi);
             try
             {
-                request.PreTokenRequestAsync().Wait();
+                request.PreTokenRequestAsync(CancellationToken.None).Wait();
                 Assert.Fail("MsalException should have been thrown here");
             }
             catch (Exception exc)
@@ -286,7 +287,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             try
             {
-                request.PreTokenRequestAsync().Wait();
+                request.PreTokenRequestAsync(CancellationToken.None).Wait(CancellationToken.None);
                 Assert.Fail("MsalException should have been thrown here");
             }
             catch (Exception exc)
@@ -325,7 +326,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             try
             {
-                request.PreTokenRequestAsync().Wait();
+                request.PreTokenRequestAsync(CancellationToken.None).Wait();
                 Assert.Fail("MsalException should be thrown here");
             }
             catch (Exception exc)

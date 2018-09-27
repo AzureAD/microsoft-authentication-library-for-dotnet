@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.OAuth2;
 
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return inputScope;
         }
         
-        internal override async Task PreTokenRequestAsync()
+        internal override async Task PreTokenRequestAsync(CancellationToken cancellationToken)
         {
             // look for access token in the cache first.
             if (!ForceRefresh && LoadFromCache)
@@ -53,12 +54,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     = await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
-        protected override async Task SendTokenRequestAsync()
+        protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
         {
             if (MsalAccessTokenItem == null)
             {
                 await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-                await base.SendTokenRequestAsync().ConfigureAwait(false);
+                await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 

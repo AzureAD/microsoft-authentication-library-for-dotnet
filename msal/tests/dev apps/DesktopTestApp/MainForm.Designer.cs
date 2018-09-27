@@ -58,6 +58,8 @@ namespace DesktopTestApp
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.IgnoreUserCbx = new System.Windows.Forms.CheckBox();
             this.passwordLabel = new System.Windows.Forms.Label();
             this.userPasswordTextBox = new System.Windows.Forms.TextBox();
             this.acquireTokenByUPButton = new System.Windows.Forms.Button();
@@ -85,8 +87,8 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.IgnoreUserCbx = new System.Windows.Forms.CheckBox();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.acquireTokenDeviceCode = new System.Windows.Forms.Button();
+            this.cancelOperationButton = new System.Windows.Forms.Button();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -392,6 +394,8 @@ namespace DesktopTestApp
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.cancelOperationButton);
+            this.publicClientTabPage.Controls.Add(this.acquireTokenDeviceCode);
             this.publicClientTabPage.Controls.Add(this.progressBar1);
             this.publicClientTabPage.Controls.Add(this.IgnoreUserCbx);
             this.publicClientTabPage.Controls.Add(this.passwordLabel);
@@ -423,6 +427,23 @@ namespace DesktopTestApp
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(15, 759);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(645, 23);
+            this.progressBar1.TabIndex = 37;
+            // 
+            // IgnoreUserCbx
+            // 
+            this.IgnoreUserCbx.AutoSize = true;
+            this.IgnoreUserCbx.Location = new System.Drawing.Point(505, 224);
+            this.IgnoreUserCbx.Name = "IgnoreUserCbx";
+            this.IgnoreUserCbx.Size = new System.Drawing.Size(56, 17);
+            this.IgnoreUserCbx.TabIndex = 36;
+            this.IgnoreUserCbx.Text = "Ignore";
+            this.IgnoreUserCbx.UseVisualStyleBackColor = true;
+            // 
             // passwordLabel
             // 
             this.passwordLabel.AutoSize = true;
@@ -442,7 +463,7 @@ namespace DesktopTestApp
             // 
             // acquireTokenByUPButton
             // 
-            this.acquireTokenByUPButton.Location = new System.Drawing.Point(207, 687);
+            this.acquireTokenByUPButton.Location = new System.Drawing.Point(207, 582);
             this.acquireTokenByUPButton.Name = "acquireTokenByUPButton";
             this.acquireTokenByUPButton.Size = new System.Drawing.Size(240, 29);
             this.acquireTokenByUPButton.TabIndex = 32;
@@ -452,7 +473,7 @@ namespace DesktopTestApp
             // 
             // acquireTokenSilentAuthority
             // 
-            this.acquireTokenSilentAuthority.Location = new System.Drawing.Point(433, 722);
+            this.acquireTokenSilentAuthority.Location = new System.Drawing.Point(433, 617);
             this.acquireTokenSilentAuthority.Name = "acquireTokenSilentAuthority";
             this.acquireTokenSilentAuthority.Size = new System.Drawing.Size(227, 30);
             this.acquireTokenSilentAuthority.TabIndex = 31;
@@ -461,7 +482,7 @@ namespace DesktopTestApp
             // 
             // acquireTokenInteractiveAuthority
             // 
-            this.acquireTokenInteractiveAuthority.Location = new System.Drawing.Point(15, 722);
+            this.acquireTokenInteractiveAuthority.Location = new System.Drawing.Point(15, 617);
             this.acquireTokenInteractiveAuthority.Name = "acquireTokenInteractiveAuthority";
             this.acquireTokenInteractiveAuthority.Size = new System.Drawing.Size(282, 30);
             this.acquireTokenInteractiveAuthority.TabIndex = 30;
@@ -472,7 +493,7 @@ namespace DesktopTestApp
             // PiiLoggingLabel
             // 
             this.PiiLoggingLabel.AutoSize = true;
-            this.PiiLoggingLabel.Location = new System.Drawing.Point(25, 716);
+            this.PiiLoggingLabel.Location = new System.Drawing.Point(25, 611);
             this.PiiLoggingLabel.Name = "PiiLoggingLabel";
             this.PiiLoggingLabel.Size = new System.Drawing.Size(0, 13);
             this.PiiLoggingLabel.TabIndex = 29;
@@ -497,7 +518,7 @@ namespace DesktopTestApp
             // 
             // callResult
             // 
-            this.callResult.Location = new System.Drawing.Point(15, 403);
+            this.callResult.Location = new System.Drawing.Point(15, 298);
             this.callResult.Multiline = true;
             this.callResult.Name = "callResult";
             this.callResult.ReadOnly = true;
@@ -618,7 +639,7 @@ namespace DesktopTestApp
             // 
             // acquireTokenSilent
             // 
-            this.acquireTokenSilent.Location = new System.Drawing.Point(496, 651);
+            this.acquireTokenSilent.Location = new System.Drawing.Point(496, 546);
             this.acquireTokenSilent.Name = "acquireTokenSilent";
             this.acquireTokenSilent.Size = new System.Drawing.Size(164, 30);
             this.acquireTokenSilent.TabIndex = 10;
@@ -628,7 +649,7 @@ namespace DesktopTestApp
             // 
             // acquireTokenWIA
             // 
-            this.acquireTokenWIA.Location = new System.Drawing.Point(207, 651);
+            this.acquireTokenWIA.Location = new System.Drawing.Point(207, 546);
             this.acquireTokenWIA.Name = "acquireTokenWIA";
             this.acquireTokenWIA.Size = new System.Drawing.Size(240, 30);
             this.acquireTokenWIA.TabIndex = 9;
@@ -638,7 +659,7 @@ namespace DesktopTestApp
             // 
             // acquireTokenInteractive
             // 
-            this.acquireTokenInteractive.Location = new System.Drawing.Point(15, 651);
+            this.acquireTokenInteractive.Location = new System.Drawing.Point(15, 546);
             this.acquireTokenInteractive.Name = "acquireTokenInteractive";
             this.acquireTokenInteractive.Size = new System.Drawing.Size(139, 30);
             this.acquireTokenInteractive.TabIndex = 9;
@@ -689,22 +710,25 @@ namespace DesktopTestApp
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
             this.tabControl1.TabIndex = 0;
             // 
-            // IgnoreUserCbx
+            // acquireTokenDeviceCode
             // 
-            this.IgnoreUserCbx.AutoSize = true;
-            this.IgnoreUserCbx.Location = new System.Drawing.Point(505, 224);
-            this.IgnoreUserCbx.Name = "IgnoreUserCbx";
-            this.IgnoreUserCbx.Size = new System.Drawing.Size(56, 17);
-            this.IgnoreUserCbx.TabIndex = 36;
-            this.IgnoreUserCbx.Text = "Ignore";
-            this.IgnoreUserCbx.UseVisualStyleBackColor = true;
+            this.acquireTokenDeviceCode.Location = new System.Drawing.Point(496, 582);
+            this.acquireTokenDeviceCode.Name = "acquireTokenDeviceCode";
+            this.acquireTokenDeviceCode.Size = new System.Drawing.Size(164, 29);
+            this.acquireTokenDeviceCode.TabIndex = 38;
+            this.acquireTokenDeviceCode.Text = "Acquire Token By DeviceCode";
+            this.acquireTokenDeviceCode.UseVisualStyleBackColor = true;
+            this.acquireTokenDeviceCode.Click += new System.EventHandler(this.acquireTokenDeviceCode_Click);
             // 
-            // progressBar1
+            // cancelOperationButton
             // 
-            this.progressBar1.Location = new System.Drawing.Point(15, 759);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(645, 23);
-            this.progressBar1.TabIndex = 37;
+            this.cancelOperationButton.Location = new System.Drawing.Point(498, 724);
+            this.cancelOperationButton.Name = "cancelOperationButton";
+            this.cancelOperationButton.Size = new System.Drawing.Size(164, 29);
+            this.cancelOperationButton.TabIndex = 39;
+            this.cancelOperationButton.Text = "Cancel Operation";
+            this.cancelOperationButton.UseVisualStyleBackColor = true;
+            this.cancelOperationButton.Click += new System.EventHandler(this.cancelOperationButton_Click);
             // 
             // MainForm
             // 
@@ -797,6 +821,8 @@ namespace DesktopTestApp
         private Label passwordLabel;
         private CheckBox IgnoreUserCbx;
         private ProgressBar progressBar1;
+        private Button acquireTokenDeviceCode;
+        private Button cancelOperationButton;
     }
 }
 

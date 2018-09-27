@@ -30,6 +30,7 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
@@ -62,7 +63,7 @@ namespace Microsoft.Identity.Client
                 ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
             };
 
-            return await handler.RunAsync().ConfigureAwait(false);
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
     }

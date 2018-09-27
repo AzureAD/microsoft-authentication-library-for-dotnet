@@ -33,6 +33,7 @@ using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Telemetry;
+using System.Threading;
 
 namespace Microsoft.Identity.Client
 {
@@ -366,7 +367,7 @@ namespace Microsoft.Identity.Client
             parameters.IsClientCredentialRequest = true;
             parameters.SendCertificate = sendCertificate;
             var handler = new ClientCredentialRequest(parameters, forceRefresh){ApiId = apiId, IsConfidentialClient = true};
-            return await handler.RunAsync().ConfigureAwait(false);
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
@@ -376,7 +377,7 @@ namespace Microsoft.Identity.Client
             requestParams.UserAssertion = userAssertion;
             requestParams.SendCertificate = sendCertificate;
             var handler = new OnBehalfOfRequest(requestParams){ApiId = apiId, IsConfidentialClient = true};
-            return await handler.RunAsync().ConfigureAwait(false);
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
@@ -389,7 +390,7 @@ namespace Microsoft.Identity.Client
             requestParams.SendCertificate = sendCertificate;
             var handler =
                 new AuthorizationCodeRequest(requestParams){ApiId = apiId, IsConfidentialClient = true};
-            return await handler.RunAsync().ConfigureAwait(false);
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scopes, IAccount user, TokenCache cache)
