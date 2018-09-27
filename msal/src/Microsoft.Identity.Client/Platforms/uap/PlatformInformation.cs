@@ -49,6 +49,71 @@ namespace Microsoft.Identity.Client
             return "MSAL.UAP";
         }
 
+        /// <summary>
+        /// Get a principal name that can be used for WIA
+        /// </summary>
+        /// <remarks>
+        /// Win10 allows several identities to be logged in at once; 
+        /// select the first principal name that can be used
+        /// </remarks>
+        /// <returns></returns>
+        public override async Task<string> GetUserPrincipalNameAsync()
+        {
+            IReadOnlyList<User> users = await User.FindAllAsync();
+            if (users == null || !users.Any())
+            {
+                throw new MsalClientException(
+                 CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorMessages.UapCannotFindDomainUser);
+            }
+
+            var getUserDetailTasks = users.Select(async u =>
+            {
+                object domainObj = await u.GetPropertyAsync(KnownUserProperties.DomainName);
+                string domainString = domainObj?.ToString();
+
+                object principalObject = await u.GetPropertyAsync(KnownUserProperties.PrincipalName);
+                string principalNameString = principalObject?.ToString();
+
+                return new { Domain = domainString, PrincipalName = principalNameString };
+            }).ToList();
+
+            var userDetails = await Task.WhenAll(getUserDetailTasks).ConfigureAwait(false);
+
+            // try to get a user that has both domain name and upn
+            var userDetailWithDomainAndPn = userDetails.FirstOrDefault(
+                d => !String.IsNullOrWhiteSpace(d.Domain) &&
+                !String.IsNullOrWhiteSpace(d.PrincipalName));
+
+            if (userDetailWithDomainAndPn != null)
+            {
+                return userDetailWithDomainAndPn.PrincipalName;
+            }
+
+            // try to get a user that at least has upn
+            var userDetailWithPn = userDetails.FirstOrDefault(
+              d => !String.IsNullOrWhiteSpace(d.PrincipalName));
+
+            if (userDetailWithPn != null)
+            {
+                return userDetailWithPn.PrincipalName;
+            }
+
+            // user has domain name, but no upn -> missing Enterprise Auth capability
+            if (userDetails.Any(d => !String.IsNullOrWhiteSpace(d.Domain)))
+            {
+                throw new MsalClientException(
+                 CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorMessages.UapCannotFindUpn);
+            }
+
+            // no domain, no upn -> missing User Info capability
+            throw new MsalClientException(
+             CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
+             CoreErrorMessages.UapCannotFindDomainUser);
+
+        }
+
         public override string GetEnvironmentVariable(string variable)
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
