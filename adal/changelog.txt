@@ -1,3 +1,10 @@
+Version 4.1.0-preview
+=============
+
+This release includes: 
+
+- Integrated Windows Auth and Username / Password minor changes, such as improved error messages and http call resilience
+
 Version 4.0.0-preview
 ==============
 This release includes:

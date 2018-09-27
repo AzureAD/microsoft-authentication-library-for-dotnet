@@ -1,3 +1,9 @@
+2.1.0-preview
+=============
+
+- Integrated Windows Authentication and Username / Password authentication flows. For details see https://aka.ms/msal-net-iwa and https://aka.ms/msal-net-up
+
+
 2.0.1-preview
 =============
 This release contains bug fixes on top of MSAL 2.0.0-preview:
