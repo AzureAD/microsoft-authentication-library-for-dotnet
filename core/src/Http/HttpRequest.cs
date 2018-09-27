@@ -255,6 +255,7 @@ namespace Microsoft.Identity.Core.Http
                 }
             }
 
+#if WINDOWS_APP
             // WORKAROUND 
             // On UWP there is a bug in the Http stack that causes an exception to be thrown when moving around a stream.
             // https://stackoverflow.com/questions/31774058/postasync-throwing-irandomaccessstream-error-when-targeting-windows-10-uwp
@@ -262,6 +263,7 @@ namespace Microsoft.Identity.Core.Http
             // Documentation is sparse, but it looks like loading the buffer into memory avoids the bug, without 
             // replacing the System.Net.HttpClient with Windows.Web.Http.HttpClient, which is not exactly a drop in replacement
             await clone.LoadIntoBufferAsync().ConfigureAwait(false);
+#endif
             
             return clone;
         }
