@@ -25,11 +25,18 @@
 //
 //------------------------------------------------------------------------------
 
-namespace LabInfrastructure
+using System.Collections.Generic;
+
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public enum UserType
+    public class UserQueryParameters
     {
-        Member = 0,
-        Guest = 1
+        public FederationProvider? FederationProvider { get; set; }
+        public bool? IsMamUser { get; set; }
+        public bool? IsMfaUser { get; set; }
+        public ISet<string> Licenses { get; set; }
+        public bool? IsFederatedUser { get; set; }
+        public UserType? IsUserType { get; set; }
+        public bool? IsExternalUser { get; set; }
     }
 }

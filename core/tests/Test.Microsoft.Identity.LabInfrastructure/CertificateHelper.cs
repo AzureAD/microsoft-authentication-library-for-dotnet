@@ -28,7 +28,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 
-namespace LabInfrastructure
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
     public static class CertificateHelper
     {

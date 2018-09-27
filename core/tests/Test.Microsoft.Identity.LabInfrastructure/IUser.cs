@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LabInfrastructure
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
     public interface IUser
     {

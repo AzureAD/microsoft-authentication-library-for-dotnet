@@ -25,12 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
-namespace LabInfrastructure
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public interface ILabService
+    public enum FederationProvider
     {
-        IEnumerable<IUser> GetUsers(UserQueryParameters query);
+        Unknown = 0,
+        None = 1,
+        AdfsV2 = 2,
+        AdfsV3 = 3,
+        AdfsV4 = 4,
+        PingFederateV83 = 5,
+        Shibboleth = 6
     }
 }

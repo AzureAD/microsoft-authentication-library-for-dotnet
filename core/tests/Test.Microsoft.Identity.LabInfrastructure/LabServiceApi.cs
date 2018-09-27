@@ -31,7 +31,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace LabInfrastructure
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
     /// <summary>
     /// Wrapper for new lab service API

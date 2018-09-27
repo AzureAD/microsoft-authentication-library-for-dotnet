@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using LabInfrastructure;
+using Test.Microsoft.Identity.LabInfrastructure;
 using NUnit.Framework;
 using Test.Microsoft.Identity.Core.UIAutomation;
 

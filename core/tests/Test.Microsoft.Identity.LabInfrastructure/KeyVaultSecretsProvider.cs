@@ -31,7 +31,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Threading.Tasks;
 
-namespace LabInfrastructure
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
     public class KeyVaultSecretsProvider
     {

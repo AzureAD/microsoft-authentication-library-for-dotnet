@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using LabInfrastructure;
+using Test.Microsoft.Identity.LabInfrastructure;
 
 namespace Test.Microsoft.Identity.Core.UIAutomation
 {

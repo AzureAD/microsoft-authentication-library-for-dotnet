@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using LabInfrastructure;
+using Test.Microsoft.Identity.LabInfrastructure;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;

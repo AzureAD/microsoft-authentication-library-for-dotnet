@@ -40,10 +40,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\LabInfrastructure\LabInfrastructure.csproj">
-      <Project>{8af6b089-8aea-41c9-8890-c94b3e8876a0}</Project>
-      <Name>LabInfrastructure</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
       <Name>Microsoft.Identity.Client</Name>
@@ -51,6 +47,10 @@
     <ProjectReference Include="..\..\..\adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
       <Project>{AECE489D-9ED4-442D-8D8F-0F383AEBB781}</Project>
       <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj">
+      <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
+      <Name>Test.Microsoft.Identity.LabInfrastructure</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
