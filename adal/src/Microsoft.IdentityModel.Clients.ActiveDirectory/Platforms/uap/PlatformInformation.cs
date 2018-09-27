@@ -107,13 +107,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (userDetails.Any(d => !String.IsNullOrWhiteSpace(d.Domain)))
             {
                 throw new AdalException(
-                 AdalErrorEx.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorCodes.UapCannotFindUpn,
                  CoreErrorMessages.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
             throw new AdalException(
-             AdalErrorEx.CannotAccessUserInformationOrUserNotDomainJoined,
+             CoreErrorMessages.UapCannotFindDomainUser,
              CoreErrorMessages.UapCannotFindDomainUser);
 
         }

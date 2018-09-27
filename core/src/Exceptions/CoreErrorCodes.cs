@@ -70,7 +70,9 @@ namespace Microsoft.Identity.Core
         public const string ParsingWsMetadataExchangeFailed = "parsing_ws_metadata_exchange_failed";
         public const string UnknownUserType = "unknown_user_type";
 
-        public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
+        public const string UapCannotFindDomainUser = "user_information_access_failed";
+        public const string UapCannotFindUpn = "uap_cannot_find_upn";
+
 
 
 #if ANDROID

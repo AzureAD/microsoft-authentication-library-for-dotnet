@@ -50,20 +50,20 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Get a principal name that can be used for WIA
+        /// Get a principal name that can be used for IWA and U/P or throws if it cannot be found
         /// </summary>
         /// <remarks>
         /// Win10 allows several identities to be logged in at once; 
         /// select the first principal name that can be used
         /// </remarks>
-        /// <returns></returns>
+        /// <returns>Upn or throws</returns>
         public override async Task<string> GetUserPrincipalNameAsync()
         {
             IReadOnlyList<User> users = await User.FindAllAsync();
             if (users == null || !users.Any())
             {
                 throw new MsalClientException(
-                 CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorCodes.UapCannotFindDomainUser,
                  CoreErrorMessages.UapCannotFindDomainUser);
             }
 
@@ -103,13 +103,13 @@ namespace Microsoft.Identity.Client
             if (userDetails.Any(d => !String.IsNullOrWhiteSpace(d.Domain)))
             {
                 throw new MsalClientException(
-                 CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
+                 CoreErrorCodes.UapCannotFindUpn,
                  CoreErrorMessages.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
             throw new MsalClientException(
-             CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
+             CoreErrorCodes.UapCannotFindDomainUser,
              CoreErrorMessages.UapCannotFindDomainUser);
 
         }

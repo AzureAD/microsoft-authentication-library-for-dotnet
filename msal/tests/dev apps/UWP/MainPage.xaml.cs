@@ -42,9 +42,8 @@ namespace UWP
             AuthenticationResult result = null;
             try
             {
-                //result = await _pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes);
-                 result = await _pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, "bogavril@microsoft.com"); // can also use this overload
-                
+                result = await _pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes);
+                 // result = await _pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, "bogavril@microsoft.com"); // can also use this overload
             }
             catch (Exception ex)
             {

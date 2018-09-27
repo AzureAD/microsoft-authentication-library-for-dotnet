@@ -157,5 +157,17 @@ namespace Microsoft.Identity.Client
         /// Request is invalid.
         /// </summary>
         public const string InvalidRequest = "invalid_request";
+
+        /// <summary>
+        /// Cannot access the user from the OS (UWP)
+        /// </summary>
+        public const string UapCannotFindDomainUser = "user_information_access_failed";
+
+        /// <summary>
+        /// Cannot get the user from the OS (UWP)
+        /// </summary>
+        public const string UapCannotFindUpn = "uap_cannot_find_upn";
+
+
     }
 }
