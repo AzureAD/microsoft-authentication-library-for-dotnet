@@ -40,33 +40,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return "PCL.iOS";
         }
 
-        public override string GetEnvironmentVariable(string variable)
-        {
-            // TODO: Update
-            return null;
-        }
-
-        public override Task<string> GetUserPrincipalNameAsync()
-        {
-            // TODO: Update
-            return null;
-        }
-
-        public override string GetProcessorArchitecture()
-        {
-            return null;
-        }
-
-        public override string GetOperatingSystem()
-        {
-            return null;
-        }
-
-        public override string GetDeviceModel()
-        {
-            return null;
-        }
-
         public override string GetAssemblyFileVersionAttribute()
         {
             // TODO: Check if assembly file version can be read in iOS assembly as well or not. For now, we use assembly version instead.

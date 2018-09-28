@@ -37,27 +37,5 @@ namespace Microsoft.Identity.Client
         {
             return "MSAL.NetCore";
         }
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            string value = Environment.GetEnvironmentVariable(variable);
-            return !string.IsNullOrWhiteSpace(value) ? value : null;
-        }
-
-        public override string GetProcessorArchitecture()
-        {
-            return null;
-        }
-
-        public override string GetOperatingSystem()
-        {
-            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
-        }
-
-        public override string GetDeviceModel()
-        {
-            // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.
-            return null;
-        }
     }
 }

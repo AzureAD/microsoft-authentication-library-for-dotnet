@@ -43,8 +43,6 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <Compile Remove="Platforms\**\*.*" />
     <Compile Remove="Features\**\*.*" />
     <None Remove="ConfigureAwait.ruleset" />
-    <None Remove="Exceptions\HttpRequestWrapperException.cs" />
-    <None Remove="Http\IHttpWebResponse.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.1' or '$(TargetFramework)' == 'netstandard1.3' or '$(TargetFramework)' == 'uap10.0' or '$(TargetFramework)' == 'netcoreapp1.0'">
@@ -96,6 +94,7 @@ in ADAL and MSAL and to ease unit testing. No projects should take a dependency 
     <Reference Include="System.Runtime.Serialization" />
     <Compile Include="Platforms\iOS\**\*.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
   </ItemGroup>

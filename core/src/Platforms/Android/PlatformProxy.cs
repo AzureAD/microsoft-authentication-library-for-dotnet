@@ -25,38 +25,65 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.Identity.Client.Internal;
 using System.Collections.Generic;
-using Microsoft.Identity.Core;
-using System.Globalization;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core
 {
+    /// <summary>
+    /// Platform / OS specific logic.
+    /// </summary>
     [Android.Runtime.Preserve(AllMembers = true)]
-    internal class PlatformInformation : PlatformInformationBase
+    internal class PlatformProxy : IPlatformProxy
     {
-        internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
-        
-        public override string GetProductName()
+        /// <summary>
+        /// Get the user logged in 
+        /// </summary>
+        /// <returns>The username or throws</returns>
+        public async Task<string> GetUserPrincipalNameAsync()
         {
-            return "MSAL.Xamarin.Android";
+            return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
+
+        }
+        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        {
+            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
         }
 
-
-
-        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public bool IsDomainJoined()
         {
-            base.ValidateRedirectUri(redirectUri, requestContext);
-
-            if (DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
-                throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + PlatformInformationBase.DefaultRedirectUri +
-                                        " can not be used on Android platform");
+            return false;
         }
 
-        public override string GetDefaultRedirectUri(string clientId)
+        public string GetEnvironmentVariable(string variable)
         {
-            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
+            return null;
+        }
+
+        public string GetProcessorArchitecture()
+        {
+            if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
+            {
+                return Android.OS.Build.CpuAbi;
+            }
+
+            IList<string> supportedABIs = Android.OS.Build.SupportedAbis;
+            if (supportedABIs != null && supportedABIs.Count > 0)
+            {
+                return supportedABIs[0];
+            }
+
+            return null;
+        }
+
+        public string GetOperatingSystem()
+        {
+            return Android.OS.Build.VERSION.Sdk;
+        }
+
+        public string GetDeviceModel()
+        {
+            return Android.OS.Build.Model;
         }
     }
 }

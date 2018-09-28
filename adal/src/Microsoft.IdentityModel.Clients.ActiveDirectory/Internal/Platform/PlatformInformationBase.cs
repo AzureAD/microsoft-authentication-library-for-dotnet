@@ -42,10 +42,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return assemblyFileVersion != null ? assemblyFileVersion.Version : "internal";
         }
 
-        public async override Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
-        }
+        //public async override Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        //{
+        //    return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
+        //}
 
         public virtual void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {

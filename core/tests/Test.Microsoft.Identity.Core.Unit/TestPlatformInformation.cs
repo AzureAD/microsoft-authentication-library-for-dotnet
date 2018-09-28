@@ -46,34 +46,9 @@ namespace Test.Microsoft.Identity.Core.Unit
             return null;
         }
 
-        public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
-        public override string GetProcessorArchitecture()
-        {
-            return null;
-        }
-
-        public override string GetOperatingSystem()
-        {
-            return null;
-        }
-
-        public override string GetDeviceModel()
-        {
-            return null;
-        }
-
         public override string GetAssemblyFileVersionAttribute()
         {
             return null;
-        }
-
-        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            throw new NotImplementedException();
         }
     }
 }

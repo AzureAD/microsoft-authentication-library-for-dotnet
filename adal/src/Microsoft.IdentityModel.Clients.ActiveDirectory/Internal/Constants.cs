@@ -151,7 +151,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public const string WsTrustEndpointNotFoundInMetadataDocument =
             "WS-Trust endpoint not found in metadata document";
 
-        public const string GetUserNameFailed = "Failed to get user name";
 
         public const string MissingFederationMetadataUrl =
             "Federation Metadata Url is missing for federated user. This user type is unsupported.";
@@ -167,6 +166,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
 
         public const string InteractionRequired = "interaction_required";
+
+        public const string GetUserNameFailed = "Failed to get user name";
+
     }
 
     internal static class XmlNamespace

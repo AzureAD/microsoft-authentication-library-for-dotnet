@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
@@ -71,24 +72,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 
         public static IDictionary<string, string> GetAdalIdParameters()
         {
+            IPlatformProxy platformProxy = new PlatformProxy();
+
             var parameters = new Dictionary<string, string>();
 
             parameters[AdalIdParameter.Product] = new PlatformInformation().GetProductName();
             parameters[AdalIdParameter.Version] = GetAdalVersion();
 
-            var processorInofrmation = new PlatformInformation().GetProcessorArchitecture();
-            if (processorInofrmation != null)
+            var processorInfo = platformProxy.GetProcessorArchitecture();
+            if (processorInfo != null)
             {
-                parameters[AdalIdParameter.CpuPlatform] = processorInofrmation;
+                parameters[AdalIdParameter.CpuPlatform] = processorInfo;
             }
 
-            var osInformation = new PlatformInformation().GetOperatingSystem();
+            var osInformation = platformProxy.GetOperatingSystem();
             if (osInformation != null)
             {
                 parameters[AdalIdParameter.OS] = osInformation;
             }
 
-            var deviceInformation = new PlatformInformation().GetDeviceModel();
+            var deviceInformation = platformProxy.GetDeviceModel();
             if (deviceInformation != null)
             {
                 parameters[AdalIdParameter.DeviceModel] = deviceInformation;

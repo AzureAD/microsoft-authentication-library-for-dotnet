@@ -85,19 +85,21 @@ namespace Microsoft.Identity.Core
                 [MsalIdParameter.Version] = GetMsalVersion()
             };
 
-            var processorInformation = corePlatformInformationBaseInstance.GetProcessorArchitecture();
+            IPlatformProxy platformProxy = new PlatformProxy();
+
+            var processorInformation = platformProxy.GetProcessorArchitecture();
             if (processorInformation != null)
             {
                 parameters[MsalIdParameter.CpuPlatform] = processorInformation;
             }
 
-            var osInformation = corePlatformInformationBaseInstance.GetOperatingSystem();
+            var osInformation = platformProxy.GetOperatingSystem();
             if (osInformation != null)
             {
                 parameters[MsalIdParameter.OS] = osInformation;
             }
 
-            var deviceInformation = corePlatformInformationBaseInstance.GetDeviceModel();
+            var deviceInformation = platformProxy.GetDeviceModel();
             if (deviceInformation != null)
             {
                 parameters[MsalIdParameter.DeviceModel] = deviceInformation;

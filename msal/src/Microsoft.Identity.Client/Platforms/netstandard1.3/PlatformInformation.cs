@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client
@@ -35,27 +34,6 @@ namespace Microsoft.Identity.Client
         public override string GetProductName()
         {
             return "MSAL.CoreCLR";
-        }
-
-        public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
-        public override string GetProcessorArchitecture()
-        {
-            return null;
-        }
-
-        public override string GetOperatingSystem()
-        {
-            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
-        }
-
-        public override string GetDeviceModel()
-        {
-            // Since MSAL .NET may be used on servers, for security reasons, we do not emit device type.
-            return null;
         }
     }
 }

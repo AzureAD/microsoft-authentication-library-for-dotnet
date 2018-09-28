@@ -45,10 +45,5 @@ namespace Microsoft.Identity.Client.Internal
             return
                 typeof (MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
         }
-
-        public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
-        }
     }
 }

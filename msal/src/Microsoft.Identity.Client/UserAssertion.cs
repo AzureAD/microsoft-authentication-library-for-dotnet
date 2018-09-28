@@ -31,6 +31,7 @@ using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client
 {
+#pragma warning disable CS1587 // XML comment is not placed on a valid language element
     /// <summary>
     /// Type containing an assertion representing a user's credentials. This type is used in the
     /// On-Behalf-Of flow in confidential client applications, enabling a Web API to request a token
@@ -40,8 +41,9 @@ namespace Microsoft.Identity.Client
 #if DESKTOP || NET_CORE || NETSTANDARD1_3
     /// <seealso cref="ConfidentialClientApplication.AcquireTokenOnBehalfOfAsync(System.Collections.Generic.IEnumerable{string}, UserAssertion)"/>
     /// and <see cref="ConfidentialClientApplication.AcquireTokenOnBehalfOfAsync(System.Collections.Generic.IEnumerable{string}, UserAssertion, string)"/>
-#endif    
+#endif
     public sealed class UserAssertion
+#pragma warning restore CS1587 // XML comment is not placed on a valid language element
     {
         /// <summary>
         /// Constructor from a JWT assertion. For other assertion types (SAML), use the other constructor <see cref="UserAssertion.UserAssertion(string, string)"/>

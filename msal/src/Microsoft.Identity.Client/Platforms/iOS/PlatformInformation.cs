@@ -42,26 +42,6 @@ namespace Microsoft.Identity.Client
             return "MSAL.Xamarin.iOS";
         }
 
-        public override string GetEnvironmentVariable(string variable)
-        {
-            return null;
-        }
-
-        public override string GetProcessorArchitecture()
-        {
-            return null;
-        }
-
-        public override string GetOperatingSystem()
-        {
-            return UIDevice.CurrentDevice.SystemVersion;
-        }
-
-        public override string GetDeviceModel()
-        {
-            return UIDevice.CurrentDevice.Model;
-        }
-
         public override string GetAssemblyFileVersionAttribute()
         {
             return typeof (MsalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
