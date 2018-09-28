@@ -43,6 +43,12 @@ namespace Test.MSAL.NET.Integration
         public string[] Scopes = { "User.Read" };
         AuthHelper authHelper = new AuthHelper();
 
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+        }
+
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()
