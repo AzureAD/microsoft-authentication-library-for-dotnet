@@ -31,6 +31,11 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core
 {
+    /// <remarks>On UWP, the ApplicationDataCompositeValue storage has a size limitation for keys 
+    /// of no more than 255 chars. As such, keys cannot contain arbitrately long strings, i.e. they cannot contain the scopes. 
+    /// This means that on UWP the AT key is not guaranteed to be unique, although the chances of collisions 
+    /// are astronomically small - <see cref="MsalAccessTokenCacheKey.GetUWPFixedSizeKey"/>
+    /// </remarks>
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
         private const string CacheValue = "CacheValue";
@@ -73,7 +78,9 @@ namespace Microsoft.Identity.Core
         {
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
             SetCacheValue(composite, JsonHelper.SerializeToJson(item));
-            _accessTokenContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/item.GetKey().ToString()] = composite;
+            var key = item.GetKey().GetUWPFixedSizeKey();
+
+            _accessTokenContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/key] = composite;
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
@@ -99,7 +106,7 @@ namespace Microsoft.Identity.Core
 
         public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            var keyStr = accessTokenKey.ToString();
+            var keyStr = accessTokenKey.GetUWPFixedSizeKey();
             if (!_accessTokenContainer.Values.ContainsKey(/*encodedKey*/keyStr))
             {
                 return null;
@@ -148,7 +155,7 @@ namespace Microsoft.Identity.Core
 
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
-            _accessTokenContainer.Values.Remove(/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/cacheKey.ToString());
+            _accessTokenContainer.Values.Remove(/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/cacheKey.GetUWPFixedSizeKey());
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
@@ -260,27 +267,7 @@ namespace Microsoft.Identity.Core
 
             return CoreCryptographyHelpers.Decrypt(encryptedValue);
         }
-        /*
-        public ICollection<string> GetAllAccessTokenKeys()
-        {
-            return new ReadOnlyCollection<string>(_accessTokenContainer.Values.Keys.ToList());
-        }
-
-        public ICollection<string> GetAllRefreshTokenKeys()
-        {
-            return new ReadOnlyCollection<string>(_refreshTokenContainer.Values.Keys.ToList());
-        }
-
-        public ICollection<string> GetAllIdTokenKeys()
-        {
-            return new ReadOnlyCollection<string>(_idTokenContainer.Values.Keys.ToList());
-        }
-
-        public ICollection<string> GetAllAccountKeys()
-        {
-            return new ReadOnlyCollection<string>(_accountContainer.Values.Keys.ToList());
-        }
-        */
+     
         public void Clear()
         {
             _accessTokenContainer.Values.Clear();

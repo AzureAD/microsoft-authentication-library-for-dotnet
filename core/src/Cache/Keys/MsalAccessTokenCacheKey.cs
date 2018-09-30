@@ -34,13 +34,14 @@ namespace Microsoft.Identity.Core.Cache
     /// An object representing the key of the token cache AT dictionary. The 
     /// format of the key is not important for this library, as long as it is unique.
     /// </summary>
+    /// <remarks>The format of the key is platform dependent</remarks>
     internal class MsalAccessTokenCacheKey
     {
-        private string _environment;
-        private string _homeAccountId;
-        private string _clientId;
-        private string _scopes;
-        private string _tenantId;
+        private readonly string _environment;
+        private readonly string _homeAccountId;
+        private readonly string _clientId;
+        private readonly string _normalizedScopes; // space separated, lowercase and ordered alphabetically
+        private readonly string _tenantId;
 
         internal MsalAccessTokenCacheKey(
             string environment,
@@ -59,74 +60,69 @@ namespace Microsoft.Identity.Core.Cache
                 throw new ArgumentNullException(nameof(clientId));
             }
 
-            this._environment = environment;
-            this._homeAccountId = userIdentifier;
-            this._clientId = clientId;
-            this._scopes = scopes;
-            this._tenantId = tenantId;
+           _environment = environment;
+           _homeAccountId = userIdentifier;
+           _clientId = clientId;
+           _normalizedScopes = scopes;
+           _tenantId = tenantId;
         }
 
 
         public override string ToString()
         {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.Append((_homeAccountId ?? "") + MsalCacheConstants.CacheKeyDelimiter);
-            stringBuilder.Append(this._environment + MsalCacheConstants.CacheKeyDelimiter);
-            stringBuilder.Append(MsalCacheConstants.AccessToken + MsalCacheConstants.CacheKeyDelimiter);
-            stringBuilder.Append(_clientId + MsalCacheConstants.CacheKeyDelimiter);
-            stringBuilder.Append((_tenantId ?? "") + MsalCacheConstants.CacheKeyDelimiter);
-            stringBuilder.Append(_scopes);
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetCredentialKey(
+                _homeAccountId,
+                _environment,
+                MsalCacheCommon.AccessToken,
+                _clientId,
+                _tenantId,
+                _normalizedScopes);          
         }
+
+        #region UWP
+
+        /// <summary>
+        /// Gets a key that is smaller than 255 characters, which is a limitation for 
+        /// UWP storage. This is done by hashing the scopes and env.
+        /// </summary>
+        /// <remarks>
+        /// accountId - two guids plus separator - 73 chars        
+        /// "accesstoken" string - 11 chars
+        /// env - ussually loging.microsoft.net - 20 chars
+        /// clientid - a guid - 36 chars
+        /// tenantid - a guid - 36 chars
+        /// scopes - a sha256 string - 44 chars
+        /// delimiters - 4 chars
+        /// total: 224 chars
+        /// </remarks>
+        public string GetUWPFixedSizeKey()
+        {
+            return MsalCacheCommon.GetCredentialKey(
+              _homeAccountId,
+              _environment,
+              MsalCacheCommon.AccessToken,
+              _clientId,
+              _tenantId,
+              CoreCryptographyHelpers.CreateSha256Hash(_normalizedScopes)); // can't use scopes and env because they are of variable length
+        }
+        #endregion
+
 
         #region iOS
 
         public string GetiOSAccountKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(_homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_environment);
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetiOSAccountKey(_homeAccountId, _environment);
         }
-
 
         public string GetiOSServiceKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(MsalCacheConstants.AccessToken);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_clientId);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_tenantId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_scopes);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetiOSServiceKey(MsalCacheCommon.AccessToken, _clientId, _tenantId, _normalizedScopes);
         }
 
         public string GetiOSGenericKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(MsalCacheConstants.AccessToken);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_clientId);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_tenantId ?? "");
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetiOSGenericKey(MsalCacheCommon.AccessToken, _clientId, _tenantId);           
         }
 
         #endregion

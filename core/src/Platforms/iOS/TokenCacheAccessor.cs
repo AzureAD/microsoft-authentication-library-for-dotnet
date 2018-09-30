@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Core
             var key = item.GetKey();
             var account = key.GetiOSAccountKey();
             var service = key.GetiOSServiceKey();
-            var generic = item.LocalAccountId;
+            var generic = key.GetiOSGenericKey();
 
             var type = AuthorityTypeToAttrType[item.AuthorityType];
 

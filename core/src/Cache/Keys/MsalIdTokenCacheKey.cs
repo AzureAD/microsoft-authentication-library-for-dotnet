@@ -36,10 +36,10 @@ namespace Microsoft.Identity.Core.Cache
     /// </summary>
     internal class MsalIdTokenCacheKey
     {
-        private string _environment;
-        private string _homeAccountId;
-        private string _clientId;
-        private string _tenantId;
+        private readonly string _environment;
+        private readonly string _homeAccountId;
+        private readonly string _clientId;
+        private readonly string _tenantId;
 
         public MsalIdTokenCacheKey(
             string environment,
@@ -67,74 +67,34 @@ namespace Microsoft.Identity.Core.Cache
 
         public override string ToString()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(_homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_environment);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(MsalCacheConstants.IdToken);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_clientId);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_tenantId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetCredentialKey(
+                _homeAccountId,
+                _environment,
+                MsalCacheCommon.IdToken,
+                _clientId,
+                _tenantId,
+                scopes: null);
         }
 
         #region iOS
 
+
         public string GetiOSAccountKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(_homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_environment);
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetiOSAccountKey(_homeAccountId, _environment);
         }
 
         public string GetiOSServiceKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(MsalCacheConstants.IdToken);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_clientId);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_tenantId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetiOSServiceKey(MsalCacheCommon.IdToken, _clientId, _tenantId, scopes: null);
         }
 
         public string GetiOSGenericKey()
         {
-            var stringBuilder = new StringBuilder();
-
-            stringBuilder.Append(MsalCacheConstants.IdToken);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_clientId);
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
-
-            stringBuilder.Append(_tenantId ?? "");
-
-            return stringBuilder.ToString();
+            return MsalCacheCommon.GetiOSGenericKey(MsalCacheCommon.IdToken, _clientId, _tenantId);
         }
 
         #endregion
-
-    
     }
 }
 

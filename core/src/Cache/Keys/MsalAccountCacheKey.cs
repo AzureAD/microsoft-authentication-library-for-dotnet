@@ -36,11 +36,12 @@ namespace Microsoft.Identity.Core.Cache
     /// </summary>
     internal class MsalAccountCacheKey 
     {
-        private string _environment;
-        private string _homeAccountId;
-        private string _tenantId;
+        private readonly string _environment;
+        private readonly string _homeAccountId;
+        private readonly string _tenantId;
+        private readonly string _localAccountId;
 
-        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier)
+        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string localAccountId)
         {
             if (string.IsNullOrEmpty(environment))
             {
@@ -50,14 +51,15 @@ namespace Microsoft.Identity.Core.Cache
             _tenantId = tenantId;
             _environment = environment;
             _homeAccountId = userIdentifier;
+            _localAccountId = localAccountId;
         }
 
         public override string ToString()
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.Append(_homeAccountId + MsalCacheConstants.CacheKeyDelimiter);
-            stringBuilder.Append(_environment + MsalCacheConstants.CacheKeyDelimiter);
+            stringBuilder.Append(_homeAccountId + MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(_environment + MsalCacheCommon.CacheKeyDelimiter);
             stringBuilder.Append(_tenantId);
 
             return stringBuilder.ToString();
@@ -70,7 +72,7 @@ namespace Microsoft.Identity.Core.Cache
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(_homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
 
             stringBuilder.Append(_environment);
 
@@ -81,6 +83,12 @@ namespace Microsoft.Identity.Core.Cache
         {
             return _tenantId ?? "";
         }
+
+        public string GetiOSGenericKey()
+        {
+            return _localAccountId;
+        }
+
 
         #endregion
     }

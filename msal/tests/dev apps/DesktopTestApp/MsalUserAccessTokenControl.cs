@@ -23,7 +23,7 @@ namespace DesktopTestApp
             _cache = cache;
             _item = item;
             accessTokenAuthorityLabel.Text = _item.Authority;
-            accessTokenScopesLabel.Text = _item.Scopes;
+            accessTokenScopesLabel.Text = _item.NormalizedScopes;
             expiresOnLabel.Text = _item.ExpiresOn.ToString();
         }
         
