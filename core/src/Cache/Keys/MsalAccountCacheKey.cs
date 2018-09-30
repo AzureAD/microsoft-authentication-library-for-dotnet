@@ -26,30 +26,62 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Cache
 {
-    internal class MsalAccountCacheKey : MsalCacheKeyBase
+    /// <summary>
+    /// An object representing the key of the token cache Account dictionary. The 
+    /// format of the key is not important for this library, as long as it is unique.
+    /// </summary>
+    internal class MsalAccountCacheKey 
     {
-        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier) : base(environment, userIdentifier)
+        private string _environment;
+        private string _homeAccountId;
+        private string _tenantId;
+
+        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier)
         {
-            TenantId = tenantId;
+            if (string.IsNullOrEmpty(environment))
+            {
+                throw new ArgumentNullException(nameof(environment));
+            }
+
+            _tenantId = tenantId;
+            _environment = environment;
+            _homeAccountId = userIdentifier;
         }
-        internal string TenantId { get; set; }
 
         public override string ToString()
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.Append(HomeAccountId + CacheKeyDelimiter);
-            stringBuilder.Append(Environment + CacheKeyDelimiter);
-            stringBuilder.Append(TenantId);
+            stringBuilder.Append(_homeAccountId + MsalCacheConstants.CacheKeyDelimiter);
+            stringBuilder.Append(_environment + MsalCacheConstants.CacheKeyDelimiter);
+            stringBuilder.Append(_tenantId);
 
             return stringBuilder.ToString();
         }
+
+        #region iOS
+
+        public string GetiOSAccountKey()
+        {
+            var stringBuilder = new StringBuilder();
+
+            stringBuilder.Append(_homeAccountId ?? "");
+            stringBuilder.Append(MsalCacheConstants.CacheKeyDelimiter);
+
+            stringBuilder.Append(_environment);
+
+            return stringBuilder.ToString();
+        }
+
+        public string GetiOSServiceKey()
+        {
+            return _tenantId ?? "";
+        }
+
+        #endregion
     }
 }
