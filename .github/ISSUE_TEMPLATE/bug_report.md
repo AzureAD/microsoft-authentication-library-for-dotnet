@@ -13,12 +13,11 @@ For MSAL, please log issues to https://github.com/AzureAD/microsoft-authenticati
 <!-- Ex: net45, netcore, UWP, xamarin android, xamarin iOS -->
 
 **What authentication flow has the issue?**
-* Desktop 
+* Desktop / Mobile
     * [ ] Interactive
-    * [ ] WIA
-    * [ ] U/P
+    * [ ] Integrated Windows Auth
+    * [ ] Username Password
     * [ ] Device code flow (browserless)
-* [ ] Mobile
 * Web App
     * [ ] Authorization code
     * [ ] OBO
