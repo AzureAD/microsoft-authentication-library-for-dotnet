@@ -29,7 +29,25 @@ using System;
 
 namespace Microsoft.Identity.Core
 {
-    internal abstract class CoreLoggerBase
+    internal interface ICoreLogger
+    {
+        Guid CorrelationId { get; }
+
+        bool PiiLoggingEnabled { get; }
+
+        void Error(string messageScrubbed);
+        void ErrorPii(string messageWithPii, string messageScrubbed);
+        void Warning(string messageScrubbed);
+        void WarningPii(string messageWithPii, string messageScrubbed);
+        void Info(string messageScrubbed);
+        void InfoPii(string messageWithPii, string messageScrubbed);
+        void Verbose(string messageScrubbed);
+        void VerbosePii(string messageWithPii, string messageScrubbed);
+        void Error(Exception exWillBeScrubbed);
+        void ErrorPii(Exception exWithPii, string messageScrubbed);
+    }
+
+    internal abstract class CoreLoggerBase : ICoreLogger
     {
         public static CoreLoggerBase Default { get; set; }
 
@@ -45,17 +63,26 @@ namespace Microsoft.Identity.Core
             CorrelationId = correlationId;
         }
 
-        public static bool PiiLoggingEnabled { get; set; }
+        public abstract bool PiiLoggingEnabled { get; }
 
-        public abstract void Error(string message);
-        public abstract void ErrorPii(string message);
-        public abstract void Warning(string message);
-        public abstract void WarningPii(string message);
-        public abstract void Info(string message);
-        public abstract void InfoPii(string message);
-        public abstract void Verbose(string message);
-        public abstract void VerbosePii(string message);
-        public abstract void Error(Exception ex);
-        public abstract void ErrorPii(Exception ex);
+        public abstract void Error(string messageScrubbed);
+        public abstract void ErrorPii(string messageWithPii);
+        public abstract void ErrorPii(string messageWithPii, string messageScrubbed);
+
+        public abstract void Warning(string messageScrubbed);
+        public abstract void WarningPii(string messageWithPii);
+        public abstract void WarningPii(string messageWithPii, string messageScrubbed);
+
+        public abstract void Info(string messageScrubbed);
+        public abstract void InfoPii(string messageWithPii);
+        public abstract void InfoPii(string messageWithPii, string messageScrubbed);
+
+        public abstract void Verbose(string messageScrubbed);
+        public abstract void VerbosePii(string messageWithPii);
+        public abstract void VerbosePii(string messageWithPii, string messageScrubbed);
+
+        public abstract void Error(Exception exWillBeScrubbed);
+        public abstract void ErrorPii(Exception exWithPii);
+        public abstract void ErrorPii(Exception exWithPii, string messageScrubbed);
     }
 }

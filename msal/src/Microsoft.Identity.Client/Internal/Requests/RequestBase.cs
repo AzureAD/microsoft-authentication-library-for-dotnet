@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //this method is the common entrance for all token requests, so it is a good place to put the generic Telemetry logic here
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = Telemetry.GetInstance().GenerateNewRequestId();
             string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
-            var apiEvent = new ApiEvent()
+            var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger)
             {
                 ApiId = ApiId,
                 ValidationStatus = AuthenticationRequestParameters.ValidateAuthority.ToString(),

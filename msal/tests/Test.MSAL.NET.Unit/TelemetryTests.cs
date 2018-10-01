@@ -112,7 +112,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -143,7 +143,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -166,7 +166,7 @@ namespace Test.MSAL.NET.Unit
             reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = false;  // mimic an unsuccessful event, so that this batch should be dispatched
@@ -240,7 +240,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var apiEvent = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var apiEvent = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
                 telemetry.StartEvent(reqId, uiEvent);
@@ -271,7 +271,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var apiEvent = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var apiEvent = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
                 // Forgot to start this event
@@ -296,13 +296,14 @@ namespace Test.MSAL.NET.Unit
             Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);
-            CoreLoggerBase.PiiLoggingEnabled = true;
-           
+            var logger = new TestLogger();
+            logger.SetPiiLoggingEnabled(true);
+
             telemetry.ClientId = "a1b3c3d4";
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
+                var e1 = new ApiEvent(logger) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -336,13 +337,14 @@ namespace Test.MSAL.NET.Unit
             Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
             var myReceiver = new MyReceiver();
             telemetry.RegisterReceiver(myReceiver.OnEvents);
-            CoreLoggerBase.PiiLoggingEnabled = false;
+            var logger = new TestLogger();
+            logger.SetPiiLoggingEnabled(false);
 
             telemetry.ClientId = "a1b3c3d4";
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
+                var e1 = new ApiEvent(logger) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -379,7 +381,7 @@ namespace Test.MSAL.NET.Unit
             var reqId = telemetry.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent() { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -393,7 +395,7 @@ namespace Test.MSAL.NET.Unit
                 telemetry.StopEvent(reqId, e1);
 
                 // Authority host not in trusted host list, should return null
-                var e2 = new ApiEvent() { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
+                var e2 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e2);
                 // do some stuff...
                 e2.WasSuccessful = true;

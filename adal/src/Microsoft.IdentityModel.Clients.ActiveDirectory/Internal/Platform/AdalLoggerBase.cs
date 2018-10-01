@@ -44,29 +44,30 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         protected AdalLoggerBase(Guid correlationId) :base(correlationId)
         {
-            PiiLoggingEnabled = LoggerCallbackHandler.PiiLoggingEnabled;
         }
 
-        private void Log(LogLevel logLevel, string message, bool containsPii,
+        public override bool PiiLoggingEnabled => LoggerCallbackHandler.PiiLoggingEnabled;
+
+        private void Log(LogLevel logLevel, string messageWithPii, string messageScrubbed,
             [CallerFilePath] string callerFilePath = "")
         {
-            if (!LoggerCallbackHandler.PiiLoggingEnabled && containsPii)
-            {
-                return;
-            }
+            bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
+            // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
+            bool isLoggingPii = messageWithPiiExists && LoggerCallbackHandler.PiiLoggingEnabled;
+            string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
 
-            var formattedMessage = FormatLogMessage(GetCallerFilename(callerFilePath), message);
+            var formattedMessage = FormatLogMessage(GetCallerFilename(callerFilePath), messageToLog);
 
-            if (LoggerCallbackHandler.UseDefaultLogging && !containsPii)
+            if (LoggerCallbackHandler.UseDefaultLogging && !isLoggingPii)
             {
                 DefaultLog(logLevel, formattedMessage);
             }
 
             if (LoggerCallbackHandler.LogCallback != null)
             {
-                LoggerCallbackHandler.ExecuteCallback(logLevel, formattedMessage, containsPii);
+                LoggerCallbackHandler.ExecuteCallback(logLevel, formattedMessage, isLoggingPii);
             }
-            else if (!containsPii)
+            else if (!isLoggingPii)
             {
                 // execute obsolete IAdalLogCallback only if LogCallback is not set and message does not contain Pii
                 LoggerCallbackHandler.ExecuteObsoleteCallback(logLevel, formattedMessage);
@@ -83,54 +84,79 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             return string.Format(CultureInfo.InvariantCulture, "{0:O}: {1} - {2}: {3}", DateTime.UtcNow, CorrelationId, classOrComponent, message);
         }
 
-        public override void InfoPii(string message)
+        public override void InfoPii(string messageWithPii)
         {
-            Log(LogLevel.Information, message, true);
+            Log(LogLevel.Information, messageWithPii, string.Empty);
         }
 
-        public override void Verbose(string message)
+        public override void InfoPii(string messageWithPii, string messageScrubbed)
         {
-            Log(LogLevel.Verbose, message, false);
+            Log(LogLevel.Information, messageWithPii, messageScrubbed);
         }
 
-        public override void VerbosePii(string message)
+        public override void Verbose(string messageScrubbed)
         {
-            Log(LogLevel.Verbose, message, true);
+            Log(LogLevel.Verbose, string.Empty, messageScrubbed);
         }
 
-        public override void ErrorPii(string message)
+        public override void VerbosePii(string messageWithPii)
         {
-            Log(LogLevel.Error, message, true);
+            Log(LogLevel.Verbose, messageWithPii, string.Empty);
         }
 
-        public override void Warning(string message)
+        public override void VerbosePii(string messageWithPii, string messageScrubbed)
         {
-            Log(LogLevel.Warning, message, false);
+            Log(LogLevel.Verbose, messageWithPii, messageScrubbed);
         }
 
-        public override void WarningPii(string message)
+        public override void ErrorPii(string messageWithPii)
         {
-            Log(LogLevel.Warning, message, true);
+            Log(LogLevel.Error, messageWithPii, string.Empty);
         }
 
-        public override void Info(string message)
+        public override void Warning(string messageScrubbed)
         {
-            Log(LogLevel.Information, message, false);
+            Log(LogLevel.Warning, string.Empty, messageScrubbed);
         }
 
-        public override void Error(Exception ex)
+        public override void WarningPii(string messageWithPii)
         {
-            Log(LogLevel.Error, AdalExceptionFactory.GetPiiScrubbedExceptionDetails(ex), false);
+            Log(LogLevel.Warning, messageWithPii, string.Empty);
         }
 
-        public override void ErrorPii(Exception ex)
+        public override void WarningPii(string messageWithPii, string messageScrubbed)
         {
-            ErrorPii(ex.ToString());
+            Log(LogLevel.Warning, messageWithPii, messageScrubbed);
         }
 
-        public override void Error(string message)
+        public override void Info(string messageScrubbed)
         {
-            Log(LogLevel.Error, message, false);
+            Log(LogLevel.Information, string.Empty, messageScrubbed);
+        }
+
+        public override void Error(Exception exWillBeScrubbed)
+        {
+            Log(LogLevel.Error, string.Empty, AdalExceptionFactory.GetPiiScrubbedExceptionDetails(exWillBeScrubbed));
+        }
+
+        public override void ErrorPii(Exception exWithPii)
+        {
+            Log(LogLevel.Error, exWithPii.ToString(), string.Empty);
+        }
+
+        public override void Error(string messageWithPii)
+        {
+            Log(LogLevel.Error, messageWithPii, string.Empty);
+        }
+
+        public override void ErrorPii(string messageWithPii, string messageScrubbed)
+        {
+            Log(LogLevel.Error, messageWithPii, string.Empty);
+        }
+
+        public override void ErrorPii(Exception exWithPii, string messageScrubbed)
+        {
+            Log(LogLevel.Error, exWithPii.ToString(), messageScrubbed);
         }
     }
 }

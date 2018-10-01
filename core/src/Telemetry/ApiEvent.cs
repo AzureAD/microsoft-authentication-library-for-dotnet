@@ -67,7 +67,12 @@ namespace Microsoft.Identity.Core.Telemetry
             AcquireTokenByAuthorizationCodeWithCodeScope = 830,
         }
 
-        public ApiEvent() : base(EventNamePrefix + "api_event") {}
+        private readonly ICoreLogger _logger;
+
+        public ApiEvent(ICoreLogger logger) : base(EventNamePrefix + "api_event")
+        {
+            _logger = logger;
+        }
 
         public ApiIds ApiId
         {
@@ -98,7 +103,7 @@ namespace Microsoft.Identity.Core.Telemetry
         {
             set
             {
-                this[TenantIdKey] = value != null && CoreLoggerBase.PiiLoggingEnabled
+                this[TenantIdKey] = value != null && _logger.PiiLoggingEnabled
                     ? CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(value)
                     : null;
             }
@@ -108,7 +113,7 @@ namespace Microsoft.Identity.Core.Telemetry
         {
             set
             {
-                this[UserIdKey] = value != null && CoreLoggerBase.PiiLoggingEnabled
+                this[UserIdKey] = value != null && _logger.PiiLoggingEnabled
                     ? CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(value)
                     : null;
             }

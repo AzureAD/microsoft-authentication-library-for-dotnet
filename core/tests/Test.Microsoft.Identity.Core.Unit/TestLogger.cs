@@ -36,6 +36,11 @@ namespace Test.Microsoft.Identity.Core.Unit
 {
     internal class TestLogger : CoreLoggerBase
     {
+        public TestLogger() 
+            : this(Guid.Empty)
+        {
+        }
+
         public TestLogger(Guid correlationId) : base(correlationId)
         {
             Default = this;
@@ -44,6 +49,13 @@ namespace Test.Microsoft.Identity.Core.Unit
         public TestLogger(Guid correlationId, string component) : base(correlationId)
         {
             Default = this;
+        }
+
+        private bool _isPiiLoggingEnabled;
+        public override bool PiiLoggingEnabled => _isPiiLoggingEnabled;
+        public void SetPiiLoggingEnabled(bool isEnabled)
+        {
+            _isPiiLoggingEnabled = isEnabled;
         }
 
         public override void Error(string message)
@@ -62,11 +74,20 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
         }
 
+        public override void WarningPii(string messageWithPii, string messageScrubbed)
+        {
+        }
+
+
         public override void Info(string message)
         {
         }
 
         public override void InfoPii(string message)
+        {
+        }
+
+        public override void InfoPii(string messageWithPii, string messageScrubbed)
         {
         }
 
@@ -78,11 +99,23 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
         }
 
+        public override void VerbosePii(string messageWithPii, string messageScrubbed)
+        {
+        }
+
         public override void Error(Exception ex)
         {
         }
 
         public override void ErrorPii(Exception ex)
+        {
+        }
+
+        public override void ErrorPii(string messageWithPii, string messageScrubbed)
+        {
+        }
+
+        public override void ErrorPii(Exception exWithPii, string messageScrubbed)
         {
         }
     }
