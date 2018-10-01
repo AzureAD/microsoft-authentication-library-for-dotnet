@@ -25,26 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using UIKit;
 
 namespace Microsoft.Identity.Core
 {
     /// <summary>
-    /// Platform / OS specific logic.
+    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class PlatformProxy : IPlatformProxy
+    internal class iOSPlatformProxy : IPlatformProxy
     {
         /// <summary>
-        /// Get the user logged in 
+        /// Get the user logged 
         /// </summary>
-        /// <returns>The username or throws</returns>
         public async Task<string> GetUserPrincipalNameAsync()
         {
             return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
-
         }
+
         public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
@@ -62,28 +60,17 @@ namespace Microsoft.Identity.Core
 
         public string GetProcessorArchitecture()
         {
-            if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
-            {
-                return Android.OS.Build.CpuAbi;
-            }
-
-            IList<string> supportedABIs = Android.OS.Build.SupportedAbis;
-            if (supportedABIs != null && supportedABIs.Count > 0)
-            {
-                return supportedABIs[0];
-            }
-
             return null;
         }
 
         public string GetOperatingSystem()
         {
-            return Android.OS.Build.VERSION.Sdk;
+            return UIDevice.CurrentDevice.SystemVersion;
         }
 
         public string GetDeviceModel()
         {
-            return Android.OS.Build.Model;
+            return UIDevice.CurrentDevice.Model;
         }
     }
 }

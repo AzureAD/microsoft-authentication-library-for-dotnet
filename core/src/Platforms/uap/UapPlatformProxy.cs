@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Core
     /// <summary>
     /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    internal class PlatformProxy : IPlatformProxy
+    internal class UapPlatformProxy : IPlatformProxy
     {
         /// <summary>
         /// Get the user logged in to Windows or throws

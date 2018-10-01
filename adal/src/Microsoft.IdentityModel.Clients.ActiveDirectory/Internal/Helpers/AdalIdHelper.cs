@@ -72,7 +72,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 
         public static IDictionary<string, string> GetAdalIdParameters()
         {
-            IPlatformProxy platformProxy = new PlatformProxy();
+            IPlatformProxy platformProxy = PlatformProxyFactory.GetPlatformProxy();
 
             var parameters = new Dictionary<string, string>();
 

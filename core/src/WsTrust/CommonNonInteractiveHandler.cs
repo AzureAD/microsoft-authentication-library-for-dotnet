@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Core.WsTrust
         {
             this.requestContext = requestContext;
             this.usernameInput = usernameInput;
-            this.platformProxy = new PlatformProxy();
+            this.platformProxy = PlatformProxyFactory.GetPlatformProxy();
         }
 
         /// <summary>

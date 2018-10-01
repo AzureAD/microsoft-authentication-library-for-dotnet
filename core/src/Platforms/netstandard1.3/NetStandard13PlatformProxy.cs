@@ -32,43 +32,42 @@ namespace Microsoft.Identity.Core
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    internal class PlatformProxy : IPlatformProxy
+    internal class Netstandard13PlatformProxy : IPlatformProxy
     {
         /// <summary>
-        /// Get the user logged in 
+        /// Get the user logged in
         /// </summary>
-        public  async Task<string> GetUserPrincipalNameAsync()
+        public async Task<string> GetUserPrincipalNameAsync()
         {
             return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
-
         }
 
-        public  async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
         }
 
-        public  bool IsDomainJoined()
+        public bool IsDomainJoined()
         {
             return false;
         }
 
-        public  string GetEnvironmentVariable(string variable)
+        public string GetEnvironmentVariable(string variable)
         {
             return null;
         }
 
-        public  string GetProcessorArchitecture()
+        public string GetProcessorArchitecture()
         {
             return null;
         }
 
-        public  string GetOperatingSystem()
+        public string GetOperatingSystem()
         {
             return null;
         }
 
-        public  string GetDeviceModel()
+        public string GetDeviceModel()
         {
             return null;
         }

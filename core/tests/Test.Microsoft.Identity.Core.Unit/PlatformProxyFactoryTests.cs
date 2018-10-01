@@ -25,52 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Threading.Tasks;
+using Microsoft.Identity.Core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Core
+namespace Test.Microsoft.Identity.Core.Unit
 {
-    /// <summary>
-    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
-    /// </summary>
-    internal class PlatformProxy : IPlatformProxy
+    [TestClass]
+    public class PlatformProxyFactoryTests
     {
-        /// <summary>
-        /// Get the user logged in 
-        /// </summary>
-        public async Task<string> GetUserPrincipalNameAsync()
+        [TestMethod]
+        public void PlatformProxyFactoryCachesTheProxy()
         {
-            return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
+            // Act 
+            var proxy1 = PlatformProxyFactory.GetPlatformProxy();
+            var proxy2 = PlatformProxyFactory.GetPlatformProxy();
 
-        }
-        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
-        {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
-        }
-
-        public bool IsDomainJoined()
-        {
-            return false;
-        }
-
-        public string GetEnvironmentVariable(string variable)
-        {
-            string value = System.Environment.GetEnvironmentVariable(variable);
-            return !string.IsNullOrWhiteSpace(value) ? value : null;
-        }
-
-        public string GetProcessorArchitecture()
-        {
-            return null;
-        }
-
-        public string GetOperatingSystem()
-        {
-            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
-        }
-
-        public string GetDeviceModel()
-        {
-            return null;
+            // Assert
+            Assert.IsTrue(proxy1 == proxy2);
         }
     }
 }

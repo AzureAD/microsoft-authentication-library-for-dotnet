@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Core
     /// <summary>
     /// Platform / OS specific logic.
     /// </summary>
-    internal class PlatformProxy : IPlatformProxy
+    internal class NetDesktopPlatformProxy : IPlatformProxy
     {
         /// <summary>
         /// Get the user logged in to Windows or throws

@@ -26,30 +26,41 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
+namespace Microsoft.Identity.Core
 {
-    internal abstract class PlatformInformationBase : CorePlatformInformationBase
+    /// <summary>
+    /// Returns the platform / os specific implementation of a PlatformProxy. 
+    /// </summary>
+    internal class PlatformProxyFactory
     {
-        public override string GetAssemblyFileVersionAttribute()
-        {
-            var assemblyFileVersion = typeof(AdalIdParameter).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            return assemblyFileVersion != null ? assemblyFileVersion.Version : "internal";
-        }
+        private PlatformProxyFactory() { }
 
-        public virtual void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
-        {
-            authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-        }
+        // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
+        private static readonly Lazy<IPlatformProxy> _platformProxyLazy = new Lazy<IPlatformProxy>(() =>
+#if NET_CORE
+            new NetCorePlatformProxy()
+#elif ANDROID
+            new AndroidPlatformProxy()
+#elif iOS
+            new iOSPlatformProxy()
+#elif WINDOWS_APP
+            new UapPlatformProxy()
+#elif FACADE
+            new NetStandard11PlatformProxy()
+#elif NETSTANDARD1_3
+            new Netstandard13PlatformProxy()
+#elif DESKTOP
+            new NetDesktopPlatformProxy()
+#endif
+        );
 
-        public virtual bool GetCacheLoadPolicy(IPlatformParameters parameters)
+        /// <summary>
+        /// Gets the platform proxy, which can be used to perform platform specific operations
+        /// </summary>
+        public static IPlatformProxy GetPlatformProxy()
         {
-            return true;
+            return _platformProxyLazy.Value;
         }
     }
 }

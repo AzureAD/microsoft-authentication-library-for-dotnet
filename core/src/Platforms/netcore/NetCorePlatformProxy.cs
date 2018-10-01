@@ -26,54 +26,51 @@
 //------------------------------------------------------------------------------
 
 using System.Threading.Tasks;
-using UIKit;
 
 namespace Microsoft.Identity.Core
 {
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    internal class PlatformProxy : IPlatformProxy
+    internal class NetCorePlatformProxy : IPlatformProxy
     {
         /// <summary>
-        /// Get the user logged 
+        /// Get the user logged in 
         /// </summary>
-        public  async Task<string> GetUserPrincipalNameAsync()
+        public async Task<string> GetUserPrincipalNameAsync()
         {
             return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
 
         }
-
-        public  async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
         }
 
-        public  bool IsDomainJoined()
+        public bool IsDomainJoined()
         {
             return false;
         }
 
-        public  string GetEnvironmentVariable(string variable)
+        public string GetEnvironmentVariable(string variable)
+        {
+            string value = System.Environment.GetEnvironmentVariable(variable);
+            return !string.IsNullOrWhiteSpace(value) ? value : null;
+        }
+
+        public string GetProcessorArchitecture()
         {
             return null;
         }
 
-        public  string GetProcessorArchitecture()
+        public string GetOperatingSystem()
+        {
+            return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
+        }
+
+        public string GetDeviceModel()
         {
             return null;
         }
-
-        public  string GetOperatingSystem()
-        {
-            return UIDevice.CurrentDevice.SystemVersion;
-        }
-
-        public  string GetDeviceModel()
-        {
-            return UIDevice.CurrentDevice.Model;
-        }
-
-
     }
 }
