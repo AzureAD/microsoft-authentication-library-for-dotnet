@@ -29,40 +29,34 @@ using System;
 
 namespace Microsoft.Identity.Core
 {
-    /// <summary>
-    /// Abstract factory for spewing exceptions for Adal and Msal. Use the <see cref="Instance"/>
-    /// singleton to access an actual implementation which will have been injected.
-    /// </summary>
-    internal abstract class CoreExceptionFactory : ICoreExceptionFactory
+    internal interface ICoreExceptionFactory
     {
-        public static CoreExceptionFactory Instance { get; set; }
-
-        public abstract Exception GetClientException(
+        Exception GetClientException(
             string errorCode,
             string errorMessage,
             Exception innerException = null);
 
-        public abstract Exception GetServiceException(
+        Exception GetServiceException(
             string errorCode,
             string errorMessage);
 
-        public abstract Exception GetServiceException(
+        Exception GetServiceException(
            string errorCode,
            string errorMessage,
            ExceptionDetail exceptionDetail = null);
 
-        public abstract Exception GetServiceException(
-           string errorCode,
-           string errorMessage,
-           Exception innerException = null,
-           ExceptionDetail exceptionDetail = null);
-
-        public abstract Exception GetUiRequiredException(
+        Exception GetServiceException(
            string errorCode,
            string errorMessage,
            Exception innerException = null,
            ExceptionDetail exceptionDetail = null);
 
-        public abstract string GetPiiScrubbedDetails(Exception exception);
+        Exception GetUiRequiredException(
+           string errorCode,
+           string errorMessage,
+           Exception innerException = null,
+           ExceptionDetail exceptionDetail = null);
+
+        string GetPiiScrubbedDetails(Exception exception);
     }
 }

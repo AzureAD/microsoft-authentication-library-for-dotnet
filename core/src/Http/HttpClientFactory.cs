@@ -30,7 +30,13 @@ using System.Net.Http.Headers;
 
 namespace Microsoft.Identity.Core.Http
 {
-    internal class HttpClientFactory
+    internal interface IHttpClientFactory
+    {
+        // TODO: rename this to GetHttpClient once we make the underlying class not fully static.
+        HttpClient GetTheHttpClient();
+    }
+
+    internal class HttpClientFactory : IHttpClientFactory
     {
         // as per guidelines HttpClient should be a singeton instance in an application.
         private static HttpClient _client;
@@ -49,6 +55,11 @@ namespace Microsoft.Identity.Core.Http
             httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
             return httpClient;
+        }
+
+        public HttpClient GetTheHttpClient()
+        {
+            return HttpClientFactory.GetHttpClient();
         }
 
         public static HttpClient GetHttpClient()
