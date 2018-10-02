@@ -168,10 +168,8 @@ namespace Microsoft.Identity.Core.Helpers
 
                     if (response.ContainsKey(key))
                     {
-                        var msg = string.Format(CultureInfo.InvariantCulture,
-                            "Key/value pair list contains redundant key '{0}'.", key);
-                        requestContext?.Logger.Warning(msg);
-                        requestContext?.Logger.WarningPii(msg);
+                        requestContext?.Logger.Warning(string.Format(CultureInfo.InvariantCulture,
+                            "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;

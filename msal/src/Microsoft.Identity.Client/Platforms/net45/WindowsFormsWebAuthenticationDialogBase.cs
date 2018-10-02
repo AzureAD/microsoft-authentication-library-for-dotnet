@@ -155,19 +155,24 @@ namespace Microsoft.Identity.Client.Internal.UI
             if (!e.Cancel)
             {
                 string urlDecode = CoreHelpers.UrlDecode(e.Url.ToString());
-                string message = string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.", urlDecode);
-                RequestContext.Logger.VerbosePii(message);
+                RequestContext.Logger.VerbosePii(
+                    string.Format(CultureInfo.InvariantCulture, "Navigating to '{0}'.", urlDecode),
+                    string.Empty);
             }
         }
 
         private void WebBrowserNavigatedHandler(object sender, WebBrowserNavigatedEventArgs e)
         {
             // Guard condition
-            if (CheckForClosingUrl(e.Url)) return;
+            if (CheckForClosingUrl(e.Url))
+            {
+                return;
+            }
 
             string urlDecode = CoreHelpers.UrlDecode(e.Url.ToString());
-            string message = string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.", urlDecode);
-            RequestContext.Logger.VerbosePii(message);
+            RequestContext.Logger.VerbosePii(
+                string.Format(CultureInfo.InvariantCulture, "Navigated to '{0}'.", urlDecode),
+                string.Empty);
         }
 
         /// <summary>
@@ -212,9 +217,7 @@ namespace Microsoft.Identity.Client.Internal.UI
             if (url.Authority.Equals(_desiredCallbackUri.Authority, StringComparison.OrdinalIgnoreCase) &&
                 url.AbsolutePath.Equals(_desiredCallbackUri.AbsolutePath))
             {
-                const string msg = "Redirect Uri was reached. Stopping webview navigation...";
-                RequestContext.Logger.Info(msg);
-                RequestContext.Logger.InfoPii(msg);
+                RequestContext.Logger.Info("Redirect Uri was reached. Stopping webview navigation...");
                 Result = new AuthorizationResult(AuthorizationStatus.Success, url.OriginalString);
                 readyToClose = true;
             }
@@ -222,10 +225,8 @@ namespace Microsoft.Identity.Client.Internal.UI
             if (!readyToClose && !url.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) &&
                 !url.AbsoluteUri.Equals("about:blank", StringComparison.OrdinalIgnoreCase) && !url.Scheme.Equals("javascript", StringComparison.OrdinalIgnoreCase))
             {
-                var msg = (string.Format(CultureInfo.InvariantCulture,
+                RequestContext.Logger.Error(string.Format(CultureInfo.InvariantCulture,
                     "Redirection to non-HTTPS scheme ({0}) found! Webview will fail...", url.Scheme));
-                RequestContext.Logger.Error(msg);
-                RequestContext.Logger.ErrorPii(msg);
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
                     Error = MsalClientException.NonHttpsRedirectNotSupported,
@@ -247,25 +248,22 @@ namespace Microsoft.Identity.Client.Internal.UI
         private void StopWebBrowser()
         {
             // Guard condition
-            if (_webBrowser.IsDisposed || !_webBrowser.IsBusy) return;
+            if (_webBrowser.IsDisposed || !_webBrowser.IsBusy)
+            {
+                return;
+            }
 
-            var msg = string.Format(CultureInfo.InvariantCulture,
+            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                 "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                 _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
-                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline);
-
-            var msgAfterStop = string.Format(CultureInfo.InvariantCulture,
-                "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
-                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline);
-
-            RequestContext.Logger.Verbose(msg);
-            RequestContext.Logger.VerbosePii(msg);
+                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
 
             _webBrowser.Stop();
 
-            RequestContext.Logger.Verbose(msgAfterStop);
-            RequestContext.Logger.VerbosePii(msgAfterStop);
+            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
+                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
         }
 
         /// <summary>

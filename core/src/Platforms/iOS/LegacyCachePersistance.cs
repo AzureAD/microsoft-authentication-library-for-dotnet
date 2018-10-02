@@ -85,10 +85,7 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "Failed to load adal cache: ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
             return null;
@@ -118,8 +115,7 @@ namespace Microsoft.Identity.Core.Cache
                 if (err != SecStatusCode.Success)
                 {
                     string msg = "Failed to remove adal cache record: ";
-                    CoreLoggerBase.Default.Warning(msg);
-                    CoreLoggerBase.Default.WarningPii(msg + err);
+                    CoreLoggerBase.Default.WarningPii(msg + err, msg);
                 }
 
                 if (serializedCache != null && serializedCache.Length > 0)
@@ -129,17 +125,13 @@ namespace Microsoft.Identity.Core.Cache
                     if (err != SecStatusCode.Success)
                     {
                         string msg = "Failed to save adal cache record: ";
-                        CoreLoggerBase.Default.Warning(msg);
-                        CoreLoggerBase.Default.WarningPii(msg + err);
+                        CoreLoggerBase.Default.WarningPii(msg + err, msg);
                     }
                 }
             }
             catch (Exception ex)
             {
-                string msg = "Failed to save adal cache: ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
     }

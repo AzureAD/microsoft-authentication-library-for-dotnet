@@ -79,7 +79,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         public TokenCache()
         {
             if (CoreLoggerBase.Default == null)
+            {
                 CoreLoggerBase.Default = new AdalLogger(Guid.Empty);
+            }
 
             this.tokenCacheDictionary = new ConcurrentDictionary<AdalTokenCacheKey, AdalResultWrapper>();
         }
@@ -272,15 +274,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (toRemoveKey != null)
                 {
                     this.tokenCacheDictionary.Remove(toRemoveKey);
-                    string msg = "One item removed successfully";
-                    CoreLoggerBase.Default.Info(msg);
-                    CoreLoggerBase.Default.InfoPii(msg);
+                    CoreLoggerBase.Default.Info("One item removed successfully");
                 }
                 else
                 {
-                    string msg = "Item not Present in the Cache";
-                    CoreLoggerBase.Default.Info(msg);
-                    CoreLoggerBase.Default.InfoPii(msg);
+                    CoreLoggerBase.Default.Info("Item not Present in the Cache");
                 }
 
                 this.HasStateChanged = true;
@@ -306,14 +304,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
             this.OnBeforeAccess(args);
             this.OnBeforeWrite(args);
-            string msg = String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed",
-                this.tokenCacheDictionary.Count);
-            CoreLoggerBase.Default.Info(msg);
-            CoreLoggerBase.Default.InfoPii(msg);
+            CoreLoggerBase.Default.Info(String.Format(CultureInfo.CurrentCulture, "Clearing Cache :- {0} items to be removed",
+                this.tokenCacheDictionary.Count));
             this.tokenCacheDictionary.Clear();
-            msg = "Successfully Cleared Cache";
-            CoreLoggerBase.Default.Info(msg);
-            CoreLoggerBase.Default.InfoPii(msg);
+            CoreLoggerBase.Default.Info("Successfully Cleared Cache");
             this.HasStateChanged = true;
             this.OnAfterAccess(args);
         }
@@ -405,9 +399,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             lock (cacheLock)
             {
-                var msg = "Looking up cache for a token...";
-                requestContext.Logger.Verbose(msg);
-                requestContext.Logger.VerbosePii(msg);
+                requestContext.Logger.Verbose("Looking up cache for a token...");
 
                 AdalResultWrapper resultEx = null;
                 KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>? kvp =
@@ -429,23 +421,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         // this is a cross-tenant result. use RT only
                         resultEx.Result.AccessToken = null;
 
-                        msg = "Cross Tenant refresh token was found in the cache";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("Cross Tenant refresh token was found in the cache");
                     }
                     else if (tokenNearExpiry && !cacheQueryData.ExtendedLifeTimeEnabled)
                     {
                         resultEx.Result.AccessToken = null;
 
-                        msg = "An expired or near expiry token was found in the cache";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("An expired or near expiry token was found in the cache");
                     }
                     else if (!cacheKey.ResourceEquals(cacheQueryData.Resource))
                     {
-                        requestContext.Logger.InfoPii(string.Format(CultureInfo.CurrentCulture,
+                        requestContext.Logger.InfoPii(
+                            string.Format(CultureInfo.CurrentCulture,
                                 "Multi resource refresh token for resource '{0}' will be used to acquire token for '{1}'",
-                                cacheKey.Resource, cacheQueryData.Resource));
+                                cacheKey.Resource, cacheQueryData.Resource),
+                            string.Empty);
                         var newResultEx = new AdalResultWrapper
                         {
                             Result = new AdalResult(null, null, DateTimeOffset.MinValue),
@@ -462,35 +452,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                         resultEx.Result.ExtendedLifeTimeToken = true;
                         resultEx.Result.ExpiresOn = resultEx.Result.ExtendedExpiresOn;
 
-                        msg =
-                            "The extendedLifeTime is enabled and a stale AT with extendedLifeTimeEnabled is returned.";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("The extendedLifeTime is enabled and a stale AT with extendedLifeTimeEnabled is returned.");
                     }
                     else if (tokenExtendedLifeTimeExpired)
                     {
                         resultEx.Result.AccessToken = null;
 
-                        msg = "The AT has expired its ExtendedLifeTime";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("The AT has expired its ExtendedLifeTime");
                     }
                     else
                     {
-                        msg = string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires",
-                            (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes);
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info(string.Format(CultureInfo.CurrentCulture, "{0} minutes left until token in cache expires",
+                            (resultEx.Result.ExpiresOn - DateTime.UtcNow).TotalMinutes));
                     }
 
                     if (resultEx.Result.AccessToken == null && resultEx.RefreshToken == null)
                     {
                         this.tokenCacheDictionary.Remove(cacheKey);
-
-                        msg = "An old item was removed from the cache";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
-
+                        requestContext.Logger.Info("An old item was removed from the cache");
                         this.HasStateChanged = true;
                         resultEx = null;
                     }
@@ -498,22 +477,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     if (resultEx != null)
                     {
                         resultEx.Result.Authority = cacheKey.Authority;
-
-                        msg = "A matching item (access token or refresh token or both) was found in the cache";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("A matching item (access token or refresh token or both) was found in the cache");
                     }
                 }
                 else
                 {
-                    msg = "No matching token was found in the cache";
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
+                    requestContext.Logger.Info("No matching token was found in the cache");
                     if (cacheQueryData.SubjectType == TokenSubjectType.User)
                     {
-                        msg = "Checking MSAL cache for user token cache";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("Checking MSAL cache for user token cache");
                         resultEx = CacheFallbackOperations.FindMsalEntryForAdal(tokenCacheAccessor,
                             cacheQueryData.Authority, cacheQueryData.ClientId, cacheQueryData.DisplayableId, requestContext);
                     }
@@ -535,9 +507,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         {
             lock (cacheLock)
             {
-                var msg = "Storing token in the cache...";
-                requestContext.Logger.Verbose(msg);
-                requestContext.Logger.VerbosePii(msg);
+                requestContext.Logger.Verbose("Storing token in the cache...");
 
                 string uniqueId = (result.Result.UserInfo != null) ? result.Result.UserInfo.UniqueId : null;
                 string displayableId = (result.Result.UserInfo != null) ? result.Result.UserInfo.DisplayableId : null;
@@ -554,9 +524,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     result.Result.UserInfo);
                 this.tokenCacheDictionary[AdalTokenCacheKey] = result;
 
-                msg = "An item was stored in the cache";
-                requestContext.Logger.Verbose(msg);
-                requestContext.Logger.VerbosePii(msg);
+                requestContext.Logger.Verbose("An item was stored in the cache");
 
                 this.UpdateCachedMrrtRefreshTokens(result, clientId, subjectType);
 
@@ -614,9 +582,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 switch (resourceValuesCount)
                 {
                     case 1:
-                        var msg = "An item matching the requested resource was found in the cache";
-                        requestContext.Logger.Info(msg);
-                        requestContext.Logger.InfoPii(msg);
+                        requestContext.Logger.Info("An item matching the requested resource was found in the cache");
 
                         returnValue = resourceSpecificItems.First();
                         break;
@@ -629,10 +595,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                             if (mrrtItems.Any())
                             {
                                 returnValue = mrrtItems.First();
-                                msg =
-                                    "A Multi Resource Refresh Token for a different resource was found which can be used";
-                                requestContext.Logger.Info(msg);
-                                requestContext.Logger.InfoPii(msg);
+                                requestContext.Logger.Info("A Multi Resource Refresh Token for a different resource was found which can be used");
                             }
                         }
                         break;

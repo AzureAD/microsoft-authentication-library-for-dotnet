@@ -172,18 +172,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     Guid correlationIdInResponse;
                     if (!Guid.TryParse(correlationIdHeader, out correlationIdInResponse))
                     {
-                        var msg = string.Format(CultureInfo.CurrentCulture,
-                            "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader);
-                        RequestContext.Logger.Warning(msg);
-                        RequestContext.Logger.WarningPii(msg);
+                        RequestContext.Logger.Warning(string.Format(CultureInfo.CurrentCulture,
+                            "Returned correlation id '{0}' is not in GUID format.", correlationIdHeader));
                     }
                     else if (correlationIdInResponse != this.RequestContext.Logger.CorrelationId)
                     {
-                        var msg = string.Format(CultureInfo.CurrentCulture,
+                        RequestContext.Logger.Warning(string.Format(CultureInfo.CurrentCulture,
                             "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
-                            correlationIdHeader, RequestContext.Logger.CorrelationId);
-                        RequestContext.Logger.Warning(msg);
-                        RequestContext.Logger.WarningPii(msg);
+                            correlationIdHeader, RequestContext.Logger.CorrelationId));
                     }
 
                     break;

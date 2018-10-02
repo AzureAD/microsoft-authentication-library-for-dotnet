@@ -151,8 +151,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 await request.GetResponseAsync().ConfigureAwait(false);
 
                 var ex = new AdalException(AdalError.UnauthorizedResponseExpected);
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Error(noPiiMsg);
                 CoreLoggerBase.Default.ErrorPii(ex);
                 throw ex;
 
@@ -163,8 +161,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 if (response == null)
                 {
                     var serviceEx = new AdalServiceException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, ex);
-                    string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(serviceEx);
-                    CoreLoggerBase.Default.Error(noPiiMsg);
                     CoreLoggerBase.Default.ErrorPii(serviceEx);
                     throw serviceEx;
                 }
@@ -192,8 +188,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 else
                 {
                     var ex = new ArgumentException(AdalErrorMessage.MissingAuthenticateHeader, "response");
-                    string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                    CoreLoggerBase.Default.Error(noPiiMsg);
                     CoreLoggerBase.Default.ErrorPii(ex);
                     throw ex;
                 }
@@ -201,8 +195,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             else
             {
                 var ex = new ArgumentException(AdalErrorMessage.UnauthorizedHttpStatusCodeExpected, "response");
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Error(noPiiMsg);
                 CoreLoggerBase.Default.ErrorPii(ex);
                 throw ex;
             }

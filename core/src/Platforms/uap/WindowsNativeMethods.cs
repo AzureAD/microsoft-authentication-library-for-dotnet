@@ -41,8 +41,7 @@ namespace Microsoft.Identity.Core.Platforms
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.Warning(ex.Message);
-                CoreLoggerBase.Default.WarningPii(ex.Message);
+                CoreLoggerBase.Default.WarningPii(ex);
                 return "Unknown";
             }
         }

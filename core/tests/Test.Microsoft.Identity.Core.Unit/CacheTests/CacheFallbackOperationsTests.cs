@@ -187,10 +187,6 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 
             CoreLoggerBase.Default.Received().Error(
                 Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
-
-            CoreLoggerBase.Default.Received().ErrorPii(
-                Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
-
         }
 
         [TestMethod]

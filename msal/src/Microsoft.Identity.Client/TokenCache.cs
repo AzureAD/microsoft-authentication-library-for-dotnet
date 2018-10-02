@@ -195,9 +195,7 @@ namespace Microsoft.Identity.Client
                     if (response.RefreshToken != null)
                     {
                         msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
-                        var msg = "Saving RT in cache...";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
+                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
                         tokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem, requestParams.RequestContext);
                     }
 
@@ -228,10 +226,8 @@ namespace Microsoft.Identity.Client
             //delete all cache entries with intersecting scopes.
             //this should not happen but we have this as a safe guard
             //against multiple matches.
-            var msg = "Looking for scopes for the authority in the cache which intersect with " +
-                      requestParams.Scope.AsSingleString();
-            requestParams.RequestContext.Logger.Info(msg);
-            requestParams.RequestContext.Logger.InfoPii(msg);
+            requestParams.RequestContext.Logger.Info("Looking for scopes for the authority in the cache which intersect with " +
+                      requestParams.Scope.AsSingleString());
             IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
             foreach (var accessTokenString in tokenCacheAccessor.GetAllAccessTokensAsString())
             {
@@ -243,16 +239,12 @@ namespace Microsoft.Identity.Client
                     msalAccessTokenItem.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase) &&
                     msalAccessTokenItem.ScopeSet.ScopeIntersects(scopeSet))
                 {
-                    msg = "Intersecting scopes found - " + msalAccessTokenItem.Scopes;
-                    requestParams.RequestContext.Logger.Verbose(msg);
-                    requestParams.RequestContext.Logger.VerbosePii(msg);
+                    requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + msalAccessTokenItem.Scopes);
                     accessTokenItemList.Add(msalAccessTokenItem);
                 }
             }
 
-            msg = "Intersecting scope entries count - " + accessTokenItemList.Count;
-            requestParams.RequestContext.Logger.Info(msg);
-            requestParams.RequestContext.Logger.InfoPii(msg);
+            requestParams.RequestContext.Logger.Info("Intersecting scope entries count - " + accessTokenItemList.Count);
 
             if (!requestParams.IsClientCredentialRequest)
             {
@@ -261,9 +253,7 @@ namespace Microsoft.Identity.Client
                     accessTokenItemList.Where(
                             item => item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase))
                         .ToList();
-                msg = "Matching entries after filtering by user - " + accessTokenItemList.Count;
-                requestParams.RequestContext.Logger.Info(msg);
-                requestParams.RequestContext.Logger.InfoPii(msg);
+                requestParams.RequestContext.Logger.Info("Matching entries after filtering by user - " + accessTokenItemList.Count);
             }
 
             foreach (var cacheItem in accessTokenItemList)
@@ -299,23 +289,16 @@ namespace Microsoft.Identity.Client
         private MsalAccessTokenCacheItem FindAccessTokenCommon
             (AuthenticationRequestParameters requestParams, string preferredEnvironmentAlias, ISet<string> environmentAliases)
         {
-            string msg;
-
             //no authority passed
             if (environmentAliases.Count == 0)
             {
-                msg = "No authority provided. Skipping cache lookup ";
-                requestParams.RequestContext.Logger.Warning(msg);
-                requestParams.RequestContext.Logger.WarningPii(msg);
-
+                requestParams.RequestContext.Logger.Warning("No authority provided. Skipping cache lookup ");
                 return null;
             }
 
             lock (LockObject)
             {
-                msg = "Looking up access token in the cache.";
-                requestParams.RequestContext.Logger.Info(msg);
-                requestParams.RequestContext.Logger.InfoPii(msg);
+                requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
                 MsalAccessTokenCacheItem msalAccessTokenCacheItem = null;
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
@@ -333,9 +316,7 @@ namespace Microsoft.Identity.Client
                 // Authority, ScopeSet and client Id.
                 if (requestParams.UserAssertion != null)
                 {
-                    msg = "Filtering by user assertion...";
-                    requestParams.RequestContext.Logger.Info(msg);
-                    requestParams.RequestContext.Logger.InfoPii(msg);
+                    requestParams.RequestContext.Logger.Info("Filtering by user assertion...");
                     tokenCacheItems =
                         tokenCacheItems.Where(
                                 item =>
@@ -347,9 +328,7 @@ namespace Microsoft.Identity.Client
                 {
                     if (!requestParams.IsClientCredentialRequest)
                     {
-                        msg = "Filtering by user identifier...";
-                        requestParams.RequestContext.Logger.Info(msg);
-                        requestParams.RequestContext.Logger.InfoPii(msg);
+                        requestParams.RequestContext.Logger.Info("Filtering by user identifier...");
                         //filter by identifier of the user instead
                         tokenCacheItems =
                             tokenCacheItems
@@ -361,24 +340,18 @@ namespace Microsoft.Identity.Client
                 //no match found after initial filtering
                 if (!tokenCacheItems.Any())
                 {
-                    msg = "No matching entry found for user or assertion";
-                    requestParams.RequestContext.Logger.Info(msg);
-                    requestParams.RequestContext.Logger.InfoPii(msg);
+                    requestParams.RequestContext.Logger.Info("No matching entry found for user or assertion");
                     return null;
                 }
 
-                msg = "Matching entry count -" + tokenCacheItems.Count;
-                requestParams.RequestContext.Logger.Info(msg);
-                requestParams.RequestContext.Logger.InfoPii(msg);
+                requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count);
 
                 IEnumerable<MsalAccessTokenCacheItem> filteredItems =
                     tokenCacheItems.Where(
                             item =>
                                 item.ScopeSet.ScopeContains(requestParams.Scope));
 
-                msg = "Matching entry count after filtering by scopes - " + filteredItems.Count();
-                requestParams.RequestContext.Logger.Info(msg);
-                requestParams.RequestContext.Logger.InfoPii(msg);
+                requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
 
                 //filter by authority
                 IEnumerable<MsalAccessTokenCacheItem> filteredByPreferredAlias =
@@ -399,9 +372,7 @@ namespace Microsoft.Identity.Client
                 //no match
                 if (!filteredItems.Any())
                 {
-                    msg = "No tokens found for matching authority, client_id, user and scopes.";
-                    requestParams.RequestContext.Logger.Info(msg);
-                    requestParams.RequestContext.Logger.InfoPii(msg);
+                    requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
                     return null;
                 }
 
@@ -412,9 +383,7 @@ namespace Microsoft.Identity.Client
                 }
                 else
                 {
-                    msg = "Multiple tokens found for matching authority, client_id, user and scopes.";
-                    requestParams.RequestContext.Logger.Error(msg);
-                    requestParams.RequestContext.Logger.ErrorPii(msg);
+                    requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
 
                     throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
                         MsalErrorMessage.MultipleTokensMatched);
@@ -423,18 +392,14 @@ namespace Microsoft.Identity.Client
                 if (msalAccessTokenCacheItem != null && msalAccessTokenCacheItem.ExpiresOn >
                     DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                 {
-                    msg = "Access token is not expired. Returning the found cache entry..";
-                    requestParams.RequestContext.Logger.Info(msg);
-                    requestParams.RequestContext.Logger.InfoPii(msg);
+                    requestParams.RequestContext.Logger.Info("Access token is not expired. Returning the found cache entry..");
                     return msalAccessTokenCacheItem;
                 }
 
                 if (msalAccessTokenCacheItem != null)
                 {
-                    msg = "Access token has expired or about to expire. Current time (" + DateTime.UtcNow +
-                          ") - Expiration Time (" + msalAccessTokenCacheItem.ExpiresOn + ")";
-                    requestParams.RequestContext.Logger.Info(msg);
-                    requestParams.RequestContext.Logger.InfoPii(msg);
+                    requestParams.RequestContext.Logger.Info("Access token has expired or about to expire. Current time (" + DateTime.UtcNow +
+                          ") - Expiration Time (" + msalAccessTokenCacheItem.ExpiresOn + ")");
                 }
 
                 return null;
@@ -468,9 +433,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                var msg = "Looking up refresh token in the cache..";
-                requestParam.RequestContext.Logger.Info(msg);
-                requestParam.RequestContext.Logger.InfoPii(msg);
+                requestParam.RequestContext.Logger.Info("Looking up refresh token in the cache..");
 
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
@@ -510,9 +473,7 @@ namespace Microsoft.Identity.Client
                         }
                     }
 
-                    msg = "Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null);
-                    requestParam.RequestContext.Logger.Info(msg);
-                    requestParam.RequestContext.Logger.InfoPii(msg);
+                    requestParam.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
 
                     if (msalRefreshTokenCacheItem != null)
                     {
@@ -520,7 +481,6 @@ namespace Microsoft.Identity.Client
                     }
 
                     requestParam.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
-                    requestParam.RequestContext.Logger.InfoPii("Checking ADAL cache for matching RT");
 
                     if (requestParam.Account == null)
                     {
@@ -913,9 +873,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                var msg = "Removing user from cache..";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
+                requestContext.Logger.Info("Removing user from cache..");
 
                 try
                 {
@@ -952,9 +910,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey(), requestContext);
             }
 
-            var msg = "Deleted refresh token count - " + allRefreshTokens.Count;
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+            requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
             IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
                                environmentAliases.Contains(item.Environment))
@@ -964,9 +920,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetKey(), requestContext);
             }
             
-            msg = "Deleted access token count - " + allAccessTokens.Count;
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+            requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
             IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
@@ -977,9 +931,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheAccessor.DeleteIdToken(idTokenCacheItem.GetKey(), requestContext);
             }
 
-            msg = "Deleted Id token count - " + allIdTokens.Count;
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+            requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
 
             IList<MsalAccountCacheItem> allAccounts = GetAllAccounts(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
@@ -990,9 +942,7 @@ namespace Microsoft.Identity.Client
                 tokenCacheAccessor.DeleteAccount(accountCacheItem.GetKey(), requestContext);
             }
 
-            msg = "Deleted Account count - " + allIdTokens.Count;
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+            requestContext.Logger.Info("Deleted Account count - " + allIdTokens.Count);
         }
 
         internal void RemoveAdalUser(IAccount account, ISet<string> environmentAliases)

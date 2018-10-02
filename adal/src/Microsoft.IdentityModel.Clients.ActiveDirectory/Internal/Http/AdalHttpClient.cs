@@ -90,13 +90,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                 {
                     Resiliency = true;
 
-                    _requestContext.Logger.Info("Network timeout, Exception type: " + ex.InnerException.GetType());
-                    _requestContext.Logger.InfoPii("Network timeout, Exception message: " + ex.InnerException.Message);
+                    _requestContext.Logger.InfoPii(
+                        "Network timeout, Exception message: " + ex.InnerException.Message, 
+                        "Network timeout, Exception type: " + ex.InnerException.GetType());
                 }
 
                 if (!Resiliency && ex.WebResponse == null)
                 {
-                    _requestContext.Logger.Error(ex);
                     _requestContext.Logger.ErrorPii(ex);
                     throw new AdalServiceException(AdalError.Unknown, ex);
                 }
@@ -104,9 +104,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                 //check for resiliency
                 if (!Resiliency && (int)ex.WebResponse.StatusCode >= 500 && (int)ex.WebResponse.StatusCode < 600)
                 {
-                    _requestContext.Logger.Info("HttpStatus code: " + ex.WebResponse.StatusCode + ", Exception type: " + ex.InnerException?.GetType());
-
-                    _requestContext.Logger.InfoPii("HttpStatus code: " + ex.WebResponse.StatusCode + ", Exception message: " + ex.InnerException?.Message);
+                    _requestContext.Logger.InfoPii(
+                        "HttpStatus code: " + ex.WebResponse.StatusCode + ", Exception message: " + ex.InnerException?.Message,
+                        "HttpStatus code: " + ex.WebResponse.StatusCode + ", Exception type: " + ex.InnerException?.GetType());
 
                     Resiliency = true;
                 }
@@ -117,16 +117,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
                     {
                         await Task.Delay(DelayTimePeriodMilliSeconds).ConfigureAwait(false);
                         RetryOnce = false;
-
-                        var msg = "Retrying one more time..";
-                        _requestContext.Logger.Info(msg);
-                        _requestContext.Logger.InfoPii(msg);
-
+                        _requestContext.Logger.Info("Retrying one more time..");
                         return await this.GetResponseAsync<T>(respondToDeviceAuthChallenge).ConfigureAwait(false);
                     }
 
-                    _requestContext.Logger.Info("Retry Failed, Exception type: " + ex.InnerException?.GetType());
-                    _requestContext.Logger.InfoPii("Retry Failed, Exception message: " + ex.InnerException?.Message);
+                    _requestContext.Logger.InfoPii(
+                        "Retry Failed, Exception message: " + ex.InnerException?.Message,
+                        "Retry Failed, Exception type: " + ex.InnerException?.GetType());
                 }
 
                 if (!this.IsDeviceAuthChallenge(ex.WebResponse, respondToDeviceAuthChallenge))

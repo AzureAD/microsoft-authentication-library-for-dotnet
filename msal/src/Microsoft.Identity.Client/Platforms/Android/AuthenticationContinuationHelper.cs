@@ -52,9 +52,7 @@ namespace Microsoft.Identity.Client
         {
             RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
 
-            var msg = string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int) resultCode);
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;
 
             int code = (int)resultCode;

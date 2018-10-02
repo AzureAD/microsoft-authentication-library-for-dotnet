@@ -43,9 +43,7 @@ namespace Microsoft.Identity.Core.UI
             }
             else
             {
-                const string msg = "No pending request for response from web ui.";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
+                requestContext.Logger.Info("No pending request for response from web ui.");
             }
         }
 

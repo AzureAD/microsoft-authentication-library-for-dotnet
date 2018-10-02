@@ -60,9 +60,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
-            var msg = "UserAgent:" + webSettings.UserAgentString;
-            CoreLoggerBase.Default.Verbose(msg);
-            CoreLoggerBase.Default.VerbosePii(msg);
+            CoreLoggerBase.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
 
             webSettings.JavaScriptEnabled = true;
 
@@ -120,9 +118,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    string msg = "It is browser launch request";
-                    CoreLoggerBase.Default.Verbose(msg);
-                    CoreLoggerBase.Default.VerbosePii(msg);
+                    CoreLoggerBase.Default.Verbose("It is browser launch request");
                     OpenLinkInBrowser(url, Activity);
                     view.StopLoading();
                     Activity.Finish();
@@ -131,9 +127,7 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 
                 if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    string msg = "It is an azure authenticator install request";
-                    CoreLoggerBase.Default.Verbose(msg);
-                    CoreLoggerBase.Default.VerbosePii(msg);
+                    CoreLoggerBase.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
                     this.Finish(Activity, url);
                     return true;

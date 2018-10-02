@@ -156,15 +156,15 @@ namespace Test.ADAL.NET.Unit
 
             LoggerCallbackHandler.PiiLoggingEnabled = true;
 
-            logger.ErrorPii(new Exception(Message));
-            logger.InfoPii(Message);
-            logger.VerbosePii(Message);
-            logger.WarningPii(Message);
+            logger.ErrorPii(Message, string.Empty);
+            logger.InfoPii(Message, string.Empty);
+            logger.VerbosePii(Message, string.Empty);
+            logger.WarningPii(Message, string.Empty);
 
             // make sure no Pii are logged with ObsoleteAdalLogCallback
             Assert.AreEqual(0, obsoleteCallback.AllCallsCount);
 
-            logger.Error(new Exception(Message));
+            logger.ErrorPii(new Exception(Message));
             Assert.AreEqual(1, obsoleteCallback.ErrorLogCount);
             Assert.AreEqual(0, obsoleteCallback.WarningLogCount);
             Assert.AreEqual(0, obsoleteCallback.InfoLogCount);
@@ -203,32 +203,37 @@ namespace Test.ADAL.NET.Unit
 
             LoggerCallbackHandler.PiiLoggingEnabled = true;
 
-            logger.Error(new Exception(Message));
-            Assert.AreEqual(1, _errorLogCount);
+            logger.ErrorPii(new Exception(Message));
+            Assert.AreEqual(1, _piiErrorLogCount);
+            Assert.AreEqual(0, _errorLogCount);
             Assert.AreEqual(0, _warningLogCount);
             Assert.AreEqual(0, _infoLogCount);
             Assert.AreEqual(0, _verboseLogCount);
 
             logger.Info(Message);
-            Assert.AreEqual(1, _errorLogCount);
+            Assert.AreEqual(1, _piiErrorLogCount);
+            Assert.AreEqual(0, _errorLogCount);
             Assert.AreEqual(0, _warningLogCount);
             Assert.AreEqual(1, _infoLogCount);
             Assert.AreEqual(0, _verboseLogCount);
 
             logger.Verbose(Message);
-            Assert.AreEqual(1, _errorLogCount);
+            Assert.AreEqual(1, _piiErrorLogCount);
+            Assert.AreEqual(0, _errorLogCount);
             Assert.AreEqual(0, _warningLogCount);
             Assert.AreEqual(1, _infoLogCount);
             Assert.AreEqual(1, _verboseLogCount);
 
             logger.Warning(Message);
-            Assert.AreEqual(1, _errorLogCount);
+            Assert.AreEqual(1, _piiErrorLogCount);
+            Assert.AreEqual(0, _errorLogCount);
             Assert.AreEqual(1, _warningLogCount);
             Assert.AreEqual(1, _infoLogCount);
             Assert.AreEqual(1, _verboseLogCount);
 
-            // make sure no calls to Log with containsPii = true
-            Assert.AreEqual(0, _piiErrorLogCount);
+            // make sure no calls to Log with containsPii = true, except
+            // for PiiErrorLogCount since Pii Logging IS enabled in this test.
+            Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(0, _piiWarningLogCount);
             Assert.AreEqual(0, _piiInfoLogCount);
             Assert.AreEqual(0, _piiVerboseLogCount);
@@ -256,19 +261,19 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(0, _piiInfoLogCount);
             Assert.AreEqual(0, _piiVerboseLogCount);
 
-            logger.InfoPii(Message);
+            logger.InfoPii(Message, string.Empty);
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(0, _piiWarningLogCount);
             Assert.AreEqual(1, _piiInfoLogCount);
             Assert.AreEqual(0, _piiVerboseLogCount);
 
-            logger.VerbosePii(Message);
+            logger.VerbosePii(Message, string.Empty);
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(0, _piiWarningLogCount);
             Assert.AreEqual(1, _piiInfoLogCount);
             Assert.AreEqual(1, _piiVerboseLogCount);
 
-            logger.WarningPii(Message);
+            logger.WarningPii(Message, string.Empty);
             Assert.AreEqual(1, _piiErrorLogCount);
             Assert.AreEqual(1, _piiWarningLogCount);
             Assert.AreEqual(1, _piiInfoLogCount);
@@ -293,15 +298,15 @@ namespace Test.ADAL.NET.Unit
             LoggerCallbackHandler.Callback = null;
             LoggerCallbackHandler.LogCallback = null;
 
-            logger.Error(new Exception(Message));
+            logger.ErrorPii(new Exception(Message));
             logger.Info(Message);
             logger.Verbose(Message);
             logger.Warning(Message);
 
             logger.ErrorPii(new Exception(Message));
-            logger.InfoPii(Message);
-            logger.VerbosePii(Message);
-            logger.WarningPii(Message);
+            logger.InfoPii(Message, string.Empty);
+            logger.VerbosePii(Message, string.Empty);
+            logger.WarningPii(Message, string.Empty);
         }
 
         [TestMethod]
@@ -313,7 +318,7 @@ namespace Test.ADAL.NET.Unit
             var defaultLogCounter = 0;
             logger.When(x => x.DefaultLog(Arg.Any<LogLevel>(), Arg.Any<string>())).Do(x => defaultLogCounter++);
             
-            LoggerCallbackHandler.PiiLoggingEnabled = true;
+            LoggerCallbackHandler.PiiLoggingEnabled = false;
             LoggerCallbackHandler.UseDefaultLogging = true;
 
             logger.Verbose(Message);
@@ -325,7 +330,7 @@ namespace Test.ADAL.NET.Unit
             logger.Warning(Message);
             Assert.AreEqual(3, defaultLogCounter);
 
-            logger.Error(new Exception(Message));
+            logger.ErrorPii(new Exception(Message));
             Assert.AreEqual(4, defaultLogCounter);
         }
 
@@ -350,7 +355,7 @@ namespace Test.ADAL.NET.Unit
             logger.Warning(Message);
             Assert.AreEqual(0, defaultLogCounter);
 
-            logger.Error(new Exception(Message));
+            logger.ErrorPii(new Exception(Message));
             Assert.AreEqual(0, defaultLogCounter);
         }
 
@@ -366,10 +371,10 @@ namespace Test.ADAL.NET.Unit
             LoggerCallbackHandler.PiiLoggingEnabled = true;
             LoggerCallbackHandler.UseDefaultLogging = true;
 
-            logger.VerbosePii(Message);
-            logger.InfoPii(Message);
-            logger.WarningPii(Message);
-            logger.ErrorPii(new Exception(Message));
+            logger.VerbosePii(Message, string.Empty);
+            logger.InfoPii(Message, string.Empty);
+            logger.WarningPii(Message, string.Empty);
+            logger.ErrorPii(Message, string.Empty);
 
             Assert.AreEqual(0, piiCounter);
         }

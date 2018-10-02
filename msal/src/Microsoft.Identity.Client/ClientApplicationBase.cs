@@ -93,12 +93,10 @@ namespace Microsoft.Identity.Client
 
             RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
 
-            var msg = string.Format(CultureInfo.InvariantCulture,
+            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 new PlatformInformation().GetProductName(), MsalIdHelper.GetMsalVersion(),
-                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion());
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
         }
 
         /// <summary>
@@ -179,9 +177,7 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
             if (UserTokenCache == null)
             {
-                const string msg = "Token cache is null or empty. Returning empty list of accounts.";
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
+                requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
                 return Enumerable.Empty<Account>();
             }
             return await UserTokenCache.GetAccountsAsync(Authority, ValidateAuthority, requestContext).ConfigureAwait(false);

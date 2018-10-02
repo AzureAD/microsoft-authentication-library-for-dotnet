@@ -51,10 +51,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.DisplayableId = userAssertion.UserName;
             CacheQueryData.AssertionHash = CoreCryptographyHelpers.CreateSha256Hash(userAssertion.Assertion);
 
-            var msg = string.Format(CultureInfo.InvariantCulture,
-                "Username provided in user assertion - " + string.IsNullOrEmpty(DisplayableId));
-            RequestContext.Logger.Verbose(msg);
-            RequestContext.Logger.VerbosePii(msg);
+            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                "Username provided in user assertion - " + string.IsNullOrEmpty(DisplayableId)));
 
             this.SupportADFS = true;
         }

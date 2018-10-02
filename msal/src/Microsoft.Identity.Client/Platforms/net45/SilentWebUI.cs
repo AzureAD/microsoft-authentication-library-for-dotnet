@@ -93,9 +93,7 @@ namespace Microsoft.Identity.Client.Internal.UI
                 bool completedNormally = uiThread.Join(navigationOverallTimeout > 0 ? (int)navigationOverallTimeout : 0);
                 if (!completedNormally)
                 {
-                    const string msg = "Silent login thread did not complete on time.";
-                    RequestContext.Logger.Info(msg);
-                    RequestContext.Logger.InfoPii(msg);
+                    RequestContext.Logger.Info("Silent login thread did not complete on time.");
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
@@ -134,8 +132,6 @@ namespace Microsoft.Identity.Client.Internal.UI
                     }
                     catch (Exception e)
                     {
-                        string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                        RequestContext.Logger.Error(noPiiMsg);
                         RequestContext.Logger.ErrorPii(e);
                         // Catch all exceptions to transfer them to the original calling thread.
                         uiException = e;

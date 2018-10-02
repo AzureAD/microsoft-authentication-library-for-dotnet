@@ -104,10 +104,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (Permission.Granted !=
                 Application.Context.PackageManager.CheckPermission(permission, Application.Context.PackageName))
             {
-                var msg = string.Format(CultureInfo.InvariantCulture,
-                    AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission);
-                RequestContext.Logger.Info(msg);
-                RequestContext.Logger.InfoPii(msg);
+                RequestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                    AdalErrorMessageAndroidEx.MissingPackagePermissionTemplate, permission));
 
                 return false;
             }
@@ -121,9 +119,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             {
                 Exception exception = new AdalException(
                     "Calling this from your main thread can lead to deadlock");
-
-                string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(exception);
-                RequestContext.Logger.Error(noPiiMsg);
                 RequestContext.Logger.ErrorPii(exception);
 
                 if (mContext.ApplicationInfo.TargetSdkVersion >= BuildVersionCodes.Froyo)
@@ -194,8 +189,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
                 catch (Exception e)
                 {
-                    string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                    RequestContext.Logger.Error(noPiiMsg);
                     RequestContext.Logger.ErrorPii(e);
                 }
             }
@@ -207,7 +200,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 // blocking call to get token from cache or refresh request in
                 // background at Authenticator
                 IAccountManagerFuture result = null;
-                string msg;
                 try
                 {
                     // It does not expect activity to be launched.
@@ -221,9 +213,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                               */, new Handler(callerActivity.MainLooper));
 
                     // Making blocking request here
-                    msg = "Received result from Authenticator";
-                    RequestContext.Logger.Verbose(msg);
-                    RequestContext.Logger.VerbosePii(msg);
+                    RequestContext.Logger.Verbose("Received result from Authenticator");
 
                     Bundle bundleResult = (Bundle) result.GetResult(10000, TimeUnit.Milliseconds);
                     // Authenticator should throw OperationCanceledException if
@@ -232,14 +222,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
                 catch (OperationCanceledException e)
                 {
-                    string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                    RequestContext.Logger.Error(noPiiMsg);
                     RequestContext.Logger.ErrorPii(e);
                 }
                 catch (AuthenticatorException e)
                 {
-                    string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                    RequestContext.Logger.Error(noPiiMsg);
                     RequestContext.Logger.ErrorPii(e);
                 }
                 catch (Exception e)
@@ -248,21 +234,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     /*                    Logger.e(TAG, "Authenticator cancels the request", "",
                                                 ADALError.BROKER_AUTHENTICATOR_IO_EXCEPTION);*/
 
-                    string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                    RequestContext.Logger.Error(noPiiMsg);
                     RequestContext.Logger.ErrorPii(e);
                 }
-                msg = "Returning result from Authenticator";
-                RequestContext.Logger.Verbose(msg);
-                RequestContext.Logger.VerbosePii(msg);
+                RequestContext.Logger.Verbose("Returning result from Authenticator");
 
                 return authResult;
             }
             else
             {
-                var msg = "Target account is not found";
-                RequestContext.Logger.Verbose(msg);
-                RequestContext.Logger.VerbosePii(msg);
+                RequestContext.Logger.Verbose("Target account is not found");
             }
 
             return null;
@@ -375,8 +355,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch(Exception e)
             {
-                string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                RequestContext.Logger.Error(noPiiMsg);
                 RequestContext.Logger.ErrorPii(e);
             }
 
@@ -417,15 +395,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             }
             catch (PackageManager.NameNotFoundException)
             {
-                var msg = "Calling App's package does not exist in PackageManager";
-                RequestContext.Logger.Info(msg);
-                RequestContext.Logger.InfoPii(msg);
+                RequestContext.Logger.Info("Calling App's package does not exist in PackageManager");
             }
             catch (NoSuchAlgorithmException)
             {
-                var msg = "Digest SHA algorithm does not exists";
-                RequestContext.Logger.Info(msg);
-                RequestContext.Logger.InfoPii(msg);
+                RequestContext.Logger.Info("Digest SHA algorithm does not exists");
             }
 
             return null;
@@ -510,10 +484,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                     // add accounts through Adal.
                     if (HasSupportToAddUserThroughBroker(packageName))
                     {
-                        var msg = "Broker supports to add user through app";
-                        RequestContext.Logger.Verbose(msg);
-                        RequestContext.Logger.VerbosePii(msg);
-
+                        RequestContext.Logger.Verbose("Broker supports to add user through app");
                         return true;
                     }
                     else if (accountList != null && accountList.Length > 0)
@@ -546,14 +517,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 }
                 catch (Exception e)
                 {
-                    string noPiiMsg = AdalExceptionFactory.GetPiiScrubbedExceptionDetails(e);
-                    RequestContext.Logger.Error(noPiiMsg);
                     RequestContext.Logger.ErrorPii(e);
                 }
 
-                var msg = "It could not check the uniqueid from broker. It is not using broker";
-                RequestContext.Logger.Verbose(msg);
-                RequestContext.Logger.VerbosePii(msg);
+                RequestContext.Logger.Verbose("It could not check the uniqueid from broker. It is not using broker");
 
                 return false;
             }
@@ -716,9 +683,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                         accountList[i], BrokerConstants.AuthtokenType, bundle,
                         null, null, null);
 
-                    var msg = "Waiting for the result";
-                    RequestContext.Logger.Verbose(msg);
-                    RequestContext.Logger.VerbosePii(msg);
+                    RequestContext.Logger.Verbose("Waiting for the result");
 
                     Bundle userInfoBundle = (Bundle) result.Result;
 

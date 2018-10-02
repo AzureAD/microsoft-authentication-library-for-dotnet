@@ -26,17 +26,13 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 
 namespace Test.Microsoft.Identity.Core.Unit
 {
     internal class TestLogger : CoreLoggerBase
     {
-        public TestLogger() 
+        public TestLogger()
             : this(Guid.Empty)
         {
         }
@@ -62,15 +58,7 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
         }
 
-        public override void ErrorPii(string message)
-        {
-        }
-
         public override void Warning(string message)
-        {
-        }
-
-        public override void WarningPii(string message)
         {
         }
 
@@ -78,12 +66,11 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
         }
 
-
-        public override void Info(string message)
+        public override void WarningPii(Exception ex)
         {
         }
 
-        public override void InfoPii(string message)
+        public override void Info(string message)
         {
         }
 
@@ -95,15 +82,7 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
         }
 
-        public override void VerbosePii(string message)
-        {
-        }
-
         public override void VerbosePii(string messageWithPii, string messageScrubbed)
-        {
-        }
-
-        public override void Error(Exception ex)
         {
         }
 
@@ -115,7 +94,19 @@ namespace Test.Microsoft.Identity.Core.Unit
         {
         }
 
-        public override void ErrorPii(Exception exWithPii, string messageScrubbed)
+        public override void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
+        {
+        }
+
+        public override void WarningPiiWithPrefix(Exception exWithPii, string prefix)
+        {
+        }
+
+        public override void InfoPii(Exception exWithPii)
+        {
+        }
+
+        public override void InfoPiiWithPrefix(Exception exWithPii, string prefix)
         {
         }
     }

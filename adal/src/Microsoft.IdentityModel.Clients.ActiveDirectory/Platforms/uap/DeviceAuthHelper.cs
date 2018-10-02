@@ -92,9 +92,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (challengeData.ContainsKey("CertAuthorities"))
             {
                 errMessage = "Cert Authorities:" + challengeData["CertAuthorities"];
-                string msg = "Looking up certificate matching authorities:" + challengeData["CertAuthorities"];
-                CoreLoggerBase.Default.Verbose(msg);
-                CoreLoggerBase.Default.VerbosePii(msg);
+                CoreLoggerBase.Default.Verbose("Looking up certificate matching authorities:" + challengeData["CertAuthorities"]);
                 string[] certAuthorities = challengeData["CertAuthorities"].Split(';');
                 foreach (var certAuthority in certAuthorities)
                 {
@@ -117,9 +115,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             else
             {
                 errMessage = "Cert Thumbprint:" + challengeData["CertThumbprint"];
-                string msg = "Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"];
-                CoreLoggerBase.Default.Verbose(msg);
-                CoreLoggerBase.Default.VerbosePii(msg);
+                CoreLoggerBase.Default.Verbose("Looking up certificate matching thumbprint:" + challengeData["CertThumbprint"]);
                 query.Thumbprint = HexStringToByteArray(challengeData["CertThumbprint"]);
                 certificates = await CertificateStores.FindAllAsync(query).AsTask().ConfigureAwait(false);
             }
@@ -136,7 +132,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         private static byte[] HexStringToByteArray(string hex)
         {
             if (hex.Length % 2 == 1)
+            {
                 throw new AdalException("The binary key cannot have an odd number of digits");
+            }
 
             byte[] arr = new byte[hex.Length >> 1];
 

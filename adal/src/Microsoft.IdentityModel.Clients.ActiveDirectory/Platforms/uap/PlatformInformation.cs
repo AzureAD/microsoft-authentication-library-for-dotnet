@@ -194,10 +194,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             if (redirectUri == null)
             {
                 redirectUri = Constant.SsoPlaceHolderUri;
-
-                var msg = "ms-app redirect Uri is used";
-                requestContext.Logger.Verbose(msg);
-                requestContext.Logger.VerbosePii(msg);
+                requestContext.Logger.Verbose("ms-app redirect Uri is used");
             }
         }
 

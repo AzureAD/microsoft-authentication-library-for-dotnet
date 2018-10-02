@@ -130,11 +130,9 @@ namespace Microsoft.Identity.Core.Http
                     return response;
                 }
 
-                var msg = string.Format(CultureInfo.InvariantCulture,
+                requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                     CoreErrorMessages.HttpRequestUnsuccessful,
-                    (int)response.StatusCode, response.StatusCode);
-                requestContext.Logger.Info(msg);
-                requestContext.Logger.InfoPii(msg);
+                    (int)response.StatusCode, response.StatusCode));
 
                 if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
                 {
@@ -143,8 +141,6 @@ namespace Microsoft.Identity.Core.Http
             }
             catch (TaskCanceledException exception)
             {
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(exception);
-                requestContext.Logger.Error(noPiiMsg);
                 requestContext.Logger.ErrorPii(exception);
                 isRetryable = true;
                 toThrow = exception;
@@ -154,9 +150,7 @@ namespace Microsoft.Identity.Core.Http
             {
                 if (retry)
                 {
-                    const string msg = "Retrying one more time..";
-                    requestContext.Logger.Info(msg);
-                    requestContext.Logger.InfoPii(msg);
+                    requestContext.Logger.Info("Retrying one more time..");
                     await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
                     return await ExecuteWithRetryAsync(
                         endpoint, 
@@ -168,9 +162,7 @@ namespace Microsoft.Identity.Core.Http
                         retry: false).ConfigureAwait(false);
                 }
 
-                const string message = "Request retry failed.";
-                requestContext.Logger.Info(message);
-                requestContext.Logger.InfoPii(message);
+                requestContext.Logger.Info("Request retry failed.");
                 if (toThrow != null)
                 {
                     throw CoreExceptionFactory.Instance.GetServiceException(

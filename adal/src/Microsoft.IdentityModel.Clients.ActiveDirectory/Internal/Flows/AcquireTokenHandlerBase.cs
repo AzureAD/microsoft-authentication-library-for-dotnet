@@ -60,38 +60,36 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             RequestContext = CreateCallState(this.Authenticator.CorrelationId);
             brokerHelper.RequestContext = RequestContext;
 
-            var msg = string.Format(CultureInfo.CurrentCulture,
+            RequestContext.Logger.Info(string.Format(CultureInfo.CurrentCulture,
                 "ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 platformInformation.GetProductName(), AdalIdHelper.GetAdalVersion(),
-                AdalIdHelper.GetAssemblyFileVersion(), AdalIdHelper.GetAssemblyInformationalVersion());
-            RequestContext.Logger.Info(msg);
-            RequestContext.Logger.InfoPii(msg);
+                AdalIdHelper.GetAssemblyFileVersion(), AdalIdHelper.GetAssemblyInformationalVersion()));
 
-            msg = string.Format(CultureInfo.CurrentCulture,
-                "=== Token Acquisition started: \n\tCacheType: {0}\n\tAuthentication Target: {1}\n\t",
-                tokenCache != null
-                    ? tokenCache.GetType().FullName +
-                      string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.tokenCacheDictionary.Count)
-                    : "null",
-                requestData.SubjectType);
-            if (InstanceDiscovery.IsWhitelisted(requestData.Authenticator.GetAuthorityHost()))
             {
-                msg += string.Format(CultureInfo.CurrentCulture,
-                    ", Authority Host: {0}",
-                    requestData.Authenticator.GetAuthorityHost());
+                string msg = string.Format(CultureInfo.CurrentCulture,
+                    "=== Token Acquisition started: \n\tCacheType: {0}\n\tAuthentication Target: {1}\n\t",
+                    tokenCache != null
+                        ? tokenCache.GetType().FullName +
+                          string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.tokenCacheDictionary.Count)
+                        : "null",
+                    requestData.SubjectType);
+                if (InstanceDiscovery.IsWhitelisted(requestData.Authenticator.GetAuthorityHost()))
+                {
+                    msg += string.Format(CultureInfo.CurrentCulture,
+                        ", Authority Host: {0}",
+                        requestData.Authenticator.GetAuthorityHost());
+                }
+
+                var piiMsg = string.Format(CultureInfo.CurrentCulture,
+                    "=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
+                    requestData.Authenticator.Authority, requestData.Resource, requestData.ClientKey.ClientId,
+                    (tokenCache != null)
+                        ? tokenCache.GetType().FullName +
+                          string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.tokenCacheDictionary.Count)
+                        : "null",
+                    requestData.SubjectType);
+                RequestContext.Logger.InfoPii(piiMsg, msg);
             }
-            RequestContext.Logger.Info(msg);
-
-
-            var piiMsg = string.Format(CultureInfo.CurrentCulture,
-                "=== Token Acquisition started:\n\tAuthority: {0}\n\tResource: {1}\n\tClientId: {2}\n\tCacheType: {3}\n\tAuthentication Target: {4}\n\t",
-                requestData.Authenticator.Authority, requestData.Resource, requestData.ClientKey.ClientId,
-                (tokenCache != null)
-                    ? tokenCache.GetType().FullName +
-                      string.Format(CultureInfo.CurrentCulture, " ({0} items)", tokenCache.tokenCacheDictionary.Count)
-                    : "null",
-                requestData.SubjectType);
-            RequestContext.Logger.InfoPii(piiMsg);
 
             this.tokenCache = requestData.TokenCache;
 
@@ -152,9 +150,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                 if (this.LoadFromCache)
                 {
-                    var msg = "Loading from cache.";
-                    RequestContext.Logger.Verbose(msg);
-                    RequestContext.Logger.VerbosePii(msg);
+                    RequestContext.Logger.Verbose("Loading from cache.");
 
                     CacheQueryData.Authority = Authenticator.Authority;
                     CacheQueryData.Resource = this.Resource;
@@ -208,14 +204,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
             catch (Exception ex)
             {
-                RequestContext.Logger.Error(ex);
                 RequestContext.Logger.ErrorPii(ex);
                 if (client != null && client.Resiliency && extendedLifetimeResultEx != null)
                 {
-                    var msg = "Refreshing access token failed due to one of these reasons:- Internal Server Error, Gateway Timeout and Service Unavailable. " +
-                                       "Hence returning back stale access token";
-                    RequestContext.Logger.Info(msg);
-                    RequestContext.Logger.InfoPii(msg);
+                    RequestContext.Logger.Info("Refreshing access token failed due to one of these reasons:- Internal Server Error, Gateway Timeout and Service Unavailable. " +
+                                       "Hence returning back stale access token");
 
                     return new AuthenticationResult(extendedLifetimeResultEx.Result);
                 }
@@ -337,10 +330,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             if (result.RefreshToken == null)
             {
                 result.RefreshToken = refreshToken;
-
-                var msg = "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead";
-                RequestContext.Logger.Verbose(msg);
-                RequestContext.Logger.VerbosePii(msg);
+                RequestContext.Logger.Verbose("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
             }
 
             return result;
@@ -352,9 +342,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             if (this.Resource != null)
             {
-                var msg = "Refreshing access token...";
-                RequestContext.Logger.Verbose(msg);
-                RequestContext.Logger.VerbosePii(msg);
+                RequestContext.Logger.Verbose("Refreshing access token...");
 
                 try
                 {
@@ -427,17 +415,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             {
                 var accessTokenHash = CoreCryptographyHelpers.CreateSha256Hash(result.AccessToken);
 
-                var msg = string.Format(CultureInfo.CurrentCulture,
-                    "=== Token Acquisition finished successfully. An access token was returned: Expiration Time: {0}",
-                    result.ExpiresOn);
-                RequestContext.Logger.Info(msg);
+                {
+                    var msg = string.Format(CultureInfo.CurrentCulture,
+                        "=== Token Acquisition finished successfully. An access token was returned: Expiration Time: {0}",
+                        result.ExpiresOn);
 
-                var piiMsg = msg + string.Format(CultureInfo.CurrentCulture, "Access Token Hash: {0}\n\t User id: {1}",
-                                 accessTokenHash,
-                                 result.UserInfo != null
-                                     ? result.UserInfo.UniqueId
-                                     : "null");
-                RequestContext.Logger.InfoPii( piiMsg);
+                    var piiMsg = msg + string.Format(CultureInfo.CurrentCulture, "Access Token Hash: {0}\n\t User id: {1}",
+                                     accessTokenHash,
+                                     result.UserInfo != null
+                                         ? result.UserInfo.UniqueId
+                                         : "null");
+                    RequestContext.Logger.InfoPii(piiMsg, msg);
+                }
             }
         }
 

@@ -162,8 +162,6 @@ namespace Microsoft.Identity.Core.OAuth2
                     new ExceptionDetail() { StatusCode = (int)response.StatusCode });
             }
 
-            string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(serviceEx);
-            requestContext.Logger.Error(noPiiMsg);
             requestContext.Logger.ErrorPii(serviceEx);
             throw serviceEx;
         }
@@ -187,10 +185,11 @@ namespace Microsoft.Identity.Core.OAuth2
                     string correlationIdHeader = headers[trimmedKey].Trim();
                     if (!string.Equals(correlationIdHeader, requestContext.Logger.CorrelationId))
                     {
-                        requestContext.Logger.Warning("Returned correlation id does not match the sent correlation id");
-                        requestContext.Logger.WarningPii(string.Format(CultureInfo.InvariantCulture,
-                            "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
-                            correlationIdHeader, requestContext.Logger.CorrelationId));
+                        requestContext.Logger.WarningPii(
+                            string.Format(CultureInfo.InvariantCulture,
+                               "Returned correlation id '{0}' does not match the sent correlation id '{1}'",
+                                correlationIdHeader, requestContext.Logger.CorrelationId),
+                            "Returned correlation id does not match the sent correlation id");
                     }
 
                     break;

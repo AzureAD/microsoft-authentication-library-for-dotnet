@@ -301,21 +301,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
             if (!this.webBrowser.IsDisposed && this.webBrowser.IsBusy)
             {
-                string msg = string.Format(CultureInfo.CurrentCulture,
+                CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
                         " WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                         this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
-                        this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline);
-                CoreLoggerBase.Default.Verbose(msg);
-                CoreLoggerBase.Default.VerbosePii(msg);
+                        this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
 
                 this.webBrowser.Stop();
 
-                msg = string.Format(CultureInfo.CurrentCulture,
+                CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
                         " WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                         this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
-                        this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline);
-                CoreLoggerBase.Default.Verbose(msg);
-                CoreLoggerBase.Default.VerbosePii(msg)
+                        this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
 ;            }
         }
 

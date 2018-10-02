@@ -55,9 +55,7 @@ namespace Microsoft.Identity.Core.Cache
 
             if (cacheDict == null || cacheDict.Count == 0)
             {
-                string msg = "Msal Cache is empty.";
-                CoreLoggerBase.Default.Info(msg);
-                CoreLoggerBase.Default.InfoPii(msg);
+                CoreLoggerBase.Default.Info("Msal Cache is empty.");
                 return;
             }
 

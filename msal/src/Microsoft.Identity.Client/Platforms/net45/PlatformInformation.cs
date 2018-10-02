@@ -88,10 +88,7 @@ namespace Microsoft.Identity.Client
 
         public override string GetProcessorArchitecture()
         {
-	        if (IsWindows)
-                return WindowsNativeMethods.GetProcessorArchitecture();
-			else
-                return null;
+            return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
         public override string GetOperatingSystem()
@@ -123,8 +120,10 @@ namespace Microsoft.Identity.Client
         public override bool IsDomainJoined()
         {
             if (!IsWindows)
+            {
                 return false;
-            
+            }
+
             bool returnValue = false;
             try
             {
@@ -141,9 +140,7 @@ namespace Microsoft.Identity.Client
             }
             catch (Exception ex)
             {
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(ex.Message);
+                CoreLoggerBase.Default.WarningPii(ex);
                 // ignore the exception as the result is already set to false;
             }
 

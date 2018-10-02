@@ -30,13 +30,13 @@ namespace Microsoft.Identity.Core
 {
     internal class RequestContext
     {
-        public RequestContext(CoreLoggerBase logger)
+        public RequestContext(ICoreLogger logger)
         {
             Logger = logger;
         }
 
         public string TelemetryRequestId { get; set; }
 
-        public CoreLoggerBase Logger { get; set; }
+        public ICoreLogger Logger { get; set; }
     }
 }

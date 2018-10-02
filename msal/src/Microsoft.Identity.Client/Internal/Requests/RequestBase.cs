@@ -72,25 +72,28 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected RequestBase(AuthenticationRequestParameters authenticationRequestParameters)
         {
             TokenCache = authenticationRequestParameters.TokenCache;
-            // Log contains Pii 
-            authenticationRequestParameters.RequestContext.Logger.InfoPii(string.Format(CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
-                authenticationRequestParameters?.Authority?.CanonicalAuthority,
-                authenticationRequestParameters.Scope.AsSingleString(),
-                authenticationRequestParameters.ClientId,
-                TokenCache != null, this.GetType().Name));
 
-            // Log does not contain Pii
-            var msg = string.Format(CultureInfo.InvariantCulture,
-                "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}", TokenCache != null, this.GetType().Name);
-
-            if (authenticationRequestParameters.Authority != null &&
-                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.Host))
             {
-                msg += string.Format(CultureInfo.CurrentCulture, "\n\tAuthority Host: {0}",
-                    authenticationRequestParameters.Authority.Host);
+                string messageWithPii = string.Format(CultureInfo.InvariantCulture,
+                        "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
+                        authenticationRequestParameters?.Authority?.CanonicalAuthority,
+                        authenticationRequestParameters.Scope.AsSingleString(),
+                        authenticationRequestParameters.ClientId,
+                        TokenCache != null, this.GetType().Name);
+
+                // Log does not contain Pii
+                string messageWithoutPii = string.Format(CultureInfo.InvariantCulture,
+                    "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}", TokenCache != null, this.GetType().Name);
+
+                if (authenticationRequestParameters.Authority != null &&
+                    AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.Host))
+                {
+                    messageWithoutPii += string.Format(CultureInfo.CurrentCulture, "\n\tAuthority Host: {0}",
+                        authenticationRequestParameters.Authority.Host);
+                }
+
+                authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
             }
-            authenticationRequestParameters.RequestContext.Logger.Info(msg);
 
             AuthenticationRequestParameters = authenticationRequestParameters;
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
@@ -174,15 +177,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 catch (MsalException ex)
                 {
                     apiEvent.ApiErrorCode = ex.ErrorCode;
-                    string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
-                    AuthenticationRequestParameters.RequestContext.Logger.Error(noPiiMsg);
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
                 catch (Exception ex)
                 {
-                    string noPiiMsg = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(ex);
-                    AuthenticationRequestParameters.RequestContext.Logger.Error(noPiiMsg);
                     AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(ex);
                     throw;
                 }
@@ -192,9 +191,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private void SaveTokenResponseToCache()
         {
             // developer passed in user object.
-            string msg = "checking client info returned from the server..";
-            AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-            AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+            AuthenticationRequestParameters.RequestContext.Logger.Info("checking client info returned from the server..");
 
             ClientInfo fromServer = null;
 
@@ -212,12 +209,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user" +
                                                                                 "identifier");
 
-                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(String.Format(
-                        CultureInfo.InvariantCulture,
-                        "Returned user identifiers (uid:{0} utid:{1}) does not meatch the sent user identifier (uid:{2} utid:{3})",
-                        fromServer.UniqueObjectIdentifier, fromServer.UniqueTenantIdentifier,
-                        AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier,
-                        AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier));
+                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Returned user identifiers (uid:{0} utid:{1}) does not meatch the sent user identifier (uid:{2} utid:{3})",
+                            fromServer.UniqueObjectIdentifier, fromServer.UniqueTenantIdentifier,
+                            AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier,
+                            AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier),
+                        string.Empty);
 
                     throw new MsalServiceException("user_mismatch", "Returned user identifier does not match the sent user identifier");
                 }
@@ -230,9 +229,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (StoreToCache)
             {
-                msg = "Saving Token Response to cache..";
-                AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+                AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
                 var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
                 MsalAccessTokenItem = tuple.Item1;
@@ -314,10 +311,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (string.IsNullOrEmpty(Response.Scope))
             {
                 Response.Scope = AuthenticationRequestParameters.Scope.AsSingleString();
-                const string msg = "ScopeSet was missing from the token response, so using developer provided scopes in the result";
-                AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
-
+                AuthenticationRequestParameters.RequestContext.Logger.Info("ScopeSet was missing from the token response, so using developer provided scopes in the result");
             }
         }
 
@@ -325,10 +319,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (result.AccessToken != null)
             {
-                var msg = string.Format(CultureInfo.InvariantCulture, "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} ===",
-                    result.ExpiresOn);
-                AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-                AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    string.Format(
+                        CultureInfo.InvariantCulture, 
+                        "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} ===",
+                        result.ExpiresOn));
             }
         }
     }

@@ -57,9 +57,7 @@ namespace Microsoft.Identity.Core.Realm
 
         internal static async Task<UserRealmDiscoveryResponse> CreateByDiscoveryAsync(string userRealmUriPrefix, string userName, RequestContext requestContext)
         {
-            var msg = "Sending request to userrealm endpoint.";
-            requestContext.Logger.Info(msg);
-            requestContext.Logger.InfoPii(msg);
+            requestContext.Logger.Info("Sending request to userrealm endpoint.");
 
             var httpResponse = await HttpRequest.SendGetAsync(
                 new UriBuilder(userRealmUriPrefix + userName + "?api-version=1.0").Uri, null, requestContext).ConfigureAwait(false);

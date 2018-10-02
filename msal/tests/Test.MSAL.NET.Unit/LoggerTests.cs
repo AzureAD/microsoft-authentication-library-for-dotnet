@@ -90,7 +90,7 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = LogLevel.Warning;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Error(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -116,7 +116,7 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = LogLevel.Info;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Error(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -142,7 +142,7 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = LogLevel.Verbose;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
-            logger.Error(new Exception("test message"));
+            logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -173,15 +173,15 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message");
+            logger.WarningPii("test message", string.Empty);
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message");
+            logger.InfoPii("test message", string.Empty);
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message");
+            logger.VerbosePii("test message", string.Empty);
             Assert.AreEqual(1, counter);
         }
 
@@ -200,15 +200,15 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message");
+            logger.WarningPii("test message", string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message");
+            logger.InfoPii("test message", string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message");
+            logger.VerbosePii("test message", string.Empty);
             Assert.AreEqual(2, counter);
         }
 
@@ -227,15 +227,15 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message");
+            logger.WarningPii("test message", string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message");
+            logger.InfoPii("test message", string.Empty);
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message");
+            logger.VerbosePii("test message", string.Empty);
             Assert.AreEqual(3, counter);
         }
 
@@ -254,15 +254,15 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.WarningPii("test message");
+            logger.WarningPii("test message", string.Empty);
             Assert.AreEqual(2, counter);
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.InfoPii("test message");
+            logger.InfoPii("test message", string.Empty);
             Assert.AreEqual(3, counter);
 
             _callback.When(x => x(LogLevel.Verbose, Arg.Any<string>(), true)).Do(x => counter++);
-            logger.VerbosePii("test message");
+            logger.VerbosePii("test message", string.Empty);
             Assert.AreEqual(4, counter);
         }
     }

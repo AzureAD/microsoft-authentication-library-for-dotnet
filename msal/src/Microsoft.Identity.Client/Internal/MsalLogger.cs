@@ -52,14 +52,19 @@ namespace Microsoft.Identity.Client.Internal
             Log(LogLevel.Info, string.Empty, messageScrubbed);
         }
 
-        public override void InfoPii(string messageWithPii)
-        {
-            Log(LogLevel.Info, messageWithPii, string.Empty);
-        }
-
         public override void InfoPii(string messageWithPii, string messageScrubbed)
         {
-            throw new NotImplementedException();
+            Log(LogLevel.Info, messageWithPii, messageScrubbed);
+        }
+
+        public override void InfoPii(Exception exWithPii)
+        {
+            Log(LogLevel.Info, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public override void InfoPiiWithPrefix(Exception exWithPii, string prefix)
+        {
+            Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public override void Verbose(string messageScrubbed)
@@ -67,19 +72,9 @@ namespace Microsoft.Identity.Client.Internal
             Log(LogLevel.Verbose, string.Empty, messageScrubbed);
         }
 
-        public override void VerbosePii(string messageWithPii)
-        {
-            Log(LogLevel.Verbose, messageWithPii, string.Empty);
-        }
-
         public override void VerbosePii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Verbose, messageWithPii, messageScrubbed);
-        }
-
-        public override void ErrorPii(string messageWithPii)
-        {
-            Log(LogLevel.Error, messageWithPii, string.Empty);
         }
 
         public override void Warning(string messageScrubbed)
@@ -87,21 +82,19 @@ namespace Microsoft.Identity.Client.Internal
             Log(LogLevel.Warning, string.Empty, messageScrubbed);
         }
 
-        public override void WarningPii(string messageWithPii)
-        {
-            Log(LogLevel.Warning, messageWithPii, string.Empty);
-        }
-
         public override void WarningPii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Warning, messageWithPii, messageScrubbed);
         }
 
-        public override void Error(Exception exWillBeScrubbed)
+        public override void WarningPii(Exception exWithPii)
         {
-            Log(LogLevel.Error,
-                string.Empty,
-                MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWillBeScrubbed));
+            Log(LogLevel.Warning, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public override void WarningPiiWithPrefix(Exception exWithPii, string prefix)
+        {
+            Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public override void Error(string messageScrubbed)
@@ -109,19 +102,19 @@ namespace Microsoft.Identity.Client.Internal
             Log(LogLevel.Error, string.Empty, messageScrubbed);
         }
 
-        public override void ErrorPii(Exception ex)
+        public override void ErrorPii(Exception exWithPii)
         {
-            ErrorPii(ex.ToString());
+            Log(LogLevel.Error, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
+        }
+
+        public override void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
+        {
+            Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
         public override void ErrorPii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Error, messageWithPii, messageScrubbed);
-        }
-
-        public override void ErrorPii(Exception exWithPii, string messageScrubbed)
-        {
-            Log(LogLevel.Error, exWithPii.ToString(), messageScrubbed);
         }
 
         private static void ExecuteCallback(LogLevel level, string message, bool containsPii)

@@ -44,28 +44,21 @@ namespace Microsoft.Identity.Core.Cache
             AdalResultWrapper resultWrapper, string authority, string clientId, string displayableId,
              string givenName, string familyName, string objectId)
         {
-            string msg;
             if (string.IsNullOrEmpty(resultWrapper.RawClientInfo))
             {
-                msg = "Client Info is missing. Skipping MSAL refresh token cache write";
-                CoreLoggerBase.Default.Info(msg);
-                CoreLoggerBase.Default.InfoPii(msg);
+                CoreLoggerBase.Default.Info("Client Info is missing. Skipping MSAL refresh token cache write");
                 return;
             }
 
             if (string.IsNullOrEmpty(resultWrapper.RefreshToken))
             {
-                msg = "Refresh Token is missing. Skipping MSAL refresh token cache write";
-                CoreLoggerBase.Default.Info(msg);
-                CoreLoggerBase.Default.InfoPii(msg);
+                CoreLoggerBase.Default.Info("Refresh Token is missing. Skipping MSAL refresh token cache write");
                 return;
             }
 
             if (string.IsNullOrEmpty(resultWrapper.Result.IdToken))
             {
-                msg = "Id Token is missing. Skipping MSAL refresh token cache write";
-                CoreLoggerBase.Default.Info(msg);
-                CoreLoggerBase.Default.InfoPii(msg);
+                CoreLoggerBase.Default.Info("Id Token is missing. Skipping MSAL refresh token cache write");
                 return;
             }
 
@@ -81,11 +74,10 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                msg = "An error occurred while writing ADAL refresh token to the cache in MSAL format. " +
-                      "For details please see https://aka.ms/net-cache-persistence-errors. ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(
+                    ex, 
+                    "An error occurred while writing ADAL refresh token to the cache in MSAL format. " 
+                    + "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
         }
 
@@ -101,9 +93,7 @@ namespace Microsoft.Identity.Core.Cache
             {
                 if (rtItem == null)
                 {
-                    string msg = "No refresh token available. Skipping MSAL refresh token cache write";
-                    CoreLoggerBase.Default.Info(msg);
-                    CoreLoggerBase.Default.InfoPii(msg);
+                    CoreLoggerBase.Default.Info("No refresh token available. Skipping MSAL refresh token cache write");
                     return;
                 }
 
@@ -137,20 +127,15 @@ namespace Microsoft.Identity.Core.Cache
                 if (!String.Equals(rtItem?.Environment, idItem?.Environment, StringComparison.OrdinalIgnoreCase))
                 {
                     CoreLoggerBase.Default.Error(DifferentEnvError);
-                    CoreLoggerBase.Default.ErrorPii(DifferentEnvError);
                 }
 
                 if (!String.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase))
                 {
                     CoreLoggerBase.Default.Error(DifferentAuthorityError);
-                    CoreLoggerBase.Default.ErrorPii(DifferentAuthorityError);
                 }
 
-                string msg = "An error occurred while writing MSAL refresh token to the cache in ADAL format. " +
-                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while writing MSAL refresh token to the cache in ADAL format. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
         }
 
@@ -190,11 +175,8 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
-                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
                 return Tuple.Create(new Dictionary<string, AdalUserInfo>(), new List<AdalUserInfo>());
             }
@@ -241,11 +223,8 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while deleting account in ADAL format from the cache. " +
-                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while deleting account in ADAL format from the cache. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
         }
 
@@ -258,7 +237,6 @@ namespace Microsoft.Identity.Core.Cache
             if (String.IsNullOrEmpty(displayableId))
             {
                 CoreLoggerBase.Default.Error(CoreErrorMessages.InternalErrorCacheEmptyUsername);
-                CoreLoggerBase.Default.ErrorPii(CoreErrorMessages.InternalErrorCacheEmptyUsername);
                 return;
             }
 
@@ -376,11 +354,8 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while searching for refresh tokens in ADAL format in the cache for MSAL. " +
-                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in ADAL format in the cache for MSAL. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
                 return new List<MsalRefreshTokenCacheItem>();
             }
@@ -451,12 +426,8 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while searching for refresh tokens in MSAL format in the cache for ADAL. " +
-                             "For details please see https://aka.ms/net-cache-persistence-errors. ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-
-                CoreLoggerBase.Default.Warning(msg + noPiiMsg);
-                CoreLoggerBase.Default.WarningPii(msg + ex);
+                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in MSAL format in the cache for ADAL. " +
+                             "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
 
             return null;

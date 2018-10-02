@@ -82,9 +82,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (_msalRefreshTokenItem == null)
                 {
-                    const string msg = "No Refresh Token was found in the cache";
-                    AuthenticationRequestParameters.RequestContext.Logger.Verbose(msg);
-                    AuthenticationRequestParameters.RequestContext.Logger.VerbosePii(msg);
+                    AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
 
                     throw new MsalUiRequiredException(MsalUiRequiredException.NoTokensFoundError,
                         "No Refresh Token found in the cache");
@@ -97,9 +95,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 if (Response.RefreshToken == null)
                 {
                     Response.RefreshToken = _msalRefreshTokenItem.Secret;
-                    const string msg = "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead";
-                    AuthenticationRequestParameters.RequestContext.Logger.Info(msg);
-                    AuthenticationRequestParameters.RequestContext.Logger.InfoPii(msg);
+                    AuthenticationRequestParameters.RequestContext.Logger.Info("Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
                 }
             }
         }

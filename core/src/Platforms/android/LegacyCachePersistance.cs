@@ -50,10 +50,7 @@ namespace Microsoft.Identity.Core.Cache
             }
             catch (Exception ex)
             {
-                string msg = "An error occurred while reading the adal cache: ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Error(msg + noPiiMsg);
-                CoreLoggerBase.Default.ErrorPii(msg + ex);
+                CoreLoggerBase.Default.ErrorPiiWithPrefix(ex, "An error occurred while reading the adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
 
@@ -62,21 +59,18 @@ namespace Microsoft.Identity.Core.Cache
 
         void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
         {
-                try
-                {
-                    ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
-                    ISharedPreferencesEditor editor = preferences.Edit();
-                    editor.Remove(SharedPreferencesKey);
-                    string stateString = Convert.ToBase64String(serializedCache);
-                    editor.PutString(SharedPreferencesKey, stateString);
-                    editor.Apply();
-                }
-                catch (Exception ex)
+            try
             {
-                const string msg = "Failed to save adal cache: ";
-                string noPiiMsg = CoreExceptionFactory.Instance.GetPiiScrubbedDetails(ex);
-                CoreLoggerBase.Default.Error(msg + noPiiMsg);
-                CoreLoggerBase.Default.ErrorPii(msg + ex);
+                ISharedPreferences preferences = Application.Context.GetSharedPreferences(SharedPreferencesName, FileCreationMode.Private);
+                ISharedPreferencesEditor editor = preferences.Edit();
+                editor.Remove(SharedPreferencesKey);
+                string stateString = Convert.ToBase64String(serializedCache);
+                editor.PutString(SharedPreferencesKey, stateString);
+                editor.Apply();
+            }
+            catch (Exception ex)
+            {
+                CoreLoggerBase.Default.ErrorPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
     }

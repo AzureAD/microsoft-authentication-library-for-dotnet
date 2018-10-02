@@ -201,10 +201,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 
                     if (response.ContainsKey(key) && requestContext != null)
                     {
-                        var msg = string.Format(CultureInfo.CurrentCulture,
-                            "Key/value pair list contains redundant key '{0}'.", key);
-                        requestContext.Logger.Warning(msg);
-                        requestContext.Logger.WarningPii(msg);
+                        requestContext.Logger.Warning(string.Format(CultureInfo.CurrentCulture,
+                            "Key/value pair list contains redundant key '{0}'.", key));
                     }
 
                     response[key] = value;

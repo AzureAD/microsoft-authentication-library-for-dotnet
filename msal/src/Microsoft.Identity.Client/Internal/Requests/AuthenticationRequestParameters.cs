@@ -91,9 +91,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     {
                         if (!RequestValidationHelper.ValidateClientAssertion(this))
                         {
-                            const string msg = "Client Assertion does not exist or near expiry.";
-                            RequestContext.Logger.Info(msg);
-                            RequestContext.Logger.InfoPii(msg);
+                            RequestContext.Logger.Info("Client Assertion does not exist or near expiry.");
                             Jwt.JsonWebToken jwtToken = new Jwt.JsonWebToken(ClientId,
                                 Authority.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate, SendCertificate);
@@ -103,9 +101,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         }
                         else
                         {
-                            const string msg = "Reusing the unexpired Client Assertion...";
-                            RequestContext.Logger.Info(msg);
-                            RequestContext.Logger.InfoPii(msg);
+                            RequestContext.Logger.Info("Reusing the unexpired Client Assertion...");
                         }
                     }
 
@@ -140,7 +136,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate != null));
             }
 #endif
-            RequestContext.Logger.InfoPii(builder.ToString());
+
+            string messageWithPii = builder.ToString();
 
             // Create no Pii enabled string builder
             builder = new StringBuilder(Environment.NewLine + "=== Request Data ===" + Environment.NewLine +
@@ -161,7 +158,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 builder.AppendLine("Client Certificate Provided? - " + (ClientCredential.Certificate != null));
             }
 #endif
-            RequestContext.Logger.Info(builder.ToString());
+            RequestContext.Logger.InfoPii(messageWithPii, builder.ToString());
         }
     }
 }
