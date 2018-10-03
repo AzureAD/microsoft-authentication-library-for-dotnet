@@ -32,8 +32,6 @@ using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client.Features.DeviceCode
 {
-    // todo: need to read through Shiung's email about changes between ADAL and MSAL 
-    // for protocol handling here.
     [DataContract]
     internal class DeviceCodeResponse : OAuth2ResponseBase
     {

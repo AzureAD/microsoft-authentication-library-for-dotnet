@@ -39,37 +39,64 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
-        // TODO: removing from public API until end to end testing is completed, add this back in when done.
-        ///// <summary>
-        ///// Acquires device code from the authority and returns it to the caller via
-        ///// the deviceCodeResultCallback. The function then proceeds to poll for the security
-        ///// token which is granted upon successful login based on the device code information.
-        ///// See https://aka.ms/msal-device-code-flow.
-        ///// </summary>
-        ///// <param name="scopes">Scopes requested to access a protected API</param>
-        ///// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        ///// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
-        ///// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        //Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
-        //    IEnumerable<string> scopes,
-        //    string extraQueryParameters,
-        //    Func<DeviceCodeResult, Task> deviceCodeResultCallback);
+        /// <summary>
+        /// Acquires device code from the authority and returns it to the caller via
+        /// the deviceCodeResultCallback. The function then proceeds to poll for the security
+        /// token which is granted upon successful login based on the device code information.
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback);
 
-        ///// <summary>
-        ///// Acquires device code from the authority and returns it to the caller via
-        ///// the deviceCodeResultCallback. The function then proceeds to poll for the security
-        ///// token which is granted upon successful login based on the device code information.
-        ///// See https://aka.ms/msal-device-code-flow.
-        ///// </summary>
-        ///// <param name="scopes">Scopes requested to access a protected API</param>
-        ///// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        ///// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
-        ///// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
-        ///// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        //Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
-        //    IEnumerable<string> scopes,
-        //    string extraQueryParameters,
-        //    Func<DeviceCodeResult, Task> deviceCodeResultCallback,
-        //    CancellationToken cancellationToken);
+        /// <summary>
+        /// Acquires device code from the authority and returns it to the caller via
+        /// the deviceCodeResultCallback. The function then proceeds to poll for the security
+        /// token which is granted upon successful login based on the device code information.
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            string extraQueryParameters,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback);
+
+        /// <summary>
+        /// Acquires device code from the authority and returns it to the caller via
+        /// the deviceCodeResultCallback. The function then proceeds to poll for the security
+        /// token which is granted upon successful login based on the device code information.
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Acquires device code from the authority and returns it to the caller via
+        /// the deviceCodeResultCallback. The function then proceeds to poll for the security
+        /// token which is granted upon successful login based on the device code information.
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            string extraQueryParameters,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback,
+            CancellationToken cancellationToken);
     }
 }
