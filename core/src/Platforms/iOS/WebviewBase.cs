@@ -28,6 +28,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using SafariServices;
 using Foundation;
+using AuthenticationServices;
+using UIKit;
 
 namespace Microsoft.Identity.Core.UI
 {
@@ -35,7 +37,10 @@ namespace Microsoft.Identity.Core.UI
     {
         protected static SemaphoreSlim returnedUriReady;
         protected static AuthorizationResult authorizationResult;
+        protected static UIViewController viewController;
         protected SFSafariViewController safariViewController;
+        protected SFAuthenticationSession sfAuthenticationSession;
+        protected ASWebAuthenticationSession asWebAuthenticationSession;
 
         public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext);
@@ -47,8 +52,12 @@ namespace Microsoft.Identity.Core.UI
                 return false;
             }
 
-            authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, url);
-            returnedUriReady.Release();
+            viewController.InvokeOnMainThread(() =>
+            {
+                authorizationResult = new AuthorizationResult(AuthorizationStatus.Success, url);
+                returnedUriReady.Release();
+            });
+
             return true;
         }
     }
