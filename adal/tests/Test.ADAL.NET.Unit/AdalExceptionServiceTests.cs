@@ -30,6 +30,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Test.ADAL.Common;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -57,10 +60,10 @@ namespace Test.ADAL.NET.Unit
                 () => adalExceptionFactory.GetClientException("", exMessage));
 
             AssertException.Throws<ArgumentNullException>(
-                () => adalExceptionFactory.GetServiceException(exCode, ""));
+                () => adalExceptionFactory.GetServiceException(exCode, "", new ExceptionDetail()));
 
             AssertException.Throws<ArgumentNullException>(
-                () => adalExceptionFactory.GetServiceException(exCode, null));
+                () => adalExceptionFactory.GetServiceException(exCode, null, new ExceptionDetail()));
         }
 
         [TestMethod]
@@ -98,8 +101,27 @@ namespace Test.ADAL.NET.Unit
             Assert.IsNull(adalServiceEx.ServiceErrorCodes);
             Assert.IsNull(adalServiceEx.Headers);
             Assert.AreEqual(exMessage, adalServiceEx.Message);
+        }
 
+        [TestMethod]
+        public void AdalServiceException_FromHttpResponse()
+        {
+            // Arrange
+            HttpResponseMessage httpResponse = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(new TimeSpan(3600));
+            HttpWebResponseWrapper responseWrapper = new HttpWebResponseWrapper("body", httpResponse.Headers, httpResponse.StatusCode);
 
+            // Act
+            Exception adalEx = adalExceptionFactory.GetServiceException(exCode, exMessage, responseWrapper);
+
+            // Assert
+            var adalServiceEx = adalEx as AdalServiceException;
+            Assert.IsNull(adalServiceEx.InnerException);
+            Assert.AreEqual(exCode, adalServiceEx.ErrorCode);
+            Assert.IsNull(adalServiceEx.ServiceErrorCodes);
+            Assert.IsNotNull(adalServiceEx.Headers);
+            Assert.AreEqual(adalServiceEx.Headers.RetryAfter, httpResponse.Headers.RetryAfter);
+            Assert.AreEqual(exMessage, adalServiceEx.Message);
         }
 
         [TestMethod]

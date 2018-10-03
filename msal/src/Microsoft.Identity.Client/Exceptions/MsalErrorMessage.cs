@@ -132,6 +132,8 @@ namespace Microsoft.Identity.Core
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
         public const string MsalUiRequiredMessage =
             "Null account was passed in AcquiretokenSilent API. Pass in an account object or call acquireToken to authenticate.";
+
+        public const string UserMismatchSaveToken = "Returned user identifier does not match the sent user identifier when saving the token to the cache.";
     }
 
 }

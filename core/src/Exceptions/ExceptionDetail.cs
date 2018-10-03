@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 
+using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 
@@ -54,7 +56,25 @@ namespace Microsoft.Identity.Core
         /// </summary>
         public string ResponseBody { get; set; }
 
-        public IDictionary<string, string> HttpHeaders { get; set; }
+        public HttpResponseHeaders HttpResponseHeaders { get; set; }
 
+        public static ExceptionDetail FromHttpResponse(IHttpWebResponse response)
+        {
+            return new ExceptionDetail()
+            {
+                ResponseBody = response?.Body,
+                StatusCode = response != null ? (int)response.StatusCode : -1,
+                HttpResponseHeaders = response?.Headers
+            };
+        }
+
+        public static ExceptionDetail FromDrsResponse(DrsMetadataResponse response)
+        {
+            return new ExceptionDetail()
+            {
+                Claims = response?.Claims,
+                ServiceErrorCodes = response?.ErrorCodes
+            };
+        }
     }
 }

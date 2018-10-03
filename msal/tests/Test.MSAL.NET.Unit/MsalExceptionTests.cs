@@ -44,17 +44,6 @@ namespace Test.Microsoft.Identity.Unit.PublicApi
             Assert.AreEqual("msg1", ex.Message);
             Assert.AreSame(innerEx, ex.InnerException);
         }
-   
-        [TestMethod]
-        [TestCategory("MsalExceptionTests")]
-        public void ExceptionsArePubliclyCreatable_ServiceException()
-        {
-            var ex = new MsalServiceException("code1", "msg1");
-
-            Assert.AreEqual("code1", ex.ErrorCode);
-            Assert.AreEqual("msg1", ex.Message);
-            Assert.IsNull(ex.InnerException);
-        }
 
         [TestMethod]
         [TestCategory("MsalExceptionTests")]

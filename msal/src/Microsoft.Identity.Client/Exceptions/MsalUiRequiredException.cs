@@ -94,7 +94,8 @@ namespace Microsoft.Identity.Client
         /// for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        public MsalUiRequiredException(string errorCode, string errorMessage):base(errorCode, errorMessage)
+        public MsalUiRequiredException(string errorCode, string errorMessage) : 
+            this(errorCode, errorMessage, null)
         {
         }
 
@@ -108,7 +109,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">Represents the root cause of the exception.</param>
-        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException):base(errorCode, errorMessage, innerException)
+        public MsalUiRequiredException(string errorCode, string errorMessage, Exception innerException) : base(errorCode, errorMessage, innerException)
         {
         }
     }

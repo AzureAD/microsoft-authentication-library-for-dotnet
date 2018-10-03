@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Core.WsTrust
         public Uri Url { get; set; }
     }
 
-    internal enum UserAuthType 
+    internal enum UserAuthType
     {
         IntegratedAuth,
         UsernamePassword
@@ -119,11 +119,9 @@ namespace Microsoft.Identity.Core.WsTrust
                     CoreErrorCodes.AccessingWsMetadataExchangeFailed,
                     string.Format(CultureInfo.CurrentCulture,
                         CoreErrorMessages.HttpRequestUnsuccessful,
-                        (int)httpResponse.StatusCode, httpResponse.StatusCode), 
-                    new ExceptionDetail() {
-                        StatusCode = (int)httpResponse.StatusCode,
-                        ServiceErrorCodes = new[] { httpResponse.StatusCode.ToString()} });
-              
+                        (int)httpResponse.StatusCode, httpResponse.StatusCode),
+                    httpResponse);
+
 
             }
             return XDocument.Parse(httpResponse.Body, LoadOptions.None);
@@ -162,7 +160,7 @@ namespace Microsoft.Identity.Core.WsTrust
                     if (auth == null && ((auth = element.Elements(XmlNamespace.Sp2005 + "SignedSupportingTokens").FirstOrDefault()) ==
                                          null))
                     {
-                            continue;
+                        continue;
                     }
 
                     securityPolicy = XmlNamespace.Sp2005;
@@ -238,7 +236,7 @@ namespace Microsoft.Identity.Core.WsTrust
                     bool isWsTrust2005 =
                         string.Compare(XmlNamespace.Issue2005.ToString(), soapAction.Value,
                             StringComparison.OrdinalIgnoreCase) == 0;
-                    policies[policyUri.Value].Version = isWsTrust2005 ? WsTrustVersion.WsTrust2005:WsTrustVersion.WsTrust13;
+                    policies[policyUri.Value].Version = isWsTrust2005 ? WsTrustVersion.WsTrust2005 : WsTrustVersion.WsTrust13;
 
 
                     XElement soapBinding = binding.Elements(XmlNamespace.Soap12 + "binding").FirstOrDefault();

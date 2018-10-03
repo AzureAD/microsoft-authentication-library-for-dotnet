@@ -1,4 +1,5 @@
 ﻿using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,9 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
             return exception.ToString();
         }
 
-        public override Exception GetServiceException(string errorCode, string errorMessage)
+        public override Exception GetServiceException(string errorCode, string errorMessage, IHttpWebResponse response)
         {
-            return GetServiceException(errorCode, errorMessage, null);
+            return GetServiceException(errorCode, errorMessage, null, ExceptionDetail.FromHttpResponse(response));
         }
 
         public override Exception GetServiceException(

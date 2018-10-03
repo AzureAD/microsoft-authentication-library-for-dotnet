@@ -36,6 +36,12 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Http
 {
+    /// <summary>
+    /// Sends an HTTP request. Uses a simple retry mechanism - if the request
+    /// timed out or returned error code 500-600, then retry once. 
+    /// After retry, throw a "service not available" service exception (i.e. only for 500-600 errors).
+    /// Does not retry / throw in case of other errors (e.g. 429), just returns the http response.
+    /// </summary>
     internal class HttpRequest
     {
         private HttpRequest()

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Http;
 using System;
 
 namespace Microsoft.Identity.Core
@@ -43,25 +44,26 @@ namespace Microsoft.Identity.Core
             Exception innerException = null);
 
         public abstract Exception GetServiceException(
+           string errorCode,
+           string errorMessage,
+           ExceptionDetail exceptionDetail);
+
+        public abstract Exception GetServiceException(
             string errorCode,
-            string errorMessage);
+            string errorMessage,
+            IHttpWebResponse httpResponse);
 
         public abstract Exception GetServiceException(
            string errorCode,
            string errorMessage,
-           ExceptionDetail exceptionDetail = null);
-
-        public abstract Exception GetServiceException(
-           string errorCode,
-           string errorMessage,
-           Exception innerException = null,
-           ExceptionDetail exceptionDetail = null);
+           Exception innerException,
+           ExceptionDetail exceptionDetail);
 
         public abstract Exception GetUiRequiredException(
            string errorCode,
            string errorMessage,
-           Exception innerException = null,
-           ExceptionDetail exceptionDetail = null);
+           Exception innerException,
+           ExceptionDetail exceptionDetail);
 
         public abstract string GetPiiScrubbedDetails(Exception exception);
     }

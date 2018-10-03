@@ -136,7 +136,7 @@ namespace Test.MSAL.NET.Unit
             var mockApp = Substitute.For<IConfidentialClientApplication>();
             mockApp
                 .WhenForAnyArgs(x => x.AcquireTokenForClientAsync(Arg.Any<string[]>()))
-                .Do(x => { throw new MsalServiceException("my error code", "my message"); });
+                .Do(x => { throw new MsalServiceException("my error code", "my message", new HttpRequestException()); });
 
 
             // Now call the substitute and check the exception is thrown

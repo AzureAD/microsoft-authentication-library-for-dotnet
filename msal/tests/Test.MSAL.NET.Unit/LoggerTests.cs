@@ -45,7 +45,13 @@ namespace Test.MSAL.NET.Unit
             _callback = Substitute.For<LogCallback>();
             Logger.LogCallback = _callback;
         }
-        
+
+        [TestInitialize]
+        public void TestInit()
+        {
+            ModuleInitializer.ForceModuleInitializationTestOnly();
+        }
+
         [TestMethod()]
         [TestCategory("LoggerTests")]
         public void ConstructorComponentTest()
@@ -89,7 +95,8 @@ namespace Test.MSAL.NET.Unit
             var counter = 0;
             Logger.Level = LogLevel.Warning;
 
-            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+            _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).
+                Do(x => counter++);
             logger.ErrorPii(new Exception("test message"));
             Assert.AreEqual(1, counter);
 

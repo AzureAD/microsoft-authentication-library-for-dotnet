@@ -218,7 +218,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier),
                         string.Empty);
 
-                    throw new MsalServiceException("user_mismatch", "Returned user identifier does not match the sent user identifier");
+                    throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
                 }
             }
 

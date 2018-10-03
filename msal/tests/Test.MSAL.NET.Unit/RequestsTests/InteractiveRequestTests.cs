@@ -236,6 +236,23 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
+        public void Foo()
+        {
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+
+            HttpMessageHandlerFactory.AddMockHandler(
+               MockHelpers.CreateInstanceDiscoveryMockHandler(
+               TestConstants.GetDiscoveryEndpoint(TestConstants.AuthorityCommonTenant)));
+
+            //add mock response for tenant endpoint discovery
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+            });
+        }
+
+        [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {

@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Net.Http.Headers;
 
 namespace Microsoft.Identity.Client
 {
@@ -86,7 +87,7 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        public MsalServiceException(string errorCode, string errorMessage)
+        public MsalServiceException(string errorCode, string errorMessage) 
             : base(
                 errorCode, errorMessage)
         {
@@ -103,7 +104,7 @@ namespace Microsoft.Identity.Client
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
         /// <param name="statusCode">Status code of the resposne received from the service.</param>
-        public MsalServiceException(string errorCode, string errorMessage, int statusCode)
+        public MsalServiceException(string errorCode, string errorMessage, int statusCode) 
             : this(errorCode, errorMessage)
         {
             StatusCode = statusCode;
@@ -210,6 +211,15 @@ namespace Microsoft.Identity.Client
         /// Raw response body received from the server.
         /// </summary>
         public string ResponseBody { get; internal set; }
+
+        /// <summary>
+        /// Contains the http headers from the server response that indicated an error. 
+        /// </summary>
+        /// <remarks>
+        /// When the server returns a 429 Too Many Requests error, a Retry-After should be set. It is important to read and respect the 
+        /// time specified in the Retry-After header to avoid a retry storm. 
+        /// </remarks>
+        public HttpResponseHeaders Headers { get; internal set; }
 
         /// <summary>
         /// Creates and returns a string representation of the current exception.

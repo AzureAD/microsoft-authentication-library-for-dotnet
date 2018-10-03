@@ -25,37 +25,57 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Http;
 using System;
 
 namespace Microsoft.Identity.Core
 {
+    /// <summary>
+    /// Factory for creating ADAL or MSAL exceptions.
+    /// ErrorCodes should be made public constants for users to reference them
+    /// </summary>
     internal interface ICoreExceptionFactory
     {
+        /// <summary>
+        /// Create a client exception, arising from logic within this library.
+        /// </summary>
+        /// <returns></returns>
         Exception GetClientException(
             string errorCode,
             string errorMessage,
             Exception innerException = null);
 
-        Exception GetServiceException(
-            string errorCode,
-            string errorMessage);
-
-        Exception GetServiceException(
-           string errorCode,
-           string errorMessage,
-           ExceptionDetail exceptionDetail = null);
-
+        /// <summary>
+        /// Create a service exception, arising from logic external to the library, e.g. a failing web request. 
+        /// </summary>
+        /// <remarks>Prefer using the constructor taking in an <see cref="IHttpWebResponse"/> for http service errors</remarks>
         Exception GetServiceException(
            string errorCode,
            string errorMessage,
-           Exception innerException = null,
-           ExceptionDetail exceptionDetail = null);
+           ExceptionDetail exceptionDetail);
+
+        /// <summary>
+        /// Create a service exception, aristing from a failed http request.
+        /// </summary>
+        Exception GetServiceException(
+          string errorCode,
+          string errorMessage,
+          IHttpWebResponse httpResponse);
+
+        /// <summary>
+        /// Create a service exception that wraps another exception. 
+        /// </summary>
+        Exception GetServiceException(
+           string errorCode,
+           string errorMessage,
+           Exception innerException,
+           ExceptionDetail exceptionDetail);
 
         Exception GetUiRequiredException(
            string errorCode,
            string errorMessage,
-           Exception innerException = null,
-           ExceptionDetail exceptionDetail = null);
+           Exception innerException,
+           ExceptionDetail exceptionDetail);
 
         string GetPiiScrubbedDetails(Exception exception);
     }

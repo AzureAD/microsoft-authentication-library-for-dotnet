@@ -27,6 +27,7 @@
 
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using System;
 using System.Globalization;
 using System.Text;
@@ -61,12 +62,19 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
+        /// <param name="httpResponse"></param>
         public override Exception GetServiceException(
             string errorCode,
-            string errorMessage)
+            string errorMessage,
+            IHttpWebResponse httpResponse)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
-            return GetServiceException(errorCode, errorMessage, null, null);
+            
+            return GetServiceException(
+                errorCode, 
+                errorMessage, 
+                null, 
+                ExceptionDetail.FromHttpResponse(httpResponse));
         }
 
         /// <summary>
@@ -78,7 +86,7 @@ namespace Microsoft.Identity.Client
         public override Exception GetServiceException(
             string errorCode, 
             string errorMessage,
-            ExceptionDetail exceptionDetail = null)
+            ExceptionDetail exceptionDetail)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
             return GetServiceException(errorCode, errorMessage, null, exceptionDetail);
@@ -90,8 +98,8 @@ namespace Microsoft.Identity.Client
         public override Exception GetServiceException(
             string errorCode, 
             string errorMessage, 
-            Exception innerException = null, 
-            ExceptionDetail exceptionDetail = null)
+            Exception innerException, 
+            ExceptionDetail exceptionDetail)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
 
@@ -100,10 +108,10 @@ namespace Microsoft.Identity.Client
                  errorMessage,
                  innerException)
             {
-
                 Claims = exceptionDetail?.Claims,
                 ResponseBody = exceptionDetail?.ResponseBody,
-                StatusCode = exceptionDetail != null ? exceptionDetail.StatusCode : 0
+                StatusCode = exceptionDetail != null ? exceptionDetail.StatusCode : 0,
+                Headers = exceptionDetail?.HttpResponseHeaders
             };
         }
 
@@ -114,7 +122,7 @@ namespace Microsoft.Identity.Client
             string errorCode, 
             string errorMessage, 
             Exception innerException,
-            ExceptionDetail exceptionDetail = null)
+            ExceptionDetail exceptionDetail)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
 

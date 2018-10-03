@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using System;
 using System.Globalization;
 using System.Text;
@@ -40,44 +41,58 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     internal class AdalExceptionFactory : CoreExceptionFactory
     {
         public override Exception GetClientException(
-            string errorCode, 
-            string errorMessage, 
+            string errorCode,
+            string errorMessage,
             Exception innerException = null)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
             return new AdalException(errorCode, errorMessage);
         }
-      
-        public override Exception GetServiceException(string errorCode, string errorMessage)
+
+        public override Exception GetServiceException(string errorCode, string errorMessage, IHttpWebResponse httpResponse)
         {
-            return GetServiceException(errorCode, errorMessage, null);
+            return GetServiceException(errorCode, errorMessage, null, ExceptionDetail.FromHttpResponse(httpResponse));
         }
 
-        public override Exception GetServiceException(string errorCode, string errorMessage, ExceptionDetail exceptionDetail = null)
+        public override Exception GetServiceException(string errorCode, string errorMessage, ExceptionDetail exceptionDetail)
         {
             return GetServiceException(errorCode, errorMessage, null, exceptionDetail);
         }
 
         public override Exception GetServiceException(
-            string errorCode, 
-            string errorMessage, 
-            Exception innerException = null, 
-            ExceptionDetail exceptionDetail = null)
+            string errorCode,
+            string errorMessage,
+            Exception innerException,
+            ExceptionDetail exceptionDetail)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
             if (exceptionDetail?.Claims != null)
             {
-                return new AdalClaimChallengeException(errorCode, errorMessage, innerException, exceptionDetail.Claims);
+                return new AdalClaimChallengeException(errorCode, errorMessage, innerException, exceptionDetail.Claims)
+                {
+                    StatusCode = exceptionDetail != null ? exceptionDetail.StatusCode : 0,
+                    ServiceErrorCodes = exceptionDetail?.ServiceErrorCodes,
+                    Headers = exceptionDetail?.HttpResponseHeaders
+                };
             }
 
             return new AdalServiceException(
                 errorCode,
                 errorMessage,
                 exceptionDetail?.ServiceErrorCodes,
-                innerException);
+                innerException)
+            {
+                StatusCode = exceptionDetail != null ? exceptionDetail.StatusCode : 0,
+                ServiceErrorCodes = exceptionDetail?.ServiceErrorCodes,
+                Headers = exceptionDetail?.HttpResponseHeaders
+            };
         }
 
-        public override Exception GetUiRequiredException(string errorCode, string errorMessage, Exception innerException = null, ExceptionDetail exceptionDetail = null)
+        public override Exception GetUiRequiredException(
+            string errorCode,
+            string errorMessage,
+            Exception innerException,
+            ExceptionDetail exceptionDetail)
         {
             // Adal does not define a specific ui required exception
             return GetClientException(errorCode, errorMessage, innerException);

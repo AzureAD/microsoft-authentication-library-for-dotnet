@@ -464,9 +464,9 @@ namespace Test.MSAL.NET.Unit
             }
             catch (AggregateException ex)
             {
-                MsalServiceException exc = (MsalServiceException)ex.InnerException;
+                MsalClientException exc = (MsalClientException)ex.InnerException;
                 Assert.IsNotNull(exc);
-                Assert.AreEqual("user_mismatch", exc.ErrorCode);
+                Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
             }
             Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "174"

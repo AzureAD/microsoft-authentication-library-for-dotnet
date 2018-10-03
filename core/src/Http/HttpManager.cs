@@ -58,8 +58,11 @@ namespace Microsoft.Identity.Core.Http
             return await SendPostAsync(endpoint, headers, body, requestContext).ConfigureAwait(false);
         }
 
-        public async Task<HttpResponse> SendPostAsync(Uri endpoint, IDictionary<string, string> headers,
-            HttpContent body, RequestContext requestContext)
+        public async Task<HttpResponse> SendPostAsync(
+            Uri endpoint, 
+            IDictionary<string, string> headers,
+            HttpContent body, 
+            RequestContext requestContext)
         {
             return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, requestContext).ConfigureAwait(false);
         }
@@ -110,9 +113,10 @@ namespace Microsoft.Identity.Core.Http
             bool doNotThrow = false,
             bool retry = true)
         {
-            Exception toThrow = null;
+            Exception timeoutException = null;
             bool isRetryable = false;
             HttpResponse response = null;
+
             try
             {
                 HttpContent clonedBody = body;
@@ -143,7 +147,7 @@ namespace Microsoft.Identity.Core.Http
             {
                 requestContext.Logger.ErrorPii(exception);
                 isRetryable = true;
-                toThrow = exception;
+                timeoutException = exception;
             }
 
             if (isRetryable)
@@ -163,12 +167,13 @@ namespace Microsoft.Identity.Core.Http
                 }
 
                 requestContext.Logger.Info("Request retry failed.");
-                if (toThrow != null)
+                if (timeoutException != null)
                 {
                     throw _coreExceptionFactory.GetServiceException(
                         CoreErrorCodes.RequestTimeout,
                         "Request to the endpoint timed out.",
-                        toThrow);
+                        timeoutException, 
+                        null); // no http response to add more details to this exception
                 }
 
                 if (doNotThrow)
@@ -179,13 +184,7 @@ namespace Microsoft.Identity.Core.Http
                 throw _coreExceptionFactory.GetServiceException(
                         CoreErrorCodes.ServiceNotAvailable,
                         "Service is unavailable to process the request",
-                        null,
-                        new ExceptionDetail
-                        {
-                            StatusCode = (int)response.StatusCode,
-                            ResponseBody = response.Body,
-                            HttpHeaders = response.HeadersAsDictionary
-                        });
+                        response);
             }
 
             return response;
@@ -214,7 +213,7 @@ namespace Microsoft.Identity.Core.Http
             }
         }
 
-        private async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
+        internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
             var headers = new Dictionary<string, string>();
             if (response.Headers != null)
