@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Core
         /// <summary>
         /// Create a client exception, arising from logic within this library.
         /// </summary>
-        /// <returns></returns>
         Exception GetClientException(
             string errorCode,
             string errorMessage,

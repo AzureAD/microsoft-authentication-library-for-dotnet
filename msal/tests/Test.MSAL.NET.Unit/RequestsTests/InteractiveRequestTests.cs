@@ -236,20 +236,98 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         }
 
         [TestMethod]
-        public void Foo()
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
             Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
 
-            HttpMessageHandlerFactory.AddMockHandler(
-               MockHelpers.CreateInstanceDiscoveryMockHandler(
-               TestConstants.GetDiscoveryEndpoint(TestConstants.AuthorityCommonTenant)));
-
-            //add mock response for tenant endpoint discovery
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
             {
                 Method = HttpMethod.Get,
-                ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(TestConstants.AuthorityHomeTenant)
+                ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse() // returns a non json response
             });
+
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
+            {
+                Authority = authority,
+                ClientId = TestConstants.ClientId,
+                Scope = TestConstants.Scope,
+                TokenCache = null,
+                RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
+            };
+            parameters.RedirectUri = new Uri("some://uri");
+
+            MockWebUI ui = new MockWebUI();
+
+            InteractiveRequest request = new InteractiveRequest(parameters,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                 TestConstants.DisplayableId,
+                UIBehavior.SelectAccount, ui);
+
+            try
+            {
+                request.PreTokenRequestAsync(CancellationToken.None).Wait();
+                
+                Assert.Fail("MsalException should have been thrown here");
+            }
+            catch (Exception exc)
+            {
+                MsalServiceException serverEx = exc.InnerException as MsalServiceException;
+                Assert.IsNotNull(serverEx);
+                Assert.AreEqual(429, serverEx.StatusCode);
+                Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
+                Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
+                Assert.AreEqual(CoreErrorCodes.NonParsableOAuthError, serverEx.ErrorCode);
+            }
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
+        {
+            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+
+            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            {
+                Method = HttpMethod.Get,
+                ResponseMessage = MockHelpers.CreateTooManyRequestsJsonResponse() // returns a non json response
+            });
+
+            AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
+            {
+                Authority = authority,
+                ClientId = TestConstants.ClientId,
+                Scope = TestConstants.Scope,
+                TokenCache = null,
+                RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
+            };
+            parameters.RedirectUri = new Uri("some://uri");
+
+            MockWebUI ui = new MockWebUI();
+
+            InteractiveRequest request = new InteractiveRequest(parameters,
+                TestConstants.ScopeForAnotherResource.ToArray(),
+                 TestConstants.DisplayableId,
+                UIBehavior.SelectAccount, ui);
+
+            try
+            {
+                request.PreTokenRequestAsync(CancellationToken.None).Wait();
+
+                Assert.Fail("MsalException should have been thrown here");
+            }
+            catch (Exception exc)
+            {
+                MsalServiceException serverEx = exc.InnerException as MsalServiceException;
+                Assert.IsNotNull(serverEx);
+                Assert.AreEqual(429, serverEx.StatusCode);
+                Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
+                Assert.AreEqual("Server overload", serverEx.ErrorCode);
+            }
+
+            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]

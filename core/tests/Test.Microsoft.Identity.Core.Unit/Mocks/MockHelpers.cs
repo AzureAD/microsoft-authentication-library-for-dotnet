@@ -31,6 +31,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using Microsoft.Identity.Core.Helpers;
 using NSubstitute;
 
@@ -38,6 +39,9 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
     internal static class MockHelpers
     {
+        public const string TooManyRequestsContent = "Too many requests error";
+        public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
+
         public static readonly string TokenResponseTemplate =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"{0}\",\"access_token\":\"some-access-token\"" +
@@ -77,7 +81,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
         {
             HttpResponseMessage responseMessage = null;
             HttpContent content = null;
-            
+
             responseMessage = new HttpResponseMessage(statusCode);
             content = new StringContent("Server Error 500-599");
 
@@ -165,7 +169,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
                                   scope.AsSingleString() +
                                   "\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"" +
                                   idToken +
-                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\""+ CreateClientInfo() + "\"}");
+                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo() + "\"}");
             responseMessage.Content = content;
             return responseMessage;
         }
@@ -187,7 +191,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"preferred_username\": \"" + displayableId + "\"," +
                         "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
-                        "\"tid\": \""+ tenantId + "\"," +
+                        "\"tid\": \"" + tenantId + "\"," +
                         "\"ver\": \"2.0\"}";
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
@@ -214,6 +218,28 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
                 new StringContent(sucessResponse);
             responseMessage.Content = content;
             return responseMessage;
+        }
+
+        public static HttpResponseMessage CreateTooManyRequestsNonJsonResponse()
+        {
+            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429);
+            httpResponse.Content = new StringContent(TooManyRequestsContent);
+            httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(TestRetryAfterDuration);
+
+            return httpResponse;
+        }
+
+        public static HttpResponseMessage CreateTooManyRequestsJsonResponse()
+        {
+            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429);
+            httpResponse.Content = new StringContent("{\"error\":\"Server overload\",\"error_description\":\"429: " +
+                TooManyRequestsContent + "\", " +
+                "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
+                "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
+                "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+            httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(TestRetryAfterDuration);
+
+            return httpResponse;
         }
 
         public static HttpResponseMessage CreateOpenIdConfigurationResponse(string authority, string qp = "")

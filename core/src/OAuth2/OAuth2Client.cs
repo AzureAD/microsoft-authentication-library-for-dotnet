@@ -97,7 +97,17 @@ namespace Microsoft.Identity.Core.OAuth2
                 httpEvent.UserAgent = response.UserAgent;
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
+                    try
+                    {
+                        httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
+                    }
+                    catch (SerializationException) // in the rare case we get an error response we cannot deserialize
+                    {
+                        throw CoreExceptionFactory.Instance.GetServiceException(
+                            CoreErrorCodes.NonParsableOAuthError,
+                            CoreErrorMessages.OAuthNonJsonError,
+                            response);
+                    }
                 }
             }
             finally
