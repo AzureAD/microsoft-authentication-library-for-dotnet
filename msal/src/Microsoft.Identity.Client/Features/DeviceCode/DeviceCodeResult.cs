@@ -35,9 +35,13 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// This object is returned as part of the device code flow
     /// and has information intended to be shown to the user about
-    /// where to navigate to login and what the device code is that needs
-    /// to be entered.
+    /// where to navigate to login and what the device code needs
+    /// to be entered on that device.
+    /// See https://aka.ms/msal-device-code-flow.
     /// </summary>
+    /// <seealso cref="PublicClientApplication.AcquireTokenWithDeviceCodeAsync(IEnumerable{string}, Func{DeviceCodeResult, System.Threading.Tasks.Task})"> and
+    /// the other overrides
+    /// </seealso>
     public class DeviceCodeResult
     {
         internal DeviceCodeResult(
@@ -96,7 +100,7 @@ namespace Microsoft.Identity.Client
         public string ClientId { get; }
 
         /// <summary>
-        /// List of the scopes that would be the recipient of the token.
+        /// List of the scopes that would be held by token.
         /// </summary>
         public IReadOnlyCollection<string> Scopes { get; }
     }

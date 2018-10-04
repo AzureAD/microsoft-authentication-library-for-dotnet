@@ -51,9 +51,7 @@ namespace Microsoft.Identity.Client
     /// <item><description>Contrary to <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, public clients are unable to hold configuration time secrets, 
     /// and as a result have no client secret</description></item>
     /// <item><description>the redirect URL is pre-proposed by the library. It does not need to be passed in the constructor</description></item>
-    /// <item><description>.NET Core does not support UI, and therefore this platform does not provide the interactive token acquisition methods. Actually
-    /// until MSAL.NET supports Windows integrated authentication, Username/Password, and Device Code Flow, the .NET Core platform does not
-    /// provide any public client application flows</description></item>
+    /// <item><description>.NET Core does not support UI, and therefore this platform does not provide the interactive token acquisition methods</description></item>
     /// </list>
     /// </remarks>
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
@@ -126,7 +124,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP
         /// <summary>
-        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// Flag to enable authentication with the user currently logged-in in Windows.
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         public bool UseCorporateNetwork { get; set; }
