@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Core.OAuth2
                     {
                         throw CoreExceptionFactory.Instance.GetServiceException(
                             CoreErrorCodes.NonParsableOAuthError,
-                            CoreErrorMessages.OAuthNonJsonError,
+                            CoreErrorMessages.NonParsableOAuthError,
                             response);
                     }
                 }

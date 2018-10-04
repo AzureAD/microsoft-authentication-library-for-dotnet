@@ -96,7 +96,14 @@ namespace Microsoft.Identity.Core
                 match = SecKeyChain.QueryAsRecord(queryRecord, out resultCode);
             }
 
-            return match.AccessGroup.Split('.')[0];
+            if (resultCode == SecStatusCode.Success)
+            {
+                return match.AccessGroup.Split('.')[0];
+            }
+
+            throw CoreExceptionFactory.Instance.GetClientException(
+                CoreErrorCodes.CannotAccessPublisherKeyChain,
+                CoreErrorMessages.CannotAccessPublisherKeyChain);
         }
 
         public TokenCacheAccessor()

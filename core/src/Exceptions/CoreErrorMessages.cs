@@ -86,12 +86,16 @@ namespace Microsoft.Identity.Core
 
         public const string InternalErrorCacheEmptyUsername =
             "Internal error - trying to remove an ADAL user with an empty username. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
-        public const string InternalErrorCacheEmptyIdentifier = 
+        public const string InternalErrorCacheEmptyIdentifier =
             "Internal error - trying to remove an ADAL user with an empty identifier. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
 
         public const string GetUserNameFailed = "Failed to get user name from the operating system.";
 
         public const string NonParsableOAuthError = "An error response was returned by the OAuth2 server, but it could not be parsed. Please inspect the exception properties for details.";
 
+        public const string CannotAccessPublisherKeyChain =
+           "The application cannot access the iOS keychain for the application publisher (the TeamId is null). " +
+           "This is needed to enable Single Sign On between applications of the same publisher. " +
+           "This is an iOS configuration issue. See https://aka.ms/msal-net-enable-keychain-access for more details on enabling keychain access.";
     }
 }
