@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Core.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
@@ -90,9 +91,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
 
         public string GetResponseToSign()
         {
-            return String.Format(CultureInfo.InvariantCulture, "{0}.{1}", 
-                Base64UrlEncoder.Encode(JsonHelper.EncodeToJson(header).ToByteArray()), 
-                Base64UrlEncoder.Encode(JsonHelper.EncodeToJson(payload).ToByteArray()));
+            return String.Format(CultureInfo.InvariantCulture, "{0}.{1}",
+                Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(header).ToByteArray()),
+                Base64UrlHelpers.Encode(JsonHelper.SerializeToJson(payload).ToByteArray()));
         }
     }
 }

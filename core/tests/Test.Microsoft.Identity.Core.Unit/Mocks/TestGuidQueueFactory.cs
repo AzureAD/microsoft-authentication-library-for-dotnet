@@ -25,25 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
-    public static class CoreAssert
+    internal class TestGuidQueueFactory : IGuidFactory
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
-        {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+        private readonly List<Guid> _guids;
 
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
+        public TestGuidQueueFactory(IEnumerable<Guid> guids)
+        {
+            _guids = guids.ToList();
+        }
+
+        public Guid NewGuid()
+        {
+            Guid guid = _guids[0];
+            _guids.RemoveAt(0);
+            return guid;
         }
     }
 }

@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Client
                 ClientId = ClientId,
                 TokenCache = cache,
                 Account = account,
-                Scope = scopes.CreateSetFromEnumerable(),
+                Scope = ScopeHelper.CreateSortedSetFromEnumerable(scopes),
                 RedirectUri = new Uri(RedirectUri),
                 RequestContext = CreateRequestContext(Guid.Empty),
                 ValidateAuthority = ValidateAuthority

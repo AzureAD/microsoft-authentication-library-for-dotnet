@@ -25,25 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
+using System;
 using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
-    public static class CoreAssert
+    internal class TestTimeService : ITimeService
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
+        public TestTimeService(DateTime utcNow)
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+            UtcNow = utcNow;
+        }
 
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
+        public DateTime UtcNow { get; set; }
+
+        public DateTime GetUtcNow()
+        {
+            return UtcNow;
         }
     }
 }

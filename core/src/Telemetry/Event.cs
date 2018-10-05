@@ -29,6 +29,7 @@ using Microsoft.Identity.Core.Helpers;
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Core.Instance;
+using System.Globalization;
 
 namespace Microsoft.Identity.Core.Telemetry
 {
@@ -53,13 +54,13 @@ namespace Microsoft.Identity.Core.Telemetry
         {
             this[EventNameKey] = eventName;
             _startTimestamp = CurrentUnixTimeMilliseconds();
-            this[StartTimeKey] = _startTimestamp.ToStringInvariant();
+            this[StartTimeKey] = _startTimestamp.ToString(CultureInfo.InvariantCulture);
             this[ElapsedTimeKey] = "-1";
         }
 
         public void Stop()
         {
-            this[ElapsedTimeKey] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToStringInvariant();  // It is a duration
+            this[ElapsedTimeKey] = (CurrentUnixTimeMilliseconds() - _startTimestamp).ToString(CultureInfo.InvariantCulture);  // It is a duration
         }
 
         public static string ScrubTenant(Uri uri) // Note: There is also a Unit Test case for this helper

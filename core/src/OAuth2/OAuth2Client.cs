@@ -179,13 +179,13 @@ namespace Microsoft.Identity.Core.OAuth2
 
         private static void VerifyCorrelationIdHeaderInResponse(IDictionary<string, string> headers, RequestContext requestContext)
         {
-            foreach (string reponseHeaderKey in headers.Keys)
+            foreach (string responseHeaderKey in headers.Keys)
             {
-                string trimmedKey = reponseHeaderKey.Trim();
+                string trimmedKey = responseHeaderKey.Trim();
                 if (string.Compare(trimmedKey, OAuth2Header.CorrelationId, StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     string correlationIdHeader = headers[trimmedKey].Trim();
-                    if (!string.Equals(correlationIdHeader, requestContext.Logger.CorrelationId))
+                    if (string.Compare(correlationIdHeader, requestContext.Logger.CorrelationId.ToString(), StringComparison.OrdinalIgnoreCase) != 0)
                     {
                         requestContext.Logger.WarningPii(
                             string.Format(CultureInfo.InvariantCulture,

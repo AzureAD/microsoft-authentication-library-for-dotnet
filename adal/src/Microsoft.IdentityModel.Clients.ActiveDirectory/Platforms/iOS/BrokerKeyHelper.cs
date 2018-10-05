@@ -30,8 +30,8 @@ using System.IO;
 using System.Security.Cryptography;
 using Foundation;
 using Security;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         internal static String GetBase64UrlBrokerKey()
         {
-            return Base64UrlEncoder.Encode(GetRawBrokerKey());
+            return Base64UrlHelpers.Encode(GetRawBrokerKey());
         }
 
         internal static byte[] GetRawBrokerKey()
@@ -93,7 +93,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         
         internal static String DecryptBrokerResponse(String encryptedBrokerResponse)
         {
-            byte[] outputBytes = Base64UrlEncoder.DecodeBytes(encryptedBrokerResponse);
+            byte[] outputBytes = Base64UrlHelpers.DecodeToBytes(encryptedBrokerResponse);
             string plaintext = string.Empty;
             
             using (MemoryStream memoryStream = new MemoryStream(outputBytes))

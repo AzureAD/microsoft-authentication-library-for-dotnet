@@ -36,6 +36,7 @@ using Microsoft.Identity.Core.UI;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using NSubstitute;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Test.ADAL.NET.Common.Mocks
 {
@@ -142,7 +143,7 @@ namespace Test.ADAL.NET.Common.Mocks
                 UniqueObjectIdentifier = TestConstants.DefaultUniqueIdentifier,
                 UniqueTenantIdentifier = TestConstants.DefaultUniqueTenantIdentifier
             };
-            var base64EncodedSerializedClientInfo = Base64UrlEncoder.Encode(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers.JsonHelper.EncodeToJson<ClientInfo>(clientInfo));
+            var base64EncodedSerializedClientInfo = Base64UrlHelpers.Encode(JsonHelper.SerializeToJson<ClientInfo>(clientInfo));
 
 
             HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3600\"," + extendedExpiresIn + "\"resource\":\"resource1\",\"access_token\":\"some-access-token\"," +
@@ -277,7 +278,7 @@ namespace Test.ADAL.NET.Common.Mocks
                         "\"tid\": \"" + TestConstants.SomeTenantId + "\"," +
                         "\"ver\": \"2.0\"}";
 
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlEncoder.Encode(header), Base64UrlEncoder.Encode(payload));
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlHelpers.Encode(header), Base64UrlHelpers.Encode(payload));
         }
     }
 }

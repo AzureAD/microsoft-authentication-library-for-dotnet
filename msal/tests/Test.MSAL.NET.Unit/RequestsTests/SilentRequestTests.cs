@@ -112,7 +112,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
-                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromEnumerable(),
+                Scope = ScopeHelper.CreateSortedSetFromEnumerable(new[] { "some-scope1", "some-scope2" }),
                 TokenCache = cache,
                 RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                 Account = new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null)
@@ -150,7 +150,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
-                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromEnumerable(),
+                Scope = ScopeHelper.CreateSortedSetFromEnumerable(new[] { "some-scope1", "some-scope2" }),
                 TokenCache = cache,
                 Account = new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null),
                 RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null))
@@ -187,7 +187,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 Authority = authority,
                 ClientId = TestConstants.ClientId,
-                Scope = new[] { "some-scope1", "some-scope2" }.CreateSetFromEnumerable(),
+                Scope = ScopeHelper.CreateSortedSetFromEnumerable(new[] { "some-scope1", "some-scope2" }),
                 TokenCache = cache,
                 Account = new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null),
                 RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null))

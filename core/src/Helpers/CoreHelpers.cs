@@ -37,11 +37,6 @@ namespace Microsoft.Identity.Core.Helpers
 {
     internal static class CoreHelpers
     {
-        internal static bool IsNullOrEmpty(IEnumerable<string> input)
-        {
-            return input == null || !input.Any();
-        }
-
         internal static string ByteArrayToString(byte[] input)
         {
             if (input == null || input.Length == 0)

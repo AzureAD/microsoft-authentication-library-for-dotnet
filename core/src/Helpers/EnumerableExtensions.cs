@@ -25,25 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Core.Helpers
 {
-    public static class CoreAssert
+    internal static class EnumerableExtensions
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
+        internal static bool IsNullOrEmpty<T>(this IEnumerable<T> input)
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+            return input == null || !input.Any();
+        }
 
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
+        internal static string AsSingleString(this IEnumerable<string> input)
+        {
+            if (input.IsNullOrEmpty())
             {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
+                return String.Empty;
             }
+
+            return String.Join(" ", input);
         }
     }
 }

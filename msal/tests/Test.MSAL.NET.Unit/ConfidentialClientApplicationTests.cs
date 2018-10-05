@@ -373,7 +373,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(app.Authority)
             });
 
-            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope,
                 TestConstants.DisplayableId, null);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
@@ -413,7 +413,7 @@ namespace Test.MSAL.NET.Unit
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText(@"OpenidConfiguration-B2C.json"))
             });
 
-            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope,
                 TestConstants.DisplayableId, null);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
@@ -456,7 +456,7 @@ namespace Test.MSAL.NET.Unit
 
             try
             {
-                Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
+                Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope,
                     TestConstants.DisplayableId, "login_hint=some@value.com");
                 Uri uri = task.Result;
                 Assert.Fail("MSALException should be thrown here");
@@ -491,9 +491,9 @@ namespace Test.MSAL.NET.Unit
             });
 
             const string CustomRedirectUri = "custom://redirect-uri";
-            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope.AsArray(),
+            Task<Uri> task = app.GetAuthorizationRequestUrlAsync(TestConstants.Scope,
                 CustomRedirectUri, TestConstants.DisplayableId, "extra=qp",
-                TestConstants.ScopeForAnotherResource.AsArray(), TestConstants.AuthorityGuestTenant);
+                TestConstants.ScopeForAnotherResource, TestConstants.AuthorityGuestTenant);
             Uri uri = task.Result;
             Assert.IsNotNull(uri);
             Assert.IsTrue(uri.AbsoluteUri.StartsWith(TestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
@@ -558,9 +558,7 @@ namespace Test.MSAL.NET.Unit
             };
 
             var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
-            var accessTokenInCache = accessTokens.Where(
-                    item =>
-                        item.ScopeSet.ScopeContains(TestConstants.Scope))
+            var accessTokenInCache = accessTokens.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, TestConstants.Scope))
                 .ToList()
                 .FirstOrDefault();
 
@@ -612,9 +610,7 @@ namespace Test.MSAL.NET.Unit
 
             // make sure token in Cache was updated
             var accessTokens = cache.GetAllAccessTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
-            var accessTokenInCache = accessTokens.Where(
-                    item =>
-                        item.ScopeSet.ScopeContains(TestConstants.Scope))
+            var accessTokenInCache = accessTokens.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, TestConstants.Scope))
                 .ToList()
                 .FirstOrDefault();
 

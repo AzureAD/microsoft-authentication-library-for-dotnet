@@ -25,25 +25,46 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
+using Microsoft.Identity.Core.Realm;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Core.WsTrust
 {
-    public static class CoreAssert
+    /// <summary>
+    /// 
+    /// </summary>
+    internal interface IWsTrustWebRequestManager
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
-        {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="federationMetadataUrl"></param>
+        /// <param name="requestContext"></param>
+        /// <returns></returns>
+        Task<MexDocument> GetMexDocumentAsync(string federationMetadataUrl, RequestContext requestContext);
 
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
-        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="wsTrustEndpoint"></param>
+        /// <param name="wsTrustRequest"></param>
+        /// <param name="requestContext"></param>
+        /// <returns></returns>
+        Task<WsTrustResponse> GetWsTrustResponseAsync(
+            WsTrustEndpoint wsTrustEndpoint,
+            string wsTrustRequest,
+            RequestContext requestContext);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="userRealmUriPrefix"></param>
+        /// <param name="userName"></param>
+        /// <param name="requestContext"></param>
+        /// <returns></returns>
+        Task<UserRealmDiscoveryResponse> GetUserRealmAsync(
+            string userRealmUriPrefix,
+            string userName,
+            RequestContext requestContext);
     }
 }

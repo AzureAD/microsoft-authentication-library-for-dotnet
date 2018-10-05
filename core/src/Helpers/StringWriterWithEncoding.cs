@@ -25,25 +25,23 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
+using System.Text;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Core.Helpers
 {
-    public static class CoreAssert
+    internal class StringWriterWithEncoding : StringWriter
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
-        {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+        private readonly Encoding encoding;
 
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
+        public StringWriterWithEncoding(Encoding encoding)
+        {
+            this.encoding = encoding;
+        }
+
+        public override Encoding Encoding
+        {
+            get { return encoding; }
         }
     }
 }

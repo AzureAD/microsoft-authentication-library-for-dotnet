@@ -40,6 +40,7 @@ using Windows.Storage.Streams;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -78,7 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             IBuffer signed = await CryptographicEngine.SignAsync(keyPair, input).AsTask().ConfigureAwait(false);
 
             string signedJwt = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", response.GetResponseToSign(),
-                Base64UrlEncoder.Encode(signed.ToArray()));
+                Base64UrlHelpers.Encode(signed.ToArray()));
             string authToken = string.Format(CultureInfo.InvariantCulture, " AuthToken=\"{0}\"", signedJwt);
             return string.Format(CultureInfo.InvariantCulture, authHeaderTemplate, authToken, challengeData["Context"], challengeData["Version"]);
         }

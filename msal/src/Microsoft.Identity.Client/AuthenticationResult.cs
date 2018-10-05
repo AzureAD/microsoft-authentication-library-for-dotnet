@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 
@@ -102,7 +103,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the granted scope values returned by the service.
         /// </summary>
-        public virtual IEnumerable<string> Scopes => _msalAccessTokenCacheItem.ScopeSet.AsArray();
+        public virtual IEnumerable<string> Scopes => _msalAccessTokenCacheItem.ScopeSet;
 
         /// <summary>
         /// Creates the content for an HTTP authorization header from this authentication result, so

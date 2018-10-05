@@ -26,14 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
 using System.Text;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
-using System.Reflection;
 using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
 {
@@ -66,12 +62,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
             public const string X509CertificateThumbprint = "x5t";
             public const string X509CertificatePublicCertValue = "x5c";
         }
-    }   
+    }
 
     internal class JsonWebToken
     {
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
-        private const int MaxTokenLength = 65536;   
+        private const int MaxTokenLength = 65536;
 
         private readonly JWTPayload payload;
 
@@ -80,21 +76,21 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
             DateTime validFrom = DateTime.UtcNow;
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
 
-            this.payload = new JWTPayload
-                           {
-                               Audience = audience,
-                               Issuer = certificate.ClientId,
-                               ValidFrom = ConvertToTimeT(validFrom),
-                               ValidTo = ConvertToTimeT(validTo),
-                               Subject = certificate.ClientId,
-                               JwtIdentifier = Guid.NewGuid().ToString()
+            payload = new JWTPayload
+            {
+                Audience = audience,
+                Issuer = certificate.ClientId,
+                ValidFrom = ConvertToTimeT(validFrom),
+                ValidTo = ConvertToTimeT(validTo),
+                Subject = certificate.ClientId,
+                JwtIdentifier = Guid.NewGuid().ToString()
             };
         }
 
         public ClientAssertion Sign(IClientAssertionCertificate credential, bool sendX5c)
         {
             // Base64Url encoded header and claims
-            string token = this.Encode(credential, sendX5c);     
+            string token = Encode(credential, sendX5c);
 
             // Length check before sign
             if (MaxTokenLength < token.Length)
@@ -102,7 +98,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
                 throw new AdalException(AdalError.EncodedTokenTooLong);
             }
 
-            return new ClientAssertion(this.payload.Issuer, string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));
+            return new ClientAssertion(payload.Issuer, string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token))));
         }
 
         private static string EncodeSegment(string segment)
@@ -112,13 +108,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
 
         private static string UrlEncodeSegment(byte[] segment)
         {
-            return Base64UrlEncoder.Encode(segment);
+            return Base64UrlHelpers.Encode(segment);
         }
 
         private static string EncodeHeaderToJson(IClientAssertionCertificate credential, bool sendX5c)
         {
             JWTHeaderWithCertificate header = new JWTHeaderWithCertificate(credential, sendX5c);
-            return JsonHelper.EncodeToJson(header);
+            return JsonHelper.SerializeToJson(header);
         }
 
         private static long ConvertToTimeT(DateTime time)
@@ -135,7 +131,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
             string encodedHeader = EncodeSegment(jsonHeader);
 
             // Payload segment
-            string jsonPayload = JsonHelper.EncodeToJson(this.payload);
+            string jsonPayload = JsonHelper.SerializeToJson(payload);
 
             string encodedPayload = EncodeSegment(jsonPayload);
 
@@ -151,8 +147,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
 
             public JWTHeader(IClientAssertionCertificate credential)
             {
-                this.Credential = credential;
-                _alg = (this.Credential == null)
+                Credential = credential;
+                _alg = (Credential == null)
                     ? JsonWebTokenConstants.Algorithms.None
                     : JsonWebTokenConstants.Algorithms.RsaSha256;
 
@@ -202,7 +198,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
                 EmitDefaultValue = false)]
             public string Subject { get; set; }
 
-            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.JwtIdentifier, IsRequired=false, EmitDefaultValue=false)]
+            [DataMember(Name = JsonWebTokenConstants.ReservedClaims.JwtIdentifier, IsRequired = false, EmitDefaultValue = false)]
             public string JwtIdentifier { get; set; }
         }
 
@@ -212,7 +208,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds
             public JWTHeaderWithCertificate(IClientAssertionCertificate credential, bool sendX5c)
                 : base(credential)
             {
-                X509CertificateThumbprint = this.Credential.Thumbprint;
+                X509CertificateThumbprint = Credential.Thumbprint;
                 X509CertificatePublicCertValue = null;
 
                 if (!sendX5c)

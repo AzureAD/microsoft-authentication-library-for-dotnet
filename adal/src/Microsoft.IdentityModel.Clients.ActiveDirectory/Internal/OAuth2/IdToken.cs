@@ -29,6 +29,7 @@ using System;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using Microsoft.Identity.Core.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
@@ -96,7 +97,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2
                 {
                     try
                     {
-                        byte[] idTokenBytes = Base64UrlEncoder.DecodeBytes(idTokenSegments[1]);
+                        byte[] idTokenBytes = Base64UrlHelpers.DecodeToBytes(idTokenSegments[1]);
                         using (var stream = new MemoryStream(idTokenBytes))
                         {
                             var serializer = new DataContractJsonSerializer(typeof(IdToken));

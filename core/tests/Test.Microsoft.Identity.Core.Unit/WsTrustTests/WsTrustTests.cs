@@ -26,16 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Schema;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.WsTrust;
@@ -63,11 +57,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             HttpMessageHandlerFactory.ClearMockHandlers();
 
             string wsTrustAddress = "https://some/address/usernamemixed";
-            WsTrustAddress address = new WsTrustAddress()
-            {
-                Uri = new Uri(wsTrustAddress),
-                Version = WsTrustVersion.WsTrust13
-            };
+            var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
@@ -79,13 +69,12 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                 }
             });
 
-            var message = WsTrustRequestBuilder.BuildMessage("urn:federation:SomeAudience", address, new IntegratedWindowsAuthInput("username"));
+            var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
+            var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+            var manager = new WsTrustWebRequestManager();
+            var wsTrustResponse = await manager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext).ConfigureAwait(false);
 
-            WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(
-               address, message.ToString(), null);
-
-            Assert.IsNotNull(wstResponse.Token);
-
+            Assert.IsNotNull(wsTrustResponse.Token);
             Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
@@ -96,16 +85,12 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             HttpClientFactory.ReturnHttpClientForMocks = true;
             HttpMessageHandlerFactory.ClearMockHandlers();
 
-            string URI = "https://some/address/usernamemixed";
-            WsTrustAddress address = new WsTrustAddress()
-            {
-                Uri = new Uri(URI),
-                Version = WsTrustVersion.WsTrust13
-            };
+            string uri = "https://some/address/usernamemixed";
+            var endpoint = new WsTrustEndpoint(new Uri(uri), WsTrustVersion.WsTrust13);
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
-                Url = URI,
+                Url = uri,
                 Method = HttpMethod.Post,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
                 {
@@ -116,9 +101,10 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
             try
             {
-                var message = WsTrustRequestBuilder.BuildMessage("urn:federation:SomeAudience", address, new IntegratedWindowsAuthInput("username"));
-                WsTrustResponse wstResponse = await WsTrustRequest.SendRequestAsync(
-                    address, message.ToString(), requestContext);
+                var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                var manager = new WsTrustWebRequestManager();
+
+                WsTrustResponse wstResponse = await manager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
                 Assert.Fail("We expect an exception to be thrown here");
             }
             catch (TestException ex)

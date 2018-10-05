@@ -78,14 +78,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
                 {
-
-                    WsTrustResponse wsTrustResponse = await this.commonNonInteractiveHandler.QueryWsTrustAsync(
-                        new MexParser(UserAuthType.UsernamePassword, this.AuthenticationRequestParameters.RequestContext),
-                        userRealmResponse,
-                        (cloudAudience, trustAddress, userName) =>
-                        {
-                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (UsernamePasswordInput)userName);
-                        }).ConfigureAwait(false);
+                    WsTrustResponse wsTrustResponse = await commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                        userRealmResponse.FederationMetadataUrl,
+                        userRealmResponse.CloudAudienceUrn,
+                        UserAuthType.UsernamePassword).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     userAssertion = new UserAssertion(

@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client
                 if (msalAccessTokenItem != null && msalAccessTokenItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(msalAccessTokenItem.Environment) &&
                     msalAccessTokenItem.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase) &&
-                    msalAccessTokenItem.ScopeSet.ScopeIntersects(scopeSet))
+                    msalAccessTokenItem.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + msalAccessTokenItem.NormalizedScopes);
                     accessTokenItemList.Add(msalAccessTokenItem);
@@ -347,9 +347,7 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count);
 
                 IEnumerable<MsalAccessTokenCacheItem> filteredItems =
-                    tokenCacheItems.Where(
-                            item =>
-                                item.ScopeSet.ScopeContains(requestParams.Scope));
+                    tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
 
                 requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
 

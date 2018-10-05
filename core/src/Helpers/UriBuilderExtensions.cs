@@ -25,24 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Core.Helpers
 {
-    public static class CoreAssert
+    internal static class UriBuilderExtensions
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
+        public static void AppendQueryParameters(this UriBuilder builder, string queryParams)
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
-
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
+            if (builder == null || String.IsNullOrEmpty(queryParams))
             {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
+                return;
+            }
+
+            if (builder.Query.Length > 1)
+            {
+                builder.Query = builder.Query.Substring(1) + "&" + queryParams;
+            }
+            else
+            {
+                builder.Query = queryParams;
             }
         }
     }

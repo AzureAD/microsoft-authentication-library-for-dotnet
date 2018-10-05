@@ -25,27 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Realm;
 using System;
-using System.Globalization;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Identity.Core.Realm;
 
 namespace Microsoft.Identity.Core.WsTrust
 {
     internal class CommonNonInteractiveHandler
     {
-        private readonly RequestContext requestContext;
-        private readonly IUsernameInput usernameInput;
-        private readonly IPlatformProxy platformProxy;
+        private readonly RequestContext _requestContext;
+        private readonly IUsernameInput _usernameInput;
+        private readonly IPlatformProxy _platformProxy;
+        private readonly IWsTrustWebRequestManager _wsTrustWebRequestManager;
 
-        public CommonNonInteractiveHandler(RequestContext requestContext, IUsernameInput usernameInput)
+        public CommonNonInteractiveHandler(
+            RequestContext requestContext,
+            IUsernameInput usernameInput,
+            IPlatformProxy platformProxy = null,
+            IWsTrustWebRequestManager wsTrustWebRequestManager = null)
         {
-            this.requestContext = requestContext;
-            this.usernameInput = usernameInput;
-            this.platformProxy = PlatformProxyFactory.GetPlatformProxy();
+            _requestContext = requestContext;
+            _usernameInput = usernameInput;
+            _platformProxy = platformProxy ?? PlatformProxyFactory.GetPlatformProxy();
+            _wsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager();
         }
 
         /// <summary>
@@ -53,45 +56,26 @@ namespace Microsoft.Identity.Core.WsTrust
         /// </summary>
         public async Task<string> GetPlatformUserAsync()
         {
-            var logger = this.requestContext.Logger;
-            string platformUsername = await this.platformProxy.GetUserPrincipalNameAsync().ConfigureAwait(false);            
+            string platformUsername = await _platformProxy.GetUserPrincipalNameAsync().ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(platformUsername))
             {
-                logger.Error("Could not find UPN for logged in user.");
+                _requestContext.Logger.Error("Could not find UPN for logged in user.");
 
                 throw CoreExceptionFactory.Instance.GetClientException(
                     CoreErrorCodes.UnknownUser,
                     CoreErrorMessages.UnknownUser);
-
             }
 
-            logger.InfoPii($"Logged in user detected with user name '{platformUsername}'", "Logged in user detected");
-
+            _requestContext.Logger.InfoPii($"Logged in user detected with user name '{platformUsername}'", "Logged in user detected");
             return platformUsername;
-        }
-
-        public async Task<WsTrustResponse> QueryWsTrustAsync(
-            MexParser mexParser,
-            UserRealmDiscoveryResponse userRealmResponse,
-            Func<string, WsTrustAddress, IUsernameInput, StringBuilder> wsTrustMessageBuilder)
-        {
-
-            WsTrustAddress wsTrustAddress = await QueryForWsTrustAddressAsync(userRealmResponse, mexParser).ConfigureAwait(false);
-
-            return await QueryWsTrustAsync(
-                wsTrustMessageBuilder,
-                userRealmResponse.CloudAudienceUrn,
-                wsTrustAddress).ConfigureAwait(false);
         }
 
         public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUriPrefix)
         {
-            var logger = this.requestContext.Logger;
-
-            var userRealmResponse = await UserRealmDiscoveryResponse.CreateByDiscoveryAsync(
+            var userRealmResponse = await _wsTrustWebRequestManager.GetUserRealmAsync(
                 userRealmUriPrefix,
-                usernameInput.UserName,
-                requestContext).ConfigureAwait(false);
+                _usernameInput.UserName,
+                _requestContext).ConfigureAwait(false);
 
             if (userRealmResponse == null)
             {
@@ -100,84 +84,22 @@ namespace Microsoft.Identity.Core.WsTrust
                     CoreErrorMessages.UserRealmDiscoveryFailed);
             }
 
-            logger.InfoPii(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    " User with user name '{0}' detected as '{1}'", 
-                    usernameInput.UserName,
-                    userRealmResponse.AccountType),
+            _requestContext.Logger.InfoPii(
+                $"User with user name '{_usernameInput.UserName}' detected as '{userRealmResponse.AccountType}'",
                 string.Empty);
 
             return userRealmResponse;
         }
 
-        private async Task<WsTrustResponse> QueryWsTrustAsync(
-            Func<string, WsTrustAddress, IUsernameInput, StringBuilder> wsTrustMessageBuilder,
-            string cloudAudience,
-            WsTrustAddress wsTrustAddress)
+        public async Task<WsTrustResponse> PerformWsTrustMexExchangeAsync(
+            string federationMetadataUrl, string cloudAudienceUrn, UserAuthType userAuthType)
         {
-            WsTrustResponse wsTrustResponse;
-            StringBuilder wsTrustRequest = null;
+            MexDocument mexDocument;
+
             try
             {
-                wsTrustRequest = wsTrustMessageBuilder(cloudAudience, wsTrustAddress, this.usernameInput);
-
-                wsTrustResponse = await WsTrustRequest.SendRequestAsync(
-                    wsTrustAddress,
-                    wsTrustRequest.ToString(),
-                    this.requestContext).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.ParsingWsTrustResponseFailed,
-                    ex.Message,
-                    ex);
-            }
-            finally
-            {
-                wsTrustRequest?.SecureClear();
-            }
-
-
-            if (wsTrustResponse == null)
-            {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.ParsingWsTrustResponseFailed,
-                    CoreErrorMessages.ParsingWsTrustResponseFailed);
-            }
-
-            this.requestContext.Logger.Info(string.Format(CultureInfo.CurrentCulture,
-                " Token of type '{0}' acquired from WS-Trust endpoint", wsTrustResponse.TokenType));
-
-            return wsTrustResponse;
-        }
-
-
-        private async Task<WsTrustAddress> QueryForWsTrustAddressAsync(
-            UserRealmDiscoveryResponse userRealmResponse, 
-            MexParser mexParser)
-        {
-            if (string.IsNullOrWhiteSpace(userRealmResponse.FederationMetadataUrl))
-            {
-                throw CoreExceptionFactory.Instance.GetClientException(
-                    CoreErrorCodes.MissingFederationMetadataUrl,
-                    CoreErrorMessages.MissingFederationMetadataUrl);
-            }
-
-            WsTrustAddress wsTrustAddress = null;
-            try
-            {
-                wsTrustAddress = await mexParser.FetchWsTrustAddressFromMexAsync(
-                    userRealmResponse.FederationMetadataUrl)
-                    .ConfigureAwait(false);
-
-                if (wsTrustAddress == null)
-                {
-                    CoreExceptionFactory.Instance.GetClientException(
-                      CoreErrorCodes.WsTrustEndpointNotFoundInMetadataDocument,
-                      CoreErrorMessages.WsTrustEndpointNotFoundInMetadataDocument);
-                }
+                mexDocument = await _wsTrustWebRequestManager.GetMexDocumentAsync(
+                federationMetadataUrl, _requestContext).ConfigureAwait(false);
             }
             catch (XmlException ex)
             {
@@ -187,12 +109,62 @@ namespace Microsoft.Identity.Core.WsTrust
                     ex);
             }
 
-            this.requestContext.Logger.InfoPii(
-                string.Format(CultureInfo.CurrentCulture, " WS-Trust endpoint '{0}' fetched from MEX at '{1}'",
-                    wsTrustAddress.Uri, userRealmResponse.FederationMetadataUrl),
+            WsTrustEndpoint wsTrustEndpoint = userAuthType == UserAuthType.IntegratedAuth
+                ? mexDocument.GetWsTrustWindowsTransportEndpoint()
+                : mexDocument.GetWsTrustUsernamePasswordEndpoint();
+
+            if (wsTrustEndpoint == null)
+            {
+                throw CoreExceptionFactory.Instance.GetClientException(
+                  CoreErrorCodes.WsTrustEndpointNotFoundInMetadataDocument,
+                  CoreErrorMessages.WsTrustEndpointNotFoundInMetadataDocument);
+            }
+
+            _requestContext.Logger.InfoPii(
+                $"WS-Trust endpoint '{wsTrustEndpoint.Uri}' being used from MEX at '{federationMetadataUrl}'",
                 "Fetched and parsed MEX");
 
-            return wsTrustAddress;
+            WsTrustResponse wsTrustResponse = await GetWsTrustResponseAsync(
+                userAuthType,
+                cloudAudienceUrn,
+                wsTrustEndpoint,
+                _usernameInput).ConfigureAwait(false);
+
+            _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint");
+
+            return wsTrustResponse;
+        }
+
+        internal async Task<WsTrustResponse> GetWsTrustResponseAsync(
+            UserAuthType userAuthType,
+            string cloudAudienceUrn,
+            WsTrustEndpoint endpoint,
+            IUsernameInput usernameInput)
+        {
+            // TODO: need to clean up the casting to UsernamePasswordInput as well as removing the PasswordToCharArray
+            // since we're putting the strings onto the managed heap anyway.
+            string wsTrustRequestMessage = userAuthType == UserAuthType.IntegratedAuth
+                ? endpoint.BuildTokenRequestMessageWindowsIntegratedAuth(cloudAudienceUrn)
+                : endpoint.BuildTokenRequestMessageUsernamePassword(
+                    cloudAudienceUrn,
+                    usernameInput.UserName,
+                    new string(((UsernamePasswordInput)usernameInput).PasswordToCharArray()));
+
+            try
+            {
+                WsTrustResponse wsTrustResponse = await _wsTrustWebRequestManager.GetWsTrustResponseAsync(
+                    endpoint, wsTrustRequestMessage, _requestContext).ConfigureAwait(false);
+
+                _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint");
+                return wsTrustResponse;
+            }
+            catch (Exception ex)
+            {
+                throw CoreExceptionFactory.Instance.GetClientException(
+                    CoreErrorCodes.ParsingWsTrustResponseFailed,
+                    ex.Message,
+                    ex);
+            }
         }
     }
 }

@@ -45,6 +45,7 @@ namespace Test.MSAL.NET.Integration
 
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
+        [Ignore]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()
         {
             var user = _authHelper.GetUser(

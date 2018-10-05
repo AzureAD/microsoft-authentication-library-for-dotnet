@@ -62,9 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
         {
             await UpdateUsernameAsync().ConfigureAwait(false);
-
             await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-
             await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -76,32 +74,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
                    .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
                    .ConfigureAwait(false);
 
-                if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
-                {
-
-                    WsTrustResponse wsTrustResponse = await this.commonNonInteractiveHandler.QueryWsTrustAsync(
-                        new MexParser(UserAuthType.IntegratedAuth, this.AuthenticationRequestParameters.RequestContext),
-                        userRealmResponse,
-                        (cloudAudience, trustAddress, userName) =>
-                        {
-                            return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (Core.IntegratedWindowsAuthInput)userName);
-                        }).ConfigureAwait(false);
-
-                    // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    userAssertion = new UserAssertion(
-                        wsTrustResponse.Token,
-                        (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
-                }
-                else
+                if (!string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
                 {
                     throw new MsalException(
                         MsalError.UnknownUserType,
                         string.Format(
-                            CultureInfo.CurrentCulture, 
-                            MsalErrorMessage.UnsupportedUserType, 
-                            userRealmResponse.AccountType, 
+                            CultureInfo.CurrentCulture,
+                            MsalErrorMessage.UnsupportedUserType,
+                            userRealmResponse.AccountType,
                             this.iwaInput.UserName));
                 }
+
+                WsTrustResponse wsTrustResponse = await commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                    userRealmResponse.FederationMetadataUrl,
+                    userRealmResponse.CloudAudienceUrn,
+                    UserAuthType.IntegratedAuth).ConfigureAwait(false);
+
+                // We assume that if the response token type is not SAML 1.1, it is SAML 2
+                userAssertion = new UserAssertion(
+                    wsTrustResponse.Token,
+                    (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
             }
         }
 

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Telemetry
@@ -76,7 +77,7 @@ namespace Microsoft.Identity.Core.Telemetry
 
         public ApiIds ApiId
         {
-            set { this[ApiIdKey] = ((int) value).ToStringInvariant(); }
+            set { this[ApiIdKey] = ((int) value).ToString(CultureInfo.InvariantCulture); }
         }
 
         public Uri Authority

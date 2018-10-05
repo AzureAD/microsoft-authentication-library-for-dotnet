@@ -68,7 +68,7 @@
     <None Include="..\..\..\core\src\Platforms\**\*.cs" LinkBase="Core\Platforms" />
     <None Include="..\..\..\core\src\Features\**\*.cs" LinkBase="Core\Features" />
     <None Include="..\..\..\core\src\*.md" LinkBase="Core" />
-    
+
     <!-- remove here, add back in certain platforms-->
     <Compile Remove="..\..\..\core\src\Platforms\**\*.*" />
     <Compile Remove="..\..\..\core\src\Features\**\*.*" />

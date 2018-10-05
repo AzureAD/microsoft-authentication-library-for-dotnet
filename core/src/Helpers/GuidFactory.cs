@@ -25,34 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using System.IO;
-using System.Runtime.Serialization.Json;
-using System.Text;
+using System;
 
-namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
+namespace Microsoft.Identity.Core.Helpers
 {
-    internal static class JsonHelper
+    internal class GuidFactory : IGuidFactory
     {
-        internal static string EncodeToJson<T>(T toEncode)
+        public Guid NewGuid()
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
-                ser.WriteObject(stream, toEncode);
-                return Encoding.UTF8.GetString(stream.ToArray(), 0, (int)stream.Position);
-            }
-        }
-
-        internal static T DecodeFromJson<T>(string json)
-        {
-            T response;
-            DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
-            using (MemoryStream stream = new MemoryStream(new StringBuilder(json).ToByteArray()))
-            {
-                response = ((T) serializer.ReadObject(stream));
-            }
-
-            return response;
+            return Guid.NewGuid();
         }
     }
 }

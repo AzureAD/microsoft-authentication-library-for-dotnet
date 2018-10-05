@@ -113,14 +113,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected virtual SortedSet<string> GetDecoratedScope(SortedSet<string> inputScope)
         {
             SortedSet<string> set = new SortedSet<string>(inputScope.ToArray());
-            set.UnionWith(OAuth2Value.ReservedScopes.CreateSetFromEnumerable());
+            set.UnionWith(ScopeHelper.CreateSortedSetFromEnumerable(OAuth2Value.ReservedScopes));
             return set;
         }
 
         protected void ValidateScopeInput(SortedSet<string> scopesToValidate)
         {
             //check if scope or additional scope contains client ID.
-            if (scopesToValidate.Intersect(OAuth2Value.ReservedScopes.CreateSetFromEnumerable()).Any())
+            if (scopesToValidate.Intersect(ScopeHelper.CreateSortedSetFromEnumerable(OAuth2Value.ReservedScopes)).Any())
             {
                 throw new ArgumentException("MSAL always sends the scopes 'openid profile offline_access'. " +
                                             "They cannot be suppressed as they are required for the " +

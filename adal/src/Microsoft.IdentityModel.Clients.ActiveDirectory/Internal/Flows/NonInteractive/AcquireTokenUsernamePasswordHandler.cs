@@ -26,54 +26,45 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.Identity.Core.WsTrust;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
     internal class AcquireTokenUsernamePasswordHandler : AcquireTokenHandlerBase
     {
-        private UsernamePasswordInput userPasswordInput;
-        private UserAssertion userAssertion;
-        private CommonNonInteractiveHandler commonNonInteractiveHandler;
+        private readonly UsernamePasswordInput _userPasswordInput;
+        private UserAssertion _userAssertion;
+        private CommonNonInteractiveHandler _commonNonInteractiveHandler;
 
         public AcquireTokenUsernamePasswordHandler(RequestData requestData, UsernamePasswordInput userPasswordInput)
             : base(requestData)
         {
-            if (userPasswordInput == null)
-            {
-                throw new ArgumentNullException("userPasswordInput");
-            }
-
             // We enable ADFS support only when it makes sense to do so
             if (requestData.Authenticator.AuthorityType == AuthorityType.ADFS)
             {
-                this.SupportADFS = true;
+                SupportADFS = true;
             }
 
-            this.userPasswordInput = userPasswordInput;
-            this.commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, this.userPasswordInput);
-
-            this.DisplayableId = userPasswordInput.UserName;
-
+            _userPasswordInput = userPasswordInput ?? throw new ArgumentNullException(nameof(userPasswordInput));
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, _userPasswordInput);
+            DisplayableId = userPasswordInput.UserName;
         }
 
         protected override async Task PreRunAsync()
         {
             await base.PreRunAsync().ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(this.userPasswordInput.UserName))
+            if (string.IsNullOrWhiteSpace(_userPasswordInput.UserName))
             {
-                string platformUsername = await this.commonNonInteractiveHandler.GetPlatformUserAsync()
+                string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync()
                     .ConfigureAwait(false);
 
-                this.userPasswordInput.UserName = platformUsername;
+                _userPasswordInput.UserName = platformUsername;
             }
         }
 
@@ -81,28 +72,25 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             await base.PreTokenRequestAsync().ConfigureAwait(false);
 
-            if (!this.SupportADFS)
+            if (!SupportADFS)
             {
-                var userRealmResponse = await this.commonNonInteractiveHandler.QueryUserRealmDataAsync(this.Authenticator.UserRealmUriPrefix)
+                var userRealmResponse = await _commonNonInteractiveHandler.QueryUserRealmDataAsync(Authenticator.UserRealmUriPrefix)
                     .ConfigureAwait(false);
 
                 if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
                 {
-                    var wsTrustResponse = await this.commonNonInteractiveHandler.QueryWsTrustAsync(
-                        new MexParser(UserAuthType.UsernamePassword, this.RequestContext),
-                        userRealmResponse,
-                     (cloudAudience, trustAddress, userName) =>
-                     {
-                         return WsTrustRequestBuilder.BuildMessage(cloudAudience, trustAddress, (UsernamePasswordInput)userName);
-                     }).ConfigureAwait(false);
+                    WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                        userRealmResponse.FederationMetadataUrl,
+                        userRealmResponse.CloudAudienceUrn,
+                        UserAuthType.UsernamePassword).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    this.userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
+                    _userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
                 }
                 else if (string.Equals(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase))
                 {
                     // handle password grant flow for the managed user
-                    if (!this.userPasswordInput.HasPassword())
+                    if (!_userPasswordInput.HasPassword())
                     {
                         throw new AdalException(AdalError.PasswordRequiredForManagedUserError);
                     }
@@ -116,17 +104,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
-            if (this.userAssertion != null)
+            if (_userAssertion != null)
             {
-                requestParameters[OAuthParameter.GrantType] = this.userAssertion.AssertionType;
-                requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion));
+                requestParameters[OAuthParameter.GrantType] = _userAssertion.AssertionType;
+                requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(_userAssertion.Assertion));
             }
             else
             {
                 // TODO: test if this is hit
                 requestParameters[OAuthParameter.GrantType] = OAuthGrantType.Password;
-                requestParameters[OAuthParameter.Username] = this.userPasswordInput.UserName;
-                requestParameters[OAuthParameter.Password] = new string(this.userPasswordInput.PasswordToCharArray());
+                requestParameters[OAuthParameter.Username] = _userPasswordInput.UserName;
+                requestParameters[OAuthParameter.Password] = new string(_userPasswordInput.PasswordToCharArray());
             }
 
             // To request id_token in response
@@ -137,7 +125,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             // To decide whether user realm discovery is needed or not
             // we should also consider if that is supported by the authority
-            return this.userAssertion == null && !this.SupportADFS;
+            return _userAssertion == null && !SupportADFS;
         }
     }
 }

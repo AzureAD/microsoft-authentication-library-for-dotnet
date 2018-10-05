@@ -25,25 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Core.Helpers
 {
-    public static class CoreAssert
+    internal static class StringExtensions
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
+        /// <summary>
+        /// Create an array of bytes representing the UTF-8 encoding of the given string.
+        /// </summary>
+        /// <param name="stringInput">String to get UTF-8 bytes for</param>
+        /// <returns>Array of UTF-8 character bytes</returns>
+        public static byte[] ToByteArray(this string stringInput)
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
-
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
+            return new UTF8Encoding().GetBytes(stringInput);
         }
     }
 }

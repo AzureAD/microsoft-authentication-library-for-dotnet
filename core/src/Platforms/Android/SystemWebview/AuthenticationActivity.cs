@@ -221,7 +221,7 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 return null;
             }
 
-            ISet<string> chromePackage = new HashSet<string>(_chromePackages.CreateSetFromEnumerable());
+            ISet<string> chromePackage = new HashSet<string>(_chromePackages);
             foreach (ResolveInfo resolveInfo in resolveInfoList)
             {
                 ServiceInfo serviceInfo = resolveInfo.ServiceInfo;

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Telemetry
@@ -69,7 +70,7 @@ namespace Microsoft.Identity.Core.Telemetry
 
         public int HttpResponseStatus
         {
-            set { this[ResponseCodeKey] = value.ToStringInvariant(); }
+            set { this[ResponseCodeKey] = value.ToString(CultureInfo.InvariantCulture); }
         }
 
         public string OauthErrorCode

@@ -182,7 +182,11 @@ namespace DesktopTestApp
 
                 try
                 {
-                    AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
+                    AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
+                        SplitScopeString(scopes.Text), 
+                        GetUIBehavior(), 
+                        _publicClientHandler.ExtraQueryParams, 
+                        new UIParent());
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -205,7 +209,7 @@ namespace DesktopTestApp
                 {
                     AuthenticationResult authenticationResult =
                         await _publicClientHandler.PublicClientApplication.AcquireTokenByIntegratedWindowsAuthAsync(
-                            scopes.Text.AsArray(),
+                            SplitScopeString(scopes.Text),
                             username);
 
                     SetResultPageInfo(authenticationResult);
@@ -239,7 +243,7 @@ namespace DesktopTestApp
                 _publicClientHandler.PublicClientApplication = new PublicClientApplication(publicClientId, "https://login.microsoftonline.com/organizations");
 
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication.AcquireTokenByUsernamePasswordAsync(
-                    scopes.Text.AsArray(),
+                    SplitScopeString(scopes.Text),
                     username,
                     password);
 
@@ -282,7 +286,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(scopes.Text.AsArray());
+                        await _publicClientHandler.AcquireTokenSilentAsync(SplitScopeString(scopes.Text));
 
                     SetResultPageInfo(authenticationResult);
                 }
@@ -311,7 +315,7 @@ namespace DesktopTestApp
 
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(scopes.Text.AsArray(), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(SplitScopeString(scopes.Text), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent());
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -483,7 +487,7 @@ namespace DesktopTestApp
 
                 AuthenticationResult authenticationResult =
                     await _publicClientHandler.PublicClientApplication.AcquireTokenWithDeviceCodeAsync(
-                        scopes.Text.AsArray(),
+                        SplitScopeString(scopes.Text),
                         dcr =>
                         {
                             BeginInvoke(new MethodInvoker(() => callResult.Text = dcr.Message));
@@ -503,6 +507,16 @@ namespace DesktopTestApp
         {
             _cancellationTokenSource?.Cancel();
             _cancellationTokenSource = null;
+        }
+
+        private IEnumerable<string> SplitScopeString(string scopes)
+        {
+            if (String.IsNullOrWhiteSpace(scopes))
+            {
+                return new string[] { };
+            }
+
+            return scopes.Split(new[] { " " }, StringSplitOptions.None);
         }
     }
 }

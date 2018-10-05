@@ -110,24 +110,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
         }
 
         /// <summary>
-        /// Convert the given dictionary of string key-value pairs into a URL query string.
-        /// </summary>
-        /// <param name="input">Dictionary of string key-value pairs</param>
-        /// <returns>URL query string</returns>
-        /// <remarks>This method does NOT prepend the result with the '?' character.</remarks>
-        public static string ToQueryParameter(this IDictionary<string, string> input)
-        {
-            StringBuilder builder = new StringBuilder();
-            foreach (var key in input.Keys)
-            {
-                builder.AppendFormat(CultureInfo.CurrentCulture, "{0}={1}&", key, UrlEncode(input[key]));
-            }
-
-            builder.Remove(builder.Length - 1, 1);
-            return builder.ToString();
-        }
-
-        /// <summary>
         /// Parse a delimited string of key-value pairs in to a dictionary.
         /// </summary>
         /// <param name="input">Delimited string of key-value pairs</param>
@@ -228,78 +210,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
         public static Dictionary<string, string> ParseKeyValueList(string input, char delimiter, bool urlDecode, RequestContext requestContext)
         {
             return ParseKeyValueList(input, delimiter, urlDecode, true, requestContext, strict: false);
-        }
-
-        /// <summary>
-        /// Create an array of bytes representing the UTF-8 encoding of the given string.
-        /// </summary>
-        /// <param name="stringInput">String to get UTF-8 bytes for</param>
-        /// <returns>Array of UTF-8 character bytes</returns>
-        public static byte[] ToByteArray(this String stringInput)
-        {
-            return ToByteArray(new StringBuilder(stringInput));
-        }
-
-        /// <summary>
-        /// Create an array of bytes representing the UTF-8 encoding of the current string value of
-        /// the given <see cref="StringBuilder"/>.
-        /// </summary>
-        /// <param name="stringBuilder"><see cref="StringBuilder"/> to get the UTF-8 bytes for</param>
-        /// <returns>Array of UTF-8 character bytes</returns>
-        public static byte[] ToByteArray(this StringBuilder stringBuilder)
-        {
-            if (stringBuilder == null)
-            {
-                return null;
-            }
-
-            UTF8Encoding encoding = new UTF8Encoding();
-            var messageChars = new char[stringBuilder.Length];
-
-            try
-            {
-                stringBuilder.CopyTo(0, messageChars, 0, stringBuilder.Length);
-                return encoding.GetBytes(messageChars);
-            }
-            finally
-            {
-                messageChars.SecureClear();
-            }
-        }
-
-        public static void SecureClear(this StringBuilder stringBuilder)
-        {
-            if (stringBuilder != null)
-            {
-                for (int i = 0; i < stringBuilder.Length; i++)
-                {
-                    stringBuilder[i] = '\0';
-                }
-
-                stringBuilder.Length = 0;
-            }
-        }
-
-        public static void SecureClear(this byte[] bytes)
-        {
-            if (bytes != null)
-            {
-                for (int i = 0; i < bytes.Length; i++)
-                {
-                    bytes[i] = 0;
-                }
-            }
-        }
-
-        public static void SecureClear(this char[] chars)
-        {
-            if (chars != null)
-            {
-                for (int i = 0; i < chars.Length; i++)
-                {
-                    chars[i] = '\0';
-                }
-            }
         }
 
         /// <summary>
