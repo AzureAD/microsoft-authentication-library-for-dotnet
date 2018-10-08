@@ -32,6 +32,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
@@ -59,7 +60,7 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
         {
             await base.PreTokenRequestAsync(cancellationToken).ConfigureAwait(false);
 
-            OAuth2Client client = new OAuth2Client();
+            OAuth2Client client = new OAuth2Client(PlatformInformation);
 
             var deviceCodeScopes = new HashSet<string>();
             deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);

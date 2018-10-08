@@ -77,7 +77,7 @@ namespace Test.Microsoft.Identity.Unit.OAuth2Tests
                 ResponseMessage =
                     MockHelpers.CreateSuccessTokenResponseMessage()
             });
-            OAuth2Client client = new OAuth2Client();
+            OAuth2Client client = new OAuth2Client(new TestPlatformInformation());
             Task<MsalTokenResponse> task = client.GetTokenAsync(new Uri(TestConstants.AuthorityCommonTenant), new RequestContext(new TestLogger(Guid.NewGuid(), null)));
             MsalTokenResponse response = task.Result;
             Assert.IsNotNull(response);

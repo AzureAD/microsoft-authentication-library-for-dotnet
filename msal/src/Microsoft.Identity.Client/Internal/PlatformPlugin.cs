@@ -31,46 +31,25 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal static class PlatformPlugin
     {
-        static PlatformPlugin()
+        public static IWebUIFactory GetWebUiFactory()
         {
-            ModuleInitializer.EnsureModuleInitialized();
-            InitializeWebFactoryAndPlatform();
-        }
-
-        public static IWebUIFactory WebUIFactory { get; set; }
-        
-        public static PlatformInformationBase PlatformInformation { get; set; }
-
-        private static void InitializeWebFactoryAndPlatform()
-        {
-            IWebUIFactory webUIFactory = null;
+            if (_overloadWebUiFactory != null)
+            {
+                return _overloadWebUiFactory;
+            }
 
 #if ANDROID || iOS
-            webUIFactory = new Microsoft.Identity.Core.UI.WebUIFactory();
+            return new Microsoft.Identity.Core.UI.WebUIFactory();
 #else
-            webUIFactory = new UI.WebUIFactory();
+            return new UI.WebUIFactory();
 #endif
-            WebUIFactory = webUIFactory;
-            PlatformInformation = new PlatformInformation();
         }
 
-        public static void LogMessage(LogLevel logLevel, string formattedMessage)
+        private static IWebUIFactory _overloadWebUiFactory = null;
+        
+        public static void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
-            switch (logLevel)
-            {
-                case LogLevel.Error:
-                    PlatformLogger.Error(formattedMessage);
-                    break;
-                case LogLevel.Warning:
-                    PlatformLogger.Warning(formattedMessage);
-                    break;
-                case LogLevel.Info:
-                    PlatformLogger.Information(formattedMessage);
-                    break;
-                case LogLevel.Verbose:
-                    PlatformLogger.Verbose(formattedMessage);
-                    break;
-            }
+            _overloadWebUiFactory = webUiFactory;
         }
     }
 }

@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (LoadFromCache)
             {
                 MsalAccessTokenItem = 
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                    await TokenCache.FindAccessTokenAsync(PlatformInformation, AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
 

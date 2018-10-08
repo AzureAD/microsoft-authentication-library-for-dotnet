@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Core.Instance
 
         public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
-        internal AadAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
+        internal AadAuthority(CorePlatformInformationBase platformInformation, string authority, bool validateAuthority) : base(platformInformation, authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Aad;
         }
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Core.Instance
         internal override async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
         {
             var metadata = await AadInstanceDiscovery.Instance.
-                GetMetadataEntryAsync(new Uri(CanonicalAuthority), this.ValidateAuthority, requestContext).ConfigureAwait(false);
+                GetMetadataEntryAsync(PlatformInformation, new Uri(CanonicalAuthority), this.ValidateAuthority, requestContext).ConfigureAwait(false);
 
             CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Core.Instance
             {
                 InstanceDiscoveryResponse discoveryResponse =
                     await AadInstanceDiscovery.Instance.
-                    DoInstanceDiscoveryAndCacheAsync(authorityUri, true, requestContext).ConfigureAwait(false);
+                    DoInstanceDiscoveryAndCacheAsync(PlatformInformation, authorityUri, true, requestContext).ConfigureAwait(false);
 
                 return discoveryResponse.TenantDiscoveryEndpoint;
             }

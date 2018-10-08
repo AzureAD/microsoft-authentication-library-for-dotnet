@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Helpers;
@@ -50,7 +51,13 @@ namespace Microsoft.Identity.Client
     public abstract partial class ClientApplicationBase
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
+        static ClientApplicationBase()
+        {
+            ModuleInitializer.EnsureModuleInitialized();
+        }
+
         private TokenCache userTokenCache;
+        internal CorePlatformInformationBase PlatformInformation { get; }
 
         /// <Summary>
         /// Default Authority used for interactive calls.
@@ -81,8 +88,10 @@ namespace Microsoft.Identity.Client
         protected ClientApplicationBase(string clientId, string authority, string redirectUri,
             bool validateAuthority)
         {
+            PlatformInformation = new PlatformInformation();
+
             ClientId = clientId;
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, validateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(PlatformInformation, authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
@@ -95,8 +104,15 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                new PlatformInformation().GetProductName(), MsalIdHelper.GetMsalVersion(),
-                MsalIdHelper.GetAssemblyFileVersion(), MsalIdHelper.GetAssemblyInformationalVersion()));
+                PlatformInformation.GetProductName(), MsalIdHelper.GetMsalVersion(),
+                PlatformInformation.GetAssemblyFileVersionAttribute(), GetAssemblyInformationalVersion()));
+        }
+
+        private static string GetAssemblyInformationalVersion()
+        {
+            AssemblyInformationalVersionAttribute attribute =
+                typeof(ClientApplicationBase).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            return (attribute != null) ? attribute.InformationalVersion : string.Empty;
         }
 
         /// <summary>
@@ -180,7 +196,7 @@ namespace Microsoft.Identity.Client
                 requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
                 return Enumerable.Empty<Account>();
             }
-            return await UserTokenCache.GetAccountsAsync(Authority, ValidateAuthority, requestContext).ConfigureAwait(false);
+            return await UserTokenCache.GetAccountsAsync(PlatformInformation, Authority, ValidateAuthority, requestContext).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -247,7 +263,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = null;
             if (!string.IsNullOrEmpty(authority))
             {
-                authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+                authorityInstance = Core.Instance.Authority.CreateAuthority(PlatformInformation, authority, ValidateAuthority);
             }
 
             return
@@ -268,12 +284,12 @@ namespace Microsoft.Identity.Client
                 return;
             }
 
-            await UserTokenCache.RemoveAsync(Authority, ValidateAuthority, account, requestContext).ConfigureAwait(false);
+            await UserTokenCache.RemoveAsync(PlatformInformation, Authority, ValidateAuthority, account, requestContext).ConfigureAwait(false);
         }
 
         internal Authority GetAuthority(IAccount account)
         {
-            var authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            var authority = Core.Instance.Authority.CreateAuthority(PlatformInformation, Authority, ValidateAuthority);
             var tenantId = authority.GetTenantId();
 
             if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId)

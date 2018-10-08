@@ -50,8 +50,10 @@ namespace Microsoft.Identity.Client
             base.ValidateRedirectUri(redirectUri, requestContext);
 
             if (DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+            {
                 throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + PlatformInformationBase.DefaultRedirectUri +
-                                        " can not be used on Android platform");
+                                                                               " can not be used on Android platform");
+            }
         }
 
         public override string GetDefaultRedirectUri(string clientId)

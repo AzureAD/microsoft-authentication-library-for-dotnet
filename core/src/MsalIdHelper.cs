@@ -66,22 +66,15 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal static class MsalIdHelper
     {
-        private static CorePlatformInformationBase corePlatformInformationBaseInstance;
-
-        static MsalIdHelper()
+        public static IDictionary<string, string> GetMsalIdParameters(CorePlatformInformationBase platformInformation)
         {
-            corePlatformInformationBaseInstance = CorePlatformInformationBase.Instance;
-        }
-
-        public static IDictionary<string, string> GetMsalIdParameters()
-        {
-            if (corePlatformInformationBaseInstance == null)
+            if (platformInformation == null)
             {
                 throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.PlatformNotSupported, CoreErrorMessages.PlatformNotSupported);
             }
             var parameters = new Dictionary<string, string>
             {
-                [MsalIdParameter.Product] = corePlatformInformationBaseInstance.GetProductName(),
+                [MsalIdParameter.Product] = platformInformation.GetProductName(),
                 [MsalIdParameter.Version] = GetMsalVersion()
             };
 
@@ -120,18 +113,6 @@ namespace Microsoft.Identity.Core
             }
 
             return null;
-        }
-
-        public static string GetAssemblyFileVersion()
-        {
-            return corePlatformInformationBaseInstance.GetAssemblyFileVersionAttribute();
-        }
-
-        public static string GetAssemblyInformationalVersion()
-        {
-            AssemblyInformationalVersionAttribute attribute =
-                typeof (MsalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            return (attribute != null) ? attribute.InformationalVersion : string.Empty;
         }
     }
 }

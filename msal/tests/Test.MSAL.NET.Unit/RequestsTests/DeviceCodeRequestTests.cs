@@ -156,7 +156,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
         private AuthenticationRequestParameters CreateAuthenticationParametersAndSetupMocks(out HashSet<string> expectedScopes)
         {
-            Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            Authority authority = Authority.CreateAuthority(new TestPlatformInformation(), TestConstants.AuthorityHomeTenant, false);
             _cache = new TokenCache()
             {
                 ClientId = TestConstants.ClientId

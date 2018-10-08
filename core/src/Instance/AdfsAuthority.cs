@@ -41,9 +41,9 @@ namespace Microsoft.Identity.Core.Instance
     {
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         
-
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
-        public AdfsAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
+        public AdfsAuthority(CorePlatformInformationBase platformInformation, string authority, bool validateAuthority) 
+            : base(platformInformation, authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Adfs;
         }
@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Core.Instance
 
         private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(string endpoint, RequestContext requestContext)
         {
-            OAuth2Client client = new OAuth2Client();
+            OAuth2Client client = new OAuth2Client(PlatformInformation);
             client.AddQueryParameter("api-version", "1.0");
             return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext).ConfigureAwait(false);
         }

@@ -42,11 +42,13 @@ namespace Microsoft.Identity.Core.OAuth2
     internal class OAuth2Client
     {
         private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
-
-        private readonly Dictionary<string, string> _headers =
-            new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters());
-
+        private readonly Dictionary<string, string> _headers;
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
+
+        public OAuth2Client(CorePlatformInformationBase platformInformation)
+        {
+            _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters(platformInformation));
+        }
 
         public void AddQueryParameter(string key, string value)
         {

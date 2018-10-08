@@ -61,7 +61,7 @@ namespace Test.MSAL.NET.Unit.Mocks
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
-            PlatformPlugin.WebUIFactory = mockFactory;
+            PlatformPlugin.SetWebUiFactory(mockFactory);
         }
     }
 }

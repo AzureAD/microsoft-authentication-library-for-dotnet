@@ -89,7 +89,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
             });
 
-            Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", true);
+            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoftonline.in/mytenant.com", true);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             Task.Run(async () =>
@@ -121,7 +121,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
             });
 
-            Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", false);
+            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoftonline.in/mytenant.com", false);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             Task.Run(async () =>
@@ -168,7 +168,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                                                                                 "4fa2-4f35-a59b-54b6f91a9c94\"}")
             });
 
-            Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
+            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoft0nline.com/mytenant.com", true);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             try
@@ -207,7 +207,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                 ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{}")
             });
 
-            Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
+            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoft0nline.com/mytenant.com", true);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             try
@@ -241,7 +241,7 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
                     MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-MissingFields.json"))
             });
 
-            Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", false);
+            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoftonline.in/mytenant.com", false);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
             try
@@ -274,13 +274,13 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             const string uriCustomPort = "https://login.microsoftonline.in:444/mytenant.com";
             const string uriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
 
-            var authority = Authority.CreateAuthority(uriNoPort, false);
+            var authority = Authority.CreateAuthority(new TestPlatformInformation(), uriNoPort, false);
             Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(uriDefaultPort, false);
+            authority = Authority.CreateAuthority(new TestPlatformInformation(), uriDefaultPort, false);
             Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(uriCustomPort, false);
+            authority = Authority.CreateAuthority(new TestPlatformInformation(), uriCustomPort, false);
             Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
         }
 

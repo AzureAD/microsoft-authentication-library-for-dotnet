@@ -84,7 +84,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
             CoreLoggerBase.Default = new AdalLogger(Guid.Empty);
             CoreExceptionFactory.Instance = new AdalExceptionFactory();
             CoreTelemetryService.InitializeCoreTelemetryService(Telemetry.GetInstance() as ITelemetry);
-            CorePlatformInformationBase.Instance = new PlatformInformation();
             isInitialized = true;
         }
     }

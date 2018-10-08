@@ -43,13 +43,14 @@ namespace Microsoft.Identity.Core.Instance
         internal readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> Cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(Uri authority, bool validateAuthority,
+        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
+            CorePlatformInformationBase platformInformation, Uri authority, bool validateAuthority,
             RequestContext requestContext)
         {
             InstanceDiscoveryMetadataEntry entry = null;
             if (!Cache.TryGetValue(authority.Host, out entry))
             {
-                await DoInstanceDiscoveryAndCacheAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
+                await DoInstanceDiscoveryAndCacheAsync(platformInformation, authority, validateAuthority, requestContext).ConfigureAwait(false);
                 Cache.TryGetValue(authority.Host, out entry);
             }
 
@@ -72,10 +73,10 @@ namespace Microsoft.Identity.Core.Instance
         }
 
         internal async Task<InstanceDiscoveryResponse> 
-            DoInstanceDiscoveryAndCacheAsync(Uri authority, bool validateAuthority, RequestContext requestContext)
+            DoInstanceDiscoveryAndCacheAsync(CorePlatformInformationBase platformInformation, Uri authority, bool validateAuthority, RequestContext requestContext)
         {
             InstanceDiscoveryResponse discoveryResponse =
-                await SendInstanceDiscoveryRequestAsync(authority, requestContext).ConfigureAwait(false);
+                await SendInstanceDiscoveryRequestAsync(platformInformation, authority, requestContext).ConfigureAwait(false);
 
             if (validateAuthority)
             {
@@ -86,9 +87,12 @@ namespace Microsoft.Identity.Core.Instance
 
             return discoveryResponse;
         }
-        private static async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(Uri authority, RequestContext requestContext)
+        private static async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
+            CorePlatformInformationBase platformInformation, 
+            Uri authority, 
+            RequestContext requestContext)
         {
-            OAuth2Client client = new OAuth2Client();
+            OAuth2Client client = new OAuth2Client(platformInformation);
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
 

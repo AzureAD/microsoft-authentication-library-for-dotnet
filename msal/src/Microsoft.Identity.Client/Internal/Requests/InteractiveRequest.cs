@@ -234,7 +234,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString();
             }
 
-            foreach (var kvp in MsalIdHelper.GetMsalIdParameters())
+            foreach (var kvp in MsalIdHelper.GetMsalIdParameters(PlatformInformation))
             {
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }

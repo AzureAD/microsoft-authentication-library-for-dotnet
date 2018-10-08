@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Core.Instance
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
         public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
 
-        internal B2CAuthority(string authority, bool validateAuthority) : base(authority, validateAuthority)
+        internal B2CAuthority(CorePlatformInformationBase platformInformation, string authority, bool validateAuthority) : base(platformInformation, authority, validateAuthority)
         {
             Uri authorityUri = new Uri(authority);
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new [] { '/'}, StringSplitOptions.RemoveEmptyEntries);

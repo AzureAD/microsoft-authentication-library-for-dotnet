@@ -42,6 +42,7 @@ using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using NSubstitute;
+using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
@@ -549,7 +550,7 @@ namespace Test.MSAL.NET.Unit
             var cache = new TokenCache();
             TokenCacheHelper.PopulateCacheForClientCredential(cache.tokenCacheAccessor);
 
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
+            var authority = Authority.CreateAuthority(new TestPlatformInformation(), TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
                 null, cache)
@@ -581,7 +582,7 @@ namespace Test.MSAL.NET.Unit
             var cache = new TokenCache();
             TokenCacheHelper.PopulateCache(cache.tokenCacheAccessor);
 
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
+            var authority = Authority.CreateAuthority(new TestPlatformInformation(), TestConstants.AuthorityTestTenant, false).CanonicalAuthority;
             var app = new ConfidentialClientApplication(TestConstants.ClientId, authority,
                 TestConstants.RedirectUri, new ClientCredential(TestConstants.ClientSecret),
                 null, cache)

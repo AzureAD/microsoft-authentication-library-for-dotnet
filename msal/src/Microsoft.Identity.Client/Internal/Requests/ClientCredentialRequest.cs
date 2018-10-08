@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!ForceRefresh && LoadFromCache)
             {
                 MsalAccessTokenItem
-                    = await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                    = await TokenCache.FindAccessTokenAsync(PlatformInformation, AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
         protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
