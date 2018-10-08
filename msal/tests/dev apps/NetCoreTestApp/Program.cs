@@ -41,7 +41,7 @@ namespace NetCoreTestApp
         private readonly static string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private readonly static string ClientIdForConfidentialApp = "<enter id>";
 
-        private readonly static string Username = ""; // used for WIA and U/P, can be empty
+        private readonly static string Username = ""; // used for WIA and U/P, cannot be empty on .net core
         private readonly static string Authority = "https://login.microsoftonline.com/organizations"; // common will not work for WIA and U/P but it is a good test case
         private readonly static IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
@@ -49,7 +49,12 @@ namespace NetCoreTestApp
 
         public static void Main(string[] args)
         {
-            PublicClientApplication pca = new PublicClientApplication(ClientIdForPublicApp, Authority);
+
+            PublicClientApplication pca = new PublicClientApplication(
+                ClientIdForPublicApp, 
+                Authority, 
+                TokenCacheHelper.GetUserCache()); // token cache serialization https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization
+
             Logger.LogCallback = Log;
             Logger.Level = LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
@@ -64,8 +69,9 @@ namespace NetCoreTestApp
                 Console.WriteLine(@"
                         1. Acquire Token by Windows Integrated Auth
                         2. Acquire Token with Username and Password
-                        3. Acquire Token Silently
-                        4. Confidential Client with Certificate (needs extra config)
+                        3. Acquire Token with Device Code
+                        4. Acquire Token Silently
+                        5. Confidential Client with Certificate (needs extra config)
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -83,7 +89,16 @@ namespace NetCoreTestApp
                             SecureString password = GetPasswordFromConsole();
                             task = pca.AcquireTokenByUsernamePasswordAsync(Scopes, Username, password);
                             break;
-                        case 3: // acquire token silent
+                        case 3:
+                            task = pca.AcquireTokenWithDeviceCodeAsync(
+                                Scopes,
+                                deviceCodeResult =>
+                                {
+                                    Console.WriteLine(deviceCodeResult.Message);
+                                    return Task.FromResult(0);
+                                });
+                            break;
+                        case 4: // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
                             if (account == null)
                             {
@@ -92,7 +107,7 @@ namespace NetCoreTestApp
 
                             task = pca.AcquireTokenSilentAsync(Scopes, account);
                             break;
-                        case 4:
+                        case 5:
                             RunClientCredentialWithCertificate();
                             break;
                         case 0:
@@ -242,6 +257,7 @@ namespace NetCoreTestApp
                 return ex.ToString();
             }
         }
+
 
     }
 }
