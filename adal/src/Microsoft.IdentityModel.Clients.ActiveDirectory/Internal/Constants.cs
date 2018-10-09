@@ -166,9 +166,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
 
         public const string InteractionRequired = "interaction_required";
-
+      
         public const string GetUserNameFailed = "Failed to get user name";
 
+        public const string BrokerRedirectUriIncorrectFormat = "The broker redirect URI is incorrect, it should be {0}. Please visit https://aka.ms/adal-net-broker-redirect-uri-android for more details.";
     }
 
     internal static class XmlNamespace
