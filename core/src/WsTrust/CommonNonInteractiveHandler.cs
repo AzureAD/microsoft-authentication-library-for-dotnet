@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Identity.Core.Realm;
@@ -121,7 +122,7 @@ namespace Microsoft.Identity.Core.WsTrust
             }
 
             _requestContext.Logger.InfoPii(
-                $"WS-Trust endpoint '{wsTrustEndpoint.Uri}' being used from MEX at '{federationMetadataUrl}'",
+                string.Format(CultureInfo.InvariantCulture, "WS-Trust endpoint '{0}' being used from MEX at '{1}'", wsTrustEndpoint.Uri, federationMetadataUrl),
                 "Fetched and parsed MEX");
 
             WsTrustResponse wsTrustResponse = await GetWsTrustResponseAsync(
