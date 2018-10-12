@@ -100,7 +100,8 @@ namespace Microsoft.Identity.Core
 
         public const string MissingEntitlements =
             "The application does not have keychain access groups enabled in the Entitlements.plist. " +
-            "As a result, there was a failure to save to the iOS keychain." +
-            " See https://aka.ms/msal-net-enable-keychain-groups for more details on enabling keychain access groups and entitlements.";
+            "As a result, there was a failure to save to the iOS keychain. " +
+            "The keychain access group '{0}' is not enabled in the Entitlements.plist. " +
+            "See https://aka.ms/msal-net-enable-keychain-groups for more details on enabling keychain access groups and entitlements.";
     }
 }

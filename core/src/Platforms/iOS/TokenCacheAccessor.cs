@@ -31,6 +31,7 @@ using Security;
 using Foundation;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
+using System.Globalization;
 
 namespace Microsoft.Identity.Core
 {
@@ -284,11 +285,14 @@ namespace Microsoft.Identity.Core
                 secStatusCode = SecKeyChain.Add(recordToSave);
             }
 
-            if(secStatusCode == SecStatusCode.MissingEntitlement)
+            if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
                 throw CoreExceptionFactory.Instance.GetClientException(
                 CoreErrorCodes.MissingEntitlements,
-                CoreErrorMessages.MissingEntitlements);
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    CoreErrorMessages.MissingEntitlements,
+                    recordToSave.AccessGroup));
             }
 
             return secStatusCode;
