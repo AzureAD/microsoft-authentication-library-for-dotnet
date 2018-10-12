@@ -1,19 +1,24 @@
+2.2.1-preview
+=============
+This release contains bug fixes on top of MSAL 2.2.0-preview:
+- Due to static initialization, there was a race condition which appeared randomly. [MSAL issue #629](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/629)
+- For iOS, TeamId is now accessible when the device is locked. [MSAL issue #626](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/626)
+- For iOS, MSAL returns a useful error message, and an [aka.ms link](https://aka.ms/msal-net-enable-keychain-groups), when keychain access groups have not been set in the Entitlements.plist. [MSAL issue #633](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/633)
+- Cache serialization for [.NetCore](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/637)
+- Improve logging for device code flow to handle "authorization_pending" exceptions as info messages [MSAL issue #631](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/631)
+
 2.2.0-preview
 =============
-
-- Device Code Flow. For details see https://aka.ms/msal-device-code-flow
-- Integration with SFAuthenticationSession for iOS11 and ASWebAuthenticationSession for iOS12+ [MSAL issue 489](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/489)
-- Return clear MsalClientException message when not able to access keychain. See https://aka.ms/msal-net-enable-keychain-access for details.
+- MSAL.NET 2.2.0 now supports Device Code Flow. For details see https://aka.ms/msal-device-code-flow
+- Xamarin.iOS applications using the system web view now benefit from the integration with SFAuthenticationSession for iOS11 and ASWebAuthenticationSession for iOS12+ [MSAL issue 489](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/489)
+- A clear MsalClientException message is now returned when the application is not able to access keychain, with instructions. See https://aka.ms/msal-net-enable-keychain-access for details.
 - Removed double-logging in log files and callbacks.  https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1289
-- Improved 429 server error handling.
-- UWP cache fix. The key should be 255 characters or less. When using several scopes the key exceeds 255. Now hashing scopes and environment on UWP.  [612](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/612)
-
+- Improved 429 server error handling by exposing the Http Response headers in MsalServiceException. See https://aka.ms/msal-net-retry-after
+- UWP cache fix. The key of the storage on UWP should be 255 characters or less. When using several scopes the key could exceed 255 characters. Now hashing scopes and environment on UWP.  [612](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/612)
 
 2.1.0-preview
 =============
-
 - Integrated Windows Authentication and Username / Password authentication flows. For details see https://aka.ms/msal-net-iwa and https://aka.ms/msal-net-up
-
 
 2.0.1-preview
 =============

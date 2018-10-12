@@ -1,6 +1,16 @@
-Version 4.1.0-preview
-=============
+Version 4.2.0-preview
+===============
+This release includes:
+- Due to static initialization, there was a race condition which appeared randomly. [MSAL issue #629](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/629)
+- Improved error messages and inclusion of an [aka.ms link]( https://aka.ms/adal-net-broker-redirect-uri-android) for broker redirect error. [ADAL issue #601](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/601)
+- For iOS, a clear exception message is now returned when the application is not able to access keychain, with instructions. See https://aka.ms/msal-net-enable-keychain-access for details. [MSAL issue #611](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/611)
+- For iOS, TeamId is now accessible when the device is locked. [MSAL issue #626](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/626)
+- For iOS, MSAL returns a useful error message, and an [aka.ms link](https://aka.ms/msal-net-enable-keychain-groups), when keychain access groups have not been set in the Entitlements.plist. [MSAL issue #633](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/633)
+- UWP cache fix. The key of the storage on UWP should be 255 characters or less. When using several scopes the key could exceed 255 characters. Now hashing scopes and environment on UWP.  [612](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/612)
+- Removal of double-logging in log files and callbacks.  https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1289
 
+Version 4.1.0-preview
+===============
 This release includes: 
 
 - Integrated Windows Auth and Username / Password minor changes, such as improved error messages and http call resilience
