@@ -117,7 +117,6 @@ namespace Microsoft.Identity.Client
         /// and a second time with the <c>containsPii</c> parameter equals to <c>true</c> and the message might contain PII. 
         /// In some cases (when the message does not contain PII), the message will be the same.
         /// <para/>
-        /// The property can only be set once and it will throw an ArgumentException if called twice.
         /// For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <exception cref="ArgumentException">will be thrown if the LogCallback was already set</exception>
@@ -127,17 +126,17 @@ namespace Microsoft.Identity.Client
             {
                 lock (LockObj)
                 {
-                    if (_logCallback != null)
-                    {
-                        throw new ArgumentException("MSAL logging callback can only be set once per process and" +
-                                                   " should never change once set.");
-                    }
-
                     _logCallback = value;
                 }
             }
 
-            internal get { return _logCallback; }
+            internal get
+            {
+                lock (LockObj)
+                {
+                    return _logCallback;
+                }
+            }
         }
 
         /// <summary>

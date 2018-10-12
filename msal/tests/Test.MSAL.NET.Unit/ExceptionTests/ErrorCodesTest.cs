@@ -24,7 +24,7 @@ namespace Test.MSAL.NET.Unit.ExceptionTests
                 typeof(MsalError)
             };
 
-            var msalErrorCodes = msalTypesWithConstants.SelectMany(t => GetConstants(t)).ToList();
+            var msalErrorCodes = msalTypesWithConstants.SelectMany(GetConstants).ToList();
             var coreErrorCodes = GetConstants(typeof(CoreErrorCodes));
 
             foreach (string coreErrorCode in coreErrorCodes)

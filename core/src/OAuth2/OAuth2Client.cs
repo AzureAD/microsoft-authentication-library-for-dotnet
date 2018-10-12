@@ -137,6 +137,8 @@ namespace Microsoft.Identity.Core.OAuth2
 
         public static void CreateErrorResponse(HttpResponse response, RequestContext requestContext)
         {
+            bool shouldLogAsError = true;
+
             Exception serviceEx;
 
             try
@@ -157,6 +159,17 @@ namespace Microsoft.Identity.Core.OAuth2
                     msalTokenResponse.Error,
                     msalTokenResponse.ErrorDescription,
                     response);
+
+                // For device code flow, AuthorizationPending can occur a lot while waiting
+                // for the user to auth via browser and this causes a lot of error noise in the logs.
+                // So suppress this particular case to an Info so we still see the data but don't 
+                // log it as an error since it's expected behavior while waiting for the user.
+                if (string.Compare(msalTokenResponse.Error, OAuth2Error.AuthorizationPending,
+                        StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    shouldLogAsError = false;
+                }
+
             }
             catch (SerializationException ex)
             {
@@ -166,7 +179,15 @@ namespace Microsoft.Identity.Core.OAuth2
                     ex);
             }
 
-            requestContext.Logger.ErrorPii(serviceEx);
+            if (shouldLogAsError)
+            {
+                requestContext.Logger.ErrorPii(serviceEx);
+            }
+            else
+            {
+                requestContext.Logger.InfoPii(serviceEx);
+            }
+
             throw serviceEx;
         }
 
