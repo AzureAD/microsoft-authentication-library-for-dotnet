@@ -141,6 +141,14 @@ namespace Microsoft.Identity.Client
         /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-access
         /// </summary>
         public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
+
+        /// <summary>
+        /// Xamarin.iOS specific. This error indicates that saving a token to the keychain failed. 
+        /// <para>Mitigation</para> In order to access the keychain on iOS, you will need to set the
+        /// keychain access groups in the Entitlements.plist for the application.
+        /// <para>For more details</para> See https://aka.ms/msal-net-enable-keychain-groups 
+        /// </summary>
+        public const string MissingEntitlements = "missing_entitlements";
 #endif
 
 #if ANDROID

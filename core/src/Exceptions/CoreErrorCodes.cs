@@ -34,8 +34,6 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal class CoreErrorCodes
     {
-
-
         public const string JsonParseError = "json_parse_failed";
         public const string RequestTimeout = "request_timeout";
         public const string ServiceNotAvailable = "service_not_available";
@@ -81,6 +79,7 @@ namespace Microsoft.Identity.Core
 
 #if iOS
         public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
+        public const string MissingEntitlements = "missing_entitlements";
 #endif
 
 #if ANDROID

@@ -284,6 +284,13 @@ namespace Microsoft.Identity.Core
                 secStatusCode = SecKeyChain.Add(recordToSave);
             }
 
+            if(secStatusCode == SecStatusCode.MissingEntitlement)
+            {
+                throw CoreExceptionFactory.Instance.GetClientException(
+                CoreErrorCodes.MissingEntitlements,
+                CoreErrorMessages.MissingEntitlements);
+            }
+
             return secStatusCode;
         }
 
