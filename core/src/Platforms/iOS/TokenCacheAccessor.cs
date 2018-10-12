@@ -85,7 +85,8 @@ namespace Microsoft.Identity.Core
             var queryRecord = new SecRecord(SecKind.GenericPassword)
             {
                 Service = "",
-                Account = TeamIdKey
+                Account = TeamIdKey,
+                Accessible = _defaultAccessiblityPolicy
             };
 
             SecRecord match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
