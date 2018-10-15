@@ -17,8 +17,7 @@
     <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <AndroidManifest>Properties\AndroidManifest.xml</AndroidManifest>
-    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
-    <CodeAnalysisRuleSet>../../../core/ConfigureAwaitDisable.ruleset</CodeAnalysisRuleSet>
+    <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>   
   </PropertyGroup>
   <PropertyGroup Label="SonarQube analysis settings">
     <!-- These properties have no effect on how the project is built. -->

@@ -44,9 +44,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msal", "msal", "{68B4CCE9-FBC2-4537-9AD8-C4692CD6661B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{1B80E121-55C5-48A5-8285-0AB9719244E6}"
-	ProjectSection(SolutionItems) = preProject
-		core\ConfigureAwait.ruleset = core\ConfigureAwait.ruleset
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{88E00ABD-6C6D-4A96-86E2-FB15CA18F4B9}"
 EndProject
@@ -107,6 +104,11 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWP", "msal\tests\dev apps\UWP\UWP.csproj", "{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
+	ProjectSection(SolutionItems) = preProject
+		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

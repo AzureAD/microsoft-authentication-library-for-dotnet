@@ -152,7 +152,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
+      <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.2.0-preview1-26831-02</Version>
     </PackageReference>

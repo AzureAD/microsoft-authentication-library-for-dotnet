@@ -3,8 +3,7 @@
     <TargetFramework>netstandard1.3</TargetFramework>
     <PackageTargetFallback>portable-net45+win8+wpa81+wp8</PackageTargetFallback>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>..\..\..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>    
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>

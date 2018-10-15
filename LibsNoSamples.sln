@@ -25,6 +25,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.Lab
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Integration", "msal\tests\Test.MSAL.NET.Integration\Test.MSAL.NET.Integration.csproj", "{3DADE3D0-676E-4E5F-B815-944A61EAAADC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C-5E2E-4C4A-BDD2-8F2A06AAE3F6}"
+	ProjectSection(SolutionItems) = preProject
+		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

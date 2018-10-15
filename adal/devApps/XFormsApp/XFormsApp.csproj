@@ -10,16 +10,14 @@
     <TargetFramework>netstandard1.1</TargetFramework>
     <PackageTargetFallback>portable-net45+win8+wpa81+wp8</PackageTargetFallback>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisRuleSet>..\..\..\..\build\Sdl7.0.ruleset</CodeAnalysisRuleSet>
+    <RunCodeAnalysis>false</RunCodeAnalysis>    
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
     <SignAssembly>False</SignAssembly>
     <AssemblyOriginatorKeyFile>35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>True</DelaySign>
-    <CodeAnalysisRuleSet>../../../core/ConfigureAwaitDisable.ruleset</CodeAnalysisRuleSet>
+    <DelaySign>True</DelaySign>    
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.91635" />

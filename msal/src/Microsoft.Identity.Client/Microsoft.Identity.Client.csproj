@@ -8,6 +8,7 @@
     <DebugType>full</DebugType>
     <!-- The MSAL.snk has both private and public keys -->
     <DelaySign>false</DelaySign>
+    <CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -182,29 +183,9 @@
     <None Update="Platforms\net45\WindowsFormsWebAuthenticationDialogBase.cs" SubType="Form" />
     <None Update="Platforms\net45\SilentWindowsFormsAuthenticationDialog.cs" SubType="Form" />
   </ItemGroup>
-
-  <!-- Copies all artifacts needed to generate the nuget package. This should be replaced with msbuild /t:pack, however
-  bug https://github.com/NuGet/Home/issues/3891 blocks this, espcially that packaging rebuilds the Core assemblies, so we cannot sign it.-->
-  <Target Name="LayoutNuGet">
-    <PropertyGroup>
-      <NugetPackageRootFolder Condition="'$(NugetPackageRootFolder)' == ''">$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..",".nugetlayout"))</NugetPackageRootFolder>
-      <NuspecFilePath>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", "..", "build", "Microsoft.Identity.Client.nuspec"))</NuspecFilePath>
-    </PropertyGroup>
-    <ItemGroup>
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.dll" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.xml" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.Identity.Client.pdb" />
-    </ItemGroup>
-
-    <RemoveDir Directories="$(NugetPackageRootFolder)" />
-    <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
-    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
-  </Target>
-
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>../../../core/ConfigureAwait.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
+   
   <ItemGroup>
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
   </ItemGroup>
 </Project>
