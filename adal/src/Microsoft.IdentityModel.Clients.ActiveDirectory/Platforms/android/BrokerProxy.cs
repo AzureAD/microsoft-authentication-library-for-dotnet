@@ -415,12 +415,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             brokerOptions.PutInt("json", 1);
             brokerOptions.PutString(BrokerConstants.AccountResource,
                 request.Resource);
-            string computedRedirectUri = GetRedirectUriForBroker();
 
-            if (!string.Equals(computedRedirectUri, request.RedirectUri, StringComparison.OrdinalIgnoreCase))
-            {
-                throw new AdalException(AdalError.BrokerRedirectUriIncorrectFormat, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.BrokerRedirectUriIncorrectFormat, computedRedirectUri));
-            }
+            ValidateBrokerRedirectURI(request);
 
             brokerOptions.PutString(BrokerConstants.AccountRedirect, request.RedirectUri);
             brokerOptions.PutString(BrokerConstants.AccountClientIdKey,
@@ -452,6 +448,22 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             brokerOptions.PutString(BrokerConstants.AccountName, username);
 
             return brokerOptions;
+        }
+
+        private void ValidateBrokerRedirectURI(AuthenticationRequest request)
+        {
+            //During the silent broker flow, the redirect URI will be null.
+            if (string.IsNullOrEmpty(request.RedirectUri))
+            {
+                return;
+            }
+
+            string computedRedirectUri = GetRedirectUriForBroker();
+
+            if (!string.Equals(computedRedirectUri, request.RedirectUri, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new AdalException(AdalError.BrokerRedirectUriIncorrectFormat, string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.BrokerRedirectUriIncorrectFormat, computedRedirectUri));
+            }
         }
 
         private bool CheckAccount(AccountManager am, string username, string uniqueId)
