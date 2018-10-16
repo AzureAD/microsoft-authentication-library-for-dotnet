@@ -41,8 +41,8 @@ namespace NetCoreTestApp
         private readonly static string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private readonly static string ClientIdForConfidentialApp = "<enter id>";
 
-        private readonly static string Username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations"; // common will not work for WIA and U/P but it is a good test case
+        private readonly static string Username = "fIDLAB@msidlab7.com"; // used for WIA and U/P, cannot be empty on .net core
+        private readonly static string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
         private readonly static IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
@@ -51,19 +51,24 @@ namespace NetCoreTestApp
         {
 
             PublicClientApplication pca = new PublicClientApplication(
-                ClientIdForPublicApp, 
-                Authority, 
+                ClientIdForPublicApp,
+                Authority,
                 TokenCacheHelper.GetUserCache()); // token cache serialization https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization
 
             Logger.LogCallback = Log;
             Logger.Level = LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
 
+            RunConsoleAppLogicAsync(pca).Wait();
+        }
+
+        private static async Task RunConsoleAppLogicAsync(PublicClientApplication pca)
+        {
             while (true)
             {
                 Console.Clear();
 
-                DisplayAccounts(pca);
+                await DisplayAccountsAsync(pca);
 
                 // display menu
                 Console.WriteLine(@"
@@ -72,31 +77,38 @@ namespace NetCoreTestApp
                         3. Acquire Token with Device Code
                         4. Acquire Token Silently
                         5. Confidential Client with Certificate (needs extra config)
+                        6. Clear PCA cache
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
 
-                System.Threading.Tasks.Task<AuthenticationResult> task = null;
+                Task<AuthenticationResult> authTask = null;
 
                 try
                 {
                     switch (selection)
                     {
                         case 1: // acquire token
-                            task = pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, Username);
+                            authTask = pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, Username);
+                            await FetchTokenAndCallGraph(pca, authTask);
+
                             break;
                         case 2: // acquire token u/p
                             SecureString password = GetPasswordFromConsole();
-                            task = pca.AcquireTokenByUsernamePasswordAsync(Scopes, Username, password);
+                            authTask = pca.AcquireTokenByUsernamePasswordAsync(Scopes, Username, password);
+                            await FetchTokenAndCallGraph(pca, authTask);
+
                             break;
                         case 3:
-                            task = pca.AcquireTokenWithDeviceCodeAsync(
+                            authTask = pca.AcquireTokenWithDeviceCodeAsync(
                                 Scopes,
                                 deviceCodeResult =>
                                 {
                                     Console.WriteLine(deviceCodeResult.Message);
                                     return Task.FromResult(0);
                                 });
+                            await FetchTokenAndCallGraph(pca, authTask);
+
                             break;
                         case 4: // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
@@ -105,10 +117,20 @@ namespace NetCoreTestApp
                                 Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                             }
 
-                            task = pca.AcquireTokenSilentAsync(Scopes, account);
+                            authTask = pca.AcquireTokenSilentAsync(Scopes, account);
+                            await FetchTokenAndCallGraph(pca, authTask);
+
                             break;
                         case 5:
                             RunClientCredentialWithCertificate();
+                            break;
+                        case 6:
+                            var accounts = await pca.GetAccountsAsync();
+                            foreach (var acc in accounts)
+                            {
+                                await pca.RemoveAsync(acc);
+                            }
+
                             break;
                         case 0:
                             return;
@@ -116,24 +138,11 @@ namespace NetCoreTestApp
                             break;
                     }
 
-                    task.Wait();
-
-                    Console.BackgroundColor = ConsoleColor.DarkGreen;
-                    Console.WriteLine("Token is {0}", task.Result.AccessToken);
-                    Console.ResetColor();
-
-
-                    Console.BackgroundColor = ConsoleColor.DarkMagenta;
-                    DisplayAccounts(pca);
-                    var callGraphTask = CallGraph(task.Result.AccessToken);
-                    callGraphTask.Wait();
-                    Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
-
                 }
-                catch (AggregateException ae)
+                catch (Exception ex)
                 {
-                    Log(LogLevel.Error, ae.InnerException.Message, false);
-                    Log(LogLevel.Error, ae.InnerException.StackTrace, false);
+                    Log(LogLevel.Error, ex.Message, false);
+                    Log(LogLevel.Error, ex.StackTrace, false);
                 }
 
                 Console.WriteLine("\n\nHit 'ENTER' to continue...");
@@ -141,10 +150,27 @@ namespace NetCoreTestApp
             }
         }
 
+        private static async Task FetchTokenAndCallGraph(PublicClientApplication pca, Task<AuthenticationResult> authTask)
+        {
+            await authTask;
+
+            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
+            Console.ResetColor();
+
+
+            Console.BackgroundColor = ConsoleColor.DarkMagenta;
+            await DisplayAccountsAsync(pca);
+            var callGraphTask = CallGraph(authTask.Result.AccessToken);
+            callGraphTask.Wait();
+            Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
+            Console.ResetColor();
+        }
+
         private static void RunClientCredentialWithCertificate()
         {
             ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(GetCertificateByThumbprint("<THUMBPRINT>")));
-            ConfidentialClientApplication app = new ConfidentialClientApplication("ClientIdForConfidentialApp", "http://localhost", cc, new TokenCache(), new TokenCache());
+            ConfidentialClientApplication app = new ConfidentialClientApplication(ClientIdForConfidentialApp, "http://localhost", cc, new TokenCache(), new TokenCache());
             try
             {
                 AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }, true).Result;
@@ -171,11 +197,9 @@ namespace NetCoreTestApp
         }
 
 
-        private static void DisplayAccounts(PublicClientApplication pca)
+        private static async Task DisplayAccountsAsync(PublicClientApplication pca)
         {
-            var getAccountsTask = pca.GetAccountsAsync();
-            getAccountsTask.Wait();
-            IEnumerable<IAccount> accounts = getAccountsTask.Result;
+            IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "For the public client, the tokenCache contains {0} token(s)", accounts.Count()));
 
