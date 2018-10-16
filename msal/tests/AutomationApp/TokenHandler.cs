@@ -48,7 +48,7 @@ namespace AutomationApp
                 : new PublicClientApplication(input["client_id"]);
         }
 
-        public async Task<AuthenticationResult> AcquireToken(Dictionary<string, string> input)
+        public async Task<AuthenticationResult> AcquireTokenAsync(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 
@@ -62,7 +62,7 @@ namespace AutomationApp
             return result;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenSilent(Dictionary<string, string> input)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(Dictionary<string, string> input)
         {
             EnsurePublicClientApplication(input);
 

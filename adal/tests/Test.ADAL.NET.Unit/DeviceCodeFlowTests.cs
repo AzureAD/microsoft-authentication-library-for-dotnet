@@ -89,7 +89,7 @@ namespace Test.ADAL.NET.Unit
 
             TokenCache cache = new TokenCache();
             AuthenticationContext ctx = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
-            AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(dcr);
+            AuthenticationResult result = await ctx.AcquireTokenByDeviceCodeAsync(dcr).ConfigureAwait(false);
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
         }

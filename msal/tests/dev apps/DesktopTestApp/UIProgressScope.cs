@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -24,34 +24,39 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
-using Microsoft.Identity.Client;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using System;
+using System.Windows.Forms;
 
-namespace Test.Microsoft.Identity.Unit.PublicApi
+namespace DesktopTestApp
 {
-    [TestClass]
-    public class MsalExceptionTests
+    public partial class MainForm
     {
-        [TestMethod]
-        [TestCategory("MsalExceptionTests")]
-        public void ExceptionsArePubliclyCreatable_MsalException()
+#pragma warning disable CA1034 // Nested types should not be visible
+        public class UIProgressScope : IDisposable
+#pragma warning restore CA1034 // Nested types should not be visible
         {
-            var innerEx = new InvalidOperationException();
-            var ex = new MsalException("code1", "msg1", innerEx);
+            MainForm mainForm;
 
-            Assert.AreEqual("code1", ex.ErrorCode);
-            Assert.AreEqual("msg1", ex.Message);
-            Assert.AreSame(innerEx, ex.InnerException);
-        }
+            public UIProgressScope(MainForm mainForm)
+            {
+                this.mainForm = mainForm;
+                this.mainForm.Enabled = false;
+                this.mainForm.progressBar1.Style = ProgressBarStyle.Marquee;
+                this.mainForm.progressBar1.MarqueeAnimationSpeed = 30;
+            }
 
-        [TestMethod]
-        [TestCategory("MsalExceptionTests")]
-        public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
-        {
-            var ex = new MsalUiRequiredException(null, null);
+            #region IDisposable Support
 
-            Assert.IsNull(ex.InnerException);
+
+            public void Dispose()
+            {
+                this.mainForm.Enabled = true;
+                this.mainForm.progressBar1.Style = ProgressBarStyle.Continuous;
+                this.mainForm.progressBar1.MarqueeAnimationSpeed = 0;
+            }
+
+            #endregion
         }
     }
 }

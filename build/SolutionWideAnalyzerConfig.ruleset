@@ -69,7 +69,7 @@
     <Rule Id="CA1010" Action="Error" />
     <Rule Id="CA1012" Action="Error" />
     <Rule Id="CA1014" Action="None" />
-    <Rule Id="CA1016" Action="Error" />
+    <Rule Id="CA1016" Action="None" />
     <Rule Id="CA1017" Action="Error" />
     <Rule Id="CA1018" Action="Error" />
     <Rule Id="CA1024" Action="None" />
@@ -137,9 +137,6 @@
   </Rules>
   <Rules AnalyzerId="Text.CSharp.Analyzers" RuleNamespace="Text.CSharp.Analyzers">
     <Rule Id="CA1704" Action="None" />
-  </Rules>
-  <Rules AnalyzerId="AsyncUsageAnalyzers" RuleNamespace="AsyncUsageAnalyzers">
-    <Rule Id="UseConfigureAwait" Action="Error" />
   </Rules>
   <Rules AnalyzerId="Microsoft.NetFramework.Analyzers" RuleNamespace="Microsoft.NetFramework.Analyzers">
     <Rule Id="CA1058" Action="None" />

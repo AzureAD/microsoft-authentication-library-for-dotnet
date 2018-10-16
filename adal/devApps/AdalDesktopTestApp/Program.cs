@@ -98,24 +98,24 @@ namespace AdalDesktopTestApp
                             break;
                         case 2: // acquire token IWA
                             authTask = context.AcquireTokenAsync(Resource, ClientId, new UserCredential(User));
-                            await FetchToken(authTask);
+                            await FetchTokenAsync(authTask).ConfigureAwait(false);
                             break;
                         case 3: // acquire token interactive
                             authTask = context.AcquireTokenAsync(Resource, ClientId, new Uri(RedirectUri), new PlatformParameters(PromptBehavior.Auto));
-                            await FetchToken(authTask);
+                            await FetchTokenAsync(authTask).ConfigureAwait(false);
                             break;
                         case 4: // acquire token with username and password
                             Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Enter password for user {0} :", User));
                             authTask = context.AcquireTokenAsync(Resource, ClientId, new UserPasswordCredential(User, Console.ReadLine()));
-                            await FetchToken(authTask);
+                            await FetchTokenAsync(authTask).ConfigureAwait(false);
                             break;
                         case 5: // acquire token silent
                             authTask = context.AcquireTokenSilentAsync(Resource, ClientId);
-                            await FetchToken(authTask);
+                            await FetchTokenAsync(authTask).ConfigureAwait(false);
                             break;
                         case 6: // device code flow
                             authTask = GetTokenViaDeviceCodeAsync(context);
-                            await FetchToken(authTask);
+                            await FetchTokenAsync(authTask).ConfigureAwait(false);
                             break;
                         case 0:
                             return;
@@ -142,11 +142,11 @@ namespace AdalDesktopTestApp
 
             try
             {
-                DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync(Resource, ClientId);
+                DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync(Resource, ClientId).ConfigureAwait(false);
                 Console.ResetColor();
                 Console.WriteLine("You need to sign in.");
                 Console.WriteLine("Message: " + codeResult.Message + "\n");
-                result = await ctx.AcquireTokenByDeviceCodeAsync(codeResult);
+                result = await ctx.AcquireTokenByDeviceCodeAsync(codeResult).ConfigureAwait(false);
             }
             catch (Exception exc)
             {
@@ -159,9 +159,9 @@ namespace AdalDesktopTestApp
 
         }
 
-        private static async Task FetchToken(Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAsync(Task<AuthenticationResult> authTask)
         {
-            await authTask;
+            await authTask.ConfigureAwait(false);
 
             Console.BackgroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine("Token is {0}", authTask.Result.AccessToken);

@@ -102,7 +102,7 @@ namespace Test.ADAL.NET.Integration
             var result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -136,7 +136,7 @@ namespace Test.ADAL.NET.Integration
             };
 
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
@@ -200,7 +200,7 @@ namespace Test.ADAL.NET.Integration
             var result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        new UserPasswordCredential("user2@id.com", TestConstants.DefaultPassword));
+                        new UserPasswordCredential("user2@id.com", TestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -242,7 +242,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -257,7 +257,7 @@ namespace Test.ADAL.NET.Integration
             });
 
             var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword));
+                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -274,7 +274,7 @@ namespace Test.ADAL.NET.Integration
                 UniqueId = TestConstants.DefaultUniqueId,
                 DisplayableId = TestConstants.DefaultDisplayableId
             },
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             Assert.AreEqual("some-access-token", entry.Result.AccessToken);
 
             // There should be one cached entry.
@@ -320,7 +320,7 @@ namespace Test.ADAL.NET.Integration
         public async Task UnknownUserRealmDiscoveryTestAsync()
         {
             AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant);
-            await context.Authenticator.UpdateFromTemplateAsync(null);
+            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
             CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" + TestConstants.DefaultDisplayableId)
             {

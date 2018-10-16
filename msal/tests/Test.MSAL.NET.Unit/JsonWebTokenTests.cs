@@ -134,12 +134,12 @@ namespace Test.MSAL.NET.Unit
 
             //Check for x5c claim
             HttpMessageHandlerFactory.AddMockHandler(X5CMockHandler);
-            AuthenticationResult result = await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenForClientWithCertificateAsync(TestConstants.Scope);
+            AuthenticationResult result = await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenForClientWithCertificateAsync(TestConstants.Scope).ConfigureAwait(false);
             Assert.IsNotNull(result.AccessToken);
 
             //Check for empty x5c claim
             HttpMessageHandlerFactory.AddMockHandler(EmptyX5CMockHandler);
-            result = await app.AcquireTokenForClientAsync(TestConstants.Scope);
+            result = await app.AcquireTokenForClientAsync(TestConstants.Scope).ConfigureAwait(false);
             Assert.IsNotNull(result.AccessToken);
         }
 
@@ -156,12 +156,12 @@ namespace Test.MSAL.NET.Unit
 
             //Check for x5c claim
             HttpMessageHandlerFactory.AddMockHandler(X5CMockHandler);
-            AuthenticationResult result = await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenOnBehalfOfWithCertificateAsync(TestConstants.Scope, userAssertion);
+            AuthenticationResult result = await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenOnBehalfOfWithCertificateAsync(TestConstants.Scope, userAssertion).ConfigureAwait(false);
             Assert.IsNotNull(result.AccessToken);
 
             //Check for empty x5c claim
             HttpMessageHandlerFactory.AddMockHandler(EmptyX5CMockHandler);
-            result = await app.AcquireTokenOnBehalfOfAsync(TestConstants.Scope, userAssertion);
+            result = await app.AcquireTokenOnBehalfOfAsync(TestConstants.Scope, userAssertion).ConfigureAwait(false);
             Assert.IsNotNull(result.AccessToken);
         }
     }

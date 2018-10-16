@@ -34,7 +34,7 @@ namespace Test.ADAL.NET.UIAutomation
     /// <summary>
     /// Contains the core test functionality that will be used by Android and iOS tests
     /// </summary>
-	public class CoreMobileADALTests
+	public static class CoreMobileADALTests
     {
         /// <summary>
         /// Runs through the standard acquire token flow

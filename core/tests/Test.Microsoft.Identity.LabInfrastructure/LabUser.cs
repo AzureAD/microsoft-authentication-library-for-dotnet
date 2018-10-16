@@ -110,7 +110,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         {
             if (String.IsNullOrWhiteSpace(CredentialUrl))
             {
-                throw new Exception("Error: CredentialUrl is not set on user. Password retrieval failed.");
+                throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
             }
 
 

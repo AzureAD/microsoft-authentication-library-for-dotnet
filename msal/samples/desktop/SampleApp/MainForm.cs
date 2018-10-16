@@ -61,8 +61,8 @@ namespace SampleApp
         {
             if ((sender as TabControl).TabIndex == 1)
             {
-                string token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] { "user.read" }, account)
-                    .ConfigureAwait(false);
+                token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] { "user.read" }, account)
+                    .ConfigureAwait(true);
             }
         }
 
@@ -74,14 +74,14 @@ namespace SampleApp
 
         private async Task AcquireTokenAsync()
         {
-            token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] { "user.read" }, account).ConfigureAwait(false);
+            token = await _msalHelper.GetTokenForCurrentAccountAsync(new[] { "user.read" }, account).ConfigureAwait(true);
         }
 
         private async void acquireTokenUsernamePasswordButton_Click(object sender, EventArgs e)
         {
             tokenResultBox.Text = string.Format("");
             SecureString securePassword = ConvertToSecureString(tokenResultBox);
-            token = await _msalHelper.GetTokenWithUsernamePasswordAsync(new[] { "user.read" }, securePassword).ConfigureAwait(false);
+            token = await _msalHelper.GetTokenWithUsernamePasswordAsync(new[] { "user.read" }, securePassword).ConfigureAwait(true);
         }
 
         private SecureString ConvertToSecureString(TextBox textBox)
@@ -110,13 +110,13 @@ namespace SampleApp
 
         private async void signOutButton1_Click(object sender, EventArgs e)
         {
-            var accounts = await _msalHelper.Application.GetAccountsAsync();
+            var accounts = await _msalHelper.Application.GetAccountsAsync().ConfigureAwait(false);
 
             if (accounts.Any())
             {
                 try
                 {
-                    await _msalHelper.Application.RemoveAsync(accounts.FirstOrDefault());
+                    await _msalHelper.Application.RemoveAsync(accounts.FirstOrDefault()).ConfigureAwait(true);
                     tokenResultBox.Text = "User has signed-out";
                 }
                 catch (MsalException ex)
@@ -130,7 +130,7 @@ namespace SampleApp
         private async void acquireTokenWIAButton_Click(object sender, EventArgs e)
         {
             string user = "";
-            token = await _msalHelper.GetTokenWithIWAAsync(new[] { "user.read" }, user).ConfigureAwait(false);
+            token = await _msalHelper.GetTokenWithIWAAsync(new[] { "user.read" }, user).ConfigureAwait(true);
         }
     }
 }

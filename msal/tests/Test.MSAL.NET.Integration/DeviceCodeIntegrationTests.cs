@@ -59,12 +59,12 @@ namespace Test.MSAL.NET.Integration
             PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
 
             AuthenticationResult authResult = await msalPublicClient.AcquireTokenWithDeviceCodeAsync(
-                Scopes, 
-                string.Empty, 
-                dcr => 
+                Scopes,
+                string.Empty,
+                dcr =>
                 {
                     return Task.FromResult(0);
-                });
+                }).ConfigureAwait(false);
 
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);

@@ -80,7 +80,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -114,7 +114,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
@@ -150,7 +150,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -167,7 +167,7 @@ namespace Test.ADAL.NET.Integration
                 await
                     context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                     new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId),
-                    new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto));
+                    new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -203,7 +203,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -219,7 +219,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Always));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Always)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -258,7 +258,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -274,7 +274,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.SelectAccount));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.SelectAccount)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -349,7 +349,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             TestConstants.DefaultAuthorityHomeTenant, TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid())));
+            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
@@ -365,7 +365,7 @@ namespace Test.ADAL.NET.Integration
             AuthenticationResult result =
                 await
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.RefreshSession));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.RefreshSession)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);

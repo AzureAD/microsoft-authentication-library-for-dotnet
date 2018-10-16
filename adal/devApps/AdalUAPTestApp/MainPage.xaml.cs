@@ -59,7 +59,7 @@ namespace UAPTestApp
             {
                 AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net",
                     ClientId, new Uri(ReturnUri),
-                    new PlatformParameters(PromptBehavior.Auto, false));
+                    new PlatformParameters(PromptBehavior.Auto, false)).ConfigureAwait(false);
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                     () =>
@@ -69,7 +69,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await ShowError(exc);
+                await ShowErrorAsync(exc).ConfigureAwait(false);
             }
         }
 
@@ -88,7 +88,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await ShowError(exc);
+                await ShowErrorAsync(exc).ConfigureAwait(false);
             }
         }
 
@@ -106,7 +106,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await ShowError(exc);
+                await ShowErrorAsync(exc).ConfigureAwait(false);
             }
         }
 
@@ -129,7 +129,7 @@ namespace UAPTestApp
                 AuthenticationResult result = await ctx.AcquireTokenAsync(
                     "https://graph.windows.net",
                     ClientId,
-                    new UserCredential()); // can add a
+                    new UserCredential()).ConfigureAwait(false); // can add a
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                     () =>
@@ -139,7 +139,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await ShowError(exc);
+                await ShowErrorAsync(exc).ConfigureAwait(false);
             }
         }
 
@@ -159,7 +159,7 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await ShowError(exc);
+                await ShowErrorAsync(exc).ConfigureAwait(false);
             }
         }
 
@@ -187,11 +187,11 @@ namespace UAPTestApp
             }
             catch (Exception exc)
             {
-                await ShowError(exc);
+                await ShowErrorAsync(exc).ConfigureAwait(false);
             }
         }
 
-        private async System.Threading.Tasks.Task ShowError(Exception exc)
+        private async System.Threading.Tasks.Task ShowErrorAsync(Exception exc)
         {
             await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                   () =>

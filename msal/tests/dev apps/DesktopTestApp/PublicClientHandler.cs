@@ -65,20 +65,20 @@ namespace DesktopTestApp
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication.AcquireTokenAsync(
-                    scopes, 
-                    CurrentUser, 
+                    scopes,
+                    CurrentUser,
                     uiBehavior,
                     extraQueryParams,
-                    uiParent);
+                    uiParent).ConfigureAwait(false);
             }
             else
             {
                 result =await PublicClientApplication.AcquireTokenAsync(
-                    scopes, 
-                    LoginHint, 
+                    scopes,
+                    LoginHint,
                     uiBehavior,
                     extraQueryParams,
-                    uiParent);
+                    uiParent).ConfigureAwait(false);
             }
 
             CurrentUser = result.Account;
@@ -97,24 +97,24 @@ namespace DesktopTestApp
             if (CurrentUser != null)
             {
                 result = await PublicClientApplication.AcquireTokenAsync(
-                    scopes, 
-                    CurrentUser, 
+                    scopes,
+                    CurrentUser,
                     uiBehavior,
-                    extraQueryParams, 
-                    null, 
+                    extraQueryParams,
+                    null,
                     AuthorityOverride,
-                    uiParent);
+                    uiParent).ConfigureAwait(false);
             }
             else
             {
                 result = await PublicClientApplication.AcquireTokenAsync(
-                    scopes, 
-                    LoginHint, 
+                    scopes,
+                    LoginHint,
                     uiBehavior,
-                    extraQueryParams, 
-                    null, 
+                    extraQueryParams,
+                    null,
                     AuthorityOverride,
-                    uiParent);
+                    uiParent).ConfigureAwait(false);
             }
 
             CurrentUser = result.Account;
@@ -124,10 +124,10 @@ namespace DesktopTestApp
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes)
         {
             return await PublicClientApplication.AcquireTokenSilentAsync(
-                scopes, 
-                CurrentUser, 
+                scopes,
+                CurrentUser,
                 AuthorityOverride,
-                false);
+                false).ConfigureAwait(false);
         }
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)

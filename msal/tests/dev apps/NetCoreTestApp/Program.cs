@@ -68,7 +68,7 @@ namespace NetCoreTestApp
             {
                 Console.Clear();
 
-                await DisplayAccountsAsync(pca);
+                await DisplayAccountsAsync(pca).ConfigureAwait(false);
 
                 // display menu
                 Console.WriteLine(@"
@@ -90,13 +90,13 @@ namespace NetCoreTestApp
                     {
                         case 1: // acquire token
                             authTask = pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, Username);
-                            await FetchTokenAndCallGraph(pca, authTask);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
                         case 2: // acquire token u/p
                             SecureString password = GetPasswordFromConsole();
                             authTask = pca.AcquireTokenByUsernamePasswordAsync(Scopes, Username, password);
-                            await FetchTokenAndCallGraph(pca, authTask);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
                         case 3:
@@ -107,7 +107,7 @@ namespace NetCoreTestApp
                                     Console.WriteLine(deviceCodeResult.Message);
                                     return Task.FromResult(0);
                                 });
-                            await FetchTokenAndCallGraph(pca, authTask);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
                         case 4: // acquire token silent
@@ -118,17 +118,17 @@ namespace NetCoreTestApp
                             }
 
                             authTask = pca.AcquireTokenSilentAsync(Scopes, account);
-                            await FetchTokenAndCallGraph(pca, authTask);
+                            await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
 
                             break;
                         case 5:
                             RunClientCredentialWithCertificate();
                             break;
                         case 6:
-                            var accounts = await pca.GetAccountsAsync();
+                            var accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
                             foreach (var acc in accounts)
                             {
-                                await pca.RemoveAsync(acc);
+                                await pca.RemoveAsync(acc).ConfigureAwait(false);
                             }
 
                             break;
@@ -150,9 +150,9 @@ namespace NetCoreTestApp
             }
         }
 
-        private static async Task FetchTokenAndCallGraph(PublicClientApplication pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAndCallGraphAsync(PublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
-            await authTask;
+            await authTask.ConfigureAwait(false);
 
             Console.BackgroundColor = ConsoleColor.DarkGreen;
             Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
@@ -160,8 +160,8 @@ namespace NetCoreTestApp
 
 
             Console.BackgroundColor = ConsoleColor.DarkMagenta;
-            await DisplayAccountsAsync(pca);
-            var callGraphTask = CallGraph(authTask.Result.AccessToken);
+            await DisplayAccountsAsync(pca).ConfigureAwait(false);
+            var callGraphTask = CallGraphAsync(authTask.Result.AccessToken);
             callGraphTask.Wait();
             Console.WriteLine("Result from calling the ME endpoint of the graph: " + callGraphTask.Result);
             Console.ResetColor();
@@ -192,7 +192,7 @@ namespace NetCoreTestApp
                 {
                     return certs[0];
                 }
-                throw new Exception($"Cannot find certificate with thumbprint '{thumbprint}'");
+                throw new InvalidOperationException($"Cannot find certificate with thumbprint '{thumbprint}'");
             }
         }
 
@@ -263,7 +263,7 @@ namespace NetCoreTestApp
             return pwd;
         }
 
-        private static async Task<string> CallGraph(string token)
+        private static async Task<string> CallGraphAsync(string token)
         {
             var httpClient = new System.Net.Http.HttpClient();
             System.Net.Http.HttpResponseMessage response;
@@ -272,8 +272,8 @@ namespace NetCoreTestApp
                 var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, GraphAPIEndpoint);
                 //Add the token in Authorization header
                 request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                response = await httpClient.SendAsync(request);
-                var content = await response.Content.ReadAsStringAsync();
+                response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return content;
             }
             catch (Exception ex)

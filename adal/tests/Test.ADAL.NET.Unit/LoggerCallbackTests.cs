@@ -34,6 +34,8 @@ using NSubstitute;
 namespace Test.ADAL.NET.Unit
 {
 #pragma warning disable 0618
+#pragma warning disable CA2201 // Do not raise reserved exception types
+
     internal class TestObsoleteAdalLogCallback : IAdalLogCallback
 #pragma warning restore 0618
     {
@@ -380,3 +382,4 @@ namespace Test.ADAL.NET.Unit
         }
     }
 }
+#pragma warning restore CA2201 // Do not raise reserved exception types

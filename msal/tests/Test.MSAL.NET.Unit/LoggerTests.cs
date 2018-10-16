@@ -97,7 +97,9 @@ namespace Test.MSAL.NET.Unit
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).
                 Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -123,7 +125,9 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = LogLevel.Info;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -149,7 +153,9 @@ namespace Test.MSAL.NET.Unit
             Logger.Level = LogLevel.Verbose;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
@@ -176,7 +182,9 @@ namespace Test.MSAL.NET.Unit
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
@@ -203,7 +211,9 @@ namespace Test.MSAL.NET.Unit
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
@@ -230,7 +240,9 @@ namespace Test.MSAL.NET.Unit
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);
@@ -257,7 +269,9 @@ namespace Test.MSAL.NET.Unit
             Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
+#pragma warning disable CA2201 // Do not raise reserved exception types
             logger.ErrorPii(new Exception("test message"));
+#pragma warning restore CA2201 // Do not raise reserved exception types
             Assert.AreEqual(1, counter);
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), true)).Do(x => counter++);

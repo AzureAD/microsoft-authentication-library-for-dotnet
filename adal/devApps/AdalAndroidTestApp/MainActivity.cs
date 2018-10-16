@@ -90,7 +90,7 @@ namespace AdalAndroidTestApp
             }
             catch (Java.Lang.Exception ex)
             {
-                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+                throw new InvalidOperationException(ex.Message + "\n" + ex.StackTrace);
             }
             catch (Exception exc)
             {
@@ -115,7 +115,7 @@ namespace AdalAndroidTestApp
             }
             catch (Java.Lang.Exception ex)
             {
-                throw new Exception(ex.Message + "\n" + ex.StackTrace);
+                throw new InvalidOperationException(ex.Message + "\n" + ex.StackTrace);
             }
             catch (Exception exc)
             {

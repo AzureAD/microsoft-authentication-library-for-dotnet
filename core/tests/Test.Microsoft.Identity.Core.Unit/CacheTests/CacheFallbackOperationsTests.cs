@@ -351,7 +351,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
         {
             if (ThrowOnWrite)
             {
-                throw new Exception();
+                throw new InvalidOperationException();
             }
             data = serializedCache;
         }

@@ -148,7 +148,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             DeviceCodeResult actualDeviceCodeResult = null;
             DeviceCodeRequest request = new DeviceCodeRequest(parameters, async result =>
             {
-                await Task.Delay(200);
+                await Task.Delay(200).ConfigureAwait(false);
                 actualDeviceCodeResult = result;
             });
 

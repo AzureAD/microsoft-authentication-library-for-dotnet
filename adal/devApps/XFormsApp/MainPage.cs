@@ -58,7 +58,7 @@ namespace XFormsApp
 
         async void browseButton_Clicked(object sender, EventArgs e)
         {
-            await Navigation.PushModalAsync(new SecondPage());
+            await Navigation.PushModalAsync(new SecondPage()).ConfigureAwait(false);
         }
     }
 }

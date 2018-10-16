@@ -160,7 +160,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.TextBox tokenResultBox;
         private System.Windows.Forms.TextBox calendarTextBox;
-        private System.Windows.Forms.Button signOutButton;
         private System.Windows.Forms.Button signOutButton1;
         private System.Windows.Forms.Button acquireTokenUsernamePasswordButton;
         private System.Windows.Forms.Button acquireTokenWIAButton;
