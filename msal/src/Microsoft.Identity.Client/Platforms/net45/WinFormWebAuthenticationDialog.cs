@@ -70,7 +70,8 @@ namespace Microsoft.Identity.Client.Internal.UI
         /// </summary>
         public void ShowBrowser()
         {
-            DialogResult uiResult = ShowDialog(ownerWindow);
+            DialogResult uiResult = DialogResult.None;
+            InvokeHandlingOwnerWindow(() => uiResult = ShowDialog(ownerWindow));
 
             switch (uiResult)
             {

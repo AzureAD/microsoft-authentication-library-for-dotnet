@@ -247,23 +247,26 @@ namespace Microsoft.Identity.Client.Internal.UI
 
         private void StopWebBrowser()
         {
-            // Guard condition
-            if (_webBrowser.IsDisposed || !_webBrowser.IsBusy)
+            InvokeHandlingOwnerWindow(() =>
             {
-                return;
-            }
+                // Guard condition
+                if (_webBrowser.IsDisposed || !_webBrowser.IsBusy)
+                {
+                    return;
+                }
 
-            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
-                "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
-                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
+                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                    "WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                    _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
+                    _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
 
-            _webBrowser.Stop();
+                _webBrowser.Stop();
 
-            RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
-                "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
-                _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
-                _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
+                RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
+                    "WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
+                    _webBrowser.IsBusy, _webBrowser.ReadyState, _webBrowser.Created,
+                    _webBrowser.Disposing, _webBrowser.IsDisposed, _webBrowser.IsOffline));
+            });
         }
 
         /// <summary>
@@ -298,59 +301,80 @@ namespace Microsoft.Identity.Client.Internal.UI
         {
         }
 
+        /// <summary>
+        /// Some calls need to be made on the UI thread and this is the central place to check if we have an owner
+        /// window and if so, ensure we invoke on that proper thread.
+        /// </summary>
+        /// <param name="action"></param>
+        protected void InvokeHandlingOwnerWindow(Action action)
+        {
+            // We only support WindowsForms (since our dialog is winforms based)
+            if (ownerWindow != null && ownerWindow is Control winFormsControl)
+            {
+                winFormsControl.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
         private void InitializeComponent()
         {
-            Screen screen = (ownerWindow != null)
-                ? Screen.FromHandle(ownerWindow.Handle)
-                : Screen.PrimaryScreen;
+            InvokeHandlingOwnerWindow(() =>
+            {
+                Screen screen = (ownerWindow != null)
+                    ? Screen.FromHandle(ownerWindow.Handle)
+                    : Screen.PrimaryScreen;
 
-            // Window height is set to 70% of the screen height.
-            int uiHeight = (int)(Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
-            _webBrowserPanel = new Panel();
-            _webBrowserPanel.SuspendLayout();
-            SuspendLayout();
+                // Window height is set to 70% of the screen height.
+                int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
+                _webBrowserPanel = new Panel();
+                _webBrowserPanel.SuspendLayout();
+                SuspendLayout();
 
-            // webBrowser
-            _webBrowser.Dock = DockStyle.Fill;
-            _webBrowser.Location = new Point(0, 25);
-            _webBrowser.MinimumSize = new Size(20, 20);
-            _webBrowser.Name = "webBrowser";
-            _webBrowser.Size = new Size(UIWidth, 565);
-            _webBrowser.TabIndex = 1;
-            _webBrowser.IsWebBrowserContextMenuEnabled = false;
+                // webBrowser
+                _webBrowser.Dock = DockStyle.Fill;
+                _webBrowser.Location = new Point(0, 25);
+                _webBrowser.MinimumSize = new Size(20, 20);
+                _webBrowser.Name = "webBrowser";
+                _webBrowser.Size = new Size(UIWidth, 565);
+                _webBrowser.TabIndex = 1;
+                _webBrowser.IsWebBrowserContextMenuEnabled = false;
 
-            // webBrowserPanel
-            _webBrowserPanel.Controls.Add(_webBrowser);
-            _webBrowserPanel.Dock = DockStyle.Fill;
-            _webBrowserPanel.BorderStyle = BorderStyle.None;
-            _webBrowserPanel.Location = new Point(0, 0);
-            _webBrowserPanel.Name = "webBrowserPanel";
-            _webBrowserPanel.Size = new Size(UIWidth, uiHeight);
-            _webBrowserPanel.TabIndex = 2;
+                // webBrowserPanel
+                _webBrowserPanel.Controls.Add(_webBrowser);
+                _webBrowserPanel.Dock = DockStyle.Fill;
+                _webBrowserPanel.BorderStyle = BorderStyle.None;
+                _webBrowserPanel.Location = new Point(0, 0);
+                _webBrowserPanel.Name = "webBrowserPanel";
+                _webBrowserPanel.Size = new Size(UIWidth, uiHeight);
+                _webBrowserPanel.TabIndex = 2;
 
-            // BrowserAuthenticationWindow
-            AutoScaleDimensions = new SizeF(6, 13);
-            AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(UIWidth, uiHeight);
-            Controls.Add(_webBrowserPanel);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
-            Name = "BrowserAuthenticationWindow";
+                // BrowserAuthenticationWindow
+                AutoScaleDimensions = new SizeF(6, 13);
+                AutoScaleMode = AutoScaleMode.Font;
+                ClientSize = new Size(UIWidth, uiHeight);
+                Controls.Add(_webBrowserPanel);
+                FormBorderStyle = FormBorderStyle.FixedSingle;
+                Name = "BrowserAuthenticationWindow";
 
-            // Move the window to the center of the parent window only if owner window is set.
-            StartPosition = (ownerWindow != null)
-                ? FormStartPosition.CenterParent
-                : FormStartPosition.CenterScreen;
-            Text = string.Empty;
-            ShowIcon = false;
-            MaximizeBox = false;
-            MinimizeBox = false;
+                // Move the window to the center of the parent window only if owner window is set.
+                StartPosition = (ownerWindow != null)
+                    ? FormStartPosition.CenterParent
+                    : FormStartPosition.CenterScreen;
+                Text = string.Empty;
+                ShowIcon = false;
+                MaximizeBox = false;
+                MinimizeBox = false;
 
-            // If we don't have an owner we need to make sure that the pop up browser 
-            // window is in the task bar so that it can be selected with the mouse.
-            ShowInTaskbar = (null == ownerWindow);
+                // If we don't have an owner we need to make sure that the pop up browser 
+                // window is in the task bar so that it can be selected with the mouse.
+                ShowInTaskbar = (null == ownerWindow);
 
-            _webBrowserPanel.ResumeLayout(false);
-            ResumeLayout(false);
+                _webBrowserPanel.ResumeLayout(false);
+                ResumeLayout(false);
+            });
         }
 
         /// <summary>

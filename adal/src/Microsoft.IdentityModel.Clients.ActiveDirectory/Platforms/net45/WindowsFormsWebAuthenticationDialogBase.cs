@@ -33,6 +33,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Windows.Threading;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.UI;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
@@ -299,20 +300,23 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         private void StopWebBrowser()
         {
-            if (!this.webBrowser.IsDisposed && this.webBrowser.IsBusy)
+            InvokeHandlingOwnerWindow(() =>
             {
-                CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
+                if (!this.webBrowser.IsDisposed && this.webBrowser.IsBusy)
+                {
+                    CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
                         " WebBrowser state: IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                         this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                         this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
 
-                this.webBrowser.Stop();
+                    this.webBrowser.Stop();
 
-                CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
+                    CoreLoggerBase.Default.Verbose(string.Format(CultureInfo.CurrentCulture,
                         " WebBrowser state (after Stop): IsBusy: {0}, ReadyState: {1}, Created: {2}, Disposing: {3}, IsDisposed: {4}, IsOffline: {5}",
                         this.webBrowser.IsBusy, this.webBrowser.ReadyState, this.webBrowser.Created,
                         this.webBrowser.Disposing, this.webBrowser.IsDisposed, this.webBrowser.IsOffline));
-;            }
+                }
+            });
         }
 
         /// <summary>
@@ -351,11 +355,31 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         {
         }
 
+        /// <summary>
+        /// Some calls need to be made on the UI thread and this is the central place to check if we have an owner
+        /// window and if so, ensure we invoke on that proper thread.
+        /// </summary>
+        /// <param name="action"></param>
+        protected void InvokeHandlingOwnerWindow(Action action)
+        {
+            // We only support WindowsForms (since our dialog is winforms based)
+            if (ownerWindow != null && ownerWindow is Control winFormsControl)
+            {
+                winFormsControl.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
         private void InitializeComponent()
         {
-            Screen screen = (this.ownerWindow != null)
-                ? Screen.FromHandle(this.ownerWindow.Handle)
-                : Screen.PrimaryScreen;
+            InvokeHandlingOwnerWindow(() =>
+            {
+                Screen screen = (this.ownerWindow != null)
+                    ? Screen.FromHandle(this.ownerWindow.Handle)
+                    : Screen.PrimaryScreen;
 
             // Window height is set to 70% of the screen height.
             int uiHeight = (int) (Math.Max(screen.WorkingArea.Height, 160) * 70.0 / DpiHelper.ZoomPercent);
@@ -410,6 +434,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
             this.webBrowserPanel.ResumeLayout(false);
             this.ResumeLayout(false);
+            });
         }
 
         private sealed class WindowsFormsWin32Window : IWin32Window

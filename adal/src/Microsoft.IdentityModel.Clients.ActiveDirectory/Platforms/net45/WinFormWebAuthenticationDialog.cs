@@ -74,7 +74,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         /// </summary>
         public void ShowBrowser()
         {
-            DialogResult uiResult = this.ShowDialog(this.ownerWindow);
+            DialogResult uiResult = DialogResult.None;
+            InvokeHandlingOwnerWindow(() => uiResult = this.ShowDialog(this.ownerWindow));
 
             switch (uiResult)
             {
