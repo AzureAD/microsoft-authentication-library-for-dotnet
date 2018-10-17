@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -34,28 +35,33 @@ namespace AdalDesktopTestApp
 {
     class Program
     {
-        public static IPlatformParameters Parameters { get; set; }
-        private static readonly AppLogger AppLogger = new AppLogger();
+        private static AppLogger AppLogger { get; } = new AppLogger();
+
+        private const string ClientId = "<CLIENT_ID>";
+        private const string RedirectUri = "https://ClientReplyUrl";
+        private const string User = ""; // can also be empty string for testing IWA and U/P
+        private const string Resource = "https://graph.windows.net";
 
         [STAThread]
         static void Main(string[] args)
         {
             LoggerCallbackHandler.LogCallback = AppLogger.Log;
-            string resource = "https://graph.windows.net";
 
-            string clientId = "<CLIENT_ID>";
-            string redirectUri = "<REDIRECT_URI>";
-            string user = "<USER>"; // can also be empty string for testing IWA and U/P
-               
+
             AuthenticationContext context = new AuthenticationContext("https://login.microsoftonline.com/common", true);
 
-            if (clientId == "<CLIENT_ID>")
+            if (ClientId == "<CLIENT_ID>")
             {
                 Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Please confgure the app first!! Press any key to exit"));
                 Console.Read();
                 return;
             }
 
+            RunAppAsync(context).Wait();
+        }
+
+        private static async Task RunAppAsync(AuthenticationContext context)
+        {
             while (true)
             {
                 Console.Clear();
@@ -68,68 +74,98 @@ namespace AdalDesktopTestApp
 
                 // display menu
                 Console.WriteLine(@"
-                        1. Acquire Token by Windows Integrated Auth
-                        2. Acquire Token by Windows Integrated Auth, with Pii logging enabled
+                        1. Clear the cache
+                        2. Acquire Token by Integrated Windows Auth
                         3. Acquire Token Interactively
                         4. Acquire Token with Username and Password
                         5. Acquire Token Silently
+                        6. Acquire Token by Device Code 
                         0. Exit App
                     Enter your Selection: ");
+
                 int.TryParse(Console.ReadLine(), out var selection);
 
                 try
                 {
-                    Task<AuthenticationResult> task = null;
-                    LoggerCallbackHandler.PiiLoggingEnabled = false;
+                    Task<AuthenticationResult> authTask = null;
+                    LoggerCallbackHandler.PiiLoggingEnabled = true;
                     switch (selection)
                     {
-                        case 1: // acquire token
-                            task = context.AcquireTokenAsync(resource, clientId, new UserCredential(user));
+                        case 1:
+                            // clear cache
+                            context.TokenCache.Clear();
                             break;
-                        case 2: // acquire token with pii logging enabled
-                            LoggerCallbackHandler.PiiLoggingEnabled = true;
-                            task = context.AcquireTokenAsync(resource, clientId, new UserCredential(user));
+                        case 2: // acquire token IWA
+                            authTask = context.AcquireTokenAsync(Resource, ClientId, new UserCredential(User));
+                            await FetchToken(authTask);
                             break;
                         case 3: // acquire token interactive
-                            task = context.AcquireTokenAsync(resource, clientId, new Uri(redirectUri), new PlatformParameters(PromptBehavior.Auto));
+                            authTask = context.AcquireTokenAsync(Resource, ClientId, new Uri(RedirectUri), new PlatformParameters(PromptBehavior.Auto));
+                            await FetchToken(authTask);
                             break;
                         case 4: // acquire token with username and password
-                            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Enter password for user {0} :", user));
-                            task = context.AcquireTokenAsync(resource, clientId, new UserPasswordCredential(user, Console.ReadLine()));
+                            Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Enter password for user {0} :", User));
+                            authTask = context.AcquireTokenAsync(Resource, ClientId, new UserPasswordCredential(User, Console.ReadLine()));
+                            await FetchToken(authTask);
                             break;
                         case 5: // acquire token silent
-                            task = context.AcquireTokenSilentAsync(resource, clientId);
+                            authTask = context.AcquireTokenSilentAsync(Resource, ClientId);
+                            await FetchToken(authTask);
+                            break;
+                        case 6: // device code flow
+                            authTask = GetTokenViaDeviceCodeAsync(context);
+                            await FetchToken(authTask);
                             break;
                         case 0:
                             return;
                         default:
                             break;
                     }
-                    task.Wait();
-                    string token = task.Result.AccessToken;
-                    string logMessage = "\n\n" + "Pii Logging Enabled: " +
-                                        LoggerCallbackHandler.PiiLoggingEnabled + "\n\n" +
-                                        AppLogger.GetAdalLogs();
 
-                    if (!LoggerCallbackHandler.PiiLoggingEnabled)
-                    {
-                        Console.WriteLine(token + "\n\n" + "====ADAL Logs====" + logMessage);
-                    }
-                    else
-                    {
-                        Console.WriteLine(token + "\n\n" + "====ADAL Logs Pii Enabled====" + logMessage);
-                    }
 
                 }
-                catch (AggregateException ae)
+                catch (Exception ex)
                 {
-                    Console.WriteLine(ae.InnerException.Message);
-                    Console.WriteLine(ae.InnerException.StackTrace);
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.StackTrace);
                 }
 
                 Console.WriteLine("\n\nHit 'ENTER' to continue...");
                 Console.ReadLine();
             }
         }
+
+        private static async Task<AuthenticationResult> GetTokenViaDeviceCodeAsync(AuthenticationContext ctx)
+        {
+            AuthenticationResult result = null;
+
+            try
+            {
+                DeviceCodeResult codeResult = await ctx.AcquireDeviceCodeAsync(Resource, ClientId);
+                Console.ResetColor();
+                Console.WriteLine("You need to sign in.");
+                Console.WriteLine("Message: " + codeResult.Message + "\n");
+                result = await ctx.AcquireTokenByDeviceCodeAsync(codeResult);
+            }
+            catch (Exception exc)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Something went wrong.");
+                Console.WriteLine("Message: " + exc.Message + "\n");
+            }
+            return result;
+
+
+        }
+
+        private static async Task FetchToken(Task<AuthenticationResult> authTask)
+        {
+            await authTask;
+
+            Console.BackgroundColor = ConsoleColor.DarkGreen;
+            Console.WriteLine("Token is {0}", authTask.Result.AccessToken);
+            Console.ResetColor();
+        }
+
     }
 }

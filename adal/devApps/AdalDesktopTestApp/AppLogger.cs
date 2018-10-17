@@ -26,22 +26,39 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
 using System.Text;
 
 namespace AdalDesktopTestApp
 {
     class AppLogger
     {
-        private readonly StringBuilder _logCollector = new StringBuilder();
-
         public void Log(LogLevel level, string message, bool containsPii)
         {
-            _logCollector.Append(message);
+
+            if (!containsPii)
+            {
+                Console.BackgroundColor = ConsoleColor.DarkBlue;
+            }
+
+            switch (level)
+            {
+                case LogLevel.Error:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    break;
+                case LogLevel.Warning:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    break;
+                case LogLevel.Verbose:
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    break;
+                default:
+                    break;
+            }
+
+            Console.WriteLine($"{level} {message}");
+            Console.ResetColor();
         }
 
-        public string GetAdalLogs()
-        {
-            return _logCollector.ToString();
-        }
     }
 }
