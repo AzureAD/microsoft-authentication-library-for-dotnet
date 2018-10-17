@@ -25,13 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
+using System.Collections.Generic;
 using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.Identity.Core.Telemetry
 {
-    internal class TelemetryTokenCacheAccessor : TokenCacheAccessor
+    internal class TelemetryTokenCacheAccessor : ITokenCacheAccessor
     {
+        private readonly ITokenCacheAccessor _tokenCacheAccessor;
+
+        public TelemetryTokenCacheAccessor(ITokenCacheAccessor tokenCacheAccessor)
+        {
+            _tokenCacheAccessor = tokenCacheAccessor;
+        }
+
+#if iOS
+        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            _tokenCacheAccessor.SetKeychainSecurityGroup(keychainSecurityGroup);
+        }
+#endif
+
         // The content of this class has to be placed outside of its base class TokenCacheAccessor,
         // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
         public void SaveAccessToken(MsalAccessTokenCacheItem item, RequestContext requestContext)
@@ -104,6 +118,132 @@ namespace Microsoft.Identity.Core.Telemetry
             {
                 DeleteAccount(cacheKey);
             }
+        }
+
+        /// <inheritdoc />
+        public int RefreshTokenCount => _tokenCacheAccessor.RefreshTokenCount;
+
+        /// <inheritdoc />
+        public int AccessTokenCount => _tokenCacheAccessor.AccessTokenCount;
+
+        /// <inheritdoc />
+        public int AccountCount => _tokenCacheAccessor.AccountCount;
+
+        /// <inheritdoc />
+        public int IdTokenCount => _tokenCacheAccessor.IdTokenCount;
+
+        /// <inheritdoc />
+        public void ClearRefreshTokens()
+        {
+            _tokenCacheAccessor.ClearRefreshTokens();
+        }
+
+        /// <inheritdoc />
+        public void ClearAccessTokens()
+        {
+            _tokenCacheAccessor.ClearAccessTokens();
+        }
+
+        /// <inheritdoc />
+        public void SaveAccessToken(MsalAccessTokenCacheItem item)
+        {
+            _tokenCacheAccessor.SaveAccessToken(item);
+        }
+
+        /// <inheritdoc />
+        public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
+        {
+            _tokenCacheAccessor.SaveRefreshToken(item);
+        }
+
+        /// <inheritdoc />
+        public void SaveIdToken(MsalIdTokenCacheItem item)
+        {
+            _tokenCacheAccessor.SaveIdToken(item);
+        }
+
+        /// <inheritdoc />
+        public void SaveAccount(MsalAccountCacheItem item)
+        {
+            _tokenCacheAccessor.SaveAccount(item);
+        }
+
+        /// <inheritdoc />
+        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        {
+            return _tokenCacheAccessor.GetAccessToken(accessTokenKey);
+        }
+
+        /// <inheritdoc />
+        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
+        {
+            return _tokenCacheAccessor.GetRefreshToken(refreshTokenKey);
+        }
+
+        /// <inheritdoc />
+        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
+        {
+            return _tokenCacheAccessor.GetIdToken(idTokenKey);
+        }
+
+        /// <inheritdoc />
+        public string GetAccount(MsalAccountCacheKey accountKey)
+        {
+            return _tokenCacheAccessor.GetAccount(accountKey);
+        }
+
+        /// <inheritdoc />
+        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
+        {
+            _tokenCacheAccessor.DeleteAccessToken(cacheKey);
+        }
+
+        /// <inheritdoc />
+        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
+        {
+            _tokenCacheAccessor.DeleteRefreshToken(cacheKey);
+        }
+
+        /// <inheritdoc />
+        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
+        {
+            _tokenCacheAccessor.DeleteIdToken(cacheKey);
+        }
+
+        /// <inheritdoc />
+        public void DeleteAccount(MsalAccountCacheKey cacheKey)
+        {
+            _tokenCacheAccessor.DeleteAccount(cacheKey);
+        }
+
+        /// <inheritdoc />
+        public ICollection<string> GetAllAccessTokensAsString()
+        {
+            return _tokenCacheAccessor.GetAllAccessTokensAsString();
+        }
+
+        /// <inheritdoc />
+        public ICollection<string> GetAllRefreshTokensAsString()
+        {
+            return _tokenCacheAccessor.GetAllRefreshTokensAsString();
+        }
+
+        /// <inheritdoc />
+        public ICollection<string> GetAllIdTokensAsString()
+        {
+            return _tokenCacheAccessor.GetAllIdTokensAsString();
+        }
+
+        /// <inheritdoc />
+        public ICollection<string> GetAllAccountsAsString()
+        {
+            return _tokenCacheAccessor.GetAllAccountsAsString();
+        }
+
+        /// <inheritdoc />
+        public void Clear()
+        {
+            _tokenCacheAccessor.Clear();
         }
     }
 }

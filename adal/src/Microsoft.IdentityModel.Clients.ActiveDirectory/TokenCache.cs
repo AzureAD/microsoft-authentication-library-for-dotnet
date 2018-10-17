@@ -71,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             };
         }
 
-        internal TokenCacheAccessor tokenCacheAccessor = new TokenCacheAccessor();
+        internal ITokenCacheAccessor tokenCacheAccessor;
 
         /// <summary>
         /// Default constructor.
@@ -84,6 +84,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             }
 
             this.tokenCacheDictionary = new ConcurrentDictionary<AdalTokenCacheKey, AdalResultWrapper>();
+
+            tokenCacheAccessor = PlatformProxyFactory.GetPlatformProxy().TokenCacheAccessor;
         }
 
         /// <summary>

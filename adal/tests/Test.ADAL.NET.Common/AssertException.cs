@@ -117,7 +117,7 @@ namespace Test.ADAL.Common
 
             if (!exceptionsMatching.Any())
             {
-                throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+                throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred => {1}", exception.InnerException.GetType().Name, exception.InnerException.Message), exception);
             }
 
             return exceptionsMatching.First();

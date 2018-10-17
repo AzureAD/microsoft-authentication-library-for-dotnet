@@ -60,7 +60,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             var parameters = new AuthenticationRequestParameters();
             parameters.ClientCredential = credential;
             parameters.SendCertificate = false;
-            parameters.Authority = Authority.CreateAuthority(new TestPlatformInformation(), TestConstants.AuthorityCommonTenant, false);
+            parameters.Authority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, false);
             parameters.Authority.SelfSignedJwtAudience = Audience1;
 
             //Validate cached client assertion with parameters
@@ -105,7 +105,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             var parameters = new AuthenticationRequestParameters();
             parameters.ClientCredential = credential;
             parameters.SendCertificate = false;
-            parameters.Authority = Authority.CreateAuthority(new TestPlatformInformation(), TestConstants.AuthorityCommonTenant, false);
+            parameters.Authority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, false);
             parameters.Authority.SelfSignedJwtAudience = "Audience1";
 
             //Validate cached client assertion with expiration time

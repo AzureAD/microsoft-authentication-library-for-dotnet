@@ -45,6 +45,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\Mocks\**\*.cs" LinkBase="CoreUT\Mocks" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\TestConstants.cs" LinkBase="CoreUT" />
+    <Compile Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.Unit\CoreAssert.cs" LinkBase="CoreUT" />
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
       <Project>{aece489d-9ed4-442d-8d8f-0f383aebb781}</Project>
       <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>

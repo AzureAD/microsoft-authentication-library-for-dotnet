@@ -28,14 +28,20 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ClientCredentialRequest : RequestBase
     {
-        public ClientCredentialRequest(AuthenticationRequestParameters authenticationRequestParameters, bool forceRefresh)
-            : base(authenticationRequestParameters)
+        public ClientCredentialRequest(
+            IHttpManager httpManager, 
+            ICryptographyManager cryptographyManager,
+            AuthenticationRequestParameters authenticationRequestParameters, 
+            bool forceRefresh)
+            : base(httpManager, cryptographyManager, authenticationRequestParameters)
         {
             ForceRefresh = forceRefresh;
         }
@@ -51,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!ForceRefresh && LoadFromCache)
             {
                 MsalAccessTokenItem
-                    = await TokenCache.FindAccessTokenAsync(PlatformInformation, AuthenticationRequestParameters).ConfigureAwait(false);
+                    = await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
             }
         }
         protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)

@@ -38,6 +38,7 @@ using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Test.Microsoft.Identity.Core.Unit;
 using System;
 using System.Xml;
+using Test.Microsoft.Identity.Unit.HttpTests;
 
 namespace Test.Microsoft.Identity.Unit.WsTrustTests
 {
@@ -84,28 +85,21 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
         public async Task MexEndpointFailsToResolveTestAsync()
         {
             // TODO: should we move this into a separate test class for WsTrustWebRequestManager?
-            HttpClientFactory.ReturnHttpClientForMocks = true;
-            HttpMessageHandlerFactory.ClearMockHandlers();
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent("Not found")
-                }
-            });
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Get);
 
-            try
-            {
-                var wsTrustWebRequestHandler = new WsTrustWebRequestManager();
-                await wsTrustWebRequestHandler.GetMexDocumentAsync("http://somehost", requestContext).ConfigureAwait(false);
-                Assert.Fail("We expect an exception to be thrown here");
+                try
+                {
+                    var wsTrustWebRequestHandler = new WsTrustWebRequestManager(httpManager);
+                    await wsTrustWebRequestHandler.GetMexDocumentAsync("http://somehost", requestContext).ConfigureAwait(false);
+                    Assert.Fail("We expect an exception to be thrown here");
+                }
+                catch (TestException ex)
+                {
+                    Assert.AreEqual(CoreErrorCodes.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
+                }
             }
-            catch (TestException ex)
-            {
-                Assert.AreEqual(CoreErrorCodes.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
-            }
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
 
         [TestMethod]

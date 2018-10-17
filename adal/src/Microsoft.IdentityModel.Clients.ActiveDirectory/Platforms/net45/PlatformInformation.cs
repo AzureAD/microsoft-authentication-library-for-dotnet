@@ -25,25 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Platforms;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using System;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class PlatformInformation : PlatformInformationBase
     {
-        public override string GetProductName()
-        {
-            return "PCL.Desktop";
-        }
-
         public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             PlatformParameters authorizationParameters = (parameters as PlatformParameters);
@@ -57,19 +45,19 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             // ADFS currently ignores the parameter for now.
             switch (promptBehavior)
             {
-                case PromptBehavior.Always:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-                    break;
-                case PromptBehavior.SelectAccount:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
-                    break;
-                case PromptBehavior.RefreshSession:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-                    break;
-                case PromptBehavior.Never:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
-                    break;
-            }            
+            case PromptBehavior.Always:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                break;
+            case PromptBehavior.SelectAccount:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
+                break;
+            case PromptBehavior.RefreshSession:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                break;
+            case PromptBehavior.Never:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                break;
+            }
         }
 
         public override bool GetCacheLoadPolicy(IPlatformParameters parameters)

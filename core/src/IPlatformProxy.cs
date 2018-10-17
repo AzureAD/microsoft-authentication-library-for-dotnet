@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.Identity.Core
 {
@@ -32,5 +34,15 @@ namespace Microsoft.Identity.Core
         bool IsDomainJoined();
 
         Task<bool> IsUserLocalAsync(RequestContext requestContext);
+
+        void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext);
+        string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext);
+        string GetDefaultRedirectUri(string correlationId);
+
+        string GetProductName();
+
+        ILegacyCachePersistence LegacyCachePersistence { get; }
+        ITokenCacheAccessor TokenCacheAccessor { get; }
+        ICryptographyManager CryptographyManager { get; }
     }
 }

@@ -25,16 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
-
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class PlatformInformation : PlatformInformationBase
     {
-        public override string GetProductName()
-        {
-            return null;
-        }
     }
 }

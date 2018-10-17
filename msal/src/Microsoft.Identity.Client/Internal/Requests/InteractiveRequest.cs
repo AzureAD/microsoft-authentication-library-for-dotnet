@@ -33,6 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.UI;
@@ -48,18 +49,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _codeVerifier;
         private string _state;
 
-        public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
+        public InteractiveRequest(IHttpManager httpManager, ICryptographyManager cryptographyManager, AuthenticationRequestParameters authenticationRequestParameters,
             IEnumerable<string> extraScopesToConsent, UIBehavior UIBehavior, IWebUI webUI)
             : this(
-                authenticationRequestParameters, extraScopesToConsent, authenticationRequestParameters.Account?.Username,
+                httpManager, cryptographyManager, authenticationRequestParameters, extraScopesToConsent, authenticationRequestParameters.Account?.Username,
                 UIBehavior, webUI)
         {
         }
 
-        public InteractiveRequest(AuthenticationRequestParameters authenticationRequestParameters,
+        public InteractiveRequest(IHttpManager httpManager, ICryptographyManager cryptographyManager, AuthenticationRequestParameters authenticationRequestParameters,
             IEnumerable<string> extraScopesToConsent, string loginHint,
             UIBehavior UIBehavior, IWebUI webUI)
-            : base(authenticationRequestParameters)
+            : base(httpManager, cryptographyManager, authenticationRequestParameters)
         {
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
@@ -120,10 +121,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task<Uri> CreateAuthorizationUriAsync()
         {
             await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync
-                (AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                (HttpManager, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             //this method is used in confidential clients to create authorization URLs.
-            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(HttpManager, AuthenticationRequestParameters.LoginHint, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
             return CreateAuthorizationUri();
         }
 
@@ -141,8 +142,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (addVerifier)
             {
-                _codeVerifier = CoreCryptographyHelpers.GenerateCodeVerifier();
-                string codeVerifierHash = CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
+                _codeVerifier = CryptographyManager.GenerateCodeVerifier();
+                string codeVerifierHash = CryptographyManager.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
 
                 requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
@@ -234,7 +235,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[OAuth2Parameter.CorrelationId] = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString();
             }
 
-            foreach (var kvp in MsalIdHelper.GetMsalIdParameters(PlatformInformation))
+            foreach (var kvp in MsalIdHelper.GetMsalIdParameters())
             {
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }

@@ -39,6 +39,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
+using PromptBehavior = Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior;
 using Microsoft.Identity.Core.UI;
 
 namespace Test.ADAL.NET.Integration
@@ -58,7 +59,7 @@ namespace Test.ADAL.NET.Integration
             InstanceDiscovery.InstanceCache.Clear();
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
         }
-        
+
         [TestMethod]
         [Description("Test for PromptBehavior.Auto, prompts only if necessary")]
         public async Task AutoPromptBehaviorTestAsync()
@@ -79,8 +80,10 @@ namespace Test.ADAL.NET.Integration
             var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
             AuthenticationResult result =
                 await
+#pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto)).ConfigureAwait(false);
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Auto));
+#pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -93,7 +96,7 @@ namespace Test.ADAL.NET.Integration
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
-        
+
         [TestMethod]
         [Description("Test for calling promptBehavior.Auto when cache already has an access token")]
         public async Task AutoPromptBehaviorWithTokenInCacheTestAsync()
@@ -113,8 +116,10 @@ namespace Test.ADAL.NET.Integration
 
             AuthenticationResult result =
                 await
+#pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto)).ConfigureAwait(false);
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Auto));
+#pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
@@ -165,9 +170,11 @@ namespace Test.ADAL.NET.Integration
 
             AuthenticationResult result =
                 await
+#pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenSilentAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
                     new UserIdentifier(TestConstants.DefaultDisplayableId, UserIdentifierType.RequiredDisplayableId),
-                    new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto)).ConfigureAwait(false);
+                    new PlatformParameters(PromptBehavior.Auto));
+#pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -218,8 +225,10 @@ namespace Test.ADAL.NET.Integration
 
             AuthenticationResult result =
                 await
+#pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Always)).ConfigureAwait(false);
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Always));
+#pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -229,7 +238,7 @@ namespace Test.ADAL.NET.Integration
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
-        
+
         [TestMethod]
         [Description("Test for Force Prompt with PromptBehavior.SelectAccount")]
         public async Task ForcePromptForSelectAccountPromptBehaviorTestAsync()
@@ -273,8 +282,10 @@ namespace Test.ADAL.NET.Integration
 
             AuthenticationResult result =
                 await
+#pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.SelectAccount)).ConfigureAwait(false);
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.SelectAccount));
+#pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
             Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
@@ -288,7 +299,7 @@ namespace Test.ADAL.NET.Integration
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
-        
+
         [TestMethod]
         [Description("Test for Force Prompt with PromptBehavior.Never")]
         public void ForcePromptForNeverPromptBehaviorTest()
@@ -313,7 +324,7 @@ namespace Test.ADAL.NET.Integration
 
             var exc = AssertException.TaskThrows<AdalServiceException>(() =>
             context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Never)));
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Never)));
 
             Assert.AreEqual(AdalError.FailedToRefreshToken, exc.ErrorCode);
             // There should be only one cache entry.
@@ -321,7 +332,7 @@ namespace Test.ADAL.NET.Integration
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
-        
+
         [TestMethod]
         [Description("Test for Force Prompt with PromptBehavior.RefreshSession")]
         public async Task ForcePromptForRefreshSessionPromptBehaviorTestAsync()
@@ -364,8 +375,10 @@ namespace Test.ADAL.NET.Integration
 
             AuthenticationResult result =
                 await
+#pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                        TestConstants.DefaultRedirectUri, new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.RefreshSession)).ConfigureAwait(false);
+                        TestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.RefreshSession));
+#pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);

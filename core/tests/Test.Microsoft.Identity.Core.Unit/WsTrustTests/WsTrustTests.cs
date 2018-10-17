@@ -36,6 +36,7 @@ using Microsoft.Identity.Core.WsTrust;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
+using Test.Microsoft.Identity.Unit.HttpTests;
 
 namespace Test.Microsoft.Identity.Unit.WsTrustTests
 {
@@ -53,65 +54,58 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
         [Description("WS-Trust Request Test")]
         public async Task WsTrustRequestTestAsync()
         {
-            HttpClientFactory.ReturnHttpClientForMocks = true;
-            HttpMessageHandlerFactory.ClearMockHandlers();
-
             string wsTrustAddress = "https://some/address/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new MockHttpManager())
             {
-                Url = wsTrustAddress,
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Url = wsTrustAddress,
+                        Method = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
+                        }
+                    });
 
-            var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
-            var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
-            var manager = new WsTrustWebRequestManager();
-            var wsTrustResponse = await manager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext).ConfigureAwait(false);
+                var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
+                var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                var manager = new WsTrustWebRequestManager(httpManager);
+                var wsTrustResponse = await manager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
+                                                   .ConfigureAwait(false);
 
-            Assert.IsNotNull(wsTrustResponse.Token);
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                Assert.IsNotNull(wsTrustResponse.Token);
+            }
         }
 
         [TestMethod]
         [Description("WsTrustRequest encounters HTTP 404")]
         public async Task WsTrustRequestFailureTestAsync()
         {
-            HttpClientFactory.ReturnHttpClientForMocks = true;
-            HttpMessageHandlerFactory.ClearMockHandlers();
-
             string uri = "https://some/address/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(uri), WsTrustVersion.WsTrust13);
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new MockHttpManager())
             {
-                Url = uri,
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
+
+                var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
+                try
                 {
-                    Content = new StringContent("Not found")
+                    var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
+                    var manager = new WsTrustWebRequestManager(httpManager);
+
+                    WsTrustResponse wstResponse =
+                        await manager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
+                    Assert.Fail("We expect an exception to be thrown here");
                 }
-            });
-
-            var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
-            try
-            {
-                var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
-                var manager = new WsTrustWebRequestManager();
-
-                WsTrustResponse wstResponse = await manager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
-                Assert.Fail("We expect an exception to be thrown here");
+                catch (TestException ex)
+                {
+                    Assert.AreEqual(CoreErrorCodes.FederatedServiceReturnedError, ex.ErrorCode);
+                }
             }
-            catch (TestException ex)
-            {
-                Assert.AreEqual(CoreErrorCodes.FederatedServiceReturnedError, ex.ErrorCode);
-            }
-            Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
         }
     }
 }

@@ -32,12 +32,12 @@ using System;
 namespace Microsoft.Identity.Core.Cache
 {
     [Android.Runtime.Preserve(AllMembers = true)]
-    internal class LegacyCachePersistance : ILegacyCachePersistance
+    internal class AndroidLegacyCachePersistence : ILegacyCachePersistence
     {
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
         private const string SharedPreferencesKey = "cache";
         
-        byte[] ILegacyCachePersistance.LoadCache()
+        byte[] ILegacyCachePersistence.LoadCache()
         {
             try
             {
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Core.Cache
             return null;
         }
 
-        void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
+        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
         {
             try
             {

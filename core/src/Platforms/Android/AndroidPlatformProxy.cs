@@ -25,8 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.Identity.Core
 {
@@ -36,6 +39,15 @@ namespace Microsoft.Identity.Core
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidPlatformProxy : IPlatformProxy
     {
+        internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
+
+        private readonly bool _isMsal;
+
+        public AndroidPlatformProxy(bool isMsal)
+        {
+            _isMsal = isMsal;
+        }
+
         /// <summary>
         /// Get the user logged in 
         /// </summary>
@@ -85,5 +97,51 @@ namespace Microsoft.Identity.Core
         {
             return Android.OS.Build.Model;
         }
+
+        /// <inheritdoc />
+        public void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        {
+            if (redirectUri == null)
+            {
+                throw new ArgumentNullException(nameof(redirectUri));
+            }
+
+            if (_isMsal)
+            {
+                if (Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
+                {
+                    // TODO: Need to use CoreExceptionFactory here...?
+                    //throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + Constants.DefaultRedirectUri +
+                    //                                                               " cannot be used on iOS platform");
+                    throw new InvalidOperationException($"Default redirect URI - {Constants.DefaultRedirectUri} cannot be used on Android platform");
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        {
+            return redirectUri.OriginalString;
+        }
+
+        /// <inheritdoc />
+        public string GetDefaultRedirectUri(string correlationId)
+        {
+            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, correlationId);
+        }
+
+        public string GetProductName()
+        {
+            return _isMsal ? "MSAL.Xamarin.Android" : "PCL.Android";
+        }
+
+        /// <inheritdoc />
+        public ILegacyCachePersistence LegacyCachePersistence { get; } = new AndroidLegacyCachePersistence();
+
+        /// <inheritdoc />
+        public ITokenCacheAccessor TokenCacheAccessor { get; } = new AndroidTokenCacheAccessor();
+
+        /// <inheritdoc />
+        public ICryptographyManager CryptographyManager { get; } = new AndroidCryptographyManager();
     }
 }

@@ -33,17 +33,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.WsTrust;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
-using Test.ADAL.NET.Common.Mocks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Test.ADAL.NET.Common;
+using Test.Microsoft.Identity.Core.Unit.Mocks;
 using CoreHttpClientFactory = Microsoft.Identity.Core.Http.HttpClientFactory;
-using CoreHttpMessageHandlerFactory = Microsoft.Identity.Core.Http.HttpMessageHandlerFactory;
+using MockHelpers = Test.ADAL.NET.Common.Mocks.MockHelpers;
+using MockHttpMessageHandler = Test.ADAL.NET.Common.Mocks.MockHttpMessageHandler;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -292,42 +295,43 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("InstanceDiscoveryTests")]
         public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForUserRealmDiscoveryAsync()
         {
-            string host = "login.windows.net";
-            string preferredNetwork = "login.microsoftonline.com";
-            var authenticator = new Authenticator($"https://{host}/contoso.com/", false);
-            AddMockInstanceDiscovery(host);
-            await authenticator.UpdateFromTemplateAsync(new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
-
-            CoreHttpClientFactory.ReturnHttpClientForMocks = true;
-            CoreHttpMessageHandlerFactory.ClearMockHandlers();
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                Url = $"https://{preferredNetwork}/common/userrealm/johndoe@contoso.com", // This validates the token request is sending to expected host
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                string host = "login.windows.net";
+                string preferredNetwork = "login.microsoftonline.com";
+                var authenticator = new Authenticator($"https://{host}/contoso.com/", false);
+                AddMockInstanceDiscovery(host);
+                await authenticator.UpdateFromTemplateAsync(new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        Url =
+                            $"https://{preferredNetwork}/common/userrealm/johndoe@contoso.com", // This validates the token request is sending to expected host
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent("{\"account_type\":\"managed\"}")
+                        }
+                    });
+
+                var requestData = new RequestData
                 {
-                    Content = new StringContent("{\"account_type\":\"managed\"}")
-                }
-            });
+                    Authenticator = authenticator,
+                    Resource = "resource1",
+                    ClientKey = new ClientKey(new ClientCredential("client1", "something")),
+                    SubjectType = TokenSubjectType.Client,
+                    ExtendedLifeTimeEnabled = false
+                };
 
-            var requestData = new RequestData
-            {
-                Authenticator = authenticator,
-                Resource = "resource1",
-                ClientKey = new ClientKey(new ClientCredential("client1", "something")),
-                SubjectType = TokenSubjectType.Client,
-                ExtendedLifeTimeEnabled = false
-            };
+                var privateObject = new PrivateObject(
+                    new AcquireTokenUsernamePasswordHandler(
+                        new WsTrustWebRequestManager(httpManager),
+                        requestData,
+                        new UsernamePasswordInput("johndoe@contoso.com", "fakepassword")));
 
-            var privateObject = new PrivateObject(
-                new AcquireTokenUsernamePasswordHandler(
-                    requestData, 
-                    new UsernamePasswordInput("johndoe@contoso.com", "fakepassword")));
-
-            Task preTokenRequestAsync = (Task)privateObject.Invoke("PreTokenRequestAsync");
-            await preTokenRequestAsync.ConfigureAwait(false);
-
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                await ((Task)privateObject.Invoke("PreTokenRequestAsync")).ConfigureAwait(false);
+            }
         }
 
         [TestMethod]

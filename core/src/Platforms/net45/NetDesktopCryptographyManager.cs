@@ -32,24 +32,23 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
-    internal class CoreCryptographyHelpers
+    internal class NetDesktopCryptographyManager : ICryptographyManager
     {
-        public static string CreateBase64UrlEncodedSha256Hash(string input)
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {
                 return null;
             }
 
-            using (SHA256Managed sha = new SHA256Managed())
+            using (SHA256Cng sha = new SHA256Cng())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
                 return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
             }
         }
 
-        public static string GenerateCodeVerifier()
+        public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
             using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
@@ -60,19 +59,38 @@ namespace Microsoft.Identity.Core
             return Base64UrlHelpers.Encode(buffer);
         }
 
-        public static string CreateSha256Hash(string input)
+        public string CreateSha256Hash(string input)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            if (string.IsNullOrEmpty(input))
             {
                 return null;
             }
 
-            using (SHA256Managed sha = new SHA256Managed())
+            using (SHA256Cng sha = new SHA256Cng())
             {
                 UTF8Encoding encoding = new UTF8Encoding();
                 return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
         }
-        
+
+        public string Encrypt(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Decrypt(string encryptedMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Encrypt(byte[] message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Decrypt(byte[] encryptedMessage)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

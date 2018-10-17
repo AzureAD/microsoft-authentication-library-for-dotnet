@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
+using PromptBehavior = Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
@@ -56,7 +57,7 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
-            _platformParameters = new PlatformParameters(Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior.Auto);
+            _platformParameters = new PlatformParameters(PromptBehavior.Auto);
 
             InstanceDiscovery.InstanceCache.Clear();
         }

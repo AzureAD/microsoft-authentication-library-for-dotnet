@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,22 +23,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core.Instance
 {
     internal class AadAuthority : Authority
     {
+        public const string DefaultTrustedHost = "login.microsoftonline.com";
+        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
+        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
+
         internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
-            "login.windows.net", // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list 
+            "login.windows.net", // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list
             "login.chinacloudapi.cn", // Microsoft Azure China
             "login.microsoftonline.de", // Microsoft Azure Blackforest
             "login-us.microsoftonline.com", // Microsoft Azure US Government - Legacy
@@ -47,41 +51,39 @@ namespace Microsoft.Identity.Core.Instance
             "login.cloudgovapi.us" // Microsoft Azure US Government
         };
 
-        public const string DefaultTrustedHost = "login.microsoftonline.com";
-
-        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
-
-        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
-
-        internal AadAuthority(CorePlatformInformationBase platformInformation, string authority, bool validateAuthority) : base(platformInformation, authority, validateAuthority)
+        internal AadAuthority(string authority, bool validateAuthority)
+            : base(authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Aad;
         }
 
-        internal override async Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)
+        internal override async Task UpdateCanonicalAuthorityAsync(IHttpManager httpManager, RequestContext requestContext)
         {
-            var metadata = await AadInstanceDiscovery.Instance.
-                GetMetadataEntryAsync(PlatformInformation, new Uri(CanonicalAuthority), this.ValidateAuthority, requestContext).ConfigureAwait(false);
+            var metadata = await AadInstanceDiscovery
+                                 .Instance.GetMetadataEntryAsync(httpManager, new Uri(CanonicalAuthority), ValidateAuthority, requestContext)
+                                 .ConfigureAwait(false);
 
             CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
         }
 
-        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(string userPrincipalName,
+        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
+            IHttpManager httpManager,
+            string userPrincipalName,
             RequestContext requestContext)
         {
             var authorityUri = new Uri(CanonicalAuthority);
 
             if (ValidateAuthority && !IsInTrustedHostList(authorityUri.Host))
             {
-                InstanceDiscoveryResponse discoveryResponse =
-                    await AadInstanceDiscovery.Instance.
-                    DoInstanceDiscoveryAndCacheAsync(PlatformInformation, authorityUri, true, requestContext).ConfigureAwait(false);
+                var discoveryResponse = await AadInstanceDiscovery
+                                              .Instance.DoInstanceDiscoveryAndCacheAsync(httpManager, authorityUri, true, requestContext)
+                                              .ConfigureAwait(false);
 
                 return discoveryResponse.TenantDiscoveryEndpoint;
             }
+
             return GetDefaultOpenIdConfigurationEndpoint();
         }
-
 
         protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
         {
@@ -101,11 +103,10 @@ namespace Microsoft.Identity.Core.Instance
 
         internal static bool IsInTrustedHostList(string host)
         {
-            return
-                !string.IsNullOrEmpty(
-                    TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
+            return !string.IsNullOrEmpty(
+                       TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
         }
-        
+
         internal override string GetTenantId()
         {
             return GetFirstPathSegment(CanonicalAuthority);
@@ -113,10 +114,13 @@ namespace Microsoft.Identity.Core.Instance
 
         internal override void UpdateTenantId(string tenantId)
         {
-            Uri authorityUri = new Uri(CanonicalAuthority);
+            var authorityUri = new Uri(CanonicalAuthority);
 
-            CanonicalAuthority = 
-                string.Format(CultureInfo.InvariantCulture, AADCanonicalAuthorityTemplate, authorityUri.Authority, tenantId);
+            CanonicalAuthority = string.Format(
+                CultureInfo.InvariantCulture,
+                AADCanonicalAuthorityTemplate,
+                authorityUri.Authority,
+                tenantId);
         }
     }
 }

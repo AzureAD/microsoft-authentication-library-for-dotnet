@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
 #endif
     /// <summary>
-    /// Token cache storing access and refresh tokens for accounts 
+    /// Token cache storing access and refresh tokens for accounts
     /// This class is used in the constuctors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
@@ -57,6 +58,9 @@ namespace Microsoft.Identity.Client
     {
         internal const string NullPreferredUsernameDisplayLabel = "preferred_username not in id_token";
 
+        // TODO: the TokenCache itself shouldn't be doing http access (SRP)
+        internal IHttpManager HttpManager { get; set; }
+
         static TokenCache()
         {
             ModuleInitializer.EnsureModuleInitialized();
@@ -64,12 +68,22 @@ namespace Microsoft.Identity.Client
 
         private const int DefaultExpirationBufferInMinutes = 5;
 
-        internal readonly TelemetryTokenCacheAccessor tokenCacheAccessor = new TelemetryTokenCacheAccessor();
+        internal readonly TelemetryTokenCacheAccessor tokenCacheAccessor;
 
-        internal ILegacyCachePersistance legacyCachePersistance = new LegacyCachePersistance();
+        internal ILegacyCachePersistence legacyCachePersistence;
 
         /// <summary>
-        /// Notification for certain token cache interactions during token acquisition. This delegate is 
+        /// Constructor
+        /// </summary>
+        public TokenCache()
+        {
+            var proxy = PlatformProxyFactory.GetPlatformProxy();
+            tokenCacheAccessor = new TelemetryTokenCacheAccessor(proxy.TokenCacheAccessor);
+            legacyCachePersistence = proxy.LegacyCachePersistence;
+        }
+
+        /// <summary>
+        /// Notification for certain token cache interactions during token acquisition. This delegate is
         /// used in particular to provide a custom token cache serialization
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
@@ -125,15 +139,15 @@ namespace Microsoft.Identity.Client
         }
 
         internal Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken
-            (CorePlatformInformationBase platformInformation, AuthenticationRequestParameters requestParams, MsalTokenResponse response)
+            (AuthenticationRequestParameters requestParams, MsalTokenResponse response)
         {
-            var tenantId = Authority.CreateAuthority(platformInformation, requestParams.TenantUpdatedCanonicalAuthority, false)
+            var tenantId = Authority.CreateAuthority(requestParams.TenantUpdatedCanonicalAuthority, false)
                 .GetTenantId();
 
             IdToken idToken = IdToken.Parse(response.IdToken);
 
-            //The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema. 
-            //It will be set to "preferred_username not in idtoken" 
+            //The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
+            //It will be set to "preferred_username not in idtoken"
             var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername)? idToken.PreferredUsername : NullPreferredUsernameDisplayLabel;
 
             var instanceDiscoveryMetadataEntry = GetCachedAuthorityMetaData(requestParams.TenantUpdatedCanonicalAuthority);
@@ -169,7 +183,7 @@ namespace Microsoft.Identity.Client
                         ClientId = ClientId,
                         Account = msalAccessTokenCacheItem.HomeAccountId != null ?
                                     new Account(AccountId.FromClientInfo(msalAccessTokenCacheItem.ClientInfo),
-                                    preferredUsername, preferredEnvironmentHost) : 
+                                    preferredUsername, preferredEnvironmentHost) :
                                     null
                     };
 
@@ -177,7 +191,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
-                    DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId, 
+                    DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
                         msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
 
                     tokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem, requestParams.RequestContext);
@@ -204,7 +218,7 @@ namespace Microsoft.Identity.Client
                     if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Core.Instance.AuthorityType.B2C))
                     {
                         CacheFallbackOperations.WriteAdalRefreshToken
-                            (legacyCachePersistance, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
+                            (legacyCachePersistence, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
                             Authority.UpdateHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
                             msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
                     }
@@ -248,7 +262,7 @@ namespace Microsoft.Identity.Client
 
             if (!requestParams.IsClientCredentialRequest)
             {
-                //filter by identifer of the user instead
+                // filter by identifier of the user instead
                 accessTokenItemList =
                     accessTokenItemList.Where(
                             item => item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase))
@@ -262,17 +276,17 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(CorePlatformInformationBase platformInformation, AuthenticationRequestParameters requestParams)
+        internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
         {
             using (CoreTelemetryService.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId,
                 new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT }))
-            {   
+            {
                 ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 string preferredEnvironmentAlias = null;
 
                 if (requestParams.Authority != null)
                 {
-                    var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(platformInformation,
+                    var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(
                         requestParams.Authority.CanonicalAuthority,
                         requestParams.ValidateAuthority, requestParams.RequestContext).ConfigureAwait(false);
 
@@ -405,23 +419,23 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(CorePlatformInformationBase platformInformation, AuthenticationRequestParameters requestParams)
+        internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)
         {
             using (CoreTelemetryService.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId,
                 new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
             {
-                return await FindRefreshTokenCommonAsync(platformInformation, requestParams).ConfigureAwait(false);
+                return await FindRefreshTokenCommonAsync(requestParams).ConfigureAwait(false);
             }
         }
 
-        private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenCommonAsync(CorePlatformInformationBase platformInformation, AuthenticationRequestParameters requestParam)
+        private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenCommonAsync(AuthenticationRequestParameters requestParam)
         {
             if (requestParam.Authority == null)
             {
                 return null;
             }
 
-            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(platformInformation, requestParam.Authority.CanonicalAuthority,
+            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParam.Authority.CanonicalAuthority,
                 requestParam.ValidateAuthority, requestParam.RequestContext).ConfigureAwait(false);
 
             var environmentAliases = GetEnvironmentAliases(requestParam.Authority.CanonicalAuthority,
@@ -486,7 +500,7 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
                     return CacheFallbackOperations.GetAdalEntryForMsal(
-                        legacyCachePersistance,
+                        legacyCachePersistence,
                         preferredEnvironmentHost,
                         environmentAliases,
                         requestParam.ClientId,
@@ -501,7 +515,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeleteRefreshToken(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem, 
+        internal void DeleteRefreshToken(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
             RequestContext requestContext)
         {
             lock (LockObject)
@@ -529,7 +543,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem, 
+        internal void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
             RequestContext requestContext)
         {
             lock (LockObject)
@@ -632,7 +646,7 @@ namespace Microsoft.Identity.Client
         }
 
         private async Task<InstanceDiscoveryMetadataEntry> GetCachedOrDiscoverAuthorityMetaDataAsync
-            (CorePlatformInformationBase platformInformation, string authority, bool validateAuthority, RequestContext requestContext)
+            (string authority, bool validateAuthority, RequestContext requestContext)
         {
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
 
@@ -640,11 +654,11 @@ namespace Microsoft.Identity.Client
             if (authorityType == Core.Instance.AuthorityType.Aad || authorityType == Core.Instance.AuthorityType.B2C)
             {
                 instanceDiscoveryMetadata = await AadInstanceDiscovery.Instance.GetMetadataEntryAsync
-                    (platformInformation, new Uri(authority), validateAuthority, requestContext).ConfigureAwait(false);
+                    (HttpManager, new Uri(authority), validateAuthority, requestContext).ConfigureAwait(false);
             }
             return instanceDiscoveryMetadata;
         }
-         
+
         private InstanceDiscoveryMetadataEntry GetCachedAuthorityMetaData(string authority)
         {
             InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
@@ -688,10 +702,10 @@ namespace Microsoft.Identity.Client
             return preferredEnvironmentHost;
         }
 
-        internal async Task<IEnumerable<IAccount>> GetAccountsAsync(CorePlatformInformationBase platformInformation, string authority, bool validateAuthority, RequestContext requestContext)
+        internal async Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, bool validateAuthority, RequestContext requestContext)
         {
-            var instanceDiscoveryMetadataEntry = 
-                await GetCachedOrDiscoverAuthorityMetaDataAsync(platformInformation, authority, validateAuthority, requestContext).ConfigureAwait(false);
+            var instanceDiscoveryMetadataEntry =
+                await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
 
             var environmentAliases = GetEnvironmentAliases(authority, instanceDiscoveryMetadataEntry);
 
@@ -709,7 +723,7 @@ namespace Microsoft.Identity.Client
                 ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
                 ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
 
-                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(legacyCachePersistance, environmentAliases, ClientId);
+                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(legacyCachePersistence, environmentAliases, ClientId);
                 OnAfterAccess(args);
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -863,10 +877,10 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal async Task RemoveAsync(CorePlatformInformationBase platformInformation, string authority, bool validateAuthority, IAccount account, RequestContext requestContext)
+        internal async Task RemoveAsync(string authority, bool validateAuthority, IAccount account, RequestContext requestContext)
         {
             var instanceDiscoveryMetadataEntry =
-                await GetCachedOrDiscoverAuthorityMetaDataAsync(platformInformation, authority, validateAuthority, requestContext).ConfigureAwait(false);
+                await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
 
             var environmentAliases = GetEnvironmentAliases(authority, instanceDiscoveryMetadataEntry);
 
@@ -918,7 +932,7 @@ namespace Microsoft.Identity.Client
             {
                 tokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetKey(), requestContext);
             }
-            
+
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
             IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
@@ -947,10 +961,10 @@ namespace Microsoft.Identity.Client
         internal void RemoveAdalUser(IAccount account, ISet<string> environmentAliases)
         {
             CacheFallbackOperations.RemoveAdalUser(
-                legacyCachePersistance, 
-                environmentAliases, 
+                legacyCachePersistence,
+                environmentAliases,
                 ClientId,
-                account.Username, 
+                account.Username,
                 account.HomeAccountId.Identifier);
         }
 
@@ -1053,9 +1067,9 @@ namespace Microsoft.Identity.Client
 
         internal void ClearAdalCache()
         {
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
             dictionary.Clear();
-            legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));
+            legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
         }
 
         internal void ClearMsalCache()
@@ -1095,7 +1109,7 @@ namespace Microsoft.Identity.Client
                     ClientId = ClientId,
                     Account = msalIdTokenCacheItem != null ? new Account(
                         AccountId.FromClientInfo(msalIdTokenCacheItem.ClientInfo),
-                        msalIdTokenCacheItem.IdToken?.PreferredUsername, 
+                        msalIdTokenCacheItem.IdToken?.PreferredUsername,
                         msalAccessTokenCacheItem.Environment) : null
                 };
 
@@ -1121,7 +1135,7 @@ namespace Microsoft.Identity.Client
         /// <param name="msalRefreshTokenCacheItem"></param>
         /// <param name="msalIdTokenCacheItem"></param>
         internal void SaveRefreshTokenCacheItem(
-            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem, 
+            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
             lock (LockObject)
@@ -1130,10 +1144,10 @@ namespace Microsoft.Identity.Client
                 {
                     TokenCache = this,
                     ClientId = ClientId,
-                    Account = msalIdTokenCacheItem != null ? 
+                    Account = msalIdTokenCacheItem != null ?
                            new Account(
                                AccountId.FromClientInfo(msalIdTokenCacheItem.ClientInfo),
-                               msalIdTokenCacheItem.IdToken.PreferredUsername, 
+                               msalIdTokenCacheItem.IdToken.PreferredUsername,
                                msalIdTokenCacheItem.IdToken.Name) : null
                 };
 

@@ -37,6 +37,7 @@ using Microsoft.Identity.Core.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
+using Test.Microsoft.Identity.Unit.HttpTests;
 
 namespace Test.Microsoft.Identity.Unit.InstanceTests
 {
@@ -48,11 +49,8 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
         [TestInitialize]
         public void TestInitialize()
         {
-            new TestPlatformInformation();
             Authority.ValidatedAuthorities.Clear();
-            HttpClientFactory.ReturnHttpClientForMocks = true;
             CoreExceptionFactory.Instance = new TestExceptionFactory();
-            HttpMessageHandlerFactory.ClearMockHandlers();
             CoreTelemetryService.InitializeCoreTelemetryService(new TestTelemetry());
             AadInstanceDiscovery.Instance.Cache.Clear();
         }
@@ -67,199 +65,220 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
         {
-            //add mock response for instance validation
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.com/common/discovery/instance",
-                QueryParams = new Dictionary<string, string>
-                {
-                    {"api-version", "1.1"},
-                    {"authorization_endpoint", "https%3A%2F%2Flogin.microsoftonline.in%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"},
-                },
-                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                    "{\"tenant_discovery_endpoint\":\"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration\"}")
-            });
+                //add mock response for instance validation
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        Method = HttpMethod.Get,
+                        Url = "https://login.microsoftonline.com/common/discovery/instance",
+                        QueryParams = new Dictionary<string, string>
+                        {
+                            {"api-version", "1.1"},
+                            {
+                                "authorization_endpoint",
+                                "https%3A%2F%2Flogin.microsoftonline.in%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"
+                            },
+                        },
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                            "{\"tenant_discovery_endpoint\":\"https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration\"}")
+                    });
 
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
-            {
-                Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
-                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
-            });
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        Method = HttpMethod.Get,
+                        Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
+                    });
 
-            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoftonline.in/mytenant.com", true);
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-            Task.Run(async () =>
-                {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                })
-                .GetAwaiter()
-                .GetResult();
+                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", true);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Task.Run(
+                    async () =>
+                    {
+                        await instance.ResolveEndpointsAsync(httpManager, null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                    }).GetAwaiter().GetResult();
 
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                instance.AuthorizationEndpoint);
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                instance.TokenEndpoint);
-            Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
-                instance.SelfSignedJwtAudience);
-            Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.UserRealmUriPrefix);
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
+                    instance.AuthorizationEndpoint);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
+                    instance.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.UserRealmUriPrefix);
+            }
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
-            });
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        Method = HttpMethod.Get,
+                        Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
+                    });
 
-            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoftonline.in/mytenant.com", false);
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-            Task.Run(async () =>
-                {
-                    await instance.ResolveEndpointsAsync(null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                })
-                .GetAwaiter()
-                .GetResult();
+                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", false);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Task.Run(
+                    async () =>
+                    {
+                        await instance.ResolveEndpointsAsync(httpManager, null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                    }).GetAwaiter().GetResult();
 
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                instance.AuthorizationEndpoint);
-            Assert.AreEqual("https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                instance.TokenEndpoint);
-            Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/",
-                instance.SelfSignedJwtAudience);
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
+                    instance.AuthorizationEndpoint);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
+                    instance.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
+            }
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationTest()
         {
-            //add mock response for instance validation
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.com/common/discovery/instance",
-                QueryParams = new Dictionary<string, string>
-                {
-                    {"api-version", "1.1"},
-                    {"authorization_endpoint", "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"},
-                },
-                ResponseMessage =
-                    MockHelpers.CreateFailureMessage(HttpStatusCode.BadRequest, "{\"error\":\"invalid_instance\"," +
-                                                                                "\"error_description\":\"AADSTS50049: " +
-                                                                                "Unknown or invalid instance. Trace " +
-                                                                                "ID: b9d0894d-a9a4-4dba-b38e-8fb6a009bc00 " +
-                                                                                "Correlation ID: 34f7b4cf-4fa2-4f35-a59b" +
-                                                                                "-54b6f91a9c94 Timestamp: 2016-08-23 " +
-                                                                                "20:45:49Z\",\"error_codes\":[50049]," +
-                                                                                "\"timestamp\":\"2016-08-23 20:45:49Z\"," +
-                                                                                "\"trace_id\":\"b9d0894d-a9a4-4dba-b38e-8f" +
-                                                                                "b6a009bc00\",\"correlation_id\":\"34f7b4cf-" +
-                                                                                "4fa2-4f35-a59b-54b6f91a9c94\"}")
-            });
-
-            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoft0nline.com/mytenant.com", true);
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-            try
-            {
-                Task.Run(async () =>
+                //add mock response for instance validation
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
                     {
-                        await instance.ResolveEndpointsAsync(null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    })
-                    .GetAwaiter()
-                    .GetResult();
-                Assert.Fail("validation should have failed here");
-            }
-            catch (Exception exc)
-            {
-                Assert.IsTrue(exc is TestServiceException);
-                Assert.AreEqual(((TestServiceException) exc).ErrorCode, "invalid_instance");
-            }
+                        Method = HttpMethod.Get,
+                        Url = "https://login.microsoftonline.com/common/discovery/instance",
+                        QueryParams = new Dictionary<string, string>
+                        {
+                            {"api-version", "1.1"},
+                            {
+                                "authorization_endpoint",
+                                "https%3A%2F%2Flogin.microsoft0nline.com%2Fmytenant.com%2Foauth2%2Fv2.0%2Fauthorize"
+                            },
+                        },
+                        ResponseMessage = MockHelpers.CreateFailureMessage(
+                            HttpStatusCode.BadRequest,
+                            "{\"error\":\"invalid_instance\"," + "\"error_description\":\"AADSTS50049: " +
+                            "Unknown or invalid instance. Trace " + "ID: b9d0894d-a9a4-4dba-b38e-8fb6a009bc00 " +
+                            "Correlation ID: 34f7b4cf-4fa2-4f35-a59b" + "-54b6f91a9c94 Timestamp: 2016-08-23 " +
+                            "20:45:49Z\",\"error_codes\":[50049]," + "\"timestamp\":\"2016-08-23 20:45:49Z\"," +
+                            "\"trace_id\":\"b9d0894d-a9a4-4dba-b38e-8f" + "b6a009bc00\",\"correlation_id\":\"34f7b4cf-" +
+                            "4fa2-4f35-a59b-54b6f91a9c94\"}")
+                    });
 
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
+                Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                try
+                {
+                    Task.Run(
+                        async () =>
+                        {
+                            await instance.ResolveEndpointsAsync(
+                                httpManager,
+                                null,
+                                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                        }).GetAwaiter().GetResult();
+                    Assert.Fail("validation should have failed here");
+                }
+                catch (Exception exc)
+                {
+                    Assert.IsTrue(exc is TestServiceException);
+                    Assert.AreEqual(((TestServiceException)exc).ErrorCode, "invalid_instance");
+                }
+            }
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationMissingFieldsTest()
         {
-            //add mock response for instance validation
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                Url = "https://login.windows.net/common/discovery/instance",
-                QueryParams = new Dictionary<string, string>
-                {
-                    {"api-version", "1.0"},
-                    {"authorization_endpoint", "https://login.microsoft0nline.com/mytenant.com/oauth2/v2.0/authorize"},
-                },
-                ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{}")
-            });
-
-            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoft0nline.com/mytenant.com", true);
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-            try
-            {
-                Task.Run(async () =>
+                //add mock response for instance validation
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
                     {
-                        await instance.ResolveEndpointsAsync(null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    })
-                    .GetAwaiter()
-                    .GetResult();
-                Assert.Fail("validation should have failed here");
-            }
-            catch (Exception exc)
-            {
-                Assert.IsNotNull(exc);
-            }
+                        Method = HttpMethod.Get,
+                        Url = "https://login.windows.net/common/discovery/instance",
+                        QueryParams = new Dictionary<string, string>
+                        {
+                            {"api-version", "1.0"},
+                            {"authorization_endpoint", "https://login.microsoft0nline.com/mytenant.com/oauth2/v2.0/authorize"},
+                        },
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{}")
+                    });
 
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
+                Authority instance = Authority.CreateAuthority("https://login.microsoft0nline.com/mytenant.com", true);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                try
+                {
+                    Task.Run(
+                        async () =>
+                        {
+                            await instance.ResolveEndpointsAsync(
+                                httpManager,
+                                null,
+                                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                        }).GetAwaiter().GetResult();
+                    Assert.Fail("validation should have failed here");
+                }
+                catch (Exception exc)
+                {
+                    Assert.IsNotNull(exc);
+                }
+            }
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
-            //add mock response for tenant endpoint discovery
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler
+            using (var httpManager = new MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                ResponseMessage =
-                    MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-MissingFields.json"))
-            });
-
-            Authority instance = Authority.CreateAuthority(new TestPlatformInformation(), "https://login.microsoftonline.in/mytenant.com", false);
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-            try
-            {
-                Task.Run(async () =>
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
                     {
-                        await instance.ResolveEndpointsAsync(null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    })
-                    .GetAwaiter()
-                    .GetResult();
-                Assert.Fail("validation should have failed here");
-            }
-            catch (TestClientException exc)
-            {
-                Assert.AreEqual(CoreErrorCodes.TenantDiscoveryFailedError, exc.ErrorCode);
-            }
+                        Method = HttpMethod.Get,
+                        Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
+                        ResponseMessage =
+                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-MissingFields.json"))
+                    });
 
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockCount);
+                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", false);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                try
+                {
+                    Task.Run(
+                        async () =>
+                        {
+                            await instance.ResolveEndpointsAsync(
+                                httpManager,
+                                null,
+                                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                        }).GetAwaiter().GetResult();
+                    Assert.Fail("validation should have failed here");
+                }
+                catch (TestClientException exc)
+                {
+                    Assert.AreEqual(CoreErrorCodes.TenantDiscoveryFailedError, exc.ErrorCode);
+                }
+            }
         }
 
         [TestMethod]
@@ -274,13 +293,13 @@ namespace Test.Microsoft.Identity.Unit.InstanceTests
             const string uriCustomPort = "https://login.microsoftonline.in:444/mytenant.com";
             const string uriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
 
-            var authority = Authority.CreateAuthority(new TestPlatformInformation(), uriNoPort, false);
+            var authority = Authority.CreateAuthority(uriNoPort, false);
             Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(new TestPlatformInformation(), uriDefaultPort, false);
+            authority = Authority.CreateAuthority(uriDefaultPort, false);
             Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(new TestPlatformInformation(), uriCustomPort, false);
+            authority = Authority.CreateAuthority(uriCustomPort, false);
             Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
         }
 

@@ -25,48 +25,34 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using System;
-using System.Reflection;
-using System.Threading.Tasks;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class PlatformInformation : PlatformInformationBase
     {
-        public override string GetProductName()
-        {
-            return "PCL.iOS";
-        }
-
-        public override string GetAssemblyFileVersionAttribute()
-        {
-            // TODO: Check if assembly file version can be read in iOS assembly as well or not. For now, we use assembly version instead.
-            return typeof(AdalIdHelper).GetTypeInfo().Assembly.GetName().Version.ToString();
-        }
-
         public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             PlatformParameters authorizationParameters = (parameters as PlatformParameters);
             if (authorizationParameters == null)
             {
-                throw new ArgumentException("parameters should be of type PlatformParameters", "parameters");
+                throw new ArgumentException("parameters should be of type PlatformParameters", nameof(parameters));
             }
 
             PromptBehavior promptBehavior = authorizationParameters.PromptBehavior;
 
             switch (promptBehavior)
             {
-                case PromptBehavior.Always:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-                    break;
-                case PromptBehavior.SelectAccount:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
-                    break;
-                case PromptBehavior.RefreshSession:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-                    break;
+            case PromptBehavior.Always:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                break;
+            case PromptBehavior.SelectAccount:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
+                break;
+            case PromptBehavior.RefreshSession:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                break;
             }
         }
 

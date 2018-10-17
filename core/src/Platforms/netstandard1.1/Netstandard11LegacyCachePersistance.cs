@@ -25,15 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core.Cache
 {
-    internal class PlatformInformation : PlatformInformationBase
+    internal class Netstandard11LegacyCachePersistence : ILegacyCachePersistence
     {
-        public override string GetProductName()
+        private byte[] data;
+
+        byte[] ILegacyCachePersistence.LoadCache()
         {
-            return "MSAL.CoreCLR";
+            return data;
+        }
+
+        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
+        {
+            data = serializedCache;
         }
     }
 }

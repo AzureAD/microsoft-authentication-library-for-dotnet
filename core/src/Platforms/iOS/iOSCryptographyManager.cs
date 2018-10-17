@@ -32,9 +32,9 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core
 {
-    internal class CoreCryptographyHelpers
+    internal class iOSCryptographyManager : ICryptographyManager
     {
-        public static string CreateBase64UrlEncodedSha256Hash(string input)
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Core
             }
         }
 
-        public static string GenerateCodeVerifier()
+        public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
             using (RNGCryptoServiceProvider randomSource = new RNGCryptoServiceProvider())
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Core
             return Base64UrlHelpers.Encode(buffer);
         }
 
-        public static string CreateSha256Hash(string input)
+        public string CreateSha256Hash(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
@@ -71,6 +71,26 @@ namespace Microsoft.Identity.Core
                 UTF8Encoding encoding = new UTF8Encoding();
                 return Convert.ToBase64String(sha.ComputeHash(encoding.GetBytes(input)));
             }
+        }
+
+        public string Encrypt(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Decrypt(string encryptedMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Encrypt(byte[] message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Decrypt(byte[] encryptedMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 }

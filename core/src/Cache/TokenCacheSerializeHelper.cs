@@ -25,13 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Cache
 {
@@ -48,7 +43,7 @@ namespace Microsoft.Identity.Core.Cache
         /// <param name="tokenCacheAccessor">Token cache accessor to perform cache write operations (to fill-in from the state)</param>
         /// <param name="unifiedState">Array of bytes containing serialized unified cache data</param>
         /// <param name="requestContext">call state to pass correlation id and logger instance</param>
-        internal static void DeserializeUnifiedCache(TokenCacheAccessor tokenCacheAccessor, byte[] unifiedState, RequestContext requestContext)
+        internal static void DeserializeUnifiedCache(ITokenCacheAccessor tokenCacheAccessor, byte[] unifiedState, RequestContext requestContext)
         {
             Dictionary<string, IEnumerable<string>> cacheDict = JsonHelper
                 .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(unifiedState);
@@ -114,7 +109,7 @@ namespace Microsoft.Identity.Core.Cache
         /// </summary>
         /// <param name="tokenCacheAccessor">Token cache accessor to perform cache read operations</param>
         /// <returns>array of bytes containing the serialized cache</returns>
-        internal static byte[] SerializeUnifiedCache(TokenCacheAccessor tokenCacheAccessor)
+        internal static byte[] SerializeUnifiedCache(ITokenCacheAccessor tokenCacheAccessor)
         {
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             Dictionary<string, IEnumerable<string>> cacheDict = new Dictionary<string, IEnumerable<string>>

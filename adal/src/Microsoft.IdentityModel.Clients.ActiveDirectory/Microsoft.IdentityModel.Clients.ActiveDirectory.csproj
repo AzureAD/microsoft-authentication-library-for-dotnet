@@ -36,6 +36,10 @@
     <PackageTags>Active Directory Authentication Library ADAL ActiveDirectory AD AAD Identity Authentication .NET Android iOS UWP NetCore Xamarin</PackageTags>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);IS_ADAL</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>

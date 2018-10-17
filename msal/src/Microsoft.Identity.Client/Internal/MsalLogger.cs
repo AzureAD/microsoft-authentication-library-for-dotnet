@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Internal
                 ? string.Empty
                 : " - " + CorrelationId;
 
-            var msalIdParameters = MsalIdHelper.GetMsalIdParameters(new PlatformInformation());
+            var msalIdParameters = MsalIdHelper.GetMsalIdParameters();
             string os = "N/A";
             if (msalIdParameters.ContainsKey(MsalIdParameter.OS))
             {

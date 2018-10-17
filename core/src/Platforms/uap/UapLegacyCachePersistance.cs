@@ -31,7 +31,7 @@ using Windows.Storage;
 
 namespace Microsoft.Identity.Core.Cache
 {
-    internal class LegacyCachePersistance : ILegacyCachePersistance
+    internal class UapLegacyCachePersistence : ILegacyCachePersistence
     {
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
@@ -40,7 +40,14 @@ namespace Microsoft.Identity.Core.Cache
         private const string CacheValueLength = "CacheValueLength";
         private const int MaxCompositeValueLength = 1024;
 
-        byte[] ILegacyCachePersistance.LoadCache()
+        private readonly ICryptographyManager _cryptographyManager;
+
+        public UapLegacyCachePersistence(ICryptographyManager cryptographyManager)
+        {
+            _cryptographyManager = cryptographyManager;
+        }
+
+        byte[] ILegacyCachePersistence.LoadCache()
         {
             try
             {
@@ -58,7 +65,7 @@ namespace Microsoft.Identity.Core.Cache
             return null;
         }
 
-        void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
+        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
         {
             try
             {
@@ -73,9 +80,9 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        internal static void SetCacheValue(IPropertySet containerValues, byte[] value)
+        internal void SetCacheValue(IPropertySet containerValues, byte[] value)
         {
-            byte[] encryptedValue = CoreCryptographyHelpers.Encrypt(value);
+            byte[] encryptedValue = _cryptographyManager.Encrypt(value);
             containerValues[CacheValueLength] = encryptedValue.Length;
             if (encryptedValue.Length == 0)
             {
@@ -99,7 +106,7 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        internal static byte[] GetCacheValue(IPropertySet containerValues)
+        internal byte[] GetCacheValue(IPropertySet containerValues)
         {
             if (!containerValues.ContainsKey(CacheValueLength))
             {
@@ -123,7 +130,7 @@ namespace Microsoft.Identity.Core.Cache
             }
 
             Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
-            return CoreCryptographyHelpers.Decrypt(encryptedValue);
+            return _cryptographyManager.Decrypt(encryptedValue);
         }
     }
 }

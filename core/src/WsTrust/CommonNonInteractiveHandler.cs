@@ -43,13 +43,13 @@ namespace Microsoft.Identity.Core.WsTrust
         public CommonNonInteractiveHandler(
             RequestContext requestContext,
             IUsernameInput usernameInput,
-            IPlatformProxy platformProxy = null,
-            IWsTrustWebRequestManager wsTrustWebRequestManager = null)
+            IWsTrustWebRequestManager wsTrustWebRequestManager,
+            IPlatformProxy platformProxy = null)
         {
             _requestContext = requestContext;
             _usernameInput = usernameInput;
             _platformProxy = platformProxy ?? PlatformProxyFactory.GetPlatformProxy();
-            _wsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager();
+            _wsTrustWebRequestManager = wsTrustWebRequestManager;
         }
 
         /// <summary>

@@ -29,10 +29,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
+using System;
 
 namespace Microsoft.Identity.Core
 {
-    internal class TokenCacheAccessor : ITokenCacheAccessor
+    internal class AndroidTokenCacheAccessor : ITokenCacheAccessor
     {
         private const string AccessTokenSharedPreferenceName = "com.microsoft.identity.client.accessToken";
         private const string RefreshTokenSharedPreferenceName = "com.microsoft.identity.client.refreshToken";
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Core
 
         private RequestContext _requestContext;
 
-        public TokenCacheAccessor()
+        public AndroidTokenCacheAccessor()
         {
             _accessTokenSharedPreference = Application.Context.GetSharedPreferences(AccessTokenSharedPreferenceName,
                     FileCreationMode.Private);
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Core
             }
         }
 
-        public TokenCacheAccessor(RequestContext requestContext) : this()
+        public AndroidTokenCacheAccessor(RequestContext requestContext) : this()
         {
             _requestContext = requestContext;
         }
@@ -199,6 +200,30 @@ namespace Microsoft.Identity.Core
         public string GetAccount(MsalAccountCacheKey accountKey)
         {
             return _accountSharedPreference.GetString(accountKey.ToString(), null);
+        }
+
+        /// <inheritdoc />
+        public int RefreshTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int AccessTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int AccountCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int IdTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public void ClearRefreshTokens()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void ClearAccessTokens()
+        {
+            throw new NotImplementedException();
         }
     }
 }

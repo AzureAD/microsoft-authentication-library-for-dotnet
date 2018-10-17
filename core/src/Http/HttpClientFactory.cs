@@ -32,21 +32,19 @@ namespace Microsoft.Identity.Core.Http
 {
     internal interface IHttpClientFactory
     {
-        // TODO: rename this to GetHttpClient once we make the underlying class not fully static.
-        HttpClient GetTheHttpClient();
+        HttpClient GetHttpClient();
     }
 
     internal class HttpClientFactory : IHttpClientFactory
     {
-        // as per guidelines HttpClient should be a singeton instance in an application.
+        // as per guidelines HttpClient should be a singleton instance in an application.
         private static HttpClient _client;
         private static readonly object LockObj = new object();
-        public static bool ReturnHttpClientForMocks { set; get; }
         public const long MaxResponseContentBufferSizeInBytes = 1024*1024;
 
         private static HttpClient CreateHttpClient()
         {
-            var httpClient = new HttpClient(HttpMessageHandlerFactory.GetMessageHandler(ReturnHttpClientForMocks))
+            var httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true })
             {
                 MaxResponseContentBufferSize = MaxResponseContentBufferSizeInBytes
             };
@@ -57,23 +55,13 @@ namespace Microsoft.Identity.Core.Http
             return httpClient;
         }
 
-        public HttpClient GetTheHttpClient()
+        public HttpClient GetHttpClient()
         {
-            return HttpClientFactory.GetHttpClient();
+            return GetHttpClientStatic();
         }
 
-        public static HttpClient GetHttpClient()
+        public static HttpClient GetHttpClientStatic()
         {
-            // we return a new instanceof httpclient beacause there
-            // is no way to provide new http request message handler
-            // for each request made and it makes mocking of network calls 
-            // impossible. So to circumvent, we simply return new instance for
-            // for mocking purposes.
-            if (ReturnHttpClientForMocks)
-            {
-                return CreateHttpClient();
-            }
-
             if (_client == null)
             {
                 lock (LockObj)

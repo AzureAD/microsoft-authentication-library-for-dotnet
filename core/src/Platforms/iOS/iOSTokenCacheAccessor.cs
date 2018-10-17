@@ -35,7 +35,7 @@ using System.Globalization;
 
 namespace Microsoft.Identity.Core
 {
-    internal class TokenCacheAccessor : ITokenCacheAccessor
+    internal class iOSTokenCacheAccessor : ITokenCacheAccessor
     {
         public const string CacheKeyDelimiter = "-";
 
@@ -109,12 +109,12 @@ namespace Microsoft.Identity.Core
                 CoreErrorMessages.CannotAccessPublisherKeyChain);
         }
 
-        public TokenCacheAccessor()
+        public iOSTokenCacheAccessor()
         {
             keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
         }
 
-        public TokenCacheAccessor(RequestContext requestContext) : this()
+        public iOSTokenCacheAccessor(RequestContext requestContext) : this()
         {
             _requestContext = requestContext;
         }
@@ -402,6 +402,30 @@ namespace Microsoft.Identity.Core
             var type = AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()];
 
             return GetValue(account, service, type);
+        }
+
+        /// <inheritdoc />
+        public int RefreshTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int AccessTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int AccountCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int IdTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public void ClearRefreshTokens()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void ClearAccessTokens()
+        {
+            throw new NotImplementedException();
         }
     }
 }

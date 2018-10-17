@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Client
 
             if (eventsToFlush.Count > 0)
             {
-                eventsToFlush.Insert(0, new DefaultEvent(new PlatformInformation(), ClientId));
+                eventsToFlush.Insert(0, new DefaultEvent(ClientId));
                 _receiver(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
             }
         }

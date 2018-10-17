@@ -46,6 +46,7 @@ namespace Test.ADAL.NET.Integration
         [TestInitialize]
         public void Initialize()
         {
+            TokenCache.DefaultShared.Clear();
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));

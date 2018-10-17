@@ -26,27 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Windows.Networking;
-using Windows.Networking.Connectivity;
-using Windows.Security.Authentication.Web;
-using Windows.Storage;
-using Microsoft.Identity.Core;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
-using Windows.System;
-using System.Collections.Generic;
-using Microsoft.Identity.Core.Platforms;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class PlatformInformation : PlatformInformationBase
     {
-        public override string GetProductName()
-        {
-            return "PCL.UAP";
-        }
-
         public override void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             PlatformParameters authorizationParameters = (parameters as PlatformParameters);
@@ -60,18 +45,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             // ADFS currently ignores the parameter for now.
             switch (promptBehavior)
             {
-                case PromptBehavior.Always:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
-                    break;
-                case PromptBehavior.SelectAccount:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
-                    break;
-                case PromptBehavior.RefreshSession:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
-                    break;
-                case PromptBehavior.Never:
-                    authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
-                    break;
+            case PromptBehavior.Always:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;
+                break;
+            case PromptBehavior.SelectAccount:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.SelectAccount;
+                break;
+            case PromptBehavior.RefreshSession:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.RefreshSession;
+                break;
+            case PromptBehavior.Never:
+                authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.AttemptNone;
+                break;
             }
         }
 
@@ -87,22 +72,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             return promptBehavior != PromptBehavior.Always && promptBehavior != PromptBehavior.RefreshSession &&
                    promptBehavior != PromptBehavior.SelectAccount;
-        }
-
-        public override void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
-        {
-            if (redirectUri == null)
-            {
-                redirectUri = Constant.SsoPlaceHolderUri;
-                requestContext.Logger.Verbose("ms-app redirect Uri is used");
-            }
-        }
-
-        public override string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
-        {
-            return ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri) ?
-                WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString :
-                redirectUri.OriginalString;
         }
     }
 }

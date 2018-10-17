@@ -29,10 +29,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.UI;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
@@ -58,7 +60,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
             : base(requestData)
         {
-            platformInformation.ValidateRedirectUri(redirectUri, RequestContext);
+            PlatformProxyFactory.GetPlatformProxy().ValidateRedirectUri(redirectUri, RequestContext);
             this.redirectUri = redirectUri;
 
             if (!string.IsNullOrWhiteSpace(this.redirectUri.Fragment))
@@ -68,14 +70,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             this.authorizationParameters = parameters;
 
-            this.redirectUriRequestParameter = platformInformation.GetRedirectUriAsString(this.redirectUri, RequestContext);
+            this.redirectUriRequestParameter = PlatformProxyFactory.GetPlatformProxy().GetRedirectUriAsString(this.redirectUri, RequestContext);
 
-            if (userId == null)
-            {
-                throw new ArgumentNullException("userId", AdalErrorMessage.SpecifyAnyUser);
-            }
-
-            this.userId = userId;
+            this.userId = userId ?? throw new ArgumentNullException(nameof(userId), AdalErrorMessage.SpecifyAnyUser);
 
             if (!string.IsNullOrEmpty(extraQueryParameters) && extraQueryParameters[0] == '&')
             {
@@ -97,6 +94,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
             else
             {
+                var platformInformation = new PlatformInformation();
                 this.LoadFromCache = (requestData.TokenCache != null && parameters != null && platformInformation.GetCacheLoadPolicy(parameters));
             }
 
@@ -224,6 +222,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             if (this.authorizationParameters != null)
             {
+                var platformInformation = new PlatformInformation();
                 platformInformation.AddPromptBehaviorQueryParameter(this.authorizationParameters, authorizationRequestParameters);
             }
             

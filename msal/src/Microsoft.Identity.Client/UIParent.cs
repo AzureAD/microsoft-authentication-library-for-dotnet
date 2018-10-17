@@ -134,7 +134,9 @@ namespace Microsoft.Identity.Client
                 return true;
             }
             else
+            {
                 return false;
+            }
         }
 #endif
 

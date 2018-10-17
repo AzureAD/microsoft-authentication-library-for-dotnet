@@ -18,8 +18,8 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
@@ -27,20 +27,43 @@
 
 using System;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Core
 {
-    internal class LegacyCachePersistance : ILegacyCachePersistance
+    internal class Netstandard11CryptographyManager : ICryptographyManager
     {
-        private byte[] data;
-
-        byte[] ILegacyCachePersistance.LoadCache()
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
-            return data;
+            return null;
         }
 
-        void ILegacyCachePersistance.WriteCache(byte[] serializedCache)
+        public string GenerateCodeVerifier()
         {
-            data = serializedCache;
+            return null;
+        }
+
+        public string CreateSha256Hash(string input)
+        {
+            return null;
+        }
+
+        public string Encrypt(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string Decrypt(string encryptedMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Encrypt(byte[] message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte[] Decrypt(byte[] encryptedMessage)
+        {
+            throw new NotImplementedException();
         }
     }
 }

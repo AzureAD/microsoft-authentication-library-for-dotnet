@@ -25,23 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Reflection;
-using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
-    internal abstract class PlatformInformationBase : CorePlatformInformationBase
+    internal abstract class PlatformInformationBase
     {
-        public override string GetAssemblyFileVersionAttribute()
-        {
-            var assemblyFileVersion = typeof(AdalIdParameter).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
-            return assemblyFileVersion != null ? assemblyFileVersion.Version : "internal";
-        }
-
         public virtual void AddPromptBehaviorQueryParameter(IPlatformParameters parameters, DictionaryRequestParameters authorizationRequestParameters)
         {
             authorizationRequestParameters[OAuthParameter.Prompt] = PromptValue.Login;

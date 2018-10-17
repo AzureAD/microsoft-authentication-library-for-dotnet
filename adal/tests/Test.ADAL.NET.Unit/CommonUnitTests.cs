@@ -35,9 +35,11 @@ namespace Test.ADAL.NET.Unit
     {
         public static void CreateSha256HashTest()
         {
-            string hash = CoreCryptographyHelpers.CreateSha256Hash("abc");
-            string hash2 = CoreCryptographyHelpers.CreateSha256Hash("abd");
-            string hash3 = CoreCryptographyHelpers.CreateSha256Hash("abc");
+            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
+
+            string hash = crypto.CreateSha256Hash("abc");
+            string hash2 = crypto.CreateSha256Hash("abd");
+            string hash3 = crypto.CreateSha256Hash("abc");
             Assert.AreEqual(hash, hash3);
             Assert.AreNotEqual(hash, hash2);
             Assert.AreEqual(hash, "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");

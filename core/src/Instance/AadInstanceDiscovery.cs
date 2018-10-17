@@ -31,6 +31,7 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -43,14 +44,13 @@ namespace Microsoft.Identity.Core.Instance
         internal readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> Cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
-        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-            CorePlatformInformationBase platformInformation, Uri authority, bool validateAuthority,
+        public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(IHttpManager httpManager, Uri authority, bool validateAuthority,
             RequestContext requestContext)
         {
             InstanceDiscoveryMetadataEntry entry = null;
             if (!Cache.TryGetValue(authority.Host, out entry))
             {
-                await DoInstanceDiscoveryAndCacheAsync(platformInformation, authority, validateAuthority, requestContext).ConfigureAwait(false);
+                await DoInstanceDiscoveryAndCacheAsync(httpManager, authority, validateAuthority, requestContext).ConfigureAwait(false);
                 Cache.TryGetValue(authority.Host, out entry);
             }
 
@@ -72,11 +72,11 @@ namespace Microsoft.Identity.Core.Instance
             return string.Format(CultureInfo.InvariantCulture, "https://{0}/common/discovery/instance", host);
         }
 
-        internal async Task<InstanceDiscoveryResponse> 
-            DoInstanceDiscoveryAndCacheAsync(CorePlatformInformationBase platformInformation, Uri authority, bool validateAuthority, RequestContext requestContext)
+        internal async Task<InstanceDiscoveryResponse>
+            DoInstanceDiscoveryAndCacheAsync(IHttpManager httpManager, Uri authority, bool validateAuthority, RequestContext requestContext)
         {
             InstanceDiscoveryResponse discoveryResponse =
-                await SendInstanceDiscoveryRequestAsync(platformInformation, authority, requestContext).ConfigureAwait(false);
+                await SendInstanceDiscoveryRequestAsync(httpManager, authority, requestContext).ConfigureAwait(false);
 
             if (validateAuthority)
             {
@@ -87,12 +87,9 @@ namespace Microsoft.Identity.Core.Instance
 
             return discoveryResponse;
         }
-        private static async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
-            CorePlatformInformationBase platformInformation, 
-            Uri authority, 
-            RequestContext requestContext)
+        private static async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(IHttpManager httpManager, Uri authority, RequestContext requestContext)
         {
-            OAuth2Client client = new OAuth2Client(platformInformation);
+            OAuth2Client client = new OAuth2Client(httpManager);
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
 

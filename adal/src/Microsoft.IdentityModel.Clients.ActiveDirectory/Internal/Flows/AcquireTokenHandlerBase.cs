@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
@@ -51,7 +52,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         protected CacheQueryData CacheQueryData = new CacheQueryData();
         protected readonly BrokerHelper brokerHelper = new BrokerHelper();
         private AdalHttpClient client = null;
-        protected PlatformInformation platformInformation = new PlatformInformation();
         internal readonly RequestContext RequestContext;
 
         protected AcquireTokenHandlerBase(RequestData requestData)
@@ -62,8 +62,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             RequestContext.Logger.Info(string.Format(CultureInfo.CurrentCulture,
                 "ADAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                platformInformation.GetProductName(), AdalIdHelper.GetAdalVersion(),
-                AdalIdHelper.GetAssemblyFileVersion(), AdalIdHelper.GetAssemblyInformationalVersion()));
+                PlatformProxyFactory.GetPlatformProxy().GetProductName(), AdalIdHelper.GetAdalVersion(),
+                AssemblyUtils.GetAssemblyFileVersionAttribute(), AssemblyUtils.GetAssemblyInformationalVersion()));
 
             {
                 string msg = string.Format(CultureInfo.CurrentCulture,
@@ -413,7 +413,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             if (result.AccessToken != null)
             {
-                var accessTokenHash = CoreCryptographyHelpers.CreateSha256Hash(result.AccessToken);
+                var accessTokenHash = PlatformProxyFactory
+                                      .GetPlatformProxy()
+                                      .CryptographyManager
+                                      .CreateSha256Hash(result.AccessToken);
 
                 {
                     var msg = string.Format(CultureInfo.CurrentCulture,

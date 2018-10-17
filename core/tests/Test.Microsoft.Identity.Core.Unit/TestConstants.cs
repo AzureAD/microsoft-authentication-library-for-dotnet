@@ -54,12 +54,18 @@ namespace Test.Microsoft.Identity.Core.Unit
         public static readonly string ClientSecret = "client_secret";
         public static readonly string Uid = "my-uid";
         public static readonly string Utid= "my-utid";
+        public static readonly string DiscoveryEndPoint = "discovery/instance";
 
         public static readonly string UserIdentifier = CreateUserIdentifer();
 
         public static string CreateUserIdentifer()
         {
             return CreateUserIdentifer(Uid, Utid);
+        }
+
+        public static string GetDiscoveryEndpoint(string authority)
+        {
+            return authority + DiscoveryEndPoint;
         }
 
         public static string CreateUserIdentifer(string uid, string utid)

@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Core
     /// This means that on UWP the AT key is not guaranteed to be unique, although the chances of collisions 
     /// are astronomically small - <see cref="MsalAccessTokenCacheKey.GetUWPFixedSizeKey"/>
     /// </remarks>
-    internal class TokenCacheAccessor : ITokenCacheAccessor
+    internal class UapTokenCacheAccessor : ITokenCacheAccessor
     {
         private const string CacheValue = "CacheValue";
         private const string CacheValueSegmentCount = "SegmentCount";
@@ -52,10 +52,11 @@ namespace Microsoft.Identity.Core
         private ApplicationDataContainer _idTokenContainer = null;
         private ApplicationDataContainer _accountContainer = null;
 
-        private RequestContext _requestContext;
+        private readonly ICryptographyManager _cryptographyManager;
 
-        public TokenCacheAccessor()
+        public UapTokenCacheAccessor(ICryptographyManager cryptographyManager)
         {
+            _cryptographyManager = cryptographyManager;
             var localSettings = ApplicationData.Current.LocalSettings;
             _accessTokenContainer =
                 localSettings.CreateContainer(LocalSettingsTokenContainerName, ApplicationDataCreateDisposition.Always);
@@ -69,9 +70,29 @@ namespace Microsoft.Identity.Core
                 localSettings.CreateContainer(LocalSettingsAccountContainerName,
                     ApplicationDataCreateDisposition.Always);
         }
-        public TokenCacheAccessor(RequestContext requestContext) : this()
+
+        /// <inheritdoc />
+        public int RefreshTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int AccessTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int AccountCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public int IdTokenCount => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public void ClearRefreshTokens()
         {
-            _requestContext = requestContext;
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void ClearAccessTokens()
+        {
+            throw new NotImplementedException();
         }
 
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
@@ -217,9 +238,9 @@ namespace Microsoft.Identity.Core
             return list;
         }
 
-        internal static void SetCacheValue(ApplicationDataCompositeValue composite, string stringValue)
+        internal void SetCacheValue(ApplicationDataCompositeValue composite, string stringValue)
         {
-            byte[] encryptedValue = CoreCryptographyHelpers.Encrypt(stringValue.ToByteArray());
+            byte[] encryptedValue = _cryptographyManager.Encrypt(stringValue.ToByteArray());
             composite[CacheValueLength] = encryptedValue.Length;
 
             int segmentCount = (encryptedValue.Length / MaxCompositeValueLength) +
@@ -237,7 +258,7 @@ namespace Microsoft.Identity.Core
             composite[CacheValueSegmentCount] = segmentCount;
         }
 
-        internal static byte[] GetCacheValue(ApplicationDataCompositeValue composite)
+        internal byte[] GetCacheValue(ApplicationDataCompositeValue composite)
         {
             if (!composite.ContainsKey(CacheValueLength))
             {
@@ -265,7 +286,7 @@ namespace Microsoft.Identity.Core
                 (segmentCount - 1) * MaxCompositeValueLength,
                 encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
 
-            return CoreCryptographyHelpers.Decrypt(encryptedValue);
+            return _cryptographyManager.Decrypt(encryptedValue);
         }
      
         public void Clear()

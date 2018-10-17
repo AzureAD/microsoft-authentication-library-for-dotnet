@@ -30,6 +30,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.WsTrust;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
@@ -41,11 +42,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
     /// </summary>
     internal class AcquireTokenIWAHandler : AcquireTokenHandlerBase
     {
-        private IntegratedWindowsAuthInput iwaInput;
-        private UserAssertion userAssertion;
-        private CommonNonInteractiveHandler commonNonInteractiveHandler;
+        private readonly IntegratedWindowsAuthInput _iwaInput;
+        private UserAssertion _userAssertion;
+        private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
 
-        public AcquireTokenIWAHandler(RequestData requestData, IntegratedWindowsAuthInput iwaInput)
+        public AcquireTokenIWAHandler(IWsTrustWebRequestManager wsTrustWebRequestManager, RequestData requestData, IntegratedWindowsAuthInput iwaInput)
             : base(requestData)
         {
             if (iwaInput == null)
@@ -59,24 +60,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 SupportADFS = true;
             }
 
-            this.iwaInput = iwaInput;
+            this._iwaInput = iwaInput;
             DisplayableId = iwaInput.UserName;
 
-            commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, this.iwaInput);
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, this._iwaInput, wsTrustWebRequestManager);
         }
 
         protected override async Task PreRunAsync()
         {
             await base.PreRunAsync().ConfigureAwait(false);
 
-            if (string.IsNullOrWhiteSpace(iwaInput.UserName))
+            if (string.IsNullOrWhiteSpace(_iwaInput.UserName))
             {
-                string platformUsername = await commonNonInteractiveHandler.GetPlatformUserAsync()
+                string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync()
                     .ConfigureAwait(false);
-                iwaInput.UserName = platformUsername;
+                _iwaInput.UserName = platformUsername;
             }
 
-            DisplayableId = iwaInput.UserName;
+            DisplayableId = _iwaInput.UserName;
         }
 
         protected override async Task PreTokenRequestAsync()
@@ -85,18 +86,18 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             if (!SupportADFS)
             {
-                var userRealmResponse = await commonNonInteractiveHandler.QueryUserRealmDataAsync(Authenticator.UserRealmUriPrefix)
+                var userRealmResponse = await _commonNonInteractiveHandler.QueryUserRealmDataAsync(Authenticator.UserRealmUriPrefix)
                    .ConfigureAwait(false);
 
                 if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
                 {
-                    WsTrustResponse wsTrustResponse = await commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                    WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                         userRealmResponse.FederationMetadataUrl,
                         userRealmResponse.CloudAudienceUrn,
                         UserAuthType.IntegratedAuth).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
+                    _userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
                 }
                 else
                 {
@@ -107,10 +108,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
-            Debug.Assert(userAssertion != null, "Expected the user assertion to have been created by PreTokenRequestAsync");
+            Debug.Assert(_userAssertion != null, "Expected the user assertion to have been created by PreTokenRequestAsync");
 
-            requestParameters[OAuthParameter.GrantType] = userAssertion.AssertionType;
-            requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(userAssertion.Assertion));
+            requestParameters[OAuthParameter.GrantType] = _userAssertion.AssertionType;
+            requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(_userAssertion.Assertion));
 
             // To request id_token in response
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;

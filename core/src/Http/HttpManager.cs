@@ -48,6 +48,11 @@ namespace Microsoft.Identity.Core.Http
             _httpClientFactory = httpClientFactory ?? new HttpClientFactory();
         }
 
+        protected virtual HttpClient GetHttpClient()
+        {
+            return _httpClientFactory.GetHttpClient();
+        }
+
         public async Task<HttpResponse> SendPostAsync(
             Uri endpoint,
             IDictionary<string, string> headers,
@@ -196,7 +201,7 @@ namespace Microsoft.Identity.Core.Http
             HttpContent body,
             HttpMethod method)
         {
-            HttpClient client = _httpClientFactory.GetTheHttpClient();
+            HttpClient client = GetHttpClient();
 
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {
@@ -215,15 +220,6 @@ namespace Microsoft.Identity.Core.Http
 
         internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
-            var headers = new Dictionary<string, string>();
-            if (response.Headers != null)
-            {
-                foreach (var kvp in response.Headers)
-                {
-                    headers[kvp.Key] = kvp.Value.First();
-                }
-            }
-
             return new HttpResponse
             {
                 Headers = response.Headers,

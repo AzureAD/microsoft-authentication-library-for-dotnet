@@ -25,29 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Windows.Security.Authentication.Web;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using System.Collections.Generic;
-using Windows.System;
-
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core.Cache
 {
-    internal class PlatformInformation : PlatformInformationBase
+    internal class NetDesktopLegacyCachePersistence : ILegacyCachePersistence
     {
-        public override string GetProductName()
+        private byte[] data;
+
+        byte[] ILegacyCachePersistence.LoadCache()
         {
-            return "MSAL.UAP";
+            return data;
         }
 
-        public override string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
         {
-            return ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri)
-                ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
-                : redirectUri.OriginalString;
+            data = serializedCache;  
         }
     }
 }

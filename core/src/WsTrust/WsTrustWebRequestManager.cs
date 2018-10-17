@@ -43,9 +43,9 @@ namespace Microsoft.Identity.Core.WsTrust
         private readonly IHttpManager _httpManager;
         private readonly ICoreExceptionFactory _coreExceptionFactory;
 
-        public WsTrustWebRequestManager(IHttpManager httpManager = null, ICoreExceptionFactory coreExceptionFactory = null)
+        public WsTrustWebRequestManager(IHttpManager httpManager, ICoreExceptionFactory coreExceptionFactory = null)
         {
-            _httpManager = httpManager = new HttpManager();
+            _httpManager = httpManager;
             _coreExceptionFactory = coreExceptionFactory ?? CoreExceptionFactory.Instance;
         }
 
@@ -93,8 +93,7 @@ namespace Microsoft.Identity.Core.WsTrust
                 wsTrustRequest,
                 Encoding.UTF8, headers["ContentType"]);
 
-            IHttpWebResponse resp = null;
-            resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext).ConfigureAwait(false);
+            IHttpWebResponse resp = await _httpManager.SendPostForceResponseAsync(wsTrustEndpoint.Uri, headers, body, requestContext).ConfigureAwait(false);
 
             if (resp.StatusCode != System.Net.HttpStatusCode.OK)
             {

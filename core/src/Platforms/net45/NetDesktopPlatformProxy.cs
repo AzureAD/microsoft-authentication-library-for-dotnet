@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using System.Text;
 using System.Security.Principal;
 using Microsoft.Identity.Core.Platforms;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.Identity.Core
 {
@@ -40,6 +41,13 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal class NetDesktopPlatformProxy : IPlatformProxy
     {
+        private readonly bool _isMsal;
+
+        public NetDesktopPlatformProxy(bool isMsal)
+        {
+            _isMsal = isMsal;
+        }
+
         /// <summary>
         /// Get the user logged in to Windows or throws
         /// </summary>
@@ -94,7 +102,9 @@ namespace Microsoft.Identity.Core
         public bool IsDomainJoined()
         {
             if (!IsWindows)
+            {
                 return false;
+            }
 
             bool returnValue = false;
             try
@@ -129,9 +139,13 @@ namespace Microsoft.Identity.Core
         public string GetProcessorArchitecture()
         {
             if (IsWindows)
+            {
                 return WindowsNativeMethods.GetProcessorArchitecture();
+            }
             else
+            {
                 return null;
+            }
         }
 
         public string GetOperatingSystem()
@@ -163,5 +177,40 @@ namespace Microsoft.Identity.Core
         }
 
 
+        /// <inheritdoc />
+        public void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        {
+            if (redirectUri == null)
+            {
+                throw new ArgumentNullException(nameof(redirectUri));
+            }
+        }
+
+        /// <inheritdoc />
+        public string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        {
+            return redirectUri.OriginalString;
+        }
+
+        /// <inheritdoc />
+        public string GetDefaultRedirectUri(string correlationId)
+        {
+            return Constants.DefaultRedirectUri;
+        }
+
+        /// <inheritdoc />
+        public string GetProductName()
+        {
+            return _isMsal ? "MSAL.Desktop" : "PCL.Desktop";
+        }
+
+        /// <inheritdoc />
+        public ILegacyCachePersistence LegacyCachePersistence => new NetDesktopLegacyCachePersistence();
+
+        /// <inheritdoc />
+        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
+
+        /// <inheritdoc />
+        public ICryptographyManager CryptographyManager { get; } = new NetDesktopCryptographyManager();
     }
 }

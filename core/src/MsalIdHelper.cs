@@ -66,19 +66,18 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal static class MsalIdHelper
     {
-        public static IDictionary<string, string> GetMsalIdParameters(CorePlatformInformationBase platformInformation)
+        public static IDictionary<string, string> GetMsalIdParameters()
         {
-            if (platformInformation == null)
+            var platformProxy = PlatformProxyFactory.GetPlatformProxy();
+            if (platformProxy == null)
             {
                 throw CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.PlatformNotSupported, CoreErrorMessages.PlatformNotSupported);
             }
             var parameters = new Dictionary<string, string>
             {
-                [MsalIdParameter.Product] = platformInformation.GetProductName(),
+                [MsalIdParameter.Product] = platformProxy.GetProductName(),
                 [MsalIdParameter.Version] = GetMsalVersion()
             };
-
-            IPlatformProxy platformProxy = PlatformProxyFactory.GetPlatformProxy();
 
             var processorInformation = platformProxy.GetProcessorArchitecture();
             if (processorInformation != null)

@@ -14,6 +14,11 @@
 <!-- Important note: this assembly should not be shipped to customers; it acts only as a placeholder for files that are included
 in ADAL and MSAL and to ease unit testing. No projects should take a dependency on Core.dll either -->
 
+  <!--but because our unit tests do, we need this to default to one or the other of adal/msal and we'll pick msal -->
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);IS_MSAL</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.1' ">
     <DefineConstants>$(DefineConstants);FACADE</DefineConstants>
   </PropertyGroup>

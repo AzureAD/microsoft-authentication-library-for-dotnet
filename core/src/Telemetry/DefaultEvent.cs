@@ -31,10 +31,11 @@ namespace Microsoft.Identity.Core.Telemetry
 {
     internal class DefaultEvent : EventBase
     {
-        public DefaultEvent(CorePlatformInformationBase platformInformation, string clientId) : base((string) (EventBase.EventNamePrefix + "default_event"))
+        public DefaultEvent(string clientId) : base(EventNamePrefix + "default_event")
         {
+            var platformProxy = PlatformProxyFactory.GetPlatformProxy();
             this[EventNamePrefix + "client_id"] = clientId;
-            this[EventNamePrefix + "sdk_platform"] = platformInformation.GetProductName()?.ToLowerInvariant();
+            this[EventNamePrefix + "sdk_platform"] = platformProxy.GetProductName()?.ToLowerInvariant();
             this[EventNamePrefix + "sdk_version"] = MsalIdHelper.GetMsalVersion();
         }
     }

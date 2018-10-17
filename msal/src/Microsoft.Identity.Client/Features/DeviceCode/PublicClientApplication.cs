@@ -142,12 +142,12 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(PlatformInformation, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
 
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
-            var handler = new DeviceCodeRequest(requestParams, deviceCodeResultCallback);
+            var handler = new DeviceCodeRequest(HttpManager, CryptographyManager, requestParams, deviceCodeResultCallback);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
     }

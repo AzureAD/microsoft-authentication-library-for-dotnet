@@ -29,7 +29,9 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Core.WsTrust;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.ClientCreds;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
@@ -50,6 +52,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     /// </summary>
     public sealed class AuthenticationContext
     {
+        private readonly IHttpManager _httpManager;
+        private readonly IWsTrustWebRequestManager _wsTrustWebRequestManager;
+
         static AuthenticationContext()
         {
             ModuleInitializer.EnsureModuleInitialized();
@@ -63,7 +68,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         /// <param name="authority">Address of the authority to issue token.</param>
         public AuthenticationContext(string authority)
-            : this(authority, AuthorityValidationType.NotProvided, TokenCache.DefaultShared)
+            : this(null, authority, AuthorityValidationType.NotProvided, TokenCache.DefaultShared)
         {
         }
 
@@ -74,7 +79,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
         public AuthenticationContext(string authority, bool validateAuthority)
-            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False,
+            : this(null, authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False,
                 TokenCache.DefaultShared)
         {
         }
@@ -86,7 +91,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="authority">Address of the authority to issue token.</param>
         /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
         public AuthenticationContext(string authority, TokenCache tokenCache)
-            : this(authority, AuthorityValidationType.NotProvided, tokenCache)
+            : this(null, authority, AuthorityValidationType.NotProvided, tokenCache)
         {
         }
 
@@ -98,18 +103,20 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="validateAuthority">Flag to turn address validation ON or OFF.</param>
         /// <param name="tokenCache">Token cache used to lookup cached tokens on calls to AcquireToken</param>
         public AuthenticationContext(string authority, bool validateAuthority, TokenCache tokenCache)
-            : this(authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False,
+            : this(null, authority, validateAuthority ? AuthorityValidationType.True : AuthorityValidationType.False,
                 tokenCache)
         {
         }
 
-        private AuthenticationContext(string authority, AuthorityValidationType validateAuthority,
+        internal AuthenticationContext(IHttpManager httpManager, string authority, AuthorityValidationType validateAuthority,
             TokenCache tokenCache)
         {
             // If authorityType is not provided (via first constructor), we validate by default (except for ASG and Office tenants).
             this.Authenticator = new Authenticator(authority, (validateAuthority != AuthorityValidationType.False));
-
             this.TokenCache = tokenCache;
+
+            _httpManager = httpManager ?? new HttpManager();
+            _wsTrustWebRequestManager = new WsTrustWebRequestManager(_httpManager);
         }
 
         /// <summary>
@@ -173,7 +180,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             set
             {
                 keychainSecurityGroup = value;
-                StorageDelegates.legacyCachePersistance.SetKeychainSecurityGroup(value);
+                StorageDelegates.LegacyCachePersistence.SetKeychainSecurityGroup(value);
                 TokenCache.tokenCacheAccessor.SetKeychainSecurityGroup(value);
             }
         }
@@ -457,7 +464,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
             };
 
-            var handler = new AcquireTokenUsernamePasswordHandler(requestData, upInput);
+            var handler = new AcquireTokenUsernamePasswordHandler(_wsTrustWebRequestManager, requestData, upInput);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 
@@ -475,7 +482,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
             };
 
-            var handler = new AcquireTokenIWAHandler(requestData, iwaInput);
+            var handler = new AcquireTokenIWAHandler(_wsTrustWebRequestManager, requestData, iwaInput);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

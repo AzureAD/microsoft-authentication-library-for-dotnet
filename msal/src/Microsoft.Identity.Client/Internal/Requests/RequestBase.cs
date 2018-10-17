@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
@@ -42,8 +43,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal abstract class RequestBase
     {
-        internal CorePlatformInformationBase PlatformInformation => new PlatformInformation();
-
         protected static readonly Task CompletedTask = Task.FromResult(false);
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
         internal TokenCache TokenCache { get; }
@@ -59,15 +58,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         protected bool SupportADFS { get; set; }
-
         protected bool LoadFromCache { get; set; }
-
         protected bool ForceRefresh { get; set; }
-
         protected bool StoreToCache { get; set; }
+        protected IHttpManager HttpManager { get; }
+        protected ICryptographyManager CryptographyManager { get; }
 
-        protected RequestBase(AuthenticationRequestParameters authenticationRequestParameters)
+        protected RequestBase(
+            IHttpManager httpManager, 
+            ICryptographyManager cryptographyManager, 
+            AuthenticationRequestParameters authenticationRequestParameters)
         {
+            HttpManager = httpManager;
+            CryptographyManager = cryptographyManager;
             TokenCache = authenticationRequestParameters.TokenCache;
 
             {
@@ -154,8 +157,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             using (CoreTelemetryService.CreateTelemetryHelper(
-                AuthenticationRequestParameters.RequestContext.TelemetryRequestId, 
-                apiEvent, 
+                AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
+                apiEvent,
                 shouldFlush: true))
             {
                 try
@@ -228,7 +231,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = TokenCache.SaveAccessAndRefreshToken(PlatformInformation, AuthenticationRequestParameters, Response);
+                var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, Response);
                 MsalAccessTokenItem = tuple.Item1;
                 MsalIdTokenItem = tuple.Item2;
             }
@@ -256,10 +259,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task ResolveAuthorityEndpointsAsync()
         {
             await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync
-                (AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                (HttpManager, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             await AuthenticationRequestParameters.Authority
-                .ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint,
+                .ResolveEndpointsAsync(HttpManager, AuthenticationRequestParameters.LoginHint,
                     AuthenticationRequestParameters.RequestContext)
                 .ConfigureAwait(false);
         }
@@ -281,7 +284,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected virtual async Task SendTokenRequestAsync(CancellationToken cancellationToken)
         {
-            OAuth2Client client = new OAuth2Client(PlatformInformation);
+            OAuth2Client client = new OAuth2Client(HttpManager);
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
             foreach (var entry in AuthenticationRequestParameters.ToParameters())
@@ -318,7 +321,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
                     string.Format(
-                        CultureInfo.InvariantCulture, 
+                        CultureInfo.InvariantCulture,
                         "=== Token Acquisition finished successfully. An access token was returned with Expiration Time: {0} ===",
                         result.ExpiresOn));
             }

@@ -27,21 +27,25 @@
 
 using System;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthorizationCodeRequest : RequestBase
     {
-        public AuthorizationCodeRequest(AuthenticationRequestParameters authenticationRequestParameters)
-            : base(authenticationRequestParameters)
+        public AuthorizationCodeRequest(
+            IHttpManager httpManager, 
+            ICryptographyManager cryptographyManager,
+            AuthenticationRequestParameters authenticationRequestParameters)
+            : base(httpManager, cryptographyManager, authenticationRequestParameters)
         {
             if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.AuthorizationCode));
             }
 
-            PlatformInformation.ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
+            PlatformProxyFactory.GetPlatformProxy().ValidateRedirectUri(authenticationRequestParameters.RedirectUri,
                 AuthenticationRequestParameters.RequestContext);
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {

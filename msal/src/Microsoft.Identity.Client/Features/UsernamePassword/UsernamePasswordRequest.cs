@@ -33,6 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.WsTrust;
 
@@ -43,22 +44,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
     /// </summary>
     internal class UsernamePasswordRequest : RequestBase
     {
-        private UsernamePasswordInput usernamePasswordInput;
-        private UserAssertion userAssertion;
+        private readonly UsernamePasswordInput _usernamePasswordInput;
+        private UserAssertion _userAssertion;
 
-        private CommonNonInteractiveHandler commonNonInteractiveHandler;
+        private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
 
-        public UsernamePasswordRequest(AuthenticationRequestParameters authenticationRequestParameters, UsernamePasswordInput usernamePasswordInput)
-       : base(authenticationRequestParameters)
+        public UsernamePasswordRequest(
+            IHttpManager httpManager, 
+            ICryptographyManager cryptographyManager,
+            IWsTrustWebRequestManager wsTrustWebRequestManager, 
+            AuthenticationRequestParameters authenticationRequestParameters, 
+            UsernamePasswordInput usernamePasswordInput)
+       : base(httpManager, cryptographyManager, authenticationRequestParameters)
         {
-            if (usernamePasswordInput == null)
-            {
-                throw new ArgumentNullException(nameof(usernamePasswordInput));
-            }
-
-            this.usernamePasswordInput = usernamePasswordInput;
-            this.commonNonInteractiveHandler = new CommonNonInteractiveHandler(
-                authenticationRequestParameters.RequestContext, usernamePasswordInput);
+            this._usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
+            this._commonNonInteractiveHandler = new CommonNonInteractiveHandler(
+                authenticationRequestParameters.RequestContext, usernamePasswordInput, wsTrustWebRequestManager);
         }
 
         protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
@@ -72,26 +73,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters.Authority.AuthorityType != Core.Instance.AuthorityType.Adfs)
             {
-                var userRealmResponse = await this.commonNonInteractiveHandler
+                var userRealmResponse = await this._commonNonInteractiveHandler
                    .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
                    .ConfigureAwait(false);
 
                 if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
                 {
-                    WsTrustResponse wsTrustResponse = await commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                    WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                         userRealmResponse.FederationMetadataUrl,
                         userRealmResponse.CloudAudienceUrn,
                         UserAuthType.UsernamePassword).ConfigureAwait(false);
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    userAssertion = new UserAssertion(
+                    _userAssertion = new UserAssertion(
                         wsTrustResponse.Token,
                         (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
                 }
                 else if (string.Equals(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase))
                 {
                     // handle grant flow
-                    if (!this.usernamePasswordInput.HasPassword())
+                    if (!this._usernamePasswordInput.HasPassword())
                     {
                         throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
                     }
@@ -102,36 +103,36 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         string.Format(CultureInfo.CurrentCulture, 
                         MsalErrorMessage.UnsupportedUserType, 
                         userRealmResponse.AccountType,
-                        this.usernamePasswordInput.UserName));
+                        this._usernamePasswordInput.UserName));
                 }
             }
         }
 
         private async Task UpdateUsernameAsync()
         {
-            if (usernamePasswordInput != null)
+            if (_usernamePasswordInput != null)
             {
-                if (string.IsNullOrWhiteSpace(usernamePasswordInput.UserName))
+                if (string.IsNullOrWhiteSpace(_usernamePasswordInput.UserName))
                 {
-                    string platformUsername = await this.commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                    this.usernamePasswordInput.UserName = platformUsername;
+                    string platformUsername = await this._commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
+                    this._usernamePasswordInput.UserName = platformUsername;
                 }
             }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            if (this.userAssertion != null)
+            if (this._userAssertion != null)
             {
-                client.AddBodyParameter(OAuth2Parameter.GrantType, this.userAssertion.AssertionType);
-                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(this.userAssertion.Assertion)));
+                client.AddBodyParameter(OAuth2Parameter.GrantType, this._userAssertion.AssertionType);
+                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(this._userAssertion.Assertion)));
             }
             // This is hit if the account is managed, as no userAssertion is created for a managed account
             else
             {
                 client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.Password);
-                client.AddBodyParameter(OAuth2Parameter.Username, this.usernamePasswordInput.UserName);
-                client.AddBodyParameter(OAuth2Parameter.Password, new string(this.usernamePasswordInput.PasswordToCharArray()));
+                client.AddBodyParameter(OAuth2Parameter.Username, this._usernamePasswordInput.UserName);
+                client.AddBodyParameter(OAuth2Parameter.Password, new string(this._usernamePasswordInput.PasswordToCharArray()));
             }
 
             ISet<string> unionScope =

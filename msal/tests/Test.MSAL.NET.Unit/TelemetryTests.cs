@@ -70,8 +70,6 @@ namespace Test.MSAL.NET.Unit
         public void Initialize()
         {
             Authority.ValidatedAuthorities.Clear();
-            HttpClientFactory.ReturnHttpClientForMocks = true;
-            HttpMessageHandlerFactory.ClearMockHandlers();
             new TestLogger(Guid.Empty);
         }
 

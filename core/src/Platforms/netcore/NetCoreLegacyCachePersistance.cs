@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -18,29 +18,29 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Core.Cache
 {
-    internal interface ILegacyCachePersistance
+    internal class NetCoreLegacyCachePersistence : ILegacyCachePersistence
     {
-        byte[] LoadCache();
+        private byte[] data;
 
-        void WriteCache(byte[] serializedCache);
+        byte[] ILegacyCachePersistence.LoadCache()
+        {
+            return data;
+        }
 
-#if iOS
-        void SetKeychainSecurityGroup(string keychainSecurityGroup);
-#endif
+        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
+        {
+            data = serializedCache;
+        }
     }
 }

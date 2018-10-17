@@ -76,7 +76,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
 
             var parameters = new Dictionary<string, string>();
 
-            parameters[AdalIdParameter.Product] = new PlatformInformation().GetProductName();
+            parameters[AdalIdParameter.Product] = PlatformProxyFactory.GetPlatformProxy().GetProductName();
             parameters[AdalIdParameter.Version] = GetAdalVersion();
 
             var processorInfo = platformProxy.GetProcessorArchitecture();
@@ -111,17 +111,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers
             }
 
             return null;
-        }
-
-        public static string GetAssemblyFileVersion()
-        {
-            return new PlatformInformation().GetAssemblyFileVersionAttribute();
-        }
-
-        public static string GetAssemblyInformationalVersion()
-        {
-            AssemblyInformationalVersionAttribute attribute = typeof(AdalIdHelper).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            return (attribute != null) ? attribute.InformationalVersion : string.Empty;
         }
     }
 }

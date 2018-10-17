@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,17 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Internal;
-
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Core.Cache
 {
-    internal class PlatformInformation : PlatformInformationBase
+    internal interface ILegacyCachePersistence
     {
-        public override string GetProductName()
-        {
-            return "MSAL.NetCore";
-        }
+        byte[] LoadCache();
+
+        void WriteCache(byte[] serializedCache);
+
+#if iOS
+        void SetKeychainSecurityGroup(string keychainSecurityGroup);
+#endif
     }
 }

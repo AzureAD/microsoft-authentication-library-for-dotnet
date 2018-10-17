@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Client
 
                 Deserialize(tokenCache, cacheData.UnifiedState);
 
-                tokenCache.legacyCachePersistance.WriteCache(cacheData.AdalV3State);
+                tokenCache.legacyCachePersistence.WriteCache(cacheData.AdalV3State);
             }
         }
 
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client
             lock (tokenCache.LockObject)
             {
                 var serializedUnifiedCache = Serialize(tokenCache);
-                var serializeAdalCache = tokenCache.legacyCachePersistance.LoadCache();
+                var serializeAdalCache = tokenCache.legacyCachePersistence.LoadCache();
 
                 return new CacheData()
                 {

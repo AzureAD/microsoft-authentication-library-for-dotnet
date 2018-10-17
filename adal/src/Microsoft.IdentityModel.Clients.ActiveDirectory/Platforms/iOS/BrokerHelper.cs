@@ -154,7 +154,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
                 string expectedHash = responseDictionary["hash"];
                 string encryptedResponse = responseDictionary["response"];
                 string decryptedResponse = BrokerKeyHelper.DecryptBrokerResponse(encryptedResponse);
-                string responseActualHash = CoreCryptographyHelpers.CreateSha256Hash(decryptedResponse);
+                string responseActualHash = PlatformProxyFactory.GetPlatformProxy().CryptographyManager.CreateSha256Hash(decryptedResponse);
                 byte[] rawHash = Convert.FromBase64String(responseActualHash);
                 string hash  = BitConverter.ToString(rawHash);
                 if (expectedHash.Equals(hash.Replace("-",""), StringComparison.OrdinalIgnoreCase))

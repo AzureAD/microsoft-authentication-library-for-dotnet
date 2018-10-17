@@ -42,7 +42,6 @@ using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using HttpMessageHandlerFactory = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http.AdalHttpMessageHandlerFactory;
-using CoreHttpMessageHandlerFactory = Microsoft.Identity.Core.Http.HttpMessageHandlerFactory;
 using CoreHttpClientFactory = Microsoft.Identity.Core.Http.HttpClientFactory;
 using UserCredential = Microsoft.IdentityModel.Clients.ActiveDirectory.UserCredential;
 
@@ -57,8 +56,8 @@ namespace Test.ADAL.NET.Integration
         [TestInitialize]
         public void Initialize()
         {
-            CoreHttpClientFactory.ReturnHttpClientForMocks = true;
-            CoreHttpMessageHandlerFactory.ClearMockHandlers();
+            TokenCache.DefaultShared.Clear();
+
             ResetInstanceDiscovery();
             CoreExceptionFactory.Instance = new AdalExceptionFactory();
         }
@@ -74,138 +73,166 @@ namespace Test.ADAL.NET.Integration
         [Description("Test for AcquireToken with empty cache")]
         public async Task AcquireTokenWithEmptyCache_GetsTokenFromServiceTestAsync()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                },
-                QueryParams = new Dictionary<string, string>()
-                {
-                    {"api-version", "1.0"}
-                }
-            });
+                AuthenticationContext context = new AuthenticationContext(
+                    httpManager,
+                    TestConstants.DefaultAuthorityCommonTenant,
+                    AuthorityValidationType.NotProvided,
+                    new TokenCache());
+                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                        }
+                    });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://login.microsoftonline.com/common/oauth2/token")
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
-                    {"scope", "openid"}
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("WsTrustResponse.xml"))
+                        }
+                    });
 
-            // Call acquire token
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
+                HttpMessageHandlerFactory.AddMockHandler(
+                    new MockHttpMessageHandler("https://login.microsoftonline.com/common/oauth2/token")
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                        PostData = new Dictionary<string, string>()
+                        {
+                            {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
+                            {"scope", "openid"}
+                        }
+                    });
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual("some-access-token", result.AccessToken);
-            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+                // Call acquire token
+                AuthenticationResult result = await context.AcquireTokenAsync(
+                                                  TestConstants.DefaultResource,
+                                                  TestConstants.DefaultClientId,
+                                                  new UserPasswordCredential(
+                                                      TestConstants.DefaultDisplayableId,
+                                                      TestConstants.DefaultPassword)).ConfigureAwait(false);
 
-            // There should be one cached entry.
-            Assert.AreEqual(1, context.TokenCache.Count);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
 
-            // All mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                // There should be one cached entry.
+                Assert.AreEqual(1, context.TokenCache.Count);
+
+                // All mocks are consumed
+                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            }
         }
 
         [TestMethod]
         [Description("Integrated auth using upn of federated user.")]
         public async Task IntegratedAuthUsingUpn_GetsTokenFromServiceTestAsync()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                },
-                QueryParams = new Dictionary<string, string>()
-                {
-                    {"api-version", "1.0"}
-                }
-            });
+                AuthenticationContext context = new AuthenticationContext(
+                    httpManager,
+                    TestConstants.DefaultAuthorityCommonTenant,
+                    AuthorityValidationType.NotProvided,
+                    new TokenCache());
+                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                        }
+                    });
 
-            HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://login.microsoftonline.com/common/oauth2/token")
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                PostData = new Dictionary<string, string>()
-                {
-                    {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
-                    {"scope", "openid"}
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
+                        }
+                    });
 
-            // Call acquire token
-            AuthenticationResult result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                new UserCredential(TestConstants.DefaultDisplayableId)).ConfigureAwait(false);
+                HttpMessageHandlerFactory.AddMockHandler(
+                    new MockHttpMessageHandler("https://login.microsoftonline.com/common/oauth2/token")
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                        PostData = new Dictionary<string, string>()
+                        {
+                            {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
+                            {"scope", "openid"}
+                        }
+                    });
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual("some-access-token", result.AccessToken);
-            Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+                // Call acquire token
+                AuthenticationResult result = await context.AcquireTokenAsync(
+                                                  TestConstants.DefaultResource,
+                                                  TestConstants.DefaultClientId,
+                                                  new UserCredential(TestConstants.DefaultDisplayableId)).ConfigureAwait(false);
 
-            // There should be one cached entry.
-            Assert.AreEqual(1, context.TokenCache.Count);
+                Assert.IsNotNull(result);
+                Assert.AreEqual("some-access-token", result.AccessToken);
+                Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
 
-            // All mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                // There should be one cached entry.
+                Assert.AreEqual(1, context.TokenCache.Count);
+
+                // All mocks are consumed
+                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            }
         }
 
 
@@ -213,49 +240,60 @@ namespace Test.ADAL.NET.Integration
         [Description("Integrated auth missing mex and fails parsing")]
         public async Task IntegratedAuthMissingMex_FailsMexParsingTestAsync()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                },
-                QueryParams = new Dictionary<string, string>()
-                {
-                    {"api-version", "1.0"}
-                }
-            });
+                AuthenticationContext context = new AuthenticationContext(
+                    httpManager,
+                    TestConstants.DefaultAuthorityCommonTenant,
+                    AuthorityValidationType.NotProvided,
+                    new TokenCache());
+                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent("Not found")
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
 
-            // Call acquire token
-            var result = AssertException.TaskThrows<AdalServiceException>(() =>
-            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                new UserCredential(TestConstants.DefaultDisplayableId)));
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                        {
+                            Content = new StringContent("Not found")
+                        }
+                    });
 
-            // Check inner exception
-            Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
+                // Call acquire token
+                var result = AssertException.TaskThrows<AdalServiceException>(
+                    () => context.AcquireTokenAsync(
+                        TestConstants.DefaultResource,
+                        TestConstants.DefaultClientId,
+                        new UserCredential(TestConstants.DefaultDisplayableId)));
 
-            // There should be no cached entries.
-            Assert.AreEqual(0, context.TokenCache.Count);
+                // Check inner exception
+                Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
 
-            // All mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                // There should be no cached entries.
+                Assert.AreEqual(0, context.TokenCache.Count);
+
+                // All mocks are consumed
+                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            }
         }
 
         [TestMethod]
@@ -367,166 +405,207 @@ namespace Test.ADAL.NET.Integration
         [Description("Mex endpoint fails to resolve and results in a 404")]
         public async Task MexEndpointFailsToResolveTestAsync()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                },
-                QueryParams = new Dictionary<string, string>()
-                {
-                    {"api-version", "1.0"}
-                }
-            });
+                AuthenticationContext context = new AuthenticationContext(
+                    httpManager,
+                    TestConstants.DefaultAuthorityCommonTenant,
+                    AuthorityValidationType.NotProvided,
+                    new TokenCache());
+                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
-            // Malformed Mex returned
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("TestMex.xml").Replace("<wsp:All>", " "))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
 
-            // Call acquire token, Mex parser fails
-            var result = AssertException.TaskThrows<AdalException>(() =>
-            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                new UserCredential(TestConstants.DefaultDisplayableId)));
+                // Malformed Mex returned
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("TestMex.xml").Replace("<wsp:All>", " "))
+                        }
+                    });
 
-            // Check exception message
-            Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
-            Assert.AreEqual("parsing_ws_metadata_exchange_failed", result.ErrorCode);
+                // Call acquire token, Mex parser fails
+                var result = AssertException.TaskThrows<AdalException>(
+                    () => context.AcquireTokenAsync(
+                        TestConstants.DefaultResource,
+                        TestConstants.DefaultClientId,
+                        new UserCredential(TestConstants.DefaultDisplayableId)));
 
-            // There should be no cached entries.
-            Assert.AreEqual(0, context.TokenCache.Count);
+                // Check exception message
+                Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
+                Assert.AreEqual("parsing_ws_metadata_exchange_failed", result.ErrorCode);
 
-            // All mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                // There should be no cached entries.
+                Assert.AreEqual(0, context.TokenCache.Count);
+
+                // All mocks are consumed
+                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            }
         }
 
         [TestMethod]
         [Description("Integrated auth using upn of federated user and Mex does not return integrated auth endpoint")]
         public async Task IntegratedAuthUsingUpn_MexDoesNotReturnAuthEndpointTestAsync()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                },
-                QueryParams = new Dictionary<string, string>()
-                {
-                    {"api-version", "1.0"}
-                }
-            });
+                AuthenticationContext context = new AuthenticationContext(
+                    httpManager,
+                    TestConstants.DefaultAuthorityCommonTenant,
+                    AuthorityValidationType.NotProvided,
+                    new TokenCache());
+                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
 
-            // Mex does not return integrated auth endpoint (.../13/windowstransport)
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent("Not found")
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                        }
+                    });
 
-            // Call acquire token, endpoint not found
-            var result = AssertException.TaskThrows<AdalException>(() =>
-            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserCredential(TestConstants.DefaultDisplayableId)));
+                // Mex does not return integrated auth endpoint (.../13/windowstransport)
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport")
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                        {
+                            Content = new StringContent("Not found")
+                        }
+                    });
 
-            // Check exception message
-            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: Not found", result.Message);
+                // Call acquire token, endpoint not found
+                var result = AssertException.TaskThrows<AdalException>(
+                    () => context.AcquireTokenAsync(
+                        TestConstants.DefaultResource,
+                        TestConstants.DefaultClientId,
+                        new UserCredential(TestConstants.DefaultDisplayableId)));
 
-            // There should be no cached entries.
-            Assert.AreEqual(0, context.TokenCache.Count);
+                // Check exception message
+                Assert.AreEqual(
+                    "Federated service at https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport returned error: Not found",
+                    result.Message);
 
-            // All mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                // There should be no cached entries.
+                Assert.AreEqual(0, context.TokenCache.Count);
+
+                // All mocks are consumed
+                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            }
         }
 
         [TestMethod]
         [Description("Password of federated user provided and Mex does not return username/password endpoint")]
         public async Task PasswordAndUpnProvided_MexDoesNotReturnUsernamePasswordEndpointTestAsync()
         {
-            AuthenticationContext context = new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, new TokenCache());
-            await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent("{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                },
-                QueryParams = new Dictionary<string, string>()
-                {
-                    {"api-version", "1.0"}
-                }
-            });
+                AuthenticationContext context = new AuthenticationContext(
+                    httpManager,
+                    TestConstants.DefaultAuthorityCommonTenant,
+                    AuthorityValidationType.NotProvided,
+                    new TokenCache());
+                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-            {
-                Method = HttpMethod.Get,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("TestMex.xml"))
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler()
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
+                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
+                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
+                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
+                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
 
-            CoreHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
-            {
-                Method = HttpMethod.Post,
-                ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
-                {
-                    Content = new StringContent("Not found")
-                }
-            });
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                        }
+                    });
 
-            // Call acquire token, endpoint not found
-            var result = AssertException.TaskThrows<AdalException>(() =>
-            context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId, new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)));
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
+                    {
+                        Method = HttpMethod.Post,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
+                        {
+                            Content = new StringContent("Not found")
+                        }
+                    });
 
-            // Check exception message
-            Assert.AreEqual("Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: Not found", result.Message);
+                // Call acquire token, endpoint not found
+                var result = AssertException.TaskThrows<AdalException>(
+                    () => context.AcquireTokenAsync(
+                        TestConstants.DefaultResource,
+                        TestConstants.DefaultClientId,
+                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)));
 
-            // There should be no cached entries.
-            Assert.AreEqual(0, context.TokenCache.Count);
+                // Check exception message
+                Assert.AreEqual(
+                    "Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: Not found",
+                    result.Message);
 
-            // All mocks are consumed
-            Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            Assert.IsTrue(CoreHttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
+                // There should be no cached entries.
+                Assert.AreEqual(0, context.TokenCache.Count);
+
+                // All mocks are consumed
+                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
+            }
         }
     }
 }

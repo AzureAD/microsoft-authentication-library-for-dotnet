@@ -49,7 +49,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            bool ssoMode = ReferenceEquals(redirectUri, Constant.SsoPlaceHolderUri);
+            bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
             if (uiParent.UseHiddenBrowser && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 throw new ArgumentException(AdalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");

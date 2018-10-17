@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Core.Cache
         }
 
         public static void WriteAdalRefreshToken(
-            ILegacyCachePersistance legacyCachePersistance,
+            ILegacyCachePersistence legacyCachePersistence,
             MsalRefreshTokenCacheItem rtItem,
             MsalIdTokenCacheItem idItem,
             string authority,
@@ -118,9 +118,9 @@ namespace Microsoft.Identity.Core.Cache
                     ResourceInResponse = scope
                 };
 
-                IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+                IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
                 dictionary[key] = wrapper;
-                legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(dictionary));
+                legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
             }
             catch (Exception ex)
             {
@@ -146,14 +146,14 @@ namespace Microsoft.Identity.Core.Cache
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
         public static Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
-            (ILegacyCachePersistance legacyCachePersistance, ISet<string> environments, string clientId)
+            (ILegacyCachePersistence legacyCachePersistence, ISet<string> environments, string clientId)
         {
             Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
             List<AdalUserInfo> adalUsersWithoutClientInfo = new List<AdalUserInfo>();
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
-                    AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+                    AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
                 //filter by client id and environment first
                 //TODO - authority check needs to be updated for alias check
                 List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Core.Cache
         /// 
         /// </summary>
         public static void RemoveAdalUser(
-            ILegacyCachePersistance legacyCachePersistance,
+            ILegacyCachePersistence legacyCachePersistence,
             ISet<string> environmentAliases,
             string clientId,
             string displayableId,
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Core.Cache
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+                AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
 
                 if (!string.IsNullOrEmpty(accountOrUserId))
                 {
@@ -219,7 +219,7 @@ namespace Microsoft.Identity.Core.Cache
                     RemoveEntriesWithMatchingName(environmentAliases, clientId, displayableId, adalCache);
                 }
 
-                legacyCachePersistance.WriteCache(AdalCacheOperations.Serialize(adalCache));
+                legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(adalCache));
             }
             catch (Exception ex)
             {
@@ -296,13 +296,13 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(ILegacyCachePersistance legacyCachePersistance,
+        public static List<MsalRefreshTokenCacheItem> GetAllAdalEntriesForMsal(ILegacyCachePersistence legacyCachePersistence,
             ISet<string> environmentAliases, string clientId, string upn, string uniqueId, string rawClientInfo)
         {
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
-                    AdalCacheOperations.Deserialize(legacyCachePersistance.LoadCache());
+                    AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
                 //filter by client id and environment first
                 //TODO - authority check needs to be updated for alias check
                 List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
@@ -361,10 +361,10 @@ namespace Microsoft.Identity.Core.Cache
             }
         }
 
-        public static MsalRefreshTokenCacheItem GetAdalEntryForMsal(ILegacyCachePersistance legacyCachePersistance,
+        public static MsalRefreshTokenCacheItem GetAdalEntryForMsal(ILegacyCachePersistence legacyCachePersistence,
             string preferredEnvironment, ISet<string> environmentAliases, string clientId, string upn, string uniqueId, string rawClientInfo)
         {
-            var adalRts = GetAllAdalEntriesForMsal(legacyCachePersistance, environmentAliases, clientId, upn, uniqueId, rawClientInfo);
+            var adalRts = GetAllAdalEntriesForMsal(legacyCachePersistence, environmentAliases, clientId, upn, uniqueId, rawClientInfo);
 
             List<MsalRefreshTokenCacheItem> filteredByPrefEnv = adalRts.Where
                 (rt => rt.Environment.Equals(preferredEnvironment, StringComparison.OrdinalIgnoreCase)).ToList();

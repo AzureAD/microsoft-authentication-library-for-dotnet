@@ -31,7 +31,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 {
@@ -42,14 +41,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         public AcquireTokenOnBehalfHandler(RequestData requestData, UserAssertion userAssertion)
             : base(requestData)
         {
-            if (userAssertion == null)
-            {
-                throw new ArgumentNullException("userAssertion");
-            }
-
-            this.userAssertion = userAssertion;
+            this.userAssertion = userAssertion ?? throw new ArgumentNullException(nameof(userAssertion));
             this.DisplayableId = userAssertion.UserName;
-            CacheQueryData.AssertionHash = CoreCryptographyHelpers.CreateSha256Hash(userAssertion.Assertion);
+            CacheQueryData.AssertionHash = PlatformProxyFactory
+                                           .GetPlatformProxy()
+                                           .CryptographyManager
+                                           .CreateSha256Hash(userAssertion.Assertion);
 
             RequestContext.Logger.Verbose(string.Format(CultureInfo.InvariantCulture,
                 "Username provided in user assertion - " + string.IsNullOrEmpty(DisplayableId)));

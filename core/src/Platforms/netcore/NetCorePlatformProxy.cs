@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Core.Cache;
 
 namespace Microsoft.Identity.Core
 {
@@ -34,6 +36,13 @@ namespace Microsoft.Identity.Core
     /// </summary>
     internal class NetCorePlatformProxy : IPlatformProxy
     {
+        private readonly bool _isMsal;
+
+        public NetCorePlatformProxy(bool isMsal)
+        {
+            _isMsal = isMsal;
+        }
+
         /// <summary>
         /// Get the user logged in 
         /// </summary>
@@ -72,5 +81,40 @@ namespace Microsoft.Identity.Core
         {
             return null;
         }
+
+        /// <inheritdoc />
+        public void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        {
+            if (redirectUri == null)
+            {
+                throw new ArgumentNullException(nameof(redirectUri));
+            }
+        }
+
+        /// <inheritdoc />
+        public string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        {
+            return redirectUri.OriginalString;
+        }
+
+        /// <inheritdoc />
+        public string GetDefaultRedirectUri(string correlationId)
+        {
+            return Constants.DefaultRedirectUri;
+        }
+
+        public string GetProductName()
+        {
+            return _isMsal ? "MSAL.NetCore" : null;
+        }
+
+        /// <inheritdoc />
+        public ILegacyCachePersistence LegacyCachePersistence { get; } = new NetCoreLegacyCachePersistence();
+
+        /// <inheritdoc />
+        public ITokenCacheAccessor TokenCacheAccessor { get; } = new TokenCacheAccessor();
+
+        /// <inheritdoc />
+        public ICryptographyManager CryptographyManager { get; } = new NetCoreCryptographyManager();
     }
 }

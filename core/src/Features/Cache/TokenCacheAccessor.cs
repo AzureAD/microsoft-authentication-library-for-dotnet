@@ -47,6 +47,30 @@ namespace Microsoft.Identity.Core
         internal readonly IDictionary<string, string> AccountCacheDictionary =
             new ConcurrentDictionary<string, string>();
 
+        /// <inheritdoc />
+        public int RefreshTokenCount => RefreshTokenCacheDictionary.Count;
+
+        /// <inheritdoc />
+        public int AccessTokenCount => AccessTokenCacheDictionary.Count;
+
+        /// <inheritdoc />
+        public int AccountCount => AccountCacheDictionary.Count;
+
+        /// <inheritdoc />
+        public int IdTokenCount => IdTokenCacheDictionary.Count;
+
+        /// <inheritdoc />
+        public void ClearRefreshTokens()
+        {
+            RefreshTokenCacheDictionary.Clear();
+        }
+
+        /// <inheritdoc />
+        public void ClearAccessTokens()
+        {
+            AccessTokenCacheDictionary.Clear();
+        }
+
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             AccessTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
@@ -158,35 +182,11 @@ namespace Microsoft.Identity.Core
                 new ReadOnlyCollection<string>(
                    AccountCacheDictionary.Values.ToList());
         }
-        /*
-        public ICollection<string> GetAllAccessTokenKeys()
-        {
-            return
-                new ReadOnlyCollection<string>(
-                    AccessTokenCacheDictionary.Keys.ToList());
-        }
 
-        public ICollection<string> GetAllRefreshTokenKeys()
+        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
         {
-            return
-                new ReadOnlyCollection<string>(
-                    RefreshTokenCacheDictionary.Keys.ToList());
+            throw new System.NotImplementedException();
         }
-
-        public ICollection<string> GetAllIdTokenKeys()
-        {
-            return
-                new ReadOnlyCollection<string>(
-                    IdTokenCacheDictionary.Keys.ToList());
-        }
-
-        public ICollection<string> GetAllAccountKeys()
-        {
-            return
-                new ReadOnlyCollection<string>(
-                    AccountCacheDictionary.Keys.ToList());
-        }
-        */
 
         public void Clear()
         {

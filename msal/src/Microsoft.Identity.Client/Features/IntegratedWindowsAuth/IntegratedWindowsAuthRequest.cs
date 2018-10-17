@@ -31,6 +31,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.WsTrust;
 
@@ -41,22 +42,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
     /// </summary>
     internal class IntegratedWindowsAuthRequest : RequestBase
     {
-        private IntegratedWindowsAuthInput iwaInput;
-        private UserAssertion userAssertion;
-        private CommonNonInteractiveHandler commonNonInteractiveHandler;
+        private readonly IntegratedWindowsAuthInput _iwaInput;
+        private UserAssertion _userAssertion;
+        private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
 
-        public IntegratedWindowsAuthRequest(AuthenticationRequestParameters authenticationRequestParameters, Core.IntegratedWindowsAuthInput iwaInput)
-            : base(authenticationRequestParameters)
+        public IntegratedWindowsAuthRequest(
+            IHttpManager httpManager, 
+            ICryptographyManager cryptographyManager,
+            IWsTrustWebRequestManager wsTrustWebRequestManager, 
+            AuthenticationRequestParameters authenticationRequestParameters, 
+            Core.IntegratedWindowsAuthInput iwaInput)
+            : base(httpManager, cryptographyManager, authenticationRequestParameters)
         {
-            if (iwaInput == null)
-            {
-                throw new ArgumentNullException(nameof(iwaInput));
-            }
-
-            this.iwaInput = iwaInput;
-            this.commonNonInteractiveHandler = new CommonNonInteractiveHandler(
+            _iwaInput = iwaInput ?? throw new ArgumentNullException(nameof(iwaInput));
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
-                this.iwaInput);
+                _iwaInput, wsTrustWebRequestManager);
         }
 
         protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (AuthenticationRequestParameters.Authority.AuthorityType != Core.Instance.AuthorityType.Adfs)
             {
-                var userRealmResponse = await this.commonNonInteractiveHandler
+                var userRealmResponse = await _commonNonInteractiveHandler
                    .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
                    .ConfigureAwait(false);
 
@@ -82,16 +83,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             CultureInfo.CurrentCulture,
                             MsalErrorMessage.UnsupportedUserType,
                             userRealmResponse.AccountType,
-                            this.iwaInput.UserName));
+                            _iwaInput.UserName));
                 }
 
-                WsTrustResponse wsTrustResponse = await commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                     userRealmResponse.FederationMetadataUrl,
                     userRealmResponse.CloudAudienceUrn,
                     UserAuthType.IntegratedAuth).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                userAssertion = new UserAssertion(
+                _userAssertion = new UserAssertion(
                     wsTrustResponse.Token,
                     (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
             }
@@ -99,21 +100,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (string.IsNullOrWhiteSpace(iwaInput.UserName))
+            if (string.IsNullOrWhiteSpace(_iwaInput.UserName))
             {
-                string platformUsername = await this.commonNonInteractiveHandler.GetPlatformUserAsync()
+                string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync()
                     .ConfigureAwait(false);
 
-                this.iwaInput.UserName = platformUsername;
+                _iwaInput.UserName = platformUsername;
             }
         }
 
         protected override void SetAdditionalRequestParameters(OAuth2Client client)
         {
-            if (userAssertion != null)
+            if (_userAssertion != null)
             {
-                client.AddBodyParameter(OAuth2Parameter.GrantType, userAssertion.AssertionType);
-                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(userAssertion.Assertion)));
+                client.AddBodyParameter(OAuth2Parameter.GrantType, _userAssertion.AssertionType);
+                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(_userAssertion.Assertion)));
             }
         }
     }

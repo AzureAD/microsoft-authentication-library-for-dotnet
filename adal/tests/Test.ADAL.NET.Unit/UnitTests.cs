@@ -46,6 +46,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
+using AuthorityType=Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -132,9 +133,9 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for authority type detection")]
         public void AuthorityTypeDetectionTest()
         {
-            Assert.AreEqual(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
-            Assert.AreEqual(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
-            Assert.AreEqual(Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance.AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
+            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://login.windows.net/tenant/dummy/"));
+            Assert.AreEqual(AuthorityType.AAD, Authenticator.DetectAuthorityType("https://accounts-int.somethingelse.w/dummy/"));
+            Assert.AreEqual(AuthorityType.ADFS, Authenticator.DetectAuthorityType("https://abc.com/adfs/dummy/"));
         }
 
 

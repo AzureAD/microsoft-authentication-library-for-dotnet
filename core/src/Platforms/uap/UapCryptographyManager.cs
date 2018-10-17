@@ -37,12 +37,12 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core
 {
-    internal class CoreCryptographyHelpers
+    internal class UapCryptographyManager : ICryptographyManager
     {
         // This descriptor does not require the enterprise authentication capability.
         private const string ProtectionDescriptor = "LOCAL=user";
 
-        public static string CreateBase64UrlEncodedSha256Hash(string input)
+        public string CreateBase64UrlEncodedSha256Hash(string input)
         {
             if (string.IsNullOrEmpty(input))
             {
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Core
             return Base64UrlHelpers.Encode(Convert.FromBase64String(output));
         }
 
-        public static string GenerateCodeVerifier()
+        public string GenerateCodeVerifier()
         {
             byte[] buffer = new byte[Constants.CodeVerifierByteSize];
             var windowsBuffer = CryptographicBuffer.GenerateRandom((uint)buffer.Length);
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Core
             return Base64UrlHelpers.Encode(buffer);
         }
 
-        public static string CreateSha256Hash(string input)
+        public string CreateSha256Hash(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
             {
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Core
             return CryptographicBuffer.EncodeToBase64String(hashed);
         }
         
-        public static string Encrypt(string message)
+        public string Encrypt(string message)
         {
             if (string.IsNullOrEmpty(message))
             {
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Core
             return Convert.ToBase64String(protectedBuffer.ToArray(0, (int)protectedBuffer.Length));
         }
 
-        public static string Decrypt(string encryptedMessage)
+        public string Decrypt(string encryptedMessage)
         {
             if (string.IsNullOrEmpty(encryptedMessage))
             {
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Core
             return CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, unprotectedBuffer);
         }
 
-        public static byte[] Encrypt(byte[] message)
+        public byte[] Encrypt(byte[] message)
         {
             if (message == null)
             {
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Core
             return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
         }
 
-        public static byte[] Decrypt(byte[] encryptedMessage)
+        public byte[] Decrypt(byte[] encryptedMessage)
         {
             if (encryptedMessage == null)
             {
