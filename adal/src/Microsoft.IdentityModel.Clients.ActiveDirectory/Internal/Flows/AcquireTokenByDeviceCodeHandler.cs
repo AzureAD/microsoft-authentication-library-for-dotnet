@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         {
             this.LoadFromCache = false; //no cache lookup for token
             this.StoreToCache = (requestData.TokenCache != null);
-            this.SupportADFS = false;
+            this.SupportADFS = true;
             this.deviceCodeResult = deviceCodeResult;
         }
 

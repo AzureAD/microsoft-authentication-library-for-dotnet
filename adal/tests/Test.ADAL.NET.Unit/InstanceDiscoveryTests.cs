@@ -346,7 +346,7 @@ namespace Test.ADAL.NET.Unit
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
             {
-                Method = HttpMethod.Get,
+                Method = HttpMethod.Post,
                 Url = $"https://{preferredNetwork}/contoso.com/oauth2/devicecode", // This validates the token request is sending to expected host
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {

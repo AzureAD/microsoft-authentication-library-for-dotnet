@@ -34,7 +34,7 @@ namespace Test.ADAL.NET.Common
     {
         public static readonly string DefaultResource = "resource1";
         public static readonly string AnotherResource = "resource2";
-        public static readonly string DefaultAdfsAuthorityTenant = "https://login.contodo.com/adfs/";
+        public static readonly string DefaultAdfsAuthorityTenant = "https://login.contoso.com/adfs/";
         public static readonly string DefaultAuthorityHomeTenant = "https://login.microsoftonline.com/home/";
         public static readonly string SomeTenantId = "some-tenant-id";
         public static readonly string TenantSpecificAuthority = "https://login.microsoftonline.com/" + SomeTenantId + "/";

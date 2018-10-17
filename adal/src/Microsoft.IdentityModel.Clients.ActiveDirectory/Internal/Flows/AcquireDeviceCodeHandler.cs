@@ -54,8 +54,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.resource = resource;
             this.extraQueryParameters = extraQueryParameters;
         }
-        
-        private string CreateDeviceCodeRequestUriString()
+
+        private DictionaryRequestParameters GetRequestParameters()
         {
             var deviceCodeRequestParameters = new DictionaryRequestParameters(this.resource, this.clientKey);
 
@@ -63,13 +63,13 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             {
                 deviceCodeRequestParameters[OAuthParameter.CorrelationId] = this.requestContext.Logger.CorrelationId.ToString();
             }
-            
-                IDictionary<string, string> adalIdParameters = AdalIdHelper.GetAdalIdParameters();
-                foreach (KeyValuePair<string, string> kvp in adalIdParameters)
-                {
-                    deviceCodeRequestParameters[kvp.Key] = kvp.Value;
-                }
-            
+
+            IDictionary<string, string> adalIdParameters = AdalIdHelper.GetAdalIdParameters();
+            foreach (KeyValuePair<string, string> kvp in adalIdParameters)
+            {
+                deviceCodeRequestParameters[kvp.Key] = kvp.Value;
+            }
+
             if (!string.IsNullOrWhiteSpace(extraQueryParameters))
             {
                 // Checks for extraQueryParameters duplicating standard parameters
@@ -84,15 +84,14 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                 deviceCodeRequestParameters.ExtraQueryParameter = extraQueryParameters;
             }
-
-            return new Uri(new Uri(this.authenticator.DeviceCodeUri), "?" + deviceCodeRequestParameters).AbsoluteUri;
+            return deviceCodeRequestParameters;
         }
 
         internal async Task<DeviceCodeResult> RunHandlerAsync()
         {
             await this.authenticator.UpdateFromTemplateAsync(this.requestContext).ConfigureAwait(false);
-            this.ValidateAuthorityType();
-            AdalHttpClient client = new AdalHttpClient(CreateDeviceCodeRequestUriString(), this.requestContext);
+            AdalHttpClient client = new AdalHttpClient(authenticator.DeviceCodeUri, this.requestContext);
+            client.Client.BodyParameters = GetRequestParameters();
             DeviceCodeResponse response = await client.GetResponseAsync<DeviceCodeResponse>().ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(response.Error))
@@ -102,15 +101,5 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             return response.GetResult(clientKey.ClientId, resource);
         }
-
-        private void ValidateAuthorityType()
-        {
-            if (this.authenticator.AuthorityType == AuthorityType.ADFS)
-            {
-                throw new AdalException(AdalError.InvalidAuthorityType,
-                    string.Format(CultureInfo.CurrentCulture, AdalErrorMessage.InvalidAuthorityTypeTemplate, this.authenticator.Authority));
-            }
-        }
-
     }
 }
