@@ -27,7 +27,6 @@
 
 using System;
 using System.Globalization;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -57,7 +56,9 @@ namespace AdalDesktopTestApp
                 return;
             }
 
+#pragma warning disable CS0162 // Unreachable code detected
             RunAppAsync(context).Wait();
+#pragma warning restore CS0162 // Unreachable code detected
         }
 
         private static async Task RunAppAsync(AuthenticationContext context)
