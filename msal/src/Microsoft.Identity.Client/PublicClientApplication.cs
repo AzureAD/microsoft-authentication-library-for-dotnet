@@ -468,10 +468,19 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-            var handler =
-                new InteractiveRequest(HttpManager, CryptographyManager, requestParams, extraScopesToConsent, loginHint, behavior,
-                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext))
-                { ApiId = apiId };
+            var handler = new InteractiveRequest(
+                HttpManager,
+                CryptographyManager,
+                requestParams,
+                apiId,
+                extraScopesToConsent,
+                loginHint,
+                behavior,
+                CreateWebAuthenticationDialog(
+                    parent,
+                    behavior,
+                    requestParams.RequestContext));
+
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -488,10 +497,15 @@ namespace Microsoft.Identity.Client
             }
 #endif
 
-            var handler =
-                new InteractiveRequest(HttpManager, CryptographyManager, requestParams, extraScopesToConsent, behavior,
-                    CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext))
-                { ApiId = apiId };
+            var handler = new InteractiveRequest(
+                HttpManager,
+                CryptographyManager,
+                requestParams,
+                apiId,
+                extraScopesToConsent,
+                behavior,
+                CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext));
+
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

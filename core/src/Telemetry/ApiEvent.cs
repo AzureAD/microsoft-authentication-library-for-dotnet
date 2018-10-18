@@ -48,6 +48,8 @@ namespace Microsoft.Identity.Core.Telemetry
 
         public enum ApiIds
         {
+            None = 0,
+
             AcquireTokenSilentWithAuthority = 31,
             AcquireTokenSilentWithoutAuthority = 30,
 

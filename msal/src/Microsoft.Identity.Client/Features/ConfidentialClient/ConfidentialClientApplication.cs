@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(HttpManager, CryptographyManager, requestParameters, null, loginHint, UIBehavior.SelectAccount, null);
+                new InteractiveRequest(HttpManager, CryptographyManager, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
             return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
 
@@ -348,8 +348,16 @@ namespace Microsoft.Identity.Client
             requestParameters.ClientId = ClientId;
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
-            var handler =
-                new InteractiveRequest(HttpManager, CryptographyManager, requestParameters, extraScopesToConsent, loginHint, UIBehavior.SelectAccount, null);
+            var handler = new InteractiveRequest(
+                HttpManager,
+                CryptographyManager,
+                requestParameters,
+                ApiEvent.ApiIds.None,
+                extraScopesToConsent,
+                loginHint,
+                UIBehavior.SelectAccount,
+                null);
+
             return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
 
@@ -377,7 +385,7 @@ namespace Microsoft.Identity.Client
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
             parameters.SendCertificate = sendCertificate;
-            var handler = new ClientCredentialRequest(HttpManager, CryptographyManager, parameters, forceRefresh){ApiId = apiId, IsConfidentialClient = true};
+            var handler = new ClientCredentialRequest(HttpManager, CryptographyManager, parameters, apiId, forceRefresh);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -387,7 +395,7 @@ namespace Microsoft.Identity.Client
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.UserAssertion = userAssertion;
             requestParams.SendCertificate = sendCertificate;
-            var handler = new OnBehalfOfRequest(HttpManager, CryptographyManager, requestParams){ApiId = apiId, IsConfidentialClient = true};
+            var handler = new OnBehalfOfRequest(HttpManager, CryptographyManager, requestParams, apiId);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -400,7 +408,7 @@ namespace Microsoft.Identity.Client
             requestParams.RedirectUri = redirectUri;
             requestParams.SendCertificate = sendCertificate;
             var handler =
-                new AuthorizationCodeRequest(HttpManager, CryptographyManager, requestParams){ApiId = apiId, IsConfidentialClient = true};
+                new AuthorizationCodeRequest(HttpManager, CryptographyManager, requestParams, apiId);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

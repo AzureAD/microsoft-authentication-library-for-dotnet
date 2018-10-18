@@ -124,6 +124,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     TestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
@@ -190,6 +191,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     TestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
@@ -244,6 +246,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                         httpManager,
                         PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                         parameters,
+                        ApiEvent.ApiIds.None,
                         TestConstants.ScopeForAnotherResource.ToArray(),
                         (string)null,
                         UIBehavior.ForceLogin,
@@ -288,6 +291,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     TestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
@@ -295,7 +299,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 try
                 {
-                    request.PreTokenRequestAsync(CancellationToken.None).Wait();
+                    request.ExecuteAsync(CancellationToken.None).Wait();
 
                     Assert.Fail("MsalException should have been thrown here");
                 }
@@ -342,6 +346,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     TestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
@@ -349,7 +354,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 try
                 {
-                    request.PreTokenRequestAsync(CancellationToken.None).Wait();
+                    request.ExecuteAsync(CancellationToken.None).Wait();
 
                     Assert.Fail("MsalException should have been thrown here");
                 }
@@ -396,13 +401,14 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     (string)null,
                     UIBehavior.ForceLogin,
                     webUi);
                 try
                 {
-                    request.PreTokenRequestAsync(CancellationToken.None).Wait();
+                    request.ExecuteAsync(CancellationToken.None).Wait();
                     Assert.Fail("MsalException should have been thrown here");
                 }
                 catch (Exception exc)
@@ -424,6 +430,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     (string)null,
                     UIBehavior.ForceLogin,
@@ -431,7 +438,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 try
                 {
-                    request.PreTokenRequestAsync(CancellationToken.None).Wait(CancellationToken.None);
+                    request.ExecuteAsync(CancellationToken.None).Wait(CancellationToken.None);
                     Assert.Fail("MsalException should have been thrown here");
                 }
                 catch (Exception exc)
@@ -468,6 +475,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     TestConstants.ScopeForAnotherResource.ToArray(),
                     null,
                     UIBehavior.ForceLogin,
@@ -475,7 +483,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 try
                 {
-                    request.PreTokenRequestAsync(CancellationToken.None).Wait();
+                    request.ExecuteAsync(CancellationToken.None).Wait();
                     Assert.Fail("MsalException should be thrown here");
                 }
                 catch (Exception exc)

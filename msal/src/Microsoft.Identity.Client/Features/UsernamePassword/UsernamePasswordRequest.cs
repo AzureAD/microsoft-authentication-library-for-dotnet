@@ -1,20 +1,20 @@
-﻿//----------------------------------------------------------------------
-//
+﻿// ------------------------------------------------------------------------------
+// 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-//
+// 
 // This code is licensed under the MIT License.
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,8 +22,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// 
+// ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -35,76 +35,88 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     /// <summary>
-    /// Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth.
+    ///     Handles requests that are non-interactive. Currently MSAL supports Integrated Windows Auth.
     /// </summary>
     internal class UsernamePasswordRequest : RequestBase
     {
-        private readonly UsernamePasswordInput _usernamePasswordInput;
-        private UserAssertion _userAssertion;
-
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
+        private readonly UsernamePasswordInput _usernamePasswordInput;
 
         public UsernamePasswordRequest(
-            IHttpManager httpManager, 
+            IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
-            IWsTrustWebRequestManager wsTrustWebRequestManager, 
-            AuthenticationRequestParameters authenticationRequestParameters, 
+            IWsTrustWebRequestManager wsTrustWebRequestManager,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            ApiEvent.ApiIds apiId,
             UsernamePasswordInput usernamePasswordInput)
-       : base(httpManager, cryptographyManager, authenticationRequestParameters)
+            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
         {
-            this._usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
-            this._commonNonInteractiveHandler = new CommonNonInteractiveHandler(
-                authenticationRequestParameters.RequestContext, usernamePasswordInput, wsTrustWebRequestManager);
+            _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
+                authenticationRequestParameters.RequestContext,
+                usernamePasswordInput,
+                wsTrustWebRequestManager);
         }
 
-        protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
+        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
+            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
-            await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
+            var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
+            var msalTokenResponse =
+                await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken).ConfigureAwait(false);
+            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
-        private async Task FetchAssertionFromWsTrustAsync()
+        private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
-            if (AuthenticationRequestParameters.Authority.AuthorityType != Core.Instance.AuthorityType.Adfs)
+            if (AuthenticationRequestParameters.Authority.AuthorityType == Core.Instance.AuthorityType.Adfs)
             {
-                var userRealmResponse = await this._commonNonInteractiveHandler
-                   .QueryUserRealmDataAsync(this.AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
-                   .ConfigureAwait(false);
+                return null;
+            }
 
-                if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
-                {
-                    WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
-                        userRealmResponse.FederationMetadataUrl,
-                        userRealmResponse.CloudAudienceUrn,
-                        UserAuthType.UsernamePassword).ConfigureAwait(false);
+            var userRealmResponse = await _commonNonInteractiveHandler
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
+                                          .ConfigureAwait(false);
 
-                    // We assume that if the response token type is not SAML 1.1, it is SAML 2
-                    _userAssertion = new UserAssertion(
-                        wsTrustResponse.Token,
-                        (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuth2GrantType.Saml11Bearer : OAuth2GrantType.Saml20Bearer);
-                }
-                else if (string.Equals(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase))
+            if (userRealmResponse.IsFederated)
+            {
+                var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
+                                          userRealmResponse.FederationMetadataUrl,
+                                          userRealmResponse.CloudAudienceUrn,
+                                          UserAuthType.UsernamePassword).ConfigureAwait(false);
+
+                // We assume that if the response token type is not SAML 1.1, it is SAML 2
+                return new UserAssertion(
+                    wsTrustResponse.Token,
+                    wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion
+                        ? OAuth2GrantType.Saml11Bearer
+                        : OAuth2GrantType.Saml20Bearer);
+            }
+            else if (userRealmResponse.IsManaged)
+            {
+                // handle grant flow
+                if (!_usernamePasswordInput.HasPassword())
                 {
-                    // handle grant flow
-                    if (!this._usernamePasswordInput.HasPassword())
-                    {
-                        throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
-                    }
+                    throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
                 }
-                else
-                {
-                    throw new MsalClientException(MsalError.UnknownUserType,
-                        string.Format(CultureInfo.CurrentCulture, 
-                        MsalErrorMessage.UnsupportedUserType, 
-                        userRealmResponse.AccountType,
-                        this._usernamePasswordInput.UserName));
-                }
+
+                return null;
+            }
+            else
+            {
+                throw new MsalClientException(
+                    MsalError.UnknownUserType,
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        MsalErrorMessage.UnsupportedUserType,
+                        userRealmResponse.AccountType));
             }
         }
 
@@ -114,32 +126,41 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 if (string.IsNullOrWhiteSpace(_usernamePasswordInput.UserName))
                 {
-                    string platformUsername = await this._commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                    this._usernamePasswordInput.UserName = platformUsername;
+                    string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
+                    _usernamePasswordInput.UserName = platformUsername;
                 }
             }
         }
 
-        protected override void SetAdditionalRequestParameters(OAuth2Client client)
+        private Dictionary<string, string> GetAdditionalBodyParameters(UserAssertion userAssertion)
         {
-            if (this._userAssertion != null)
+            var dict = new Dictionary<string, string>();
+
+            if (userAssertion != null)
             {
-                client.AddBodyParameter(OAuth2Parameter.GrantType, this._userAssertion.AssertionType);
-                client.AddBodyParameter(OAuth2Parameter.Assertion, Convert.ToBase64String(Encoding.UTF8.GetBytes(this._userAssertion.Assertion)));
+                dict[OAuth2Parameter.GrantType] = userAssertion.AssertionType;
+                dict[OAuth2Parameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(userAssertion.Assertion));
             }
+
             // This is hit if the account is managed, as no userAssertion is created for a managed account
             else
             {
-                client.AddBodyParameter(OAuth2Parameter.GrantType, OAuth2GrantType.Password);
-                client.AddBodyParameter(OAuth2Parameter.Username, this._usernamePasswordInput.UserName);
-                client.AddBodyParameter(OAuth2Parameter.Password, new string(this._usernamePasswordInput.PasswordToCharArray()));
+                dict[OAuth2Parameter.GrantType] = OAuth2GrantType.Password;
+                dict[OAuth2Parameter.Username] = _usernamePasswordInput.UserName;
+                dict[OAuth2Parameter.Password] = new string(_usernamePasswordInput.PasswordToCharArray());
             }
 
-            ISet<string> unionScope =
-                new HashSet<string>() { OAuth2Value.ScopeOpenId, OAuth2Value.ScopeOfflineAccess, OAuth2Value.ScopeProfile };
+            ISet<string> unionScope = new HashSet<string>()
+            {
+                OAuth2Value.ScopeOpenId,
+                OAuth2Value.ScopeOfflineAccess,
+                OAuth2Value.ScopeProfile
+            };
 
-            unionScope.UnionWith(this.AuthenticationRequestParameters.Scope);
-            client.AddBodyParameter(OAuth2Parameter.Scope, unionScope.AsSingleString());
+            unionScope.UnionWith(AuthenticationRequestParameters.Scope);
+            dict[OAuth2Parameter.Scope] = unionScope.AsSingleString();
+
+            return dict;
         }
     }
 }

@@ -26,11 +26,14 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -39,8 +42,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public OnBehalfOfRequest(
             IHttpManager httpManager, 
             ICryptographyManager cryptographyManager,
-            AuthenticationRequestParameters authenticationRequestParameters)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters)
+            AuthenticationRequestParameters authenticationRequestParameters,
+            ApiEvent.ApiIds apiId)
+            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
         {
             if (authenticationRequestParameters.UserAssertion == null)
             {
@@ -48,36 +52,43 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        internal override async Task PreTokenRequestAsync(CancellationToken cancellationToken)
+        internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            await base.PreTokenRequestAsync(cancellationToken).ConfigureAwait(false);
+            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
             // look for access token in the cache first.
             // no access token is found, then it means token does not exist
             // or new assertion has been passed. We should not use Refresh Token
             // for the user because the new incoming token may have updated claims
             // like mfa etc.
-            if (LoadFromCache)
+
+            if (TokenCache != null)
             {
-                MsalAccessTokenItem = 
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                MsalAccessTokenCacheItem msalAccessTokenItem = await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                if (msalAccessTokenItem != null)
+                {
+                    return new AuthenticationResult(msalAccessTokenItem, null);
+                }
             }
+
+            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
+            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
-        protected override async Task SendTokenRequestAsync(CancellationToken cancellationToken)
+        protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
         {
-            if (MsalAccessTokenItem == null)
-            {
-                await base.SendTokenRequestAsync(cancellationToken).ConfigureAwait(false);
-            }
+            apiEvent.IsConfidentialClient = true;
         }
 
-        protected override void SetAdditionalRequestParameters(OAuth2Client client)
+        private Dictionary<string, string> GetBodyParameters()
         {
-            client.AddBodyParameter(OAuth2Parameter.GrantType,
-                AuthenticationRequestParameters.UserAssertion.AssertionType);
-            client.AddBodyParameter(OAuth2Parameter.Assertion, AuthenticationRequestParameters.UserAssertion.Assertion);
-            client.AddBodyParameter(OAuth2Parameter.RequestedTokenUse, OAuth2RequestedTokenUse.OnBehalfOf);
+            var dict = new Dictionary<string, string>
+            {
+                [OAuth2Parameter.GrantType] = AuthenticationRequestParameters.UserAssertion.AssertionType,
+                [OAuth2Parameter.Assertion] = AuthenticationRequestParameters.UserAssertion.Assertion,
+                [OAuth2Parameter.RequestedTokenUse] = OAuth2RequestedTokenUse.OnBehalfOf
+            };
+            return dict;
         }
     }
 }

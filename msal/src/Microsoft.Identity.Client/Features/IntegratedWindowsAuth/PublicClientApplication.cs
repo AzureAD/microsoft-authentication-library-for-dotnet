@@ -79,10 +79,13 @@ namespace Microsoft.Identity.Client
         {
             Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new IntegratedWindowsAuthRequest(HttpManager, CryptographyManager, WsTrustWebRequestManager, requestParams, iwaInput)
-            {
-                ApiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser
-            };
+            var handler = new IntegratedWindowsAuthRequest(
+                HttpManager,
+                CryptographyManager,
+                WsTrustWebRequestManager,
+                requestParams,
+                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
+                iwaInput);
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }

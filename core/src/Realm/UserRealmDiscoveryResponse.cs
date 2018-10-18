@@ -54,5 +54,8 @@ namespace Microsoft.Identity.Core.Realm
 
         [DataMember(Name = "cloud_audience_urn")]
         public string CloudAudienceUrn { get; set; }
+
+        public bool IsFederated => string.Equals(AccountType, "federated", StringComparison.OrdinalIgnoreCase);
+        public bool IsManaged => string.Equals(AccountType, "managed", StringComparison.OrdinalIgnoreCase);
     }
 }

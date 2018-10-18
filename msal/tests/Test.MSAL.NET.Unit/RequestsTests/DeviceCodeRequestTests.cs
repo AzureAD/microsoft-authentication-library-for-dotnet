@@ -40,6 +40,7 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
@@ -116,6 +117,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     result =>
                     {
                         actualDeviceCodeResult = result;
@@ -163,6 +165,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
+                    ApiEvent.ApiIds.None,
                     async result =>
                     {
                         await Task.Delay(200, CancellationToken.None).ConfigureAwait(false);
@@ -212,6 +215,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                         httpManager,
                         PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                         parameters,
+                        ApiEvent.ApiIds.None,
                         result => Task.FromResult(0));
 
                     Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);

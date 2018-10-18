@@ -31,6 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Features.DeviceCode;
 using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Client
 {
@@ -147,7 +148,7 @@ namespace Microsoft.Identity.Client
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
-            var handler = new DeviceCodeRequest(HttpManager, CryptographyManager, requestParams, deviceCodeResultCallback);
+            var handler = new DeviceCodeRequest(HttpManager, CryptographyManager, requestParams, ApiEvent.ApiIds.None, deviceCodeResultCallback);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
     }

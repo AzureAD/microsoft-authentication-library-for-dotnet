@@ -317,9 +317,12 @@ namespace Microsoft.Identity.Client
             }
 
             var handler = new SilentRequest(
-                    HttpManager, CryptographyManager, CreateRequestParameters(authority, scopes, account, UserTokenCache),
-                forceRefresh)
-            { ApiId = apiId };
+                HttpManager,
+                CryptographyManager,
+                CreateRequestParameters(authority, scopes, account, UserTokenCache),
+                apiId,
+                forceRefresh);
+
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
