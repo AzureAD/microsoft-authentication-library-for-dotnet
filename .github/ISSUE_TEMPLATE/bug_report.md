@@ -21,8 +21,8 @@ For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-
 **What authentication flow has the issue?**
 * Desktop 
     * [ ] Interactive
-    * [ ] WIA
-    * [ ] U/P
+    * [ ] Integrated Windows Auth
+    * [ ] Username / Password
     * [ ] Device code flow (browserless)
 * [ ] Mobile
 * Web App
