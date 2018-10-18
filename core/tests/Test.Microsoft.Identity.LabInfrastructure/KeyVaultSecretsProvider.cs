@@ -29,11 +29,12 @@ using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public class KeyVaultSecretsProvider
+    public class KeyVaultSecretsProvider : IDisposable
     {
         /// <summary>
         /// Token cache used by the test infrastructure when authenticating against KeyVault
@@ -50,9 +51,13 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 
         private KeyVaultConfiguration _config;
 
-        private readonly string keyVaultClientID = "ebe49c8f-61de-4357-9194-7a786f6402b4";
+        private readonly string _keyVaultClientID = "ebe49c8f-61de-4357-9194-7a786f6402b4";
 
-        private readonly string keyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
+        private readonly string _keyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
+
+        private readonly string _dataFileName = "data.txt";
+
+        private AuthenticationResult _authResult;
 
         /// <summary>Initialize the secrets provider with the "keyVault" configuration section.</summary>
         /// <remarks>
@@ -84,10 +89,38 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         public KeyVaultSecretsProvider()
         {
             _config = new KeyVaultConfiguration();
-            _config.AuthType = KeyVaultAuthenticationType.ClientCertificate;
-            _config.ClientId = keyVaultClientID;
-            _config.CertThumbprint = keyVaultThumbPrint;
+
+            //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
+            //After the tests are finished in appcenter, the file will be deleted from the appcenter servers.
+            //The file will then be deleted locally Via VSTS task.
+            if (File.Exists(_dataFileName))
+            {
+                var data = File.ReadAllText(_dataFileName);
+
+                if (string.IsNullOrWhiteSpace(data))
+                {
+                    _config.AuthType = KeyVaultAuthenticationType.ClientCertificate;
+                }
+                else
+                {
+                    _config.AuthType = KeyVaultAuthenticationType.ClientSecret;
+                    _config.KeyVaultSecret = data;
+                }
+            }
+            else
+            {
+                _config.AuthType = KeyVaultAuthenticationType.ClientCertificate;
+            }
+
+            _config.ClientId = _keyVaultClientID;
+            _config.CertThumbprint = _keyVaultThumbPrint;
             _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
+            
+        }
+
+        ~KeyVaultSecretsProvider()
+        {
+            Dispose();
         }
 
         public SecretBundle GetSecret(string secretUrl)
@@ -97,6 +130,10 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 
         private async Task<string> AuthenticationCallbackAsync(string authority, string resource, string scope)
         {
+            if (_authResult != null)
+            {
+                return _authResult.AccessToken;
+            }
             var authContext = new AuthenticationContext(authority, keyVaultTokenCache);
 
             AuthenticationResult authResult;
@@ -110,6 +147,10 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                     }
                     authResult = await authContext.AcquireTokenAsync(resource, _assertionCert).ConfigureAwait(false);
                     break;
+                case KeyVaultAuthenticationType.ClientSecret:
+                    ClientCredential cred = new ClientCredential(_config.ClientId, _config.KeyVaultSecret);
+                    authResult = await authContext.AcquireTokenAsync(resource, cred).ConfigureAwait(false);
+                    break;
                 case KeyVaultAuthenticationType.UserCredential:
                     authResult = await authContext.AcquireTokenAsync(resource, _config.ClientId, new UserCredential()).ConfigureAwait(false);
                     break;
@@ -117,7 +158,19 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                     throw new ArgumentOutOfRangeException();
             }
 
+            _authResult = authResult;
             return authResult?.AccessToken;
+        }
+
+        public void Dispose()
+        {
+            if (_keyVaultClient != null)
+            {
+                _keyVaultClient.Dispose();
+                _keyVaultClient = null;
+            }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -52,11 +52,17 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         /// <see cref="AuthType"/> is <see cref="KeyVaultAuthenticationType.ClientCertificate"/>.
         /// </summary>
         public string CertThumbprint { get; set; }
+
+        /// <summary>
+        /// Secret value used to access Key Vault
+        /// </summary>
+        public string KeyVaultSecret { get; set; }
     }
 
     public enum KeyVaultAuthenticationType
     {
         ClientCertificate,
+        ClientSecret,
         UserCredential
     }
 }

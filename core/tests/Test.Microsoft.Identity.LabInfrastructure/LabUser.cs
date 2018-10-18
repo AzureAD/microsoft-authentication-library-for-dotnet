@@ -33,12 +33,14 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 {
     public class LabUser : IUser
     {
-        private KeyVaultSecretsProvider keyVault;
+        public LabUser() { }
 
-        public LabUser()
+        public LabUser(KeyVaultSecretsProvider keyVault)
         {
-            keyVault = new KeyVaultSecretsProvider();
+            KeyVault = keyVault;
         }
+
+        public KeyVaultSecretsProvider KeyVault { get; set; }
 
         [JsonProperty("objectId")]
         public Guid ObjectId { get; set; }
@@ -113,8 +115,12 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                 throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
             }
 
+            if(KeyVault == null)
+            {
+                throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
+            }
 
-            return keyVault.GetSecret(CredentialUrl).Value;
+            return KeyVault.GetSecret(CredentialUrl).Value;
         }
     }
 

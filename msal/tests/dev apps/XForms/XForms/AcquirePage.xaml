@@ -72,10 +72,6 @@
                 <Frame OutlineColor="Black" Padding="10">
                     <Label x:Name="acquireResponseLabel" Text=""/>
                 </Frame>
-                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                    <Button  Text="Clear Result"  Clicked="OnClearClicked" TextColor="Blue" Font="Bold,15" AutomationId="clearLog"/>
-                    <Button  Text="Clear Cache"  Clicked="OnClearCacheClickedAsync" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>
-                </StackLayout>
             </StackLayout>
         </ScrollView>
 

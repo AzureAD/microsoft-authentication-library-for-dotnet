@@ -40,9 +40,12 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="NUnit" Version="2.6.4" />
-    <PackageReference Include="Xamarin.UITest" Version="2.2.4" />
+    <PackageReference Include="NUnit3TestAdapter">
+      <Version>3.10.0</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.UITest" Version="2.2.6" />
     <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.*" />
+    <PackageReference Include="Newtonsoft.Json" Version="6.0.8" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="2.0.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
@@ -58,6 +61,10 @@
       <Project>{AECE489D-9ED4-442D-8D8F-0F383AEBB781}</Project>
       <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Core.csproj">
+      <Project>{3eef5981-8f11-4f54-9ddf-2f63c574d028}</Project>
+      <Name>Microsoft.Identity.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj">
       <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
       <Name>Test.Microsoft.Identity.LabInfrastructure</Name>
@@ -65,8 +72,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppFactory.cs" />
+    <Compile Include="CoreMobileTestHelper.cs" />
     <Compile Include="ITestController.cs" />
     <Compile Include="PlatformNotSupportedException.cs" />
+    <Compile Include="ResultVerificationFailureException.cs" />
+    <Compile Include="CoreUiTestConstants.cs" />
     <Compile Include="XamarinUITestController.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

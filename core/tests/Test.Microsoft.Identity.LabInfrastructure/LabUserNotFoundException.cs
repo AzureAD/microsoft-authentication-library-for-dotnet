@@ -25,20 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using Test.Microsoft.Identity.LabInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
+using System;
 
-namespace Test.MSAL.NET.Integration.Infrastructure
+namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public class AuthHelper
+    public class LabUserNotFoundException : Exception
     {
-        public IUser GetUser(UserQueryParameters query)
+        public UserQueryParameters Parameters { get; set; }
+
+        public LabUserNotFoundException(UserQueryParameters parameters, string message):base(message)
         {
-            ILabService _labService = new LabServiceApi(new KeyVaultSecretsProvider());
-            var user = _labService.GetUser(query);
-            Assert.IsTrue(user != null, "Found no users for the given query.");
-            return user;
+            Parameters = parameters;
         }
     }
 }

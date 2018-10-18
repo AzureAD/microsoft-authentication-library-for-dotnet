@@ -31,6 +31,6 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 {
     public interface ILabService
     {
-        IEnumerable<IUser> GetUsers(UserQueryParameters query);
+        IUser GetUser(UserQueryParameters query);
     }
 }

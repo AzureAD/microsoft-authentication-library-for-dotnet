@@ -45,5 +45,6 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         FederationProvider FederationProvider { get; }
         string CurrentTenantId { get; }
         string HomeTenantId { get; }
+        KeyVaultSecretsProvider KeyVault { get; set; }
     }
 }

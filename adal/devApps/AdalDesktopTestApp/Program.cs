@@ -66,7 +66,6 @@ namespace AdalDesktopTestApp
             while (true)
             {
                 Console.Clear();
-
                 Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "TokenCache contains {0} token(s)", context.TokenCache.Count));
                 foreach (var item in context.TokenCache.ReadItems())
                 {

@@ -146,7 +146,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Button  Text="Clear"  Clicked="OnClearClickedAsync" TextColor="Blue" Font="Bold,15"/>
+        <Button  Text="Clear"  Clicked="OnClearClickedAsync" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>
 
     </StackLayout>
 </ContentPage>

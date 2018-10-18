@@ -89,11 +89,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "msal\samples\d
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.Core.Unit", "core\tests\Test.Microsoft.Identity.Core.Unit\Test.Microsoft.Identity.Core.Unit.csproj", "{147076E1-195D-437A-A599-54AE8DABA9B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.ADAL.NET.UIAutomation", "adal\tests\Test.ADAL.NET.UIAutomation\Test.ADAL.NET.UIAutomation.csproj", "{B19C892E-2628-4CA7-AD27-08D406A3B14B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.ADAL.UIAutomation", "adal\tests\Test.ADAL.NET.UIAutomation\Test.ADAL.UIAutomation.csproj", "{B19C892E-2628-4CA7-AD27-08D406A3B14B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Microsoft.Identity.Core.UIAutomation", "core\tests\Test.Microsoft.Identity.Core.UIAutomation\Test.Microsoft.Identity.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.MSAL.NET.UIAutomation", "msal\tests\Test.MSAL.NET.UIAutomation\Test.MSAL.NET.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.MSAL.UIAutomation", "msal\tests\Test.MSAL.NET.UIAutomation\Test.MSAL.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdalUAPTestApp", "adal\devApps\AdalUAPTestApp\AdalUAPTestApp.csproj", "{CF5DD35B-A52F-4C9C-B77C-04D15DF99D0F}"
 EndProject

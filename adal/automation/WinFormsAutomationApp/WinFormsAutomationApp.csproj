@@ -103,8 +103,8 @@
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="10.*">
-      <PrivateAssets>All</PrivateAssets>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2">
+      <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

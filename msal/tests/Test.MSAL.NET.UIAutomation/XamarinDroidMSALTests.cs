@@ -30,17 +30,22 @@ using NUnit.Framework;
 using Test.Microsoft.Identity.Core.UIAutomation;
 using Xamarin.UITest;
 
-namespace Test.MSAL.NET.UIAutomation
+//NOTICE! Inorder to run UI automation tests for xamarin locally, you may need to upgrade nunit to 3.0 and above for this project and the core ui Automation project.
+//It is set to 2.6.4 because that is the maximum version that appcenter can support.
+//There is an error in visual studio that can prevent the NUnit test framework from loading the test dll properly.
+//Remember to return the version back to 2.6.4 before commiting to prevent appcenter from failing
+
+namespace Test.MSAL.UIAutomation
 {
     /// <summary>
     /// Configures environment for core/android tests to run
     /// </summary>
     [TestFixture(Platform.Android)]
-    class XamarinMSALDroidTests
+    public class XamarinMSALDroidTests
     {
         IApp app;
         Platform platform;
-        ITestController xamarinController;
+        ITestController xamarinController = new XamarinUITestController();
 
         public XamarinMSALDroidTests(Platform platform)
         {
@@ -54,7 +59,7 @@ namespace Test.MSAL.NET.UIAutomation
         public void InitializeBeforeTest()
         {
             app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
-            xamarinController = new XamarinUITestController(app);
+            xamarinController.Application = app;
         }
 
         /// <summary>
@@ -63,7 +68,68 @@ namespace Test.MSAL.NET.UIAutomation
         [Test]
         public void AcquireTokenTest()
         {
-            CoreMobileMSALTests.AcquireTokenTest(xamarinController);
+            MSALMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.DefaultUserQuery);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token silent flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenSilentTest()
+        {
+            MSALMobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.DefaultUserQuery);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token ADFSV4 Federated flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenADFSV4InteractiveFederatedTest()
+        {
+            var user = LabUserHelper.DefaultUserQuery;
+            user.FederationProvider = FederationProvider.AdfsV4;
+            user.IsFederatedUser = true;
+
+            MSALMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, user);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token ADFSV3 Federated flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenADFSV3InteractiveFederatedTest()
+        {
+            var user = LabUserHelper.DefaultUserQuery;
+            user.FederationProvider = FederationProvider.AdfsV3;
+            user.IsFederatedUser = true;
+
+            MSALMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, user);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token ADFSV4 Non-Federated flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenADFSV4InteractiveNonFederatedTest()
+        {
+            var user = LabUserHelper.DefaultUserQuery;
+            user.FederationProvider = FederationProvider.AdfsV4;
+            user.IsFederatedUser = false;
+
+            MSALMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, user);
+        }
+
+        /// <summary>
+        /// Runs through the standard acquire token ADFSV3 Non-Federated flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenADFSV3InteractiveNonFederatedTest()
+        {
+            var user = LabUserHelper.DefaultUserQuery;
+            user.FederationProvider = FederationProvider.AdfsV3;
+            user.IsFederatedUser = false;
+
+            MSALMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, user);
         }
     }
 }

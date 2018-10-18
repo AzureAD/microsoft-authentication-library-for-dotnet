@@ -43,6 +43,8 @@ namespace XForms
     public partial class AcquirePage : ContentPage
     {
         private const string UserNotSelected = "not selected";
+        private const string EmptyResult = "Result:";
+        private const string SuccsessfulResult = "Result: Success";
 
         public AcquirePage()
         {
@@ -168,7 +170,14 @@ namespace XForms
                 var res = await App.MsalPublicClient.AcquireTokenSilentAsync(GetScopes(),
                     getUserByDisplayableId(selectedUser), authority, ForceRefreshSwitch.IsToggled).ConfigureAwait(true);
 
-                acquireResponseLabel.Text = ToString(res);
+                var resText = ToString(res);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccsessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
             }
             catch (Exception exception)
             {
@@ -180,6 +189,7 @@ namespace XForms
         {
             try
             {
+                acquireResponseTitleLabel.Text = EmptyResult;
                 AuthenticationResult res;
                 if (LoginHintSwitch.IsToggled)
                 {
@@ -199,9 +209,7 @@ namespace XForms
                 var resText = ToString(res);
 
                 if (resText.Contains("AccessToken"))
-                {
-                    acquireResponseTitleLabel.Text = "Result: Success";
-                }
+                    acquireResponseTitleLabel.Text = SuccsessfulResult;
 
                 acquireResponseLabel.Text = resText;
                 RefreshUsers();
@@ -215,7 +223,7 @@ namespace XForms
         private void OnClearClicked(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "";
-            acquireResponseTitleLabel.Text = "Result:";
+            acquireResponseTitleLabel.Text = EmptyResult;
         }
 
         private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
@@ -229,7 +237,7 @@ namespace XForms
             }
 
             acquireResponseLabel.Text = "";
-            acquireResponseTitleLabel.Text = "Result:";
+            acquireResponseTitleLabel.Text = EmptyResult;
         }
 
         private void CreateExceptionMessage(Exception exception)

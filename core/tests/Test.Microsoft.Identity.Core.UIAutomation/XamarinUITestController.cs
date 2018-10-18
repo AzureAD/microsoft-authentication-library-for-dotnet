@@ -35,7 +35,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
 {
     public class XamarinUITestController : ITestController
     {
-        IApp app;
         TimeSpan defaultSearchTimeout;
         TimeSpan defaultRetryFrequency;
         TimeSpan defaultPostTimeout;
@@ -43,15 +42,16 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         const int defaultRetryFrequencySec = 1;
         const int defaultPostTimeoutSec = 1;
         const string CSSIDSelector = "[id|={0}]";
-        private readonly ILabService _labService;
+        private ILabService _labService;
 
-        public XamarinUITestController(IApp app)
+        public IApp Application { get; set; }
+
+        public XamarinUITestController()
         {
-            this.app = app;
             this.defaultSearchTimeout = new TimeSpan(0, 0, defaultSearchTimeoutSec);
             this.defaultRetryFrequency = new TimeSpan(0, 0, defaultRetryFrequencySec);
             this.defaultPostTimeout = new TimeSpan(0, 0, defaultPostTimeoutSec);
-            _labService = new LabServiceApi();
+            _labService = new LabServiceApi(new KeyVaultSecretsProvider());
         }
 
         public void Tap(string elementID)
@@ -83,11 +83,11 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             if (isWebElement)
             {
-                return app.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
+                return Application.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
             }
             else
             {
-                return app.WaitForElement(elementID, "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
+                return Application.WaitForElement(elementID, "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
             }
         }
 
@@ -95,13 +95,13 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             if (isWebElement)
             {
-                app.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
-                app.Tap(c => c.Css(String.Format(CSSIDSelector, elementID)));
+                Application.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
+                Application.Tap(c => c.Css(String.Format(CSSIDSelector, elementID)));
             }
             else
             {
-                app.WaitForElement(elementID, "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
-                app.Tap(x => x.Marked(elementID));
+                Application.WaitForElement(elementID, "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
+                Application.Tap(x => x.Marked(elementID));
             }
         }
 
@@ -109,27 +109,34 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             if (isWebElement)
             {
-                app.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
-                app.EnterText(c => c.Css(String.Format(CSSIDSelector, elementID)), text);
+                Application.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
+                Application.EnterText(c => c.Css(String.Format(CSSIDSelector, elementID)), text);
             }
             else
             {
-                app.WaitForElement(elementID, "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
-                app.Tap(x => x.Marked(elementID));
+                Application.WaitForElement(elementID, "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
+                Application.Tap(x => x.Marked(elementID));
+                Application.ClearText(); 
+                Application.EnterText(x => x.Marked(elementID), text);
             }
+        }
+
+        public void DismissKeyboard()
+        {
+            Application.DismissKeyboard();
         }
 
         public string GetText(string elementID)
         {
-            app.WaitForElement(elementID, "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
-            return app.Query(x => x.Marked(elementID)).FirstOrDefault().Text;
+            Application.WaitForElement(elementID, "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
+            return Application.Query(x => x.Marked(elementID)).FirstOrDefault().Text;
         }
 
         public IUser GetUser(UserQueryParameters query)
         {
-            var availableUsers = _labService.GetUsers(query);
-            Assert.AreNotEqual(0, availableUsers.Count(), "Found no users for the given query.");
-            return availableUsers.First();
+            var user = _labService.GetUser(query);
+            Assert.True(user != null, "Found no users for the given query.");
+            return user;
         }
     }
 }
