@@ -29,12 +29,11 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
+using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -50,7 +49,7 @@ namespace Test.ADAL.NET.Integration
 
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
-            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
         }
 
         [TestCleanup()]
@@ -67,8 +66,8 @@ namespace Test.ADAL.NET.Integration
         {
             DeviceCodeResult dcr = new DeviceCodeResult()
             {
-                ClientId = TestConstants.DefaultClientId,
-                Resource = TestConstants.DefaultResource,
+                ClientId = AdalTestConstants.DefaultClientId,
+                Resource = AdalTestConstants.DefaultResource,
 
                 DeviceCode = "device-code",
                 ExpiresOn = (DateTimeOffset.UtcNow + TimeSpan.FromMinutes(10)),
@@ -78,7 +77,7 @@ namespace Test.ADAL.NET.Integration
                 VerificationUrl = "https://login.microsoftonline.com/home.oauth2/token"
             };
 
-            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
                 Url = "https://login.microsoftonline.com/home/oauth2/token",
@@ -92,17 +91,17 @@ namespace Test.ADAL.NET.Integration
             };
 
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
                 Url = "https://login.microsoftonline.com/home/oauth2/token",
                 ResponseMessage =
-                    MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId,
-                        TestConstants.DefaultDisplayableId, TestConstants.DefaultResource)
+                    MockHelpers.CreateSuccessTokenResponseMessage(AdalTestConstants.DefaultUniqueId,
+                        AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultResource)
             });
 
             TokenCache cache = new TokenCache();
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
+            context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityHomeTenant, cache);
             AuthenticationResult result = await context.AcquireTokenByDeviceCodeAsync(dcr).ConfigureAwait(false);
             Assert.IsNotNull(result);
             Assert.AreEqual("some-access-token", result.AccessToken);
@@ -114,19 +113,19 @@ namespace Test.ADAL.NET.Integration
         public async Task FullCoveragePositiveTestAsync()
         {
 
-            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
                 ResponseMessage = MockHelpers.CreateSuccessDeviceCodeResponseMessage()
             };
 
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
 
-            mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
                 ResponseMessage = MockHelpers.CreateFailureResponseMessage("{\"error\":\"authorization_pending\"," +
                                                                "\"error_description\":\"AADSTS70016: Pending end-user authorization." +
                                                                "\\r\\nTrace ID: f6c2c73f-a21d-474e-a71f-d8b121a58205\\r\\nCorrelation ID: " +
@@ -137,17 +136,17 @@ namespace Test.ADAL.NET.Integration
             };
 
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
                 ResponseMessage =
-                    MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId,
-                        TestConstants.DefaultDisplayableId, TestConstants.DefaultResource)
+                    MockHelpers.CreateSuccessTokenResponseMessage(AdalTestConstants.DefaultUniqueId,
+                        AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultResource)
             });
 
             TokenCache cache = new TokenCache();
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
+            context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityHomeTenant, cache);
             DeviceCodeResult dcr = await context.AcquireDeviceCodeAsync("some-resource", "some-client").ConfigureAwait(false);
 
             Assert.IsNotNull(dcr);
@@ -170,17 +169,17 @@ namespace Test.ADAL.NET.Integration
         [TestMethod]
         public void NegativeDeviceCodeTest()
         {
-            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
                 ResponseMessage = MockHelpers.CreateDeviceCodeErrorResponse()
             };
 
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
 
             TokenCache cache = new TokenCache();
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
+            context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityHomeTenant, cache);
             DeviceCodeResult dcr;
             AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(async () => dcr = await context.AcquireDeviceCodeAsync("some-resource", "some-client").ConfigureAwait(false));
             Assert.IsTrue(ex.Message.Contains("some error message"));
@@ -191,10 +190,10 @@ namespace Test.ADAL.NET.Integration
         [TestMethod]
         public async Task NegativeDeviceCodeTimeoutTestAsync()
         {
-            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
                 ResponseMessage = MockHelpers.CreateSuccessDeviceCodeResponseMessage(
                     // do not lower this to 1-2s as test execution may be slow and the flow 
                     // will never call the server
@@ -204,10 +203,10 @@ namespace Test.ADAL.NET.Integration
 
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
 
-            mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
                 ResponseMessage = MockHelpers.CreateFailureResponseMessage("{\"error\":\"authorization_pending\"," +
                                                                "\"error_description\":\"AADSTS70016: Pending end-user authorization." +
                                                                "\\r\\nTrace ID: f6c2c73f-a21d-474e-a71f-d8b121a58205\\r\\nCorrelation ID: " +
@@ -219,16 +218,16 @@ namespace Test.ADAL.NET.Integration
 
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
 
-            mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/token",
                 ResponseMessage = MockHelpers.CreateDeviceCodeExpirationErrorResponse()
             };
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
 
             TokenCache cache = new TokenCache();
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
+            context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityHomeTenant, cache);
             DeviceCodeResult dcr = await context.AcquireDeviceCodeAsync("some resource", "some authority").ConfigureAwait(false);
 
             Assert.IsNotNull(dcr);
@@ -242,10 +241,10 @@ namespace Test.ADAL.NET.Integration
         [TestMethod]
         public async Task NegativeDeviceCodeTimeoutTest_WithZeroRetriesAsync()
         {
-            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(TestConstants.DefaultAuthorityHomeTenant)
+            MockHttpMessageHandler mockMessageHandler = new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityHomeTenant)
             {
                 Method = HttpMethod.Post,
-                Url = TestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
+                Url = AdalTestConstants.DefaultAuthorityHomeTenant + "oauth2/devicecode",
                 ResponseMessage = MockHelpers.CreateSuccessDeviceCodeResponseMessage(
                     expirationTimeInSeconds: 0,
                     retryInternvalInSeconds: 1)
@@ -254,7 +253,7 @@ namespace Test.ADAL.NET.Integration
             AdalHttpMessageHandlerFactory.AddMockHandler(mockMessageHandler);
 
             TokenCache cache = new TokenCache();
-            context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, cache);
+            context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityHomeTenant, cache);
             DeviceCodeResult dcr = await context.AcquireDeviceCodeAsync("some resource", "some authority").ConfigureAwait(false);
 
             Assert.IsNotNull(dcr);

@@ -30,7 +30,7 @@ using System.Collections.Generic;
 
 namespace Test.ADAL.NET.Common
 {
-	public class TestConstants
+	public class AdalTestConstants
     {
         public static readonly string DefaultResource = "resource1";
         public static readonly string AnotherResource = "resource2";

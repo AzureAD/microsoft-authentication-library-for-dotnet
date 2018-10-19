@@ -36,12 +36,12 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http;
-using Test.ADAL.Common;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
+using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.ADAL.NET.Integration
 {
@@ -59,7 +59,7 @@ namespace Test.ADAL.NET.Integration
         public void ResetInstanceDiscovery()
         {
             InstanceDiscovery.InstanceCache.Clear();
-            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
         }
 
         [TestMethod]
@@ -70,8 +70,8 @@ namespace Test.ADAL.NET.Integration
             {
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(
-                        TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" +
-                        TestConstants.DefaultDisplayableId)
+                        AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
+                        AdalTestConstants.DefaultDisplayableId)
                     {
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -86,15 +86,15 @@ namespace Test.ADAL.NET.Integration
                     });
 
                 AdalHttpMessageHandlerFactory.AddMockHandler(
-                    new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+                    new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))
                     {
                         Method = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                         PostData = new Dictionary<string, string>()
                         {
                             {"grant_type", "password"},
-                            {"username", TestConstants.DefaultDisplayableId},
-                            {"password", TestConstants.DefaultPassword}
+                            {"username", AdalTestConstants.DefaultDisplayableId},
+                            {"password", AdalTestConstants.DefaultPassword}
                         }
                     });
 
@@ -102,22 +102,22 @@ namespace Test.ADAL.NET.Integration
 
                 var context = new AuthenticationContext(
                     httpManager,
-                    TestConstants.DefaultAuthorityHomeTenant,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     cache);
 
                 Assert.AreEqual(0, context.TokenCache.Count);
 
                 var result = await context.AcquireTokenAsync(
-                                 TestConstants.DefaultResource,
-                                 TestConstants.DefaultClientId,
-                                 new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
+                                 AdalTestConstants.DefaultResource,
+                                 AdalTestConstants.DefaultClientId,
+                                 new UserPasswordCredential(AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultPassword)).ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+                Assert.AreEqual(AdalTestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.UserInfo);
-                Assert.AreEqual(TestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
-                Assert.AreEqual(TestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
+                Assert.AreEqual(AdalTestConstants.DefaultDisplayableId, result.UserInfo.DisplayableId);
+                Assert.AreEqual(AdalTestConstants.DefaultUniqueId, result.UserInfo.UniqueId);
 
                 // All mocks are consumed
                 Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
@@ -131,25 +131,25 @@ namespace Test.ADAL.NET.Integration
         [Description("Test for AcquireToken with valid token in cache")]
         public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedTokenAsync()
         {
-            var context = new AuthenticationContext(TestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
+            var context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityHomeTenant, true, new TokenCache());
 
-            AdalTokenCacheKey key = new AdalTokenCacheKey(TestConstants.DefaultAuthorityHomeTenant,
-                TestConstants.DefaultResource, TestConstants.DefaultClientId, TokenSubjectType.User,
-                TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId);
+            AdalTokenCacheKey key = new AdalTokenCacheKey(AdalTestConstants.DefaultAuthorityHomeTenant,
+                AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId, TokenSubjectType.User,
+                AdalTestConstants.DefaultUniqueId, AdalTestConstants.DefaultDisplayableId);
             context.TokenCache.tokenCacheDictionary[key] = new AdalResultWrapper
             {
                 RefreshToken = "some-rt",
-                ResourceInResponse = TestConstants.DefaultResource,
+                ResourceInResponse = AdalTestConstants.DefaultResource,
                 Result = new AdalResult("Bearer", "existing-access-token",
                     DateTimeOffset.UtcNow + TimeSpan.FromMinutes(100))
             };
 
-            var result = await context.AcquireTokenAsync(TestConstants.DefaultResource, TestConstants.DefaultClientId,
-                                                         new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
+            var result = await context.AcquireTokenAsync(AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId,
+                                                         new UserPasswordCredential(AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultPassword)).ConfigureAwait(false);
 
             Assert.IsNotNull(result);
             Assert.AreEqual("existing-access-token", result.AccessToken);
-            Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+            Assert.AreEqual(AdalTestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
             Assert.IsNotNull(result.UserInfo);
 
             // There should be one cached entry.
@@ -164,7 +164,7 @@ namespace Test.ADAL.NET.Integration
             {
 
                 httpManager.AddMockHandler(
-                    new MockHttpMessageHandler(TestConstants.DefaultAuthorityCommonTenant + "userrealm/user2@id.com")
+                    new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityCommonTenant + "userrealm/user2@id.com")
                     {
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -179,18 +179,18 @@ namespace Test.ADAL.NET.Integration
                     });
 
                 AdalHttpMessageHandlerFactory.AddMockHandler(
-                    new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+                    new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))
                     {
                         Method = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            TestConstants.DefaultUniqueId + "2",
+                            AdalTestConstants.DefaultUniqueId + "2",
                             "user2@id.com",
-                            TestConstants.DefaultResource),
+                            AdalTestConstants.DefaultResource),
                         PostData = new Dictionary<string, string>()
                         {
                             {"grant_type", "password"},
                             {"username", "user2@id.com"},
-                            {"password", TestConstants.DefaultPassword},
+                            {"password", AdalTestConstants.DefaultPassword},
                         }
                     });
 
@@ -198,39 +198,39 @@ namespace Test.ADAL.NET.Integration
 
                 var context = new AuthenticationContext(
                     httpManager,
-                    TestConstants.DefaultAuthorityHomeTenant,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     new TokenCache());
 
                 AdalTokenCacheKey key = new AdalTokenCacheKey(
-                    TestConstants.DefaultAuthorityHomeTenant,
-                    TestConstants.DefaultResource,
-                    TestConstants.DefaultClientId,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
+                    AdalTestConstants.DefaultResource,
+                    AdalTestConstants.DefaultClientId,
                     TokenSubjectType.User,
-                    TestConstants.DefaultUniqueId,
-                    TestConstants.DefaultDisplayableId);
+                    AdalTestConstants.DefaultUniqueId,
+                    AdalTestConstants.DefaultDisplayableId);
                 var setupResult = new AdalResultWrapper
                 {
                     RefreshToken = "some-rt",
-                    ResourceInResponse = TestConstants.DefaultResource,
+                    ResourceInResponse = AdalTestConstants.DefaultResource,
                     Result = new AdalResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow + +TimeSpan.FromMinutes(100))
                 };
 
                 setupResult.Result.UserInfo = new AdalUserInfo();
-                setupResult.Result.UserInfo.DisplayableId = TestConstants.DefaultDisplayableId;
+                setupResult.Result.UserInfo.DisplayableId = AdalTestConstants.DefaultDisplayableId;
                 context.TokenCache.tokenCacheDictionary[key] = setupResult;
 
                 var result = await context.AcquireTokenAsync(
-                                 TestConstants.DefaultResource,
-                                 TestConstants.DefaultClientId,
-                                 new UserPasswordCredential("user2@id.com", TestConstants.DefaultPassword)).ConfigureAwait(false);
+                                 AdalTestConstants.DefaultResource,
+                                 AdalTestConstants.DefaultClientId,
+                                 new UserPasswordCredential("user2@id.com", AdalTestConstants.DefaultPassword)).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+                Assert.AreEqual(AdalTestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.UserInfo);
                 Assert.AreEqual("user2@id.com", result.UserInfo.DisplayableId);
-                Assert.AreEqual(TestConstants.DefaultUniqueId + "2", result.UserInfo.UniqueId);
+                Assert.AreEqual(AdalTestConstants.DefaultUniqueId + "2", result.UserInfo.UniqueId);
 
                 // There should be only two cache entries.
                 Assert.AreEqual(2, context.TokenCache.Count);
@@ -251,7 +251,7 @@ namespace Test.ADAL.NET.Integration
             {
                 var context = new AuthenticationContext(
                     httpManager,
-                    TestConstants.DefaultAuthorityHomeTenant,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     new TokenCache());
 
@@ -259,58 +259,58 @@ namespace Test.ADAL.NET.Integration
                     new AdalResultWrapper
                     {
                         RefreshToken = "some-rt",
-                        ResourceInResponse = TestConstants.DefaultResource,
+                        ResourceInResponse = AdalTestConstants.DefaultResource,
                         Result = new AdalResult("Bearer", "existing-access-token", DateTimeOffset.UtcNow)
                         {
                             UserInfo = new AdalUserInfo()
                             {
-                                DisplayableId = TestConstants.DefaultDisplayableId,
-                                UniqueId = TestConstants.DefaultUniqueId
+                                DisplayableId = AdalTestConstants.DefaultDisplayableId,
+                                UniqueId = AdalTestConstants.DefaultUniqueId
                             },
                             IdToken = MockHelpers.CreateIdToken(
-                                TestConstants.DefaultUniqueId,
-                                TestConstants.DefaultDisplayableId)
+                                AdalTestConstants.DefaultUniqueId,
+                                AdalTestConstants.DefaultDisplayableId)
                         },
                     },
-                    TestConstants.DefaultAuthorityHomeTenant,
-                    TestConstants.DefaultResource,
-                    TestConstants.DefaultClientId,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
+                    AdalTestConstants.DefaultResource,
+                    AdalTestConstants.DefaultClientId,
                     TokenSubjectType.User,
                     new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
                 ResetInstanceDiscovery();
 
                 AdalHttpMessageHandlerFactory.AddMockHandler(
-                    new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityHomeTenant))
+                    new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))
                     {
                         Method = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
                         PostData = new Dictionary<string, string>()
                         {
-                            {"client_id", TestConstants.DefaultClientId},
+                            {"client_id", AdalTestConstants.DefaultClientId},
                             {"grant_type", "refresh_token"}
                         }
                     });
 
                 var result = await context.AcquireTokenAsync(
-                                 TestConstants.DefaultResource,
-                                 TestConstants.DefaultClientId,
-                                 new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)).ConfigureAwait(false);
+                                 AdalTestConstants.DefaultResource,
+                                 AdalTestConstants.DefaultClientId,
+                                 new UserPasswordCredential(AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultPassword)).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
-                Assert.AreEqual(TestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
+                Assert.AreEqual(AdalTestConstants.DefaultAuthorityHomeTenant, context.Authenticator.Authority);
                 Assert.IsNotNull(result.UserInfo);
 
                 // Cache entry updated with new access token
                 var entry = await context.TokenCache.LoadFromCacheAsync(
                                 new CacheQueryData
                                 {
-                                    Authority = TestConstants.DefaultAuthorityHomeTenant,
-                                    Resource = TestConstants.DefaultResource,
-                                    ClientId = TestConstants.DefaultClientId,
+                                    Authority = AdalTestConstants.DefaultAuthorityHomeTenant,
+                                    Resource = AdalTestConstants.DefaultResource,
+                                    ClientId = AdalTestConstants.DefaultClientId,
                                     SubjectType = TokenSubjectType.User,
-                                    UniqueId = TestConstants.DefaultUniqueId,
-                                    DisplayableId = TestConstants.DefaultDisplayableId
+                                    UniqueId = AdalTestConstants.DefaultUniqueId,
+                                    DisplayableId = AdalTestConstants.DefaultDisplayableId
                                 },
                                 new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
                 Assert.AreEqual("some-access-token", entry.Result.AccessToken);
@@ -328,14 +328,14 @@ namespace Test.ADAL.NET.Integration
             {
                 AuthenticationContext context = new AuthenticationContext(
                     httpManager,
-                    TestConstants.DefaultAuthorityCommonTenant,
+                    AdalTestConstants.DefaultAuthorityCommonTenant,
                     AuthorityValidationType.NotProvided,
                     TokenCache.DefaultShared);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(
-                        TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" +
-                        TestConstants.DefaultDisplayableId)
+                        AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
+                        AdalTestConstants.DefaultDisplayableId)
                     {
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest)
@@ -350,9 +350,9 @@ namespace Test.ADAL.NET.Integration
 
                 var ex = AssertException.TaskThrows<AdalException>(
                     () => context.AcquireTokenAsync(
-                        TestConstants.DefaultResource,
-                        TestConstants.DefaultClientId,
-                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)));
+                        AdalTestConstants.DefaultResource,
+                        AdalTestConstants.DefaultClientId,
+                        new UserPasswordCredential(AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultPassword)));
                 Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
                 Assert.AreEqual(0, context.TokenCache.Count);
 
@@ -371,7 +371,7 @@ namespace Test.ADAL.NET.Integration
             {
                 AuthenticationContext context = new AuthenticationContext(
                     httpManager,
-                    TestConstants.DefaultAuthorityCommonTenant,
+                    AdalTestConstants.DefaultAuthorityCommonTenant,
                     AuthorityValidationType.NotProvided,
                     TokenCache.DefaultShared);
 
@@ -379,8 +379,8 @@ namespace Test.ADAL.NET.Integration
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(
-                        TestConstants.GetUserRealmEndpoint(TestConstants.DefaultAuthorityCommonTenant) + "/" +
-                        TestConstants.DefaultDisplayableId)
+                        AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
+                        AdalTestConstants.DefaultDisplayableId)
                     {
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -396,9 +396,9 @@ namespace Test.ADAL.NET.Integration
 
                 var ex = AssertException.TaskThrows<AdalException>(
                     () => context.AcquireTokenAsync(
-                        TestConstants.DefaultResource,
-                        TestConstants.DefaultClientId,
-                        new UserPasswordCredential(TestConstants.DefaultDisplayableId, TestConstants.DefaultPassword)));
+                        AdalTestConstants.DefaultResource,
+                        AdalTestConstants.DefaultClientId,
+                        new UserPasswordCredential(AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultPassword)));
 
                 Assert.AreEqual(AdalError.UnknownUserType, ex.ErrorCode);
                 Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());

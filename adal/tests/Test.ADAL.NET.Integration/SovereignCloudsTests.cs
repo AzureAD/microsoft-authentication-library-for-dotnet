@@ -35,7 +35,6 @@ using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.Au
 using PromptBehavior = Microsoft.IdentityModel.Clients.ActiveDirectory.PromptBehavior;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
-using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Net;
@@ -51,7 +50,7 @@ namespace Test.ADAL.NET.Integration
 
         private const string SovereignAuthorityHost = "login.microsoftonline.de";
 
-        private readonly string _sovereignTenantSpecificAuthority = String.Format("https://{0}/{1}/", SovereignAuthorityHost, TestConstants.SomeTenantId);
+        private readonly string _sovereignTenantSpecificAuthority = String.Format("https://{0}/{1}/", SovereignAuthorityHost, AdalTestConstants.SomeTenantId);
 
         [TestInitialize]
         public void Initialize()
@@ -68,10 +67,10 @@ namespace Test.ADAL.NET.Integration
         {
             // creating AuthenticationContext with common Authority
             var authenticationContext =
-                new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, false, new TokenCache());
+                new AuthenticationContext(AdalTestConstants.DefaultAuthorityCommonTenant, false, new TokenCache());
 
             // mock value for authentication returnedUriInput, with cloud_instance_name claim
-            var authReturnedUriInputMock = TestConstants.DefaultRedirectUri + "?code=some-code" + "&" +
+            var authReturnedUriInputMock = AdalTestConstants.DefaultRedirectUri + "?code=some-code" + "&" +
                                            TokenResponseClaim.CloudInstanceHost + "=" + SovereignAuthorityHost;
 
             MockHelpers.ConfigureMockWebUI(
@@ -79,14 +78,14 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains instance_aware query parameter
                 new Dictionary<string, string> { { "instance_aware", "true" } });
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant)));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityBlackforestTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
-                    MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId,
-                    TestConstants.DefaultDisplayableId, TestConstants.DefaultResource),
+                    MockHelpers.CreateSuccessTokenResponseMessage(AdalTestConstants.DefaultUniqueId,
+                    AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultResource),
 
                 AdditionalRequestValidation = request =>
                 {
@@ -95,9 +94,9 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            var authenticationResult = await authenticationContext.AcquireTokenAsync(TestConstants.DefaultResource,
-                TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, _platformParameters, UserIdentifier.AnyUser, "instance_aware=true").ConfigureAwait(false);
+            var authenticationResult = await authenticationContext.AcquireTokenAsync(AdalTestConstants.DefaultResource,
+                AdalTestConstants.DefaultClientId,
+                AdalTestConstants.DefaultRedirectUri, _platformParameters, UserIdentifier.AnyUser, "instance_aware=true").ConfigureAwait(false);
 
             // make sure that tenant specific sovereign Authority returned to the app in AuthenticationResult
             Assert.AreEqual(_sovereignTenantSpecificAuthority, authenticationResult.Authority);
@@ -132,10 +131,10 @@ namespace Test.ADAL.NET.Integration
 
             // creating AuthenticationContext with common Authority
             var authenticationContext =
-                new AuthenticationContext(TestConstants.DefaultAuthorityCommonTenant, false, new TokenCache());
+                new AuthenticationContext(AdalTestConstants.DefaultAuthorityCommonTenant, false, new TokenCache());
 
             // mock value for authentication returnedUriInput, with cloud_instance_name claim
-            var authReturnedUriInputMock = TestConstants.DefaultRedirectUri + "?code=some-code" + "&" +
+            var authReturnedUriInputMock = AdalTestConstants.DefaultRedirectUri + "?code=some-code" + "&" +
                                            TokenResponseClaim.CloudInstanceHost + "=" + SovereignAuthorityHost;
 
             MockHelpers.ConfigureMockWebUI(
@@ -143,9 +142,9 @@ namespace Test.ADAL.NET.Integration
                 // validate that authorizationUri passed to WebUi contains instance_aware query parameter
                 new Dictionary<string, string> { { "instance_aware", "true" } });
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityCommonTenant), content));
+            AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant), content));
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetDiscoveryEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityBlackforestTenant))
             {
                 Method = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
@@ -154,20 +153,20 @@ namespace Test.ADAL.NET.Integration
                 }
             });
 
-            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(TestConstants.GetTokenEndpoint(TestConstants.DefaultAuthorityBlackforestTenant))
+            AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityBlackforestTenant))
             {
                 Method = HttpMethod.Post,
                 ResponseMessage =
-                   MockHelpers.CreateSuccessTokenResponseMessage(TestConstants.DefaultUniqueId,
-                   TestConstants.DefaultDisplayableId, TestConstants.DefaultResource)
+                   MockHelpers.CreateSuccessTokenResponseMessage(AdalTestConstants.DefaultUniqueId,
+                   AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultResource)
             });
 
             // Assure instance cache is empty
             Assert.AreEqual(0, InstanceDiscovery.InstanceCache.Count());
 
-            await authenticationContext.AcquireTokenAsync(TestConstants.DefaultResource,
-                TestConstants.DefaultClientId,
-                TestConstants.DefaultRedirectUri, _platformParameters, UserIdentifier.AnyUser, "instance_aware=true").ConfigureAwait(false);
+            await authenticationContext.AcquireTokenAsync(AdalTestConstants.DefaultResource,
+                AdalTestConstants.DefaultClientId,
+                AdalTestConstants.DefaultRedirectUri, _platformParameters, UserIdentifier.AnyUser, "instance_aware=true").ConfigureAwait(false);
 
             // make sure AT was stored in the cache with tenant specific Sovereign Authority in the key
             Assert.AreEqual(1, authenticationContext.TokenCache.tokenCacheDictionary.Count);

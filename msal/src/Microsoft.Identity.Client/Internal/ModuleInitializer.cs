@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Internal
     internal class ModuleInitializer
     {
         private static volatile bool _isInitialized = false;
-        private static readonly object LockObj = new object();
+        private static readonly object _lockObj = new object();
 
         /// <summary>
         /// Handle all the initialization of singletons, factories, statics etc. Initialization will only happen once.
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Internal
             // double check locking instead locking first to improve performace
             if (!_isInitialized)
             {
-                lock (LockObj)
+                lock (_lockObj)
                 {
                     if (!_isInitialized)
                     {
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal
         /// acceptable for tests to reinitialize the module. </remarks>
         public static void ForceModuleInitializationTestOnly()
         {
-            lock (LockObj)
+            lock (_lockObj)
             {
                 InitializeModule();
             }

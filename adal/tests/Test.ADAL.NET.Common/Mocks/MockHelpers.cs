@@ -140,15 +140,15 @@ namespace Test.ADAL.NET.Common.Mocks
 
             var clientInfo = new ClientInfo
             {
-                UniqueObjectIdentifier = TestConstants.DefaultUniqueIdentifier,
-                UniqueTenantIdentifier = TestConstants.DefaultUniqueTenantIdentifier
+                UniqueObjectIdentifier = AdalTestConstants.DefaultUniqueIdentifier,
+                UniqueTenantIdentifier = AdalTestConstants.DefaultUniqueTenantIdentifier
             };
             var base64EncodedSerializedClientInfo = Base64UrlHelpers.Encode(JsonHelper.SerializeToJson<ClientInfo>(clientInfo));
 
 
             HttpContent content = new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3600\"," + extendedExpiresIn + "\"resource\":\"resource1\",\"access_token\":\"some-access-token\"," +
-                                                    "\"refresh_token\":\"" + TestConstants.DefaultRefreshTokenValue + "\",\"id_token\":\"" +
-                                  CreateIdToken(TestConstants.DefaultUniqueId, TestConstants.DefaultDisplayableId) + "\"," +
+                                                    "\"refresh_token\":\"" + AdalTestConstants.DefaultRefreshTokenValue + "\",\"id_token\":\"" +
+                                  CreateIdToken(AdalTestConstants.DefaultUniqueId, AdalTestConstants.DefaultDisplayableId) + "\"," +
                                   "\"client_info\":\"" + base64EncodedSerializedClientInfo + "\"}");
 
             responseMessage.Content = content;
@@ -275,7 +275,7 @@ namespace Test.ADAL.NET.Common.Mocks
                         "\"oid\": \"" + uniqueId + "\"," +
                         "\"upn\": \"" + displayableId + "\"," +
                         "\"sub\": \"werwerewrewrew-Qd80ehIEdFus\"," +
-                        "\"tid\": \"" + TestConstants.SomeTenantId + "\"," +
+                        "\"tid\": \"" + AdalTestConstants.SomeTenantId + "\"," +
                         "\"ver\": \"2.0\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.signature", Base64UrlHelpers.Encode(header), Base64UrlHelpers.Encode(payload));

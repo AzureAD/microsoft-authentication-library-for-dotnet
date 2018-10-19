@@ -6,7 +6,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
-    <AssemblyOriginatorKeyFile>..\..\build\35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
     <DebugType>full</DebugType>
     <CodeAnalysisRuleSet>..\..\build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
 </PropertyGroup>

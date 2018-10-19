@@ -30,7 +30,7 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
-    internal class TestTimeService : ITimeService
+    public class TestTimeService : ITimeService
     {
         public TestTimeService(DateTime utcNow)
         {
