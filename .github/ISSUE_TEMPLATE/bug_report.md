@@ -24,14 +24,25 @@ For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-
     * [ ] Integrated Windows Auth
     * [ ] Username / Password
     * [ ] Device code flow (browserless)
-* [ ] Mobile
+* Mobile
+    * [ ] Xamarin.iOS
+    * [ ] Xamarin.Android
+    * [ ] UWP
 * Web App
     * [ ] Authorization code
     * [ ] OBO
 * Web API
     * [ ] OBO
-
+* Daemon App
+    * [ ] Client credentials
+    
 Other? - please describe;
+
+** What is the identity provider ?**
+* [ ] Azure AD
+* [ ] Azure AD B2C
+
+If B2C, what social identity did you use?
 
 **Repro**
 
