@@ -64,17 +64,20 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
         }
 
         /// <inheritdoc />
-        protected override HttpClient GetHttpClient()
+        protected override HttpClient HttpClient
         {
-            var httpClient = new HttpClient(_httpMessageHandlerQueue.Dequeue())
+            get
             {
-                MaxResponseContentBufferSize = HttpClientFactory.MaxResponseContentBufferSizeInBytes
-            };
+                var httpClient = new HttpClient(_httpMessageHandlerQueue.Dequeue())
+                {
+                    MaxResponseContentBufferSize = HttpClientFactory.MaxResponseContentBufferSizeInBytes
+                };
 
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            return httpClient;
+                return httpClient;
+            }
         }
     }
 }
