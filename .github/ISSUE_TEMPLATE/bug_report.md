@@ -38,7 +38,7 @@ For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-
     
 Other? - please describe;
 
-** What is the identity provider ?**
+**What is the identity provider ?**
 * [ ] Azure AD
 * [ ] Azure AD B2C
 
