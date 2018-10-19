@@ -41,7 +41,10 @@
                     <Entry x:Name="ExtraQueryParametersEntry" Text=""  HorizontalOptions="FillAndExpand" AutomationId="extraQueryParametersEntry"/>
                 </StackLayout>
 
-                <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken"/>
+                <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                    <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken"/>
+                    <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>
+                </StackLayout>
             </StackLayout>
         </Frame>
 

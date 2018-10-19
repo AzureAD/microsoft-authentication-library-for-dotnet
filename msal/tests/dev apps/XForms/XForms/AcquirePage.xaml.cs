@@ -209,7 +209,43 @@ namespace XForms
                 var resText = ToString(res);
 
                 if (resText.Contains("AccessToken"))
+                {
                     acquireResponseTitleLabel.Text = SuccsessfulResult;
+                }
+
+                acquireResponseLabel.Text = resText;
+                RefreshUsers();
+            }
+            catch (Exception exception)
+            {
+                CreateExceptionMessage(exception);
+            }
+        }
+
+        private async Task OnAcquireByDeviceCodeClickedAsync(object sender, EventArgs e)
+        {
+            try
+            {
+                acquireResponseTitleLabel.Text = EmptyResult;
+                AuthenticationResult res =
+                        await App.MsalPublicClient.AcquireTokenWithDeviceCodeAsync(
+                            GetScopes(), 
+                            GetExtraQueryParams(),
+                            dcr =>
+                            {
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    acquireResponseLabel.Text = dcr.Message;
+                                });
+                                return Task.FromResult(0);
+                            }).ConfigureAwait(true);
+
+                var resText = ToString(res);
+
+                if (resText.Contains("AccessToken"))
+                {
+                    acquireResponseTitleLabel.Text = SuccsessfulResult;
+                }
 
                 acquireResponseLabel.Text = resText;
                 RefreshUsers();
