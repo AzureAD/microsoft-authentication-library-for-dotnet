@@ -1,3 +1,10 @@
+2.3.0-preview
+=============
+This release includes:
+- Fix for cross-thread exception when setting the ownerWindow [ADAL issue #1277](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet)
+- Ensure error codes are public [MSAL issue #638](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/638)
+- Add device code flow api to iOS and Android platforms [MSAL issue #642](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/642)
+
 2.2.1-preview
 =============
 This release contains bug fixes on top of MSAL 2.2.0-preview:

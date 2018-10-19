@@ -1,3 +1,10 @@
+Version 4.3.0
+===============
+This release includes:
+- Fix for cross-thread exception when setting the ownerWindow in PlatformParameters [ADAL issue #1277](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet)
+- Ensure error codes are public [MSAL issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/638)
+- Device code flow enabled for ADFS
+
 Version 4.2.0-preview
 ===============
 This release includes:
