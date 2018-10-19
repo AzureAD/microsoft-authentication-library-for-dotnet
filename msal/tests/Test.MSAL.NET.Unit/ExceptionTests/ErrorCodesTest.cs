@@ -11,12 +11,9 @@ namespace Test.MSAL.NET.Unit.ExceptionTests
     [TestClass]
     public class ErrorCodesTest
     {
-        [TestMethod]
-        [Description("CoreErrorCodes are internal. Msal and Adal should expose equivalent public constants.")]
-        public void CheckErrorCodesArePublicMsalConstants()
+        // Arrange
+        Type[] msalTypesWithConstants = new[]
         {
-            Type[] msalTypesWithConstants = new[]
-            {
                 typeof(MsalException),
                 typeof(MsalClientException),
                 typeof(MsalServiceException),
@@ -24,14 +21,29 @@ namespace Test.MSAL.NET.Unit.ExceptionTests
                 typeof(MsalError)
             };
 
+        [TestMethod]
+        [Description("CoreErrorCodes are internal. Msal and Adal should expose equivalent public constants.")]
+        public void CheckErrorCodesArePublicMsalConstants()
+        {
+            // Act
             var msalErrorCodes = msalTypesWithConstants.SelectMany(GetConstants).ToList();
             var coreErrorCodes = GetConstants(typeof(CoreErrorCodes));
 
+            // Assert
             foreach (string coreErrorCode in coreErrorCodes)
             {
                 Assert.IsTrue(
                     msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture), 
                     "Could not find a core error code in msal error codes: " + coreErrorCode);
+            }
+        }
+
+        [TestMethod]
+        public void ErrorCodeClassesArePublic()
+        {
+            foreach (Type t in msalTypesWithConstants)
+            {
+                Assert.IsTrue(t.IsPublic);
             }
         }
 

@@ -234,7 +234,7 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(dcr);
             AuthenticationResult result;
             AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(async () => result = await context.AcquireTokenByDeviceCodeAsync(dcr).ConfigureAwait(false));
-            Assert.AreEqual(AdalErrorEx.DeviceCodeAuthorizationCodeExpired, ex.ErrorCode);
+            Assert.AreEqual(AdalError.DeviceCodeAuthorizationCodeExpired, ex.ErrorCode);
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
@@ -260,7 +260,7 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(dcr);
             AuthenticationResult result;
             AdalServiceException ex = AssertException.TaskThrows<AdalServiceException>(async () => result = await context.AcquireTokenByDeviceCodeAsync(dcr).ConfigureAwait(false));
-            Assert.AreEqual(AdalErrorEx.DeviceCodeAuthorizationCodeExpired, ex.ErrorCode);
+            Assert.AreEqual(AdalError.DeviceCodeAuthorizationCodeExpired, ex.ErrorCode);
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }

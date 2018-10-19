@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
                 }
             }
 
-            throw new MsalClientException(OAuth2Error.CodeExpired, "Verification code expired before contacting the server");
+            throw new MsalClientException(MsalError.CodeExpired, "Verification code expired before contacting the server");
         }
 
         private Dictionary<string, string> GetBodyParameters(DeviceCodeResult deviceCodeResult)

@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Error code returned as a property in MsalException
     /// </summary>
-    internal static class MsalError
+    public static class MsalError
     {
         /// <summary>
         /// Authentication failed.
@@ -172,5 +172,13 @@ namespace Microsoft.Identity.Client
         /// An error response was returned by the OAuth2 server and it could not be parsed
         /// </summary>
         public const string NonParsableOAuthError = "non_parsable_oauth_error";
+
+        /// <summary>
+        /// In the context of Device code flow (See https://aka.ms/msal-net-device-code-flow),
+        /// this error happens when the device code expired before the user signed-in on another device (this is usually after 15 mins).
+        /// 
+        /// Mitigation: None. Inform the user that they took too long to sign-in at the provided URL and enter the provided code.
+        /// </summary>
+        public const string CodeExpired = "code_expired";
     }
 }

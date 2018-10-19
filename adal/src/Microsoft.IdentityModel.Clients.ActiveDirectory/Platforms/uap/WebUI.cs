@@ -38,6 +38,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
     internal class WebUI : IWebUI
     {
+        private const string MsAppScheme = "ms-app";
+
         protected RequestContext context;
         protected CoreUIParent uiParent;
 
@@ -52,15 +54,15 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
             if (uiParent.UseHiddenBrowser && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
-                throw new ArgumentException(AdalErrorMessageEx.RedirectUriUnsupportedWithPromptBehaviorNever, "redirectUri");
+                throw new AdalException(AdalError.UapRedirectUriUnsupported);
             }
-            
+
             WebAuthenticationResult webAuthenticationResult;
             WebAuthenticationOptions options = (uiParent.UseCorporateNetwork &&
                                                 (ssoMode || redirectUri.Scheme == Constant.MsAppScheme))
                 ? WebAuthenticationOptions.UseCorporateNetwork
                 : WebAuthenticationOptions.None;
-            
+
             if (uiParent.UseHiddenBrowser)
             {
                 options |= WebAuthenticationOptions.SilentMode;
@@ -69,7 +71,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
             try
             {
                 webAuthenticationResult = await CoreApplication.MainView.CoreWindow.Dispatcher.RunTaskAsync(
-                    async() =>
+                    async () =>
                     {
                         if (ssoMode)
                         {

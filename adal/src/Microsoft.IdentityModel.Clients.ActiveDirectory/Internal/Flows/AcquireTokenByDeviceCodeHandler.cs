@@ -59,7 +59,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 }
                 catch (AdalServiceException exc)
                 {
-                    if (!exc.ErrorCode.Equals(AdalErrorEx.DeviceCodeAuthorizationPendingError, StringComparison.OrdinalIgnoreCase))
+                    if (!exc.ErrorCode.Equals(AdalError.DeviceCodeAuthorizationPendingError, StringComparison.OrdinalIgnoreCase))
                     {
                         throw;
                     }
@@ -72,8 +72,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             if (resultEx == null)
             {
                 throw new AdalServiceException(
-                    AdalErrorEx.DeviceCodeAuthorizationCodeExpired, 
-                    AdalErrorMessageEx.DeviceCodeAuthorizationCodeExpired);
+                    AdalError.DeviceCodeAuthorizationCodeExpired, 
+                    AdalErrorMessage.DeviceCodeAuthorizationCodeExpired);
             }
            
             return resultEx;

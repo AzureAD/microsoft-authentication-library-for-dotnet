@@ -174,20 +174,4 @@
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
   </ItemGroup>
 
-  <Target Name="LayoutNuGet">
-    <PropertyGroup>
-      <NugetPackageRootFolder Condition="'$(NugetPackageRootFolder)' == ''">$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..",".nugetlayout"))</NugetPackageRootFolder>
-      <NuspecFilePath>$([System.IO.Path]::Combine($(MSBuildThisFileDirectory), "..", "..", "build", "Microsoft.IdentityModel.Clients.ActiveDirectory.nuspec"))</NuspecFilePath>
-    </PropertyGroup>
-    <ItemGroup>
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.dll" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.xml" />
-      <FilesToPack Include="bin\$(Configuration)\**\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb" />
-    </ItemGroup>
-
-    <RemoveDir Directories="$(NugetPackageRootFolder)" />
-    <Copy SourceFiles="@(FilesToPack)" DestinationFiles="$(NugetPackageRootFolder)\lib\%(RecursiveDir)%(FileName)%(Extension)" />
-    <Copy SourceFiles="$(NuspecFilePath)" DestinationFolder="$(NugetPackageRootFolder)" />
-  </Target>
-
 </Project>

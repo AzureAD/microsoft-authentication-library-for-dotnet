@@ -92,11 +92,14 @@ namespace Microsoft.Identity.Core.OAuth2
         public const string RequestCorrelationIdInResponse = "return-client-request-id";
     }
 
+    /// <summary>
+    /// OAuth2 errors that are only used internally. All error codes used when propagating exceptions should 
+    /// be made public.
+    /// </summary>
     internal class OAuth2Error
     {
         public const string LoginRequired = "login_required";
         public const string AuthorizationPending = "authorization_pending";
-        public const string CodeExpired = "code_expired";
     }
 
     internal class OAuth2Value

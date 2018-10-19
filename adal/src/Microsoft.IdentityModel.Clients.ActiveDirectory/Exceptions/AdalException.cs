@@ -223,6 +223,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                     message = AdalErrorMessage.InteractionRequired;
                     break;
 
+                case AdalError.UapRedirectUriUnsupported:
+                    message = AdalErrorMessage.UapRedirectUriUnsupported;
+                    break;
+
                 default:
                     message = AdalErrorMessage.Unknown;
                     break;

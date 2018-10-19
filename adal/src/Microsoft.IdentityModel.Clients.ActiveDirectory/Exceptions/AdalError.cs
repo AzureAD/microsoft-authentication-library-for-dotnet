@@ -295,5 +295,26 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Broker redirectUri has incorrect format
         /// </summary>
         public const string BrokerRedirectUriIncorrectFormat = "broker_redirect_uri_incorrect_format";
+
+        /// <summary>
+        /// Cannot fetch the upn from the OS, possibly due to missing permissions
+        /// </summary>
+        public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
+
+        /// <summary>
+        /// This library is still polling to see if the user entered the code as instructed by the device code message. 
+        /// This is for information only, not an error.
+        /// </summary>
+        public const string DeviceCodeAuthorizationPendingError = "authorization_pending";
+
+        /// <summary>
+        /// The device code expiered before it was sent to the server
+        /// </summary>
+        public const string DeviceCodeAuthorizationCodeExpired = "code_expired";
+
+        /// <summary>
+        /// PromptBehavior.Never is supported in SSO mode only (null or application's callback URI as redirectUri)
+        /// </summary>
+        public const string UapRedirectUriUnsupported = "uap_redirect_uri_not_supported";
     }
 }
