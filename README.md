@@ -23,7 +23,7 @@ Active Directory Authentication Library for .NET (ADAL.NET) is an easy to use au
 ## Versions
 
 Current version - latest one at [nuget.org](https://www.nuget.org/packages/Microsoft.IdentityModel.Clients.ActiveDirectory/).  
-Minimum recommended version - 2.29.0
+Minimum recommended version - 3.19.8
 
 You can find the changes for each version in the [change log](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/blob/master/changelog.txt).
 
