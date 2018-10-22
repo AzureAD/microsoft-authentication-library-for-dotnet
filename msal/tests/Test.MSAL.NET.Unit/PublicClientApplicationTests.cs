@@ -1179,7 +1179,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [Description("ClientApplicationBase.GetAuthoriy tests")]
-        public void GetAuthority_AccountWithNullIdPassed_CommonAuthorityUsed()
+        public void GetAuthority_AccountWithNullIdPassed_CommonAuthorityReturned()
         {
             PublicClientApplication app = new PublicClientApplication(TestConstants.ClientId);
 

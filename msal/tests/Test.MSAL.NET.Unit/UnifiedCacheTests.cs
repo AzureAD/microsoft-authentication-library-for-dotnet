@@ -36,6 +36,7 @@ using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Test.MSAL.NET.Unit.Mocks;
 
@@ -54,20 +55,6 @@ namespace Test.MSAL.NET.Unit
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
 
             AadInstanceDiscovery.Instance.Cache.Clear();
-        }
-
-        class TestLegacyCachePersistence : ILegacyCachePersistence
-        {
-            private byte[] data;
-            public byte[] LoadCache()
-            {
-                return data;
-            }
-
-            public void WriteCache(byte[] serializedCache)
-            {
-                data = serializedCache;
-            }
         }
 
         [TestMethod]
@@ -89,7 +76,7 @@ namespace Test.MSAL.NET.Unit
                 {
                     UserTokenCache =
                     {
-                        legacyCachePersistence = new TestLegacyCachePersistence()
+                        legacyCachePersistence = new TestLegacyCachePersistance()
                     }
                 };
 
@@ -113,7 +100,7 @@ namespace Test.MSAL.NET.Unit
                 foreach (IAccount user in users)
                 {
                     ISet<string> authorityHostAliases = new HashSet<string>();
-                    authorityHostAliases.Add(TestConstants.ProductionPrefNetworkEnvironment);
+                    authorityHostAliases.Add(TestConstants.ProductionPrefCacheEnvironment);
 
                     app.UserTokenCache.RemoveMsalAccount(user, authorityHostAliases, requestContext);
                 }
@@ -156,7 +143,7 @@ namespace Test.MSAL.NET.Unit
                 {
                     UserTokenCache =
                     {
-                        legacyCachePersistence = new TestLegacyCachePersistence()
+                        legacyCachePersistence = new TestLegacyCachePersistance()
                     }
                 };
 

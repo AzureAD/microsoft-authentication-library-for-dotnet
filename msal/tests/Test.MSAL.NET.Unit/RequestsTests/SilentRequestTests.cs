@@ -33,6 +33,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
@@ -106,41 +107,51 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
-                var cache = new TokenCache()
+                Authority authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+                TokenCache cache = new TokenCache()
                 {
                     ClientId = TestConstants.ClientId,
                     HttpManager = httpManager
                 };
                 TokenCacheHelper.PopulateCache(cache.tokenCacheAccessor);
 
-                var parameters = new AuthenticationRequestParameters()
+                AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
                     Authority = authority,
                     ClientId = TestConstants.ClientId,
-                    Scope = ScopeHelper.CreateSortedSetFromEnumerable(
-                        new[]
-                        {
-                            "some-scope1",
-                            "some-scope2"
-                        }),
+                    Scope = TestConstants.Scope,
                     TokenCache = cache,
                     RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
                     Account = new Account(TestConstants.UserIdentifier, TestConstants.DisplayableId, null)
                 };
 
+                // set access tokens as expired
+                foreach (var atCacheItemStr in cache.GetAllAccessTokenCacheItems(new RequestContext(new MsalLogger(Guid.NewGuid(), null))))
+                {
+                    MsalAccessTokenCacheItem accessItem =
+                        JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
+                    accessItem.ExpiresOnUnixTimestamp =
+                        (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+
+                    cache.AddAccessTokenCacheItem(accessItem);
+                }
                 RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                httpManager.AddMockHandler(new MockHttpMessageHandler()
+                {
+                    Method = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                });
 
                 var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
 
-                var request = new SilentRequest(httpManager, crypto, parameters, ApiEvent.ApiIds.None, false);
+                SilentRequest request = new SilentRequest(httpManager, crypto, parameters, ApiEvent.ApiIds.None, false);
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                var result = task.Result;
+                AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
-                Assert.AreEqual("some-scope1 some-scope2", result.Scopes.AsSingleString());
+                Assert.AreEqual(TestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+
             }
         }
 

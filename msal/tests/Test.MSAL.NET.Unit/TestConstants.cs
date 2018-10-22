@@ -42,10 +42,16 @@ namespace Test.MSAL.NET.Unit
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
         public static readonly string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
+        public static readonly string Uid = "my-uid";
+        public static readonly string Utid = "my-utid";
+
         public static readonly string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public static readonly string ProductionPrefCacheEnvironment = "login.windows.net";
+        public static readonly string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
+
         public static readonly string SovereignEnvironment = "login.microsoftonline.de";
         public static readonly string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
+        public static readonly string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public static readonly string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public static readonly string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
@@ -60,8 +66,6 @@ namespace Test.MSAL.NET.Unit
         public static readonly string ClientSecret = "client_secret";
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly string DefaultPassword = "password";
-        public static readonly string Uid = "my-uid";
-        public static readonly string Utid = "my-utid";
         public static readonly string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
         public static readonly string DefaultAuthorizationCode = "DefaultAuthorizationCode";
@@ -69,7 +73,12 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DefaultClientAssertion = "DefaultClientAssertion";
         public const string RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
-        public enum AuthorityType { B2C};
+        public enum AuthorityType { B2C };
+        public static string[] ProdEnvAliases = new string[] {
+                                "login.microsoftonline.com",
+                                "login.windows.net",
+                                "login.microsoft.com",
+                                "sts.windows.net"};
 
         public static readonly AccountId UserIdentifier = CreateUserIdentifer();
 

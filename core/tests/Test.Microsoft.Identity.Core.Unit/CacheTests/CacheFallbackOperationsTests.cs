@@ -281,6 +281,48 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
         }
 
         [TestMethod]
+        public void RemoveAdalUser_RemovesAdalEntitiesWithClientInfoAndWithout()
+        {
+            // in case of adalv3 -> adalv4 -> msal2 migration
+            // adal cache can have different cache entities for the
+            // same user/account with client info and wihout
+            // CacheFallbackOperations.RemoveAdalUser should remove both
+            PopulateLegacyWithRtAndId(
+                _legacyCachePersistence,
+                TestConstants.ClientId,
+                TestConstants.ProductionPrefNetworkEnvironment,
+                TestConstants.Uid,
+                TestConstants.Utid,
+                TestConstants.DisplayableId,
+                TestConstants.ScopeStr);
+
+            AssertCacheEntryCount(1);
+
+            PopulateLegacyWithRtAndId(
+                _legacyCachePersistence,
+                TestConstants.ClientId,
+                TestConstants.ProductionPrefNetworkEnvironment,
+                null,
+                null,
+                TestConstants.DisplayableId,
+                TestConstants.ScopeForAnotherResourceStr);
+
+            AssertCacheEntryCount(2);
+
+            CacheFallbackOperations.RemoveAdalUser(
+                _legacyCachePersistence,
+                new HashSet<string>
+                {
+                    TestConstants.ProductionPrefNetworkEnvironment
+                },
+                TestConstants.ClientId,
+                TestConstants.DisplayableId,
+                TestConstants.Uid + "." + TestConstants.Utid);
+
+            AssertCacheEntryCount(0);
+        }
+
+        [TestMethod]
         public void WriteAdalRefreshToken_ErrorLog()
         {
             // Arrange
@@ -384,6 +426,18 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             string uniqueTenantId,
             string username)
         {
+            PopulateLegacyWithRtAndId(legacyCachePersistence, clientId, env, uid, uniqueTenantId, username, "scope1");
+        }
+
+        private static void PopulateLegacyWithRtAndId(
+            ILegacyCachePersistence legacyCachePersistence,
+            string clientId,
+            string env,
+            string uid,
+            string uniqueTenantId,
+            string username,
+            string scope)
+        {
             string clientInfoString;
             if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(uniqueTenantId))
             {
@@ -409,7 +463,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 idTokenCacheItem,
                 "https://" + env + "/common",
                 "uid",
-                "scope1");
+                scope);
         }
 
         private static void AssertByUsername(

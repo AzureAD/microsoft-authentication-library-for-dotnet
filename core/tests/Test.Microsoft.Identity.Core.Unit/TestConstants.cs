@@ -34,6 +34,7 @@ namespace Test.Microsoft.Identity.Core.Unit
     class TestConstants
     {
         public static readonly string ScopeStr = "scope1 scope2";
+        public static readonly string ScopeForAnotherResourceStr = "scope3 scope4";
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] {"r1/scope1", "r1/scope2"});
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
         public static readonly string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";

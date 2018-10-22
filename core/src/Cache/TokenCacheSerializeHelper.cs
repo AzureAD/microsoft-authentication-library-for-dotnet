@@ -45,6 +45,8 @@ namespace Microsoft.Identity.Core.Cache
         /// <param name="requestContext">call state to pass correlation id and logger instance</param>
         internal static void DeserializeUnifiedCache(ITokenCacheAccessor tokenCacheAccessor, byte[] unifiedState, RequestContext requestContext)
         {
+            tokenCacheAccessor.Clear();
+
             Dictionary<string, IEnumerable<string>> cacheDict = JsonHelper
                 .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(unifiedState);
 

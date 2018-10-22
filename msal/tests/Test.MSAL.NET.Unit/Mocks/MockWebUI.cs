@@ -53,11 +53,18 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public RequestContext RequestContext { get; set; }
 
+        public string Environment { get; set; }
+
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             if (ExceptionToThrow != null)
             {
                 throw ExceptionToThrow;
+            }
+
+            if (Environment != null)
+            {
+                Assert.AreEqual(Environment, authorizationUri.Host);
             }
 
             IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);

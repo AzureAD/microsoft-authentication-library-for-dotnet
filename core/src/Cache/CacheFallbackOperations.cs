@@ -214,10 +214,8 @@ namespace Microsoft.Identity.Core.Cache
                 {
                     RemoveEntriesWithMatchingId(environmentAliases, clientId, accountOrUserId, adalCache);
                 }
-                else
-                {
-                    RemoveEntriesWithMatchingName(environmentAliases, clientId, displayableId, adalCache);
-                }
+
+                RemoveEntriesWithMatchingName(environmentAliases, clientId, displayableId, adalCache);
 
                 legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(adalCache));
             }

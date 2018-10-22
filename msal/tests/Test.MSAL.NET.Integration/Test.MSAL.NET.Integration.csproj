@@ -4,6 +4,9 @@
     <TargetFramework>net4.5.2</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,8 +30,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
+      <Aliases>adal</Aliases>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj" />
-    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Aliases>msal</Aliases>
+    </ProjectReference>
   </ItemGroup>
 
 	<PropertyGroup>

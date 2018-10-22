@@ -49,13 +49,21 @@ namespace Test.MSAL.NET.Unit.Mocks
 
         public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> queryParamsToValidate)
         {
-            MockWebUI webUi = new MockWebUI();
-            webUi.QueryParamsToValidate = queryParamsToValidate;
-            webUi.MockResult = authorizationResult;
+            ConfigureMockWebUI(authorizationResult, queryParamsToValidate, null);
+        }
+
+        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, 
+            Dictionary<string, string> queryParamsToValidate, string environment)
+        {
+            MockWebUI webUi = new MockWebUI
+            {
+                QueryParamsToValidate = queryParamsToValidate,
+                MockResult = authorizationResult,
+                Environment = environment
+            };
 
             ConfigureMockWebUI(webUi);
         }
-
 
         public static void ConfigureMockWebUI(MockWebUI webUi)
         {

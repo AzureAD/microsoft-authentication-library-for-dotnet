@@ -24,9 +24,10 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+extern alias msal;
 
 using Test.Microsoft.Identity.LabInfrastructure;
-using Microsoft.Identity.Client;
+using msal::Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using System.Security;
