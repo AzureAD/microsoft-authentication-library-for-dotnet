@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+#if !NET_CORE
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,5 +54,6 @@ namespace Test.MSAL.NET.Unit
             Assert.IsTrue(ub1 == UIBehavior.Never);
         }
     }
-
 }
+
+#endif

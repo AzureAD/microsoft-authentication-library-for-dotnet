@@ -231,7 +231,6 @@ namespace Test.ADAL.Common.Unit
             VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
         }
 
-#if TEST_ADAL_NET
     public static async Task TokenCacheKeyTestAsync(IPlatformParameters parameters)
         {
             CheckPublicGetSets();
@@ -324,7 +323,6 @@ namespace Test.ADAL.Common.Unit
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId).ConfigureAwait(false);
             VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
         }
-#endif
 
         internal static void TokenCacheCrossTenantOperationsTest()
         {

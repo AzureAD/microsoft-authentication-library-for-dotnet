@@ -74,17 +74,17 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void SliceParametersTest()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
             _cache = new TokenCache()
             {
-                ClientId = TestConstants.ClientId
+                ClientId = MsalTestConstants.ClientId
             };
 
             var ui = new MockWebUI()
             {
                 MockResult = new AuthorizationResult(
                     AuthorizationStatus.Success,
-                    TestConstants.AuthorityHomeTenant + "?code=some-code"),
+                    MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
                 QueryParamsToValidate = new Dictionary<string, string>()
                 {
                     {"key1", "value1%20with%20encoded%20space"},
@@ -112,8 +112,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 {
                     Authority = authority,
                     SliceParameters = "key1=value1%20with%20encoded%20space&key2=value2",
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
                     TokenCache = _cache,
                     RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                     RedirectUri = new Uri("some://uri"),
@@ -125,8 +125,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DisplayableId,
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
                     ui);
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -143,18 +143,18 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
             _cache = new TokenCache()
             {
-                ClientId = TestConstants.ClientId
+                ClientId = MsalTestConstants.ClientId
             };
 
             var atItem = new MsalAccessTokenCacheItem(
-                TestConstants.ProductionPrefNetworkEnvironment,
-                TestConstants.ClientId,
+                MsalTestConstants.ProductionPrefNetworkEnvironment,
+                MsalTestConstants.ClientId,
                 "Bearer",
-                TestConstants.Scope.AsSingleString(),
-                TestConstants.Utid,
+                MsalTestConstants.Scope.AsSingleString(),
+                MsalTestConstants.Utid,
                 null,
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
                 MockHelpers.CreateClientInfo());
@@ -167,7 +167,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             {
                 MockResult = new AuthorizationResult(
                     AuthorizationStatus.Success,
-                    TestConstants.AuthorityHomeTenant + "?code=some-code")
+                    MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
             };
 
             using (var httpManager = new MockHttpManager())
@@ -179,8 +179,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 var parameters = new AuthenticationRequestParameters
                 {
                     Authority = authority,
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
                     TokenCache = _cache,
                     RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                     RedirectUri = new Uri("some://uri"),
@@ -192,8 +192,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DisplayableId,
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
                     ui);
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -226,7 +226,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
             try
             {
                 using (var httpManager = new MockHttpManager())
@@ -234,8 +234,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     var parameters = new AuthenticationRequestParameters
                     {
                         Authority = authority,
-                        ClientId = TestConstants.ClientId,
-                        Scope = TestConstants.Scope,
+                        ClientId = MsalTestConstants.ClientId,
+                        Scope = MsalTestConstants.Scope,
                         TokenCache = null,
                         RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                         RedirectUri = new Uri("some://uri#fragment=not-so-good"),
@@ -247,7 +247,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                         PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                         parameters,
                         ApiEvent.ApiIds.None,
-                        TestConstants.ScopeForAnotherResource.ToArray(),
+                        MsalTestConstants.ScopeForAnotherResource.ToArray(),
                         (string)null,
                         UIBehavior.ForceLogin,
                         new MockWebUI());
@@ -264,7 +264,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
 
             using (var httpManager = new MockHttpManager())
             {
@@ -278,8 +278,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 var parameters = new AuthenticationRequestParameters
                 {
                     Authority = authority,
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
                     TokenCache = null,
                     RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                     RedirectUri = new Uri("some://uri"),
@@ -292,8 +292,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DisplayableId,
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
                     ui);
 
@@ -319,7 +319,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
 
             using (var httpManager = new MockHttpManager())
             {
@@ -333,8 +333,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 var parameters = new AuthenticationRequestParameters
                 {
                     Authority = authority,
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
                     TokenCache = null,
                     RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                     RedirectUri = new Uri("some://uri"),
@@ -347,8 +347,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
-                    TestConstants.DisplayableId,
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.DisplayableId,
                     UIBehavior.SelectAccount,
                     ui);
 
@@ -373,7 +373,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
 
             using (var httpManager = new MockHttpManager())
             {
@@ -383,14 +383,14 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.ErrorHttp,
-                        TestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired)
+                        MsalTestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired)
                 };
 
                 var parameters = new AuthenticationRequestParameters
                 {
                     Authority = authority,
-                    ClientId = TestConstants.ClientId,
-                    Scope = TestConstants.Scope,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
                     TokenCache = null,
                     RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                     RedirectUri = new Uri("some://uri"),
@@ -402,7 +402,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
                     (string)null,
                     UIBehavior.ForceLogin,
                     webUi);
@@ -423,7 +423,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.ErrorHttp,
-                        TestConstants.AuthorityHomeTenant + "?error=invalid_request&error_description=some error description")
+                        MsalTestConstants.AuthorityHomeTenant + "?error=invalid_request&error_description=some error description")
                 };
 
                 request = new InteractiveRequest(
@@ -431,7 +431,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
                     (string)null,
                     UIBehavior.ForceLogin,
                     webUi);
@@ -454,13 +454,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
         {
-            var authority = Authority.CreateAuthority(TestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
 
             var parameters = new AuthenticationRequestParameters
             {
                 Authority = authority,
-                ClientId = TestConstants.ClientId,
-                Scope = TestConstants.Scope,
+                ClientId = MsalTestConstants.ClientId,
+                Scope = MsalTestConstants.Scope,
                 TokenCache = null,
                 RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null)),
                 RedirectUri = new Uri("some://uri"),
@@ -476,7 +476,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     parameters,
                     ApiEvent.ApiIds.None,
-                    TestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
                     null,
                     UIBehavior.ForceLogin,
                     new MockWebUI());

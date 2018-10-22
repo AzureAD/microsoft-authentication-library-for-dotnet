@@ -65,8 +65,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             // Don't validate certs, since the test root isn't installed.
             const bool validateCerts = false;
 
-            var store = new X509Store(name, location);
-            try
+            using (var store = new X509Store(name, location))
             {
                 store.Open(OpenFlags.ReadOnly);
                 var collection = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, validateCerts);
@@ -74,10 +73,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                 return collection.Count == 0
                     ? null
                     : collection[0];
-            }
-            finally
-            {
-                store.Close();
+
             }
         }
     }

@@ -119,8 +119,16 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             {
                 throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
             }
-
-            return KeyVault.GetSecret(CredentialUrl).Value;
+            
+            try
+            {
+                var secret = this.KeyVault.GetSecret(CredentialUrl);
+                return secret.Value;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Test setup: cannot get the user password. See inner exception.", e);
+            }
         }
     }
 

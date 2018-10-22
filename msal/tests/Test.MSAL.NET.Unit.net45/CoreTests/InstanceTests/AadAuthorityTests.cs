@@ -88,7 +88,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     {
                         Method = HttpMethod.Get,
                         Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
                 Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", true);
@@ -123,7 +124,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     {
                         Method = HttpMethod.Get,
                         Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration.json"))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
                 Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", false);
@@ -253,7 +255,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                         ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-MissingFields.json"))
+                            MockHelpers.CreateSuccessResponseMessage(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields.json")))
                     });
 
                 Authority instance = Authority.CreateAuthority("https://login.microsoftonline.in/mytenant.com", false);

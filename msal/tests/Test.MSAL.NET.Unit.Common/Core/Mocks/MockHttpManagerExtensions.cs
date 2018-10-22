@@ -38,12 +38,12 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
     {
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager)
         {
-            AddInstanceDiscoveryMockHandler(httpManager, TestConstants.AuthorityCommonTenant);
+            AddInstanceDiscoveryMockHandler(httpManager, CoreTestConstants.AuthorityCommonTenant);
         }
 
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager, string url)
         {
-            httpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(TestConstants.GetDiscoveryEndpoint(url)));
+            httpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(CoreTestConstants.GetDiscoveryEndpoint(url)));
         }
 
         public static void AddSuccessTokenResponseMockHandlerForPost(

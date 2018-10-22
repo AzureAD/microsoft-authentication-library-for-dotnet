@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System.Net.Http;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Instance;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
@@ -37,7 +38,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         public static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(TestConstants.AuthorityHomeTenant);
+            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);            
         }
 
         public static void InitializeRequestTests()
@@ -45,6 +46,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             ModuleInitializer.ForceModuleInitializationTestOnly();
             Authority.ValidatedAuthorities.Clear();
             AadInstanceDiscovery.Instance.Cache.Clear();
+            Logger.Level = LogLevel.Info;
         }
     }
 }

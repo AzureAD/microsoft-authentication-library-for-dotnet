@@ -76,7 +76,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void ValidationEnabledNotSupportedTest()
         {
-            var instance = Authority.CreateAuthority(TestConstants.B2CAuthority, true);
+            var instance = Authority.CreateAuthority(CoreTestConstants.B2CAuthority, true);
             Assert.IsNotNull(instance);
             Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
             try
@@ -99,8 +99,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
-            const string uriNoPort = TestConstants.B2CAuthority;
-            const string uriNoPortTailSlash = TestConstants.B2CAuthority;
+            const string uriNoPort = CoreTestConstants.B2CAuthority;
+            const string uriNoPortTailSlash = CoreTestConstants.B2CAuthority;
 
             const string uriDefaultPort = "https://login.microsoftonline.in:443/tfp/tenant/policy";
 

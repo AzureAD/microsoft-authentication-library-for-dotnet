@@ -25,25 +25,29 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 namespace Test.Microsoft.Identity.Core.Unit
-{
-    public static class CoreAssert
+{    
+    public class ResourceHelper
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
+        /// <summary>
+        /// Gets the relative path to a test resource. Resource should be using DeploymentItem (desktop) or 
+        /// by setting Copy to Output Directory to Always (other platforms)
+        /// </summary>
+        /// <remarks>
+        /// This is just a simple workaround for DeploymentItem not being implemented in mstest on netcore
+        /// Tests seems to run from the bin directory and not from a TestRun dir on netcore
+        /// Assumes resources are in a Resources dir.
+        /// Note that conditional compilation files cannot live in the common projects unless
+        /// the flags are replicated.
+        /// </remarks>
+        public static string GetTestResourceRelativePath(string resourceName)
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
-
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
+     
+#if DESKTOP
+            return resourceName;
+#else
+            return "Resources\\" + resourceName;
+#endif
         }
     }
 }

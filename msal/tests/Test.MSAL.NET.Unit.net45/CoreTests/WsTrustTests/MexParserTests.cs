@@ -48,6 +48,8 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
     {
         RequestContext requestContext;
 
+        public TestContext TestContext { get; set; }
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -60,8 +62,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
         public void WsTrust2005AddressExtractionTest()
         {
             // Arrange
-
-            string responseBody = File.ReadAllText("TestMex2005.xml");
+            string responseBody = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex2005.xml"));
             Assert.IsFalse(string.IsNullOrWhiteSpace(responseBody));
 
             // Act

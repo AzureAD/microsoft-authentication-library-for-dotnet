@@ -46,7 +46,10 @@ namespace Microsoft.Identity.Core.Http
             _httpClientFactory = httpClientFactory ?? new HttpClientFactory();
         }
 
-        protected virtual HttpClient HttpClient => _httpClientFactory.HttpClient;
+        protected virtual HttpClient GetHttpClient()
+        {
+            return _httpClientFactory.HttpClient;
+        }
 
         public async Task<HttpResponse> SendPostAsync(
             Uri endpoint,
@@ -196,7 +199,7 @@ namespace Microsoft.Identity.Core.Http
             HttpContent body,
             HttpMethod method)
         {
-            HttpClient client = HttpClient;
+            HttpClient client = GetHttpClient();
 
             using (HttpRequestMessage requestMessage = CreateRequestMessage(endpoint, headers))
             {

@@ -78,7 +78,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("drs-response.json"))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
                     });
 
 
@@ -103,10 +104,11 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-OnPremise.json"))
+                            MockHelpers.CreateSuccessResponseMessage(
+                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 Task.Run(
@@ -114,7 +116,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             httpManager,
-                            TestConstants.FabrikamDisplayableId,
+                            CoreTestConstants.FabrikamDisplayableId,
                             new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
@@ -124,7 +126,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                 Assert.AreEqual(1, Authority.ValidatedAuthorities.Count);
 
                 //attempt to do authority validation again. NO network call should be made
-                instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+                instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 Task.Run(
@@ -132,7 +134,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             httpManager,
-                            TestConstants.FabrikamDisplayableId,
+                            CoreTestConstants.FabrikamDisplayableId,
                             new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
@@ -171,7 +173,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("drs-response.json"))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
                     });
 
 
@@ -196,10 +199,11 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-OnPremise.json"))
+                            MockHelpers.CreateSuccessResponseMessage(
+                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 Task.Run(
@@ -207,7 +211,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             httpManager,
-                            TestConstants.FabrikamDisplayableId,
+                            CoreTestConstants.FabrikamDisplayableId,
                             new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
@@ -231,10 +235,11 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("OpenidConfiguration-OnPremise.json"))
+                            MockHelpers.CreateSuccessResponseMessage(
+                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, false);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 Task.Run(
@@ -242,7 +247,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             httpManager,
-                            TestConstants.FabrikamDisplayableId,
+                            CoreTestConstants.FabrikamDisplayableId,
                             new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
@@ -268,7 +273,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("drs-response.json"))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
                     });
 
 
@@ -286,7 +292,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "not-found")
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 try
@@ -296,7 +302,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
-                                TestConstants.FabrikamDisplayableId,
+                                CoreTestConstants.FabrikamDisplayableId,
                                 new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
@@ -324,7 +330,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             {"api-version", "1.0"}
                         },
-                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("drs-response.json"))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response.json")))
                     });
 
 
@@ -342,7 +349,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.some-other-sts.com")
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 try
@@ -352,7 +359,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
-                                TestConstants.FabrikamDisplayableId,
+                                CoreTestConstants.FabrikamDisplayableId,
                                 new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
@@ -381,10 +388,11 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                             {"api-version", "1.0"}
                         },
                         ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(File.ReadAllText("drs-response-missing-field.json"))
+                            MockHelpers.CreateSuccessResponseMessage(
+                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("drs-response-missing-field.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, true);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 try
@@ -394,7 +402,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
-                                TestConstants.FabrikamDisplayableId,
+                                CoreTestConstants.FabrikamDisplayableId,
                                 new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
@@ -419,10 +427,10 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                            File.ReadAllText("OpenidConfiguration-MissingFields-OnPremise.json"))
+                            ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-MissingFields-OnPremise.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(TestConstants.OnPremiseAuthority, false);
+                Authority instance = Authority.CreateAuthority(CoreTestConstants.OnPremiseAuthority, false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
                 try
@@ -432,7 +440,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
-                                TestConstants.FabrikamDisplayableId,
+                                CoreTestConstants.FabrikamDisplayableId,
                                 new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");

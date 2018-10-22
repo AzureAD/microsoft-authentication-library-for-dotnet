@@ -33,6 +33,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Core.Http;
 using System.Net;
+using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.MSAL.NET.Unit
 {

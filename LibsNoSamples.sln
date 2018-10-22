@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Core", "core\src\Microsoft.Identity.Core.csproj", "{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.Core.net45.Unit", "core\tests\Test.Microsoft.Identity.Core.Unit\Test.Microsoft.Identity.Core.net45.Unit.csproj", "{B453B558-009A-4F28-999B-2A82F2BAED8B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.IdentityModel.Clients.ActiveDirectory", "adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj", "{A71924EE-1172-4725-9E2C-6E5A342D1620}"
@@ -19,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{1D934F01-7EF8-47D7-B6C4-D8802FB089C1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Integration", "msal\tests\Test.MSAL.NET.Integration\Test.MSAL.NET.Integration.csproj", "{3DADE3D0-676E-4E5F-B815-944A61EAAADC}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C-5E2E-4C4A-BDD2-8F2A06AAE3F6}"
 	ProjectSection(SolutionItems) = preProject
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
@@ -29,10 +25,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "adal", "adal", "{DC4A6EAD-07D8-480A-A111-F2F8C359735B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msal", "msal", "{459B71BF-176E-4E1D-B77A-D21862DB115E}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{D2976AB4-BC6C-408C-BED8-14B2E8B82231}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.Unit.Infrastructure", "core\tests\Test.Microsoft.Identity.Core.Unit.Infrastructure\Test.Microsoft.Identity.Unit.Infrastructure.csproj", "{4C294854-1396-4223-9A54-D22C127C8885}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.netcore", "msal\tests\Test.MSAL.NET.Unit.netcore\Test.MSAL.NET.Unit.netcore.csproj", "{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}"
 EndProject
@@ -52,10 +44,6 @@ Global
 		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B453B558-009A-4F28-999B-2A82F2BAED8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B453B558-009A-4F28-999B-2A82F2BAED8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B453B558-009A-4F28-999B-2A82F2BAED8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B453B558-009A-4F28-999B-2A82F2BAED8B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -76,14 +64,6 @@ Global
 		{1D934F01-7EF8-47D7-B6C4-D8802FB089C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D934F01-7EF8-47D7-B6C4-D8802FB089C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D934F01-7EF8-47D7-B6C4-D8802FB089C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3DADE3D0-676E-4E5F-B815-944A61EAAADC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3DADE3D0-676E-4E5F-B815-944A61EAAADC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3DADE3D0-676E-4E5F-B815-944A61EAAADC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3DADE3D0-676E-4E5F-B815-944A61EAAADC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C294854-1396-4223-9A54-D22C127C8885}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C294854-1396-4223-9A54-D22C127C8885}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C294854-1396-4223-9A54-D22C127C8885}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C294854-1396-4223-9A54-D22C127C8885}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -105,15 +85,11 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{B453B558-009A-4F28-999B-2A82F2BAED8B} = {D2976AB4-BC6C-408C-BED8-14B2E8B82231}
 		{412F8F05-2694-4D2E-8FE0-A821721CF682} = {DC4A6EAD-07D8-480A-A111-F2F8C359735B}
 		{2BD6EA30-37A4-4799-B778-A473FC6B19D4} = {DC4A6EAD-07D8-480A-A111-F2F8C359735B}
 		{1D934F01-7EF8-47D7-B6C4-D8802FB089C1} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
-		{3DADE3D0-676E-4E5F-B815-944A61EAAADC} = {459B71BF-176E-4E1D-B77A-D21862DB115E}
 		{DC4A6EAD-07D8-480A-A111-F2F8C359735B} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{459B71BF-176E-4E1D-B77A-D21862DB115E} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
-		{D2976AB4-BC6C-408C-BED8-14B2E8B82231} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
-		{4C294854-1396-4223-9A54-D22C127C8885} = {D2976AB4-BC6C-408C-BED8-14B2E8B82231}
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8} = {459B71BF-176E-4E1D-B77A-D21862DB115E}
 		{DA8E7933-0A56-4668-9786-ECECA3D16944} = {459B71BF-176E-4E1D-B77A-D21862DB115E}
 		{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98} = {459B71BF-176E-4E1D-B77A-D21862DB115E}

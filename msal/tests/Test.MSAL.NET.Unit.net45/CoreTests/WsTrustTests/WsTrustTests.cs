@@ -66,7 +66,8 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                         Method = HttpMethod.Post,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
+                            Content = new StringContent(
+                               File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("WsTrustResponse13.xml")))
                         }
                     });
 

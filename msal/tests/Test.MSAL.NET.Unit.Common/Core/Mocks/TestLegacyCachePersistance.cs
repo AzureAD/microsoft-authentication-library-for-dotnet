@@ -25,25 +25,26 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Core.Cache;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Test.Microsoft.Identity.Core.Unit.Mocks
 {
-    public static class CoreAssert
+    public class TestLegacyCachePersistance : ILegacyCachePersistence
     {
-        public static void AreScopesEqual(string scopesExpected, string scopesActual)
+        private byte[] data;
+        public byte[] LoadCache()
         {
-            var expectedScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesExpected);
-            var actualScopes = ScopeHelper.ConvertStringToLowercaseSortedSet(scopesActual);
+            return data;
+        }
 
-            // can't use Assert.AreEqual on HashSet, so we'll compare by hand.
-            Assert.AreEqual(expectedScopes.Count, actualScopes.Count);
-            foreach (string expectedScope in expectedScopes)
-            {
-                Assert.IsTrue(actualScopes.Contains(expectedScope));
-            }
+        public void WriteCache(byte[] serializedCache)
+        {
+            data = serializedCache;
         }
     }
 }

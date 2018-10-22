@@ -32,6 +32,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -44,7 +45,8 @@ namespace Test.MSAL.NET.Unit
         public void SignWithCertificate()
         {
             //Tests the cryptography libraries used by MSAL to sign with certificates
-            var cert = new X509Certificate2("testCert.crtfile", "passw0rd!");
+            var cert = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
             CryptographyHelper helper = new CryptographyHelper();
             byte[] result = helper.SignWithCertificate("TEST", cert);
             string value = Base64UrlHelpers.Encode(result);

@@ -51,15 +51,15 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public static readonly string DefaultTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-            "\"some-scope1 some-scope2\",\"access_token\":\"some-access-token\"" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(TestConstants.UniqueId, TestConstants.DisplayableId) +
+            ":\"" + CreateIdToken(CoreTestConstants.UniqueId, CoreTestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
         public static string CreateClientInfo()
         {
-            return CreateClientInfo(TestConstants.Uid, TestConstants.Utid);
+            return CreateClientInfo(CoreTestConstants.Uid, CoreTestConstants.Utid);
         }
 
         public static string CreateClientInfo(string uid, string utid)
@@ -162,7 +162,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)
         {
-            string idToken = CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
+            string idToken = CreateIdToken(uniqueId, displayableId, CoreTestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
@@ -176,7 +176,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
 
         public static string CreateIdToken(string uniqueId, string displayableId)
         {
-            return CreateIdToken(uniqueId, displayableId, TestConstants.Utid);
+            return CreateIdToken(uniqueId, displayableId, CoreTestConstants.Utid);
         }
 
         public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)

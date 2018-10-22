@@ -39,7 +39,11 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
     internal sealed class MockHttpManager : HttpManager,
                                             IDisposable
     {
-        private readonly Queue<HttpMessageHandler> _httpMessageHandlerQueue = new Queue<HttpMessageHandler>();
+        private Queue<HttpMessageHandler> _httpMessageHandlerQueue
+        {
+            get;
+            set;
+        } = new Queue<HttpMessageHandler>();
 
         public MockHttpManager(ICoreExceptionFactory coreExceptionFactory = null)
             : base(coreExceptionFactory)
@@ -52,9 +56,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
             // This ensures we only check the mock queue on dispose when we're not in the middle of an
             // exception flow.  Otherwise, any early assertion will cause this to likely fail
             // even though it's not the root cause.
-#pragma warning disable CS0618 // Type or member is obsolete
             if (Marshal.GetExceptionCode() == 0)
-#pragma warning restore CS0618 // Type or member is obsolete
             {
                 Assert.AreEqual(0, _httpMessageHandlerQueue.Count, "All mocks should have been consumed");
             }
@@ -66,9 +68,11 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
         }
 
         /// <inheritdoc />
+
         protected override HttpClient GetHttpClient()
         {
-            var httpClient = new HttpClient(_httpMessageHandlerQueue.Dequeue())
+            var messageHandler = _httpMessageHandlerQueue.Dequeue();
+            var httpClient = new HttpClient(messageHandler)
             {
                 MaxResponseContentBufferSize = HttpClientFactory.MaxResponseContentBufferSizeInBytes
             };

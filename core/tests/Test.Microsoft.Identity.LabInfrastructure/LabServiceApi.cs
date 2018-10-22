@@ -29,7 +29,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 
 namespace Test.Microsoft.Identity.LabInfrastructure
 {
@@ -38,41 +38,44 @@ namespace Test.Microsoft.Identity.LabInfrastructure
     /// </summary>
     public class LabServiceApi : ILabService
     {
-        KeyVaultSecretsProvider keyVault;
+        readonly KeyVaultSecretsProvider _keyVault;
 
         public LabServiceApi(KeyVaultSecretsProvider keyVault)
         {
-            this.keyVault = keyVault;
+            this._keyVault = keyVault;
         }
 
         private IUser GetUserFromLab(UserQueryParameters query)
-        {
-            WebClient webClient = new WebClient();
+        {                        
+            HttpClient webClient = new HttpClient();
+            IDictionary<string, string> queryDict = new Dictionary<string, string>();
 
             //Disabled for now until there are tests that use it.
-            webClient.QueryString.Add("mamca", "false");
-            webClient.QueryString.Add("mdmca", "false");
+            queryDict.Add("mamca", "false");
+            queryDict.Add("mdmca", "false");
 
             //Building user query
             if (query.FederationProvider != null)
-                webClient.QueryString.Add("federationProvider", query.FederationProvider.ToString());
+                queryDict.Add("federationProvider", query.FederationProvider.ToString());
 
-            webClient.QueryString.Add("mam", query.IsMamUser != null && (bool)(query.IsMamUser) ? "true" : "false");
-
-            webClient.QueryString.Add("mfa", query.IsMfaUser != null && (bool)(query.IsMfaUser) ? "true" : "false");
+            queryDict.Add("mam", query.IsMamUser != null && (bool)(query.IsMamUser) ? "true" : "false");
+            queryDict.Add("mfa", query.IsMfaUser != null && (bool)(query.IsMfaUser) ? "true" : "false");
 
             if (query.Licenses != null && query.Licenses.Count > 0)
-                webClient.QueryString.Add("license", query.Licenses.ToArray().ToString());
+                queryDict.Add("license", query.Licenses.ToArray().ToString());
 
-            webClient.QueryString.Add("isFederated", query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? "true" : "false");
+            queryDict.Add("isFederated", query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? "true" : "false");
 
             if (query.IsUserType != null)
-                webClient.QueryString.Add("usertype", query.IsUserType.ToString());
+                queryDict.Add("usertype", query.IsUserType.ToString());
 
-            webClient.QueryString.Add("external", query.IsExternalUser != null && (bool)(query.IsExternalUser) ? "true" : "false");
+            queryDict.Add("external", query.IsExternalUser != null && (bool)(query.IsExternalUser) ? "true" : "false");
+
+            UriBuilder uriBuilder = new UriBuilder("http://api.msidlab.com/api/user");
+            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
 
             //Fetch user
-            string result = webClient.DownloadString("http://api.msidlab.com/api/user");
+            string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
 
             if (String.IsNullOrWhiteSpace(result))
             {
@@ -87,7 +90,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             if (!String.IsNullOrEmpty(user.HomeTenantId) && !String.IsNullOrEmpty(user.HomeUPN))
                 user.InitializeHomeUser();
 
-            user.KeyVault = keyVault;
+            user.KeyVault = _keyVault;
             return user;
         }
 

@@ -51,16 +51,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             string Audience1 = "Audience1";
             string Audience2 = "Audience2";
 
-            var credential = new ClientCredential(TestConstants.ClientSecret);
+            var credential = new ClientCredential(MsalTestConstants.ClientSecret);
             credential.Audience = Audience1;
             credential.ContainsX5C = false;
-            credential.Assertion = TestConstants.DefaultClientAssertion;
+            credential.Assertion = MsalTestConstants.DefaultClientAssertion;
             credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
             var parameters = new AuthenticationRequestParameters();
             parameters.ClientCredential = credential;
             parameters.SendCertificate = false;
-            parameters.Authority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, false);
+            parameters.Authority = Authority.CreateAuthority(MsalTestConstants.AuthorityCommonTenant, false);
             parameters.Authority.SelfSignedJwtAudience = Audience1;
 
             //Validate cached client assertion with parameters
@@ -96,16 +96,16 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [Description("Test for expired client assertion in Request Validator.")]
         public void ClientAssertionRequestValidatorExpirationTimeTest()
         {
-            var credential = new ClientCredential(TestConstants.ClientSecret);
+            var credential = new ClientCredential(MsalTestConstants.ClientSecret);
             credential.Audience = "Audience1";
             credential.ContainsX5C = false;
-            credential.Assertion = TestConstants.DefaultClientAssertion;
+            credential.Assertion = MsalTestConstants.DefaultClientAssertion;
             credential.ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds));
 
             var parameters = new AuthenticationRequestParameters();
             parameters.ClientCredential = credential;
             parameters.SendCertificate = false;
-            parameters.Authority = Authority.CreateAuthority(TestConstants.AuthorityCommonTenant, false);
+            parameters.Authority = Authority.CreateAuthority(MsalTestConstants.AuthorityCommonTenant, false);
             parameters.Authority.SelfSignedJwtAudience = "Audience1";
 
             //Validate cached client assertion with expiration time

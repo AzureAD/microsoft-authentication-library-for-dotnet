@@ -67,10 +67,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                     _legacyCachePersistence,
                     new HashSet<string>
                     {
-                        TestConstants.ProductionPrefNetworkEnvironment,
+                        CoreTestConstants.ProductionPrefNetworkEnvironment,
                         "bogus"
                     },
-                    TestConstants.ClientId);
+                    CoreTestConstants.ClientId);
 
             AssertByUsername(
                 userTuple,
@@ -90,7 +90,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 _legacyCachePersistence,
                 new HashSet<string>
                 {
-                    TestConstants.SovereignEnvironment
+                    CoreTestConstants.SovereignEnvironment
                 },
                 "other_client_id");
 
@@ -113,14 +113,14 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             PopulateLegacyWithRtAndId( //different clientId -> should not be deleted
                 _legacyCachePersistence,
                 "other_client_id",
-                TestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
                 "uid1",
                 "tenantId1",
                 "user1_other_client_id");
 
             PopulateLegacyWithRtAndId( //different env -> should not be deleted
                 _legacyCachePersistence,
-                TestConstants.ClientId,
+                CoreTestConstants.ClientId,
                 "other_env",
                 "uid1",
                 "tenantId1",
@@ -131,9 +131,9 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 _legacyCachePersistence,
                 new HashSet<string>
                 {
-                    TestConstants.ProductionPrefNetworkEnvironment
+                    CoreTestConstants.ProductionPrefNetworkEnvironment
                 },
-                TestConstants.ClientId,
+                CoreTestConstants.ClientId,
                 "username_does_not_matter",
                 "uid1.tenantId1");
 
@@ -143,10 +143,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                     _legacyCachePersistence,
                     new HashSet<string>
                     {
-                        TestConstants.ProductionPrefNetworkEnvironment,
+                        CoreTestConstants.ProductionPrefNetworkEnvironment,
                         "other_env"
                     },
-                    TestConstants.ClientId);
+                    CoreTestConstants.ClientId);
 
             AssertByUsername(
                 userTuple,
@@ -171,14 +171,14 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             PopulateLegacyWithRtAndId(
                 _legacyCachePersistence,
                 "other_client_id",
-                TestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
                 null,
                 null,
                 "no_client_info_user3"); // no client info, different client id -> won't be deleted
 
             PopulateLegacyWithRtAndId(
                 _legacyCachePersistence,
-                TestConstants.ClientId,
+                CoreTestConstants.ClientId,
                 "other_env",
                 null,
                 null,
@@ -191,10 +191,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                     _legacyCachePersistence,
                     new HashSet<string>
                     {
-                        TestConstants.ProductionPrefNetworkEnvironment,
+                        CoreTestConstants.ProductionPrefNetworkEnvironment,
                         "other_env"
                     },
-                    TestConstants.ClientId);
+                    CoreTestConstants.ClientId);
 
             AssertByUsername(
                 userTuple,
@@ -215,9 +215,9 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 _legacyCachePersistence,
                 new HashSet<string>
                 {
-                    TestConstants.ProductionPrefNetworkEnvironment
+                    CoreTestConstants.ProductionPrefNetworkEnvironment
                 },
-                TestConstants.ClientId,
+                CoreTestConstants.ClientId,
                 "no_client_info_user3",
                 "");
 
@@ -228,10 +228,10 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 _legacyCachePersistence,
                 new HashSet<string>
                 {
-                    TestConstants.ProductionPrefNetworkEnvironment,
+                    CoreTestConstants.ProductionPrefNetworkEnvironment,
                     "other_env"
                 },
-                TestConstants.ClientId);
+                CoreTestConstants.ClientId);
 
             AssertByUsername(
                 userTuple,
@@ -268,9 +268,9 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 _legacyCachePersistence,
                 new HashSet<string>
                 {
-                    TestConstants.ProductionPrefNetworkEnvironment
+                    CoreTestConstants.ProductionPrefNetworkEnvironment
                 },
-                TestConstants.ClientId,
+                CoreTestConstants.ClientId,
                 "",
                 "");
 
@@ -281,6 +281,48 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
         }
 
         [TestMethod]
+        public void RemoveAdalUser_RemovesAdalEntitiesWithClientInfoAndWithout()
+        {
+            // in case of adalv3 -> adalv4 -> msal2 migration
+            // adal cache can have different cache entities for the
+            // same user/account with client info and wihout
+            // CacheFallbackOperations.RemoveAdalUser should remove both
+            PopulateLegacyWithRtAndId(
+                _legacyCachePersistence,
+                CoreTestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.Uid,
+                CoreTestConstants.Utid,
+                CoreTestConstants.DisplayableId,
+                CoreTestConstants.ScopeStr);
+
+            AssertCacheEntryCount(1);
+
+            PopulateLegacyWithRtAndId(
+                _legacyCachePersistence,
+                CoreTestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
+                null,
+                null,
+                CoreTestConstants.DisplayableId,
+                CoreTestConstants.ScopeForAnotherResourceStr);
+
+            AssertCacheEntryCount(2);
+
+            CacheFallbackOperations.RemoveAdalUser(
+                _legacyCachePersistence,
+                new HashSet<string>
+                {
+                    CoreTestConstants.ProductionPrefNetworkEnvironment
+                },
+                CoreTestConstants.ClientId,
+                CoreTestConstants.DisplayableId,
+                CoreTestConstants.Uid + "." + CoreTestConstants.Utid);
+
+            AssertCacheEntryCount(0);
+        }
+
+        [TestMethod]
         public void WriteAdalRefreshToken_ErrorLog()
         {
             // Arrange
@@ -288,14 +330,14 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             CoreExceptionFactory.Instance = new TestExceptionFactory();
 
             var rtItem = new MsalRefreshTokenCacheItem(
-                TestConstants.ProductionPrefNetworkEnvironment,
-                TestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ClientId,
                 "someRT",
                 MockHelpers.CreateClientInfo("u1", "ut1"));
 
             var idTokenCacheItem = new MsalIdTokenCacheItem(
-                TestConstants.ProductionPrefCacheEnvironment, // different env
-                TestConstants.ClientId,
+                CoreTestConstants.ProductionPrefCacheEnvironment, // different env
+                CoreTestConstants.ClientId,
                 MockHelpers.CreateIdToken("u1", "username"),
                 MockHelpers.CreateClientInfo("u1", "ut1"),
                 "ut1");
@@ -319,40 +361,40 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
         {
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
-                TestConstants.ClientId,
-                TestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
                 "uid1",
                 "tenantId1",
                 "user1");
 
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
-                TestConstants.ClientId,
-                TestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
                 "uid2",
                 "tenantId2",
                 "user2");
 
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
-                TestConstants.ClientId,
-                TestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
                 null,
                 null,
                 "no_client_info_user3");
 
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
-                TestConstants.ClientId,
-                TestConstants.ProductionPrefNetworkEnvironment,
+                CoreTestConstants.ClientId,
+                CoreTestConstants.ProductionPrefNetworkEnvironment,
                 null,
                 null,
                 "no_client_info_user4");
 
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
-                TestConstants.ClientId,
-                TestConstants.SovereignEnvironment, // different env
+                CoreTestConstants.ClientId,
+                CoreTestConstants.SovereignEnvironment, // different env
                 "uid4",
                 "tenantId4",
                 "sovereign_user5");
@@ -360,7 +402,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             PopulateLegacyWithRtAndId(
                 legacyCachePersistence,
                 "other_client_id", // different client id
-                TestConstants.SovereignEnvironment,
+                CoreTestConstants.SovereignEnvironment,
                 "uid5",
                 "tenantId5",
                 "user6");
@@ -383,6 +425,18 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             string uid,
             string uniqueTenantId,
             string username)
+        {
+            PopulateLegacyWithRtAndId(legacyCachePersistence, clientId, env, uid, uniqueTenantId, username, "scope1");
+        }
+
+        private static void PopulateLegacyWithRtAndId(
+            ILegacyCachePersistence legacyCachePersistence,
+            string clientId,
+            string env,
+            string uid,
+            string uniqueTenantId,
+            string username,
+            string scope)
         {
             string clientInfoString;
             if (string.IsNullOrEmpty(uid) || string.IsNullOrEmpty(uniqueTenantId))
@@ -409,7 +463,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
                 idTokenCacheItem,
                 "https://" + env + "/common",
                 "uid",
-                "scope1");
+                scope);
         }
 
         private static void AssertByUsername(

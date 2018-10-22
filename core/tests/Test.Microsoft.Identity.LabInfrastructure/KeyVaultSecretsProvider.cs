@@ -143,6 +143,11 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                     if (_assertionCert == null)
                     {
                         var cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
+                        if (cert == null)
+                        {
+                            throw new InvalidOperationException(
+                                "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
+                        }
                         _assertionCert = new ClientAssertionCertificate(_config.ClientId, cert);
                     }
                     authResult = await authContext.AcquireTokenAsync(resource, _assertionCert).ConfigureAwait(false);

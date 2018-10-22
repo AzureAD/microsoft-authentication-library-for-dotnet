@@ -27,19 +27,31 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Test.MSAL.NET.Unit
 {
-    class TestConstants
+    class MsalTestConstants
     {
-        public static readonly string ScopeStr = "scope1 scope2";
-        public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] {"r1/scope1", "r1/scope2"});
+        public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
+        public static readonly string ScopeStr = "r1/scope1 r1/scope2";
         public static readonly SortedSet<string> ScopeForAnotherResource = new SortedSet<string>(new[] { "r2/scope1", "r2/scope2" });
+        public static readonly SortedSet<string> CacheMissScope = new SortedSet<string>(new[] { "r3/scope1", "r3/scope2" });
+        public static readonly string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
+        public static readonly string Uid = "my-uid";
+        public static readonly string Utid = "my-utid";
+
         public static readonly string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public static readonly string ProductionPrefCacheEnvironment = "login.windows.net";
+        public static readonly string ProductionNotPrefEnvironmentAlias = "sts.windows.net";
+
         public static readonly string SovereignEnvironment = "login.microsoftonline.de";
         public static readonly string AuthorityHomeTenant = "https://" + ProductionPrefNetworkEnvironment + "/home/";
+        public static readonly string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public static readonly string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
         public static readonly string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
@@ -52,29 +64,41 @@ namespace Test.Microsoft.Identity.Core.Unit
         public static readonly string DisplayableId = "displayable@id.com";
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
-        public static readonly string Uid = "my-uid";
-        public static readonly string Utid= "my-utid";
+        public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly string DefaultPassword = "password";
+        public static readonly string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
+        public static readonly string DefaultAuthorizationCode = "DefaultAuthorizationCode";
+        public static readonly string DefaultAccessToken = "DefaultAccessToken";
+        public static readonly string DefaultClientAssertion = "DefaultClientAssertion";
+        public const string RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9";
+        public const TokenSubjectType TokenSubjectTypeUser = 0;
+        public enum AuthorityType { B2C };
+        public static string[] ProdEnvAliases = new string[] {
+                                "login.microsoftonline.com",
+                                "login.windows.net",
+                                "login.microsoft.com",
+                                "sts.windows.net"};
 
-        public static readonly string UserIdentifier = CreateUserIdentifer();
-
-        public static string CreateUserIdentifer()
-        {
-            return CreateUserIdentifer(Uid, Utid);
-        }
+        public static readonly AccountId UserIdentifier = CreateUserIdentifer();
 
         public static string GetDiscoveryEndpoint(string authority)
         {
             return authority + DiscoveryEndPoint;
         }
 
-        public static string CreateUserIdentifer(string uid, string utid)
+        public static AccountId CreateUserIdentifer()
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
-                Base64UrlHelpers.Encode(uid),
-                Base64UrlHelpers.Encode(utid));
+            return CreateUserIdentifier(Uid, Utid);
         }
 
+        public static AccountId CreateUserIdentifier(string uid, string utid)
+        {
+            return new AccountId(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid), uid, utid);
+        }
+
+        public static readonly Account User = new Account(UserIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
+  
         public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
         public static readonly string OnPremiseClientId = "on_premise_client_id";
         public static readonly string OnPremiseUniqueId = "on_premise_unique_id";
@@ -86,5 +110,8 @@ namespace Test.Microsoft.Identity.Core.Unit
         public static readonly string OnPremiseClientSecret = "on_premise_client_secret";
         public static readonly string OnPremiseUid = "my-OnPremise-UID";
         public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
+        public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly Account OnPremiseUser = new Account(
+            new AccountId(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
     }
 }
