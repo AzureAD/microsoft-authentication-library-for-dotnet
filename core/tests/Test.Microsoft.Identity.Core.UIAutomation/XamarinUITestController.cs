@@ -38,7 +38,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         TimeSpan defaultSearchTimeout;
         TimeSpan defaultRetryFrequency;
         TimeSpan defaultPostTimeout;
-        const int defaultSearchTimeoutSec = 10;
+        const int defaultSearchTimeoutSec = 30;
         const int defaultRetryFrequencySec = 1;
         const int defaultPostTimeoutSec = 1;
         const string CSSIDSelector = "[id|={0}]";
