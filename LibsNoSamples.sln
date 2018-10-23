@@ -30,7 +30,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.netcore"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.net45", "msal\tests\Test.MSAL.NET.Unit.net45\Test.MSAL.NET.Unit.net45.csproj", "{DA8E7933-0A56-4668-9786-ECECA3D16944}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.Common", "msal\tests\Test.MSAL.NET.Unit.Common\Test.MSAL.NET.Unit.Common.csproj", "{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Common", "msal\tests\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj", "{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.ADAL.NET.Unit.net45", "adal\tests\Test.ADAL.NET.Unit.net45\Test.ADAL.NET.Unit.net45.csproj", "{91E9E564-8A44-457B-A97C-E76C9F6275D6}"
 EndProject

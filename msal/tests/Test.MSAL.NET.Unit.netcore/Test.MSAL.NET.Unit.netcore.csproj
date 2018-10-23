@@ -33,6 +33,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj" />
     <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\Test.MSAL.NET.Unit.Common\Test.MSAL.NET.Unit.Common.csproj" />
+    <ProjectReference Include="..\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj" />
   </ItemGroup>
 </Project>

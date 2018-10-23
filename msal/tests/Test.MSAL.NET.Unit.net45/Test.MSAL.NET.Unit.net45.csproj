@@ -29,7 +29,7 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Test.MSAL.NET.Unit.Common\Test.MSAL.NET.Unit.Common.csproj" />
+    <ProjectReference Include="..\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj" />
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
