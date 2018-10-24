@@ -44,7 +44,6 @@ namespace Test.ADAL.NET.Unit
     [TestClass]
     public class ClaimsChallengeExceptionTests
     {
-        private PlatformParameters platformParameters;
         public static string claims = "{\\\"access_token\\\":{\\\"polids\\\":{\\\"essential\\\":true,\\\"values\\\":[\\\"5ce770ea-8690-4747-aa73-c5b3cd509cd4\\\"]}}}";
 
         public static string responseContent = "{\"error\":\"interaction_required\",\"claims\":\"" + claims + "\"}";
@@ -56,7 +55,6 @@ namespace Test.ADAL.NET.Unit
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
-            platformParameters = new PlatformParameters(PromptBehavior.Auto);
         }
 
         [TestMethod]
@@ -130,7 +128,9 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for claims challenge exception with client assertion")]
         public void AdalClaimsChallengeExceptionThrownWithClientAssertionWhenClaimsChallengeRequiredTest()
         {
-            var certificate = new X509Certificate2("valid_cert.pfx", AdalTestConstants.DefaultPassword);
+            var certificate = new X509Certificate2(
+                ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                AdalTestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(AdalTestConstants.DefaultClientId, certificate);
             var context = new AuthenticationContext(AdalTestConstants.DefaultAuthorityCommonTenant, new TokenCache());
 

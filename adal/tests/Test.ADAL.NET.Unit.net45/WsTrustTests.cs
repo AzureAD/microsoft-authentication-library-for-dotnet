@@ -33,14 +33,15 @@ using System.Xml.Linq;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    [DeploymentItem("WsTrustResponse.xml")]
+    [DeploymentItem("Resources\\WsTrustResponse.xml")]
     public class WsTrustTests
     {
         [TestMethod]
         [TestCategory("WsTrustTests")]
         public void TestCreateFromResponseDocument_WhenInputContainsWhitespace_ShouldPreserveWhitespace()
         {
-            string sample = File.ReadAllText("WsTrustResponse.xml");
+            string sample = File.ReadAllText(
+                Microsoft.Identity.Core.Unit.ResourceHelper.GetTestResourceRelativePath("WsTrustResponse.xml"));
             string characteristic = "\n        <saml:Assertion";
             StringAssert.Contains(sample, characteristic);
             WsTrustResponse resp = WsTrustResponse.CreateFromResponseDocument(
@@ -52,7 +53,8 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("WsTrustTests")]
         public void TestCreateFromResponse_WhenInputContainsWhitespace_ShouldPreserveWhitespace()
         {
-            string sample = File.ReadAllText("WsTrustResponse.xml");
+            string sample = File.ReadAllText(
+                Microsoft.Identity.Core.Unit.ResourceHelper.GetTestResourceRelativePath("WsTrustResponse.xml"));
             string characteristic = "\n        <saml:Assertion";
             StringAssert.Contains(sample, characteristic);
             WsTrustResponse resp = WsTrustResponse.CreateFromResponse(sample, WsTrustVersion.WsTrust2005);

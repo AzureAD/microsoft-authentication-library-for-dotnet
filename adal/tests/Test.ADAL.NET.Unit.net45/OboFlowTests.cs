@@ -43,6 +43,8 @@ using Test.ADAL.NET.Common.Mocks;
 
 namespace Test.ADAL.NET.Unit
 {
+#if !NET_CORE // Enable when bug https://IdentityDivision.visualstudio.com/_workitems/edit/573878 is fixed
+
     /// <summary>
     /// This test class executes and validates OBO scenarios where token cache may or may not 
     /// contain entries with user assertion hash. It accounts for cases where there is
@@ -380,7 +382,6 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(2, context.TokenCache.Count);
         }
 
-
         [TestMethod]
         [TestCategory("OboFlowTests")]
         public async Task MultiUserWithHashInCacheMatchingUsernameAndMatchingAssertionTestAsync()
@@ -430,8 +431,9 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(2, context.TokenCache.Count);
 
             //assertion hash should be stored in the cache entry.
-            Assert.AreEqual(_crypto.CreateSha256Hash(accessToken),
-                context.TokenCache.tokenCacheDictionary.Values.First().UserAssertionHash);
+            var expectedHash = _crypto.CreateSha256Hash(accessToken);
+
+            Assert.IsTrue(context.TokenCache.tokenCacheDictionary.Values.Any(v => v.UserAssertionHash == expectedHash));
         }
 
         [TestMethod]
@@ -966,4 +968,5 @@ namespace Test.ADAL.NET.Unit
             }
         }
     }
+#endif
 }

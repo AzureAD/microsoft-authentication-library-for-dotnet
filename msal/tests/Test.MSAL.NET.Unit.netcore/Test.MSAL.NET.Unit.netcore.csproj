@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET_CORE;MSAL_TEST</DefineConstants>
 
     <IsPackable>false</IsPackable>
     <SignAssembly>true</SignAssembly>
@@ -16,8 +16,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     
-
-
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0-beta" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0-beta" />
@@ -29,9 +27,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj" />
+
     <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
     <ProjectReference Include="..\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj" />
   </ItemGroup>

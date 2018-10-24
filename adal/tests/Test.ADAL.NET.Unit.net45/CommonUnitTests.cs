@@ -47,22 +47,7 @@ namespace Test.ADAL.NET.Unit
 
         public static void AdalIdTest()
         {
-            var adalParameters = AdalIdHelper.GetAdalIdParameters();
-
-            Assert.AreEqual(4, adalParameters.Count);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
-            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
-            adalParameters = AdalIdHelper.GetAdalIdParameters();
-
-            Assert.AreEqual(4, adalParameters.Count);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
-            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
-            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
+           
         }
     }
 }

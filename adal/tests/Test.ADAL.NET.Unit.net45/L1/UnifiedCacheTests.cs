@@ -41,6 +41,7 @@ using Microsoft.Identity.Core.UI;
 
 namespace Test.ADAL.NET.Integration
 {
+#if !NET_CORE  // PromptBehavior
     [TestClass]
     public class UnifiedCacheTests
     {
@@ -115,4 +116,5 @@ namespace Test.ADAL.NET.Integration
             Assert.IsNotNull(result);
         }
     }
+#endif
 }

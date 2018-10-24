@@ -43,11 +43,11 @@ using Microsoft.Identity.Core.UI;
 
 namespace Test.ADAL.NET.Integration
 {
+#if !NET_CORE
     [TestClass]
     public class SovereignCloudsTests
     {
         private PlatformParameters _platformParameters;
-
         private const string SovereignAuthorityHost = "login.microsoftonline.de";
 
         private readonly string _sovereignTenantSpecificAuthority = String.Format("https://{0}/{1}/", SovereignAuthorityHost, AdalTestConstants.SomeTenantId);
@@ -183,4 +183,5 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
     }
+#endif
 }

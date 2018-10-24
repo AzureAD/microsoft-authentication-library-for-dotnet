@@ -44,6 +44,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.Common;
+using Microsoft.Identity.Core;
 using Test.ADAL.NET.Common;
 using Test.ADAL.NET.Common.Mocks;
 using Test.Microsoft.Identity.Core.Unit;
@@ -52,8 +53,8 @@ using AuthorityType=Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Ins
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    [DeploymentItem("valid_cert.pfx")]
-    [DeploymentItem("valid_cert2.pfx")]
+    [DeploymentItem("Resources\\valid_cert.pfx")]
+    [DeploymentItem("Resources\\valid_cert2.pfx")]
     public class UnitTests
     {
         private const string ComplexString = "asdfk+j0a-=skjwe43;1l234 1#$!$#%345903485qrq@#$!@#$!(rekr341!#$%Ekfaآزمايشsdsdfsddfdgsfgjsglk==CVADS";
@@ -67,27 +68,7 @@ namespace Test.ADAL.NET.Unit
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
         }
 
-        [TestMethod]
-        [Description("Tests for SecureClientSecret")]
-        public void SecureClientSecretTest()
-        {
-            SecureString str = new SecureString();
-            str.AppendChar('x');
-            str.MakeReadOnly();
-            SecureClientSecret secret = new SecureClientSecret(str);
-            IDictionary<string, string> paramStr = new Dictionary<string, string>();
-            secret.ApplyTo(paramStr);
-            Assert.IsTrue(paramStr.ContainsKey("client_secret"));
-            Assert.AreEqual("x", paramStr["client_secret"]);
-
-            str = new SecureString();
-            str.AppendChar('x');
-            secret = new SecureClientSecret(str);
-            paramStr = new Dictionary<string, string>();
-            secret.ApplyTo(paramStr);
-            Assert.IsTrue(paramStr.ContainsKey("client_secret"));
-            Assert.AreEqual("x", paramStr["client_secret"]);
-        }
+      
 
         [TestMethod]
         [Description("Positive Test for UrlEncoding")]
@@ -222,15 +203,39 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for CreateSha256Hash method in PlatformSpecificHelper")]
         public void CreateSha256HashTest()
         {
-            CommonUnitTests.CreateSha256HashTest();
+            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
+
+            string hash = crypto.CreateSha256Hash("abc");
+            string hash2 = crypto.CreateSha256Hash("abd");
+            string hash3 = crypto.CreateSha256Hash("abc");
+            Assert.AreEqual(hash, hash3);
+            Assert.AreNotEqual(hash, hash2);
+            Assert.AreEqual(hash, "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0=");
         }
 
+#if DESKTOP // on netcore the parameters are different
         [TestMethod]
         [Description("Test for ADAL Id")]
-        public void AdalIdTest()
+        public void AdalIdDesktopTest()
         {
-            CommonUnitTests.AdalIdTest();
+            var adalParameters = AdalIdHelper.GetAdalIdParameters();
+
+            Assert.AreEqual(4, adalParameters.Count);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
+            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
+            adalParameters = AdalIdHelper.GetAdalIdParameters();
+
+            Assert.AreEqual(4, adalParameters.Count);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Product]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.Version]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.CpuPlatform]);
+            Assert.IsNotNull(adalParameters[AdalIdParameter.OS]);
+            Assert.IsFalse(adalParameters.ContainsKey(AdalIdParameter.DeviceModel));
         }
+#endif
 
         [TestMethod]
         [Description("Test for Id Token Parsing")]
@@ -275,7 +280,9 @@ namespace Test.ADAL.NET.Unit
             string[] certs = { "valid_cert.pfx", "valid_cert2.pfx" };
             for (int i = 0; i < 2; i++)
             {
-                X509Certificate2 x509Certificate = new X509Certificate2(certs[i], "password");
+                X509Certificate2 x509Certificate = new X509Certificate2(
+                       ResourceHelper.GetTestResourceRelativePath(certs[i]),
+                       "password");
                 ClientAssertionCertificate cac = new ClientAssertionCertificate("some_id", x509Certificate);
                 byte[] signature = cac.Sign(Message);
                 Assert.IsNotNull(signature);

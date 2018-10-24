@@ -44,6 +44,7 @@ using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.ADAL.NET.Integration
 {
+#if !NET_CORE
     [TestClass]
     public class PromptBehaviorTests
     {
@@ -82,7 +83,7 @@ namespace Test.ADAL.NET.Integration
                 await
 #pragma warning disable UseConfigureAwait // Use ConfigureAwait
                     context.AcquireTokenAsync(AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId,
-                        AdalTestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Auto));
+                        AdalTestConstants.DefaultRedirectUri, new PlatformParameters(PromptBehavior.Auto)); 
 #pragma warning restore UseConfigureAwait // Use ConfigureAwait
 
             Assert.IsNotNull(result);
@@ -389,4 +390,6 @@ namespace Test.ADAL.NET.Integration
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
         }
     }
+
+#endif
 }

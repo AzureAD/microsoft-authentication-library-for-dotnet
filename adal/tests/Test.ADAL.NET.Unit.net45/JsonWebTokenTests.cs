@@ -43,11 +43,9 @@ using AuthenticationContext = Microsoft.IdentityModel.Clients.ActiveDirectory.Au
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    [DeploymentItem("valid_cert.pfx")]
+    [DeploymentItem("Resources\\valid_cert.pfx")]
     public class JsonWebTokenTests
     {
-        private PlatformParameters platformParameters;
-
         MockHttpMessageHandler X5CMockHandler = new MockHttpMessageHandler(request =>
         {
             var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -65,7 +63,7 @@ namespace Test.ADAL.NET.Unit
         {
             Method = HttpMethod.Post,
             ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(AdalTestConstants.DefaultUniqueId, AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultResource)
-    };
+        };
 
         MockHttpMessageHandler EmptyX5CMockHandler = new MockHttpMessageHandler(request =>
             {
@@ -84,7 +82,7 @@ namespace Test.ADAL.NET.Unit
         {
             Method = HttpMethod.Post,
             ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(AdalTestConstants.DefaultUniqueId, AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultResource)
-    };
+        };
 
         [TestInitialize]
         public void Initialize()
@@ -93,14 +91,15 @@ namespace Test.ADAL.NET.Unit
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
             InstanceDiscovery.InstanceCache.Clear();
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
-            platformParameters = new PlatformParameters(PromptBehavior.Auto);
         }
 
         [TestMethod]
         [Description("Test for Json Web Token with client assertion and a X509 public certificate claim")]
         public async Task JsonWebTokenWithX509PublicCertClaimTestAsync()
         {
-            var certificate = new X509Certificate2("valid_cert.pfx", AdalTestConstants.DefaultPassword);
+            var certificate = new X509Certificate2(
+                Microsoft.Identity.Core.Unit.ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                AdalTestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(AdalTestConstants.DefaultClientId, certificate);
             var context = new AuthenticationContext(AdalTestConstants.TenantSpecificAuthority, new TokenCache());
 
@@ -138,7 +137,9 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for default client assertion without X509 public certificate claim")]
         public async Task JsonWebTokenDefaultX509PublicCertClaimTestAsync()
         {
-            var certificate = new X509Certificate2("valid_cert.pfx", AdalTestConstants.DefaultPassword);
+            var certificate = new X509Certificate2(
+                Microsoft.Identity.Core.Unit.ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                AdalTestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionCertificate(AdalTestConstants.DefaultClientId, certificate);
             var context = new AuthenticationContext(AdalTestConstants.TenantSpecificAuthority, new TokenCache());
 
@@ -159,20 +160,33 @@ namespace Test.ADAL.NET.Unit
         [Description("Test for client assertion with developer implemented client assertion")]
         public async Task JsonWebTokenWithDeveloperImplementedClientAssertionTestAsync()
         {
-            var certificate = new X509Certificate2("valid_cert.pfx", AdalTestConstants.DefaultPassword);
             var clientAssertion = new ClientAssertionTestImplementation();
             var context = new AuthenticationContext(AdalTestConstants.TenantSpecificAuthority, new TokenCache());
 
             AdalHttpMessageHandlerFactory.AddMockHandler(EmptyX5CMockHandler);
-            AuthenticationResult result = await context.AcquireTokenAsync(AdalTestConstants.DefaultResource, clientAssertion, true).ConfigureAwait(false);
+            AuthenticationResult result = await context.AcquireTokenAsync(
+                AdalTestConstants.DefaultResource, 
+                clientAssertion, 
+                true).ConfigureAwait(false);
             Assert.IsNotNull(result.AccessToken);
 
             AdalHttpMessageHandlerFactory.AddMockHandler(EmptyX5CMockHandler);
-            result = await context.AcquireTokenByAuthorizationCodeAsync(AdalTestConstants.DefaultAuthorizationCode, AdalTestConstants.DefaultRedirectUri, clientAssertion, AdalTestConstants.DefaultResource, true).ConfigureAwait(false);
+            result = await context.AcquireTokenByAuthorizationCodeAsync(
+                AdalTestConstants.DefaultAuthorizationCode, 
+                AdalTestConstants.DefaultRedirectUri, 
+                clientAssertion, 
+                AdalTestConstants.DefaultResource, 
+                true).ConfigureAwait(false);
+
             Assert.IsNotNull(result.AccessToken);
 
             AdalHttpMessageHandlerFactory.AddMockHandler(EmptyX5CMockHandler);
-            result = await context.AcquireTokenAsync(AdalTestConstants.DefaultResource, clientAssertion, new UserAssertion("Access Token"), true).ConfigureAwait(false);
+            result = await context.AcquireTokenAsync(
+                AdalTestConstants.DefaultResource, 
+                clientAssertion, 
+                new UserAssertion("Access Token"), 
+                true).ConfigureAwait(false);
+
             Assert.IsNotNull(result.AccessToken);
         }
     }

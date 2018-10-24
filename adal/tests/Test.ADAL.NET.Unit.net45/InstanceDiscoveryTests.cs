@@ -256,6 +256,7 @@ namespace Test.ADAL.NET.Unit
             });
         }
 
+#if !NET_CORE // no support for private object
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
         public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequestAsync()
@@ -333,6 +334,7 @@ namespace Test.ADAL.NET.Unit
                 await ((Task)privateObject.Invoke("PreTokenRequestAsync")).ConfigureAwait(false);
             }
         }
+#endif
 
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
@@ -401,6 +403,7 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(1, AdalHttpMessageHandlerFactory.MockHandlersCount()); // Still 1 mock response remaining, so no new request was attempted
         }
 
+#if !NET_CORE // no support for PrivateObject
         [TestMethod]
         [TestCategory("InstanceDiscoveryTests")]
         public async Task TestInstanceDiscovery_WhenMetadataIsReturned_ShouldUsePreferredNetworkForTokenRequest_WithDstsAsync()
@@ -434,5 +437,6 @@ namespace Test.ADAL.NET.Unit
 
             Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount()); // This validates that all the mock handlers have been consumed
         }
+#endif
     }
 }

@@ -1,21 +1,27 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
-    <DefineConstants>$(DefineConstants);DESKTOP;ADAL_TEST</DefineConstants>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <DefineConstants>$(DefineConstants);NET_CORE;ADAL_TEST</DefineConstants>
+    <IsPackable>false</IsPackable>
     <SignAssembly>true</SignAssembly>
     <DelaySign>true</DelaySign>
     <AssemblyOriginatorKeyFile>../../../build/35MSSharedLib1024.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-   
+
+    <Compile Include="..\Test.ADAL.NET.Unit.net45\**\*.cs" Exclude="..\Test.ADAL.NET.Unit.net45\obj\**\*;..\Test.ADAL.NET.Unit.net45\bin\**\*" />
     <Compile Include="..\..\..\msal\tests\Test.MSAL.NET.Unit.net45\CoreTests\**\*" LinkBase="CoreTests" />
+    <None Include="..\Test.ADAL.NET.Unit.net45\Resources\**\*" LinkBase="Resources">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj" />
     <ProjectReference Include="..\Test.ADAL.NET.Common\Test.ADAL.NET.Common.csproj" />
     <!-- This reference is a workaround for a bug in .net46 
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.3" />
-    <Reference Include="System.Windows.Forms" />
+    
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -31,14 +37,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.4" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Resources\**" />
-    <EmbeddedResource Remove="Resources\**" />
-    <None Include="Resources\**" />  
-    <None Update="Resources\**">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>

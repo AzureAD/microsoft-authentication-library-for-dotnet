@@ -38,7 +38,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    [DeploymentItem("oldcache.serialized")]
+    [DeploymentItem("Resources\\oldcache.serialized")]
     public class TokenCacheUnitTests
     {
         [TestInitialize]
@@ -58,6 +58,8 @@ namespace Test.ADAL.NET.Unit
             TokenCacheTests.DefaultTokenCacheTest();
         }
 
+#if !NET_CORE
+
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
         public async Task TestUniqueIdDisplayableIdLookupAsync()
@@ -72,6 +74,7 @@ namespace Test.ADAL.NET.Unit
         {
             await TokenCacheTests.TokenCacheKeyTestAsync(new PlatformParameters(PromptBehavior.Auto, null)).ConfigureAwait(false);
         }
+#endif
 
         [TestMethod]
         [Description("Test for Token Cache Operations")]

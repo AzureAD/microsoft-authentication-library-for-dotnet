@@ -56,12 +56,13 @@ namespace Test.ADAL.NET.Integration
             ResetInstanceDiscovery();
         }
 
-        public void ResetInstanceDiscovery()
+        private void ResetInstanceDiscovery()
         {
             InstanceDiscovery.InstanceCache.Clear();
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
         }
 
+#if DESKTOP // UserPasswordCredential available only on net45
         [TestMethod]
         [Description("Test for AcquireToken with an empty cache")]
         public async Task AcquireTokenWithEmptyCache_GetsTokenFromServiceTestAsync()
@@ -126,7 +127,6 @@ namespace Test.ADAL.NET.Integration
                 Assert.AreEqual(1, context.TokenCache.Count);
             }
         }
-
         [TestMethod]
         [Description("Test for AcquireToken with valid token in cache")]
         public async Task AcquireTokenWithValidTokenInCache_ReturnsCachedTokenAsync()
@@ -405,5 +405,8 @@ namespace Test.ADAL.NET.Integration
                 Assert.AreEqual(0, context.TokenCache.Count);
             }
         }
+#endif
+
     }
+
 }

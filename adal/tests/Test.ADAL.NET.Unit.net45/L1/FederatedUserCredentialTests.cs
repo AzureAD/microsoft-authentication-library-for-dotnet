@@ -47,10 +47,11 @@ using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.ADAL.NET.Integration
 {
+
     [TestClass]
-    [DeploymentItem("TestMex.xml")]
-    [DeploymentItem("WsTrustResponse.xml")]
-    [DeploymentItem("WsTrustResponse13.xml")]
+    [DeploymentItem("Resources\\TestMex.xml")]
+    [DeploymentItem("Resources\\WsTrustResponse.xml")]
+    [DeploymentItem("Resources\\WsTrustResponse13.xml")]
     public class FederatedUserCredentialTests
     {
         [TestInitialize]
@@ -69,6 +70,7 @@ namespace Test.ADAL.NET.Integration
             HttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
         }
 
+#if DESKTOP // UserPasswordCredential only supported on net45
         [TestMethod]
         [Description("Test for AcquireToken with empty cache")]
         public async Task AcquireTokenWithEmptyCache_GetsTokenFromServiceTestAsync()
@@ -153,6 +155,9 @@ namespace Test.ADAL.NET.Integration
             }
         }
 
+
+#endif
+
         [TestMethod]
         [Description("Integrated auth using upn of federated user.")]
         public async Task IntegratedAuthUsingUpn_GetsTokenFromServiceTestAsync()
@@ -191,7 +196,8 @@ namespace Test.ADAL.NET.Integration
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml")))
                         }
                     });
 
@@ -201,7 +207,8 @@ namespace Test.ADAL.NET.Integration
                         Method = HttpMethod.Post,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(File.ReadAllText("WsTrustResponse13.xml"))
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("WsTrustResponse13.xml")))
                         }
                     });
 
@@ -440,7 +447,9 @@ namespace Test.ADAL.NET.Integration
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(File.ReadAllText("TestMex.xml").Replace("<wsp:All>", " "))
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml"))
+                                .Replace("<wsp:All>", " "))
                         }
                     });
 
@@ -501,7 +510,8 @@ namespace Test.ADAL.NET.Integration
                         Method = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
-                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
+                            Content = new StringContent(
+                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("TestMex.xml")))
                         }
                     });
 
@@ -536,76 +546,6 @@ namespace Test.ADAL.NET.Integration
             }
         }
 
-        [TestMethod]
-        [Description("Password of federated user provided and Mex does not return username/password endpoint")]
-        public async Task PasswordAndUpnProvided_MexDoesNotReturnUsernamePasswordEndpointTestAsync()
-        {
-            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
-            {
-                AuthenticationContext context = new AuthenticationContext(
-                    httpManager,
-                    AdalTestConstants.DefaultAuthorityCommonTenant,
-                    AuthorityValidationType.NotProvided,
-                    new TokenCache());
-                await context.Authenticator.UpdateFromTemplateAsync(null).ConfigureAwait(false);
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        Method = HttpMethod.Get,
-                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                        {
-                            Content = new StringContent(
-                                "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
-                                "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
-                                "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
-                                "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
-                                ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                        },
-                        QueryParams = new Dictionary<string, string>()
-                        {
-                            {"api-version", "1.0"}
-                        }
-                    });
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/mex")
-                    {
-                        Method = HttpMethod.Get,
-                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                        {
-                            Content = new StringContent(File.ReadAllText("TestMex.xml"))
-                        }
-                    });
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler("https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed")
-                    {
-                        Method = HttpMethod.Post,
-                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
-                        {
-                            Content = new StringContent("Not found")
-                        }
-                    });
-
-                // Call acquire token, endpoint not found
-                var result = AssertException.TaskThrows<AdalException>(
-                    () => context.AcquireTokenAsync(
-                        AdalTestConstants.DefaultResource,
-                        AdalTestConstants.DefaultClientId,
-                        new UserPasswordCredential(AdalTestConstants.DefaultDisplayableId, AdalTestConstants.DefaultPassword)));
-
-                // Check exception message
-                Assert.AreEqual(
-                    "Federated service at https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed returned error: Not found",
-                    result.Message);
-
-                // There should be no cached entries.
-                Assert.AreEqual(0, context.TokenCache.Count);
-
-                // All mocks are consumed
-                Assert.AreEqual(0, HttpMessageHandlerFactory.MockHandlersCount());
-            }
-        }
+      
     }
 }

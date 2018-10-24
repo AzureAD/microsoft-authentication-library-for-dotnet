@@ -42,7 +42,7 @@ namespace Test.ADAL.NET.Unit
     /// <summary>
     /// Test implementation of IClientAssertionCertificate.
     /// </summary>
-    [DeploymentItem("valid_cert.pfx")]
+    [DeploymentItem("Resources\\valid_cert.pfx")]
     public class ClientAssertionTestImplementation : IClientAssertionCertificate
     {
         public string ClientId { get { return AdalTestConstants.DefaultClientId; } }
@@ -58,7 +58,9 @@ namespace Test.ADAL.NET.Unit
 
         public ClientAssertionTestImplementation()
         {
-            this.Certificate = new X509Certificate2("valid_cert.pfx", AdalTestConstants.DefaultPassword);
+            this.Certificate = new X509Certificate2(
+                Microsoft.Identity.Core.Unit.ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"), 
+                AdalTestConstants.DefaultPassword);
         }
     }
 }

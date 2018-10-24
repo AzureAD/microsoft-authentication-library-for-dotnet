@@ -30,8 +30,8 @@ namespace Test.Microsoft.Identity.Core.Unit
     public class ResourceHelper
     {
         /// <summary>
-        /// Gets the relative path to a test resource. Resource should be using DeploymentItem (desktop) or 
-        /// by setting Copy to Output Directory to Always (other platforms)
+        /// Gets the relative path to a test resource that is deployed to the test, across
+        /// netcore and net desktop.
         /// </summary>
         /// <remarks>
         /// This is just a simple workaround for DeploymentItem not being implemented in mstest on netcore

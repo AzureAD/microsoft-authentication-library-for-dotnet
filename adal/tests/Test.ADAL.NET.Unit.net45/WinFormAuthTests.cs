@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,48 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
+#if DESKTOP
 
-using Microsoft.Identity.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Linq;
-using System.Security;
+using System;
+using System.Windows.Forms;
+using Microsoft.Identity.Core.UI;
+using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal;
 
-namespace Test.Microsoft.Identity.Core.Unit.WsTrustTests
+namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    public class UsernamePasswordInputTests
+    public class WinFormAuthTests
     {
         [TestMethod]
-        public void PlainTextPassword()
+        public void WindowsFormsWebAuthenticationDialog_FormPostToUrlTest()
         {
             // Arrange
-            UsernamePasswordInput input = new UsernamePasswordInput("user", "plain_text_password");
+            string htmlResponse = "<html><head><title>Working...</title></head><body><form method=\"POST\" name=\"hiddenform\" action=\"https://ResponseUri\"><input type=\"hidden\" name=\"code\" value=\"someAuthCodeValueInFormPost\" /><input type=\"hidden\" name=\"session_state\" value=\"9f0efc27-15c0-45e9-be87-d11d81d913a8\" /><noscript><p>Script is disabled. Click Submit to continue.</p><input type=\"submit\" value=\"Submit\" /></noscript></form><script language=\"javascript\">document.forms[0].submit();</script></body></html>";
+            WebBrowser browser = new WebBrowser();
+            browser.DocumentText = htmlResponse;
+            browser.Document.Write(htmlResponse);
 
-            // Act 
-            char[] charPassword = input.PasswordToCharArray();
-
-            // Assert
-            Assert.IsTrue(input.HasPassword());
-            CollectionAssert.AreEqual("plain_text_password".ToCharArray(), charPassword);
-        }
-
-#if MSAL_TEST || DESKTOP // no explicit support for netcore on ADAL
-        [TestMethod]
-        public void SecureStringPassword()
-        {
-            // Arrange
-            SecureString secureString = new SecureString();
-            "secure_string_password".ToCharArray().ToList().ForEach(c => secureString.AppendChar(c));
-            UsernamePasswordInput input = new UsernamePasswordInput("user", secureString);
-
-            // Act 
-            char[] charPassword = input.PasswordToCharArray();
+            // Act
+            string url = WindowsFormsWebAuthenticationDialogBase.GetUrlFromDocument(
+                new Uri("https://mocktest.net/callback"),
+                browser.Document);
 
             // Assert
-            Assert.IsTrue(input.HasPassword());
-            CollectionAssert.AreEqual("secure_string_password".ToCharArray(), charPassword);
+            var result = new AuthorizationResult(AuthorizationStatus.Success, url);
+            Assert.AreEqual("someAuthCodeValueInFormPost", result.Code);
         }
-#endif
-
     }
 }
+#endif    
+
