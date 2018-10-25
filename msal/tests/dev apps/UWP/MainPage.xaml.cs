@@ -26,7 +26,7 @@ namespace UWP
     {
         private IPublicClientApplication _pca;
         private readonly static string ClientID = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations"; // common will not work for WIA and U/P but it is a good test case
+        private readonly static string Authority = "https://login.microsoftonline.com/organizations/";
         private readonly static IEnumerable<string> Scopes = new[] { "user.read" };
 
         public MainPage()
@@ -91,9 +91,20 @@ namespace UWP
             await DisplayResultAsync(result).ConfigureAwait(false);
         }
 
-        private void AccessTokenButton_ClickAsync(object sender, RoutedEventArgs e)
+        private async void AccessTokenButton_ClickAsync(object sender, RoutedEventArgs e)
         {
-            throw new NotImplementedException();
+            AuthenticationResult result = null;
+            try
+            {
+                result = await _pca.AcquireTokenAsync(Scopes).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                await DisplayErrorAsync(ex).ConfigureAwait(false);
+                return;
+            }
+
+            await DisplayResultAsync(result).ConfigureAwait(false);
         }
 
         private async Task DisplayErrorAsync(Exception ex)
