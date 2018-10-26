@@ -80,32 +80,16 @@ namespace Microsoft.Identity.Client
             ValidateId();
         }
 
-      
-
-        #region Adapter to / from ClientInfo
-        internal static AccountId FromClientInfo(ClientInfo clientInfo)
+        internal static AccountId ParseFromString(string str)
         {
-            if (clientInfo == null)
+            if (string.IsNullOrEmpty(str))
             {
-                throw new ArgumentNullException(nameof(clientInfo));
+                return null;
             }
+            string[] elements = str.Split('.');
 
-            return new AccountId(
-                clientInfo.ToAccountIdentifier(),
-                clientInfo.UniqueObjectIdentifier,
-                clientInfo.UniqueTenantIdentifier);
+            return new AccountId(str, elements[0], elements[1]);
         }
-
-        internal ClientInfo ToClientInfo()
-        {
-            return new ClientInfo()
-            {
-                UniqueObjectIdentifier = this.ObjectId,
-                UniqueTenantIdentifier = this.TenantId
-            };
-        }
-
-        #endregion
 
         /// <summary>
         /// Two accounts are equal when their <see cref="Identifier"/> properties match

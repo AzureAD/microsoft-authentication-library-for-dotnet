@@ -131,7 +131,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     MsalAccessTokenCacheItem accessItem =
                         JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
                     accessItem.ExpiresOnUnixTimestamp =
-                        (long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+                        ((long)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)).ToString();
 
                     cache.AddAccessTokenCacheItem(accessItem);
                 }

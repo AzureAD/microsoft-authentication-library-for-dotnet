@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "environment", IsRequired = true)]
         internal string Environment { get; set; }
 
-        [DataMember(Name = "client_info")]
         internal string RawClientInfo { get; set; }
 
         internal ClientInfo ClientInfo {

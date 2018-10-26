@@ -42,14 +42,14 @@ namespace Test.MSAL.NET.Unit
             new Account(null, "d", "n");
 
             // 2. Other properties are optional too
-            new Account(new AccountId("a.b", "a", "b"), null, null);
+            new Account("a.b", null, null);
         }
 
         [TestMethod]
         [TestCategory("UserTests")]
         public void Constructor_PropertiesSet()
         {
-            Account actual = new Account(new AccountId("a.b", "a", "b"), "disp", "env");
+            Account actual = new Account("a.b", "disp", "env");
 
             Assert.AreEqual("a.b", actual.HomeAccountId.Identifier);
             Assert.AreEqual("a", actual.HomeAccountId.ObjectId);

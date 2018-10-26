@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client
     public sealed class TokenCache
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        internal const string NullPreferredUsernameDisplayLabel = "preferred_username not in id_token";
+        internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
 
         // TODO: the TokenCache itself shouldn't be doing http access (SRP)
         internal IHttpManager HttpManager { get; set; }
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client
                         TokenCache = this,
                         ClientId = ClientId,
                         Account = msalAccessTokenCacheItem.HomeAccountId != null ?
-                                    new Account(AccountId.FromClientInfo(msalAccessTokenCacheItem.ClientInfo),
+                                    new Account(msalAccessTokenCacheItem.HomeAccountId,
                                     preferredUsername, preferredEnvironmentHost) :
                                     null
                     };
@@ -527,7 +527,7 @@ namespace Microsoft.Identity.Client
                         TokenCache = this,
                         ClientId = ClientId,
                         Account = new Account(
-                            AccountId.FromClientInfo(msalIdTokenCacheItem.ClientInfo),
+                            msalIdTokenCacheItem.HomeAccountId,
                             msalIdTokenCacheItem?.IdToken?.PreferredUsername, msalRefreshTokenCacheItem.Environment)
                     };
 
@@ -554,7 +554,7 @@ namespace Microsoft.Identity.Client
                     {
                         TokenCache = this,
                         ClientId = ClientId,
-                        Account = new Account(AccountId.FromClientInfo(msalAccessTokenCacheItem.ClientInfo),
+                        Account = new Account(msalAccessTokenCacheItem.HomeAccountId,
                             msalIdTokenCacheItem?.IdToken?.PreferredUsername, msalAccessTokenCacheItem.Environment)
                     };
 
@@ -737,7 +737,7 @@ namespace Microsoft.Identity.Client
                                 environmentAliases.Contains(account.Environment))
                             {
                                 clientInfoToAccountMap[rtItem.HomeAccountId] = new Account
-                                    (AccountId.FromClientInfo(account.ClientInfo), account.PreferredUsername, environment);
+                                    (account.HomeAccountId, account.PreferredUsername, environment);
                                 break;
                             }
                         }
@@ -755,7 +755,7 @@ namespace Microsoft.Identity.Client
                     if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
                     {
                         clientInfoToAccountMap[accountIdentifier] = new Account(
-                             AccountId.FromClientInfo(clientInfo), pair.Value.DisplayableId, environment);
+                             accountIdentifier, pair.Value.DisplayableId, environment);
                     }
                 }
 
@@ -1112,7 +1112,7 @@ namespace Microsoft.Identity.Client
                     TokenCache = this,
                     ClientId = ClientId,
                     Account = msalIdTokenCacheItem != null ? new Account(
-                        AccountId.FromClientInfo(msalIdTokenCacheItem.ClientInfo),
+                        msalIdTokenCacheItem.HomeAccountId,
                         msalIdTokenCacheItem.IdToken?.PreferredUsername,
                         msalAccessTokenCacheItem.Environment) : null
                 };
@@ -1150,7 +1150,7 @@ namespace Microsoft.Identity.Client
                     ClientId = ClientId,
                     Account = msalIdTokenCacheItem != null ?
                            new Account(
-                               AccountId.FromClientInfo(msalIdTokenCacheItem.ClientInfo),
+                               msalIdTokenCacheItem.HomeAccountId,
                                msalIdTokenCacheItem.IdToken.PreferredUsername,
                                msalIdTokenCacheItem.IdToken.Name) : null
                 };

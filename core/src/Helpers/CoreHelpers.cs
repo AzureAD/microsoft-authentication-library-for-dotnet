@@ -54,17 +54,23 @@ namespace Microsoft.Identity.Core.Helpers
             return dateTime;
         }
 
-        public static long DateTimeToUnixTimestamp(DateTimeOffset dateTimeOffset)
+        public static DateTime UnixTimestampStringToDateTime(string str)
+        {
+            return UnixTimestampToDateTime(Convert.ToInt64(str));
+        }
+
+        public static string DateTimeToUnixTimestamp(DateTimeOffset dateTimeOffset)
         {
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalSeconds;
-            return unixTimestamp;
+            return unixTimestamp.ToString();
         }
 
-        public static long CurrDateTimeInUnixTimestamp()
+        public static string CurrDateTimeInUnixTimestamp()
         {
             var unixEpochDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            return (long)DateTime.UtcNow.Subtract(unixEpochDateTime).TotalSeconds;
+            long unixTimestamp = (long)DateTime.UtcNow.Subtract(unixEpochDateTime).TotalSeconds;
+            return unixTimestamp.ToString();
         }
 
         public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)

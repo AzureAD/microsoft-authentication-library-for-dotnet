@@ -79,21 +79,22 @@ namespace Test.MSAL.NET.Unit
                                 "login.microsoft.com",
                                 "sts.windows.net"};
 
-        public static readonly AccountId UserIdentifier = CreateUserIdentifer();
+        public static readonly string UserIdentifier = CreateUserIdentifer();
 
         public static string GetDiscoveryEndpoint(string authority)
         {
             return authority + DiscoveryEndPoint;
         }
 
-        public static AccountId CreateUserIdentifer()
+        public static string CreateUserIdentifer()
         {
-            return CreateUserIdentifier(Uid, Utid);
+            //return CreateUserIdentifier(Uid, Utid);
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Uid, Utid);
         }
 
-        public static AccountId CreateUserIdentifier(string uid, string utid)
+        public static string CreateUserIdentifier(string uid, string utid)
         {
-            return new AccountId(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid), uid, utid);
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", uid, utid);
         }
 
         public static readonly Account User = new Account(UserIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
@@ -111,12 +112,11 @@ namespace Test.MSAL.NET.Unit
         public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
         
         public static readonly Account OnPremiseUser = new Account(
-            new AccountId(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
+            string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
 
-#if !ANDROID && !iOS && !WINDOWS_APP
+        #if !ANDROID && !iOS && !WINDOWS_APP
         public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
 #endif
-
     }
 }

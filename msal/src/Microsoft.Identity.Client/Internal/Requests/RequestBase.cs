@@ -209,10 +209,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
 
-            if (fromServer!= null && AuthenticationRequestParameters.ClientInfo != null)
+            if (fromServer!= null && AuthenticationRequestParameters?.Account?.HomeAccountId != null)
             {
-                if (!fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier, StringComparison.OrdinalIgnoreCase) ||
-                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier, StringComparison.OrdinalIgnoreCase))
+                if (!fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.ObjectId, StringComparison.OrdinalIgnoreCase) ||
+                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId, StringComparison.OrdinalIgnoreCase))
                 {
                     AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user identifier");
 
@@ -222,8 +222,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                             "Returned user identifiers (uid:{0} utid:{1}) does not match the sent user identifier (uid:{2} utid:{3})",
                             fromServer.UniqueObjectIdentifier, 
                             fromServer.UniqueTenantIdentifier,
-                            AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier,
-                            AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier),
+                            AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
+                            AuthenticationRequestParameters.Account.HomeAccountId.TenantId),
                         string.Empty);
 
                     throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);

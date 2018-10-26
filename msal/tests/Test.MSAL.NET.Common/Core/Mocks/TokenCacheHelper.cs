@@ -75,7 +75,8 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
             accessor.SaveIdToken(idTokenCacheItem);
 
             MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
-                (CoreTestConstants.ProductionPrefNetworkEnvironment, null, MockHelpers.CreateClientInfo(), null, null, CoreTestConstants.Utid);
+                (CoreTestConstants.ProductionPrefNetworkEnvironment, null, MockHelpers.CreateClientInfo(), null, null, CoreTestConstants.Utid,
+                null, null);
 
             accessor.SaveAccount(accountCacheItem);
 
@@ -118,7 +119,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Mocks
         public static void AddAccountToCache(ITokenCacheAccessor accessor, string uid, string utid)
         {
             MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
-                (CoreTestConstants.ProductionPrefCacheEnvironment, null, MockHelpers.CreateClientInfo(uid, utid), null, null, utid);
+                (CoreTestConstants.ProductionPrefCacheEnvironment, null, MockHelpers.CreateClientInfo(uid, utid), null, null, utid, null, null);
 
             accessor.SaveAccount(accountCacheItem);
         }

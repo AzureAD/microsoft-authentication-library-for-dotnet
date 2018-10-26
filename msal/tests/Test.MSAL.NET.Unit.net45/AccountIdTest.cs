@@ -46,20 +46,5 @@ namespace Test.MSAL.NET.Unit
             // Act Assert
             Assert.AreEqual(accountId1, accountId2);
         }
-
-        [TestMethod]
-        public void FromClientInfo()
-        {
-            // Arrange
-            ClientInfo ci = new ClientInfo() { UniqueObjectIdentifier = "a", UniqueTenantIdentifier = "b" };
-
-            // Act
-            var accountId = AccountId.FromClientInfo(ci);
-
-            // Assert
-            Assert.AreEqual("a.b", accountId.Identifier);
-            Assert.AreEqual("a", accountId.ObjectId);
-            Assert.AreEqual("b", accountId.TenantId);
-        }
     }
 }

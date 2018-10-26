@@ -39,9 +39,9 @@ namespace Microsoft.Identity.Core.Cache
         private readonly string _environment;
         private readonly string _homeAccountId;
         private readonly string _tenantId;
-        private readonly string _localAccountId;
+        private readonly string _username;
 
-        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string localAccountId)
+        public MsalAccountCacheKey(string environment, string tenantId, string userIdentifier, string username)
         {
             if (string.IsNullOrEmpty(environment))
             {
@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Core.Cache
             _tenantId = tenantId;
             _environment = environment;
             _homeAccountId = userIdentifier;
-            _localAccountId = localAccountId;
+            _username = username;
         }
 
         public override string ToString()
@@ -76,17 +76,17 @@ namespace Microsoft.Identity.Core.Cache
 
             stringBuilder.Append(_environment);
 
-            return stringBuilder.ToString();
+            return stringBuilder.ToString().ToLower();
         }
 
         public string GetiOSServiceKey()
         {
-            return _tenantId ?? "";
+            return (_tenantId ?? "").ToLower();
         }
 
         public string GetiOSGenericKey()
         {
-            return _localAccountId;
+            return _username.ToLower();
         }
 
 

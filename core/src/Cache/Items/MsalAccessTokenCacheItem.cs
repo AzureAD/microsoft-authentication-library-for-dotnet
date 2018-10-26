@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Core.Cache
         internal MsalAccessTokenCacheItem
             (string environment, string clientId, MsalTokenResponse response, string tenantId) :
 
-            this(environment, clientId, response.TokenType, ScopeHelper.ConvertStringToLowercaseSortedSet(response.Scope).AsSingleString(),
+            this(environment, clientId, response.TokenType, response.Scope,
                  tenantId, response.AccessToken, response.AccessTokenExpiresOn, response.ClientInfo)
         {
         }
@@ -78,12 +78,12 @@ namespace Microsoft.Identity.Core.Cache
         internal string NormalizedScopes { get; set; }
 
         [DataMember(Name = "cached_at", IsRequired = true)]
-        internal long CachedAt { get; set; }
+        internal string CachedAt { get; set; }
 
         [DataMember(Name = "expires_on", IsRequired = true)]
-        internal long ExpiresOnUnixTimestamp { get; set; }
+        internal string ExpiresOnUnixTimestamp { get; set; }
 
-        [DataMember(Name = "user_assertion_hash")]
+        [DataMember(Name = "user_assertion_hash", EmitDefaultValue = false)]
         public string UserAssertionHash { get; set; }
 
         [DataMember(Name = "access_token_type")]
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Core.Cache
             get
             {
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                return dtDateTime.AddSeconds(ExpiresOnUnixTimestamp).ToUniversalTime();
+                return dtDateTime.AddSeconds(Convert.ToInt64(ExpiresOnUnixTimestamp)).ToUniversalTime();
             }
         }
 

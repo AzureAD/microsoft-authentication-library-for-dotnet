@@ -196,18 +196,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     requestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.Account.Username;
                 }
 
-                AuthenticationRequestParameters.ClientInfo = AuthenticationRequestParameters.Account.HomeAccountId.ToClientInfo();
-
-                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier))
+                if (AuthenticationRequestParameters.Account?.HomeAccountId?.ObjectId != null)
                 {
                     requestParameters[OAuth2Parameter.LoginReq] =
-                        AuthenticationRequestParameters.ClientInfo.UniqueObjectIdentifier;
+                        AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
                 }
 
-                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier))
+                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account?.HomeAccountId?.TenantId))
                 {
                     requestParameters[OAuth2Parameter.DomainReq] =
-                        AuthenticationRequestParameters.ClientInfo.UniqueTenantIdentifier;
+                        AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
                 }
             }
 

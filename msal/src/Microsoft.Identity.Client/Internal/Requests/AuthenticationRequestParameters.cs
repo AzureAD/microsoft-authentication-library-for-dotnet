@@ -61,8 +61,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public IAccount Account { get; set; }
 
-        public ClientInfo ClientInfo { get; set; }
-
         public UserAssertion UserAssertion { get; set; }
 
         public bool IsClientCredentialRequest { get; set; } = false;

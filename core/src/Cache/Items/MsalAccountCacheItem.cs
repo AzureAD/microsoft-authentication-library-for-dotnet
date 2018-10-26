@@ -40,24 +40,26 @@ namespace Microsoft.Identity.Core.Cache
         {
             IdToken idToken = IdToken.Parse(response.IdToken);
 
-            Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, idToken.PreferredUsername, idToken.TenantId);
+            Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, idToken.PreferredUsername, idToken.TenantId,
+                idToken.GivenName, idToken.FamilyName);
         }
 
         internal MsalAccountCacheItem(string environment, MsalTokenResponse response, string preferredUsername, string tenantID) : this()
         {
             IdToken idToken = IdToken.Parse(response.IdToken);
 
-            Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, preferredUsername, tenantID);
+            Init(environment, idToken?.ObjectId, response.ClientInfo, idToken.Name, preferredUsername, tenantID, 
+                idToken.GivenName, idToken.FamilyName);
         }
 
         internal MsalAccountCacheItem(string environment, string localAccountId, string rawClientInfo,
-            string name, string preferredUsername, string tenantId) : this()
+            string name, string preferredUsername, string tenantId, string givenName, string familyName) : this()
         {
-            Init(environment, localAccountId, rawClientInfo, name, preferredUsername, tenantId);
+            Init(environment, localAccountId, rawClientInfo, name, preferredUsername, tenantId, givenName, familyName);
         }
 
         private void Init(string environment, string localAccountId, string rawClientInfo, 
-            string name, string preferredUsername, string tenantId)
+            string name, string preferredUsername, string tenantId, string givenName, string familyName)
         {
             Environment = environment;
             PreferredUsername = preferredUsername;
@@ -65,6 +67,8 @@ namespace Microsoft.Identity.Core.Cache
             TenantId = tenantId;
             LocalAccountId = localAccountId;
             RawClientInfo = rawClientInfo;
+            GivenName = givenName;
+            FamilyName = familyName;
 
             InitUserIdentifier();
         }
@@ -78,10 +82,10 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "name")]
         internal string Name { get; set; }
 
-        [DataMember(Name = "given_name")]
+        [DataMember(Name = "given_name", EmitDefaultValue = false)]
         internal string GivenName { get; set; }
 
-        [DataMember(Name = "family_name")]
+        [DataMember(Name = "family_name", EmitDefaultValue = false)]
         internal string FamilyName { get; set; }
 
         [DataMember(Name = "local_account_id")]
@@ -90,9 +94,19 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "authority_type")]
         internal string AuthorityType { get; set; }
 
+        [DataMember(Name = "client_info")]
+        internal string ClientInfoString
+        {
+            get => RawClientInfo;
+            set
+            {
+                RawClientInfo = value;
+            }
+        }
+
         internal MsalAccountCacheKey GetKey()
         {
-            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, LocalAccountId);
+            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
         }
     }
 }

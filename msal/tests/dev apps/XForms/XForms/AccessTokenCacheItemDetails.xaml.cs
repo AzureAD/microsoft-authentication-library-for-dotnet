@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -52,7 +53,7 @@ namespace XForms
             expiresOnLabel.Text = msalAccessTokenCacheItem.ExpiresOn.ToString();
             scopesLabel.Text = msalAccessTokenCacheItem.NormalizedScopes;
 
-            cachedAtLabel.Text = CoreHelpers.UnixTimestampToDateTime(msalAccessTokenCacheItem.CachedAt).ToString();
+            cachedAtLabel.Text = CoreHelpers.UnixTimestampStringToDateTime(msalAccessTokenCacheItem.CachedAt).ToString();
 
             rawClientInfoLabel.Text = msalAccessTokenCacheItem.RawClientInfo;
             clientInfoUniqueIdentifierLabel.Text = msalAccessTokenCacheItem.ClientInfo.UniqueObjectIdentifier;

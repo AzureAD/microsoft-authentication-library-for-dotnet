@@ -68,7 +68,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             Assert.AreEqual("accesstoken-clientid-contoso.com-user.read user.write", key.GetiOSServiceKey());
             Assert.AreEqual("accesstoken-clientid-contoso.com", key.GetiOSGenericKey());
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientid-contoso.com-N5wvhDuSof/wFSjGK1MuXRK89NwFYNyMSL4QefKyNBU=", key.GetUWPFixedSizeKey());
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientid-contoso.com-n5wvhdusof/wfsjgk1muxrk89nwfynymsl4qefkynbu=", key.GetUWPFixedSizeKey());
         }
 
         [TestMethod]
@@ -117,7 +117,7 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.GetiOSAccountKey());
             Assert.AreEqual("contoso.com", key.GetiOSServiceKey());
-            Assert.AreEqual("localId", key.GetiOSGenericKey());
+            Assert.AreEqual("localid", key.GetiOSGenericKey());
         }
     }
 }

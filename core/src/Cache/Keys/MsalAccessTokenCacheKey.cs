@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Core.Cache
                 MsalCacheCommon.AccessToken,
                 _clientId,
                 _tenantId,
-                _normalizedScopes);          
+                _normalizedScopes);
         }
 
         #region UWP

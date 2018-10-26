@@ -43,6 +43,8 @@ namespace Microsoft.Identity.Core
         public const string PreferredUsername = "preferred_username";
         public const string Name = "name";
         public const string HomeObjectId = "home_oid";
+        public const string GivenName = "given_name";
+        public const string FamilyName = "family_name";
     }
 
     [DataContract]
@@ -71,6 +73,12 @@ namespace Microsoft.Identity.Core
 
         [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
         public string HomeObjectId { get; set; }
+
+        [DataMember(Name = IdTokenClaim.GivenName)]
+        public string GivenName { get; set; }
+
+        [DataMember(Name = IdTokenClaim.FamilyName, IsRequired = false)]
+        public string FamilyName { get; set; }
 
         public static IdToken Parse(string idToken)
         {

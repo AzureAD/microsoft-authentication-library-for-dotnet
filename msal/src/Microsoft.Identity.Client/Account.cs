@@ -39,14 +39,14 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="homeAccountId">An object and tenant scoped id; can be null, for example when migrating the ADAL v3 cache</param>
+        /// <param name="homeAccountId">Home account id in "uid.utid" format; can be null, for example when migrating the ADAL v3 cache</param>
         /// <param name="username">UPN style , can be null</param>
         /// <param name="environment">Identity provider for this account, e.g. <c>login.microsoftonline.com</c></param>
-        public Account(AccountId homeAccountId, string username, string environment)
+        public Account(string homeAccountId, string username, string environment)
         {
             Username = username;
             Environment = environment;
-            HomeAccountId = homeAccountId;
+            HomeAccountId = AccountId.ParseFromString(homeAccountId);
         }
 
         public string Username { get; internal set; }
