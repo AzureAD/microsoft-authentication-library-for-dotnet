@@ -33,10 +33,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using System.Security;
 using System.Threading.Tasks;
-using System.IO;
 using System.Linq;
-using System;
-using msal::Microsoft.Identity.Client;
 
 namespace Test.MSAL.NET.Integration
 {
@@ -44,7 +41,7 @@ namespace Test.MSAL.NET.Integration
     public class UnifiedCacheTests
     {
         public const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        public const string Authority = "https://login.microsoftonline.com/d34a1bb7-3481-4d5f-8b94-f3cc27bf8eac/";
+        public const string AuthorityTemplate = "https://login.microsoftonline.com/{0}/";
 
         public string[] MsalScopes = { "https://graph.microsoft.com/.default" };
         public string[] MsalScopes1 = { "https://graph.windows.net/.default" };
@@ -52,32 +49,34 @@ namespace Test.MSAL.NET.Integration
         private const string AdalResource1 = "https://graph.windows.net";
         private const string AdalResource2 = "https://graph.microsoft.com";
 
-        private static Test.Microsoft.Identity.LabInfrastructure.IUser user;
-        private static SecureString securePassword;
+        private IUser user;
+        private SecureString securePassword;
+        private string authority;
 
         private byte[] AdalV3StateStorage;
         private byte[] UnifiedStateStorage;
 
-        static UnifiedCacheTests()
-        {
-            user = GetUser(
-                new Test.Microsoft.Identity.LabInfrastructure.UserQueryParameters
-                {
-                    IsMamUser = false,
-                    IsMfaUser = false,
-                    IsFederatedUser = false
-                });
-
-            securePassword = new NetworkCredential("", ((LabUser) user).GetPassword()).SecurePassword;
-        }
-
         [TestInitialize]
         public void TestInitialize()
         {
+            if (user == null)
+            {
+                user = GetUser(
+                  new UserQueryParameters
+                  {
+                      IsMamUser = false,
+                      IsMfaUser = false,
+                      IsFederatedUser = false
+                  });
+
+                string stringPassword = ((LabUser)user).GetPassword();
+                securePassword = new NetworkCredential("", stringPassword).SecurePassword;
+                authority = string.Format(AuthorityTemplate, user.CurrentTenantId);
+            }
+
             InitAdal();
             InitMsal();
         }
-
 
         private void AdalDoBefore(
             adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs args)
@@ -110,7 +109,7 @@ namespace Test.MSAL.NET.Integration
         private void MsalDoBefore(msal::Microsoft.Identity.Client.TokenCacheNotificationArgs args)
         {
             msal::Microsoft.Identity.Core.Cache.CacheData cacheData;
-            
+
             cacheData = new msal::Microsoft.Identity.Core.Cache.CacheData()
             {
                 AdalV3State = AdalV3StateStorage,
@@ -142,7 +141,8 @@ namespace Test.MSAL.NET.Integration
                 BeforeAccess = AdalDoBefore,
                 AfterAccess = AdalDoAfter
             };
-            adalContext = new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(Authority, adalCache);
+            adalContext = new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(
+                authority, adalCache);
         }
 
         private msal::Microsoft.Identity.Client.PublicClientApplication msalPublicClient;
@@ -155,7 +155,8 @@ namespace Test.MSAL.NET.Integration
             msal::Microsoft.Identity.Client.TokenCacheExtensions.SetBeforeAccess(msalCache, MsalDoBefore);
             msal::Microsoft.Identity.Client.TokenCacheExtensions.SetAfterAccess(msalCache, MsalDoAfter);
 
-            msalPublicClient = new msal::Microsoft.Identity.Client.PublicClientApplication(ClientId, Authority, msalCache);
+            msalPublicClient = new msal::Microsoft.Identity.Client.PublicClientApplication(
+                ClientId, authority, msalCache);
         }
 
         private void ValidateMsalAuthResult()
@@ -185,7 +186,7 @@ namespace Test.MSAL.NET.Integration
 
             // passing empty password to make sure that token returned silenlty - using RT
             adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
-                AcquireTokenAsync(adalContext, AdalResource1, ClientId, 
+                AcquireTokenAsync(adalContext, AdalResource1, ClientId,
                 new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
@@ -220,7 +221,7 @@ namespace Test.MSAL.NET.Integration
             adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
                 new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
-     
+
             ValidateAdalAuthResult();
         }
 
@@ -395,7 +396,7 @@ namespace Test.MSAL.NET.Integration
                 AcquireTokenAsync(adalContext, AdalResource2, ClientId,
                 new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
-            
+
             // simulate adalV3 token cache state by setting client info in adal cache entities to null 
             // and clearing msal cache
             UpdateAdalCacheSetClientInfoToNull();
@@ -441,7 +442,7 @@ namespace Test.MSAL.NET.Integration
             ClearMsalCache();
             AssertMsalCacheIsEmpty();
 
-            
+
             // Migration to AdalV4 - acquire adal tokens using adalV4
 
             // make sure that AT in AdalV3 format is used by AdalV4
