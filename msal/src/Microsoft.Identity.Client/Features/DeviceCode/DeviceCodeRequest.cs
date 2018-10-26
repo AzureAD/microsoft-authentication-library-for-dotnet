@@ -135,6 +135,9 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.DeviceCode,
+                [OAuth2Parameter.DeviceCode] = deviceCodeResult.DeviceCode,
+                // TODO: this is out of spec and the server is changing but for now to keep compatible
+                // across servers as the changes roll out, we're sending the device code both ways.
                 [OAuth2Parameter.Code] = deviceCodeResult.DeviceCode
             };
             return dict;

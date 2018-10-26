@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Core.OAuth2
         public const string RedirectUri = "redirect_uri";
         public const string Resource = "resource";
         public const string Code = "code";
+        public const string DeviceCode = "device_code";
         public const string Scope = "scope";
         public const string Assertion = "assertion";
         public const string RequestedTokenUse = "requested_token_use";

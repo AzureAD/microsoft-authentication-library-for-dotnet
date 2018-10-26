@@ -1,3 +1,8 @@
+2.3.1-preview
+=============
+This release includes:
+- Fix for device code flow where server is now expecting device_code as the body parameter.
+
 2.3.0-preview
 =============
 This release includes:
