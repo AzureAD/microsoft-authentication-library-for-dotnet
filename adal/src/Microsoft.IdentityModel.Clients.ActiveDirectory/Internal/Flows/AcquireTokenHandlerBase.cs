@@ -278,7 +278,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.ValidateAuthorityType();
         }
 
-        protected virtual Task PreTokenRequestAsync()
+        protected internal /* internal for test only */ virtual Task PreTokenRequestAsync()
         {
             return CompletedTask;
         }
@@ -307,7 +307,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected abstract void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters);
 
-        protected virtual async Task<AdalResultWrapper> SendTokenRequestAsync()
+        protected internal /* interal for test only */ virtual async Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             var requestParameters = new DictionaryRequestParameters(this.Resource, this.ClientKey)
             {

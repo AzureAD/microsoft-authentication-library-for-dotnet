@@ -25,7 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#if !NET_CORE
+
+// Test should run on net core. Please re-enable once bug 
+// https://identitydivision.visualstudio.com/DevEx/_workitems/edit/574705 is fixed
+#if !ANDROID && !iOS && !NET_CORE
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -36,6 +39,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
@@ -49,9 +53,10 @@ namespace Test.MSAL.NET.Unit
         readonly MockHttpMessageHandler X5CMockHandler = new MockHttpMessageHandler()
         {
             Method = HttpMethod.Post,
-            ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(MsalTestConstants.Scope.AsSingleString(),
-                    MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
-                    MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more")),
+            ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
+                MsalTestConstants.Scope.AsSingleString(),
+                MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more")),
             AdditionalRequestValidation = request =>
             {
                 var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -63,32 +68,10 @@ namespace Test.MSAL.NET.Unit
                 // Check presence of x5c cert claim. It should exist.
                 var handler = new JwtSecurityTokenHandler();
                 var jsonToken = handler.ReadJwtToken(encodedJwt);
-                var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
-                Assert.IsTrue(x5c.Key == "x5c", "x5c should be present");
+                Assert.IsTrue(jsonToken.Header.Any(header => header.Key == "x5c"), "x5c should be present");
             }
         };
-        readonly MockHttpMessageHandler EmptyX5CMockHandler = new MockHttpMessageHandler()
-        {
-            Method = HttpMethod.Post,
-            ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(MsalTestConstants.Scope.AsSingleString(),
-                    MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
-                    MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more")),
-            AdditionalRequestValidation = request =>
-            {
-                var requestContent = request.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                var formsData = CoreHelpers.ParseKeyValueList(requestContent, '&', true, null);
-
-                // Check presence of client_assertion in request
-                Assert.IsTrue(formsData.TryGetValue("client_assertion", out string encodedJwt), "Missing client_assertion from request");
-
-                // Check presence of x5c cert claim. It should not exist.
-                var handler = new JwtSecurityTokenHandler();
-                var jsonToken = handler.ReadJwtToken(encodedJwt);
-                var x5c = jsonToken.Header.Where(header => header.Key == "x5c").FirstOrDefault();
-                Assert.IsTrue(x5c.Key != "x5c", "x5c should not be present");
-            }
-        };
-
+     
         [TestInitialize]
         public void TestInitialize()
         {
@@ -112,7 +95,10 @@ namespace Test.MSAL.NET.Unit
             using (var httpManager = new MockHttpManager())
             {
                 SetupMocks(httpManager);
-                var certificate = new X509Certificate2("valid_cert.pfx", MsalTestConstants.DefaultPassword);
+                var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                    MsalTestConstants.DefaultPassword);
+
                 var clientAssertion = new ClientAssertionCertificate(certificate);
                 var clientCredential = new ClientCredential(clientAssertion);
                 var app = new ConfidentialClientApplication(
@@ -134,12 +120,6 @@ namespace Test.MSAL.NET.Unit
                         MsalTestConstants.Scope).ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
 
-                //Check for empty x5c claim
-                // TODO: this was in the test before,
-                // but this mock is not being called.
-                // test was NOT validating that all mock queues were empty before...
-                // httpManager.AddMockHandler(EmptyX5CMockHandler);
-
                 result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope).ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
             }
@@ -153,7 +133,9 @@ namespace Test.MSAL.NET.Unit
             {
                 SetupMocks(httpManager);
 
-                var certificate = new X509Certificate2("valid_cert.pfx", MsalTestConstants.DefaultPassword);
+                var certificate = new X509Certificate2(
+                    ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
+                    MsalTestConstants.DefaultPassword);
                 var clientAssertion = new ClientAssertionCertificate(certificate);
                 var clientCredential = new ClientCredential(clientAssertion);
                 var app = new ConfidentialClientApplication(
@@ -177,11 +159,6 @@ namespace Test.MSAL.NET.Unit
                         userAssertion).ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
 
-                //Check for empty x5c claim
-                // TODO: this was in the test before,
-                // but this mock is not being called.
-                // test was NOT validating that all mock queues were empty before...
-                // httpManager.AddMockHandler(EmptyX5CMockHandler);
                 result = await app.AcquireTokenOnBehalfOfAsync(MsalTestConstants.Scope, userAssertion).ConfigureAwait(false);
                 Assert.IsNotNull(result.AccessToken);
             }

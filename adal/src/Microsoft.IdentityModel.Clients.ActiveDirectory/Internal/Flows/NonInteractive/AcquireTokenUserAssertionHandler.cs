@@ -58,7 +58,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.DisplayableId = userAssertion.UserName;
         }
 
-        protected override async Task PreTokenRequestAsync()
+        protected internal /* internal for test only */ override async Task PreTokenRequestAsync()
         {
             await base.PreTokenRequestAsync().ConfigureAwait(false);
         }

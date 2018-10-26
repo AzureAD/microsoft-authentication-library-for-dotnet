@@ -38,6 +38,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.ADAL.NET.Common;
+using Test.ADAL.NET.Unit;
 using Test.Microsoft.Identity.Core.Unit;
 using UserCredential = Microsoft.IdentityModel.Clients.ActiveDirectory.UserCredential;
 
@@ -171,7 +172,6 @@ namespace Test.ADAL.Common.Unit
             VerifyCacheItemCount(cache, 0);
         }
 
-#if !NET_CORE // Platform Behaviour
         /// <summary>
         /// Check when there are multiple users in the cache with the same
         /// authority, clientId, resource but different unique and displayId's that
@@ -216,7 +216,7 @@ namespace Test.ADAL.Common.Unit
             var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
             var userIdUpper = new UserIdentifier(displayableId.ToUpper(CultureInfo.InvariantCulture), UserIdentifierType.RequiredDisplayableId);
 
-            var parameters = new PlatformParameters(PromptBehavior.Auto);
+            var parameters = PlatformParametersFactory.CreateDefault();
             var authenticationResultFromCache = await acWithLocalCache.AcquireTokenAsync(resource, clientId, redirectUri, parameters, userId).ConfigureAwait(false);
             VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
 
@@ -230,7 +230,6 @@ namespace Test.ADAL.Common.Unit
             VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);
         }
 
-#endif
 
         public static async Task TokenCacheKeyTestAsync(IPlatformParameters parameters)
         {

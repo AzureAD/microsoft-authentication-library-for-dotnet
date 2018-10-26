@@ -120,7 +120,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             return new UriBuilder(original) { Host = newHost }.Uri.ToString();
         }
 
-        protected override async Task PreTokenRequestAsync()
+        protected internal /* internal for test only */ override async Task PreTokenRequestAsync()
         {
             await base.PreTokenRequestAsync().ConfigureAwait(false);
 

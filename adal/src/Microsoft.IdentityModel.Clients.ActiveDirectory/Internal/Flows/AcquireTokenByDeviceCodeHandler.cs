@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.deviceCodeResult = deviceCodeResult;
         }
 
-        protected override async Task<AdalResultWrapper> SendTokenRequestAsync()
+        protected internal /* internal for test only */ override async Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             TimeSpan timeRemaining = deviceCodeResult.ExpiresOn - DateTimeOffset.UtcNow;
             AdalResultWrapper resultEx = null;

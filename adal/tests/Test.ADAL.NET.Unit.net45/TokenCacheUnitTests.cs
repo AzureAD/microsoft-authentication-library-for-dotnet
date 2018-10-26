@@ -58,8 +58,7 @@ namespace Test.ADAL.NET.Unit
             TokenCacheTests.DefaultTokenCacheTest();
         }
 
-#if !NET_CORE
-
+#if !NET_CORE // netcore doesn't support interactive
         [TestMethod]
         [TestCategory("AdalDotNetUnit")]
         public async Task TestUniqueIdDisplayableIdLookupAsync()
@@ -72,7 +71,8 @@ namespace Test.ADAL.NET.Unit
         [TestCategory("AdalDotNetUnit")]
         public async Task TokenCacheKeyTestAsync()
         {
-            await TokenCacheTests.TokenCacheKeyTestAsync(new PlatformParameters(PromptBehavior.Auto, null)).ConfigureAwait(false);
+            await TokenCacheTests.TokenCacheKeyTestAsync(PlatformParametersFactory.CreateDefault())
+                .ConfigureAwait(false);
         }
 #endif
 

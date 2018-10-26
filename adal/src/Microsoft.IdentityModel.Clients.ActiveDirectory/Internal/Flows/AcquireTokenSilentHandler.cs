@@ -55,7 +55,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.brokerParameters[BrokerParameter.SilentBrokerFlow] = null; //add key
         }
 
-        protected override Task<AdalResultWrapper> SendTokenRequestAsync()
+        protected internal /* internal for test only */ override Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             if (ResultEx == null)
             {

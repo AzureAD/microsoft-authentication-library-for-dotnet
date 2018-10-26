@@ -54,7 +54,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.SupportADFS = true;
         }
 
-        protected override async Task<AdalResultWrapper> SendTokenRequestAsync()
+        protected internal /* internal for test only */ override async Task<AdalResultWrapper> SendTokenRequestAsync()
         {
             AdalResultWrapper resultEx = await base.SendTokenRequestAsync().ConfigureAwait(false);
             if (resultEx != null)

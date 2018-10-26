@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             DisplayableId = _iwaInput.UserName;
         }
 
-        protected override async Task PreTokenRequestAsync()
+        protected internal /* internal for test only */ override async Task PreTokenRequestAsync()
         {
             await base.PreTokenRequestAsync().ConfigureAwait(false);
 

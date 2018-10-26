@@ -38,23 +38,24 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
 using Microsoft.Identity.Core.UI;
+using Test.ADAL.NET.Unit;
 
 namespace Test.ADAL.NET.Integration
 {
-#if !NET_CORE  // PromptBehavior
     [TestClass]
     public class UnifiedCacheTests
     {
-        private PlatformParameters _platformParameters;
+        private IPlatformParameters _platformParameters;
 
         [TestInitialize]
         public void Initialize()
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
-            _platformParameters = new PlatformParameters(PromptBehavior.Auto);
+            _platformParameters = PlatformParametersFactory.CreateDefault();
             InstanceDiscovery.InstanceCache.Clear();
         }
 
+#if !NET_CORE // interactive auth not supported on netcore
         [TestMethod]
         [Description("Test unified token cache")]
         public async Task UnifedCache_AdalStoresToAndReadRtFromMsalCacheAsync()
@@ -115,6 +116,6 @@ namespace Test.ADAL.NET.Integration
             //ps todo validate that state in adal is same as was before adal cache clean
             Assert.IsNotNull(result);
         }
-    }
 #endif
+    }
 }

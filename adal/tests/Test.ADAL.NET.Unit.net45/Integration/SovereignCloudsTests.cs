@@ -40,14 +40,15 @@ using System;
 using System.Net;
 using TokenResponseClaim = Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2.TokenResponseClaim;
 using Microsoft.Identity.Core.UI;
+using Test.ADAL.NET.Unit;
 
 namespace Test.ADAL.NET.Integration
 {
-#if !NET_CORE
+#if !NET_CORE // these tests use UI
     [TestClass]
     public class SovereignCloudsTests
     {
-        private PlatformParameters _platformParameters;
+        private IPlatformParameters _platformParameters;
         private const string SovereignAuthorityHost = "login.microsoftonline.de";
 
         private readonly string _sovereignTenantSpecificAuthority = String.Format("https://{0}/{1}/", SovereignAuthorityHost, AdalTestConstants.SomeTenantId);
@@ -56,7 +57,7 @@ namespace Test.ADAL.NET.Integration
         public void Initialize()
         {
             AdalHttpMessageHandlerFactory.InitializeMockProvider();
-            _platformParameters = new PlatformParameters(PromptBehavior.Auto);
+            _platformParameters = PlatformParametersFactory.CreateDefault();
 
             InstanceDiscovery.InstanceCache.Clear();
         }
