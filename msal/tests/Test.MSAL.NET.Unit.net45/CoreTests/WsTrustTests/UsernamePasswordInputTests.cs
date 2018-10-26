@@ -33,6 +33,7 @@ using System.Security;
 
 namespace Test.Microsoft.Identity.Core.Unit.WsTrustTests
 {
+#if !ANDROID && !iOS && !WINDOWS_APP
     [TestClass]
     public class UsernamePasswordInputTests
     {
@@ -67,6 +68,6 @@ namespace Test.Microsoft.Identity.Core.Unit.WsTrustTests
             CollectionAssert.AreEqual("secure_string_password".ToCharArray(), charPassword);
         }
 #endif
-
     }
+#endif
 }

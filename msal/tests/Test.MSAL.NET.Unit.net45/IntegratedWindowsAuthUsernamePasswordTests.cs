@@ -231,6 +231,7 @@ namespace Test.MSAL.NET.Unit
             }
         }
 
+#if !WINDOWS_APP // U/P flow not enabled on UWP
         [TestMethod]
         [TestCategory("IntegratedWindowsAuthAndUsernamePasswordTests")]
         [DeploymentItem(@"Resources\TestMex.xml")]
@@ -662,5 +663,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
             }
         }
+#endif
+
     }
 }

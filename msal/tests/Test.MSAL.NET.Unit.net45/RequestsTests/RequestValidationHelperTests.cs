@@ -39,6 +39,8 @@ using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.MSAL.NET.Unit.RequestsTests
 {
+#if !WINDOWS_APP && !ANDROID && !iOS // Confidential Client not available
+
     [TestClass]
     public class RequestValidationHelperTests
     {
@@ -126,4 +128,5 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             return (long)(diff.TotalSeconds);
         }
     }
+#endif
 }

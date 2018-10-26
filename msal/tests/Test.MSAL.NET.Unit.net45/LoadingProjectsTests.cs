@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Test.MSAL.NET.Unit.netcore
 {
+#if !ANDROID && !iOS && !WINDOWS_APP // custom token cache serialization not available 
     [TestClass]
     public class LoadingProjectsTests
     {
@@ -19,4 +20,5 @@ namespace Test.MSAL.NET.Unit.netcore
             Logger.Level = previousLogLevel;
         }
     }
+#endif
 }

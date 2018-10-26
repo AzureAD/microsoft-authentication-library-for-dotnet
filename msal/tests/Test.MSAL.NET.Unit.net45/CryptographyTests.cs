@@ -36,6 +36,7 @@ using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.MSAL.NET.Unit
 {
+#if !WINDOWS_APP // not available on UWP
     [TestClass]
     [DeploymentItem(@"Resources\testCert.crtfile")]
     public class CryptographyTests
@@ -54,4 +55,5 @@ namespace Test.MSAL.NET.Unit
             Assert.AreEqual("MrknKHbOAVu2iuLHMFSk2SK773H1ysxaAjAPcTXYSfH4P2fUfvzP6aIb9MkBknjoE_aBYtTnQ7jOAvyQETvogdeSH7pRDPhCk2aX_8VIQw0bjo_zBZj5yJYVWQDLIu8XvbuzIGEvVaXKz4jJ1nYM6toun4tM74rEHvwa0ferafmqHWOd5puPhlKH1VVK2RPuNOoKNLWBprVBaAQVJVFOdRcd3iR0INBHykxtOsG0pgo0Q2uQBlKP7KQb7Ox8i_sw-M21BuUzdIdGs_oeUYh0B8s-eIGf34JmHRWMwWCnRWzZgY9YuIjRoaWNqlWYb8ASjKOxzvk99x8eFEYKOjgAcA", value);
         }
     }
+#endif
 }

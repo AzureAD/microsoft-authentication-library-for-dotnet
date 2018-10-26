@@ -45,7 +45,7 @@ using NSubstitute;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-#if !NET_CORE  // TODO - run these tests on netcore once the bug is fixed 
+#if !ANDROID && !iOS && !WINDOWS_APP && !NET_CORE  // TODO - run these tests on netcore once the bug is fixed 
 // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/656
 namespace Test.MSAL.NET.Unit
 {

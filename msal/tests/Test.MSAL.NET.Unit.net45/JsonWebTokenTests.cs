@@ -28,7 +28,7 @@
 
 // Test should run on net core. Please re-enable once bug 
 // https://identitydivision.visualstudio.com/DevEx/_workitems/edit/574705 is fixed
-#if !ANDROID && !iOS && !NET_CORE
+#if !ANDROID && !iOS && !WINDOWS_APP && !NET_CORE
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;

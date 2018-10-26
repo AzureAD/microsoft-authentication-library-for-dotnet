@@ -50,4 +50,29 @@ namespace Test.Microsoft.Identity.Core.Unit
 #endif
         }
     }
+
+#if WINDOWS_APP
+    /// <summary>
+    /// On .net, this attribute is needed to copy resources to the test, which are 
+    /// placed in a directory similar to TestRun/date/out 
+    /// On other platforms, mstest runs the tests directly from bin, so this isn't needed.
+    /// On netcore, this attribute has been implemented with NOP by mstest. 
+    /// On uwp, this attribute is missing completely.
+    /// </summary>
+    [System.AttributeUsage(System.AttributeTargets.Class | System.AttributeTargets.Method, AllowMultiple =true)]
+    public class DeploymentItemAttribute : System.Attribute
+    {
+        public DeploymentItemAttribute(string path)
+        {
+            // do nothing, on platforms other than .net 
+            // deployment happens by way of copying resources to the bin folder
+        }
+
+        public DeploymentItemAttribute(string path, string deploymentPath)
+        {
+            // do nothing, on platforms other than .net 
+            // deployment happens by way of copying resources to the bin folder
+        }
+    }
+#endif
 }

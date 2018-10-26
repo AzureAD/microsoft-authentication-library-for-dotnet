@@ -64,7 +64,6 @@ namespace Test.MSAL.NET.Unit
         public static readonly string DisplayableId = "displayable@id.com";
         public static readonly string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public static readonly string ClientSecret = "client_secret";
-        public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly string DefaultPassword = "password";
         public static readonly string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
@@ -110,8 +109,14 @@ namespace Test.MSAL.NET.Unit
         public static readonly string OnPremiseClientSecret = "on_premise_client_secret";
         public static readonly string OnPremiseUid = "my-OnPremise-UID";
         public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
-        public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
+        
         public static readonly Account OnPremiseUser = new Account(
             new AccountId(string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
+
+#if !ANDROID && !iOS && !WINDOWS_APP
+        public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+#endif
+
     }
 }

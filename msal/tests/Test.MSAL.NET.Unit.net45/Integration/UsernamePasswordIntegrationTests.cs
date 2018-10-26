@@ -24,6 +24,7 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+#if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
 
 using Test.Microsoft.Identity.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -160,3 +161,4 @@ namespace Test.MSAL.NET.Integration
         }
     }
 }
+#endif
