@@ -27,7 +27,10 @@
 
 #if ANDROID
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 #endif
 
@@ -73,8 +76,7 @@ namespace Microsoft.Identity.Client
 #if ANDROID
         private Activity Activity { get; set; }
 
-        private static readonly string[] _chromePackages =
-        {"com.android.chrome", "com.chrome.beta", "com.chrome.dev"};
+        private static readonly string ChromePackage = "com.android.chrome";
 
         /// <summary>
         /// Initializes an instance for a provided activity.
@@ -112,24 +114,12 @@ namespace Microsoft.Identity.Client
         /// </example>
         public static bool IsSystemWebviewAvailable()
         {
-            PackageManager packageManager = Application.Context.PackageManager;
-
-            int counter = 0;
-
-            ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(_chromePackages[0], 0);
-
-            for (int i = 0; i < _chromePackages.Length; i++)
+            bool isBrowserWithCustomTabSupportAvailable = IsBrowserWithCustomTabSupportAvailable();
+            if (!isBrowserWithCustomTabSupportAvailable && !IsChromeEnabled())
             {
-                try
-                {
-                    packageManager.GetPackageInfo(_chromePackages[i], PackageInfoFlags.Activities);
-                    counter++;
-                }
-                catch (PackageManager.NameNotFoundException)
-                {
-                }
+                return false;
             }
-            if (counter > 0 && applicationInfo.Enabled == true)
+            else if (isBrowserWithCustomTabSupportAvailable)
             {
                 return true;
             }
@@ -137,6 +127,37 @@ namespace Microsoft.Identity.Client
             {
                 return false;
             }
+        }
+
+        private static bool IsBrowserWithCustomTabSupportAvailable()
+        {
+            string customTabsServiceAction = "android.support.customtabs.action.CustomTabsService";
+
+            Intent customTabServiceIntent = new Intent(customTabsServiceAction);
+
+            IEnumerable<ResolveInfo> resolveInfoListWithCustomTabs = Application.Context.PackageManager.QueryIntentServices(
+                    customTabServiceIntent, PackageInfoFlags.MatchAll);
+
+            // queryIntentServices could return null or an empty list if no matching service existed.
+            if (resolveInfoListWithCustomTabs == null || !resolveInfoListWithCustomTabs.Any())
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsChromeEnabled()
+        {
+            ApplicationInfo applicationInfo = Application.Context.PackageManager.GetApplicationInfo(ChromePackage, 0);
+
+            // Chrome is difficult to uninstall on an Android device. Most users will disable it, but the package will still
+            // show up, therefore need to check application.Enabled is false
+            if (!string.IsNullOrEmpty(ChromePackage) && !applicationInfo.Enabled)
+            {
+                return false;
+            }
+            return true;
         }
 #endif
 

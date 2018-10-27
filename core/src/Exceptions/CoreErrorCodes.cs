@@ -84,8 +84,7 @@ namespace Microsoft.Identity.Core
 
 #if ANDROID
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
-        public const string ChromeNotInstalledError = "chrome_not_installed";
-        public const string ChromeDisabledError = "chrome_disabled";
+        public const string AndroidActivityNotFound = "android_activity_not_found";
         public const string UnresolvableIntentError = "unresolvable_intent";
 #endif
 
