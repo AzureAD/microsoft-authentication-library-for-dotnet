@@ -87,10 +87,10 @@ namespace Microsoft.Identity.Core
         public ILegacyCachePersistence LegacyCachePersistence { get; } = new NetStandard13LegacyCachePersistence();
 
         /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor { get; } = new TokenCacheAccessor();
+        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
 
         /// <inheritdoc />
-        public ICryptographyManager CryptographyManager { get; } = new NetStandard13CryptographyManager();
+        public ICryptographyManager CryptographyManager => new NetStandard13CryptographyManager();
 
         public bool IsDomainJoined()
         {

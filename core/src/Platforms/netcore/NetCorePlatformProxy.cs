@@ -109,10 +109,10 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public ILegacyCachePersistence LegacyCachePersistence { get; } = new NetCoreLegacyCachePersistence();
+        public ILegacyCachePersistence LegacyCachePersistence => new NetCoreLegacyCachePersistence();
 
         /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor { get; } = new TokenCacheAccessor();
+        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new NetCoreCryptographyManager();
