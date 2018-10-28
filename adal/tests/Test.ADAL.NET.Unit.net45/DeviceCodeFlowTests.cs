@@ -156,7 +156,7 @@ namespace Test.ADAL.NET.Unit
 
             AuthenticationContext context = new AuthenticationContext(AdalTestConstants.DefaultAdfsAuthorityTenant, false);
             DeviceCodeResult dcr = await context.AcquireDeviceCodeAsync(
-                AdalTestConstants.DefaultResource, 
+                AdalTestConstants.DefaultResource,
                 AdalTestConstants.DefaultClientId)
                 .ConfigureAwait(false);
 

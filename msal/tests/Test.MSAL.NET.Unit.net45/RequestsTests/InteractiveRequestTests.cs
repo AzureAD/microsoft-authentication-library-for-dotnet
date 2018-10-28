@@ -157,6 +157,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 MsalTestConstants.Utid,
                 null,
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
                 MockHelpers.CreateClientInfo());
 
             string atKey = atItem.GetKey().ToString();

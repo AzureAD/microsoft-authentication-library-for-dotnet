@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client
 #endif
     /// <summary>
     /// Token cache storing access and refresh tokens for accounts
-    /// This class is used in the constuctors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
+    /// This class is used in the constructors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
     /// See also <see cref="TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
@@ -402,21 +402,45 @@ namespace Microsoft.Identity.Client
                         MsalErrorMessage.MultipleTokensMatched);
                 }
 
-                if (msalAccessTokenCacheItem != null && msalAccessTokenCacheItem.ExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
-                {
-                    requestParams.RequestContext.Logger.Info("Access token is not expired. Returning the found cache entry..");
-                    return msalAccessTokenCacheItem;
-                }
-
                 if (msalAccessTokenCacheItem != null)
                 {
-                    requestParams.RequestContext.Logger.Info("Access token has expired or about to expire. Current time (" + DateTime.UtcNow +
-                          ") - Expiration Time (" + msalAccessTokenCacheItem.ExpiresOn + ")");
+                    if (msalAccessTokenCacheItem.ExpiresOn >
+                        DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                    {
+                        requestParams.RequestContext.Logger.Info(
+                            "Access token is not expired. Returning the found cache entry. " +
+                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                        return msalAccessTokenCacheItem;
+                    }
+
+                    if (requestParams.IsExtendedLifeTimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
+                        DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                    {
+                        requestParams.RequestContext.Logger.Info(
+                            "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " + 
+                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+
+                        msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
+                        return msalAccessTokenCacheItem;
+                    }
+
+                    requestParams.RequestContext.Logger.Info(
+                        "Access token has expired or about to expire. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
                 }
 
                 return null;
             }
+        }
+
+        private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture, 
+                "[Current time ({0}) - Expiration Time ({1}) - Extended Expiration Time ({2})]",
+                DateTime.UtcNow,
+                msalAccessTokenCacheItem.ExpiresOn,
+                msalAccessTokenCacheItem.ExtendedExpiresOn);
         }
 
         internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)

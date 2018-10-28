@@ -47,6 +47,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public TokenCache TokenCache { get; set; }
 
+        public bool IsExtendedLifeTimeEnabled { get; set; }
+
         public SortedSet<string> Scope { get; set; }
 
         public string ClientId { get; set; }

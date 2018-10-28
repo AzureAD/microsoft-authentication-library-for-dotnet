@@ -48,6 +48,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
     public class TokenCacheTests
     {
         public static long ValidExpiresIn = 3600;
+        public static long ValidExtendedExpiresIn = 7200;
 
         // Passing a seed to make repro possible
         private static readonly Random Rand = new Random(42);
@@ -107,6 +108,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     "",
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                     MockHelpers.CreateClientInfo());
 
                 // create key out of access token cache item and then
@@ -152,6 +154,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 // create key out of access token cache item and then
@@ -199,6 +202,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 // create key out of access token cache item and then
@@ -248,6 +252,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 atItem.Secret = atItem.GetKey().ToString();
@@ -263,6 +268,51 @@ namespace Test.MSAL.NET.Unit.CacheTests
                             Scope = MsalTestConstants.Scope,
                             Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null)
                         }).Result);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("TokenCacheTests")]
+        public void GetExpiredAccessToken_WithExtendedExpireStillValid_Test()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                _cache = new TokenCache()
+                {
+                    ClientId = MsalTestConstants.ClientId,
+                    HttpManager = httpManager
+                };
+
+                var atItem = new MsalAccessTokenCacheItem(
+                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.ClientId,
+                    "Bearer",
+                    MsalTestConstants.Scope.AsSingleString(),
+                    MsalTestConstants.Utid,
+                    null,
+                    new DateTimeOffset(DateTime.UtcNow),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
+                    MockHelpers.CreateClientInfo());
+
+                atItem.Secret = atItem.GetKey().ToString();
+                _cache.tokenCacheAccessor.SaveAccessToken(atItem);
+
+                var cacheItem = _cache.FindAccessTokenAsync(
+                    new AuthenticationRequestParameters()
+                    {
+                        IsExtendedLifeTimeEnabled = true,
+                        RequestContext = new RequestContext(new MsalLogger(Guid.Empty, null)),
+                        ClientId = MsalTestConstants.ClientId,
+                        Authority = Authority.CreateAuthority(MsalTestConstants.AuthorityTestTenant, false),
+                        Scope = MsalTestConstants.Scope,
+                        Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null)
+                    }).Result;
+
+                Assert.IsNotNull(cacheItem);
+                Assert.AreEqual(atItem.GetKey().ToString(), cacheItem.GetKey().ToString());
+                Assert.IsTrue(cacheItem.IsExtendedLifeTimeToken);
             }
         }
 
@@ -288,6 +338,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     "",
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromMinutes(4)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 atItem.Secret = atItem.GetKey().ToString();
@@ -405,6 +456,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                     MockHelpers.CreateClientInfo());
 
                 string atKey = atItem.GetKey().ToString();
@@ -494,6 +546,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 // create key out of access token cache item and then
@@ -542,6 +595,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 // create key out of access token cache item and then
@@ -591,6 +645,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
                     MsalTestConstants.Utid,
                     null,
                     new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(1)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromHours(2)),
                     MockHelpers.CreateClientInfo());
 
                 // create key out of access token cache item and then
