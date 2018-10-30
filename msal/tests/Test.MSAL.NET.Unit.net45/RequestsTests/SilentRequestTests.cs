@@ -155,10 +155,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             }
         }
 
-        // remove when bug is fixed. The token cache is not cleared between tests because it is shared, 
-        // so an extra http call is made, which is not expected by this test.
-        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/656
-#if !NET_CORE
         [TestMethod]
         [TestCategory("SilentRequestTests")]
         public void SilentRefreshFailedNullCacheTest()
@@ -249,6 +245,5 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 }
             }
         }
-#endif
     }
 }

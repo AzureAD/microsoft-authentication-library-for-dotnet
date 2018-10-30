@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Core
     {
         private readonly bool _isMsal;
 
+
         public NetCorePlatformProxy(bool isMsal)
         {
             _isMsal = isMsal;
@@ -108,13 +109,17 @@ namespace Microsoft.Identity.Core
             return _isMsal ? "MSAL.NetCore" : null;
         }
 
-        /// <inheritdoc />
-        public ILegacyCachePersistence LegacyCachePersistence => new NetCoreLegacyCachePersistence();
+        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        {
+            return new NetCoreLegacyCachePersistence();
+        }
 
-        /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
+        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        {
+            return new TokenCacheAccessor();
+        }
 
-        /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new NetCoreCryptographyManager();
+
     }
 }

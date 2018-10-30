@@ -45,8 +45,7 @@ using NSubstitute;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-#if !ANDROID && !iOS && !WINDOWS_APP && !NET_CORE  // TODO - run these tests on netcore once the bug is fixed 
-// https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/656
+#if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
 namespace Test.MSAL.NET.Unit
 {
     [TestClass]
@@ -61,6 +60,7 @@ namespace Test.MSAL.NET.Unit
         public void TestInitialize()
         {
             Authority.ValidatedAuthorities.Clear();
+            ModuleInitializer.ForceModuleInitializationTestOnly();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
             AadInstanceDiscovery.Instance.Cache.Clear();
         }
@@ -402,21 +402,13 @@ namespace Test.MSAL.NET.Unit
                 Uri uri = task.Result;
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
-                Assert.IsNotNull(qp);
-                Assert.AreEqual(11, qp.Count);
-                Assert.IsTrue(qp.ContainsKey("client-request-id"));
+                ValidateCommonQueryParams(qp);
                 Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
-                Assert.AreEqual(MsalTestConstants.ClientId, qp["client_id"]);
-                Assert.AreEqual("code", qp["response_type"]);
-                Assert.AreEqual(MsalTestConstants.RedirectUri, qp["redirect_uri"]);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, qp["login_hint"]);
-                Assert.AreEqual(UIBehavior.SelectAccount.PromptValue, qp["prompt"]);
-                Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+
             }
         }
+
+  
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
@@ -445,7 +437,9 @@ namespace Test.MSAL.NET.Unit
                         Method = HttpMethod.Get,
                         ResponseMessage =
                             MockHelpers.CreateSuccessResponseMessage(
-                                ResourceHelper.GetTestResourceRelativePath(File.ReadAllText(@"OpenidConfiguration-B2C.json")))
+                                File.ReadAllText(
+                                    ResourceHelper.GetTestResourceRelativePath(
+                                        @"OpenidConfiguration-B2C.json")))
                     });
 
                 Task<Uri> task = app.GetAuthorizationRequestUrlAsync(MsalTestConstants.Scope, MsalTestConstants.DisplayableId, null);
@@ -453,19 +447,11 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(uri);
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
                 Assert.IsNotNull(qp);
-                Assert.AreEqual(12, qp.Count);
+
                 Assert.AreEqual("my-policy", qp["p"]);
-                Assert.IsTrue(qp.ContainsKey("client-request-id"));
+                ValidateCommonQueryParams(qp);
                 Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2", qp["scope"]);
-                Assert.AreEqual(MsalTestConstants.ClientId, qp["client_id"]);
-                Assert.AreEqual("code", qp["response_type"]);
-                Assert.AreEqual(MsalTestConstants.RedirectUri, qp["redirect_uri"]);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, qp["login_hint"]);
-                Assert.AreEqual(UIBehavior.SelectAccount.PromptValue, qp["prompt"]);
-                Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+
             }
         }
 
@@ -546,22 +532,33 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(uri);
                 Assert.IsTrue(uri.AbsoluteUri.StartsWith(MsalTestConstants.AuthorityGuestTenant, StringComparison.CurrentCulture));
                 Dictionary<string, string> qp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', true, null);
-                Assert.IsNotNull(qp);
-                Assert.AreEqual(12, qp.Count);
-                Assert.IsTrue(qp.ContainsKey("client-request-id"));
-                Assert.IsFalse(qp.ContainsKey("client_secret"));
+                ValidateCommonQueryParams(qp, CustomRedirectUri);
                 Assert.AreEqual("offline_access openid profile r1/scope1 r1/scope2 r2/scope1 r2/scope2", qp["scope"]);
-                Assert.AreEqual(MsalTestConstants.ClientId, qp["client_id"]);
-                Assert.AreEqual("code", qp["response_type"]);
-                Assert.AreEqual(CustomRedirectUri, qp["redirect_uri"]);
-                Assert.AreEqual(MsalTestConstants.DisplayableId, qp["login_hint"]);
-                Assert.AreEqual("MSAL.Desktop", qp["x-client-sku"]);
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
-                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+                Assert.IsFalse(qp.ContainsKey("client_secret"));
                 Assert.AreEqual("qp", qp["extra"]);
-                Assert.AreEqual("select_account", qp["prompt"]);
             }
+        }
+
+        private static void ValidateCommonQueryParams(
+            Dictionary<string, string> qp, 
+            string redirectUri = MsalTestConstants.RedirectUri)
+        {
+            Assert.IsNotNull(qp);
+
+            Assert.IsTrue(qp.ContainsKey("client-request-id"));
+            Assert.AreEqual(MsalTestConstants.ClientId, qp["client_id"]);
+            Assert.AreEqual("code", qp["response_type"]);
+            Assert.AreEqual(redirectUri, qp["redirect_uri"]);
+            Assert.AreEqual(MsalTestConstants.DisplayableId, qp["login_hint"]);
+            Assert.AreEqual(UIBehavior.SelectAccount.PromptValue, qp["prompt"]);
+            Assert.AreEqual(PlatformProxyFactory.GetPlatformProxy().GetProductName(),
+                qp["x-client-sku"]);
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
+            Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));
+
+#if !NET_CORE
+                Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-cpu"]));
+#endif
         }
 
         [TestMethod]

@@ -83,15 +83,6 @@ namespace Microsoft.Identity.Core
             return _isMsal ? "MSAL.CoreCLR" : "PCL.CoreCLR";
         }
 
-        /// <inheritdoc />
-        public ILegacyCachePersistence LegacyCachePersistence { get; } = new NetStandard13LegacyCachePersistence();
-
-        /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
-
-        /// <inheritdoc />
-        public ICryptographyManager CryptographyManager => new NetStandard13CryptographyManager();
-
         public bool IsDomainJoined()
         {
             return false;
@@ -117,6 +108,17 @@ namespace Microsoft.Identity.Core
             return null;
         }
 
+        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        {
+           return new NetStandard13LegacyCachePersistence();
+        }
 
+        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        {
+            return new TokenCacheAccessor();
+        }
+
+        /// <inheritdoc />
+        public ICryptographyManager CryptographyManager { get; } = new NetStandard13CryptographyManager();
     }
 }

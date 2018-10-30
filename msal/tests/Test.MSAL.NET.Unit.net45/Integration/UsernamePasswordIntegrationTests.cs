@@ -36,6 +36,8 @@ using IUser = Test.Microsoft.Identity.LabInfrastructure.IUser;
 
 namespace Test.MSAL.NET.Integration
 {
+    // Note: these tests require permission to a KeyVault Microsoft account; 
+    // Please ignore them if you are not a Microsoft FTE, they will run as part of the CI build
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {

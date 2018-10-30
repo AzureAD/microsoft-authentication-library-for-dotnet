@@ -40,8 +40,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-#if !NET_CORE //TODO: remove the !IF once the bug around token cache is fixed
-// https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/656
+
 namespace Test.MSAL.NET.Unit.CacheTests
 {
     [TestClass]
@@ -50,10 +49,6 @@ namespace Test.MSAL.NET.Unit.CacheTests
         public static long ValidExpiresIn = 3600;
         public static long ValidExtendedExpiresIn = 7200;
 
-        // Passing a seed to make repro possible
-        private static readonly Random Rand = new Random(42);
-
-        // TODO: rename this to _cache, since other tests ALSO use the local variable cache which is confusing.
         private TokenCache _cache;
 
         [TestInitialize]
@@ -61,7 +56,7 @@ namespace Test.MSAL.NET.Unit.CacheTests
         {
             _cache = new TokenCache();
             new TestLogger(Guid.Empty);
-
+            CoreTelemetryService.InitializeCoreTelemetryService(new TestTelemetry());
             AadInstanceDiscovery.Instance.Cache.Clear();
         }
 
@@ -1147,4 +1142,3 @@ namespace Test.MSAL.NET.Unit.CacheTests
         */
     }
 }
-#endif

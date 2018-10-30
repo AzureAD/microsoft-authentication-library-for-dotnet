@@ -43,5 +43,26 @@ namespace Test.Microsoft.Identity.Core.Unit
             // Assert
             Assert.IsTrue(proxy1 == proxy2);
         }
+
+        [TestMethod]
+        public void PlatformProxyFactoryReturnsInstances()
+        {
+            // Arrange
+            var factory = PlatformProxyFactory.GetPlatformProxy();
+
+            // Act and Assert
+            Assert.AreNotSame(
+                factory.CreateLegacyCachePersistence(),
+                factory.CreateLegacyCachePersistence());
+
+            Assert.AreNotSame(
+                factory.CreateTokenCacheAccessor(),
+                factory.CreateTokenCacheAccessor());
+
+            Assert.AreSame(
+                factory.CryptographyManager,
+                factory.CryptographyManager);
+
+        }
     }
 }

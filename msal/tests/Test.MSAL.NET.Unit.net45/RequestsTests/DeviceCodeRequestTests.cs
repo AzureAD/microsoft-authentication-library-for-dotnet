@@ -94,10 +94,6 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             return MockHelpers.CreateSuccessResponseMessage(ExpectedResponseMessage);
         }
 
-
-        // remove when bug is fixed. The token cache is not cleared between tests because it is shared on netcore..        
-        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/656
-#if !NET_CORE
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
         public void TestDeviceCodeAuthSuccess()
@@ -150,7 +146,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 Assert.AreEqual(1, _cache.tokenCacheAccessor.RefreshTokenCount);
             }
         }
-#endif
+
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
         public void TestDeviceCodeCancel()
@@ -184,9 +180,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             }
         }
 
-        // Remove #if when bug is fixed 
-        // https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/656
-#if !NET_CORE
+
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
         public void VerifyAuthorizationPendingErrorDoesNotLogError()
@@ -261,7 +255,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 }
             }
         }
-#endif
+
         private AuthenticationRequestParameters CreateAuthenticationParametersAndSetupMocks(
             MockHttpManager httpManager,
             int numAuthorizationPendingResults,

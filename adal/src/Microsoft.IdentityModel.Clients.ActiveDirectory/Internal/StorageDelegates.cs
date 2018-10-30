@@ -45,7 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
 
         static StorageDelegates()
         {
-            LegacyCachePersistence = PlatformProxyFactory.GetPlatformProxy().LegacyCachePersistence;
+            LegacyCachePersistence = PlatformProxyFactory.GetPlatformProxy().CreateLegacyCachePersistence();
         }
 
         public static void BeforeAccess(TokenCacheNotificationArgs args)

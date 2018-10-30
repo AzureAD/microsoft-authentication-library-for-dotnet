@@ -85,7 +85,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             this.tokenCacheDictionary = new ConcurrentDictionary<AdalTokenCacheKey, AdalResultWrapper>();
 
-            tokenCacheAccessor = PlatformProxyFactory.GetPlatformProxy().TokenCacheAccessor;
+            tokenCacheAccessor = PlatformProxyFactory.GetPlatformProxy().CreateTokenCacheAccessor();
         }
 
         /// <summary>

@@ -121,11 +121,15 @@ namespace Microsoft.Identity.Core
             return _isMsal ? "MSAL.Xamarin.iOS" : "PCL.iOS";
         }
 
-        /// <inheritdoc />
-        public ILegacyCachePersistence LegacyCachePersistence { get; } = new iOSLegacyCachePersistence();
+        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        {
+            return new iOSLegacyCachePersistence();
+        }
 
-        /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor { get; } = new iOSTokenCacheAccessor();
+        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        {
+            return new iOSTokenCacheAccessor();
+        }
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new iOSCryptographyManager();

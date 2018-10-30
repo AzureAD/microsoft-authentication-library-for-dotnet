@@ -205,10 +205,16 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public ILegacyCachePersistence LegacyCachePersistence => new NetDesktopLegacyCachePersistence();
+        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        {
+            return new NetDesktopLegacyCachePersistence();
+        }
 
         /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
+        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        {
+            return new TokenCacheAccessor();
+        }
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new NetDesktopCryptographyManager();

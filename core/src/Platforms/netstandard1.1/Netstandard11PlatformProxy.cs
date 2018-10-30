@@ -108,11 +108,15 @@ namespace Microsoft.Identity.Core
             return null;
         }
 
-        /// <inheritdoc />
-        public ILegacyCachePersistence LegacyCachePersistence => new Netstandard11LegacyCachePersistence();
+        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        {
+            return new Netstandard11LegacyCachePersistence();
+        }
 
-        /// <inheritdoc />
-        public ITokenCacheAccessor TokenCacheAccessor => new TokenCacheAccessor();
+        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        {
+            return new TokenCacheAccessor();
+        }
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new Netstandard11CryptographyManager();

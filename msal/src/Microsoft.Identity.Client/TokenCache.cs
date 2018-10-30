@@ -78,8 +78,8 @@ namespace Microsoft.Identity.Client
         public TokenCache()
         {
             var proxy = PlatformProxyFactory.GetPlatformProxy();
-            tokenCacheAccessor = new TelemetryTokenCacheAccessor(proxy.TokenCacheAccessor);
-            legacyCachePersistence = proxy.LegacyCachePersistence;
+            tokenCacheAccessor = new TelemetryTokenCacheAccessor(proxy.CreateTokenCacheAccessor());
+            legacyCachePersistence = proxy.CreateLegacyCachePersistence();
         }
 
         /// <summary>
