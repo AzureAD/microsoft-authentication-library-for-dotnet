@@ -58,18 +58,11 @@ namespace Test.MSAL.NET.Unit
             AadInstanceDiscovery.Instance.Cache.Clear();
         }
 
-        #if !NET_CORE
+#if !NET_CORE
         [TestMethod]
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
         {
-            MockWebUI ui = new MockWebUI()
-            {
-                MockResult = new AuthorizationResult(AuthorizationStatus.Success,
-                    MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
-            };
-
-
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -129,6 +122,92 @@ namespace Test.MSAL.NET.Unit
                     false).Result;
 
                 Assert.IsNotNull(result1);
+            }
+        }
+
+        [TestMethod]
+        [Description("Test that RemoveAccount api is application specific")]
+        public async System.Threading.Tasks.Task UnifiedCache_RemoveAccountIsApplicationSpecificAsync()
+        {
+            byte[] data = null;
+
+            using (var httpManager = new MockHttpManager())
+            {
+                // login to app
+                var tokenCache = new TokenCache();
+                tokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) => 
+                   {
+                        args.TokenCache.Deserialize(data);
+                   });
+                tokenCache.SetAfterAccess((TokenCacheNotificationArgs args) =>
+                    {
+                        data = args.TokenCache.Serialize();
+                    });
+
+                PublicClientApplication app = new PublicClientApplication(
+                    httpManager,
+                    MsalTestConstants.ClientId,
+                    ClientApplicationBase.DefaultAuthority)
+                {
+                    UserTokenCache = tokenCache
+                };
+
+                httpManager.AddInstanceDiscoveryMockHandler();
+
+                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                                                                           app.RedirectUri + "?code=some-code"));
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                Assert.IsNotNull(result);
+
+                Assert.AreEqual(1, tokenCache.tokenCacheAccessor.GetAllAccountsAsString().Count);
+                Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
+
+                // login tp app1 with same credentials
+                var tokenCache1 = new TokenCache();
+                tokenCache1.SetBeforeAccess((TokenCacheNotificationArgs args) =>
+                {
+                    args.TokenCache.Deserialize(data);
+                });
+                tokenCache1.SetAfterAccess((TokenCacheNotificationArgs args) =>
+                {
+                    data = args.TokenCache.Serialize();
+                });
+
+                PublicClientApplication app1 = new PublicClientApplication(
+                    httpManager,
+                    MsalTestConstants.ClientId_1,
+                    ClientApplicationBase.DefaultAuthority)
+                {
+                    UserTokenCache = tokenCache1
+                };
+
+                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                                                                           app.RedirectUri + "?code=some-code"));
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                Assert.IsNotNull(result);
+
+                // make sure that only one account cache entity was created
+                Assert.AreEqual(1, tokenCache1.tokenCacheAccessor.GetAllAccountsAsString().Count);
+                Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
+
+                Assert.AreEqual(2, tokenCache1.tokenCacheAccessor.GetAllAccessTokensAsString().Count);
+                Assert.AreEqual(2, tokenCache1.tokenCacheAccessor.GetAllRefreshTokensAsString().Count);
+                Assert.AreEqual(2, tokenCache1.tokenCacheAccessor.GetAllIdTokensAsString().Count);
+
+                // remove account from app
+                app.RemoveAsync(app.GetAccountsAsync().Result.First()).Wait();
+
+                // make sure account removed from app
+                Assert.AreEqual(0, app.GetAccountsAsync().Result.Count());
+
+                // make sure account Not removed from app1
+                Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
             }
         }
 #endif

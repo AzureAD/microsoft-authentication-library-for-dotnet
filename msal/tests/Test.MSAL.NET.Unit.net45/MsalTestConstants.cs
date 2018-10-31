@@ -58,6 +58,7 @@ namespace Test.MSAL.NET.Unit
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public const string ClientId = "client_id";
+        public static readonly string ClientId_1 = "client_id_1";
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
