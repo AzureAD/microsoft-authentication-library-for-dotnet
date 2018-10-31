@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Core.Cache
         [DataMember(Name = "expires_on", IsRequired = true)]
         internal string ExpiresOnUnixTimestamp { get; set; }
 
-        [DataMember(Name = "ext_expires_on", IsRequired = true)]
+        [DataMember(Name = "ext_expires_on")]
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
 
         [DataMember(Name = "user_assertion_hash", EmitDefaultValue = false)]
