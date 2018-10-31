@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -76,10 +77,9 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            RequestTestsCommon.InitializeRequestTests();
+            TestCommon.ResetStateAndInitMsal();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
             _cache = new TokenCache();
-            Logger.Level = LogLevel.Info;
         }
 
         [TestCleanup]
@@ -194,6 +194,14 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             
             Logger.LogCallback = (level, message, pii) =>
             {
+                if (level == LogLevel.Error)
+                {
+                    Assert.Fail(
+                        "Received an error message {0} and the stack trace is {1}", 
+                        message, 
+                        new StackTrace(true));
+                }
+
                 logCallbacks.Add(
                     new _LogData
                     {
@@ -245,6 +253,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                             .Select(x => x.Message)
                             .ToArray());
 
+                    
+
                     Assert.IsFalse(
                         logCallbacks.Any(x => x.Level == LogLevel.Error),
                         "Error level logs should not exist but got: " + errorLogs);
@@ -276,7 +286,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 RequestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null))
             };
 
-            RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+            TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
             expectedScopes = new HashSet<string>();
             expectedScopes.UnionWith(MsalTestConstants.Scope);
