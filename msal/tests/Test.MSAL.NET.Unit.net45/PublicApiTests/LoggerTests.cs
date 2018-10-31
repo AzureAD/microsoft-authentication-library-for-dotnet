@@ -41,10 +41,10 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInit()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
+            TestCommon.ResetStateAndInitMsal();
+
             _callback = Substitute.For<LogCallback>();
             Logger.LogCallback = _callback;
-            Logger.PiiLoggingEnabled = false;
         }
 
         [TestMethod()]
@@ -68,12 +68,12 @@ namespace Test.MSAL.NET.Unit
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error("test message");
             Assert.AreEqual(1, counter);
-            //_callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
+            _callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
 
             _callback.When(x => x(LogLevel.Warning, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Warning("test message");
             Assert.AreEqual(1, counter);
-            //_callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
+            _callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
 
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);

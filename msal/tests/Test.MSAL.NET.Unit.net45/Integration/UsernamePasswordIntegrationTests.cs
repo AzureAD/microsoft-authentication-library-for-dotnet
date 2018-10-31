@@ -33,6 +33,7 @@ using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using IUser = Test.Microsoft.Identity.LabInfrastructure.IUser;
+using Test.MSAL.NET.Unit;
 
 namespace Test.MSAL.NET.Integration
 {
@@ -50,6 +51,13 @@ namespace Test.MSAL.NET.Integration
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetState();
+        }
+
 
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]

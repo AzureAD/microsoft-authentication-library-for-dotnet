@@ -40,6 +40,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Test.MSAL.NET.Unit.Mocks;
+using Test.MSAL.NET.Unit;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -53,13 +54,9 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-
+            TestCommon.ResetStateAndInitMsal();
             cache = new TokenCache();
-            Authority.ValidatedAuthorities.Clear();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
-
-            AadInstanceDiscovery.Instance.Cache.Clear();
             CreateSecureString();
         }
 

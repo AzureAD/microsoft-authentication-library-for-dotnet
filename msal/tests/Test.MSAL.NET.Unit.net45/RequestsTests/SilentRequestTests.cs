@@ -51,7 +51,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            RequestTestsCommon.InitializeRequestTests();
+            TestCommon.ResetStateAndInitMsal();
             _cache = new TokenCache();
         }
 
@@ -135,7 +135,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                     cache.AddAccessTokenCacheItem(accessItem);
                 }
-                RequestTestsCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 httpManager.AddMockHandler(new MockHttpMessageHandler()
                 {

@@ -54,10 +54,12 @@ namespace Test.MSAL.NET.Unit.CacheTests
         [TestInitialize]
         public void TestInitialize()
         {
+            TestCommon.ResetStateAndInitMsal();
+
             _cache = new TokenCache();
             new TestLogger(Guid.Empty);
             CoreTelemetryService.InitializeCoreTelemetryService(new TestTelemetry());
-            AadInstanceDiscovery.Instance.Cache.Clear();
+            
         }
 
         private void AddHostToInstanceCache(string host)

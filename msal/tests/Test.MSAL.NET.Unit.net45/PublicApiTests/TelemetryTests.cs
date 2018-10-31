@@ -69,8 +69,7 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void Initialize()
         {
-            Authority.ValidatedAuthorities.Clear();
-            new TestLogger(Guid.Empty);
+            TestCommon.ResetStateAndInitMsal();
         }
 
         private const string TenantId = "1234";

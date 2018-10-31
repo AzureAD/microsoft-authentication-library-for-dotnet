@@ -51,11 +51,10 @@ namespace Test.MSAL.NET.Unit
 
         internal void TestInitialize(MockHttpManager httpManager)
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-            Authority.ValidatedAuthorities.Clear();
+            TestCommon.ResetStateAndInitMsal();
+
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
 
-            AadInstanceDiscovery.Instance.Cache.Clear();
             httpManager.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(
                     MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));

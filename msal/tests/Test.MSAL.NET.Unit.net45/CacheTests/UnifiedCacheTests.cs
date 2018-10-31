@@ -51,11 +51,9 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-            Authority.ValidatedAuthorities.Clear();
-            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
+            TestCommon.ResetStateAndInitMsal();
 
-            AadInstanceDiscovery.Instance.Cache.Clear();
+            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
         }
 
 #if !NET_CORE

@@ -58,13 +58,11 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
+            TestCommon.ResetStateAndInitMsal();
 
             _cache = new TokenCache();
-            Authority.ValidatedAuthorities.Clear();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
 
-            AadInstanceDiscovery.Instance.Cache.Clear();
             // AddMockResponseForInstanceDisovery();
         }
 

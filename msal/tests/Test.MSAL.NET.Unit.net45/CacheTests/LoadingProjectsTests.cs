@@ -8,16 +8,18 @@ namespace Test.MSAL.NET.Unit.netcore
     [TestClass]
     public class LoadingProjectsTests
     {
-        [TestMethod]
-        public void CanDeserializeTokenCacheInNetCore()
+        [TestInitialize]
+        public void TestInitialize()
         {
-            var previousLogLevel = Logger.Level;
-            // Setting LogLevel.Verbose causes certain static dependencies to load
-            Logger.Level = LogLevel.Verbose;
+            TestCommon.ResetStateAndInitMsal();
+        }
+
+        [TestMethod]
+        public void CanDeserializeTokenCache()
+        {
             TokenCache tokenCache = new TokenCache();
             tokenCache.Deserialize(null);
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
-            Logger.Level = previousLogLevel;
         }
     }
 #endif

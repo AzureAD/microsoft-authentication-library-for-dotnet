@@ -76,13 +76,9 @@ namespace Test.MSAL.NET.Unit
         [TestInitialize]
         public void TestInitialize()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-
+            TestCommon.ResetStateAndInitMsal();
             cache = new TokenCache();
-            Authority.ValidatedAuthorities.Clear();
             Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
-
-            AadInstanceDiscovery.Instance.Cache.Clear();
         }
 
         internal void SetupMocks(MockHttpManager httpManager)
