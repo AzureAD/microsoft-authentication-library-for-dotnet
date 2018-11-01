@@ -73,7 +73,7 @@ namespace Test.ADAL.UIAutomation
         public static void AcquireTokenInteractiveHelper(ITestController controller, UserQueryParameters userParams)
         {
             var user = PrepareForAuthentication(controller, userParams);
-            SetInputData(controller, CoreUiTestConstants.UiAutomationTestClientId, CoreUiTestConstants.MSGraph);
+            SetInputData(controller, CoreUiTestConstants.MSIDLAB4ClientId, CoreUiTestConstants.MSGraph);
             CoreMobileTestHelper.PerformSignInFlow(controller, user);
         }
 
