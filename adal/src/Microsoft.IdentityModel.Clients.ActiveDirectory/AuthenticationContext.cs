@@ -469,7 +469,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
-            string resource, 
+            string resource,
             string clientId,
             IntegratedWindowsAuthInput iwaInput)
         {
@@ -487,7 +487,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
-            string resource, 
+            string resource,
             string clientId,
             UserAssertion userAssertion)
         {
@@ -918,6 +918,9 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// <param name="resource">Identifier of the target resource that is the recipient of the requested token.</param>
         /// <param name="clientCredential">The client credential to use for token acquisition.</param>
         /// <returns>It contains Access Token and the Access Token's expiration time. Refresh Token property will be null for this overload.</returns>
+#if ANDROID || iOS || WINDOWS_APP
+        [Obsolete("As a security hygiene, this confidential flow API should not be used on this platform which only supports public client applications. For details please see https://aka.ms/AdalNetConfFlows")]
+#endif
         public async Task<AuthenticationResult> AcquireTokenAsync(string resource, ClientCredential clientCredential)
         {
             return await AcquireTokenForClientCommonAsync(resource, new ClientKey(clientCredential))
