@@ -161,8 +161,8 @@ namespace Test.ADAL.NET.Common.Mocks
 
             HttpContent content = new StringContent(
                 "{\"user_code\":\"some-user-code\",\"device_code\":\"some-device-code\",\"verification_url\":\"some-URL\"," +
-                "\"expires_in\":\"" + expirationTimeInSeconds.ToString() + "\"," +
-                "\"interval\":\"" + retryInternvalInSeconds.ToString() + "\"," +
+                "\"expires_in\":\"" + expirationTimeInSeconds.ToString(CultureInfo.InvariantCulture) + "\"," +
+                "\"interval\":\"" + retryInternvalInSeconds.ToString(CultureInfo.InvariantCulture) + "\"," +
                 "\"message\":\"some-message\"}");
             responseMessage.Content = content;
             return responseMessage;

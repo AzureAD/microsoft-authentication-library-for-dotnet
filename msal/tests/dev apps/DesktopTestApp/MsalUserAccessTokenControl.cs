@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Globalization;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
@@ -24,7 +25,7 @@ namespace DesktopTestApp
             _item = item;
             accessTokenAuthorityLabel.Text = _item.Authority;
             accessTokenScopesLabel.Text = _item.NormalizedScopes;
-            expiresOnLabel.Text = _item.ExpiresOn.ToString();
+            expiresOnLabel.Text = _item.ExpiresOn.ToString(CultureInfo.CurrentCulture);
         }
         
         public MsalUserAccessTokenControl()
@@ -34,7 +35,7 @@ namespace DesktopTestApp
 
         private void expireAccessTokenButton_Click(object sender, System.EventArgs e)
         {
-            expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString();
+            expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString(CultureInfo.CurrentCulture);
             _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
             _cache.SaveAccesTokenCacheItem(_item, null);
         }

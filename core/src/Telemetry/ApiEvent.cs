@@ -126,8 +126,11 @@ namespace Microsoft.Identity.Core.Telemetry
 
         public bool WasSuccessful
         {
+#pragma warning disable CA1305 // .net standard does not have an overload for ToString() with Culture
             set { this[WasSuccessfulKey] = value.ToString().ToLowerInvariant(); }
             get { return this[WasSuccessfulKey] == true.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
+
         }
 
         public string CorrelationId
@@ -142,7 +145,9 @@ namespace Microsoft.Identity.Core.Telemetry
 
         public bool IsConfidentialClient
         {
+#pragma warning disable CA1305 // Specify IFormatProvider
             set { this[IsConfidentialClientKey] = value.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         public string ApiErrorCode {

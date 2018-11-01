@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -56,7 +57,7 @@ namespace WebApp.Controllers
 
         static HomeController()
         {
-            Logger.LogCallback = delegate(LogLevel level, string message, bool containsPii)
+            Logger.LogCallback = delegate (LogLevel level, string message, bool containsPii)
             {
                 lock (LogStringBuilder)
                 {
@@ -148,7 +149,9 @@ namespace WebApp.Controllers
         public ActionResult RequestApplicationPermissions()
         {
             return new RedirectResult(
-                string.Format(AdminConsentUrlFormat,
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    AdminConsentUrlFormat,
                     Startup.Configuration["AzureAd:Tenant"],
                     Startup.Configuration["AzureAd:ClientId"],
                     Startup.Configuration["AzureAd:AdminConsentRedirectUri"]

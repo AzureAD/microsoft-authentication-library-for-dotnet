@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -131,7 +132,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     MsalAccessTokenCacheItem accessItem =
                         JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
                     accessItem.ExpiresOnUnixTimestamp =
-                        ((long)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)).ToString();
+                        ((long)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)).ToString(CultureInfo.InvariantCulture);
 
                     cache.AddAccessTokenCacheItem(accessItem);
                 }

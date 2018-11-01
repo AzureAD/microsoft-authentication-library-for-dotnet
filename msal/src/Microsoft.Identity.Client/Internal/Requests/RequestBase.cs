@@ -177,7 +177,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger)
             {
                 ApiId = _apiId,
+#pragma warning disable CA1305 // netcore does not have bool.tostring(culture)
                 ValidationStatus = AuthenticationRequestParameters.ValidateAuthority.ToString(),
+#pragma warning restore CA1305 // Specify IFormatProvider
                 AccountId = accountId ?? "",
                 CorrelationId = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString(),
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,

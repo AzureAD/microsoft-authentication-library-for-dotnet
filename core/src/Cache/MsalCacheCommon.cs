@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Core.Cache
 
             stringBuilder.Append(scopes ?? "");
 
-            return stringBuilder.ToString().ToLower();
+            return stringBuilder.ToString().ToLowerInvariant();
         }
 
         public static string GetiOSAccountKey(string homeAccountId, string environment)
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Core.Cache
 
             stringBuilder.Append(environment);
 
-            return stringBuilder.ToString().ToLower();
+            return stringBuilder.ToString().ToLowerInvariant();
         }
 
 
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Core.Cache
 
             stringBuilder.Append(scopes ?? "");
 
-            return stringBuilder.ToString().ToLower();
+            return stringBuilder.ToString().ToLowerInvariant();
         }
 
         public static string GetiOSGenericKey(string keyDescriptor, string clientId, string tenantId)
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Core.Cache
 
             stringBuilder.Append(tenantId ?? "");
 
-            return stringBuilder.ToString().ToLower();
+            return stringBuilder.ToString().ToLowerInvariant();
         }
     }
 }

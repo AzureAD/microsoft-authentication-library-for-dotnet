@@ -30,6 +30,7 @@ using NUnit.Framework;
 using System;
 using System.Linq;
 using Xamarin.UITest;
+using System.Globalization;
 
 namespace Test.Microsoft.Identity.Core.UIAutomation
 {
@@ -83,7 +84,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             if (isWebElement)
             {
-                return Application.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
+                return Application.WaitForElement(c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID)), "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
             }
             else
             {
@@ -95,8 +96,8 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             if (isWebElement)
             {
-                Application.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
-                Application.Tap(c => c.Css(String.Format(CSSIDSelector, elementID)));
+                Application.WaitForElement(c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
+                Application.Tap(c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID)));
             }
             else
             {
@@ -109,8 +110,8 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             if (isWebElement)
             {
-                Application.WaitForElement(c => c.Css(String.Format(CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
-                Application.EnterText(c => c.Css(String.Format(CSSIDSelector, elementID)), text);
+                Application.WaitForElement(c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID)), "Could not find element", timeout, defaultRetryFrequency, defaultPostTimeout);
+                Application.EnterText(c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID)), text);
             }
             else
             {

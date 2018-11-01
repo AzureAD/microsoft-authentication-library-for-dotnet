@@ -101,7 +101,8 @@ namespace Microsoft.Identity.Core.Cache
             get
             {
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                return dtDateTime.AddSeconds(Convert.ToInt64(ExpiresOnUnixTimestamp)).ToUniversalTime();
+                var expiresLong = Convert.ToInt64(ExpiresOnUnixTimestamp, CultureInfo.InvariantCulture);
+                return dtDateTime.AddSeconds(expiresLong).ToUniversalTime();
             }
         }
 
@@ -110,7 +111,9 @@ namespace Microsoft.Identity.Core.Cache
             get
             {
                 DateTime dtDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-                return dtDateTime.AddSeconds(Convert.ToInt64(ExtendedExpiresOnUnixTimestamp)).ToUniversalTime();
+                var expiresLong = Convert.ToInt64(ExtendedExpiresOnUnixTimestamp, CultureInfo.InvariantCulture);
+
+                return dtDateTime.AddSeconds(expiresLong).ToUniversalTime();
             }
         }
 

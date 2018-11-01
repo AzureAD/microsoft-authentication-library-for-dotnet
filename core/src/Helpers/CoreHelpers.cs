@@ -56,21 +56,21 @@ namespace Microsoft.Identity.Core.Helpers
 
         public static DateTime UnixTimestampStringToDateTime(string str)
         {
-            return UnixTimestampToDateTime(Convert.ToInt64(str));
+            return UnixTimestampToDateTime(Convert.ToInt64(str, CultureInfo.InvariantCulture));
         }
 
         public static string DateTimeToUnixTimestamp(DateTimeOffset dateTimeOffset)
         {
             DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)dateTimeOffset.Subtract(dateTime).TotalSeconds;
-            return unixTimestamp.ToString();
+            return unixTimestamp.ToString(CultureInfo.InvariantCulture);
         }
 
         public static string CurrDateTimeInUnixTimestamp()
         {
             var unixEpochDateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             long unixTimestamp = (long)DateTime.UtcNow.Subtract(unixEpochDateTime).TotalSeconds;
-            return unixTimestamp.ToString();
+            return unixTimestamp.ToString(CultureInfo.InvariantCulture);
         }
 
         public static long DateTimeToUnixTimestampMilliseconds(DateTimeOffset dateTimeOffset)

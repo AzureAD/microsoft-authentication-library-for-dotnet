@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Cache;
 using UIKit;
@@ -113,7 +114,12 @@ namespace Microsoft.Identity.Core
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string correlationId)
         {
-            return _isMsal ? string.Format(IosDefaultRedirectUriTemplate, correlationId) : Constants.DefaultRedirectUri;
+            return _isMsal ?
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    IosDefaultRedirectUriTemplate,
+                    correlationId)
+                : Constants.DefaultRedirectUri;
         }
 
         public string GetProductName()

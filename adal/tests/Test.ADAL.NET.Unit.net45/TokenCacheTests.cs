@@ -311,7 +311,7 @@ namespace Test.ADAL.Common.Unit
                 cacheValue);
 
             var userId = new UserIdentifier(uniqueId, UserIdentifierType.UniqueId);
-            var userIdUpper = new UserIdentifier(displayableId.ToUpper(), UserIdentifierType.RequiredDisplayableId);
+            var userIdUpper = new UserIdentifier(displayableId.ToUpperInvariant(), UserIdentifierType.RequiredDisplayableId);
 
             authenticationResultFromCache = await acWithLocalCache.AcquireTokenSilentAsync(resource, clientId, userId).ConfigureAwait(false);
             VerifyAuthenticationResultsAreEqual(new AuthenticationResult(cacheValue.Result), authenticationResultFromCache);

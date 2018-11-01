@@ -108,7 +108,9 @@ namespace Microsoft.Identity.Core.WsTrust
                     writer.WriteEndElement(); // Action
 
                     writer.WriteStartElement("messageID", wsaNamespaceValue);
+#pragma warning disable CA1305 // Specify IFormatProvider - no overload on netcore
                     writer.WriteString($"urn:uuid:{_guidFactory.NewGuid().ToString("D")}");
+#pragma warning restore CA1305 // Specify IFormatProvider
                     writer.WriteEndElement(); // messageID
 
                     writer.WriteStartElement("ReplyTo", wsaNamespaceValue);
@@ -169,7 +171,9 @@ namespace Microsoft.Identity.Core.WsTrust
             string expiryTimeString = BuildTimeString(expiryTime);
 
             string versionString = Version == WsTrustVersion.WsTrust2005 ? "UnPwSecTok2005-" : "UnPwSecTok13-";
+#pragma warning disable CA1305 // no overload on netcore
             string trustId = $"{versionString}{_guidFactory.NewGuid().ToString("D")}";
+#pragma warning restore CA1305 // Specify IFormatProvider
 
             writer.WriteStartElement("wsse", "Security", wsseNamespaceValue);
             writer.WriteAttributeString("mustUnderstand", envelopeNamespaceValue, "1");

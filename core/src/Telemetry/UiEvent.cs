@@ -37,12 +37,16 @@ namespace Microsoft.Identity.Core.Telemetry
 
         public bool UserCancelled
         {
+#pragma warning disable CA1305 // .net standard does not have an overload for this
             set { this[UserCancelledKey] = value.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         public bool AccessDenied
         {
+#pragma warning disable CA1305 // .net standard does not have an overload for this
             set { this[AccessDeniedKey] = value.ToString().ToLowerInvariant(); }
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
     }
 }

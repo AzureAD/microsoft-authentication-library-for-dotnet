@@ -76,17 +76,17 @@ namespace Microsoft.Identity.Core.Cache
 
             stringBuilder.Append(_environment);
 
-            return stringBuilder.ToString().ToLower();
+            return stringBuilder.ToString().ToLowerInvariant();
         }
 
         public string GetiOSServiceKey()
         {
-            return (_tenantId ?? "").ToLower();
+            return (_tenantId ?? "").ToLowerInvariant();
         }
 
         public string GetiOSGenericKey()
         {
-            return _username.ToLower();
+            return _username.ToLowerInvariant();
         }
 
 

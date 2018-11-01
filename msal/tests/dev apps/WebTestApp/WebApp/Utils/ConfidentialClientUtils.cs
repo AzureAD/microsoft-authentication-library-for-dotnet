@@ -34,6 +34,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace WebApp.Utils
 {
@@ -107,7 +108,10 @@ namespace WebApp.Utils
         public static async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes,
             ISession session, ClientCredential clientCredential, string userId)
         {
-            var appAuthority = string.Format(Startup.Configuration["AzureAd:AuthorityForApplication"], Startup.Configuration["AzureAd:Tenant"]);
+            var appAuthority = string.Format(
+                CultureInfo.InvariantCulture,
+                Startup.Configuration["AzureAd:AuthorityForApplication"], 
+                Startup.Configuration["AzureAd:Tenant"]);
             var confidentialClient = GetConfidentialClientWithExtraParams(clientCredential, appAuthority, userId, session);
 
             return await confidentialClient.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);

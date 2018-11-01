@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -50,13 +51,13 @@ namespace XForms
             clientIdEntry.Text = App.ClientId;
 
             numOfAtItems.Text = App.MsalPublicClient.UserTokenCache.tokenCacheAccessor.GetAllAccessTokensAsString()
-                .Count.ToString();
+                .Count.ToString(CultureInfo.InvariantCulture);
             numOfRtItems.Text = App.MsalPublicClient.UserTokenCache.tokenCacheAccessor.GetAllRefreshTokensAsString()
-                .Count.ToString();
+                .Count.ToString(CultureInfo.InvariantCulture);
             numOfIdItems.Text = App.MsalPublicClient.UserTokenCache.tokenCacheAccessor.GetAllIdTokensAsString()
-                .Count.ToString();
+                .Count.ToString(CultureInfo.InvariantCulture);
             numOfAccountItems.Text = App.MsalPublicClient.UserTokenCache.tokenCacheAccessor.GetAllAccountsAsString()
-                .Count.ToString();
+                .Count.ToString(CultureInfo.InvariantCulture);
 
             validateAuthority.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.RedirectUri;

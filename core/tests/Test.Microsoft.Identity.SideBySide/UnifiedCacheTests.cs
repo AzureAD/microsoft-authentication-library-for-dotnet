@@ -34,6 +34,7 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Globalization;
 
 namespace Test.MSAL.NET.Integration
 {
@@ -72,7 +73,10 @@ namespace Test.MSAL.NET.Integration
 
                 string stringPassword = ((LabUser)user).GetPassword();
                 securePassword = new NetworkCredential("", stringPassword).SecurePassword;
-                authority = string.Format(AuthorityTemplate, user.CurrentTenantId);
+                authority = string.Format(
+                    CultureInfo.InvariantCulture, 
+                    AuthorityTemplate, 
+                    user.CurrentTenantId);
             }
 
             InitAdal();
