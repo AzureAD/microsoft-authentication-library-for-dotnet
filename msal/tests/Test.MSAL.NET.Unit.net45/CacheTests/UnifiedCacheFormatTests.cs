@@ -58,12 +58,8 @@ namespace Test.MSAL.NET.Unit
     {
         private void TestInitialize(MockHttpManager httpManager)
         {
-            MyReceiver _myReceiver = new MyReceiver();
-
             ModuleInitializer.ForceModuleInitializationTestOnly();
             Authority.ValidatedAuthorities.Clear();
-            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
-
             AadInstanceDiscovery.Instance.Cache.Clear();
 
             httpManager.AddMockHandler(
@@ -101,7 +97,7 @@ namespace Test.MSAL.NET.Unit
         private string ExpectedAccountCacheKeyIosGeneric;
         private string ExpectedAccountCacheValue;
 
-        private readonly RequestContext requestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null));
+        private readonly RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
 
         private void IntitTestData(string fileName)
         {
@@ -199,7 +195,7 @@ namespace Test.MSAL.NET.Unit
             {
                 TestInitialize(httpManager);
 
-                PublicClientApplication app = new PublicClientApplication(httpManager, ClientId, RequestAuthority);
+                PublicClientApplication app = new PublicClientApplication(httpManager, null, ClientId, RequestAuthority);
                 MockWebUI ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(AuthorizationStatus.Success,

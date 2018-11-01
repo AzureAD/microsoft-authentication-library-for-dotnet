@@ -61,6 +61,7 @@ namespace Microsoft.Identity.Client
             var handler = new UsernamePasswordRequest(
                 HttpManager,
                 CryptographyManager,
+                TelemetryManager,
                 WsTrustWebRequestManager,
                 requestParams,
                 ApiEvent.ApiIds.AcquireTokenWithScopeUser,

@@ -50,11 +50,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IntegratedWindowsAuthRequest(
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             IWsTrustWebRequestManager wsTrustWebRequestManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IntegratedWindowsAuthInput iwaInput)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
             _iwaInput = iwaInput ?? throw new ArgumentNullException(nameof(iwaInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(

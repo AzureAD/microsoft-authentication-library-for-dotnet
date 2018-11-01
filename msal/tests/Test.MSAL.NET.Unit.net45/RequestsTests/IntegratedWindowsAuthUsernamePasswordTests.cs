@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
@@ -35,6 +35,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit;
@@ -48,25 +49,26 @@ namespace Test.MSAL.NET.Unit
     public class IntegratedWindowsAuthAndUsernamePasswordTests
     {
         private readonly MyReceiver _myReceiver = new MyReceiver();
-        private TokenCache cache;
-        private SecureString secureString;
+        private ITelemetryManager _telemetryManager;
+        private TokenCache _cache;
+        private SecureString _secureString;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            cache = new TokenCache();
-            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
+            _cache = new TokenCache();
+            _telemetryManager = new TelemetryManager(_myReceiver);
             CreateSecureString();
         }
 
         internal void CreateSecureString()
         {
-            secureString = null;
+            _secureString = null;
             var str = new SecureString();
             str.AppendChar('x');
             str.MakeReadOnly();
-            secureString = str;
+            _secureString = str;
         }
 
         private void AddMockHandlerDefaultUserRealmDiscovery(MockHttpManager httpManager)
@@ -189,8 +191,8 @@ namespace Test.MSAL.NET.Unit
         [TestCleanup]
         public void TestCleanup()
         {
-            cache.tokenCacheAccessor.ClearAccessTokens();
-            cache.tokenCacheAccessor.ClearRefreshTokens();
+            _cache.TokenCacheAccessor.ClearAccessTokens();
+            _cache.TokenCacheAccessor.ClearRefreshTokens();
         }
 
         [TestMethod]
@@ -217,7 +219,7 @@ namespace Test.MSAL.NET.Unit
                 AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityHomeTenant);
 
                 var app =
-                    new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority);
+                    new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority);
                 var result = await app.AcquireTokenByIntegratedWindowsAuthAsync(MsalTestConstants.Scope, MsalTestConstants.User.Username)
                                       .ConfigureAwait(false);
 
@@ -241,12 +243,12 @@ namespace Test.MSAL.NET.Unit
                 AddMockResponseForFederatedAccounts(httpManager);
 
                 var app =
-                    new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority);
+                    new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority);
 
                 var result = await app.AcquireTokenByUsernamePasswordAsync(
                                  MsalTestConstants.Scope,
                                  MsalTestConstants.User.Username,
-                                 secureString).ConfigureAwait(false);
+                                 _secureString).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
@@ -287,10 +289,10 @@ namespace Test.MSAL.NET.Unit
                         }
                     });
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 // Call acquire token, Mex parser fails
@@ -298,14 +300,14 @@ namespace Test.MSAL.NET.Unit
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                                     MsalTestConstants.Scope,
                                     MsalTestConstants.User.Username,
-                                    secureString).ConfigureAwait(false));
+                                    _secureString).ConfigureAwait(false));
 
                 // Check exception message
                 Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
                 Assert.AreEqual("parsing_ws_metadata_exchange_failed", result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -331,10 +333,10 @@ namespace Test.MSAL.NET.Unit
                 // Mex does not return integrated auth endpoint (../13/windowstransport)
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 // Call acquire token, endpoint not found
@@ -342,13 +344,13 @@ namespace Test.MSAL.NET.Unit
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                                     MsalTestConstants.Scope,
                                     MsalTestConstants.User.Username,
-                                    secureString).ConfigureAwait(false));
+                                    _secureString).ConfigureAwait(false));
 
                 // Check exception message
                 Assert.AreEqual(CoreErrorCodes.ParsingWsTrustResponseFailed, result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -372,10 +374,10 @@ namespace Test.MSAL.NET.Unit
                 // MEX
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Get, url: "https://msft.sts.microsoft.com/adfs/services/trust/mex");
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 // Call acquire token
@@ -383,13 +385,13 @@ namespace Test.MSAL.NET.Unit
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                                     MsalTestConstants.Scope,
                                     MsalTestConstants.User.Username,
-                                    secureString).ConfigureAwait(false));
+                                    _secureString).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -416,10 +418,10 @@ namespace Test.MSAL.NET.Unit
                 // Mex does not return integrated auth endpoint (.../13/windowstransport)
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 SecureString str = null;
@@ -435,7 +437,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(CoreErrorCodes.ParsingWsTrustResponseFailed, result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -469,10 +471,10 @@ namespace Test.MSAL.NET.Unit
                         ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
                     });
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 // Call acquire token
@@ -480,13 +482,13 @@ namespace Test.MSAL.NET.Unit
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                                     MsalTestConstants.Scope,
                                     MsalTestConstants.User.Username,
-                                    secureString).ConfigureAwait(false));
+                                    _secureString).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -522,10 +524,10 @@ namespace Test.MSAL.NET.Unit
                         ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage(),
                     });
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 // Call acquire token
@@ -533,13 +535,13 @@ namespace Test.MSAL.NET.Unit
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                                     MsalTestConstants.Scope,
                                     MsalTestConstants.User.Username,
-                                    secureString).ConfigureAwait(false));
+                                    _secureString).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -561,19 +563,20 @@ namespace Test.MSAL.NET.Unit
                         {
                             {"grant_type", "password"},
                             {"username", MsalTestConstants.User.Username},
-                            {"password", secureString}
+                            {"password", _secureString}
                         }
                     });
 
                 var app = new PublicClientApplication(
                     httpManager,
+                    _telemetryManager,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority);
 
                 var result = await app.AcquireTokenByUsernamePasswordAsync(
                                  MsalTestConstants.Scope,
                                  MsalTestConstants.User.Username,
-                                 secureString).ConfigureAwait(false);
+                                 _secureString).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
@@ -591,10 +594,10 @@ namespace Test.MSAL.NET.Unit
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 SecureString str = null;
@@ -610,7 +613,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(MsalError.PasswordRequiredForManagedUserError, result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 
@@ -636,14 +639,14 @@ namespace Test.MSAL.NET.Unit
                         {
                             {"grant_type", "password"},
                             {"username", MsalTestConstants.User.Username},
-                            {"password", secureString}
+                            {"password", _secureString}
                         }
                     });
 
-                cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                _cache.ClientId = MsalTestConstants.ClientId;
+                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
-                    UserTokenCache = cache
+                    UserTokenCache = _cache
                 };
 
                 // Call acquire token
@@ -657,7 +660,7 @@ namespace Test.MSAL.NET.Unit
                 Assert.AreEqual(CoreErrorCodes.InvalidGrantError, result.ErrorCode);
 
                 // There should be no cached entries.
-                Assert.AreEqual(0, cache.tokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
             }
         }
 #endif

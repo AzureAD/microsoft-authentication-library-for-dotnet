@@ -30,12 +30,14 @@ namespace Microsoft.Identity.Core
 {
     internal class RequestContext
     {
-        public RequestContext(ICoreLogger logger)
+        public RequestContext(string clientId, ICoreLogger logger)
         {
+            ClientId = string.IsNullOrWhiteSpace(clientId) ? "unset_client_id" : clientId;
             Logger = logger;
         }
 
         public string TelemetryRequestId { get; set; }
+        public string ClientId { get; set; }
 
         public ICoreLogger Logger { get; set; }
     }

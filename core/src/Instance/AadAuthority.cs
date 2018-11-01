@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -57,10 +58,18 @@ namespace Microsoft.Identity.Core.Instance
             AuthorityType = AuthorityType.Aad;
         }
 
-        internal override async Task UpdateCanonicalAuthorityAsync(IHttpManager httpManager, RequestContext requestContext)
+        internal override async Task UpdateCanonicalAuthorityAsync(
+            IHttpManager httpManager, 
+            ITelemetryManager telemetryManager,
+            RequestContext requestContext)
         {
             var metadata = await AadInstanceDiscovery
-                                 .Instance.GetMetadataEntryAsync(httpManager, new Uri(CanonicalAuthority), ValidateAuthority, requestContext)
+                                 .Instance.GetMetadataEntryAsync(
+                                     httpManager, 
+                                     telemetryManager, 
+                                     new Uri(CanonicalAuthority), 
+                                     ValidateAuthority, 
+                                     requestContext)
                                  .ConfigureAwait(false);
 
             CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
@@ -68,6 +77,7 @@ namespace Microsoft.Identity.Core.Instance
 
         protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
             IHttpManager httpManager,
+            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext)
         {
@@ -76,7 +86,12 @@ namespace Microsoft.Identity.Core.Instance
             if (ValidateAuthority && !IsInTrustedHostList(authorityUri.Host))
             {
                 var discoveryResponse = await AadInstanceDiscovery
-                                              .Instance.DoInstanceDiscoveryAndCacheAsync(httpManager, authorityUri, true, requestContext)
+                                              .Instance.DoInstanceDiscoveryAndCacheAsync(
+                                                  httpManager, 
+                                                  telemetryManager,
+                                                  authorityUri, 
+                                                  true, 
+                                                  requestContext)
                                               .ConfigureAwait(false);
 
                 return discoveryResponse.TenantDiscoveryEndpoint;

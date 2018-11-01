@@ -29,24 +29,22 @@ using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Http;
 using Test.Microsoft.Identity.Core.Unit;
 
 namespace Test.MSAL.NET.Unit
 {
-    public class MyReceiver
+    public class MyReceiver : ITelemetryReceiver
     {
-        public List<Dictionary<string, string>> EventsReceived { get; set; }
+        public List<Dictionary<string, string>> EventsReceived { get; private set; }
 
         public MyReceiver()
         {
             EventsReceived = new List<Dictionary<string, string>>();
         }
 
-        public void OnEvents(List<Dictionary<string, string>> events)
+        public void HandleTelemetryEvents(List<Dictionary<string, string>> events)
         {
             EventsReceived = events;  // Only for testing purpose
             Console.WriteLine("{0} event(s) received", events.Count);
@@ -59,17 +57,25 @@ namespace Test.MSAL.NET.Unit
                 }
             }
         }
+
+        /// <inheritdoc />
+        public bool OnlySendFailureTelemetry { get; set; }
     }
 
     [TestClass]
     public class TelemetryTests
     {
-        private readonly MyReceiver _myReceiver = new MyReceiver();
+        private const string ClientId = "a1b3c3d4";
+
+        private MyReceiver _myReceiver;
+        private TelemetryManager _telemetryManager;
 
         [TestInitialize]
         public void Initialize()
         {
             TestCommon.ResetStateAndInitMsal();
+            _myReceiver = new MyReceiver();
+            _telemetryManager = new TelemetryManager(_myReceiver);
         }
 
         private const string TenantId = "1234";
@@ -81,10 +87,10 @@ namespace Test.MSAL.NET.Unit
         {
             var telemetry = Telemetry.GetInstance();
             var receiver = new MyReceiver();
-            telemetry.RegisterReceiver(receiver.OnEvents);
+            telemetry.RegisterReceiver(receiver.HandleTelemetryEvents);
 
             // Or you can use a one-liner:
-            Telemetry.GetInstance().RegisterReceiver(new MyReceiver().OnEvents);
+            Telemetry.GetInstance().RegisterReceiver(new MyReceiver().HandleTelemetryEvents);
         }
 
         [TestMethod]
@@ -101,43 +107,41 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryInternalApiSample()
         {
-            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
-
-            telemetry.ClientId = "a1b3c3d4";
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, e1);
+                _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
-                telemetry.StopEvent(reqId, e1);
+                _telemetryManager.StopEvent(reqId, e1);
 
                 var e2 = new HttpEvent() { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2" };
-                telemetry.StartEvent(reqId, e2);
+                _telemetryManager.StartEvent(reqId, e2);
                 // do some stuff...
                 e2.HttpResponseStatus = 200;
-                telemetry.StopEvent(reqId, e2);
+                _telemetryManager.StopEvent(reqId, e2);
             }
             finally
             {
-                telemetry.Flush(reqId);
+                _telemetryManager.Flush(reqId, ClientId);
             }
-            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+            Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
 
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetrySkipEventsIfApiEventWasSuccessful()
         {
-            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
-            telemetry.TelemetryOnFailureOnly = true;
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
+            var myReceiver = new MyReceiver
+            {
+                OnlySendFailureTelemetry = true
+            };
 
-            var reqId = telemetry.GenerateNewRequestId();
+            var telemetryManager = new TelemetryManager(myReceiver);
+            var telemetry = (ITelemetry)telemetryManager;
+
+            var reqId = telemetryManager.GenerateNewRequestId();
             try
             {
                 var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
@@ -156,11 +160,11 @@ namespace Test.MSAL.NET.Unit
             }
             finally
             {
-                telemetry.Flush(reqId);
+                telemetry.Flush(reqId, ClientId);
             }
             Assert.AreEqual(0, myReceiver.EventsReceived.Count);
 
-            reqId = telemetry.GenerateNewRequestId();
+            reqId = telemetryManager.GenerateNewRequestId();
             try
             {
                 var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
@@ -179,7 +183,7 @@ namespace Test.MSAL.NET.Unit
             }
             finally
             {
-                telemetry.Flush(reqId);
+                telemetry.Flush(reqId, ClientId);
             }
             Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
         }
@@ -207,53 +211,46 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryContainsDefaultEventAsFirstEvent()
         {
-            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var anEvent = new UiEvent();
-                telemetry.StartEvent(reqId, anEvent);
-                telemetry.StopEvent(reqId, anEvent);
+                _telemetryManager.StartEvent(reqId, anEvent);
+                _telemetryManager.StopEvent(reqId, anEvent);
             }
             finally
             {
-                telemetry.Flush(reqId);
+                _telemetryManager.Flush(reqId, ClientId);
             }
-            Assert.IsTrue(myReceiver.EventsReceived[0][EventBase.EventNameKey].EndsWith("default_event"));
-            Assert.IsTrue(myReceiver.EventsReceived[1][EventBase.EventNameKey].EndsWith("ui_event"));
-            Assert.AreNotEqual(myReceiver.EventsReceived[1][EventBase.ElapsedTimeKey], "-1");
+            Assert.IsTrue(_myReceiver.EventsReceived[0][EventBase.EventNameKey].EndsWith("default_event"));
+            Assert.IsTrue(_myReceiver.EventsReceived[1][EventBase.EventNameKey].EndsWith("ui_event"));
+            Assert.AreNotEqual(_myReceiver.EventsReceived[1][EventBase.ElapsedTimeKey], "-1");
         }
 
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryStartAnEventWithoutStoppingItLater() // Such event(s) becomes an orphaned event
         {
-            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
-
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var apiEvent = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, apiEvent);
+                _telemetryManager.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
-                telemetry.StartEvent(reqId, uiEvent);
+                _telemetryManager.StartEvent(reqId, uiEvent);
                 // Forgot to stop this event. A started event which never got stopped, becomes an orphan.
-                //telemetry.StopEvent(reqId, uiEvent);
-                telemetry.StopEvent(reqId, apiEvent);
+                // telemetry.StopEvent(reqId, uiEvent);
+                _telemetryManager.StopEvent(reqId, apiEvent);
             }
             finally
             {
-                Assert.IsFalse(telemetry.CompletedEvents.IsEmpty); // There are completed event(s) inside
-                Assert.IsFalse(telemetry.EventsInProgress.IsEmpty); // There is an orphaned event inside
-                telemetry.Flush(reqId);
-                Assert.IsTrue(telemetry.CompletedEvents.IsEmpty); // Completed event(s) have been dispatched
-                Assert.IsTrue(telemetry.EventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
+                Assert.IsFalse(_telemetryManager.CompletedEvents.IsEmpty); // There are completed event(s) inside
+                Assert.IsFalse(_telemetryManager.EventsInProgress.IsEmpty); // There is an orphaned event inside
+                _telemetryManager.Flush(reqId, ClientId);
+                Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty); // Completed event(s) have been dispatched
+                Assert.IsTrue(_telemetryManager.EventsInProgress.IsEmpty); // The orphaned event is also dispatched, so there is no memory leak here.
             }
-            Assert.IsNotNull(myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
+            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("ui_event") && anEvent[EventBase.ElapsedTimeKey] == "-1"));
         }
 
@@ -261,28 +258,24 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetryStopAnEventWithoutStartingItBeforehand()
         {
-            Telemetry telemetry = new Telemetry() { ClientId = "a1b2c3d4" };  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
-
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var apiEvent = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, apiEvent);
+                _telemetryManager.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
                 // Forgot to start this event
                 //telemetry.StartEvent(reqId, uiEvent);
                 // Now attempting to stop a never-started event
-                telemetry.StopEvent(reqId, uiEvent); // This line will not cause any exception. The implementation simply ignores it.
-                telemetry.StopEvent(reqId, apiEvent);
+                _telemetryManager.StopEvent(reqId, uiEvent); // This line will not cause any exception. The implementation simply ignores it.
+                _telemetryManager.StopEvent(reqId, apiEvent);
             }
             finally
             {
-                telemetry.Flush(reqId);
-                Assert.IsTrue(telemetry.CompletedEvents.IsEmpty && telemetry.EventsInProgress.IsEmpty); // No memory leak here
+                _telemetryManager.Flush(reqId, ClientId);
+                Assert.IsTrue(_telemetryManager.CompletedEvents.IsEmpty && _telemetryManager.EventsInProgress.IsEmpty); // No memory leak here
             }
-            Assert.IsNull(myReceiver.EventsReceived.Find(anEvent =>  // Expect NOT finding such an event
+            Assert.IsNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect NOT finding such an event
                 anEvent[EventBase.EventNameKey].EndsWith("ui_event")));
         }
 
@@ -290,18 +283,14 @@ namespace Test.MSAL.NET.Unit
         [TestCategory("PiiLoggingEnabled set to true, TenantId & UserId are hashed values")]
         public void PiiLoggingEnabledTrue_TenantAndUserIdHashedTest()
         {
-            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
             var logger = new TestLogger();
             logger.SetPiiLoggingEnabled(true);
 
-            telemetry.ClientId = "a1b3c3d4";
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var e1 = new ApiEvent(logger) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
-                telemetry.StartEvent(reqId, e1);
+                _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
                 // TenantId and UserId are hashed
@@ -318,31 +307,27 @@ namespace Test.MSAL.NET.Unit
                     Assert.AreNotEqual(UserId, e1[ApiEvent.UserIdKey]);
                 }
 
-                telemetry.StopEvent(reqId, e1);
+                _telemetryManager.StopEvent(reqId, e1);
             }
             finally
             {
-                telemetry.Flush(reqId);
+                _telemetryManager.Flush(reqId, ClientId);
             }
-            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+            Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
 
         [TestMethod]
         [TestCategory("PiiLoggingEnabled set to false, TenantId & UserId set to null values")]
         public void PiiLoggingEnabledFalse_TenantIdUserIdSetToNullValueTest()
         {
-            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
             var logger = new TestLogger();
             logger.SetPiiLoggingEnabled(false);
 
-            telemetry.ClientId = "a1b3c3d4";
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var e1 = new ApiEvent(logger) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
-                telemetry.StartEvent(reqId, e1);
+                _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
 
@@ -357,29 +342,24 @@ namespace Test.MSAL.NET.Unit
                     Assert.AreEqual(null, e1[ApiEvent.UserIdKey]);
                 }
 
-                telemetry.StopEvent(reqId, e1);
+                _telemetryManager.StopEvent(reqId, e1);
             }
             finally
             {
-                telemetry.Flush(reqId);
+                _telemetryManager.Flush(reqId, ClientId);
             }
-            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+            Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
 
         [TestMethod]
         [TestCategory("Check untrusted host Authority is set as null")]
         public void AuthorityNotInTrustedHostList_AuthorityIsSetAsNullValueTest()
         {
-            Telemetry telemetry = new Telemetry();  // To isolate the test environment, we do not use a singleton here
-            var myReceiver = new MyReceiver();
-            telemetry.RegisterReceiver(myReceiver.OnEvents);
-
-            telemetry.ClientId = "a1b3c3d4";
-            var reqId = telemetry.GenerateNewRequestId();
+            var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
                 var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, e1);
+                _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
 
@@ -389,11 +369,11 @@ namespace Test.MSAL.NET.Unit
                     Assert.AreEqual("https://login.microsoftonline.com/<tenant>", e1[ApiEvent.AuthorityKey]);
                 }
 
-                telemetry.StopEvent(reqId, e1);
+                _telemetryManager.StopEvent(reqId, e1);
 
                 // Authority host not in trusted host list, should return null
                 var e2 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
-                telemetry.StartEvent(reqId, e2);
+                _telemetryManager.StartEvent(reqId, e2);
                 // do some stuff...
                 e2.WasSuccessful = true;
 
@@ -402,13 +382,13 @@ namespace Test.MSAL.NET.Unit
                     Assert.AreEqual(null, e2[ApiEvent.AuthorityKey]);
                 }
 
-                telemetry.StopEvent(reqId, e2);
+                _telemetryManager.StopEvent(reqId, e2);
             }
             finally
             {
-                telemetry.Flush(reqId);
+                _telemetryManager.Flush(reqId, ClientId);
             }
-            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+            Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
     }
 }

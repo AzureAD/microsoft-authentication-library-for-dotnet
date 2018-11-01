@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core;
+using System.Collections.Generic;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,26 +35,32 @@ namespace Test.Microsoft.Identity.Core.Unit.Telemetry
     [TestClass]
     public class TelemetryHelperTests
     {
-        private const string requestId = "therequestid";
-        private _TestTelem _telem;
-        private _TestEvent _startEvent;
-        private _TestEvent _stopEvent;
+        private const string RequestId = "therequestid";
+        private const string ClientId = "theclientid";
+        private _TestEvent _trackingEvent;
+        private TelemetryManager _telemetryManager;
+        private _TestReceiver _testReceiver;
 
         [TestInitialize]
         public void Setup()
         {
-            _telem = new _TestTelem();
-            CoreTelemetryService.InitializeCoreTelemetryService(_telem);
-
-            _startEvent = new _TestEvent("start event");
-            _stopEvent = new _TestEvent("stop event");
+            _testReceiver = new _TestReceiver();
+            _telemetryManager = new TelemetryManager(_testReceiver);
+            _trackingEvent = new _TestEvent("tracking event");
         }
 
-        [TestCleanup]
-        public void Cleanup()
+        private class _TestReceiver : ITelemetryReceiver
         {
-            _telem = null;
-            CoreTelemetryService.InitializeCoreTelemetryService(null);
+            public List<Dictionary<string, string>> ReceivedEvents = new List<Dictionary<string, string>>();
+
+            /// <inheritdoc />
+            public void HandleTelemetryEvents(List<Dictionary<string, string>> events)
+            {
+                ReceivedEvents.AddRange(events);
+            }
+
+            /// <inheritdoc />
+            public bool OnlySendFailureTelemetry { get; set; }
         }
 
         private class _TestEvent : EventBase
@@ -64,110 +70,51 @@ namespace Test.Microsoft.Identity.Core.Unit.Telemetry
             }
         }
 
-        private class _TestTelem : ITelemetry
-        {
-            public int NumFlushCalls { get; private set; } = 0;
-            public int NumStartEventCalls { get; private set; } = 0;
-            public int NumStopEventCalls { get; private set; } = 0;
-
-            public string LastStartEventRequestId { get; private set; } = string.Empty;
-            public string LastStopEventRequestId { get; private set; } = string.Empty;
-            public string LastFlushEventRequestId { get; private set; } = string.Empty;
-
-            public EventBase LastEventToStart { get; private set; }
-            public EventBase LastEventToStop { get; private set; }
-
-            public void Flush(string requestId)
-            {
-                NumFlushCalls++;
-                LastFlushEventRequestId = requestId;
-            }
-
-            public void StartEvent(string requestId, EventBase eventToStart)
-            {
-                NumStartEventCalls++;
-                LastStartEventRequestId = requestId;
-                LastEventToStart = eventToStart;
-            }
-
-            public void StopEvent(string requestId, EventBase eventToStop)
-            {
-                NumStopEventCalls++;
-                LastStopEventRequestId = requestId;
-                LastEventToStop = eventToStop;
-            }
-        }
-
         [TestMethod]
         [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelper()
         {
-            using (CoreTelemetryService.CreateTelemetryHelper(requestId, _startEvent))
+            using (_telemetryManager.CreateTelemetryHelper(RequestId, ClientId, _trackingEvent))
             {
             }
 
-            ValidateResults(_telem, requestId, _startEvent, _startEvent, false);
+            ValidateResults(ClientId, false);
         }
 
         [TestMethod]
         [TestCategory("TelemetryHelperTests")]
         public void TestTelemetryHelperWithFlush()
         {
-            using (CoreTelemetryService.CreateTelemetryHelper(requestId, _startEvent, shouldFlush: true))
+            using (_telemetryManager.CreateTelemetryHelper(RequestId, ClientId, _trackingEvent, shouldFlush: true))
             {
             }
 
-            ValidateResults(_telem, requestId, _startEvent, _startEvent, true);
-        }
-
-        [TestMethod]
-        [TestCategory("TelemetryHelperTests")]
-        public void TestTelemetryHelperWithDifferentStopStartEvents()
-        {
-            using (CoreTelemetryService.CreateTelemetryHelper(requestId, _startEvent, eventToEnd: _stopEvent))
-            {
-            }
-
-            ValidateResults(_telem, requestId, _startEvent, _stopEvent, false);
-        }
-
-        [TestMethod]
-        [TestCategory("TelemetryHelperTests")]
-        public void TestTelemetryHelperWithDifferentStopStartEventsWithFlush()
-        {
-            using (CoreTelemetryService.CreateTelemetryHelper(requestId, _startEvent, eventToEnd: _stopEvent, shouldFlush: true))
-            {
-            }
-
-            ValidateResults(_telem, requestId, _startEvent, _stopEvent, true);
+            ValidateResults(ClientId, true);
         }
 
         private void ValidateResults(
-            _TestTelem telem,
-            string expectedRequestId,
-            _TestEvent expectedStartEvent,
-            _TestEvent expectedStopEvent,
+            string expectedClientId,
             bool shouldFlush)
         {
             if (shouldFlush)
             {
-                Assert.AreEqual(1, telem.NumFlushCalls);
-                Assert.AreEqual(expectedRequestId, telem.LastFlushEventRequestId);
+                Assert.AreEqual(2, _testReceiver.ReceivedEvents.Count);
+
+                var first = _testReceiver.ReceivedEvents[0];
+                Assert.AreEqual(6, first.Count);
+                Assert.IsTrue(first.ContainsKey(EventBase.EventNameKey));
+                Assert.AreEqual("msal.default_event", first[EventBase.EventNameKey]);
+                Assert.AreEqual(expectedClientId, first["msal.client_id"]);
+
+                var second = _testReceiver.ReceivedEvents[1];
+                Assert.AreEqual(3, second.Count);
+                Assert.IsTrue(second.ContainsKey(EventBase.EventNameKey));
+                Assert.AreEqual("tracking event", second[EventBase.EventNameKey]);
             }
             else
             {
-                Assert.AreEqual(0, telem.NumFlushCalls);
-                Assert.AreEqual(string.Empty, telem.LastFlushEventRequestId);
+                Assert.AreEqual(0, _testReceiver.ReceivedEvents.Count);
             }
-
-            Assert.AreEqual(1, telem.NumStartEventCalls);
-            Assert.AreEqual(1, telem.NumStopEventCalls);
-
-            Assert.AreEqual(expectedRequestId, telem.LastStartEventRequestId);
-            Assert.AreEqual(expectedRequestId, telem.LastStopEventRequestId);
-
-            Assert.AreEqual(expectedStartEvent, telem.LastEventToStart);
-            Assert.AreEqual(expectedStopEvent, telem.LastEventToStop);
         }
     }
 }

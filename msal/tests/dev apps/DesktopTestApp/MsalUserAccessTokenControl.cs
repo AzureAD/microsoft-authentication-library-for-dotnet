@@ -42,7 +42,7 @@ namespace DesktopTestApp
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)
         {
-            var requestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
 
             _cache.DeleteAccessToken(_item, null, requestContext);
             RefreshViewDelegate?.Invoke();

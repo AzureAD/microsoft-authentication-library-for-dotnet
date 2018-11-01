@@ -46,10 +46,11 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
         public DeviceCodeRequest(
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
             _deviceCodeResultCallback = deviceCodeResultCallback;
         }
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
-            var client = new OAuth2Client(HttpManager);
+            var client = new OAuth2Client(HttpManager, TelemetryManager);
 
             var deviceCodeScopes = new HashSet<string>();
             deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);

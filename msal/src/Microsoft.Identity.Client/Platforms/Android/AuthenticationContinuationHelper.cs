@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
+            RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;

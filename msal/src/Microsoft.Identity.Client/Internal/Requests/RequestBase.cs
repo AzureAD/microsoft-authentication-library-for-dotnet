@@ -44,19 +44,38 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal abstract class RequestBase
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
-        internal TokenCache TokenCache { get; }
+
+        private TokenCache _tokenCache;
+        internal TokenCache TokenCache
+        {
+            get => _tokenCache;
+            set
+            {
+                _tokenCache = value;
+                if (_tokenCache != null)
+                {
+                    _tokenCache.HttpManager = HttpManager;
+                    _tokenCache.TelemetryManager = TelemetryManager;
+                }
+            }
+        }
+
+
         private readonly ApiEvent.ApiIds _apiId;
         protected IHttpManager HttpManager { get; }
         protected ICryptographyManager CryptographyManager { get; }
+        protected ITelemetryManager TelemetryManager { get; }
 
         protected RequestBase(
             IHttpManager httpManager, 
             ICryptographyManager cryptographyManager, 
+            ITelemetryManager telemetryManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
         {
             HttpManager = httpManager;
             CryptographyManager = cryptographyManager;
+            TelemetryManager = telemetryManager;
             TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
             
@@ -69,10 +88,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ValidateScopeInput(authenticationRequestParameters.Scope);
 
             AuthenticationRequestParameters.LogState();
-
-            // TODO: FIX THIS SINCE THIS IS PROCESS GLOBAL.  
-            // #HOWDOESTHISEVENWORK?!
-            Telemetry.GetInstance().ClientId = AuthenticationRequestParameters.ClientId;
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
@@ -135,8 +150,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
             var apiEvent = InitializeApiEvent(accountId);
 
-            using (CoreTelemetryService.CreateTelemetryHelper(
+            using (TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
+                AuthenticationRequestParameters.ClientId,
                 apiEvent,
                 shouldFlush: true))
             {
@@ -173,7 +189,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = Telemetry.GetInstance().GenerateNewRequestId();
+            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = TelemetryManager.GenerateNewRequestId();
             var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger)
             {
                 ApiId = _apiId,
@@ -269,10 +285,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task ResolveAuthorityEndpointsAsync()
         {
             await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync
-                (HttpManager, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                (HttpManager, TelemetryManager, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             await AuthenticationRequestParameters.Authority
-                .ResolveEndpointsAsync(HttpManager, AuthenticationRequestParameters.LoginHint,
+                .ResolveEndpointsAsync(HttpManager, TelemetryManager, AuthenticationRequestParameters.LoginHint,
                     AuthenticationRequestParameters.RequestContext)
                 .ConfigureAwait(false);
         }
@@ -281,7 +297,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters, 
             CancellationToken cancellationToken)
         {
-            OAuth2Client client = new OAuth2Client(HttpManager);
+            OAuth2Client client = new OAuth2Client(HttpManager, TelemetryManager);
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
             foreach (var entry in AuthenticationRequestParameters.ToParameters())

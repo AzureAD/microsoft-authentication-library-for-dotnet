@@ -50,7 +50,7 @@ namespace XForms
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
 
-            var requestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
 
             IDictionary<string, MsalAccessTokenCacheItem> accessTokens = new Dictionary<string, MsalAccessTokenCacheItem>();
             foreach (var accessItemStr in tokenCache.GetAllAccessTokenCacheItems(requestContext))
@@ -128,7 +128,7 @@ namespace XForms
 
             var tokenCache = App.MsalPublicClient.UserTokenCache;
             // todo pass idToken instead of null
-            var requestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
 
             tokenCache.DeleteAccessToken(accessTokenCacheItem, null, requestContext);
 

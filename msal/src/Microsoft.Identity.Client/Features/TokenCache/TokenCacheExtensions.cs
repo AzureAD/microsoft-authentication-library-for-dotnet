@@ -95,9 +95,8 @@ namespace Microsoft.Identity.Client
         {
             lock (tokenCache.LockObject)
             {
-                RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
-
-                TokenCacheSerializeHelper.DeserializeUnifiedCache(tokenCache.tokenCacheAccessor, unifiedState, requestContext);
+                RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
+                TokenCacheSerializeHelper.DeserializeUnifiedCache(tokenCache.TokenCacheAccessor, unifiedState, requestContext);
             }
         }
 
@@ -110,11 +109,10 @@ namespace Microsoft.Identity.Client
         {
             lock (tokenCache.LockObject)
             {
-                RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
-
+                RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
                 Deserialize(tokenCache, cacheData.UnifiedState);
 
-                tokenCache.legacyCachePersistence.WriteCache(cacheData.AdalV3State);
+                tokenCache.LegacyCachePersistence.WriteCache(cacheData.AdalV3State);
             }
         }
 
@@ -128,7 +126,7 @@ namespace Microsoft.Identity.Client
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (tokenCache.LockObject)
             {
-                return TokenCacheSerializeHelper.SerializeUnifiedCache(tokenCache.tokenCacheAccessor);
+                return TokenCacheSerializeHelper.SerializeUnifiedCache(tokenCache.TokenCacheAccessor);
             }
         }
 
@@ -143,7 +141,7 @@ namespace Microsoft.Identity.Client
             lock (tokenCache.LockObject)
             {
                 var serializedUnifiedCache = Serialize(tokenCache);
-                var serializeAdalCache = tokenCache.legacyCachePersistence.LoadCache();
+                var serializeAdalCache = tokenCache.LegacyCachePersistence.LoadCache();
 
                 return new CacheData()
                 {

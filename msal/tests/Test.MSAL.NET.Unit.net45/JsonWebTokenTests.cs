@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-// Test should run on net core. Please re-enable once bug 
+// Test should run on net core. Please re-enable once bug
 // https://identitydivision.visualstudio.com/DevEx/_workitems/edit/574705 is fixed
 #if !ANDROID && !iOS && !WINDOWS_APP && !NET_CORE
 
@@ -49,9 +49,9 @@ namespace Test.MSAL.NET.Unit
     [DeploymentItem(@"Resources\valid_cert.pfx")]
     public class JsonWebTokenTests
     {
-        TokenCache cache;
-        private MyReceiver _myReceiver = new MyReceiver();
-        readonly MockHttpMessageHandler X5CMockHandler = new MockHttpMessageHandler()
+        private TokenCache _cache;
+
+        private readonly MockHttpMessageHandler X5CMockHandler = new MockHttpMessageHandler()
         {
             Method = HttpMethod.Post,
             ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
@@ -72,13 +72,12 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsTrue(jsonToken.Header.Any(header => header.Key == "x5c"), "x5c should be present");
             }
         };
-     
+
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            cache = new TokenCache();
-            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
+            _cache = new TokenCache();
         }
 
         internal void SetupMocks(MockHttpManager httpManager)
@@ -102,12 +101,13 @@ namespace Test.MSAL.NET.Unit
                 var clientCredential = new ClientCredential(clientAssertion);
                 var app = new ConfidentialClientApplication(
                     httpManager,
+                    null,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority,
                     MsalTestConstants.RedirectUri,
                     clientCredential,
-                    cache,
-                    cache)
+                    _cache,
+                    _cache)
                 {
                     ValidateAuthority = false
                 };
@@ -139,12 +139,13 @@ namespace Test.MSAL.NET.Unit
                 var clientCredential = new ClientCredential(clientAssertion);
                 var app = new ConfidentialClientApplication(
                     httpManager,
+                    null,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority,
                     MsalTestConstants.RedirectUri,
                     clientCredential,
-                    cache,
-                    cache)
+                    _cache,
+                    _cache)
                 {
                     ValidateAuthority = false
                 };

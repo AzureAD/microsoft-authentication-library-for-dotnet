@@ -57,7 +57,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         protected AcquireTokenHandlerBase(RequestData requestData)
         {
             this.Authenticator = requestData.Authenticator;
-            RequestContext = CreateCallState(this.Authenticator.CorrelationId);
+            RequestContext = CreateCallState(null, this.Authenticator.CorrelationId);
             brokerHelper.RequestContext = RequestContext;
 
             RequestContext.Logger.Info(string.Format(CultureInfo.CurrentCulture,
@@ -260,10 +260,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             return false;
         }
 
-        public static RequestContext CreateCallState(Guid correlationId)
+        public static RequestContext CreateCallState(string clientId, Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(new AdalLogger(correlationId));
+            return new RequestContext(clientId, new AdalLogger(correlationId));
         }
 
         protected virtual Task PostRunAsync(AdalResult result)

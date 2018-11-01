@@ -45,10 +45,12 @@ namespace Microsoft.Identity.Core.OAuth2
         private readonly Dictionary<string, string> _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters());
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
+        private readonly ITelemetryManager _telemetryManager;
 
-        public OAuth2Client(IHttpManager httpManager)
+        public OAuth2Client(IHttpManager httpManager, ITelemetryManager telemetryManager)
         {
             _httpManager = httpManager ?? throw new ArgumentNullException(nameof(httpManager));
+            _telemetryManager = telemetryManager ?? throw new ArgumentNullException(nameof(telemetryManager));
         }
 
         public void AddQueryParameter(string key, string value)
@@ -89,9 +91,8 @@ namespace Microsoft.Identity.Core.OAuth2
                 HttpPath = endpointUri,
                 QueryParams = endpointUri.Query
             };
-            var telemetry = CoreTelemetryService.GetInstance();
-            telemetry.StartEvent(requestContext.TelemetryRequestId, httpEvent);
-            try
+
+            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId, httpEvent))
             {
                 if (method == HttpMethod.Post)
                 {
@@ -119,10 +120,6 @@ namespace Microsoft.Identity.Core.OAuth2
                             response);
                     }
                 }
-            }
-            finally
-            {
-                telemetry.StopEvent(requestContext.TelemetryRequestId, httpEvent);
             }
 
             return CreateResponse<T>(response, requestContext, addCorrelationId);

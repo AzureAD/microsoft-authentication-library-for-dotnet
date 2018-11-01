@@ -41,10 +41,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ClientCredentialRequest(
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             bool forceRefresh)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
             ForceRefresh = forceRefresh;
         }

@@ -34,6 +34,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -64,12 +65,17 @@ namespace Microsoft.Identity.Core.Instance
 
         protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
             IHttpManager httpManager,
+            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext)
         {
             if (ValidateAuthority)
             {
-                var drsResponse = await GetMetadataFromEnrollmentServerAsync(httpManager, userPrincipalName, requestContext)
+                var drsResponse = await GetMetadataFromEnrollmentServerAsync(
+                                          httpManager, 
+                                          telemetryManager,
+                                          userPrincipalName, 
+                                          requestContext)
                                       .ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(drsResponse.Error))
@@ -140,6 +146,7 @@ namespace Microsoft.Identity.Core.Instance
 
         private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(
             IHttpManager httpManager,
+            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext)
         {
@@ -148,6 +155,7 @@ namespace Microsoft.Identity.Core.Instance
                 //attempt to connect to on-premise enrollment server first.
                 return await QueryEnrollmentServerEndpointAsync(
                            httpManager,
+                           telemetryManager,
                            string.Format(
                                CultureInfo.InvariantCulture,
                                "https://enterpriseregistration.{0}/enrollmentserver/contract",
@@ -163,6 +171,7 @@ namespace Microsoft.Identity.Core.Instance
 
             return await QueryEnrollmentServerEndpointAsync(
                        httpManager,
+                       telemetryManager,
                        string.Format(
                            CultureInfo.InvariantCulture,
                            "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
@@ -170,9 +179,10 @@ namespace Microsoft.Identity.Core.Instance
                        requestContext).ConfigureAwait(false);
         }
 
-        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(IHttpManager httpManager, string endpoint, RequestContext requestContext)
+        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(
+            IHttpManager httpManager, ITelemetryManager telemetryManager, string endpoint, RequestContext requestContext)
         {
-            var client = new OAuth2Client(httpManager);
+            var client = new OAuth2Client(httpManager, telemetryManager);
             client.AddQueryParameter("api-version", "1.0");
             return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext)
                                .ConfigureAwait(false);

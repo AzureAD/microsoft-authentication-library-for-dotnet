@@ -365,7 +365,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             AdalTestConstants.DefaultAuthorityCommonTenant, AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             HttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler()
@@ -398,7 +398,7 @@ namespace Test.ADAL.NET.Integration
                 UniqueId = AdalTestConstants.DefaultUniqueId,
                 DisplayableId = AdalTestConstants.DefaultDisplayableId
             },
-            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             Assert.AreEqual("some-access-token", entry.Result.AccessToken);
 
             Assert.IsNotNull(result.UserInfo);

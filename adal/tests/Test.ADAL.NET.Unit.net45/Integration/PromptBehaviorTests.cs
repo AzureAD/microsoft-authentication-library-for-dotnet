@@ -156,7 +156,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             AdalTestConstants.DefaultAuthorityHomeTenant, AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))
@@ -211,7 +211,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             AdalTestConstants.DefaultAuthorityHomeTenant, AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))
@@ -268,7 +268,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             AdalTestConstants.DefaultAuthorityHomeTenant, AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))
@@ -361,7 +361,7 @@ namespace Test.ADAL.NET.Integration
                 },
             },
             AdalTestConstants.DefaultAuthorityHomeTenant, AdalTestConstants.DefaultResource, AdalTestConstants.DefaultClientId, TokenSubjectType.User,
-            new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             ResetInstanceDiscovery();
 
             AdalHttpMessageHandlerFactory.AddMockHandler(new MockHttpMessageHandler(AdalTestConstants.GetTokenEndpoint(AdalTestConstants.DefaultAuthorityHomeTenant))

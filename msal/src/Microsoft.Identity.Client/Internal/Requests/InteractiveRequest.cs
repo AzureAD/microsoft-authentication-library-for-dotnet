@@ -52,6 +52,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public InteractiveRequest(
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
@@ -60,6 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             : this(
                 httpManager,
                 cryptographyManager,
+                telemetryManager,
                 authenticationRequestParameters,
                 apiId,
                 extraScopesToConsent,
@@ -72,13 +74,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public InteractiveRequest(
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
             string loginHint,
             UIBehavior uiBehavior,
             IWebUI webUi)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
             {
@@ -129,8 +132,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var authorizationUri = CreateAuthorizationUri(true, true);
 
             var uiEvent = new UiEvent();
-            using (CoreTelemetryService.CreateTelemetryHelper(
+            using (TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
+                AuthenticationRequestParameters.ClientId,
                 uiEvent))
             {
                 _authorizationResult = await _webUi.AcquireAuthorizationAsync(
@@ -145,12 +149,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal async Task<Uri> CreateAuthorizationUriAsync()
         {
             await AuthenticationRequestParameters
-                  .Authority.UpdateCanonicalAuthorityAsync(HttpManager, AuthenticationRequestParameters.RequestContext)
+                  .Authority.UpdateCanonicalAuthorityAsync(HttpManager, TelemetryManager, AuthenticationRequestParameters.RequestContext)
                   .ConfigureAwait(false);
 
             //this method is used in confidential clients to create authorization URLs.
             await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(
                 HttpManager,
+                TelemetryManager,
                 AuthenticationRequestParameters.LoginHint,
                 AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
             return CreateAuthorizationUri();

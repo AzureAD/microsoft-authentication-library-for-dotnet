@@ -386,7 +386,7 @@ namespace Test.ADAL.Common.Unit
                 SubjectType = TokenSubjectType.User
             };
 
-            AdalResultWrapper resultEx = await tokenCache.LoadFromCacheAsync(data, new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            AdalResultWrapper resultEx = await tokenCache.LoadFromCacheAsync(data, new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             Assert.IsNotNull(resultEx);
 
 
@@ -510,18 +510,18 @@ namespace Test.ADAL.Common.Unit
                 DisplayableId = null
             };
 
-            AdalResultWrapper resultEx = await cache.LoadFromCacheAsync(data, new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            AdalResultWrapper resultEx = await cache.LoadFromCacheAsync(data, new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             AreAdalResultWrappersEqual(value, resultEx);
 
             data.AssertionHash = "hash2";
-            resultEx = await cache.LoadFromCacheAsync(data, new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false);
+            resultEx = await cache.LoadFromCacheAsync(data, new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false);
             AreAdalResultWrappersEqual(value2, resultEx);
 
             data.AssertionHash = null;
 
             // Multiple tokens in cache -> error
             var exc = AssertException.TaskThrows<AdalException>(async () =>
-                await cache.LoadFromCacheAsync(data, new RequestContext(new AdalLogger(new Guid()))).ConfigureAwait(false));
+                await cache.LoadFromCacheAsync(data, new RequestContext(null, new AdalLogger(new Guid()))).ConfigureAwait(false));
             Assert.AreEqual(exc.ErrorCode, AdalError.MultipleTokensMatched);
         }
 

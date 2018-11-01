@@ -41,9 +41,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorizationCodeRequest(
             IHttpManager httpManager, 
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
             if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {

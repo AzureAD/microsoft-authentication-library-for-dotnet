@@ -148,7 +148,14 @@ namespace Microsoft.Identity.Client
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
-            var handler = new DeviceCodeRequest(HttpManager, CryptographyManager, requestParams, ApiEvent.ApiIds.None, deviceCodeResultCallback);
+            var handler = new DeviceCodeRequest(
+                HttpManager,
+                CryptographyManager,
+                TelemetryManager,
+                requestParams,
+                ApiEvent.ApiIds.None,
+                deviceCodeResultCallback);
+
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
     }

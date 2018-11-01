@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,22 +23,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.UI;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.UI;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Test.MSAL.NET.Unit.Mocks;
 
@@ -47,13 +45,9 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class AuthorityAliasesTests
     {
-        private MyReceiver _myReceiver = new MyReceiver();
-
         internal void TestInitialize(MockHttpManager httpManager)
         {
             TestCommon.ResetStateAndInitMsal();
-
-            Telemetry.GetInstance().RegisterReceiver(_myReceiver.OnEvents);
 
             httpManager.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(
@@ -66,16 +60,27 @@ namespace Test.MSAL.NET.Unit
         public void AuthorityMigration_IntegrationTest()
         {
             // make sure that for all network calls "preferred_cache" enironment is used
-            // (it is taken from metadata in instance discovery response), 
+            // (it is taken from metadata in instance discovery response),
             // except very first network call - instance discovery
 
             using (var httpManager = new MockHttpManager())
             {
                 TestInitialize(httpManager);
 
-                PublicClientApplication app = new PublicClientApplication(httpManager, MsalTestConstants.ClientId,
-                string.Format(CultureInfo.InvariantCulture, "https://{0}/common", MsalTestConstants.ProductionNotPrefEnvironmentAlias));
-                app.UserTokenCache.legacyCachePersistence = new TestLegacyCachePersistance();
+                PublicClientApplication app = new PublicClientApplication(
+                    httpManager,
+                    null,
+                    MsalTestConstants.ClientId,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "https://{0}/common",
+                        MsalTestConstants.ProductionNotPrefEnvironmentAlias))
+                {
+                    UserTokenCache =
+                    {
+                        LegacyCachePersistence = new TestLegacyCachePersistance()
+                    }
+                };
 
                 // mock for openId config request
                 httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -163,33 +168,33 @@ namespace Test.MSAL.NET.Unit
 
         private void ValidateCacheEntitiesEnvironment(TokenCache cache, string expectedEnvironment)
         {
-            var requestContext = new RequestContext(new MsalLogger(Guid.NewGuid(), null));
-            var accessTokens = cache.GetAllAccessTokensForClient(requestContext);
+            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            ICollection<MsalAccessTokenCacheItem> accessTokens = cache.GetAllAccessTokensForClient(requestContext);
             foreach (var at in accessTokens)
             {
                 Assert.AreEqual(expectedEnvironment, at.Environment);
             }
 
-            var refreshTokens = cache.GetAllRefreshTokensForClient(requestContext);
+            ICollection<MsalRefreshTokenCacheItem> refreshTokens = cache.GetAllRefreshTokensForClient(requestContext);
             foreach (var rt in refreshTokens)
             {
                 Assert.AreEqual(expectedEnvironment, rt.Environment);
             }
 
-            var idTokens = cache.GetAllIdTokensForClient(requestContext);
+            ICollection<MsalIdTokenCacheItem> idTokens = cache.GetAllIdTokensForClient(requestContext);
             foreach (var id in idTokens)
             {
                 Assert.AreEqual(expectedEnvironment, id.Environment);
             }
 
-            var accounts = cache.GetAllAccounts(requestContext);
+            ICollection<MsalAccountCacheItem> accounts = cache.GetAllAccounts(requestContext);
             foreach (var account in accounts)
             {
                 Assert.AreEqual(expectedEnvironment, account.Environment);
             }
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(cache.legacyCachePersistence.LoadCache());
+                AdalCacheOperations.Deserialize(cache.LegacyCachePersistence.LoadCache());
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {

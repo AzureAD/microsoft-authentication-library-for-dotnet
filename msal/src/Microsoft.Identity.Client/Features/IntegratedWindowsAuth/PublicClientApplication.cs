@@ -82,6 +82,7 @@ namespace Microsoft.Identity.Client
             var handler = new IntegratedWindowsAuthRequest(
                 HttpManager,
                 CryptographyManager,
+                TelemetryManager,
                 WsTrustWebRequestManager,
                 requestParams,
                 ApiEvent.ApiIds.AcquireTokenWithScopeUser,

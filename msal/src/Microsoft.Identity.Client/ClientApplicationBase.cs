@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Helpers;
@@ -68,35 +67,44 @@ namespace Microsoft.Identity.Client
         internal IHttpManager HttpManager { get; }
         internal ICryptographyManager CryptographyManager { get; }
         internal IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
+        internal ITelemetryManager TelemetryManager { get; }
 
-        /// <summary>
-        /// Constructor of the base application
-        /// </summary>
-        /// <param name="clientId">Client ID (also known as <i>Application ID</i>) of the application as registered in the
-        /// application registration portal (https://aka.ms/msal-net-register-app)</param>
-        /// <param name="authority">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
-        ///
-        /// Usual authorities endpoints for the Azure public Cloud are:
-        /// <list type="bullet">
-        /// <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
-        /// or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
-        /// <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
-        /// <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
-        /// <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
-        /// </list>
-        /// Note that this setting needs to be consistent with what is declared in the application registration portal
-        /// </param>
-        /// <param name="redirectUri">also named <i>Reply URI</i>, the redirect URI is the URI where the STS will call back the application with the security token. For details see https://aka.ms/msal-net-client-applications</param>
-        /// <param name="validateAuthority">Boolean telling MSAL.NET if the authority needs to be verified against a list of known authorities.
-        /// This should be set to <c>false</c> for Azure AD B2C authorities as those are customer specific (a list of known B2C authorities
-        /// cannot be maintained by MSAL.NET</param>
-        /// <param name="httpManager"></param>
+        internal ITelemetryReceiver TelemetryReceiver
+        {
+            get => TelemetryManager.TelemetryReceiver;
+            set => TelemetryManager.TelemetryReceiver = value;
+        }
+
+        ///  <summary>
+        ///  Constructor of the base application
+        ///  </summary>
+        ///  <param name="clientId">Client ID (also known as <i>Application ID</i>) of the application as registered in the
+        ///  application registration portal (https://aka.ms/msal-net-register-app)</param>
+        ///  <param name="authority">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
+        /// 
+        ///  Usual authorities endpoints for the Azure public Cloud are:
+        ///  <list type="bullet">
+        ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
+        ///  or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
+        ///  </list>
+        ///  Note that this setting needs to be consistent with what is declared in the application registration portal
+        ///  </param>
+        ///  <param name="redirectUri">also named <i>Reply URI</i>, the redirect URI is the URI where the STS will call back the application with the security token. For details see https://aka.ms/msal-net-client-applications</param>
+        ///  <param name="validateAuthority">Boolean telling MSAL.NET if the authority needs to be verified against a list of known authorities.
+        ///  This should be set to <c>false</c> for Azure AD B2C authorities as those are customer specific (a list of known B2C authorities
+        ///  cannot be maintained by MSAL.NET</param>
+        ///  <param name="httpManager"></param>
+        ///  <param name="telemetryManager"></param>
         internal ClientApplicationBase(string clientId, string authority, string redirectUri,
-            bool validateAuthority, IHttpManager httpManager)
+            bool validateAuthority, IHttpManager httpManager, ITelemetryManager telemetryManager)
         {
             HttpManager = httpManager ?? new HttpManager();
             CryptographyManager = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
+            TelemetryManager = telemetryManager ?? new TelemetryManager(Telemetry.GetInstance());
 
             ClientId = clientId;
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, validateAuthority);
@@ -108,7 +116,7 @@ namespace Microsoft.Identity.Client
                 UserTokenCache.ClientId = clientId;
             }
 
-            RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
+            RequestContext requestContext = new RequestContext(ClientId, new MsalLogger(Guid.Empty, null));
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
@@ -167,7 +175,7 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         internal TokenCache UserTokenCache
         {
-            get { return _userTokenCache; }
+            get => _userTokenCache;
             set
             {
                 _userTokenCache = value;
@@ -175,6 +183,7 @@ namespace Microsoft.Identity.Client
                 {
                     _userTokenCache.ClientId = ClientId;
                     _userTokenCache.HttpManager = HttpManager;
+                    _userTokenCache.TelemetryManager = TelemetryManager;
                 }
             }
         }
@@ -198,7 +207,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public async Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            RequestContext requestContext = new RequestContext(new MsalLogger(Guid.Empty, null));
+            RequestContext requestContext = new RequestContext(ClientId, new MsalLogger(Guid.Empty, null));
             if (UserTokenCache == null)
             {
                 requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
@@ -325,6 +334,7 @@ namespace Microsoft.Identity.Client
             var handler = new SilentRequest(
                 HttpManager,
                 CryptographyManager,
+                TelemetryManager,
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 apiId,
                 forceRefresh);
@@ -354,7 +364,7 @@ namespace Microsoft.Identity.Client
         internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(new MsalLogger(correlationId, Component));
+            return new RequestContext(ClientId, new MsalLogger(correlationId, Component));
         }
     }
 }

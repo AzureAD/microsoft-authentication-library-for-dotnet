@@ -71,7 +71,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
+                var requestContext = new RequestContext(null, new TestLogger(Guid.NewGuid(), null));
                 var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
                 var manager = new WsTrustWebRequestManager(httpManager);
                 var wsTrustResponse = await manager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
@@ -92,7 +92,7 @@ namespace Test.Microsoft.Identity.Unit.WsTrustTests
             {
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
-                var requestContext = new RequestContext(new TestLogger(Guid.NewGuid(), null));
+                var requestContext = new RequestContext(null, new TestLogger(Guid.NewGuid(), null));
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");

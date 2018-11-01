@@ -33,6 +33,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -78,6 +79,7 @@ namespace Microsoft.Identity.Core.Instance
 
         protected abstract Task<string> GetOpenIdConfigurationEndpointAsync(
             IHttpManager httpManager,
+            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext);
 
@@ -106,7 +108,10 @@ namespace Microsoft.Identity.Core.Instance
             }
         }
 
-        internal virtual async Task UpdateCanonicalAuthorityAsync(IHttpManager httpManager, RequestContext requestContext)
+        internal virtual async Task UpdateCanonicalAuthorityAsync(
+            IHttpManager httpManager, 
+            ITelemetryManager telemetryManager, 
+            RequestContext requestContext)
         {
             await Task.FromResult(0).ConfigureAwait(false);
         }
@@ -165,7 +170,11 @@ namespace Microsoft.Identity.Core.Instance
             }
         }
 
-        public async Task ResolveEndpointsAsync(IHttpManager httpManager, string userPrincipalName, RequestContext requestContext)
+        public async Task ResolveEndpointsAsync(
+            IHttpManager httpManager, 
+            ITelemetryManager telemetryManager,
+            string userPrincipalName, 
+            RequestContext requestContext)
         {
             requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - " + _resolved);
 
@@ -197,11 +206,19 @@ namespace Microsoft.Identity.Core.Instance
                     return;
                 }
 
-                string openIdConfigurationEndpoint = await GetOpenIdConfigurationEndpointAsync(httpManager, userPrincipalName, requestContext)
+                string openIdConfigurationEndpoint = await GetOpenIdConfigurationEndpointAsync(
+                                                             httpManager, 
+                                                             telemetryManager,
+                                                             userPrincipalName, 
+                                                             requestContext)
                                                          .ConfigureAwait(false);
 
                 //discover endpoints via openid-configuration
-                var edr = await DiscoverEndpointsAsync(httpManager, openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
+                var edr = await DiscoverEndpointsAsync(
+                              httpManager, 
+                              telemetryManager, 
+                              openIdConfigurationEndpoint, 
+                              requestContext).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
@@ -242,10 +259,11 @@ namespace Microsoft.Identity.Core.Instance
 
         private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(
             IHttpManager httpManager,
+            ITelemetryManager telemetryManager,
             string openIdConfigurationEndpoint,
             RequestContext requestContext)
         {
-            var client = new OAuth2Client(httpManager);
+            var client = new OAuth2Client(httpManager, telemetryManager);
             return await client.ExecuteRequestAsync<TenantDiscoveryResponse>(
                        new Uri(openIdConfigurationEndpoint),
                        HttpMethod.Get,

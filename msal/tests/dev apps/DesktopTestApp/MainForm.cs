@@ -384,9 +384,9 @@ namespace DesktopTestApp
 
             cachePageTableLayout.RowCount = 0;
             var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
-                .GetAllRefreshTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+                .GetAllRefreshTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
             var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
-                    .GetAllAccessTokensForClient(new RequestContext(new MsalLogger(Guid.NewGuid(), null)));
+                    .GetAllAccessTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {

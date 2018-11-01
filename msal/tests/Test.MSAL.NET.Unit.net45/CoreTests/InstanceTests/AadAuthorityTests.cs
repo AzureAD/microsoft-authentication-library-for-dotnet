@@ -33,6 +33,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
@@ -48,7 +49,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             Authority.ValidatedAuthorities.Clear();
             CoreExceptionFactory.Instance = new TestExceptionFactory();
-            CoreTelemetryService.InitializeCoreTelemetryService(new TestTelemetry());
             AadInstanceDiscovery.Instance.Cache.Clear();
         }
 
@@ -98,7 +98,11 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                 Task.Run(
                     async () =>
                     {
-                        await instance.ResolveEndpointsAsync(httpManager, null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                        await instance.ResolveEndpointsAsync(
+                            httpManager, 
+                            new TelemetryManager(), 
+                            null, 
+                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
@@ -134,7 +138,11 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                 Task.Run(
                     async () =>
                     {
-                        await instance.ResolveEndpointsAsync(httpManager, null, new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                        await instance.ResolveEndpointsAsync(
+                            httpManager, 
+                            new TelemetryManager(), 
+                            null, 
+                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
@@ -187,8 +195,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
+                                new TelemetryManager(), 
                                 null,
-                                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }
@@ -230,8 +239,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
+                                new TelemetryManager(), 
                                 null,
-                                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }
@@ -269,8 +279,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         {
                             await instance.ResolveEndpointsAsync(
                                 httpManager,
+                                new TelemetryManager(), 
                                 null,
-                                new RequestContext(new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }

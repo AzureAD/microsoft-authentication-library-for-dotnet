@@ -112,13 +112,13 @@ namespace Microsoft.Identity.Client
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : this(null, clientId, authority, redirectUri, clientCredential, userTokenCache, appTokenCache)
+            : this(null, null, clientId, authority, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
         }
 
-        internal ConfidentialClientApplication(IHttpManager httpManager, string clientId, string authority, string redirectUri,
+        internal ConfidentialClientApplication(IHttpManager httpManager, ITelemetryManager telemetryManager, string clientId, string authority, string redirectUri,
                                                ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : base(clientId, authority, redirectUri, true, httpManager)
+            : base(clientId, authority, redirectUri, true, httpManager, telemetryManager)
         {
             ClientCredential = clientCredential;
             UserTokenCache = userTokenCache;
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(HttpManager, CryptographyManager, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
+                new InteractiveRequest(HttpManager, CryptographyManager, TelemetryManager, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
             return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
 
@@ -351,6 +351,7 @@ namespace Microsoft.Identity.Client
             var handler = new InteractiveRequest(
                 HttpManager,
                 CryptographyManager,
+                TelemetryManager,
                 requestParameters,
                 ApiEvent.ApiIds.None,
                 extraScopesToConsent,
@@ -385,7 +386,14 @@ namespace Microsoft.Identity.Client
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
             parameters.SendCertificate = sendCertificate;
-            var handler = new ClientCredentialRequest(HttpManager, CryptographyManager, parameters, apiId, forceRefresh);
+            var handler = new ClientCredentialRequest(
+                HttpManager,
+                CryptographyManager,
+                TelemetryManager,
+                parameters,
+                apiId,
+                forceRefresh);
+
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -395,7 +403,12 @@ namespace Microsoft.Identity.Client
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.UserAssertion = userAssertion;
             requestParams.SendCertificate = sendCertificate;
-            var handler = new OnBehalfOfRequest(HttpManager, CryptographyManager, requestParams, apiId);
+            var handler = new OnBehalfOfRequest(
+                HttpManager,
+                CryptographyManager,
+                TelemetryManager,
+                requestParams,
+                apiId);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -407,8 +420,12 @@ namespace Microsoft.Identity.Client
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;
             requestParams.SendCertificate = sendCertificate;
-            var handler =
-                new AuthorizationCodeRequest(HttpManager, CryptographyManager, requestParams, apiId);
+            var handler = new AuthorizationCodeRequest(
+                HttpManager,
+                CryptographyManager,
+                TelemetryManager,
+                requestParams,
+                apiId);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

@@ -51,11 +51,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public UsernamePasswordRequest(
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
+            ITelemetryManager telemetryManager,
             IWsTrustWebRequestManager wsTrustWebRequestManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             UsernamePasswordInput usernamePasswordInput)
-            : base(httpManager, cryptographyManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
             _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(

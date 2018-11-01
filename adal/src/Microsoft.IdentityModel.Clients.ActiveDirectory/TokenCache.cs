@@ -222,7 +222,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             {
                 Deserialize(cacheData.AdalV3State);
 
-                RequestContext requestContext = new RequestContext(new AdalLogger(Guid.Empty));
+                RequestContext requestContext = new RequestContext(null, new AdalLogger(Guid.Empty));
                 TokenCacheSerializeHelper.DeserializeUnifiedCache(tokenCacheAccessor, cacheData.UnifiedState, requestContext);
             }
         }
