@@ -48,7 +48,7 @@ To provide a recommendation, visit our [User Voice page](https://feedback.azure.
 
 ## Contribute
 
-We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](contributing.md) for more information.
+We enthusiastically welcome contributions and feedback. You can clone the repo and start contributing now. Read our [Contribution Guide](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/Contributing-overview) for more information.
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
