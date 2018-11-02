@@ -65,8 +65,12 @@ namespace Microsoft.Identity.Core
 
         public string GetEnvironmentVariable(string variable)
         {
-            string value = System.Environment.GetEnvironmentVariable(variable);
-            return !string.IsNullOrWhiteSpace(value) ? value : null;
+            if (String.IsNullOrWhiteSpace(variable))
+            {
+                throw new ArgumentNullException(nameof(variable));
+            }
+
+            return Environment.GetEnvironmentVariable(variable);
         }
 
         public string GetProcessorArchitecture()

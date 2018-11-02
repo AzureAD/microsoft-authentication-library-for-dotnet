@@ -49,6 +49,7 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows;
 using System.Linq;
 using Test.Microsoft.Identity.Core.Unit;
 using System.IO;
+using Microsoft.Identity.Core;
 
 namespace Test.ADAL.NET.Unit
 {
@@ -914,14 +915,7 @@ namespace Test.ADAL.NET.Unit
             _context.TokenCache.Clear();
         }
 
-        [TestMethod]
-        [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
-        [DeploymentItem("Resources\\valid_cert.pfx")]
-        public void Foo()
-        {
-            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"));
-
-        }
+      
 
         [TestMethod]
         [Description("Positive Test for AcquireTokenOnBehalf with client credential")]

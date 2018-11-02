@@ -15,6 +15,7 @@
     <None Include="..\Test.ADAL.NET.Unit.net45\Resources\**\*" LinkBase="Resources">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Compile Remove="..\Test.ADAL.NET.Unit.net45\CommonUnitTests.cs" />
 
     <ProjectReference Include="..\..\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj" />
     <ProjectReference Include="..\Test.ADAL.NET.Common\Test.ADAL.NET.Common.csproj" />

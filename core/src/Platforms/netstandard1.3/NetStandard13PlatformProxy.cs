@@ -90,7 +90,12 @@ namespace Microsoft.Identity.Core
 
         public string GetEnvironmentVariable(string variable)
         {
-            return null;
+            if (String.IsNullOrWhiteSpace(variable))
+            {
+                throw new ArgumentNullException(nameof(variable));
+            }
+
+            return Environment.GetEnvironmentVariable(variable);
         }
 
         public string GetProcessorArchitecture()

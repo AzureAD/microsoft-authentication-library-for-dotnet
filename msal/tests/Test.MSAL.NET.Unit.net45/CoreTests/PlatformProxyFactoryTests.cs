@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Test.Microsoft.Identity.Core.Unit
 {
@@ -48,21 +49,55 @@ namespace Test.Microsoft.Identity.Core.Unit
         public void PlatformProxyFactoryReturnsInstances()
         {
             // Arrange
-            var factory = PlatformProxyFactory.GetPlatformProxy();
+            var proxy = PlatformProxyFactory.GetPlatformProxy();
 
             // Act and Assert
             Assert.AreNotSame(
-                factory.CreateLegacyCachePersistence(),
-                factory.CreateLegacyCachePersistence());
+                proxy.CreateLegacyCachePersistence(),
+                proxy.CreateLegacyCachePersistence());
 
             Assert.AreNotSame(
-                factory.CreateTokenCacheAccessor(),
-                factory.CreateTokenCacheAccessor());
+                proxy.CreateTokenCacheAccessor(),
+                proxy.CreateTokenCacheAccessor());
 
             Assert.AreSame(
-                factory.CryptographyManager,
-                factory.CryptographyManager);
+                proxy.CryptographyManager,
+                proxy.CryptographyManager);
 
+        }
+
+        [TestMethod]
+        public void GetEnvRetrievesAValue()
+        {
+            try
+            {
+                // Arrange
+                Environment.SetEnvironmentVariable("proxy_foo", "bar");
+
+                var proxy = PlatformProxyFactory.GetPlatformProxy();
+
+                // Act
+                string actualValue = proxy.GetEnvironmentVariable("proxy_foo");
+                string actualEmptyValue = proxy.GetEnvironmentVariable("no_such_env_var_exists");
+
+
+                // Assert
+                Assert.AreEqual("bar", actualValue);
+                Assert.IsNull(actualEmptyValue);
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("proxy_foo", "");
+            }
+        }
+
+        [TestMethod]
+        public void GetEnvThrowsArgNullEx()
+        {
+
+            AssertException.Throws<ArgumentNullException>(
+                () =>
+                PlatformProxyFactory.GetPlatformProxy().GetEnvironmentVariable(""));
         }
     }
 }

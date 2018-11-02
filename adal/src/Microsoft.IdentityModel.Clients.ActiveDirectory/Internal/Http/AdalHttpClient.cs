@@ -45,6 +45,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
         private const string WwwAuthenticateHeader = "WWW-Authenticate";
         private const string PKeyAuthName = "PKeyAuth";
         private const int DelayTimePeriodMilliSeconds = 1000;
+        internal /* internal for test only */ const string ExtraQueryParamEnvVariable = "ExtraQueryParameter";
         private readonly RequestContext _requestContext;
         internal bool Resiliency = false;
         internal bool RetryOnce = true;
@@ -197,7 +198,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Http
 
         private static string CheckForExtraQueryParameter(string url)
         {
-            string extraQueryParameter = PlatformProxyFactory.GetPlatformProxy().GetEnvironmentVariable("ExtraQueryParameter");
+            string extraQueryParameter = PlatformProxyFactory.GetPlatformProxy().GetEnvironmentVariable(ExtraQueryParamEnvVariable);
             string delimiter = (url.IndexOf('?') > 0) ? "&" : "?";
             if (!string.IsNullOrWhiteSpace(extraQueryParameter))
             {
