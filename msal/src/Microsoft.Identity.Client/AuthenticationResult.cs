@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Gets the  Id Token if returned by the service or null if no Id Token is returned.
         /// </summary>
-        public virtual string IdToken => _msalIdTokenCacheItem.Secret;
+        public virtual string IdToken => _msalIdTokenCacheItem?.Secret;
 
         /// <summary>
         /// Gets the granted scope values returned by the service.
