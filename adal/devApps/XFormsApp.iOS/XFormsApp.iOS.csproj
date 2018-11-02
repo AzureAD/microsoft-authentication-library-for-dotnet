@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Label="SonarQube analysis settings">
     <!-- These properties have no effect on how the project is built. -->
@@ -107,6 +107,7 @@
     <OutputPath>bin\iPhone\Appveyor\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="iOSPlatformParametersFactory.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
     <Compile Include="SecondPageRenderer.cs" />
@@ -166,7 +167,7 @@
     <Reference Include="Xamarin.iOS" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
 </Project>

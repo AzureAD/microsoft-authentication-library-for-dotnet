@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-using Xamarin.Forms.Platform.iOS;
-using Xamarin.Forms;
-using XFormsApp;
-using XFormsApp.iOS;
+using Android.App;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using System;
+using Xamarin.Forms;
+using XFormsApp.Droid;
+using Application = Android.App.Application;
 
-[assembly: ExportRenderer(typeof(SecondPage), typeof(SecondPageRenderer))]
-namespace XFormsApp.iOS
+namespace XFormsApp.Droid
 {
-    class SecondPageRenderer : PageRenderer
+    public class DroidPlatformParametersFactory : IPlatformParametersFactory
     {
-        SecondPage page;
+        // Workaround for DependencyService not being able to attach a pre-made object to an interface
+        // In a production app I would consider using a proper dependency service like AutoFac
+        // as Xamarin.DependencyService is just a simple service locator
+        public static Activity Activity { get; set; }
 
-        protected override void OnElementChanged(VisualElementChangedEventArgs e)
+        public IPlatformParameters GetPlatformParameters(string promptBehavior)
         {
-            base.OnElementChanged(e);
+            if (Activity == null)
+            {
+                throw new InvalidOperationException("Please initialize Activity");
+            }
 
-            page = e.NewElement as SecondPage;
-        }
-
-        public override void ViewDidLoad()
-        {
-            base.ViewDidLoad();
-
-            DependencyService.Register<iOSPlatformParametersFactory>();
-            iOSPlatformParametersFactory.UIViewController = this;
-
-            page.BrokerParameters = new PlatformParameters(this, true, PromptBehavior.SelectAccount);
+            switch (promptBehavior)
+            {
+                case "always":
+                    return new PlatformParameters(Activity, false, PromptBehavior.Always);
+                default:
+                    return new PlatformParameters(Activity, false, PromptBehavior.Auto);
+            }
         }
     }
 }

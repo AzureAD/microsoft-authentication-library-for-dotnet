@@ -40,6 +40,8 @@ namespace XFormsApp.Droid
     {
         public SecondPageRenderer(Context context) : base(context)
         {
+            DependencyService.Register<DroidPlatformParametersFactory>();
+            DroidPlatformParametersFactory.Activity = this.Context as Activity;
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<Page> e)
@@ -49,7 +51,6 @@ namespace XFormsApp.Droid
             SecondPage page = e.NewElement as SecondPage;
 
             var activity = this.Context as Activity;
-            page.Parameters = new PlatformParameters(activity, false, PromptBehavior.Auto);
             page.BrokerParameters = new PlatformParameters(activity, true);
         }
     }

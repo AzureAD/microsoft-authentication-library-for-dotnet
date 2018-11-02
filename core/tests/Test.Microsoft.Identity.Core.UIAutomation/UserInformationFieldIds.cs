@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-using Xamarin.Forms.Platform.iOS;
-using Xamarin.Forms;
-using XFormsApp;
-using XFormsApp.iOS;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Test.Microsoft.Identity.LabInfrastructure;
 
-[assembly: ExportRenderer(typeof(SecondPage), typeof(SecondPageRenderer))]
-namespace XFormsApp.iOS
+namespace Test.Microsoft.Identity.Core.UIAutomation
 {
-    class SecondPageRenderer : PageRenderer
+    public class UserInformationFieldIds
     {
-        SecondPage page;
+        public string PasswordInputId { get; set; }
+        public string SignInButtonId { get;  set; }
 
-        protected override void OnElementChanged(VisualElementChangedEventArgs e)
+        public void DetermineUser(IUser user)
         {
-            base.OnElementChanged(e);
-
-            page = e.NewElement as SecondPage;
-        }
-
-        public override void ViewDidLoad()
-        {
-            base.ViewDidLoad();
-
-            DependencyService.Register<iOSPlatformParametersFactory>();
-            iOSPlatformParametersFactory.UIViewController = this;
-
-            page.BrokerParameters = new PlatformParameters(this, true, PromptBehavior.SelectAccount);
+            if (user.IsFederated)
+            {
+                switch (user.FederationProvider)
+                {
+                    case FederationProvider.AdfsV3:
+                    case FederationProvider.AdfsV4:
+                        PasswordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
+                        SignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
+                        break;
+                    default:
+                        PasswordInputId = CoreUiTestConstants.WebPasswordID;
+                        SignInButtonId = CoreUiTestConstants.WebSubmitID;
+                        break;
+                }
+            }
+            else
+            {
+                PasswordInputId = CoreUiTestConstants.WebPasswordID;
+                SignInButtonId = CoreUiTestConstants.WebSubmitID;
+            }
         }
     }
 }

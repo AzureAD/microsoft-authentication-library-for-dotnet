@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,34 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
-using Xamarin.Forms.Platform.iOS;
-using Xamarin.Forms;
-using XFormsApp;
-using XFormsApp.iOS;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-[assembly: ExportRenderer(typeof(SecondPage), typeof(SecondPageRenderer))]
-namespace XFormsApp.iOS
+namespace XFormsApp.UWP
 {
-    class SecondPageRenderer : PageRenderer
+    public class UWPPlatformParametersFactory : IPlatformParametersFactory
     {
-        SecondPage page;
-
-        protected override void OnElementChanged(VisualElementChangedEventArgs e)
+        public IPlatformParameters GetPlatformParameters(string promptBehavior)
         {
-            base.OnElementChanged(e);
-
-            page = e.NewElement as SecondPage;
-        }
-
-        public override void ViewDidLoad()
-        {
-            base.ViewDidLoad();
-
-            DependencyService.Register<iOSPlatformParametersFactory>();
-            iOSPlatformParametersFactory.UIViewController = this;
-
-            page.BrokerParameters = new PlatformParameters(this, true, PromptBehavior.SelectAccount);
+            switch(promptBehavior)
+            {
+                case "always":
+                    return new PlatformParameters(PromptBehavior.Always, true);
+                default:
+                    return new PlatformParameters(PromptBehavior.Auto, true);
+            }
         }
     }
 }

@@ -55,15 +55,17 @@ namespace XFormsApp
         private readonly Label testResult;
         private Picker clientIdPicker;
         private Picker resourcePicker;
+        private Picker promptBehaviorPicker;
         private Entry clientIdInput;
         private Entry resourceInput;
+        private Entry promptBehaviorInput;
 
         private string ClientId { get; set; } = AppConstants.UiAutomationTestClientId;
         private string Resource { get; set; } = AppConstants.MSGraph;
-
-        public IPlatformParameters Parameters { get; set; }
-
+        
         public IPlatformParameters BrokerParameters { get; set; }
+
+        public string PlatformParameters { get; set; }
 
         public SecondPage()
         {
@@ -119,6 +121,11 @@ namespace XFormsApp
                 Text = "Resource:"
             };
 
+            var promptBehaviorLabel = new Label
+            {
+                Text = "Prompt Behavior:"
+            };
+
             clientIdPicker = new Picker
             {
                 Title = "Pick an application",
@@ -133,6 +140,13 @@ namespace XFormsApp
                 AutomationId = "resourcePicker"
             };
 
+            promptBehaviorPicker = new Picker
+            {
+                Title = "Select a prompt behavior",
+                ItemsSource = new List<string>(AppConstants.PromptBehaviorList),
+                AutomationId = "promptBehaviorPicker"
+            };
+
             clientIdInput = new Entry
             {
                 Text = AppConstants.UiAutomationTestClientId,
@@ -143,6 +157,12 @@ namespace XFormsApp
             {
                 Text = AppConstants.MSGraph,
                 AutomationId = "resourceEntry"
+            };
+
+            promptBehaviorInput = new Entry
+            {
+                Text = "auto",
+                AutomationId = "promptBehaviorEntry"
             };
 
             var scrollView = new ScrollView()
@@ -168,6 +188,8 @@ namespace XFormsApp
             resourcePicker.SelectedIndexChanged += UpdateResourceId;
             clientIdInput.TextChanged += UpdateClientIdFromInput;
             resourceInput.TextChanged += UpdateResourceFromInput;
+            promptBehaviorPicker.SelectedIndexChanged += UpdatePromptBehavior;
+            promptBehaviorInput.TextChanged += UpdatePromptBehaviorFromInput;
 
             Thickness padding;
 
@@ -200,6 +222,9 @@ namespace XFormsApp
                     resourceInputLabel,
                     resourcePicker,
                     resourceInput,
+                    promptBehaviorLabel,
+                    promptBehaviorPicker,
+                    promptBehaviorInput,
                     scrollView
                 }
             };
@@ -217,13 +242,17 @@ namespace XFormsApp
             this.result.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
             string output = string.Empty;
-            string accessToken = String.Empty;
+            string accessToken = string.Empty;
             this.testResult.Text = "Result:";
+
             try
             {
+                var factory = DependencyService.Get<IPlatformParametersFactory>();
+                IPlatformParameters platformParameters = factory.GetPlatformParameters(PlatformParameters);
+
                 AuthenticationResult result =
                     await
-                        ctx.AcquireTokenAsync(Resource, ClientId, new Uri(RedirectURI), Parameters).ConfigureAwait(false);
+                        ctx.AcquireTokenAsync(Resource, ClientId, new Uri(RedirectURI), platformParameters).ConfigureAwait(false);
                 output = "Signed in User - " + result.UserInfo.DisplayableId;
                 accessToken = result.AccessToken;
                 User = result.UserInfo.DisplayableId;
@@ -249,7 +278,7 @@ namespace XFormsApp
             this.result.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/" + Tenant);
             string output = string.Empty;
-            string accessToken = String.Empty;
+            string accessToken = string.Empty;
             this.testResult.Text = "Result:";
             try
             {
@@ -272,7 +301,6 @@ namespace XFormsApp
                 });
             }
         }
-
 
         private async void AcquireTokenWithBroker()
         {
@@ -409,6 +437,11 @@ namespace XFormsApp
             Resource = resourceInput.Text = AppConstants.LabelToResourceUriMap.Where(x => x.Key == (string)resourcePicker.SelectedItem).FirstOrDefault().Value;
         }
 
+        void UpdatePromptBehavior(object sender, EventArgs e)
+        {
+            PlatformParameters = promptBehaviorInput.Text = AppConstants.PromptBehaviorList.Where(x => x == (string)promptBehaviorPicker.SelectedItem).FirstOrDefault();
+        }
+
         void UpdateClientIdFromInput(object sender, EventArgs e)
         {
             ClientId = clientIdInput.Text;
@@ -417,6 +450,11 @@ namespace XFormsApp
         private void UpdateResourceFromInput(object sender, TextChangedEventArgs e)
         {
             Resource = resourceInput.Text;
+        }
+
+        private void UpdatePromptBehaviorFromInput(object sender, TextChangedEventArgs e)
+        {
+            PlatformParameters = promptBehaviorInput.Text;
         }
     }
 }

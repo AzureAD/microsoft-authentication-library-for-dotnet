@@ -39,14 +39,16 @@ namespace Test.ADAL.UIAutomation
     /// <summary>
     /// Contains the core test functionality that will be used by Android and iOS tests
     /// </summary>
-	public static class ADALMobileTestHelper
+	public class ADALMobileTestHelper
     {
+        CoreMobileTestHelper CoreMobileTestHelper = new CoreMobileTestHelper();
+
         /// <summary>
         /// Runs through the standard acquire token interactive flow
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public static void AcquireTokenInteractiveTestHelper(ITestController controller, UserQueryParameters userParams)
-		{
+        public void AcquireTokenInteractiveTestHelper(ITestController controller, UserQueryParameters userParams)
+        {
             AcquireTokenInteractiveHelper(controller, userParams);
             CoreMobileTestHelper.VerifyResult(controller);
         }
@@ -55,7 +57,7 @@ namespace Test.ADAL.UIAutomation
         /// Runs through the standard acquire token silent flow
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public static void AcquireTokenSilentTestHelper(ITestController controller, UserQueryParameters userParams)
+        public void AcquireTokenSilentTestHelper(ITestController controller, UserQueryParameters userParams)
         {
             AcquireTokenInteractiveHelper(controller, userParams);
             CoreMobileTestHelper.VerifyResult(controller);
@@ -70,14 +72,33 @@ namespace Test.ADAL.UIAutomation
             CoreMobileTestHelper.VerifyResult(controller);
         }
 
-        public static void AcquireTokenInteractiveHelper(ITestController controller, UserQueryParameters userParams)
+        public void AcquireTokenInteractiveHelper(ITestController controller, UserQueryParameters userParams)
         {
             var user = PrepareForAuthentication(controller, userParams);
             SetInputData(controller, CoreUiTestConstants.MSIDLAB4ClientId, CoreUiTestConstants.MSGraph);
             CoreMobileTestHelper.PerformSignInFlow(controller, user);
         }
 
-        private static IUser PrepareForAuthentication(ITestController controller, UserQueryParameters userParams)
+        public void AcquireTokenWithPromptBehaviorAlwaysHelper(ITestController controller, UserQueryParameters userParams)
+        {
+            var user = PrepareForAuthentication(controller, userParams);
+            SetInputData(controller, CoreUiTestConstants.MSIDLAB4ClientId, CoreUiTestConstants.MSGraph);
+
+            // AcquireToken promptBehavior.Auto to get a token in the cache 
+            SetPromptBehavior(controller, CoreUiTestConstants.PromptBehaviorAuto);
+            CoreMobileTestHelper.PerformSignInFlow(controller, user);
+
+            // AcquireToken promptBehavior.Always. Even with a token, the UI should be shown 
+            SetPromptBehavior(controller, CoreUiTestConstants.PromptBehaviorAlways);
+            CoreMobileTestHelper.PerformSignInFlow(controller, user);
+
+            // AcquireToken promptBehavior.Auto. No UI should be shown. 
+            SetPromptBehavior(controller, CoreUiTestConstants.PromptBehaviorAuto);
+            CoreMobileTestHelper.PerformSignInFlowWithoutUI(controller);
+            CoreMobileTestHelper.VerifyResult(controller);
+        }
+
+        private IUser PrepareForAuthentication(ITestController controller, UserQueryParameters userParams)
         {
             //Navigate to second page
             controller.Tap(CoreUiTestConstants.SecondPageID);
@@ -89,14 +110,21 @@ namespace Test.ADAL.UIAutomation
             return controller.GetUser(userParams);
         }
 
-        private static void SetInputData(ITestController controller, string ClientID, string Resource)
+        private void SetInputData(ITestController controller, string clientID, string resource)
         {
             //Enter ClientID
-            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, ClientID, false);
+            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, clientID, false);
             controller.DismissKeyboard();
 
             //Enter Resource
-            controller.EnterText(CoreUiTestConstants.ResourceEntryID, Resource, false);
+            controller.EnterText(CoreUiTestConstants.ResourceEntryID, resource, false);
+            controller.DismissKeyboard();
+        }
+
+        private void SetPromptBehavior(ITestController controller, string promptBehavior)
+        {
+            //Select PromptBehavior 
+            controller.EnterText(CoreUiTestConstants.PromptBehaviorEntryID, promptBehavior, false);
             controller.DismissKeyboard();
         }
     }

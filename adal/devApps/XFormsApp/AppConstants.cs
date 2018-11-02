@@ -34,9 +34,14 @@ namespace XFormsApp
             LabelToResourceUriMap.Add("Ui Test Resource", UiAutomationTestResource);
             LabelToResourceUriMap.Add("Exchange", Exchange);
             LabelToResourceUriMap.Add("SharePoint", SharePoint);
+
+            PromptBehaviorList = new List<string>();
+            PromptBehaviorList.Add("auto");
+            PromptBehaviorList.Add("always");
         }
 
         public static Dictionary<string, string> LabelToApplicationUriMap { get; set; }
         public static Dictionary<string, string> LabelToResourceUriMap { get; set; }
+        public static List<string> PromptBehaviorList { get; set; }
     }
 }

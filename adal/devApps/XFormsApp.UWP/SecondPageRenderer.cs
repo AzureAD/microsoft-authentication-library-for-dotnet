@@ -27,7 +27,6 @@
 
 using Xamarin.Forms;
 using XFormsApp;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Xamarin.Forms.Platform.UWP;
 using XFormsApp.UWP;
 
@@ -42,9 +41,9 @@ namespace XFormsApp.UWP
         {
             base.OnElementChanged(e);
 
-            page = e.NewElement as SecondPage;
+            DependencyService.Register<UWPPlatformParametersFactory>();
 
-            page.Parameters = new PlatformParameters(PromptBehavior.Auto, true);
+            page = e.NewElement as SecondPage;
         }
     }
 }
