@@ -42,7 +42,7 @@ namespace Test.ADAL.UIAutomation
     /// Configures environment for core/android tests to run
     /// </summary>
     [TestFixture(Platform.Android)]
-    class XamarinDroidADALTests
+    public class XamarinDroidADALTests
     {
         IApp app;
         Platform platform;

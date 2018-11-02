@@ -52,7 +52,8 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             this.defaultSearchTimeout = new TimeSpan(0, 0, defaultSearchTimeoutSec);
             this.defaultRetryFrequency = new TimeSpan(0, 0, defaultRetryFrequencySec);
             this.defaultPostTimeout = new TimeSpan(0, 0, defaultPostTimeoutSec);
-            _labService = new LabServiceApi(new KeyVaultSecretsProvider());
+            var keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            _labService = new LabServiceApi(keyVaultSecretsProvider);
         }
 
         public void Tap(string elementID)
