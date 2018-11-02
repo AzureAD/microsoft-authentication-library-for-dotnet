@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -201,6 +201,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 WasSuccessful = false
             };
+
+            if (AuthenticationRequestParameters.LoginHint != null)
+            {
+                apiEvent.LoginHint = AuthenticationRequestParameters.LoginHint;
+            }
 
             if (AuthenticationRequestParameters.Authority != null)
             {

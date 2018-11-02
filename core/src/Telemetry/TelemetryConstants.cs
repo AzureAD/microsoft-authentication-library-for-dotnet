@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,26 +27,17 @@
 
 namespace Microsoft.Identity.Core.Telemetry
 {
-    internal class UiEvent : EventBase
+    internal class TelemetryError
     {
-        public const string UserCancelledKey = EventNamePrefix + "user_cancelled";
+        public const string XmsCliTelemMalformed = "Malformed x-ms-clitelem header: '{0}'";
+        public const string XmsUnrecognizedHeaderVersion = "Header version '{0}' unrecognized";
+    }
 
-        public const string AccessDeniedKey = EventNamePrefix + "access_denied";
- 
-        public UiEvent(): base(EventNamePrefix + "ui_event") {}
-
-        public bool UserCancelled
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for this
-            set { this[UserCancelledKey] = value.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
-
-        public bool AccessDenied
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for this
-            set { this[AccessDeniedKey] = value.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
+    internal class TelemetryEventProperties
+    {
+        public const string MsalDefaultEvent = "msal.default_event";
+        public const string MsalHttpEventCount = "msal.http_event_count";
+        public const string MsalCacheEventCount = "msal.cache_event_count";
+        public const string MsalUiEventCount = "msal.ui_event_count";
     }
 }

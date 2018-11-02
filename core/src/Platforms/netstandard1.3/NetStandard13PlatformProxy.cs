@@ -108,9 +108,36 @@ namespace Microsoft.Identity.Core
             return null;
         }
 
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Name of the calling application</returns>
+        public string GetCallingApplicationName()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Version of the calling application</returns>
+        public string GetCallingApplicationVersion()
+        {
+            return null;
+        }
+
+        /// <summary>
+        /// Considered PII. Please ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Device identifier</returns>
+        public string GetDeviceId()
+        {
+            return null;
+        }
+
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-           return new NetStandard13LegacyCachePersistence();
+            return new NetStandard13LegacyCachePersistence();
         }
 
         public ITokenCacheAccessor CreateTokenCacheAccessor()

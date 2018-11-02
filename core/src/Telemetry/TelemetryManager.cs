@@ -35,6 +35,9 @@ namespace Microsoft.Identity.Core.Telemetry
     internal class TelemetryManager : ITelemetryManager,
                                       ITelemetry
     {
+        private const string MsalCacheEventValuePrefix = "msal.token"; 
+        private const string MsalCacheEventName = "msal.cache_event";
+
         private readonly object _lockObj = new object();
 
         internal readonly ConcurrentDictionary<string, List<EventBase>> CompletedEvents =
@@ -42,6 +45,9 @@ namespace Microsoft.Identity.Core.Telemetry
 
         internal readonly ConcurrentDictionary<EventKey, EventBase> EventsInProgress =
             new ConcurrentDictionary<EventKey, EventBase>();
+
+        internal ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount = 
+            new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
         private ITelemetryReceiver _telemetryReceiver;
 
@@ -145,8 +151,9 @@ namespace Microsoft.Identity.Core.Telemetry
                 return;
             }
 
-            // Set execution time properties on the event
+            // Set execution time properties on the event adn increment the event count.
             eventToStop.Stop();
+            IncrementEventCount(requestId, eventToStop);
 
             if (!CompletedEvents.ContainsKey(requestId))
             {
@@ -157,13 +164,16 @@ namespace Microsoft.Identity.Core.Telemetry
                 {
                     eventToStop
                 };
-                CompletedEvents[requestId] = events;
+                CompletedEvents.TryAdd(requestId, events);
             }
             else
             {
                 // if this event shares a RequestId with other events
                 // just add it to the List
-                CompletedEvents[requestId].Add(eventToStop);
+                if (CompletedEvents.TryGetValue(requestId, out List<EventBase> events))
+                {
+                    events.Add(eventToStop);
+                }
             }
 
             // Mark this event as no longer in progress
@@ -185,6 +195,7 @@ namespace Microsoft.Identity.Core.Telemetry
 
             CompletedEvents[requestId].AddRange(CollateOrphanedEvents(requestId));
             CompletedEvents.TryRemove(requestId, out List<EventBase> eventsToFlush);
+            EventCount.TryRemove(requestId, out ConcurrentDictionary<string, int> eventCountToFlush);
 
             bool onlySendFailureTelemetry;
             lock (_lockObj)
@@ -203,7 +214,14 @@ namespace Microsoft.Identity.Core.Telemetry
                 return;
             }
 
-            eventsToFlush.Insert(0, new DefaultEvent(clientId));
+            if (eventCountToFlush != null)
+            {
+                eventsToFlush.Insert(0, new DefaultEvent(clientId, eventCountToFlush));
+            }
+            else
+            {
+                eventsToFlush.Insert(0, new DefaultEvent(clientId, new ConcurrentDictionary<string, int>()));
+            }
 
             lock (_lockObj)
             {
@@ -221,6 +239,7 @@ namespace Microsoft.Identity.Core.Telemetry
                     // The orphaned event already contains its own start time, we simply collect it
                     if (EventsInProgress.TryRemove(key, out var orphan))
                     {
+                        IncrementEventCount(requestId, orphan);
                         orphanedEvents.Add(orphan);
                     }
                 }
@@ -228,6 +247,29 @@ namespace Microsoft.Identity.Core.Telemetry
 
             return orphanedEvents;
         }
+
+        private void IncrementEventCount(string requestId, EventBase eventToIncrement) 
+        { 
+            string eventName; 
+            if (eventToIncrement[EventBase.EventNameKey].Substring(0,10) == MsalCacheEventValuePrefix) 
+            { 
+                eventName = MsalCacheEventName; 
+            } 
+            else 
+            { 
+                eventName = eventToIncrement[EventBase.EventNameKey]; 
+            } 
+
+            if (!EventCount.ContainsKey(requestId)) 
+            { 
+                EventCount[requestId] = new ConcurrentDictionary<string, int>(); 
+                EventCount[requestId].TryAdd(eventName, 1); 
+            } 
+            else 
+            { 
+                EventCount[requestId].AddOrUpdate(eventName, 1, (key, count) => count + 1); 
+            } 
+        } 
 
         internal class EventKey : IEquatable<EventKey>
         {

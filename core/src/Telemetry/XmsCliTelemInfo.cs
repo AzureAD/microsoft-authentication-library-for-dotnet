@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,26 +27,36 @@
 
 namespace Microsoft.Identity.Core.Telemetry
 {
-    internal class UiEvent : EventBase
+    internal class XmsCliTelemInfo
     {
-        public const string UserCancelledKey = EventNamePrefix + "user_cancelled";
+        /// <summary>
+        /// Monotonically increasing integer specifying 
+        /// x-ms-cliteleminfo header version
+        /// </summary>
+        public string Version { get; set; }
 
-        public const string AccessDeniedKey = EventNamePrefix + "access_denied";
- 
-        public UiEvent(): base(EventNamePrefix + "ui_event") {}
+        /// <summary>
+        /// Bundle id for server error.
+        /// </summary>
+        public string ServerErrorCode { get; set; }
 
-        public bool UserCancelled
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for this
-            set { this[UserCancelledKey] = value.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
+        /// <summary>
+        /// Bundle id for server suberror.
+        /// </summary>
+        public string ServerSubErrorCode { get; set; }
 
-        public bool AccessDenied
-        {
-#pragma warning disable CA1305 // .net standard does not have an overload for this
-            set { this[AccessDeniedKey] = value.ToString().ToLowerInvariant(); }
-#pragma warning restore CA1305 // Specify IFormatProvider
-        }
+        /// <summary>
+        /// Bundle id for refresh token age.
+        /// Floating-point value with a unit of milliseconds 
+        /// </summary>
+        public string TokenAge { get; set; }
+
+        /// <summary>
+        /// Bundle id for spe_ring info. Indicates whether the request was executed 
+        /// on a ring serving SPE traffic. An empty string indicates this occurred on 
+        /// an outer ring, and the string "I" indicates the request occurred on the 
+        /// inner ring
+        /// </summary>
+        public string SpeInfo { get; set; }
     }
 }

@@ -135,6 +135,35 @@ namespace Microsoft.Identity.Core
             return _isMsal ? "MSAL.Xamarin.Android" : "PCL.Android";
         }
 
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Name of the calling application</returns>
+        public string GetCallingApplicationName()
+        {
+            return Android.App.Application.Context.ApplicationInfo?.LoadLabel(Android.App.Application.Context.PackageManager);
+        }
+
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Version of the calling application</returns>
+        public string GetCallingApplicationVersion()
+        {
+            return Android.App.Application.Context.PackageManager.GetPackageInfo(Android.App.Application.Context.PackageName, 0)?.VersionName;
+        }
+
+        /// <summary>
+        /// Considered PII. Please ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Device identifier</returns>
+        public string GetDeviceId()
+        {
+            return Android.Provider.Settings.Secure.GetString(
+                Android.App.Application.Context.ContentResolver, 
+                Android.Provider.Settings.Secure.AndroidId);
+        }
+
         /// <inheritdoc />
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {

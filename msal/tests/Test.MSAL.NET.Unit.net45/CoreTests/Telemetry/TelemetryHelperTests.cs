@@ -101,7 +101,7 @@ namespace Test.Microsoft.Identity.Core.Unit.Telemetry
                 Assert.AreEqual(2, _testReceiver.ReceivedEvents.Count);
 
                 var first = _testReceiver.ReceivedEvents[0];
-                Assert.AreEqual(6, first.Count);
+                Assert.AreEqual(12, first.Count);
                 Assert.IsTrue(first.ContainsKey(EventBase.EventNameKey));
                 Assert.AreEqual("msal.default_event", first[EventBase.EventNameKey]);
                 Assert.AreEqual(expectedClientId, first["msal.client_id"]);

@@ -33,6 +33,9 @@ using System.Text;
 using System.Security.Principal;
 using Microsoft.Identity.Core.Platforms;
 using Microsoft.Identity.Core.Cache;
+using System.Reflection;
+using System.Net.NetworkInformation;
+using System.Linq;
 
 namespace Microsoft.Identity.Core
 {
@@ -138,14 +141,7 @@ namespace Microsoft.Identity.Core
 
         public string GetProcessorArchitecture()
         {
-            if (IsWindows)
-            {
-                return WindowsNativeMethods.GetProcessorArchitecture();
-            }
-            else
-            {
-                return null;
-            }
+            return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture() : null;
         }
 
         public string GetOperatingSystem()
@@ -202,6 +198,34 @@ namespace Microsoft.Identity.Core
         public string GetProductName()
         {
             return _isMsal ? "MSAL.Desktop" : "PCL.Desktop";
+        }
+
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Name of the calling application</returns>
+        public string GetCallingApplicationName()
+        {
+            return Assembly.GetEntryAssembly()?.GetName()?.Name;
+        }
+
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Device identifier</returns>
+        public string GetCallingApplicationVersion()
+        {
+            return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
+        }
+
+        /// <summary>
+        /// Considered PII, ensure that it is hashed. 
+        /// </summary>
+        /// <returns>Device identifier</returns>
+        public string GetDeviceId()
+        {
+            return  NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
+                .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault();
         }
 
         /// <inheritdoc />

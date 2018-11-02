@@ -122,7 +122,7 @@ namespace Test.MSAL.NET.Unit
 
         [TestMethod]
         [Description("Test that RemoveAccount api is application specific")]
-        public async System.Threading.Tasks.Task UnifiedCache_RemoveAccountIsApplicationSpecificAsync()
+        public void UnifiedCache_RemoveAccountIsApplicationSpecific()
         {
             byte[] data = null;
 

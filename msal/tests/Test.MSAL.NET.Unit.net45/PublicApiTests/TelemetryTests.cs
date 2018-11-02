@@ -32,6 +32,8 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.Instance;
 using Test.Microsoft.Identity.Core.Unit;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -46,7 +48,7 @@ namespace Test.MSAL.NET.Unit
 
         public void HandleTelemetryEvents(List<Dictionary<string, string>> events)
         {
-            EventsReceived = events;  // Only for testing purpose
+            EventsReceived.AddRange(events);  // Only for testing purpose
             Console.WriteLine("{0} event(s) received", events.Count);
             foreach (var e in events)
             {
@@ -154,7 +156,7 @@ namespace Test.MSAL.NET.Unit
                 telemetry.StartEvent(reqId, e2);
                 telemetry.StopEvent(reqId, e2);
 
-                var e3 = new UiEvent() {AccessDenied = false };
+                var e3 = new UiEvent() { AccessDenied = false };
                 telemetry.StartEvent(reqId, e3);
                 telemetry.StopEvent(reqId, e3);
             }
@@ -280,8 +282,8 @@ namespace Test.MSAL.NET.Unit
         }
 
         [TestMethod]
-        [TestCategory("PiiLoggingEnabled set to true, TenantId & UserId are hashed values")]
-        public void PiiLoggingEnabledTrue_TenantAndUserIdHashedTest()
+        [TestCategory("PiiLoggingEnabled set to true, TenantId , UserId, and Login Hint are hashed values")]
+        public void PiiLoggingEnabledTrue_ApiEventFieldsHashedTest()
         {
             var logger = new TestLogger();
             logger.SetPiiLoggingEnabled(true);
@@ -289,7 +291,14 @@ namespace Test.MSAL.NET.Unit
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent(logger) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
+                var e1 = new ApiEvent(logger)
+                {
+                    Authority = new Uri("https://login.microsoftonline.com"),
+                    AuthorityType = "Aad",
+                    TenantId = TenantId,
+                    AccountId = UserId,
+                    LoginHint = "loginHint"
+                };
                 _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -305,6 +314,12 @@ namespace Test.MSAL.NET.Unit
                 {
                     Assert.AreNotEqual(null, e1[ApiEvent.UserIdKey]);
                     Assert.AreNotEqual(UserId, e1[ApiEvent.UserIdKey]);
+                }
+
+                if (e1.ContainsKey(ApiEvent.LoginHintKey))
+                {
+                    Assert.AreNotEqual(null, e1[ApiEvent.LoginHintKey]);
+                    Assert.AreNotEqual("loginHint", e1[ApiEvent.LoginHintKey]);
                 }
 
                 _telemetryManager.StopEvent(reqId, e1);
@@ -326,7 +341,15 @@ namespace Test.MSAL.NET.Unit
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent(logger) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad", TenantId = TenantId, AccountId = UserId };
+                var e1 = new ApiEvent(logger)
+                {
+                    Authority = new Uri("https://login.microsoftonline.com"),
+                    AuthorityType = "Aad",
+                    TenantId = TenantId,
+                    AccountId = UserId,
+                    LoginHint = "loginHint"
+                };
+
                 _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -342,6 +365,10 @@ namespace Test.MSAL.NET.Unit
                     Assert.AreEqual(null, e1[ApiEvent.UserIdKey]);
                 }
 
+                if (e1.ContainsKey(ApiEvent.LoginHintKey))
+                {
+                    Assert.AreEqual(null, e1[ApiEvent.LoginHintKey]);
+                }
                 _telemetryManager.StopEvent(reqId, e1);
             }
             finally
@@ -389,6 +416,72 @@ namespace Test.MSAL.NET.Unit
                 _telemetryManager.Flush(reqId, ClientId);
             }
             Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
+        }
+
+        [TestMethod]
+        [TestCategory("TelemetryInternalAPI")]
+        public void TelemetryEventCountsAreCorrectTest()
+        {
+            string[] reqIdArray = new string[5];
+            Task[] taskArray = new Task[5];
+            try
+            {
+                for(int i=0; i < 5; i++)
+                {
+                    string reqId = _telemetryManager.GenerateNewRequestId();
+                    reqIdArray[i] = reqId;
+                    Task task= (new Task(() =>
+                    {
+                        var e1 = new ApiEvent(new TestLogger()) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                        _telemetryManager.StartEvent(reqId, e1);
+                        // do some stuff...
+                        e1.WasSuccessful = true;
+                        _telemetryManager.StopEvent(reqId, e1);
+
+                        var e2 = new HttpEvent() { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeUserAgent", QueryParams = "?a=1&b=2" };
+                        _telemetryManager.StartEvent(reqId, e2);
+                        // do some stuff...
+                        e2.HttpResponseStatus = 200;
+                        _telemetryManager.StopEvent(reqId, e2);
+
+                        var e3 = new HttpEvent() { HttpPath = new Uri("https://contoso.com"), UserAgent = "SomeOtherUserAgent", QueryParams = "?a=3&b=4" };
+                        _telemetryManager.StartEvent(reqId, e3);
+                        // do some stuff...
+                        e2.HttpResponseStatus = 200;
+                        _telemetryManager.StopEvent(reqId, e3);
+
+                        var e4 = new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT };
+                        _telemetryManager.StartEvent(reqId, e4);
+                        // do some stuff...
+                        _telemetryManager.StopEvent(reqId, e4);
+
+                        var e5 = new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT };
+                        _telemetryManager.StartEvent(reqId, e5);
+                        // do some stuff...
+                        _telemetryManager.StopEvent(reqId, e5);
+                    }));
+                    taskArray[i] = task;
+                    task.Start();
+                }
+                Task.WaitAll(taskArray);
+            }
+            finally
+            {
+                foreach (string reqId in reqIdArray)
+                {
+                    _telemetryManager.Flush(reqId, ClientId);
+                }
+            }
+            // Every task should have one default event with these counts
+            foreach(Dictionary<string, string> telemetryEvent in _myReceiver.EventsReceived)
+            {
+                if(telemetryEvent[EventBase.EventNameKey] == TelemetryEventProperties.MsalDefaultEvent)
+                {
+                    Assert.AreEqual("2", telemetryEvent[TelemetryEventProperties.MsalHttpEventCount]);
+                    Assert.AreEqual("2", telemetryEvent[TelemetryEventProperties.MsalCacheEventCount]);
+                    Assert.AreEqual("0", telemetryEvent[TelemetryEventProperties.MsalUiEventCount]);
+                }
+            }
         }
     }
 }

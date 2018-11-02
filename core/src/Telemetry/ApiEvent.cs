@@ -27,7 +27,6 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.Telemetry
 {
@@ -45,6 +44,7 @@ namespace Microsoft.Identity.Core.Telemetry
         public const string RequestIdKey = EventNamePrefix + "request_id";
         public const string IsConfidentialClientKey = EventNamePrefix + "is_confidential_client";
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
+        public const string LoginHintKey = EventNamePrefix + "login_hint";
 
         public enum ApiIds
         {
@@ -106,9 +106,8 @@ namespace Microsoft.Identity.Core.Telemetry
         {
             set
             {
-                var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
                 this[TenantIdKey] = value != null && _logger.PiiLoggingEnabled
-                    ? crypto.CreateBase64UrlEncodedSha256Hash(value)
+                    ? HashPersonalIdentifier(value)
                     : null;
             }
         }
@@ -117,9 +116,8 @@ namespace Microsoft.Identity.Core.Telemetry
         {
             set
             {
-                var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
                 this[UserIdKey] = value != null && _logger.PiiLoggingEnabled
-                    ? crypto.CreateBase64UrlEncodedSha256Hash(value)
+                    ? HashPersonalIdentifier(value)
                     : null;
             }
         }
@@ -150,8 +148,18 @@ namespace Microsoft.Identity.Core.Telemetry
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
-        public string ApiErrorCode {
+        public string ApiErrorCode
+        {
             set { this[ApiErrorCodeKey] = value; }
+        }
+
+        public string LoginHint
+        {
+            set {
+                this[LoginHintKey] = value != null && _logger.PiiLoggingEnabled
+                    ? HashPersonalIdentifier(value)
+                    : null;
+            }
         }
     }
 }
