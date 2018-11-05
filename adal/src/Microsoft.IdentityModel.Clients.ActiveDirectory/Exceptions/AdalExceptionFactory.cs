@@ -46,7 +46,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             Exception innerException = null)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
-            return new AdalException(errorCode, errorMessage);
+            return new AdalException(errorCode, errorMessage, innerException);
         }
 
         public override Exception GetServiceException(string errorCode, string errorMessage, IHttpWebResponse httpResponse)

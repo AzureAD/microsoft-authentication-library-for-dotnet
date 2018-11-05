@@ -38,7 +38,7 @@ using Test.Microsoft.Identity.Core.Unit;
 namespace Test.ADAL.NET.Unit
 {
     [TestClass]
-    public class AdalExceptionServiceTests
+    public class AdalExceptionFactoryTests
     {
         private const string exCode = "exCode";
         private const string exMessage = "exMessage";
@@ -79,6 +79,23 @@ namespace Test.ADAL.NET.Unit
             Assert.AreEqual(exCode, adalClientException.ErrorCode);
             Assert.AreEqual(exMessage, adalClientException.Message);
             Assert.IsNull(adalClientException.InnerException);
+        }
+
+        [TestMethod]
+        public void AdalClientException_PassesInnerException()
+        {
+            InvalidOperationException invalidOperationException
+                = new InvalidOperationException();
+
+            // Act
+            Exception exception = adalExceptionFactory
+                 .GetClientException(exCode, exMessage, invalidOperationException);
+
+            // Assert
+            var adalClientException = exception as AdalException;
+            Assert.AreEqual(exCode, adalClientException.ErrorCode);
+            Assert.AreEqual(exMessage, adalClientException.Message);
+            Assert.AreSame(invalidOperationException, adalClientException.InnerException);
         }
 
         [TestMethod]
