@@ -48,7 +48,7 @@ namespace XForms.Droid
             LoadApplication(new App());
 
             // To activate system webview, remove '//' from line 51 below, and comment out line 57 ;
-            App.UIParent = new UIParent(this);
+            //App.UIParent = new UIParent(this);
 
             #region Web browsers for MSAL.NET Android
             // To activate embedded webview, remove '//' from line 57 below, 
