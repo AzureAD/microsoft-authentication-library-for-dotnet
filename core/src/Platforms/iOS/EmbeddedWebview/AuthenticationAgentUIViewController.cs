@@ -106,7 +106,6 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 
         public void CancelAuthentication(object sender, EventArgs e)
         {
-            this.callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null));
             this.DismissViewController(true, () =>
                     callbackMethod(new AuthorizationResult(AuthorizationStatus.UserCancel, null)));
         }
