@@ -1,3 +1,20 @@
+2.4.0-preview
+=============
+Improvements and fixes to the token cache
+- The serialized token cache can now be shared by different applications, therefore providing SSO if the same user signs-in in both applications
+  - See [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1365) and [MSAL Issue #653](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/654)
+- On .NET Core, the Token cache was shared by all instances of applications in memory. This is now fixed (See MSAL.NET issue #656 and [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1360))
+- Fixes consistency issues for advanced token cache migration scenarios from ADAL v3.x to ADA v4.x to MSAL v2.x 
+  - [MSAL Issue #652](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/652)
+  - [MSAL Issue #651](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/651)
+- Cache lookups were optimized. Work done in conjunction with ADAL.iOS and MSAL.iOS native) [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1350)
+
+More browsers are now supported on Xamarin.Android when you choose to use system web browsers.
+- Removed chrome dependency for system browser on Android devices. See https://aka.ms/msal-net-system-browsers for more information. [MSAL issue #664](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/664)
+
+Azure AD B2C improvement
+- Add support for b2clogin.com for b2c authorities [MSAL issue #669](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/669) [#632](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/632)
+
 2.3.1-preview
 =============
 This release includes:
