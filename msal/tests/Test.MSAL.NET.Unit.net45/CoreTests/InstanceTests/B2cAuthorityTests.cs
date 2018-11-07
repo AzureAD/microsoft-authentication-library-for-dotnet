@@ -25,17 +25,18 @@
 //
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Threading.Tasks;
+using Test.Microsoft.Identity.Core.Unit.Mocks;
 
 namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 {
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
-    [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-B2C.json")]
     public class B2CAuthorityTests
     {
         [TestInitialize]
@@ -62,9 +63,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     async () =>
                     {
                         await instance.ResolveEndpointsAsync(
-                            null, 
                             null,
-                            null, 
+                            null,
+                            null,
                             new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
                 Assert.Fail("test should have failed");
@@ -80,26 +81,26 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void ValidationEnabledNotSupportedTest()
         {
-            var instance = Authority.CreateAuthority(CoreTestConstants.B2CAuthority, true);
-            Assert.IsNotNull(instance);
-            Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
-            try
+            using (var httpManager = new MockHttpManager())
             {
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            null, 
-                            null,
-                            null, 
-                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
-                Assert.Fail("test should have failed");
-            }
-            catch (Exception exc)
-            {
-                Assert.IsInstanceOfType(exc, typeof(ArgumentException));
-                Assert.AreEqual(CoreErrorMessages.UnsupportedAuthorityValidation, exc.Message);
+                var instance = Authority.CreateAuthority(CoreTestConstants.B2CAuthority, true);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
+                try
+                {
+                    instance.UpdateCanonicalAuthorityAsync(
+                                    httpManager,
+                                    new TelemetryManager(),
+                                    new RequestContext(null, new TestLogger(Guid.NewGuid(), null))
+                                    ).GetAwaiter().GetResult();
+
+                    Assert.Fail("test should have failed");
+                }
+                catch (ArgumentException exc)
+                {
+                    Assert.IsInstanceOfType(exc, typeof(ArgumentException));
+                    Assert.AreEqual(CoreErrorMessages.UnsupportedAuthorityValidation, exc.Message);
+                }
             }
         }
 
@@ -114,6 +115,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 
             const string uriCustomPort = "https://login.microsoftonline.in:444/tfp/tenant/policy";
             const string uriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
+            const string uriVanityPort = CoreTestConstants.B2CLoginAuthority;
 
             var authority = new B2CAuthority(uriNoPort, false);
             Assert.AreEqual(uriNoPortTailSlash, authority.CanonicalAuthority);
@@ -123,6 +125,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 
             authority = new B2CAuthority(uriCustomPort, false);
             Assert.AreEqual(uriCustomPortTailSlash, authority.CanonicalAuthority);
+
+            authority = new B2CAuthority(uriVanityPort, false);
+            Assert.AreEqual(uriVanityPort, authority.CanonicalAuthority);
         }
     }
 }

@@ -54,6 +54,8 @@ namespace Microsoft.Identity.Core.Instance
 
         protected Authority(string authority, bool validateAuthority)
         {
+            ValidateAuthority = validateAuthority;
+
             var authorityUri = new UriBuilder(authority);
             Host = authorityUri.Host;
 
@@ -62,8 +64,6 @@ namespace Microsoft.Identity.Core.Instance
                 "https://{0}/{1}/",
                 authorityUri.Uri.Authority,
                 GetFirstPathSegment(authority));
-
-            ValidateAuthority = validateAuthority;
         }
 
         public AuthorityType AuthorityType { get; set; }
