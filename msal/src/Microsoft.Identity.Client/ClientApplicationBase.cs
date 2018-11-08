@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Client
         /// ExtendedLifeTimeEnabled is a Boolean that first party applications (read Office) can set to true in case when the STS has an outage,
         /// to be more resilient.
         /// </summary>
-        public bool ExtendedLifeTimeEnabled { get; set; }
+        private bool ExtendedLifeTimeEnabled { get; set; }
 
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
