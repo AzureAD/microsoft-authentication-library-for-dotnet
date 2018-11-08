@@ -38,12 +38,11 @@ namespace XForms
     {
         public static PublicClientApplication MsalPublicClient;
         public static UIParent UIParent { get; set; }
-        public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
+        public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         public const string B2cClientId = "750a8822-a6d4-4127-bc0b-efbfacccbc28";
 
-        public const string RedirectUriOnAndroid =
-            "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
         public const string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+        public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
         public const string B2cAuthority = "https://login.microsoftonline.com/tfp/panwariusb2c.onmicrosoft.com/B2C_1_signup_signin/";

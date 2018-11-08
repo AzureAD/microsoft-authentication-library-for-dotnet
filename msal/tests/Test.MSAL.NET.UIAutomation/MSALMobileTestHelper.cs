@@ -45,9 +45,9 @@ namespace Test.MSAL.UIAutomation
         /// Runs through the standard acquire token flow
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void AcquireTokenInteractiveTestHelper(ITestController controller, UserQueryParameters userParams)
+        public void AcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
         {
-            AcquireTokenInteractiveHelper(controller, userParams);
+            AcquireTokenInteractiveHelper(controller, labResponse);
             _coreMobileTestHelper.VerifyResult(controller);
         }
 
@@ -55,33 +55,30 @@ namespace Test.MSAL.UIAutomation
         /// Runs through the standard acquire token silent flow
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void AcquireTokenSilentTestHelper(ITestController controller, UserQueryParameters userParams)
+        public void AcquireTokenSilentTestHelper(ITestController controller, LabResponse labResponse)
         {
             //acquire token for 1st resource
-            AcquireTokenInteractiveHelper(controller, userParams);
+            AcquireTokenInteractiveHelper(controller, labResponse);
             _coreMobileTestHelper.VerifyResult(controller);
 
             //acquire token for 2nd resource with refresh token
-            SetInputData(controller, CoreUiTestConstants.UIAutomationAppV2, CoreUiTestConstants.DefaultScope);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope);
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
             _coreMobileTestHelper.VerifyResult(controller);
         }
 
-        private void AcquireTokenInteractiveHelper(ITestController controller, UserQueryParameters userParams)
+        private void AcquireTokenInteractiveHelper(ITestController controller, LabResponse labResponse)
         {
-            var user = PrepareForAuthentication(controller, userParams);
-            SetInputData(controller, CoreUiTestConstants.UIAutomationAppV2, CoreUiTestConstants.DefaultScope);
-            _coreMobileTestHelper.PerformSignInFlow(controller, user);
+            PrepareForAuthentication(controller);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope);
+            _coreMobileTestHelper.PerformSignInFlow(controller, labResponse.User);
         }
 
-        private IUser PrepareForAuthentication(ITestController controller, UserQueryParameters userParams)
+        private void PrepareForAuthentication(ITestController controller)
         {
             //Clear Cache
             controller.Tap(CoreUiTestConstants.CachePageID);
             controller.Tap(CoreUiTestConstants.ClearCacheID);
-
-            //Get User from Lab
-            return controller.GetUser(userParams);
         }
 
         private void SetInputData(ITestController controller, string ClientID, string scopes)
@@ -90,13 +87,11 @@ namespace Test.MSAL.UIAutomation
 
             //Enter ClientID
             controller.EnterText(CoreUiTestConstants.ClientIdEntryID, ClientID, false);
-            controller.DismissKeyboard();
             controller.Tap(CoreUiTestConstants.SaveID);
 
             //Enter Scopes
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquirePageID);
             controller.EnterText(CoreUiTestConstants.ScopesEntryID, scopes, false);
-            controller.DismissKeyboard();
         }
     }
 }

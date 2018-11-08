@@ -35,6 +35,14 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 {
     public static class LabUserHelper
     {
+        static LabServiceApi _labService;
+        static KeyVaultSecretsProvider _keyVaultSecretsProvider;
+        static LabUserHelper()
+        {
+            _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
+            _labService = new LabServiceApi(_keyVaultSecretsProvider);
+        }
+
         public static UserQueryParameters DefaultUserQuery
         {
             get
@@ -45,6 +53,53 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                     IsMfaUser = false,
                     IsFederatedUser = false
                 };
+            }
+        }
+
+        public static LabResponse GetLabUserData(UserQueryParameters query)
+        {
+            var user = _labService.GetLabResponse(query);
+            if (user == null)
+            {
+                throw new LabUserNotFoundException(query, "Found no users for the given query.");
+            }
+            return user;
+        }
+
+        public static LabResponse GetLabResponseWithDefaultUser()
+        {
+            return GetLabUserData(DefaultUserQuery);
+        }
+
+        public static LabResponse GetLabResponseWithADFSUser(FederationProvider federationProvider, bool federated = true)
+        {
+            var user = DefaultUserQuery;
+            user.FederationProvider = federationProvider;
+            user.IsFederatedUser = true;
+            user.IsFederatedUser = federated;
+            return GetLabUserData(user);
+        }
+
+        public static string GetUserPassword(LabUser user)
+        {
+            if (String.IsNullOrWhiteSpace(user.CredentialUrl))
+            {
+                throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
+            }
+
+            if (_keyVaultSecretsProvider == null)
+            {
+                throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
+            }
+
+            try
+            {
+                var secret = _keyVaultSecretsProvider.GetSecret(user.CredentialUrl);
+                return secret.Value;
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Test setup: cannot get the user password. See inner exception.", e);
             }
         }
     }

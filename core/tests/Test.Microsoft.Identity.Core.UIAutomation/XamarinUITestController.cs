@@ -43,7 +43,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         const int defaultRetryFrequencySec = 1;
         const int defaultPostTimeoutSec = 1;
         const string CSSIDSelector = "[id|={0}]";
-        private ILabService _labService;
 
         public IApp Application { get; set; }
 
@@ -52,8 +51,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             this.defaultSearchTimeout = new TimeSpan(0, 0, defaultSearchTimeoutSec);
             this.defaultRetryFrequency = new TimeSpan(0, 0, defaultRetryFrequencySec);
             this.defaultPostTimeout = new TimeSpan(0, 0, defaultPostTimeoutSec);
-            var keyVaultSecretsProvider = new KeyVaultSecretsProvider();
-            _labService = new LabServiceApi(keyVaultSecretsProvider);
         }
 
         public void Tap(string elementID)
@@ -121,6 +118,8 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
                 Application.ClearText(); 
                 Application.EnterText(x => x.Marked(elementID), text);
             }
+
+            DismissKeyboard();
         }
 
         public void DismissKeyboard()
@@ -132,13 +131,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
             Application.WaitForElement(elementID, "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
             return Application.Query(x => x.Marked(elementID)).FirstOrDefault().Text;
-        }
-
-        public IUser GetUser(UserQueryParameters query)
-        {
-            var user = _labService.GetUser(query);
-            Assert.True(user != null, "Found no users for the given query.");
-            return user;
         }
     }
 }

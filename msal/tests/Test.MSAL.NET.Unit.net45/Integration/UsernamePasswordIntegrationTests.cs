@@ -32,7 +32,6 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using IUser = Test.Microsoft.Identity.LabInfrastructure.IUser;
 using Test.MSAL.NET.Unit;
 
 namespace Test.MSAL.NET.Integration
@@ -63,15 +62,9 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()
         {
-            var user = GetUser(
-                new UserQueryParameters
-                {
-                    IsMamUser = false,
-                    IsMfaUser = false,
-                    IsFederatedUser = false
-                });
+            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
 
-            SecureString securePassword = new NetworkCredential("", ((LabUser)user).GetPassword()).SecurePassword;
+            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
             PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
 
@@ -93,15 +86,9 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithFederatedUsernamePasswordAsync()
         {
-            var user = GetUser(
-                new UserQueryParameters
-                {
-                    IsMamUser = false,
-                    IsMfaUser = false,
-                    IsFederatedUser = true
-                });
+            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
 
-            SecureString securePassword = new NetworkCredential("", ((LabUser)user).GetPassword()).SecurePassword;
+            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
             PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
             AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
@@ -122,13 +109,7 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithManagedUsernameIncorrectPassword()
         {
-            var user = GetUser(
-                new UserQueryParameters
-                {
-                    IsMamUser = false,
-                    IsMfaUser = false,
-                    IsFederatedUser = false
-                });
+            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
@@ -144,13 +125,7 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithFederatedUsernameIncorrectPassword()
         {
-            var user = GetUser(
-                new UserQueryParameters
-                {
-                    IsMamUser = false,
-                    IsMfaUser = false,
-                    IsFederatedUser = true
-                });
+            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
@@ -160,14 +135,6 @@ namespace Test.MSAL.NET.Integration
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
                  await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
-        }
-
-        private IUser GetUser(UserQueryParameters query)
-        {
-            ILabService _labService = new LabServiceApi(new KeyVaultSecretsProvider());
-            var user = _labService.GetUser(query);
-            Assert.IsTrue(user != null, "Found no users for the given query.");
-            return user;
         }
     }
 }

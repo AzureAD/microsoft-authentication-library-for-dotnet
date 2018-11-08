@@ -89,6 +89,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         public KeyVaultSecretsProvider()
         {
             _config = new KeyVaultConfiguration();
+            _config.AuthType = KeyVaultAuthenticationType.ClientCertificate;
 
             //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
             //After the tests are finished in appcenter, the file will be deleted from the appcenter servers.
@@ -97,25 +98,16 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             {
                 var data = File.ReadAllText(_dataFileName);
 
-                if (string.IsNullOrWhiteSpace(data))
-                {
-                    _config.AuthType = KeyVaultAuthenticationType.ClientCertificate;
-                }
-                else
+                if (!string.IsNullOrWhiteSpace(data))
                 {
                     _config.AuthType = KeyVaultAuthenticationType.ClientSecret;
                     _config.KeyVaultSecret = data;
                 }
             }
-            else
-            {
-                _config.AuthType = KeyVaultAuthenticationType.ClientCertificate;
-            }
 
             _config.ClientId = _keyVaultClientID;
             _config.CertThumbprint = _keyVaultThumbPrint;
-            _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
-            
+            _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);            
         }
 
         ~KeyVaultSecretsProvider()

@@ -195,15 +195,22 @@ namespace XForms
                 {
                     var loginHint = LoginHintEntry.Text.Trim();
                     res =
-                        await App.MsalPublicClient.AcquireTokenAsync(GetScopes(), loginHint, GetUIBehavior(),
+                        await App.MsalPublicClient.AcquireTokenAsync(
+                            GetScopes(), 
+                            loginHint, 
+                            GetUIBehavior(),
                             GetExtraQueryParams(),
                             App.UIParent).ConfigureAwait(true);
                 }
                 else
                 {
                     var user = getUserByDisplayableId(GetSelectedUserId());
-                    res = await App.MsalPublicClient.AcquireTokenAsync(GetScopes(), user, GetUIBehavior(),
-                        GetExtraQueryParams(), App.UIParent).ConfigureAwait(true);
+                    res = await App.MsalPublicClient.AcquireTokenAsync(
+                        GetScopes(), 
+                        user, 
+                        GetUIBehavior(),
+                        GetExtraQueryParams(), 
+                        App.UIParent).ConfigureAwait(true);
                 }
 
                 var resText = ToString(res);

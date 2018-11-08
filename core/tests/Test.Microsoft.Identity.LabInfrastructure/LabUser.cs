@@ -31,16 +31,9 @@ using Newtonsoft.Json;
 
 namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public class LabUser : IUser
+    public class LabUser
     {
         public LabUser() { }
-
-        public LabUser(KeyVaultSecretsProvider keyVault)
-        {
-            KeyVault = keyVault;
-        }
-
-        public KeyVaultSecretsProvider KeyVault { get; set; }
 
         [JsonProperty("objectId")]
         public Guid ObjectId { get; set; }
@@ -54,7 +47,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         [JsonProperty("credentialVaultKeyName")]
         public string CredentialUrl { get; set; }
 
-        public IUser HomeUser { get; set; }
+        public LabUser HomeUser { get; set; }
 
         [JsonProperty("external")]
         public bool IsExternal { get; set; }
@@ -103,38 +96,5 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             labHomeUser.CurrentTenantId = HomeTenantId;
             labHomeUser.Upn = HomeUPN;
         }
-
-        /// <summary>
-        /// Gets password from MSID Lab Keyvault
-        /// </summary>
-        /// <returns>password</returns>
-        public string GetPassword()
-        {
-            if (String.IsNullOrWhiteSpace(CredentialUrl))
-            {
-                throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
-            }
-
-            if(KeyVault == null)
-            {
-                throw new InvalidOperationException("Error: Keyvault secrets provider is not set");
-            }
-            
-            try
-            {
-                var secret = this.KeyVault.GetSecret(CredentialUrl);
-                return secret.Value;
-            }
-            catch (Exception e)
-            {
-                throw new InvalidOperationException("Test setup: cannot get the user password. See inner exception.", e);
-            }
-        }
-    }
-
-    public class LabResponse
-    {
-        [JsonProperty("Users")]
-        public LabUser Users { get; set; }
     }
 }

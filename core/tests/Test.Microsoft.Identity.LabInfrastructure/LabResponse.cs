@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//-----------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,26 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public interface IUser
+    public class LabResponse
     {
-        Guid ObjectId { get; }
-        UserType UserType { get; }
-        string Upn { get; }
-        string CredentialUrl { get; }
-        IUser HomeUser { get; }
-        bool IsExternal { get; }
-        bool IsMfa { get; }
-        bool IsMam { get; }
-        ISet<string> Licenses { get; }
-        bool IsFederated { get; }
-        FederationProvider FederationProvider { get; }
-        string CurrentTenantId { get; }
-        string HomeTenantId { get; }
-        KeyVaultSecretsProvider KeyVault { get; set; }
+        [JsonProperty("AppId")]
+        public string AppId { get; set; }
+
+        [JsonProperty("Users")]
+        public LabUser User { get; set; }
     }
 }

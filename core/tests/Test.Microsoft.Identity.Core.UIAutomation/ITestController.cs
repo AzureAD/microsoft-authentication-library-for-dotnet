@@ -91,14 +91,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         /// <returns>The text value of the element</returns>
         string GetText(string elementID);
 
-        /// <summary>
-        /// Returns a test user account for use in testing.
-        /// An exception is thrown if no matching user is found.
-        /// </summary>
-        /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
-        /// <returns>A single user that matches the given query parameters.</returns>
-        IUser GetUser(UserQueryParameters query);
-
         IApp Application { get; set; }
     }
 }

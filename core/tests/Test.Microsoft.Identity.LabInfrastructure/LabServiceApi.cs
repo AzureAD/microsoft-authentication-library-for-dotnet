@@ -45,7 +45,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             this._keyVault = keyVault;
         }
 
-        private IUser GetUserFromLab(UserQueryParameters query)
+        private LabResponse GetLabResponseFromAPI(UserQueryParameters query)
         {                        
             HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
@@ -82,16 +82,16 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                 throw new LabUserNotFoundException(query, "No lab user with specified parameters exists");
             }
 
-            LabUser user = JsonConvert.DeserializeObject<LabResponse>(result).Users;
+            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
 
-            if (user == null)
-                user = JsonConvert.DeserializeObject<LabUser>(result);
+            LabUser user = response.User;
+
+            user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!String.IsNullOrEmpty(user.HomeTenantId) && !String.IsNullOrEmpty(user.HomeUPN))
                 user.InitializeHomeUser();
 
-            user.KeyVault = _keyVault;
-            return user;
+            return response;
         }
 
         /// <summary>
@@ -99,9 +99,10 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         /// </summary>
         /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
         /// <returns>Users that match the given query parameters.</returns>
-        public IUser GetUser(UserQueryParameters query)
+        public LabResponse GetLabResponse(UserQueryParameters query)
         {
-            var user = GetUserFromLab(query) as LabUser;
+            var response = GetLabResponseFromAPI(query);
+            var user = response.User;
 
             if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))
             {
@@ -113,7 +114,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
                 Console.WriteLine($"User '{user.Upn}' has no matching home user.");
             }
 
-            return user;
+            return response;
         }
     }
 }
