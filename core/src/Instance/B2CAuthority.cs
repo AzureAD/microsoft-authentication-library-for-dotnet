@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Core.Instance
 
         private bool InTrustedHostList(string host)
         {
-            if(IsInTrustedHostList(host) || host.EndsWith(B2CTrustedHost))
+            if(IsInTrustedHostList(host) || host.EndsWith(B2CTrustedHost, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
