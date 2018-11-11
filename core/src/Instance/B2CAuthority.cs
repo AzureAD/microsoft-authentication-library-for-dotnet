@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Core.Instance
             string userPrincipalName,
             RequestContext requestContext)
         {
-            return await Task.Run(() => GetDefaultOpenIdConfigurationEndpoint()).ConfigureAwait(false);
+            return await Task.FromResult(GetDefaultOpenIdConfigurationEndpoint()).ConfigureAwait(false);
         }
 
         internal override string GetTenantId()
