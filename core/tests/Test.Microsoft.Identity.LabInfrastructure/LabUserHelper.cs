@@ -33,10 +33,14 @@ using System.Threading.Tasks;
 
 namespace Test.Microsoft.Identity.LabInfrastructure
 {
+    //TODO: add a layer of user and password caching to speed up the tests
     public static class LabUserHelper
     {
         static LabServiceApi _labService;
         static KeyVaultSecretsProvider _keyVaultSecretsProvider;
+        static LabResponse _defaultLabResponse;
+
+
         static LabUserHelper()
         {
             _keyVaultSecretsProvider = new KeyVaultSecretsProvider();
@@ -68,7 +72,12 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 
         public static LabResponse GetLabResponseWithDefaultUser()
         {
-            return GetLabUserData(DefaultUserQuery);
+            if (_defaultLabResponse == null)
+            {
+                _defaultLabResponse = GetLabUserData(DefaultUserQuery);
+            }
+
+            return _defaultLabResponse;
         }
 
         public static LabResponse GetLabResponseWithADFSUser(FederationProvider federationProvider, bool federated = true)

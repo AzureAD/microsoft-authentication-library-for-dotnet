@@ -63,7 +63,10 @@ namespace Test.ADAL.UIAutomation
             CoreMobileTestHelper.VerifyResult(controller);
 
             //Enter 2nd Resource
-            controller.EnterText(CoreUiTestConstants.ResourceEntryID, CoreUiTestConstants.Exchange, false);
+            controller.EnterText(
+                CoreUiTestConstants.ResourceEntryID, 
+                CoreUiTestConstants.Exchange, 
+                XamarinSelector.ByAutomationId);
 
             //Acquire token silently
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
@@ -110,16 +113,16 @@ namespace Test.ADAL.UIAutomation
         private void SetInputData(ITestController controller, string clientID, string resource)
         {
             //Enter ClientID
-            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, clientID, false);
+            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, clientID, XamarinSelector.ByAutomationId);
 
             //Enter Resource
-            controller.EnterText(CoreUiTestConstants.ResourceEntryID, resource, false);
+            controller.EnterText(CoreUiTestConstants.ResourceEntryID, resource, XamarinSelector.ByAutomationId);
         }
 
         private void SetPromptBehavior(ITestController controller, string promptBehavior)
         {
             //Select PromptBehavior
-            controller.EnterText(CoreUiTestConstants.PromptBehaviorEntryID, promptBehavior, false);
+            controller.EnterText(CoreUiTestConstants.PromptBehaviorEntryID, promptBehavior, XamarinSelector.ByAutomationId);
         }
     }
 }

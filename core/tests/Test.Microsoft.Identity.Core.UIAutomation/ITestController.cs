@@ -25,8 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Test.Microsoft.Identity.LabInfrastructure;
 using Xamarin.UITest;
+using Xamarin.UITest.Queries;
 
 namespace Test.Microsoft.Identity.Core.UIAutomation
 {
@@ -41,34 +43,34 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         /// <summary>
         /// Taps an element on the UI
         /// </summary>
-        /// <param name="elementID">ID of the element to tap</param>
-        /// <param name="isWebElement">Set to true if the element to be tapped is within a web view</param>
-        void Tap(string elementID, bool isWebElement);
+        /// <param name="textOrId">ID or text of the element to tap</param>
+        /// <param name="xamarinSelector">Strategy for finding the element</param>
+        void Tap(string textOrId, XamarinSelector xamarinSelector);
 
         /// <summary>
         /// Taps an element on the UI
         /// </summary>
-        /// <param name="elementID">ID of the element to tap</param>
+        /// <param name="textOrId">ID or text of the element to tap</param>
         /// <param name="waitTime">The time in seconds in which the test controller will search for the element before it times out</param>
         /// <param name="isWebElement">Set to true if the element to be tapped is within a web view</param>
-        void Tap(string elementID, int waitTime, bool isWebElement);
+        void Tap(string elementID, int waitTime, XamarinSelector xamarinSelector);
 
         /// <summary>
         /// enters text into a text field on the UI
         /// </summary>
-        /// <param name="elementID">ID of the element to enter text into</param>
+        /// <param name="textOrId">ID or text of the element to tap</param>
         /// <param name="text">The text to be entered into the element</param>
         /// <param name="isWebElement">Set to true if the element to be tapped is within a web view</param>
-        void EnterText(string elementID, string text, bool isWebElement);
+        void EnterText(string elementID, string text, XamarinSelector xamarinSelector);
 
         /// <summary>
         /// enters text into a text field on the UI
         /// </summary>
-        /// <param name="elementID">ID of the element to enter text into</param>
+        /// <param name="textOrId">ID or text of the element to tap</param>
         /// <param name="waitTime">The time in seconds in which the test controller will search for the element before it times out</param>
         /// <param name="text">The text to be entered into the element</param>
         /// <param name="isWebElement">Set to true if the element to be tapped is within a web view</param>
-        void EnterText(string elementID, int waitTime, string text, bool isWebElement);
+        void EnterText(string textOrId, int waitTime, string text, XamarinSelector xamarinSelector);
 
         /// <summary>
         /// Dismisses the keyboard. This should be called after each text input operation with the keyboard because the keyboard can stay active and hide
@@ -77,20 +79,33 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         void DismissKeyboard();
 
         /// <summary>
-        /// Querys the Ui until an element is found on the UI
+        /// Returns the text of an element visible on the UI
         /// </summary>
-        /// <param name="automationID">ID of the element to look for</param>
-        /// <param name="isWebElement">Set to true if the element to be tapped is within a web view</param>
-        /// <returns>return details of the object that is being searched for.</returns>
-        object[] WaitForElement(string automationID, bool isWebElement);
-
-        /// <summary>
-        /// Returns the text of an element wisible on the UI
-        /// </summary>
-        /// <param name="elementID">ID of the element to get text from</param>
+        /// <param name="textOrId">ID of the element to get text from</param>
         /// <returns>The text value of the element</returns>
-        string GetText(string elementID);
+        string GetText(string textOrId);
 
         IApp Application { get; set; }
+
+        /// <summary>
+        /// Waits for an html element to be present and returns it.
+        /// </summary>
+        /// <param name="resourceId">Id of the html element, exposed as "resource-id" by the UI Automation Viewer tool</param>
+        /// <returns></returns>
+        AppWebResult[] WaitForWebElementByCssId(string resourceId, TimeSpan? timeout = null);
+
+        /// <summary>
+        /// Waits for a native XAML widget element to be present and returns it.
+        /// </summary>
+        /// <param name="elementID">An automation id</param>
+        /// <returns></returns>
+        AppResult[] WaitForXamlElement(string elementID, TimeSpan? timeout = null);
+
+        /// <summary>
+        /// Waits for an HTML element to be present and returns it. Useful when the WebUI does not have elements with IDs.
+        /// </summary>
+        /// <param name="text">The text of the element, e.g. foo will find the element div in <div>foo</div>
+        /// </param>
+        AppWebResult[] WaitForWebElementByText(string text, TimeSpan? timeout = null);
     }
 }

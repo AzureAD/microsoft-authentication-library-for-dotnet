@@ -31,6 +31,8 @@ using Test.Microsoft.Identity.Core.UIAutomation;
 using System.Threading;
 using System;
 using System.Threading.Tasks;
+using System.Linq;
+using Xamarin.UITest.Queries;
 
 namespace Test.MSAL.UIAutomation
 {
@@ -39,16 +41,19 @@ namespace Test.MSAL.UIAutomation
     /// </summary>
     public class MSALMobileTestHelper
     {
-        CoreMobileTestHelper _coreMobileTestHelper = new CoreMobileTestHelper();
+        public CoreMobileTestHelper CoreMobileTestHelper { get; set; } = new CoreMobileTestHelper();
 
         /// <summary>
-        /// Runs through the standard acquire token flow
+        /// Runs through the standard acquire token flow, using the login prompt behavior
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void AcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
+        public void AcquireTokenInteractiveTestHelper(
+            ITestController controller,
+            LabResponse labResponse,
+            string promptBehavior = CoreUiTestConstants.UIBehaviorLogin)
         {
-            AcquireTokenInteractiveHelper(controller, labResponse);
-            _coreMobileTestHelper.VerifyResult(controller);
+            AcquireTokenInteractiveHelper(controller, labResponse, promptBehavior);
+            CoreMobileTestHelper.VerifyResult(controller);
         }
 
         /// <summary>
@@ -58,20 +63,34 @@ namespace Test.MSAL.UIAutomation
         public void AcquireTokenSilentTestHelper(ITestController controller, LabResponse labResponse)
         {
             //acquire token for 1st resource
-            AcquireTokenInteractiveHelper(controller, labResponse);
-            _coreMobileTestHelper.VerifyResult(controller);
+            AcquireTokenInteractiveHelper(controller, labResponse, CoreUiTestConstants.UIBehaviorLogin);
+            CoreMobileTestHelper.VerifyResult(controller);
 
             //acquire token for 2nd resource with refresh token
-            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UIBehaviorLogin);
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
-            _coreMobileTestHelper.VerifyResult(controller);
+            CoreMobileTestHelper.VerifyResult(controller);
         }
 
-        private void AcquireTokenInteractiveHelper(ITestController controller, LabResponse labResponse)
+        private void AcquireTokenInteractiveHelper(
+            ITestController controller,
+            LabResponse labResponse,
+            string promptBehavior)
         {
             PrepareForAuthentication(controller);
-            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope);
-            _coreMobileTestHelper.PerformSignInFlow(controller, labResponse.User);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, promptBehavior);
+            CoreMobileTestHelper.PerformSignInFlow(controller, labResponse.User);
+
+
+            // on consent, also hit the accept button
+            if (promptBehavior == CoreUiTestConstants.UIBehaviorConsent)
+            {
+                AppWebResult consentHeader = controller.WaitForWebElementByCssId("consentHeader").FirstOrDefault();
+                Assert.IsNotNull(consentHeader);
+                Assert.IsTrue(consentHeader.TextContent.Contains("Permissions requested"));
+
+                controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+            }
         }
 
         private void PrepareForAuthentication(ITestController controller)
@@ -81,17 +100,45 @@ namespace Test.MSAL.UIAutomation
             controller.Tap(CoreUiTestConstants.ClearCacheID);
         }
 
-        private void SetInputData(ITestController controller, string ClientID, string scopes)
+        private void SetInputData(
+            ITestController controller,
+            string ClientID,
+            string scopes,
+            string uiBehavior)
         {
             controller.Tap(CoreUiTestConstants.SettingsPageID);
 
             //Enter ClientID
-            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, ClientID, false);
+            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, ClientID, XamarinSelector.ByAutomationId);
             controller.Tap(CoreUiTestConstants.SaveID);
 
             //Enter Scopes
             controller.Tap(CoreUiTestConstants.AcquirePageID);
-            controller.EnterText(CoreUiTestConstants.ScopesEntryID, scopes, false);
+            controller.EnterText(CoreUiTestConstants.ScopesEntryID, scopes, XamarinSelector.ByAutomationId);
+
+            SetUiBehavior(controller, uiBehavior);
+        }
+
+        public void SetUiBehavior(ITestController controller, string promptBehavior)
+        {
+            // Enter Prompt Behavior
+            controller.Tap(CoreUiTestConstants.UiBehaviorPickerID);
+            controller.Tap(promptBehavior);
+        }
+
+        private void ValidateUiBehaviorString(string uiBehavior)
+        {
+            var okList = new[] {
+                CoreUiTestConstants.UIBehaviorConsent,
+                CoreUiTestConstants.UIBehaviorLogin,
+                CoreUiTestConstants.UIBehaviorSelectAccount };
+
+            bool isInList = okList.Any(item => string.Equals(item, uiBehavior, StringComparison.InvariantCulture));
+
+            if (!isInList)
+            {
+                throw new InvalidOperationException("Test Setup Error: invalid uiBehavior " + uiBehavior);
+            }
         }
     }
 }

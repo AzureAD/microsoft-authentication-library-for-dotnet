@@ -65,7 +65,7 @@ namespace XForms
 
             userIds.Add(UserNotSelected);
             usersPicker.ItemsSource = userIds;
-            usersPicker.SelectedIndex = 0;
+            usersPicker.SelectedIndex = userIds.Count - 1; // go to UserNotSelected
         }
 
         private void InitUIBehaviorPicker()

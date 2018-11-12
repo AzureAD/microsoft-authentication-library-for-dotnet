@@ -41,7 +41,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             switch (platform)
             {
                 case Platform.Android:
-                    return ConfigureApp.Android.InstalledApp(targetApp).StartApp();
+                     return ConfigureApp.Android.InstalledApp(targetApp).StartApp();
                 case Platform.iOS:
                     return ConfigureApp.iOS.StartApp();
                 default:
