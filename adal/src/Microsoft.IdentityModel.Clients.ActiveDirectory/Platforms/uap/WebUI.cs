@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            bool ssoMode = ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri);
+            bool ssoMode = ReferenceEquals(redirectUri, Constants.UapWEBRedirectUri);
             if (uiParent.UseHiddenBrowser && !ssoMode && redirectUri.Scheme != Constant.MsAppScheme)
             {
                 throw new AdalException(AdalError.UapRedirectUriUnsupported);

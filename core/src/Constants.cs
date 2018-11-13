@@ -33,11 +33,11 @@ namespace Microsoft.Identity.Core
     internal static class Constants
     {
         public const string MsAppScheme = "ms-app";
-        public static readonly Uri SsoPlaceHolderUri = new Uri("https://sso");
         public const int ExpirationMarginInMinutes = 5;
         public const int CodeVerifierLength = 128;
         public const int CodeVerifierByteSize = 32;
 
+        public const string UapWEBRedirectUri = "https://sso"; // only ADAL supports WEB
         public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
     }
 

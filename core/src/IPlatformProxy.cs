@@ -53,9 +53,20 @@ namespace Microsoft.Identity.Core
         /// <returns></returns>
         string GetDeviceId();
 
-        void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext);
-        string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext);
-        string GetDefaultRedirectUri(string correlationId);
+        /// <summary>
+        /// Throws if the redirect uri is not valid
+        /// </summary>
+        void ValidateRedirectUri(Uri redirectUri);
+
+        /// <summary>
+        /// Get the redirect Uri as string, or the a broker specified value
+        /// </summary>        
+        string GetBrokerOrRedirectUri(Uri redirectUri);
+
+        /// <summary>
+        /// Gets the default redirect uri for the platform, which sometimes includes the clientId
+        /// </summary>
+        string GetDefaultRedirectUri(string clientId);
 
         string GetProductName();
 

@@ -60,18 +60,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
             : base(requestData)
         {
-            PlatformProxyFactory.GetPlatformProxy().ValidateRedirectUri(redirectUri, RequestContext);
+            PlatformProxyFactory.GetPlatformProxy().ValidateRedirectUri(redirectUri);
             this.redirectUri = redirectUri;
 
-            if (!string.IsNullOrWhiteSpace(this.redirectUri.Fragment))
-            {
-                throw new ArgumentException(AdalErrorMessage.RedirectUriContainsFragment, "redirectUri");
-            }
-
             this.authorizationParameters = parameters;
-
-            this.redirectUriRequestParameter = PlatformProxyFactory.GetPlatformProxy().GetRedirectUriAsString(this.redirectUri, RequestContext);
-
+            this.redirectUriRequestParameter = PlatformProxyFactory.GetPlatformProxy().GetBrokerOrRedirectUri(this.redirectUri);
             this.userId = userId ?? throw new ArgumentNullException(nameof(userId), AdalErrorMessage.SpecifyAnyUser);
 
             if (!string.IsNullOrEmpty(extraQueryParameters) && extraQueryParameters[0] == '&')

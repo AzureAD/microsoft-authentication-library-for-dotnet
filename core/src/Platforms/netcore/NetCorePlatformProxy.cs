@@ -29,6 +29,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Cache;
 using System.Reflection;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core
 {
@@ -89,22 +90,19 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public void ValidateRedirectUri(Uri redirectUri)
         {
-            if (redirectUri == null)
-            {
-                throw new ArgumentNullException(nameof(redirectUri));
-            }
+            RedirectUriCommon.Validate(redirectUri);
         }
 
         /// <inheritdoc />
-        public string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
-        public string GetDefaultRedirectUri(string correlationId)
+        public string GetDefaultRedirectUri(string clientId)
         {
             return Constants.DefaultRedirectUri;
         }

@@ -77,6 +77,11 @@ namespace Microsoft.Identity.Core
         public const string GetUserNameFailed = "get_user_name_failed";
         public const string NonParsableOAuthError = "non_parsable_oauth_error";
 
+        /// <summary>
+        /// RedirectUri validation failed.
+        /// </summary>
+        public const string DefaultRedirectUriIsInvalid = "redirect_uri_validation_failed";
+
 #if iOS
         public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
         public const string MissingEntitlements = "missing_entitlements";
@@ -86,6 +91,7 @@ namespace Microsoft.Identity.Core
         public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
         public const string AndroidActivityNotFound = "android_activity_not_found";
         public const string UnresolvableIntentError = "unresolvable_intent";
+       
 #endif
 
     }

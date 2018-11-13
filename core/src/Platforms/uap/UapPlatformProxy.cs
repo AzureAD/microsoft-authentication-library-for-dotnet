@@ -27,6 +27,7 @@
 
 
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Platforms;
 using System;
 using System.Collections.Generic;
@@ -156,34 +157,28 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public void ValidateRedirectUri(Uri redirectUri)
         {
-            if (_isMsal)
-            {
-            }
-            else
-            {
-                // FROM ADAL
-                if (redirectUri == null)
-                {
-                    redirectUri = Constants.SsoPlaceHolderUri;
-                    requestContext.Logger.Verbose("ms-app redirect Uri is used");
-                }
-            }
+            RedirectUriCommon.Validate(redirectUri);
         }
 
         /// <inheritdoc />
-        public string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
-            return ReferenceEquals(redirectUri, Constants.SsoPlaceHolderUri)
-                       ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
-                       : redirectUri.OriginalString;
+            if (!_isMsal)
+            {
+                return string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase)
+                           ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
+                           : redirectUri.OriginalString;
+            }
+
+            return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string correlationId)
         {
-            return Constants.DefaultRedirectUri;
+            return _isMsal ? Constants.DefaultRedirectUri : Constants.UapWEBRedirectUri; // ADAL uses WEB
         }
 
         public string GetProductName()

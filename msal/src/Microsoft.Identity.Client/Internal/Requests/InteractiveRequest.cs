@@ -83,12 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IWebUI webUi)
             : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
         {
-            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.RedirectUri.Fragment))
-            {
-                throw new ArgumentException(
-                    MsalErrorMessage.RedirectUriContainsFragment,
-                    nameof(authenticationRequestParameters.RedirectUri));
-            }
+            PlatformProxyFactory.GetPlatformProxy().ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
 
             _extraScopesToConsent = new SortedSet<string>();
             if (!extraScopesToConsent.IsNullOrEmpty())

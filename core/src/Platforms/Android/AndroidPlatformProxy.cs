@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core
 {
@@ -99,35 +100,35 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri, RequestContext requestContext)
+        public void ValidateRedirectUri(Uri redirectUri)
         {
-            if (redirectUri == null)
-            {
-                throw new ArgumentNullException(nameof(redirectUri));
-            }
+            RedirectUriCommon.Validate(redirectUri);
 
             if (_isMsal)
             {
                 if (Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
                 {
-                    // TODO: Need to use CoreExceptionFactory here...?
-                    //throw new MsalException(MsalError.RedirectUriValidationFailed, "Default redirect URI - " + Constants.DefaultRedirectUri +
-                    //                                                               " cannot be used on iOS platform");
-                    throw new InvalidOperationException($"Default redirect URI - {Constants.DefaultRedirectUri} cannot be used on Android platform");
+                    throw CoreExceptionFactory.Instance.GetClientException(
+                        CoreErrorCodes.DefaultRedirectUriIsInvalid,
+                        String.Format(
+                            CultureInfo.InvariantCulture,
+                            CoreErrorMessages.DefaultRedirectUriIsInvalid,
+                            Constants.DefaultRedirectUri,
+                            "Android"));
                 }
             }
         }
 
         /// <inheritdoc />
-        public string GetRedirectUriAsString(Uri redirectUri, RequestContext requestContext)
+        public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
-        public string GetDefaultRedirectUri(string correlationId)
+        public string GetDefaultRedirectUri(string clientId)
         {
-            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, correlationId);
+            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
         }
 
         public string GetProductName()
@@ -160,7 +161,7 @@ namespace Microsoft.Identity.Core
         public string GetDeviceId()
         {
             return Android.Provider.Settings.Secure.GetString(
-                Android.App.Application.Context.ContentResolver, 
+                Android.App.Application.Context.ContentResolver,
                 Android.Provider.Settings.Secure.AndroidId);
         }
 
