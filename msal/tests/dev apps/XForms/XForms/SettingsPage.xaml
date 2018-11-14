@@ -31,8 +31,16 @@
             </Frame>
 
             <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
-                <Label Text="B2C" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
-                <Switch x:Name="b2cSwitch" Toggled="OnB2cSwitchToggled"/>
+                <Picker x:Name="b2cAuthorityPicker" Title="Select a B2C authority" SelectedIndexChanged="OnPickerSelectedIndexChanged" AutomationId="b2cAuthorityPicker">
+                    <Picker.ItemsSource>
+                        <x:Array Type="{x:Type x:String}">
+                            <x:String>login.microsoftonline.com</x:String>
+                            <x:String>b2clogin.com</x:String>
+                            <x:String>non-b2c authority</x:String>
+                        </x:Array>
+                    </Picker.ItemsSource>
+                </Picker>
+                <Label Text="{Binding Source={x:Reference b2cAuthorityPicker}, Path=SelectedItem}" />
             </StackLayout>
 
             <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">

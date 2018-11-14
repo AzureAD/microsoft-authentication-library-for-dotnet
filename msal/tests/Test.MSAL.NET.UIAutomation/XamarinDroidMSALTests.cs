@@ -104,12 +104,42 @@ namespace Test.MSAL.UIAutomation
         }
 
         /// <summary>
+        /// B2C aquire token flow with local account and login.microsoftonline.com
+        /// </summary>
+        [Test]
+        public void B2CLocalAccountAcquireTokenTest()
+        {
+            _msalMobileTestHelper.isB2CloginAuthority = false;
+            _msalMobileTestHelper.B2CLocalAccountAcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithB2CUser());
+        }
+
+        /// <summary>
+        /// B2C aquire token flow with local account and b2clogin.com authority
+        /// </summary>
+        [Test]
+        [Ignore("Related to this MSAL issue: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/686")]
+        public void B2CLocalAccountB2CLoginAuthorityAcquireTokenTest()
+        {
+            _msalMobileTestHelper.isB2CloginAuthority = true;
+            _msalMobileTestHelper.B2CLocalAccountAcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithB2CUser());
+        }
+
+        /// <summary>
         /// Runs through the standard acquire token silent flow
         /// </summary>
         [Test]
         public void AcquireTokenSilentTest()
         {
             _msalMobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetLabResponseWithDefaultUser());
+        }
+
+        /// <summary>
+        /// B2C acquire token flow with local account and silent call
+        /// </summary>
+        [Test]
+        public void B2CLocalAccountAcquireTokenSilentTest()
+        {
+            _msalMobileTestHelper.B2CLocalAccountAcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetLabResponseWithB2CUser());
         }
 
         /// <summary>

@@ -36,7 +36,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         public bool? IsMfaUser { get; set; }
         public ISet<string> Licenses { get; set; }
         public bool? IsFederatedUser { get; set; }
-        public UserType? IsUserType { get; set; }
+        public UserType? UserType { get; set; }
         public bool? IsExternalUser { get; set; }
     }
 }

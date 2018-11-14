@@ -196,8 +196,8 @@ namespace XForms
                     var loginHint = LoginHintEntry.Text.Trim();
                     res =
                         await App.MsalPublicClient.AcquireTokenAsync(
-                            GetScopes(), 
-                            loginHint, 
+                            GetScopes(),
+                            loginHint,
                             GetUIBehavior(),
                             GetExtraQueryParams(),
                             App.UIParent).ConfigureAwait(true);
@@ -206,10 +206,10 @@ namespace XForms
                 {
                     var user = getUserByDisplayableId(GetSelectedUserId());
                     res = await App.MsalPublicClient.AcquireTokenAsync(
-                        GetScopes(), 
-                        user, 
+                        GetScopes(),
+                        user,
                         GetUIBehavior(),
-                        GetExtraQueryParams(), 
+                        GetExtraQueryParams(),
                         App.UIParent).ConfigureAwait(true);
                 }
 
@@ -236,7 +236,7 @@ namespace XForms
                 acquireResponseTitleLabel.Text = EmptyResult;
                 AuthenticationResult res =
                         await App.MsalPublicClient.AcquireTokenWithDeviceCodeAsync(
-                            GetScopes(), 
+                            GetScopes(),
                             GetExtraQueryParams(),
                             dcr =>
                             {

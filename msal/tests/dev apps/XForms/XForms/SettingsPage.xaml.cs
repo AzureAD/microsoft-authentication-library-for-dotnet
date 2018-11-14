@@ -94,13 +94,26 @@ namespace XForms
             App.ValidateAuthority = args.Value;
         }
 
-        private void OnB2cSwitchToggled(object sender, ToggledEventArgs args)
+        private void InitPublicClientAndRefreshView()
         {
-            if (b2cSwitch.IsToggled)
+            App.InitPublicClient();
+            RefreshView();
+        }
+        
+        private void OnPickerSelectedIndexChanged(object sender, EventArgs args)
+        {            
+            var selectedB2CAuthority = (Picker)sender;
+            int selectedIndex = selectedB2CAuthority.SelectedIndex;
+
+            if (selectedIndex == 0)
             {
                 App.Authority = App.B2cAuthority;
-                App.Scopes = App.B2cScopes;
-                App.ClientId = App.B2cClientId;
+                CreateB2CAppSettings();
+            }
+            else if (selectedIndex == 1)
+            {
+                App.Authority = App.B2CLoginAuthority;
+                CreateB2CAppSettings();
             }
             else
             {
@@ -108,8 +121,15 @@ namespace XForms
                 App.Scopes = App.DefaultScopes;
                 App.ClientId = App.DefaultClientId;
             }
-            App.InitPublicClient();
-            RefreshView();
+
+            InitPublicClientAndRefreshView();
+        }
+
+        private void CreateB2CAppSettings()
+        {
+            App.Scopes = App.B2cScopes;
+            App.ClientId = App.B2cClientId;
+            App.RedirectUriOnAndroid = App.RedirectUriB2C;
         }
     }
 }

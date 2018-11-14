@@ -51,6 +51,11 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
                         break;
                 }
             }
+            else if (user.UserType == UserType.B2C)
+            {
+                PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
+                SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+            }
             else
             {
                 PasswordInputId = CoreUiTestConstants.WebPasswordID;

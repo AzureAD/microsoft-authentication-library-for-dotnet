@@ -30,6 +30,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
     public enum UserType
     {
         Member = 0,
-        Guest = 1
+        Guest = 1,
+        B2C = 2
     }
 }

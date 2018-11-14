@@ -85,6 +85,12 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         /// <returns>The text value of the element</returns>
         string GetText(string textOrId);
 
+        /// <summary>
+        /// Checks if a switch has changed state
+        /// </summary>
+        /// <param name="automationID">ID of the element to tap</param>
+        void SetSwitchState(string automationID);
+
         IApp Application { get; set; }
 
         /// <summary>

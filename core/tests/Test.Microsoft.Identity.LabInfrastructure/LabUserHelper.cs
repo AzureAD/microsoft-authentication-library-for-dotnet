@@ -60,6 +60,17 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             }
         }
 
+        public static UserQueryParameters B2CUserQuery
+        {
+            get
+            {
+                return new UserQueryParameters
+                {
+                    UserType = UserType.B2C
+                };
+            }
+        }
+
         public static LabResponse GetLabUserData(UserQueryParameters query)
         {
             var user = _labService.GetLabResponse(query);
@@ -80,6 +91,12 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             return _defaultLabResponse;
         }
 
+        public static LabResponse GetLabResponseWithB2CUser()
+        {
+            var user = B2CUserQuery;
+            return GetLabUserData(user);
+        }
+
         public static LabResponse GetLabResponseWithADFSUser(FederationProvider federationProvider, bool federated = true)
         {
             var user = DefaultUserQuery;
@@ -91,7 +108,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
 
         public static string GetUserPassword(LabUser user)
         {
-            if (String.IsNullOrWhiteSpace(user.CredentialUrl))
+            if (string.IsNullOrWhiteSpace(user.CredentialUrl))
             {
                 throw new InvalidOperationException("Error: CredentialUrl is not set on user. Password retrieval failed.");
             }

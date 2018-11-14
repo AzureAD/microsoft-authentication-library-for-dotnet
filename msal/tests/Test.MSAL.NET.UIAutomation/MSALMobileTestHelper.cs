@@ -42,6 +42,7 @@ namespace Test.MSAL.UIAutomation
     public class MSALMobileTestHelper
     {
         public CoreMobileTestHelper CoreMobileTestHelper { get; set; } = new CoreMobileTestHelper();
+        public bool isB2CloginAuthority;
 
         /// <summary>
         /// Runs through the standard acquire token flow, using the login prompt behavior
@@ -68,6 +69,45 @@ namespace Test.MSAL.UIAutomation
 
             //acquire token for 2nd resource with refresh token
             SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UIBehaviorLogin);
+            controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
+            CoreMobileTestHelper.VerifyResult(controller);
+        }
+
+        /// <summary>
+        /// Runs through the B2C acquire token flow
+        /// </summary>
+        public void B2CLocalAccountAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse)
+        {
+            PrepareForAuthentication(controller);
+            if (isB2CloginAuthority)
+            {
+                SetB2CInputDataForB2CloginAuthority(controller);
+            }
+            else
+            {
+                SetB2CInputData(controller);
+            }
+
+            PerformB2CLocalAccountSignInFlow(controller, labResponse.User);
+            CoreMobileTestHelper.VerifyResult(controller);
+        }
+
+        /// <summary>
+        /// Runs through the B2C acquire token silent flow
+        /// </summary>
+        /// <param name="controller">The test framework that will execute the test interaction</param>
+        public void B2CLocalAccountAcquireTokenSilentTestHelper(ITestController controller, LabResponse labResponse)
+        {
+            //acquire token for 1st resource   
+            isB2CloginAuthority = false;
+            B2CLocalAccountAcquireTokenInteractiveTestHelper(controller, labResponse);
+            CoreMobileTestHelper.VerifyResult(controller);
+
+            //select user
+            controller.Tap(CoreUiTestConstants.SelectUser);
+            //b2c does not return userinfo in token response
+            controller.Tap(CoreUiTestConstants.UserMissingFromResponse);
+            //acquire token silent with selected user
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
             CoreMobileTestHelper.VerifyResult(controller);
         }
@@ -119,6 +159,22 @@ namespace Test.MSAL.UIAutomation
             SetUiBehavior(controller, uiBehavior);
         }
 
+        private void SetB2CInputData(ITestController controller)
+        {
+            controller.Tap(CoreUiTestConstants.SettingsPageID);
+
+            // Select login.microsoftonline.com for authority
+            SetAuthority(controller, CoreUiTestConstants.MicrosoftOnlineAuthority);
+        }
+
+        private void SetB2CInputDataForB2CloginAuthority(ITestController controller)
+        {
+            controller.Tap(CoreUiTestConstants.SettingsPageID);
+
+            // Select b2clogin.com for authority
+            SetAuthority(controller, CoreUiTestConstants.B2CLoginAuthority);
+        }
+
         public void SetUiBehavior(ITestController controller, string promptBehavior)
         {
             // Enter Prompt Behavior
@@ -139,6 +195,29 @@ namespace Test.MSAL.UIAutomation
             {
                 throw new InvalidOperationException("Test Setup Error: invalid uiBehavior " + uiBehavior);
             }
+        }
+
+        public void SetAuthority(ITestController controller, string authority)
+        {
+            // Select authority
+            controller.Tap(CoreUiTestConstants.AuthorityPickerID);
+            controller.Tap(authority);
+        }
+
+        public void PerformB2CLocalAccountSignInFlow(ITestController controller, LabUser user)
+        {
+            UserInformationFieldIds userInformationFieldIds = CoreMobileTestHelper.DetermineUserInformationFieldIds(user);
+
+            controller.Tap(CoreUiTestConstants.AcquirePageID);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+
+            controller.EnterText(CoreUiTestConstants.WebUPNB2CLocalInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+
+            controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
+
+            controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
     }
 }

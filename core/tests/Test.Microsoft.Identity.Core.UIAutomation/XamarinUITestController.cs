@@ -121,7 +121,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
                 defaultPostTimeout);
         }
 
-
         public AppResult[] WaitForXamlElement(string elementID, TimeSpan? timeout = null)
         {
             if (timeout == null)
@@ -198,10 +197,8 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
             }
 
-
             DismissKeyboard();
         }
-
        
         public void DismissKeyboard()
         {
@@ -214,6 +211,21 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             return Application.Query(x => x.Marked(elementID)).FirstOrDefault().Text;
         }
 
+        /// <summary>
+        /// Checks if a switch has changed state
+        /// </summary>
+        /// <param name="automationID"></param>
+        public void SetSwitchState(string automationID)
+        {
+            if (Application.Query(c => c.Marked(automationID).Invoke("isChecked").Value<bool>()).First() == false)
+            {
+                Tap(automationID);
+                Application.WaitFor(() =>
+                {
+                    return Application.Query(c => c.Marked(automationID).Invoke("isChecked").Value<bool>()).First() == true;
+                });
+            }
+        }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string text)
         {

@@ -38,8 +38,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
     {
         public void PerformSignInFlow(ITestController controller, LabUser user)
         {
-            UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds();
-            userInformationFieldIds.DetermineFieldIds(user);
+            UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenID);
@@ -51,14 +50,19 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             //i0118 = password text field
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
-
-          
         }
 
         public void PerformSignInFlowWithoutUI(ITestController controller)
         {
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenID);
+        }
+
+        public UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
+        {
+            UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds();
+            userInformationFieldIds.DetermineFieldIds(user);
+            return userInformationFieldIds;
         }
 
         public void VerifyResult(ITestController controller)

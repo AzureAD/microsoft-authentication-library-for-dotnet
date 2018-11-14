@@ -39,16 +39,18 @@ namespace XForms
         public static PublicClientApplication MsalPublicClient;
         public static UIParent UIParent { get; set; }
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
-        public const string B2cClientId = "750a8822-a6d4-4127-bc0b-efbfacccbc28";
+        public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
         public const string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
-        public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
+        public static string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
+        public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
-        public const string B2cAuthority = "https://login.microsoftonline.com/tfp/panwariusb2c.onmicrosoft.com/B2C_1_signup_signin/";
+        public const string B2cAuthority = "https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
+        public const string B2CLoginAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
 
         public static string[] DefaultScopes = {"User.Read"};
-        public static string[] B2cScopes = { "https://sometenant.onmicrosoft.com/some/scope" };
+        public static string[] B2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
 
         public const bool DefaultValidateAuthority = true;
 
