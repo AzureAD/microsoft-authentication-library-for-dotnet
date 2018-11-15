@@ -100,35 +100,6 @@ namespace Test.Microsoft.Identity.Core.Unit
                 PlatformProxyFactory.GetPlatformProxy().GetEnvironmentVariable(""));
         }
 
-        [TestMethod]
-        public void ValidateRedirectUri_Throws()
-        {
-            // Arrange
-            var proxy = PlatformProxyFactory.GetPlatformProxy();
-
-
-            // Act Assert
-            Assert.ThrowsException<ArgumentNullException>(
-                () => proxy.ValidateRedirectUri(null));
-
-            // Act Assert
-            Assert.ThrowsException<ArgumentException>(
-               () => proxy.ValidateRedirectUri(new Uri("https://redirectUri/uri#fragment")), 
-               "Validatation should fail if uri has a fragment, i.e. #foo");
-        }
-
-        [TestMethod]
-        public void ValidateRedirectUri_ReturnsRedirectUri()
-        {
-            // Arrange
-            var proxy = PlatformProxyFactory.GetPlatformProxy();
-            Uri inputUri = new Uri("http://redirectUri");
-
-            // Act
-            proxy.ValidateRedirectUri(inputUri);
-
-            // Assert
-            // no exception is thrown
-        }
+      
     }
 }

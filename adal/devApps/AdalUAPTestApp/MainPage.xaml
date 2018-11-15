@@ -15,8 +15,9 @@
         <Button Content="Acquire Token with Client Credential" HorizontalAlignment="Center" Margin="0,304,0,0" VerticalAlignment="Top" Click="AcquireTokenClientCred_Click"/>
         <Button Content="Clear Cache" HorizontalAlignment="Center" Margin="0,354,0,0" VerticalAlignment="Top" Click="ClearCache"/>
         <Button Content="Show Cache Size" HorizontalAlignment="Center" Margin="0,404,0,0" VerticalAlignment="Top" Click="ShowCacheCount"/>
-        <TextBlock HorizontalAlignment="Center" Margin="0,469,0,0" Height="450" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
+        <TextBlock HorizontalAlignment="Center" Margin="0,563,0,0" Height="356" Width="800" TextWrapping="Wrap" Text="" VerticalAlignment="Top" TextAlignment="Center" Name="AccessToken"/>
         <Button Content="Acquire Token Integrated Windows Auth" HorizontalAlignment="Center" Margin="0,200,0,0" VerticalAlignment="Top" Click="AcquireTokenIWA_Click"/>
+        <ComboBox PlaceholderText="RedirectURI" x:Name="redirectUriCbx" ItemsSource="{x:Bind _redirectUris}" HorizontalAlignment="Center" Margin="0,468,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 

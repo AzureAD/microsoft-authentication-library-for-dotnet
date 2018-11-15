@@ -81,6 +81,7 @@ namespace Microsoft.Identity.Core
         /// RedirectUri validation failed.
         /// </summary>
         public const string DefaultRedirectUriIsInvalid = "redirect_uri_validation_failed";
+        internal const string NoRedirectUri = "no_redirect_uri";
 
 #if iOS
         public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";

@@ -28,6 +28,7 @@
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.Web.Http;
@@ -41,13 +42,33 @@ namespace UAPTestApp
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        private const string ClientId = "cd01dc27-9d3c-4812-beda-8229d5d4a8d5";
-
-        private const string ReturnUri = "https://MyDirectorySearcherApp";
+        private const string ClientId = "9058d700-ccd7-4dd4-a029-aec31995add0";
+        private const string NullRedirectUri = "None - WEB redirect uri";
+        private ObservableCollection<string> _redirectUris = new ObservableCollection<string>();
+        
 
         public MainPage()
         {
             this.InitializeComponent();
+
+            _redirectUris.Add(NullRedirectUri);
+            _redirectUris.Add("https://MyDirectorySearcherApp");
+        }
+
+        private Uri GetRedirectUri()
+        {
+            if (redirectUriCbx.SelectedValue == null)
+            {
+                return null;
+            }
+
+            string selectedRedirectUri = redirectUriCbx.SelectedValue.ToString();
+            if (selectedRedirectUri == NullRedirectUri)
+            {
+                return null;
+            }
+
+            return new Uri(selectedRedirectUri);
         }
 
         private async void AccessTokenButton_Click(object sender, RoutedEventArgs e)
@@ -55,10 +76,14 @@ namespace UAPTestApp
             this.AccessToken.Text = string.Empty;
             AuthenticationContext ctx = new AuthenticationContext("https://login.microsoftonline.com/common");
 
+            
+
             try
             {
-                AuthenticationResult result = await ctx.AcquireTokenAsync("https://graph.windows.net",
-                    ClientId, new Uri(ReturnUri),
+                AuthenticationResult result = await ctx.AcquireTokenAsync(
+                    "https://graph.windows.net",
+                    ClientId, 
+                    GetRedirectUri(),
                     new PlatformParameters(PromptBehavior.Auto, false)).ConfigureAwait(false);
 
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,

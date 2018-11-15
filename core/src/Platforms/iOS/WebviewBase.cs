@@ -111,5 +111,7 @@ namespace Microsoft.Identity.Core.UI
                 }
             }
         }
+
+        public abstract void ValidateRedirectUri(Uri redirectUri);
     }
 }

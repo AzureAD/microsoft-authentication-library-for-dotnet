@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.UI;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -57,6 +58,11 @@ namespace Test.ADAL.NET.Common.Mocks
             }
 
             return await Task.Factory.StartNew(() => this.MockResult).ConfigureAwait(false);
+        }
+
+        public void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri);
         }
     }
 }

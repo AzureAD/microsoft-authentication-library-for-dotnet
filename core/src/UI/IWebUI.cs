@@ -33,5 +33,12 @@ namespace Microsoft.Identity.Core.UI
     internal interface IWebUI
     {
         Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
+
+        /// <summary>
+        /// Extra validations on the redirect uri, for example system web views cannot work with the urn:oob... uri because 
+        /// there is no way of knowing which app to get back to.
+        /// Throws if uri is invalid
+        /// </summary>
+        void ValidateRedirectUri(Uri redirectUri);
     }
 }

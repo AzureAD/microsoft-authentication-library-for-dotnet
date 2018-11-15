@@ -100,26 +100,6 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri)
-        {
-            RedirectUriCommon.Validate(redirectUri);
-
-            if (_isMsal)
-            {
-                if (Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw CoreExceptionFactory.Instance.GetClientException(
-                        CoreErrorCodes.DefaultRedirectUriIsInvalid,
-                        String.Format(
-                            CultureInfo.InvariantCulture,
-                            CoreErrorMessages.DefaultRedirectUriIsInvalid,
-                            Constants.DefaultRedirectUri,
-                            "Android"));
-                }
-            }
-        }
-
-        /// <inheritdoc />
         public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
@@ -128,7 +108,9 @@ namespace Microsoft.Identity.Core
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string clientId)
         {
-            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
+            return _isMsal ?
+                string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId) :
+                null; // Adal does not specify a default
         }
 
         public string GetProductName()

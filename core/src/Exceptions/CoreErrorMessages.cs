@@ -109,9 +109,11 @@ namespace Microsoft.Identity.Core
         public const string AndroidActivityNotFound = "The Activity cannot be found to launch the given Intent. To ensure authentication, a browser with custom tab support " +
             "is recommended. See https://aka.ms/msal-net-system-browsers for more details on using system browser on Android.";
 
-        public const string DefaultRedirectUriIsInvalid = "Default redirect Uri {0} cannot be used on {1} platform";
+        public const string DefaultRedirectUriIsInvalid = "The OAuth2 redirect uri {0} should not be used with the system browser, because the operating system cannot go back to the app. Consider using the default redirect uri for this platform. See https://aka.ms/msal-client-apps for more details.";
 
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
+
+        public const string NoRedirectUri = "No redirectUri was configured. ADAL does not provide any defaults.";
 
     }
 }

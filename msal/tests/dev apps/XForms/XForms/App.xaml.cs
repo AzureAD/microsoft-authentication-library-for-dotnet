@@ -41,8 +41,8 @@ namespace XForms
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
+        public static string RedirectUriOnAndroid = Microsoft.Identity.Core.Constants.DefaultRedirectUri; // will not work with embedded browser
         public const string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
-        public static string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
@@ -67,7 +67,7 @@ namespace XForms
 
             InitPublicClient();
 
-            Logger.LogCallback = delegate(LogLevel level, string message, bool containsPii)
+            Logger.LogCallback = delegate (LogLevel level, string message, bool containsPii)
             {
                 Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, containsPii); });
             };
@@ -78,6 +78,8 @@ namespace XForms
         public static void InitPublicClient()
         {
             MsalPublicClient = new PublicClientApplication(ClientId, Authority);
+
+            // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)
             {
                 case "iOS":
@@ -87,7 +89,7 @@ namespace XForms
                     MsalPublicClient.RedirectUri = RedirectUriOnAndroid;
                     break;
             }
-            
+
             MsalPublicClient.ValidateAuthority = ValidateAuthority;
         }
 

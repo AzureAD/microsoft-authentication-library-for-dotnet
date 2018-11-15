@@ -54,11 +54,6 @@ namespace Microsoft.Identity.Core
         string GetDeviceId();
 
         /// <summary>
-        /// Throws if the redirect uri is not valid
-        /// </summary>
-        void ValidateRedirectUri(Uri redirectUri);
-
-        /// <summary>
         /// Get the redirect Uri as string, or the a broker specified value
         /// </summary>        
         string GetBrokerOrRedirectUri(Uri redirectUri);

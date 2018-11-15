@@ -33,6 +33,7 @@ using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.UI;
 using Windows.ApplicationModel.Core;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 {
@@ -133,5 +134,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
 
             return result;
         }
+
+        public void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+        }
+
     }
 }

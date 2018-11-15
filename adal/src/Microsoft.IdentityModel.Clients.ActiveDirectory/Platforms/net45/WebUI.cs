@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.UI;
 using System;
 using System.Net.NetworkInformation;
@@ -106,5 +107,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
         }
 
         protected abstract AuthorizationResult OnAuthenticate();
+
+        public void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+        }
     }
 }

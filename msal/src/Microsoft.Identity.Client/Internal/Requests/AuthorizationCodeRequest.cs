@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.AuthorizationCode));
             }
 
-            RedirectUriCommon.Validate(authenticationRequestParameters.RedirectUri);
+            RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
         }
 
         protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)

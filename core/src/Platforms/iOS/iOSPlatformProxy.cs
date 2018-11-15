@@ -86,26 +86,7 @@ namespace Microsoft.Identity.Core
             return UIDevice.CurrentDevice.Model;
         }
 
-        /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri)
-        {
-            RedirectUriCommon.Validate(redirectUri);
-
-            if (_isMsal)
-            {
-                if (Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw CoreExceptionFactory.Instance.GetClientException(
-                        CoreErrorCodes.DefaultRedirectUriIsInvalid,
-                        String.Format(
-                            CultureInfo.InvariantCulture,
-                            CoreErrorMessages.DefaultRedirectUriIsInvalid,
-                            Constants.DefaultRedirectUri,
-                            "iOS"));
-                }
-            }
-        }
-
+       
         /// <inheritdoc />
         public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
@@ -120,7 +101,7 @@ namespace Microsoft.Identity.Core
                     CultureInfo.InvariantCulture,
                     IosDefaultRedirectUriTemplate,
                     clientId)
-                : Constants.DefaultRedirectUri;
+                : null; // ADAL does not provide a default
         }
 
         public string GetProductName()

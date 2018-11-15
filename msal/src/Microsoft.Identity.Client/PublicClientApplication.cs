@@ -491,13 +491,6 @@ namespace Microsoft.Identity.Client
             var requestParams = CreateRequestParameters(authority, scopes, user, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
-#if iOS || ANDROID
-            if (!parent.CoreUIParent.UseEmbeddedWebview)
-            {
-                PlatformProxyFactory.GetPlatformProxy().ValidateRedirectUri(requestParams.RedirectUri);
-            }
-#endif
-
             var handler = new InteractiveRequest(
                 HttpManager,
                 CryptographyManager,

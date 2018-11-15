@@ -23,6 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using Microsoft.Identity.Core.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,5 +55,7 @@ namespace Microsoft.Identity.Core.UI
         }
 
         public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
+
+        public abstract void ValidateRedirectUri(Uri redirectUri);
     }
 }

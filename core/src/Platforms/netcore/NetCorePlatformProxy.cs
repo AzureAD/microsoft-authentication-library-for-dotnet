@@ -90,12 +90,6 @@ namespace Microsoft.Identity.Core
         }
 
         /// <inheritdoc />
-        public void ValidateRedirectUri(Uri redirectUri)
-        {
-            RedirectUriCommon.Validate(redirectUri);
-        }
-
-        /// <inheritdoc />
         public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
@@ -104,7 +98,9 @@ namespace Microsoft.Identity.Core
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string clientId)
         {
-            return Constants.DefaultRedirectUri;
+            return _isMsal ?
+             Constants.DefaultRedirectUri :
+             null; // Adal does not specify a default
         }
 
         public string GetProductName()

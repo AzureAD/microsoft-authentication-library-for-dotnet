@@ -32,6 +32,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.Internal.UI
                         // In MTA case, AggregateException is two layer deep, so checking the InnerException for that.
                         if (innerException is AggregateException)
                         {
-                            innerException = ((AggregateException) innerException).InnerExceptions[0];
+                            innerException = ((AggregateException)innerException).InnerExceptions[0];
                         }
 
                         throw innerException;
@@ -106,5 +107,10 @@ namespace Microsoft.Identity.Client.Internal.UI
         }
 
         protected abstract AuthorizationResult OnAuthenticate();
+
+        public void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+        }
     }
 }

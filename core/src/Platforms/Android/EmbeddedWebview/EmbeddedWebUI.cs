@@ -29,6 +29,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 {
@@ -63,6 +64,11 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
 
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
             return authorizationResult;
+        }
+
+        public override void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
         }
     }
 }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Foundation;
+using Microsoft.Identity.Core.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -89,5 +90,11 @@ namespace Microsoft.Identity.Core.UI.EmbeddedWebview
         {
             SetAuthorizationResult(result);
         }
+
+        public override void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+        }
+
     }
 }

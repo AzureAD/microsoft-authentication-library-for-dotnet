@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using SafariServices;
 using UIKit;
 using System.Threading;
+using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core.UI.SystemWebview
 {
@@ -143,6 +144,11 @@ namespace Microsoft.Identity.Core.UI.SystemWebview
                 authorizationResult = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                 returnedUriReady.Release();
             }
-        }       
+        }
+
+        public override void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: true);
+        }
     }
 }
