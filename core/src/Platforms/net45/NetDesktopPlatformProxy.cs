@@ -215,14 +215,17 @@ namespace Microsoft.Identity.Core
             return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
         }
 
+        private static readonly Lazy<string> DeviceId = new Lazy<string>(
+            () => NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
+                                  .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault());
+
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         public string GetDeviceId()
         {
-            return  NetworkInterface.GetAllNetworkInterfaces().Where(nic => nic.OperationalStatus == OperationalStatus.Up)
-                .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault();
+            return DeviceId.Value;
         }
 
         /// <inheritdoc />
