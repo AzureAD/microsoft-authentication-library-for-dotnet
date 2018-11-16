@@ -61,17 +61,17 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         public AcquireTokenInteractiveHandler(
             RequestData requestData, 
             Uri redirectUri, 
-            IPlatformParameters parameters,
+            IPlatformParameters platformParameters,
             UserIdentifier userId, 
             string extraQueryParameters, 
-            IWebUI webUI, 
+            //IWebUI webUI, 
             string claims)
             : base(requestData)
         {
             this.redirectUri = ComputeAndValidateRedirectUri(redirectUri, this.ClientKey?.ClientId);
             this.redirectUriRequestParameter = PlatformProxyFactory.GetPlatformProxy().GetBrokerOrRedirectUri(this.redirectUri);
 
-            this.authorizationParameters = parameters;
+            this.authorizationParameters = platformParameters;
             this.userId = userId ?? throw new ArgumentNullException(nameof(userId), AdalErrorMessage.SpecifyAnyUser);
 
             if (!string.IsNullOrEmpty(extraQueryParameters) && extraQueryParameters[0] == '&')
@@ -80,7 +80,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
 
             this.extraQueryParameters = extraQueryParameters;
-            this.webUi = webUI;
+            this.webUi = CreateWebUIOrNull(platformParameters);
             this.UniqueId = userId.UniqueId;
             this.DisplayableId = userId.DisplayableId;
             this.UserIdentifierType = userId.Type;
@@ -95,7 +95,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             else
             {
                 var platformInformation = new PlatformInformation();
-                this.LoadFromCache = (requestData.TokenCache != null && parameters != null && platformInformation.GetCacheLoadPolicy(parameters));
+                this.LoadFromCache = (requestData.TokenCache != null && platformParameters != null && platformInformation.GetCacheLoadPolicy(platformParameters));
             }
 
             this.brokerParameters[BrokerParameter.Force] = "NO";
@@ -113,6 +113,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             this.brokerParameters[BrokerParameter.ExtraQp] = extraQueryParameters;
             this.brokerParameters[BrokerParameter.Claims] = claims;
             brokerHelper.PlatformParameters = authorizationParameters;
+        }
+
+        private IWebUI CreateWebUIOrNull(IPlatformParameters parameters)
+        {
+            if (parameters == null)
+            {
+                return null;
+            }
+
+            PlatformParameters parametersObj = parameters as PlatformParameters;
+            if (parametersObj == null)
+            {
+                throw new ArgumentException("Objects implementing IPlatformParameters should be of type PlatformParameters");
+            }
+
+            return WebUIFactoryProvider.WebUIFactory.CreateAuthenticationDialog(
+                parametersObj.GetCoreUIParent(), 
+                base.RequestContext);
         }
 
         private static Uri ComputeAndValidateRedirectUri(Uri redirectUri, string clientId)

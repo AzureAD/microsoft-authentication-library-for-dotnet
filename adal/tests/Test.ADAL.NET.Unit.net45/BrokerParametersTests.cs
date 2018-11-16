@@ -77,9 +77,13 @@ namespace Test.ADAL.NET.Unit
         [Description("Test setting of brokerParameters by AcquireTokenInteractiveHandler constructor")]
         public void AcquireTokenInteractiveHandlerConstructor_InitializeBrokerParameters()
         {
-            var acquireTokenInteractiveHandler = new AcquireTokenInteractiveHandler(_requestData,
-                AdalTestConstants.DefaultRedirectUri, null, UserIdentifier.AnyUser,
-                ExtraQueryParameters, null, Claims);
+            var acquireTokenInteractiveHandler = new AcquireTokenInteractiveHandler(
+                _requestData,
+                AdalTestConstants.DefaultRedirectUri, 
+                null, 
+                UserIdentifier.AnyUser,
+                ExtraQueryParameters, 
+                Claims);
 
             Assert.AreEqual(11, acquireTokenInteractiveHandler.brokerParameters.Count);
 

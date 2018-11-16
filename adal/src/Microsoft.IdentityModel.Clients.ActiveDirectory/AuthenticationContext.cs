@@ -261,10 +261,24 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
             IPlatformParameters parameters,
             UserIdentifier userId, string extraQueryParameters, string claims)
         {
-            return await this.AcquireTokenWithClaimsCommonAsync(resource, new ClientKey(clientId), redirectUri,
-                    parameters,
-                    userId, extraQueryParameters, this.CreateWebAuthenticationDialog((PlatformParameters)parameters), claims)
-                .ConfigureAwait(false);
+            RequestData requestData = new RequestData
+            {
+                Authenticator = this.Authenticator,
+                TokenCache = this.TokenCache,
+                Resource = resource,
+                ClientKey = new ClientKey(clientId),
+                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
+            };
+
+            var handler = new AcquireTokenInteractiveHandler(
+                requestData, 
+                redirectUri, 
+                parameters, 
+                userId,
+                extraQueryParameters, 
+                claims);
+
+            return await handler.RunAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -371,7 +385,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
             var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, null, userId,
-                extraQueryParameters, null, claims);
+                extraQueryParameters, claims);
             return await handler.CreateAuthorizationUriAsync(this.CorrelationId).ConfigureAwait(false);
         }
 
@@ -424,30 +438,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
 
             var handler = new AcquireTokenOnBehalfHandler(requestData, userAssertion);
             return await handler.RunAsync().ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenWithClaimsCommonAsync(string resource, ClientKey clientKey,
-            Uri redirectUri, IPlatformParameters parameters,
-            UserIdentifier userId, string extraQueryParameters, IWebUI webUI, string claims)
-        {
-            RequestData requestData = new RequestData
-            {
-                Authenticator = this.Authenticator,
-                TokenCache = this.TokenCache,
-                Resource = resource,
-                ClientKey = clientKey,
-                ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled
-            };
-
-            var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, parameters, userId,
-                extraQueryParameters, webUI, claims);
-
-            return await handler.RunAsync().ConfigureAwait(false);
-        }
-
-        internal IWebUI CreateWebAuthenticationDialog(PlatformParameters parameters)
-        {
-            return WebUIFactoryProvider.WebUIFactory.CreateAuthenticationDialog(parameters.GetCoreUIParent(), null);
         }
 
         internal async Task<AuthenticationResult> AcquireTokenCommonAsync(
@@ -516,7 +506,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
                 ExtendedLifeTimeEnabled = this.ExtendedLifeTimeEnabled,
             };
             var handler = new AcquireTokenInteractiveHandler(requestData, redirectUri, parameters, userId,
-                extraQueryParameters, this.CreateWebAuthenticationDialog((PlatformParameters)parameters), claims);
+                extraQueryParameters, claims);
             return await handler.RunAsync().ConfigureAwait(false);
         }
 

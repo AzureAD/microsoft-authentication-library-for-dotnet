@@ -915,8 +915,6 @@ namespace Test.ADAL.NET.Unit
             _context.TokenCache.Clear();
         }
 
-      
-
         [TestMethod]
         [Description("Positive Test for AcquireTokenOnBehalf with client credential")]
         [DeploymentItem("Resources\\valid_cert.pfx")]

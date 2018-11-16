@@ -39,7 +39,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Platform
     {
         protected Uri RequestUri { get; private set; }
 
-        protected RequestContext context;
+        protected RequestContext context { get; set;}
 
         protected Uri CallbackUri { get; private set; }
 
