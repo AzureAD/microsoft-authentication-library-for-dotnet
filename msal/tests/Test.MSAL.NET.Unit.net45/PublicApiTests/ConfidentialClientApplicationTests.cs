@@ -70,9 +70,16 @@ namespace Test.MSAL.NET.Unit
         public void MockConfidentialClientApplication_AcquireToken()
         {
             // Setup up a confidential client application that returns a dummy result
-            var mockResult = Substitute.For<AuthenticationResult>();
-            mockResult.IdToken.Returns("id token");
-            mockResult.Scopes.Returns(new string[] { "scope1", "scope2" });
+            var mockResult = new AuthenticationResult(
+                accessToken: "",
+                isExtendedLifeTimeToken: false,
+                uniqueId: "",
+                expiresOn: DateTimeOffset.Now,
+                extendedExpiresOn: DateTimeOffset.Now, 
+                tenantId: "", 
+                account: null, 
+                idToken: "id token",
+                scopes: new[] { "scope1", "scope2" });
 
             var mockApp = Substitute.For<IConfidentialClientApplication>();
             mockApp.AcquireTokenByAuthorizationCodeAsync("123", null).Returns(mockResult);

@@ -81,9 +81,16 @@ namespace Test.MSAL.NET.Unit
         {
             // Setup up a public client application that returns a dummy result
             // The caller asks for two scopes, but only one is returned
-            var mockResult = Substitute.For<AuthenticationResult>();
-            mockResult.IdToken.Returns("id token");
-            mockResult.Scopes.Returns(new string[] { "scope1" });
+            var mockResult = new AuthenticationResult(
+               accessToken: "",
+               isExtendedLifeTimeToken: false,
+               uniqueId: "",
+               expiresOn: DateTimeOffset.Now,
+               extendedExpiresOn: DateTimeOffset.Now,
+               tenantId: "",
+               account: null,
+               idToken: "id token",
+               scopes: new[] { "scope1"});
 
             var mockApp = Substitute.For<IPublicClientApplication>();
             mockApp.AcquireTokenAsync(new string[] { "scope1", "scope2" }).ReturnsForAnyArgs(mockResult);
