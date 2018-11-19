@@ -30,6 +30,8 @@ using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 
@@ -37,6 +39,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 {
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
+    [DeploymentItem("Resources\\OpenidConfiguration-B2CLogin.json")]
     public class B2CAuthorityTests
     {
         [TestInitialize]
@@ -79,28 +82,79 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
 
         [TestMethod]
         [TestCategory("B2CAuthorityTests")]
-        public void ValidationEnabledNotSupportedTest()
+        public void B2CLoginAuthorityCreateAuthority()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var instance = Authority.CreateAuthority(CoreTestConstants.B2CAuthority, true);
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        Method = HttpMethod.Get,
+                        Url = "https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2CLogin.json")))
+                    });
+
+                Authority instance = Authority.CreateAuthority("https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
-                try
-                {
-                    instance.UpdateCanonicalAuthorityAsync(
-                                    httpManager,
-                                    new TelemetryManager(),
-                                    new RequestContext(null, new TestLogger(Guid.NewGuid(), null))
-                                    ).GetAwaiter().GetResult();
+                Task.Run(
+                    async () =>
+                    {
+                        await instance.ResolveEndpointsAsync(
+                            httpManager,
+                            new TelemetryManager(),
+                            null,
+                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                    }).GetAwaiter().GetResult();
 
-                    Assert.Fail("test should have failed");
-                }
-                catch (ArgumentException exc)
-                {
-                    Assert.IsInstanceOfType(exc, typeof(ArgumentException));
-                    Assert.AreEqual(CoreErrorMessages.UnsupportedAuthorityValidation, exc.Message);
-                }
+                Assert.AreEqual(
+                    "https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",
+                    instance.AuthorizationEndpoint);
+                Assert.AreEqual(
+                    "https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/token",
+                    instance.TokenEndpoint);
+                Assert.AreEqual("https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/v2.0/", instance.SelfSignedJwtAudience);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("B2CAuthorityTests")]
+        public void B2CMicrosoftOnlineCreateAuthority()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        Method = HttpMethod.Get,
+                        Url = "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2C.json")))
+                    });
+
+                Authority instance = Authority.CreateAuthority("https://login.microsoftonline.com/tfp/mytenant.com/my-policy/", true);
+                Assert.IsNotNull(instance);
+                Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
+                Task.Run(
+                    async () =>
+                    {
+                        await instance.ResolveEndpointsAsync(
+                            httpManager,
+                            new TelemetryManager(),
+                            null,
+                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                    }).GetAwaiter().GetResult();
+
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",
+                    instance.AuthorizationEndpoint);
+                Assert.AreEqual(
+                    "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/token",
+                    instance.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
             }
         }
 

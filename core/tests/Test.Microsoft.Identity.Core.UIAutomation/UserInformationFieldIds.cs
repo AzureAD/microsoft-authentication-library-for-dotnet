@@ -51,15 +51,35 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
                         break;
                 }
             }
-            else if (user.UserType == UserType.B2C)
+
+            if(user.UserType == UserType.B2C)
             {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
-                SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+                DetermineB2CFieldIds(user);
             }
+            
             else
             {
                 PasswordInputId = CoreUiTestConstants.WebPasswordID;
                 SignInButtonId = CoreUiTestConstants.WebSubmitID;
+            }
+        }
+
+        private void DetermineB2CFieldIds(LabUser user)
+        {
+            if (user.B2CIdentityProvider == B2CIdentityProvider.Local)
+            {
+                PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
+                SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+            }
+            if (user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
+            {
+                PasswordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
+                SignInButtonId = CoreUiTestConstants.B2CFacebookSubmitID;
+            }
+            if (user.B2CIdentityProvider == B2CIdentityProvider.Google)
+            {
+                PasswordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
+                SignInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
             }
         }
     }

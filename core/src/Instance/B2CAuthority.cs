@@ -46,6 +46,8 @@ namespace Microsoft.Identity.Core.Instance
             : base(authority, validateAuthority)
         {
             AuthorityType = AuthorityType.B2C;
+            // Setting this to false as B2C authorities are customer specific
+            validateAuthority = false;
 
             Uri authorityUri = new Uri(authority);
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
@@ -63,21 +65,24 @@ namespace Microsoft.Identity.Core.Instance
             ITelemetryManager telemetryManager,
             RequestContext requestContext)
         {
-            if (ValidateAuthority && !InTrustedHostList(new Uri(CanonicalAuthority).Host))
+            Uri b2cHost = new Uri(CanonicalAuthority);
+            if (IsB2CLoginHost(b2cHost.Host))
             {
-                throw new ArgumentException(CoreErrorMessages.UnsupportedAuthorityValidation);
+                return;
             }
+            else
+            {
+                var metadata = await AadInstanceDiscovery
+                                 .Instance.GetMetadataEntryAsync(
+                                     httpManager,
+                                     telemetryManager,
+                                     new Uri(CanonicalAuthority),
+                                     ValidateAuthority,
+                                     requestContext)
+                                 .ConfigureAwait(false);
 
-            var metadata = await AadInstanceDiscovery
-                             .Instance.GetMetadataEntryAsync(
-                                 httpManager,
-                                 telemetryManager,
-                                 new Uri(GetCanonicalAuthorityB2C()),
-                                 ValidateAuthority,
-                                 requestContext)
-                             .ConfigureAwait(false);
-
-            CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
+                CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
+            }
         }
 
         private string GetCanonicalAuthorityB2C()
@@ -88,9 +93,9 @@ namespace Microsoft.Identity.Core.Instance
             return canonicalAuthorityUri;
         }
 
-        private bool InTrustedHostList(string host)
+        private bool IsB2CLoginHost(string host)
         {
-            if(IsInTrustedHostList(host) || host.EndsWith(B2CTrustedHost, StringComparison.OrdinalIgnoreCase))
+            if (host.EndsWith(B2CTrustedHost, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -99,12 +104,7 @@ namespace Microsoft.Identity.Core.Instance
 
         protected override string GetDefaultOpenIdConfigurationEndpoint()
         {
-            Uri b2cAuthority = new Uri(CanonicalAuthority);
-
-            // To support host we would need to make the call to the tenant discovery end point, 
-            // which is not supported for b2clogin.com
-            string authorityUri = string.Format(CultureInfo.InvariantCulture, MicrosoftOnline + b2cAuthority.AbsolutePath + OpenIdConfigurationEndpoint);
-            return authorityUri;
+            return string.Format(CultureInfo.InvariantCulture, new Uri(CanonicalAuthority).AbsoluteUri + OpenIdConfigurationEndpoint);
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpointAsync(

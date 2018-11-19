@@ -47,7 +47,7 @@ namespace Test.Microsoft.Identity.Core.Unit
         public static readonly string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
-        public const string B2CAuthorityNotTrustedHost = "https://sometenantid.b2blogin.com/tfp/sometenantid/policy/";
+        public const string B2CRandomHost = "https://sometenantid.randomhost.com/tfp/sometenantid/policy/";
         public static readonly string ClientId = "client_id";
         public static readonly string UniqueId = "unique_id";
         public static readonly string IdentityProvider = "my-idp";

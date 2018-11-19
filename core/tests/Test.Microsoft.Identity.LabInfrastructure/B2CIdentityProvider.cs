@@ -25,19 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
 namespace Test.Microsoft.Identity.LabInfrastructure
 {
-    public class UserQueryParameters
+    public enum B2CIdentityProvider
     {
-        public FederationProvider? FederationProvider { get; set; }
-        public bool? IsMamUser { get; set; }
-        public bool? IsMfaUser { get; set; }
-        public ISet<string> Licenses { get; set; }
-        public bool? IsFederatedUser { get; set; }
-        public UserType? UserType { get; set; }
-        public bool? IsExternalUser { get; set; }
-        public B2CIdentityProvider? B2CIdentityProvider { get; set; }
+        None = 0, // Non-B2C user
+        Local = 1, // Local B2C account
+        Facebook = 2,
+        Google = 3
     }
 }

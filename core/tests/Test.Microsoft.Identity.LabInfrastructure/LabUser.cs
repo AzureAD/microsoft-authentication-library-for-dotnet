@@ -76,6 +76,9 @@ namespace Test.Microsoft.Identity.LabInfrastructure
         [JsonProperty("homeUPN")]
         public string HomeUPN { get; set; }
 
+        [JsonProperty("b2cProvider")]
+        public B2CIdentityProvider B2CIdentityProvider { get; set; }
+
         public void InitializeHomeUser()
         {
             HomeUser = new LabUser();
@@ -95,6 +98,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             labHomeUser.HomeUPN = HomeUPN;
             labHomeUser.CurrentTenantId = HomeTenantId;
             labHomeUser.Upn = HomeUPN;
+            labHomeUser.B2CIdentityProvider = B2CIdentityProvider;
         }
     }
 }

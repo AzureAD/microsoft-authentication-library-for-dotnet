@@ -50,7 +50,7 @@ namespace Test.MSAL.NET.Unit
 {
     [TestClass]
     [DeploymentItem(@"Resources\valid.crtfile")]
-    [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]
+    [DeploymentItem("Resources\\OpenidConfiguration-QueryParams-B2C.json")]
     public class ConfidentialClientApplicationTests
     {
         private readonly MyReceiver _myReceiver = new MyReceiver();
@@ -450,7 +450,7 @@ namespace Test.MSAL.NET.Unit
                             MockHelpers.CreateSuccessResponseMessage(
                                 File.ReadAllText(
                                     ResourceHelper.GetTestResourceRelativePath(
-                                        @"OpenidConfiguration-B2C.json")))
+                                        @"OpenidConfiguration-QueryParams-B2C.json")))
                     });
 
                 Task<Uri> task = app.GetAuthorizationRequestUrlAsync(MsalTestConstants.Scope, MsalTestConstants.DisplayableId, null);

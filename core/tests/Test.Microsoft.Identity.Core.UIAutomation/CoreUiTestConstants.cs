@@ -52,7 +52,6 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         public const string ClearCacheID = "clearCache";
         public const string SaveID = "saveButton";
         public const string WebUPNInputID = "i0116";
-        public const string WebUPNB2CLocalInputID = "logonIdentifier";
         public const string AdfsV4WebPasswordID = "passwordInput";
         public const string AdfsV4WebSubmitID = "submitButton";
         public const string WebPasswordID = "i0118";
@@ -77,11 +76,21 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         //MSAL B2C
         public static string B2cScopes = "https://sometenant.onmicrosoft.com/some/scope";
         public const string AuthorityPickerID = "b2cAuthorityPicker";
+        public const string WebUPNB2CLocalInputID = "logonIdentifier";
         public const string B2CWebSubmitID = "next";
         public const string B2CWebPasswordID = "password";
         public const string B2CLoginAuthority = "b2clogin.com";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
         public const string NonB2CAuthority = "non-b2c authority";
+        public const string FacebookAccountID = "FacebookExchange";
+        public const string WebUPNB2CFacebookInputID = "m_login_email";
+        public const string B2CWebPasswordFacebookID = "m_login_password";
+        public const string B2CFacebookSubmitID = "u_0_5";
+        public const string GoogleAccountID = "GoogleExchange";
+        public const string WebUPNB2CGoogleInputID = "Email";
+        public const string B2CWebPasswordGoogleID = "Passwd";
+        public const string B2CGoogleNextID = "next";
+        public const string B2CGoogleSignInID = "signIn";
 
         // these should match the product enum values
         public const string UIBehaviorConsent = "consent";
