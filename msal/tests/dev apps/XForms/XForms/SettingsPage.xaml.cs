@@ -130,6 +130,7 @@ namespace XForms
             App.Scopes = App.B2cScopes;
             App.ClientId = App.B2cClientId;
             App.RedirectUriOnAndroid = App.RedirectUriB2C;
+            App.RedirectUriOnIos = App.RedirectUriB2C;
         }
     }
 }
