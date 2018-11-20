@@ -1,3 +1,9 @@
+Version 4.4.1
+===============
+- **Fix default redirect uri for ADAL on UWP**. When using a null RedirectURI, you typically got an error. However on UWP, this is an indication that the Windows Auth Broker (WEB) will be used. [ADAL issue #1400](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/1400)
+- **Fix for a race condition and a crash in ADAL when using PromptBehavior = Hidden** (which is only available on some windows platforms). [ADAL issue](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/commit/663ffeb8554ac6f6feab5cf0d2550ab99f7e2556)
+- **GetAccountsAsync() can now be called when the device / computer is offline**. It was making an network call to the instance discovery endpoint to determine the environments (equivalent clouds base URLs) for caching, which meant GetAccountsAsync() did not work off-line. This has been fixed and GetAccountsAsync() is not dependent on a network call and works off-line. [MSAL issue #630](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/630)
+
 Version 4.4.0
 ===============
 -Improvements and fixes to the token cache

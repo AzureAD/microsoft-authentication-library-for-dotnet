@@ -1,10 +1,21 @@
+2.5.0-preview
+=============
+- **Improved the testability of apps using MSAL.NET**: MSAL.NET was not easily mockable because the AuthenticationResult was an immutable sealed class with no public constructors. AuthenticationResult now has a public constructor for testing. [MSAL issue #682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/682)
+- **Improved support for Azure AD B2C**: apps constructors now understand to b2clogin.com based authorities, Developer no longer needs to set ValidateAuthority=false, as the library handles this now. [MSAL issue #686](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/686)
+- **GetAccountsAsync() can now be called when the device / computer is offline**. It was making an network call to the instance discovery endpoint to determine the environments (equivalent clouds base URLs) for caching, which meant GetAccountsAsync() did not work off-line. This has been fixed and GetAccountsAsync() is not dependent on a network call and works off-line. [MSAL issue #630](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/630)
+
+2.4.1-preview
+=============
+Hot fix release includes:
+- Fix performance issue [1406] for degredation in .NET Framework compared to .NET Core
+
 2.4.0-preview
 =============
 Improvements and fixes to the token cache
 - The serialized token cache can now be shared by different applications, therefore providing SSO if the same user signs-in in both applications
   - See [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1365) and [MSAL Issue #653](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/654)
 - On .NET Core, the Token cache was shared by all instances of applications in memory. This is now fixed (See MSAL.NET issue #656 and [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1360))
-- Fixes consistency issues for advanced token cache migration scenarios from ADAL v3.x to ADA v4.x to MSAL v2.x 
+- Fixes consistency issues for advanced token cache migration scenarios from ADAL v3.x to ADAL v4.x to MSAL v2.x 
   - [MSAL Issue #652](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/652)
   - [MSAL Issue #651](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/651)
 - Cache lookups were optimized. Work done in conjunction with ADAL.iOS and MSAL.iOS native) [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1350)
