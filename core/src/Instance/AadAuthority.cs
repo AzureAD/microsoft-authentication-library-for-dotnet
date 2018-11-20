@@ -38,7 +38,6 @@ namespace Microsoft.Identity.Core.Instance
     internal class AadAuthority : Authority
     {
         public const string DefaultTrustedHost = "login.microsoftonline.com";
-        private const string AadInstanceDiscoveryEndpoint = "https://login.microsoftonline.com/common/discovery/instance";
         public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
 
         internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
@@ -52,21 +51,24 @@ namespace Microsoft.Identity.Core.Instance
             "login.cloudgovapi.us" // Microsoft Azure US Government
         };
 
-        internal AadAuthority(string authority, bool validateAuthority)
-            : base(authority, validateAuthority)
+        protected IAadInstanceDiscovery AadInstanceDiscovery { get; }
+
+        internal AadAuthority(
+            IValidatedAuthoritiesCache validatedAuthoritiesCache,
+            string authority,
+            bool validateAuthority,
+            IAadInstanceDiscovery aadInstanceDiscovery)
+            : base(validatedAuthoritiesCache, authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Aad;
+            AadInstanceDiscovery = aadInstanceDiscovery;
         }
 
         internal override async Task UpdateCanonicalAuthorityAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
             RequestContext requestContext)
         {
             var metadata = await AadInstanceDiscovery
-                                 .Instance.GetMetadataEntryAsync(
-                                     httpManager,
-                                     telemetryManager,
+                                 .GetMetadataEntryAsync(
                                      new Uri(CanonicalAuthority),
                                      ValidateAuthority,
                                      requestContext)
@@ -85,14 +87,10 @@ namespace Microsoft.Identity.Core.Instance
 
             if (ValidateAuthority && !IsInTrustedHostList(authorityUri.Host))
             {
-                var discoveryResponse = await AadInstanceDiscovery
-                                              .Instance.DoInstanceDiscoveryAndCacheAsync(
-                                                  httpManager,
-                                                  telemetryManager,
-                                                  authorityUri,
-                                                  true,
-                                                  requestContext)
-                                              .ConfigureAwait(false);
+                var discoveryResponse = await AadInstanceDiscovery.DoInstanceDiscoveryAndCacheAsync(
+                                            authorityUri,
+                                            true,
+                                            requestContext).ConfigureAwait(false);
 
                 return discoveryResponse.TenantDiscoveryEndpoint;
             }
@@ -102,13 +100,13 @@ namespace Microsoft.Identity.Core.Instance
 
         protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
         {
-            return ValidatedAuthorities.ContainsKey(CanonicalAuthority);
+            return ValidatedAuthoritiesCache.ContainsKey(CanonicalAuthority);
         }
 
         protected override void AddToValidatedAuthorities(string userPrincipalName)
         {
             // add to the list of validated authorities so that we don't do openid configuration call
-            ValidatedAuthorities[CanonicalAuthority] = this;
+            ValidatedAuthoritiesCache.TryAddValue(CanonicalAuthority, this);
         }
 
         protected override string GetDefaultOpenIdConfigurationEndpoint()

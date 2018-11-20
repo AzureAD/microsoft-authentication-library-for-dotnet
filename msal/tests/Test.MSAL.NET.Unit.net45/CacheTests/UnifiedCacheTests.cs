@@ -1,20 +1,20 @@
-﻿//----------------------------------------------------------------------
-//
+﻿// ------------------------------------------------------------------------------
+// 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-//
+// 
 // This code is licensed under the MIT License.
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,8 +22,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// 
+// ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -33,17 +33,14 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit;
 using Test.Microsoft.Identity.Core.Unit.Mocks;
 using Test.MSAL.NET.Unit.Mocks;
 
 namespace Test.MSAL.NET.Unit
 {
-
     [TestClass]
     public class UnifiedCacheTests
     {
@@ -62,7 +59,11 @@ namespace Test.MSAL.NET.Unit
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                PublicClientApplication app = new PublicClientApplication(httpManager, null, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                PublicClientApplication app = new PublicClientApplication(
+                    httpManager,
+                    null,
+                    MsalTestConstants.ClientId,
+                    ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache =
                     {
@@ -89,8 +90,10 @@ namespace Test.MSAL.NET.Unit
                     app.UserTokenCache.GetAccountsAsync(MsalTestConstants.AuthorityCommonTenant, false, requestContext).Result;
                 foreach (IAccount user in users)
                 {
-                    ISet<string> authorityHostAliases = new HashSet<string>();
-                    authorityHostAliases.Add(MsalTestConstants.ProductionPrefCacheEnvironment);
+                    ISet<string> authorityHostAliases = new HashSet<string>
+                    {
+                        MsalTestConstants.ProductionPrefCacheEnvironment
+                    };
 
                     app.UserTokenCache.RemoveMsalAccount(user, authorityHostAliases, requestContext);
                 }
@@ -184,6 +187,7 @@ namespace Test.MSAL.NET.Unit
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
+                
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
@@ -215,7 +219,7 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
-                PublicClientApplication app = new PublicClientApplication(
+                var app = new PublicClientApplication(
                     httpManager,
                     null,
                     MsalTestConstants.ClientId,
@@ -232,17 +236,19 @@ namespace Test.MSAL.NET.Unit
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, MsalTestConstants.Scope.ToString());
 
-                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(
-                    app.UserTokenCache.LegacyCachePersistence,
-                    authorityHostAliases,
-                    MsalTestConstants.ClientId);
+                Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple =
+                    CacheFallbackOperations.GetAllAdalUsersForMsal(
+                        app.UserTokenCache.LegacyCachePersistence,
+                        authorityHostAliases,
+                        MsalTestConstants.ClientId);
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, "user.read");
 
-                var tuple2 = CacheFallbackOperations.GetAllAdalUsersForMsal(
-                    app.UserTokenCache.LegacyCachePersistence,
-                    authorityHostAliases,
-                    MsalTestConstants.ClientId);
+                Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple2 =
+                    CacheFallbackOperations.GetAllAdalUsersForMsal(
+                        app.UserTokenCache.LegacyCachePersistence,
+                        authorityHostAliases,
+                        MsalTestConstants.ClientId);
 
                 Assert.AreEqual(tuple.Item1.Keys.First(), tuple2.Item1.Keys.First());
 
@@ -253,10 +259,15 @@ namespace Test.MSAL.NET.Unit
 
         private void CreateAdalCache(ILegacyCachePersistence legacyCachePersistence, string scopes)
         {
-            AdalTokenCacheKey key = new AdalTokenCacheKey(MsalTestConstants.AuthorityHomeTenant, scopes,
-                MsalTestConstants.ClientId, MsalTestConstants.TokenSubjectTypeUser, MsalTestConstants.UniqueId, MsalTestConstants.User.Username);
+            var key = new AdalTokenCacheKey(
+                MsalTestConstants.AuthorityHomeTenant,
+                scopes,
+                MsalTestConstants.ClientId,
+                MsalTestConstants.TokenSubjectTypeUser,
+                MsalTestConstants.UniqueId,
+                MsalTestConstants.User.Username);
 
-            AdalResultWrapper wrapper = new AdalResultWrapper()
+            var wrapper = new AdalResultWrapper()
             {
                 Result = new AdalResult(null, null, DateTimeOffset.MinValue)
                 {
@@ -271,10 +282,10 @@ namespace Test.MSAL.NET.Unit
                 ResourceInResponse = scopes
             };
 
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
+                AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
             dictionary[key] = wrapper;
             legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
         }
     }
 }
-

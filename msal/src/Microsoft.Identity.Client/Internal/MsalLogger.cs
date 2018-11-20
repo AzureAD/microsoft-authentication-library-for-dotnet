@@ -139,9 +139,9 @@ namespace Microsoft.Identity.Client.Internal
 
             var msalIdParameters = MsalIdHelper.GetMsalIdParameters();
             string os = "N/A";
-            if (msalIdParameters.ContainsKey(MsalIdParameter.OS))
+            if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
             {
-                os = msalIdParameters[MsalIdParameter.OS];
+                os = osValue;
             }
 
             bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);

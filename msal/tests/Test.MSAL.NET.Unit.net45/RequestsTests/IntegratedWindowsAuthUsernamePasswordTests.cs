@@ -59,6 +59,10 @@ namespace Test.MSAL.NET.Unit
             TestCommon.ResetStateAndInitMsal();
             _cache = new TokenCache();
             _telemetryManager = new TelemetryManager(_myReceiver);
+
+            new AadInstanceDiscovery(null, _telemetryManager, true);
+            new ValidatedAuthoritiesCache(true);
+
             CreateSecureString();
         }
 
@@ -375,6 +379,7 @@ namespace Test.MSAL.NET.Unit
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Get, url: "https://msft.sts.microsoft.com/adfs/services/trust/mex");
 
                 _cache.ClientId = MsalTestConstants.ClientId;
+
                 var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache

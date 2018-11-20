@@ -21,10 +21,6 @@
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2146:TypesMustBeAtLeastAsCriticalAsBaseTypesFxCopRule", Scope = "type",
-        Target = "Microsoft.Identity.Client.PlatformInformation")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2146:TypesMustBeAtLeastAsCriticalAsBaseTypesFxCopRule", Scope = "type",
         Target = "Microsoft.Identity.Client.PlatformParameters")]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
@@ -48,10 +44,6 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target = "Microsoft.Identity.Client.Logger.#.ctor()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#.ctor()")]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
@@ -104,10 +96,6 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
         Target = "Microsoft.Identity.Client.MsalInitializer.#Initialize()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetAssemblyFileVersionAttribute()")]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",
@@ -212,34 +200,6 @@
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetProductName()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetEnvironmentVariable(System.String)")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetUserPrincipalNameAsync()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetProcessorArchitecture()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetOperatingSystem()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetDeviceModel()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
-        Target = "Microsoft.Identity.Client.PlatformInformation.#GetAssemblyFileVersionAttribute()")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2134:MethodsMustOverrideWithConsistentTransparencyFxCopRule", Scope = "member",
         Target =
             "Microsoft.Identity.Client.TokenCachePlugin.#BeforeAccess(Microsoft.Identity.Client.TokenCacheNotificationArgs)"
         )]
@@ -265,10 +225,6 @@
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2132:DefaultConstructorsMustHaveConsistentTransparencyFxCopRule", Scope = "type",
         Target = "Microsoft.Identity.Client.Logger")]
-[assembly:
-    System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
-        "CA2132:DefaultConstructorsMustHaveConsistentTransparencyFxCopRule", Scope = "type",
-        Target = "Microsoft.Identity.Client.PlatformInformation")]
 [assembly:
     System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security",
         "CA2140:TransparentMethodsMustNotReferenceCriticalCodeFxCopRule", Scope = "member",

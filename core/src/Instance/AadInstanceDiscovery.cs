@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -23,50 +23,81 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-//------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.OAuth2;
 using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Core.Instance
 {
-    internal class AadInstanceDiscovery
+    internal class AadInstanceDiscovery : IAadInstanceDiscovery
     {
-        private AadInstanceDiscovery()
-        {
-        }
-
-        public static AadInstanceDiscovery Instance { get; } = new AadInstanceDiscovery();
-
-        internal readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> Cache =
+        // TODO: The goal of creating this class was to remove statics, but for the time being
+        // we don't have a good separation to cache these across ClientApplication instances
+        // in the case where a ConfidentialClientApplication is created per-request, for example.
+        // So moving this back to static to keep the existing behavior but the rest of the code
+        // won't know this is static.
+        private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> _cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
+        private readonly IHttpManager _httpManager;
+        private readonly ITelemetryManager _telemetryManager;
+
+        public AadInstanceDiscovery(IHttpManager httpManager, ITelemetryManager telemetryManager, bool shouldClearCache = true)
+        {
+            _httpManager = httpManager;
+            _telemetryManager = telemetryManager;
+            if (shouldClearCache)
+            {
+                _cache.Clear();
+            }
+        }
+
+        public bool TryGetValue(string host, out InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
+        {
+            return _cache.TryGetValue(host, out instanceDiscoveryMetadataEntry);
+        }
+
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
             Uri authority,
             bool validateAuthority,
             RequestContext requestContext)
         {
-            InstanceDiscoveryMetadataEntry entry = null;
-            if (!Cache.TryGetValue(authority.Host, out entry))
+            if (!TryGetValue(authority.Host, out var entry))
             {
-                await DoInstanceDiscoveryAndCacheAsync(
-                    httpManager,
-                    telemetryManager,
-                    authority,
-                    validateAuthority,
-                    requestContext).ConfigureAwait(false);
-                Cache.TryGetValue(authority.Host, out entry);
+                await DoInstanceDiscoveryAndCacheAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
+                TryGetValue(authority.Host, out entry);
             }
 
             return entry;
+        }
+
+        public async Task<InstanceDiscoveryResponse> DoInstanceDiscoveryAndCacheAsync(
+            Uri authority,
+            bool validateAuthority,
+            RequestContext requestContext)
+        {
+            var discoveryResponse = await SendInstanceDiscoveryRequestAsync(authority, requestContext).ConfigureAwait(false);
+
+            if (validateAuthority)
+            {
+                Validate(discoveryResponse);
+            }
+
+            CacheInstanceDiscoveryMetadata(authority.Host, discoveryResponse);
+
+            return discoveryResponse;
+        }
+
+        public bool TryAddValue(string host, InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry)
+        {
+            return _cache.TryAdd(host, instanceDiscoveryMetadataEntry);
         }
 
         public static string BuildAuthorizeEndpoint(string host, string tenant)
@@ -84,51 +115,22 @@ namespace Microsoft.Identity.Core.Instance
             return string.Format(CultureInfo.InvariantCulture, "https://{0}/common/discovery/instance", host);
         }
 
-        internal async Task<InstanceDiscoveryResponse>
-            DoInstanceDiscoveryAndCacheAsync(
-                IHttpManager httpManager,
-                ITelemetryManager telemetryManager,
-                Uri authority,
-                bool validateAuthority,
-                RequestContext requestContext)
-        {
-            InstanceDiscoveryResponse discoveryResponse =
-                await SendInstanceDiscoveryRequestAsync(
-                    httpManager,
-                    telemetryManager,
-                    authority,
-                    requestContext).ConfigureAwait(false);
-
-            if (!validateAuthority)
-            {
-                Validate(discoveryResponse);
-            }
-
-            CacheInstanceDiscoveryMetadata(authority.Host, discoveryResponse);
-
-            return discoveryResponse;
-        }
-
-        private static async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
+        private async Task<InstanceDiscoveryResponse> SendInstanceDiscoveryRequestAsync(
             Uri authority,
             RequestContext requestContext)
         {
-            OAuth2Client client = new OAuth2Client(httpManager, telemetryManager);
+            var client = new OAuth2Client(_httpManager, _telemetryManager);
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
 
-            var discoveryHost = AadAuthority.IsInTrustedHostList(authority.Host) ?
-                authority.Host :
-                AadAuthority.DefaultTrustedHost;
+            string discoveryHost = AadAuthority.IsInTrustedHostList(authority.Host)
+                                       ? authority.Host
+                                       : AadAuthority.DefaultTrustedHost;
 
             string instanceDiscoveryEndpoint = BuildInstanceDiscoveryEndpoint(discoveryHost);
 
-            InstanceDiscoveryResponse discoveryResponse =
-                await
-                    client.DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
-                        .ConfigureAwait(false);
+            var discoveryResponse = await client.DiscoverAadInstanceAsync(new Uri(instanceDiscoveryEndpoint), requestContext)
+                                                .ConfigureAwait(false);
 
             return discoveryResponse;
         }
@@ -137,8 +139,9 @@ namespace Microsoft.Identity.Core.Instance
         {
             if (instanceDiscoveryResponse.TenantDiscoveryEndpoint == null)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(instanceDiscoveryResponse.Error,
-                     instanceDiscoveryResponse.ErrorDescription);
+                throw CoreExceptionFactory.Instance.GetClientException(
+                    instanceDiscoveryResponse.Error,
+                    instanceDiscoveryResponse.ErrorDescription);
             }
         }
 
@@ -146,18 +149,20 @@ namespace Microsoft.Identity.Core.Instance
         {
             foreach (var entry in instanceDiscoveryResponse?.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (var aliasedAuthority in entry?.Aliases ?? Enumerable.Empty<string>())
+                foreach (string aliasedAuthority in entry?.Aliases ?? Enumerable.Empty<string>())
                 {
-                    Cache.TryAdd(aliasedAuthority, entry);
+                    TryAddValue(aliasedAuthority, entry);
                 }
             }
 
-            Cache.TryAdd(host, new InstanceDiscoveryMetadataEntry
-            {
-                PreferredNetwork = host,
-                PreferredCache = host,
-                Aliases = null
-            });
+            TryAddValue(
+                host,
+                new InstanceDiscoveryMetadataEntry
+                {
+                    PreferredNetwork = host,
+                    PreferredCache = host,
+                    Aliases = null
+                });
         }
     }
 }

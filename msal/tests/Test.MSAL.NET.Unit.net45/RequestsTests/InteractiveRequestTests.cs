@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
@@ -53,16 +54,18 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         private readonly MyReceiver _myReceiver = new MyReceiver();
         private TokenCache _cache;
         private ITelemetryManager _telemetryManager;
+        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
+            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
             _telemetryManager = new TelemetryManager(_myReceiver);
 
             _cache = new TokenCache
             {
-                TelemetryManager = _telemetryManager
+                TelemetryManager = _telemetryManager,
             };
         }
 
@@ -77,27 +80,30 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void SliceParametersTest()
         {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
-            _cache = new TokenCache()
-            {
-                ClientId = MsalTestConstants.ClientId,
-                TelemetryManager = _telemetryManager
-            };
-
-            var ui = new MockWebUI()
-            {
-                MockResult = new AuthorizationResult(
-                    AuthorizationStatus.Success,
-                    MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
-                QueryParamsToValidate = new Dictionary<string, string>()
-                {
-                    {"key1", "value1%20with%20encoded%20space"},
-                    {"key2", "value2"}
-                }
-            };
-
             using (var httpManager = new MockHttpManager())
             {
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+
+                var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+                _cache = new TokenCache()
+                {
+                    ClientId = MsalTestConstants.ClientId,
+                    TelemetryManager = _telemetryManager,
+                    AadInstanceDiscovery = aadInstanceDiscovery
+                };
+
+                var ui = new MockWebUI()
+                {
+                    MockResult = new AuthorizationResult(
+                        AuthorizationStatus.Success,
+                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
+                    QueryParamsToValidate = new Dictionary<string, string>()
+                    {
+                        {"key1", "value1%20with%20encoded%20space"},
+                        {"key2", "value2"}
+                    }
+                };         
+                
                 TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 httpManager.AddMockHandler(
@@ -128,6 +134,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -148,37 +156,39 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
         {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
-            _cache = new TokenCache()
-            {
-                ClientId = MsalTestConstants.ClientId,
-                TelemetryManager = _telemetryManager
-            };
-
-            var atItem = new MsalAccessTokenCacheItem(
-                MsalTestConstants.ProductionPrefNetworkEnvironment,
-                MsalTestConstants.ClientId,
-                "Bearer",
-                MsalTestConstants.Scope.AsSingleString(),
-                MsalTestConstants.Utid,
-                null,
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
-                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
-                MockHelpers.CreateClientInfo());
-
-            string atKey = atItem.GetKey().ToString();
-            atItem.Secret = atKey;
-            _cache.TokenCacheAccessor.SaveAccessToken(atItem);
-
-            var ui = new MockWebUI()
-            {
-                MockResult = new AuthorizationResult(
-                    AuthorizationStatus.Success,
-                    MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
-            };
-
             using (var httpManager = new MockHttpManager())
             {
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+
+                var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+                _cache = new TokenCache()
+                {
+                    ClientId = MsalTestConstants.ClientId,
+                    TelemetryManager = _telemetryManager
+                };
+
+                var atItem = new MsalAccessTokenCacheItem(
+                    MsalTestConstants.ProductionPrefNetworkEnvironment,
+                    MsalTestConstants.ClientId,
+                    "Bearer",
+                    MsalTestConstants.Scope.AsSingleString(),
+                    MsalTestConstants.Utid,
+                    null,
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(3599)),
+                    new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(7200)),
+                    MockHelpers.CreateClientInfo());
+
+                string atKey = atItem.GetKey().ToString();
+                atItem.Secret = atKey;
+                _cache.TokenCacheAccessor.SaveAccessToken(atItem);
+
+                var ui = new MockWebUI()
+                {
+                    MockResult = new AuthorizationResult(
+                        AuthorizationStatus.Success,
+                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
+                };
+                                
                 TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
@@ -198,6 +208,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -234,11 +246,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
             try
             {
                 using (var httpManager = new MockHttpManager())
                 {
+                    var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+                    var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+
                     var parameters = new AuthenticationRequestParameters
                     {
                         Authority = authority,
@@ -254,6 +268,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                         httpManager,
                         PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                         _telemetryManager,
+                        _validatedAuthoritiesCache,
+                        aadInstanceDiscovery,
                         parameters,
                         ApiEvent.ApiIds.None,
                         MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -273,10 +289,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
-
             using (var httpManager = new MockHttpManager())
             {
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+                var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -300,6 +317,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -329,10 +348,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
         {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
-
             using (var httpManager = new MockHttpManager())
             {
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+                var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -356,6 +375,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -384,10 +405,11 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
-
             using (var httpManager = new MockHttpManager())
             {
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+                var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+
                 TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 var webUi = new MockWebUI()
@@ -412,6 +434,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -442,6 +466,8 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -466,28 +492,31 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
-        {
-            var authority = Authority.CreateAuthority(MsalTestConstants.AuthorityHomeTenant, false);
-
-            var parameters = new AuthenticationRequestParameters
-            {
-                Authority = authority,
-                ClientId = MsalTestConstants.ClientId,
-                Scope = MsalTestConstants.Scope,
-                TokenCache = null,
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
-                RedirectUri = new Uri("some://uri"),
-                ExtraQueryParameters = "extra=qp&prompt=login"
-            };
-
+        {            
             using (var httpManager = new MockHttpManager())
             {
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, _telemetryManager);
+
+                var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+                var parameters = new AuthenticationRequestParameters
+                {
+                    Authority = authority,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
+                    TokenCache = null,
+                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RedirectUri = new Uri("some://uri"),
+                    ExtraQueryParameters = "extra=qp&prompt=login"
+                };
+
                 TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 var request = new InteractiveRequest(
                     httpManager,
                     PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
                     _telemetryManager,
+                    _validatedAuthoritiesCache,
+                    aadInstanceDiscovery,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),

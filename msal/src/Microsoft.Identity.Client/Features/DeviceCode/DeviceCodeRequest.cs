@@ -34,6 +34,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 
@@ -47,10 +48,12 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
             ITelemetryManager telemetryManager,
+            IValidatedAuthoritiesCache validatedAuthoritiesCache,
+            IAadInstanceDiscovery aadInstanceDiscovery,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
-            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
         {
             _deviceCodeResultCallback = deviceCodeResultCallback;
         }

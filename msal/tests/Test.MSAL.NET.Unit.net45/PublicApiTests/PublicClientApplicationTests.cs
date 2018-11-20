@@ -751,10 +751,12 @@ namespace Test.MSAL.NET.Unit
                     ValidateAuthority = false
                 };
 
+                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
+
                 _cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
-                    HttpManager = httpManager
+                    AadInstanceDiscovery = aadInstanceDiscovery
                 };
 
                 app.UserTokenCache = _cache;

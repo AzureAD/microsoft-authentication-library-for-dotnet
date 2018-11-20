@@ -49,7 +49,6 @@ namespace Test.Microsoft.Identity.Core.Unit.CacheTests
             // By setting this to null, logging will fail, making the test fail.
             CoreExceptionFactory.Instance = null;
             CoreLoggerBase.Default = Substitute.For<CoreLoggerBase>();
-            AadInstanceDiscovery.Instance.Cache.Clear();
 
             // Use the net45 accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();

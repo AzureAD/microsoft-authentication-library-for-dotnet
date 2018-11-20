@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.Identity.Core.WsTrust;
@@ -52,11 +53,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
             ITelemetryManager telemetryManager,
+            IValidatedAuthoritiesCache validatedAuthoritiesCache,
+            IAadInstanceDiscovery aadInstanceDiscovery,
             IWsTrustWebRequestManager wsTrustWebRequestManager,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             UsernamePasswordInput usernamePasswordInput)
-            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
         {
             _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(

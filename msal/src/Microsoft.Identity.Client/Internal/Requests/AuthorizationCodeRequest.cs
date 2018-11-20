@@ -31,6 +31,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 
@@ -39,12 +40,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class AuthorizationCodeRequest : RequestBase
     {
         public AuthorizationCodeRequest(
-            IHttpManager httpManager, 
+            IHttpManager httpManager,
             ICryptographyManager cryptographyManager,
             ITelemetryManager telemetryManager,
+            IValidatedAuthoritiesCache validatedAuthoritiesCache,
+            IAadInstanceDiscovery aadInstanceDiscovery,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
-            : base(httpManager, cryptographyManager, telemetryManager, authenticationRequestParameters, apiId)
+            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
         {
             if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {
@@ -63,7 +66,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse); 
+            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
         private Dictionary<string, string> GetBodyParameters()

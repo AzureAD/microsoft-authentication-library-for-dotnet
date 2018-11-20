@@ -68,6 +68,8 @@ namespace Microsoft.Identity.Client
         internal ICryptographyManager CryptographyManager { get; }
         internal IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         internal ITelemetryManager TelemetryManager { get; }
+        internal IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
+        internal IAadInstanceDiscovery AadInstanceDiscovery { get; }
 
         internal ITelemetryReceiver TelemetryReceiver
         {
@@ -105,9 +107,11 @@ namespace Microsoft.Identity.Client
             CryptographyManager = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             TelemetryManager = telemetryManager ?? new TelemetryManager(Telemetry.GetInstance());
+            ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(false);
+            AadInstanceDiscovery = new AadInstanceDiscovery(HttpManager, TelemetryManager, false);
 
             ClientId = clientId;
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, validateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
@@ -182,8 +186,8 @@ namespace Microsoft.Identity.Client
                 if (_userTokenCache != null)
                 {
                     _userTokenCache.ClientId = ClientId;
-                    _userTokenCache.HttpManager = HttpManager;
                     _userTokenCache.TelemetryManager = TelemetryManager;
+                    _userTokenCache.AadInstanceDiscovery = AadInstanceDiscovery;
                 }
             }
         }
@@ -280,7 +284,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = null;
             if (!string.IsNullOrEmpty(authority))
             {
-                authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+                authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
             }
 
             return
@@ -306,7 +310,7 @@ namespace Microsoft.Identity.Client
 
         internal Authority GetAuthority(IAccount account)
         {
-            var authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            var authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             var tenantId = authority.GetTenantId();
 
             if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId)
@@ -335,6 +339,8 @@ namespace Microsoft.Identity.Client
                 HttpManager,
                 CryptographyManager,
                 TelemetryManager,
+                ValidatedAuthoritiesCache,
+                AadInstanceDiscovery,
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 apiId,
                 forceRefresh);

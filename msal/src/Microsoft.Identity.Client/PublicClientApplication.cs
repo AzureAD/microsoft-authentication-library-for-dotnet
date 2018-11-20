@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Client
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             IAccount account)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account,
@@ -211,7 +211,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
@@ -255,7 +255,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
@@ -298,7 +298,7 @@ namespace Microsoft.Identity.Client
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and login</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             IAccount account, UIParent parent)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account,
@@ -356,7 +356,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -377,7 +377,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
@@ -402,7 +402,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
         UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
@@ -472,6 +472,8 @@ namespace Microsoft.Identity.Client
                 HttpManager,
                 CryptographyManager,
                 TelemetryManager,
+                ValidatedAuthoritiesCache,
+                AadInstanceDiscovery,
                 requestParams,
                 apiId,
                 extraScopesToConsent,
@@ -495,6 +497,8 @@ namespace Microsoft.Identity.Client
                 HttpManager,
                 CryptographyManager,
                 TelemetryManager,
+                ValidatedAuthoritiesCache,
+                AadInstanceDiscovery,
                 requestParams,
                 apiId,
                 extraScopesToConsent,

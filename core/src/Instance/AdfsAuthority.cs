@@ -43,8 +43,8 @@ namespace Microsoft.Identity.Core.Instance
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
 
-        public AdfsAuthority(string authority, bool validateAuthority)
-            : base(authority, validateAuthority)
+        public AdfsAuthority(IValidatedAuthoritiesCache validatedAuthoritiesCache, string authority, bool validateAuthority)
+            : base(validatedAuthoritiesCache, authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Adfs;
         }
@@ -58,9 +58,13 @@ namespace Microsoft.Identity.Core.Instance
                     CoreErrorMessages.UpnRequiredForAuthroityValidation);
             }
 
-            return ValidatedAuthorities.ContainsKey(CanonicalAuthority) &&
-                   ((AdfsAuthority)ValidatedAuthorities[CanonicalAuthority])._validForDomainsList.Contains(
-                       GetDomainFromUpn(userPrincipalName));
+            if (ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out Authority authority))
+            {
+                var auth = (AdfsAuthority)authority;
+                return auth._validForDomainsList.Contains(GetDomainFromUpn(userPrincipalName));
+            }
+
+            return false;
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
@@ -135,13 +139,13 @@ namespace Microsoft.Identity.Core.Instance
         protected override void AddToValidatedAuthorities(string userPrincipalName)
         {
             var authorityInstance = this;
-            if (ValidatedAuthorities.ContainsKey(CanonicalAuthority))
+            if (ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out Authority authority))
             {
-                authorityInstance = (AdfsAuthority)ValidatedAuthorities[CanonicalAuthority];
+                authorityInstance = (AdfsAuthority)authority;
             }
 
             authorityInstance._validForDomainsList.Add(GetDomainFromUpn(userPrincipalName));
-            ValidatedAuthorities[CanonicalAuthority] = authorityInstance;
+            ValidatedAuthoritiesCache.TryAddValue(CanonicalAuthority, authorityInstance);
         }
 
         private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(

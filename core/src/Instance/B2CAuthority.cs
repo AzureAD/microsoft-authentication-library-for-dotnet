@@ -42,8 +42,8 @@ namespace Microsoft.Identity.Core.Instance
         public const string OpenIdConfigurationEndpoint = "v2.0/.well-known/openid-configuration";
         public const string B2CTrustedHost = "b2clogin.com";
 
-        internal B2CAuthority(string authority, bool validateAuthority)
-            : base(authority, validateAuthority)
+        internal B2CAuthority(IValidatedAuthoritiesCache validatedAuthoritiesCache, string authority, bool validateAuthority, IAadInstanceDiscovery aadInstanceDiscovery)
+            : base(validatedAuthoritiesCache, authority, validateAuthority, aadInstanceDiscovery)
         {
             AuthorityType = AuthorityType.B2C;
             // Setting this to false as B2C authorities are customer specific
@@ -61,8 +61,6 @@ namespace Microsoft.Identity.Core.Instance
         }
 
         internal override async Task UpdateCanonicalAuthorityAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
             RequestContext requestContext)
         {
             Uri b2cHost = new Uri(CanonicalAuthority);
@@ -73,9 +71,7 @@ namespace Microsoft.Identity.Core.Instance
             else
             {
                 var metadata = await AadInstanceDiscovery
-                                 .Instance.GetMetadataEntryAsync(
-                                     httpManager,
-                                     telemetryManager,
+                                        .GetMetadataEntryAsync(
                                      new Uri(CanonicalAuthority),
                                      ValidateAuthority,
                                      requestContext)

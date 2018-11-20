@@ -54,8 +54,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _tokenCache = value;
                 if (_tokenCache != null)
                 {
-                    _tokenCache.HttpManager = HttpManager;
                     _tokenCache.TelemetryManager = TelemetryManager;
+                    _tokenCache.AadInstanceDiscovery = AadInstanceDiscovery;
                 }
             }
         }
@@ -65,17 +65,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected IHttpManager HttpManager { get; }
         protected ICryptographyManager CryptographyManager { get; }
         protected ITelemetryManager TelemetryManager { get; }
+        protected IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
+        protected IAadInstanceDiscovery AadInstanceDiscovery { get; }
 
         protected RequestBase(
             IHttpManager httpManager, 
             ICryptographyManager cryptographyManager, 
             ITelemetryManager telemetryManager,
+            IValidatedAuthoritiesCache validatedAuthoritiesCache,
+            IAadInstanceDiscovery aadInstanceDiscovery,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
         {
             HttpManager = httpManager;
             CryptographyManager = cryptographyManager;
             TelemetryManager = telemetryManager;
+            ValidatedAuthoritiesCache = validatedAuthoritiesCache;
+            AadInstanceDiscovery = aadInstanceDiscovery;
             TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
             
@@ -262,7 +268,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, msalTokenResponse);
+                var tuple = TokenCache.SaveAccessAndRefreshToken(ValidatedAuthoritiesCache, AadInstanceDiscovery, AuthenticationRequestParameters, msalTokenResponse);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else
@@ -281,16 +287,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
         }
 
-        // this method used to do this...  when we find derived classes that still call base() they should just call REsolveAuthorityEndpointsAsync...
-        //internal virtual async Task PreTokenRequestAsync(CancellationToken cancellationToken)
-        //{
-        //    await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-        //}
-
         internal async Task ResolveAuthorityEndpointsAsync()
         {
-            await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync
-                (HttpManager, TelemetryManager, AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             await AuthenticationRequestParameters.Authority
                 .ResolveEndpointsAsync(HttpManager, TelemetryManager, AuthenticationRequestParameters.LoginHint,

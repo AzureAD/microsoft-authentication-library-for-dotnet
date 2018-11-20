@@ -49,6 +49,9 @@ namespace Test.MSAL.NET.Unit
         {
             TestCommon.ResetStateAndInitMsal();
 
+            new AadInstanceDiscovery(null, null, true);
+            new ValidatedAuthoritiesCache(true);
+
             httpManager.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(
                     MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
