@@ -758,15 +758,17 @@ namespace Test.MSAL.NET.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
 
-            response = new MsalTokenResponse();
-            response.IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId);
-            response.ClientInfo = MockHelpers.CreateClientInfo();
-            response.AccessToken = "access-token-2";
-            response.ExpiresIn = 3599;
-            response.CorrelationId = "correlation-id";
-            response.RefreshToken = "refresh-token-2";
-            response.Scope = MsalTestConstants.Scope.AsSingleString() + " another-scope";
-            response.TokenType = "Bearer";
+            response = new MsalTokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                AccessToken = "access-token-2",
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token-2",
+                Scope = MsalTestConstants.Scope.AsSingleString() + " another-scope",
+                TokenType = "Bearer"
+            };
 
             cache.SaveAccessAndRefreshToken(_validatedAuthoritiesCache, aadInstanceDiscovery, requestParams, response);
 

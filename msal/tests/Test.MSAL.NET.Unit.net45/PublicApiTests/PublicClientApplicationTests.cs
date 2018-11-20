@@ -559,8 +559,6 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = new PublicClientApplication(
                     httpManager,
                     _telemetryManager,

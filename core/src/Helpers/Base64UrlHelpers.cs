@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Core.Helpers
             }
 
             string s = Convert.ToBase64String(arg);
-            s = s.Split(Base64PadCharacter)[0]; // Remove any trailing padding
+            s = s.Split(Base64PadCharacter)[0]; // RemoveAccount any trailing padding
             s = s.Replace(Base64Character62, Base64UrlCharacter62); // 62nd char of encoding
             s = s.Replace(Base64Character63, Base64UrlCharacter63); // 63rd char of encoding
 

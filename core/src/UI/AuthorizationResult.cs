@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Core.UI
 
             if (!string.IsNullOrWhiteSpace(resultData))
             {
-                // Remove the leading '?' first
+                // RemoveAccount the leading '?' first
                 Dictionary<string, string> response = CoreHelpers.ParseKeyValueList(resultData.Substring(1), '&',
                     true, null);
 

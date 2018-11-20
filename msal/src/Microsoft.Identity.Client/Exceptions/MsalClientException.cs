@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// <para>What happens?</para> You have used <see cref="ClientApplicationBase.SliceParameters"/> or the <c>extraQueryParameter</c> of overrides
         /// of token acquisition operations in public client and confidential client application and are passing a parameter which is already present in the
         /// URL (either because you had it in another way, or the library added it).
-        /// <para>Mitigation [App Development]</para> Remove the duplicate parameter from <see cref="ClientApplicationBase.SliceParameters"/> or the token acquisition override.
+        /// <para>Mitigation [App Development]</para> RemoveAccount the duplicate parameter from <see cref="ClientApplicationBase.SliceParameters"/> or the token acquisition override.
         /// </summary>
         /// <seealso cref="P:ClientApplicationBase.SliceParameters"/>
         /// <seealso cref="ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>

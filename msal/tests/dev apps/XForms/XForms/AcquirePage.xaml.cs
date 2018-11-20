@@ -272,8 +272,8 @@ namespace XForms
         private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
-            var users = await tokenCache.GetAccountsAsync
-                (App.Authority, true, new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(true);
+            var users = tokenCache.GetAccounts
+                (App.Authority, true, new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
             foreach (var user in users)
             {
                 await App.MsalPublicClient.RemoveAsync(user).ConfigureAwait(true);

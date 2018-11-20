@@ -209,15 +209,20 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
-        public async Task<IEnumerable<IAccount>> GetAccountsAsync()
+        public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
             RequestContext requestContext = new RequestContext(ClientId, new MsalLogger(Guid.Empty, null));
+            IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
             if (UserTokenCache == null)
             {
                 requestContext.Logger.Info("Token cache is null or empty. Returning empty list of accounts.");
-                return Enumerable.Empty<Account>();
             }
-            return await UserTokenCache.GetAccountsAsync(Authority, ValidateAuthority, requestContext).ConfigureAwait(false);
+            else
+            {
+                accounts = UserTokenCache.GetAccounts(Authority, ValidateAuthority, requestContext);
+            }
+
+            return Task.FromResult(accounts);
         }
 
         /// <summary>
@@ -297,15 +302,15 @@ namespace Microsoft.Identity.Client
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
-        public async Task RemoveAsync(IAccount account)
+        public Task RemoveAsync(IAccount account)
         {
             RequestContext requestContext = CreateRequestContext(Guid.Empty);
-            if (account == null || UserTokenCache == null)
+            if (account != null)
             {
-                return;
+                UserTokenCache?.RemoveAccount(account, requestContext);
             }
 
-            await UserTokenCache.RemoveAsync(Authority, ValidateAuthority, account, requestContext).ConfigureAwait(false);
+            return Task.FromResult(0);
         }
 
         internal Authority GetAuthority(IAccount account)

@@ -754,13 +754,8 @@ namespace Microsoft.Identity.Client
             return preferredEnvironmentHost;
         }
 
-        internal async Task<IEnumerable<IAccount>> GetAccountsAsync(string authority, bool validateAuthority, RequestContext requestContext)
+        internal IEnumerable<IAccount> GetAccounts(string authority, bool validateAuthority, RequestContext requestContext)
         {
-            var instanceDiscoveryMetadataEntry =
-                await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
-
-            var environmentAliases = GetEnvironmentAliases(authority, instanceDiscoveryMetadataEntry);
-
             var environment = new Uri(authority).Host;
             lock (LockObject)
             {
@@ -775,23 +770,19 @@ namespace Microsoft.Identity.Client
                 ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
                 ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
 
-                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, environmentAliases, ClientId);
+                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, ClientId);
                 OnAfterAccess(args);
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
                 foreach (MsalRefreshTokenCacheItem rtItem in tokenCacheItems)
                 {
-                    if (environmentAliases.Contains(rtItem.Environment))
+                    foreach (MsalAccountCacheItem account in accountCacheItems)
                     {
-                        foreach (MsalAccountCacheItem account in accountCacheItems)
+                        if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase))
                         {
-                            if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase) &&
-                                environmentAliases.Contains(account.Environment))
-                            {
-                                clientInfoToAccountMap[rtItem.HomeAccountId] = new Account
-                                    (account.HomeAccountId, account.PreferredUsername, environment);
-                                break;
-                            }
+                            clientInfoToAccountMap[rtItem.HomeAccountId] = new Account
+                                (account.HomeAccountId, account.PreferredUsername, environment);
+                            break;
                         }
                     }
                 }
@@ -811,7 +802,7 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                ICollection<Account> accounts = new List<Account>(clientInfoToAccountMap.Values);
+                var accounts = new List<IAccount>(clientInfoToAccountMap.Values);
                 List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
                 foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
@@ -822,7 +813,7 @@ namespace Microsoft.Identity.Client
                         uniqueUserNames.Add(user.DisplayableId);
                     }
                 }
-                return accounts;
+                return accounts.AsEnumerable();
             }
         }
 
@@ -929,13 +920,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal async Task RemoveAsync(string authority, bool validateAuthority, IAccount account, RequestContext requestContext)
+        internal void RemoveAccount(IAccount account, RequestContext requestContext)
         {
-            var instanceDiscoveryMetadataEntry =
-                await GetCachedOrDiscoverAuthorityMetaDataAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
-
-            var environmentAliases = GetEnvironmentAliases(authority, instanceDiscoveryMetadataEntry);
-
             lock (LockObject)
             {
                 requestContext.Logger.Info("Removing user from cache..");
@@ -952,8 +938,8 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
-                    RemoveMsalAccount(account, environmentAliases, requestContext);
-                    RemoveAdalUser(account, environmentAliases);
+                    RemoveMsalAccount(account, requestContext);
+                    RemoveAdalUser(account);
 
                     OnAfterAccess(args);
                 }
@@ -964,7 +950,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void RemoveMsalAccount(IAccount account, ISet<string> environmentAliases, RequestContext requestContext)
+        internal void RemoveMsalAccount(IAccount account, RequestContext requestContext)
         {
             if (account.HomeAccountId == null)
             {
@@ -972,8 +958,7 @@ namespace Microsoft.Identity.Client
                 return;
             }
             IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
-                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmentAliases.Contains(item.Environment))
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
             {
@@ -982,8 +967,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
             IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
-                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmentAliases.Contains(item.Environment))
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
             {
@@ -993,8 +977,7 @@ namespace Microsoft.Identity.Client
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
             IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
-                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
-                               environmentAliases.Contains(item.Environment))
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
             {
@@ -1004,11 +987,10 @@ namespace Microsoft.Identity.Client
             requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
         }
 
-        internal void RemoveAdalUser(IAccount account, ISet<string> environmentAliases)
+        internal void RemoveAdalUser(IAccount account)
         {
             CacheFallbackOperations.RemoveAdalUser(
                 LegacyCachePersistence,
-                environmentAliases,
                 ClientId,
                 account.Username,
                 account.HomeAccountId.Identifier);

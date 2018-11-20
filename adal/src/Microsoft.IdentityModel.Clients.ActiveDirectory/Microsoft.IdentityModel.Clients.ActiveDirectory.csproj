@@ -153,7 +153,7 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
-    <Compile Include="Platforms\Android\**\*.cs" />
+    <Compile Include="Platforms\android\**\*.cs" />
     <Compile Include="Features\NonWinCommon\**\*.cs" />
     <Compile Include="..\..\..\core\src\Platforms\Android\**\*.cs" LinkBase="Core\Platforms\Android" />
   </ItemGroup>
