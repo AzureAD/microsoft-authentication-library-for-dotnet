@@ -32,36 +32,26 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
     public class UserInformationFieldIds
     {
         public string PasswordInputId { get; set; }
-        public string SignInButtonId { get;  set; }
+        public string SignInButtonId { get; set; }
 
         public void DetermineFieldIds(LabUser user)
         {
             if (user.IsFederated)
             {
-                switch (user.FederationProvider)
-                {
-                    case FederationProvider.AdfsV3:
-                    case FederationProvider.AdfsV4:
-                        PasswordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
-                        SignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
-                        break;
-                    default:
-                        PasswordInputId = CoreUiTestConstants.WebPasswordID;
-                        SignInButtonId = CoreUiTestConstants.WebSubmitID;
-                        break;
-                }
+                // We use the same IDs for ADFSv3 and ADFSv4
+                PasswordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
+                SignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
+                return;
             }
 
-            if(user.UserType == UserType.B2C)
+            if (user.UserType == UserType.B2C)
             {
                 DetermineB2CFieldIds(user);
+                return;
             }
-            
-            else
-            {
-                PasswordInputId = CoreUiTestConstants.WebPasswordID;
-                SignInButtonId = CoreUiTestConstants.WebSubmitID;
-            }
+
+            PasswordInputId = CoreUiTestConstants.WebPasswordID;
+            SignInButtonId = CoreUiTestConstants.WebSubmitID;
         }
 
         private void DetermineB2CFieldIds(LabUser user)
