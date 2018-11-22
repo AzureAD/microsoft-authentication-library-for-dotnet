@@ -62,6 +62,98 @@ namespace Test.ADAL.NET.Integration
             AdalHttpMessageHandlerFactory.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(AdalTestConstants.GetDiscoveryEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant)));
         }
 
+        [TestMethod]
+        public void IntegratedWindowsAuth_ThrowsExceptionForManagedUser()
+        {
+            // Arrange
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
+            {
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler(
+                        AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
+                        AdalTestConstants.DefaultDisplayableId)
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
+
+                TokenCache cache = new TokenCache();
+                var context = new AuthenticationContext(
+                    httpManager,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
+                    AuthorityValidationType.True,
+                    cache);
+
+                Assert.AreEqual(0, context.TokenCache.Count);
+
+                // Act
+                var exception = AssertException.TaskThrows<AdalException>(
+                    async () => await context.AcquireTokenAsync(
+                                 AdalTestConstants.DefaultResource,
+                                 AdalTestConstants.DefaultClientId,
+                                 new UserCredential(AdalTestConstants.DefaultDisplayableId))
+                    .ConfigureAwait(false));
+
+
+                Assert.AreEqual(AdalError.IntegratedWindowsAuthNotSupportedForManagedUser, exception.ErrorCode);
+                Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
+            }
+        }
+
+        [TestMethod]
+        public void IntegratedWindowsAuth_ThrowsExceptionForUnknownUser()
+        {
+            // Arrange
+            using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
+            {
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler(
+                        AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
+                        AdalTestConstants.DefaultDisplayableId)
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                "{\"ver\":\"1.0\",\"account_type\":\"Unknown\",\"domain_name\":\"id.com\"}")
+                        },
+                        QueryParams = new Dictionary<string, string>()
+                        {
+                            {"api-version", "1.0"}
+                        }
+                    });
+
+                TokenCache cache = new TokenCache();
+                var context = new AuthenticationContext(
+                    httpManager,
+                    AdalTestConstants.DefaultAuthorityHomeTenant,
+                    AuthorityValidationType.True,
+                    cache);
+
+                Assert.AreEqual(0, context.TokenCache.Count);
+
+                // Act
+                var exception = AssertException.TaskThrows<AdalException>(
+                    async () => await context.AcquireTokenAsync(
+                                 AdalTestConstants.DefaultResource,
+                                 AdalTestConstants.DefaultClientId,
+                                 new UserCredential(AdalTestConstants.DefaultDisplayableId))
+                    .ConfigureAwait(false));
+
+
+                Assert.AreEqual(AdalError.UnknownUserType, exception.ErrorCode);
+                Assert.AreEqual(0, AdalHttpMessageHandlerFactory.MockHandlersCount());
+            }
+        }
+
 #if DESKTOP // UserPasswordCredential available only on net45
         [TestMethod]
         [Description("Test for AcquireToken with an empty cache")]
@@ -193,8 +285,6 @@ namespace Test.ADAL.NET.Integration
                             {"password", AdalTestConstants.DefaultPassword},
                         }
                     });
-
-                TokenCache cache = new TokenCache();
 
                 var context = new AuthenticationContext(
                     httpManager,

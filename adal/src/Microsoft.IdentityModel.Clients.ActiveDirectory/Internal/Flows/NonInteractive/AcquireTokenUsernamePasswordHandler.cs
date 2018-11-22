@@ -77,7 +77,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 var userRealmResponse = await _commonNonInteractiveHandler.QueryUserRealmDataAsync(Authenticator.UserRealmUriPrefix)
                     .ConfigureAwait(false);
 
-                if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
+                if (userRealmResponse.IsFederated)
                 {
                     WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                         userRealmResponse.FederationMetadataUrl,
@@ -87,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     _userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
                 }
-                else if (string.Equals(userRealmResponse.AccountType, "managed", StringComparison.OrdinalIgnoreCase))
+                else if (userRealmResponse.IsManaged)
                 {
                     // handle password grant flow for the managed user
                     if (!_userPasswordInput.HasPassword())
@@ -119,13 +119,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
             // To request id_token in response
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;
-        }
-
-        private bool PerformUserRealmDiscovery()
-        {
-            // To decide whether user realm discovery is needed or not
-            // we should also consider if that is supported by the authority
-            return _userAssertion == null && !SupportADFS;
         }
     }
 }

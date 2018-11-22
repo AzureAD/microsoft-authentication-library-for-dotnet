@@ -150,6 +150,8 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal
         public const string UapRedirectUriUnsupported = "PromptBehavior.Never is supported in SSO mode only (null or application's callback URI as redirectUri)";
 
         public const string DeviceCodeAuthorizationCodeExpired = "Verification code expired before contacting the server";
+
+        public const string IwaNotSupportedForManagedUser = "Integrated Windows Auth is not supported for managed users. See https://aka.ms/adal-iwa for details.";
     }
     
 }

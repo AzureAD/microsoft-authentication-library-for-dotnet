@@ -26,11 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.WsTrust;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Instance;
 using Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.OAuth2;
@@ -60,10 +58,10 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 SupportADFS = true;
             }
 
-            this._iwaInput = iwaInput;
+            _iwaInput = iwaInput;
             DisplayableId = iwaInput.UserName;
 
-            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, this._iwaInput, wsTrustWebRequestManager);
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, _iwaInput, wsTrustWebRequestManager);
         }
 
         protected override async Task PreRunAsync()
@@ -89,7 +87,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
                 var userRealmResponse = await _commonNonInteractiveHandler.QueryUserRealmDataAsync(Authenticator.UserRealmUriPrefix)
                    .ConfigureAwait(false);
 
-                if (string.Equals(userRealmResponse.AccountType, "federated", StringComparison.OrdinalIgnoreCase))
+                if (userRealmResponse.IsFederated)
                 {
                     WsTrustResponse wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                         userRealmResponse.FederationMetadataUrl,
@@ -98,6 +96,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
                     // We assume that if the response token type is not SAML 1.1, it is SAML 2
                     _userAssertion = new UserAssertion(wsTrustResponse.Token, (wsTrustResponse.TokenType == WsTrustResponse.Saml1Assertion) ? OAuthGrantType.Saml11Bearer : OAuthGrantType.Saml20Bearer);
+                }
+                else if (userRealmResponse.IsManaged)
+                {
+                    throw new AdalException(
+                        AdalError.IntegratedWindowsAuthNotSupportedForManagedUser, 
+                        AdalErrorMessage.IwaNotSupportedForManagedUser);
                 }
                 else
                 {
@@ -108,10 +112,12 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
 
         protected override void AddAditionalRequestParameters(DictionaryRequestParameters requestParameters)
         {
-            Debug.Assert(_userAssertion != null, "Expected the user assertion to have been created by PreTokenRequestAsync");
-
-            requestParameters[OAuthParameter.GrantType] = _userAssertion.AssertionType;
-            requestParameters[OAuthParameter.Assertion] = Convert.ToBase64String(Encoding.UTF8.GetBytes(_userAssertion.Assertion));
+            if (_userAssertion != null)
+            {
+                requestParameters[OAuthParameter.GrantType] = _userAssertion.AssertionType;
+                requestParameters[OAuthParameter.Assertion] =
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(_userAssertion.Assertion));
+            }
 
             // To request id_token in response
             requestParameters[OAuthParameter.Scope] = OAuthValue.ScopeOpenId;

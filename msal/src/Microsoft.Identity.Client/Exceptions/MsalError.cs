@@ -138,6 +138,8 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string UnknownUserType = "unknown_user_type";
 
+
+
         /// <summary>
         /// Unknown User.
         /// </summary>
@@ -180,5 +182,10 @@ namespace Microsoft.Identity.Client
         /// Mitigation: None. Inform the user that they took too long to sign-in at the provided URL and enter the provided code.
         /// </summary>
         public const string CodeExpired = "code_expired";
+
+        /// <summary>
+        /// Integrated Windows Auth is only supported for "federated" users
+        /// </summary>
+        public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
     }
 }

@@ -34,6 +34,11 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
     public static class AdalError
     {
         /// <summary>
+        /// Integrated Windows Auth is only supported for "federated" users
+        /// </summary>
+        public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
+
+        /// <summary>
         /// Unknown error.
         /// </summary>
         public const string Unknown = "unknown_error";
@@ -181,6 +186,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// Unknown User Type.
         /// </summary>
         public const string UnknownUserType = "unknown_user_type";
+
 
         /// <summary>
         /// Unknown User.

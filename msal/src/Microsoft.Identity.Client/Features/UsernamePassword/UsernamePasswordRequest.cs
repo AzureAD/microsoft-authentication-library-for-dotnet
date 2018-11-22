@@ -103,7 +103,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         ? OAuth2GrantType.Saml11Bearer
                         : OAuth2GrantType.Saml20Bearer);
             }
-            else if (userRealmResponse.IsManaged)
+
+            if (userRealmResponse.IsManaged)
             {
                 // handle grant flow
                 if (!_usernamePasswordInput.HasPassword())
@@ -113,15 +114,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 return null;
             }
-            else
-            {
-                throw new MsalClientException(
-                    MsalError.UnknownUserType,
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        MsalErrorMessage.UnsupportedUserType,
-                        userRealmResponse.AccountType));
-            }
+
+            throw new MsalClientException(
+                MsalError.UnknownUserType,
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    MsalErrorMessage.UnsupportedUserType,
+                    userRealmResponse.AccountType));
         }
 
         private async Task UpdateUsernameAsync()

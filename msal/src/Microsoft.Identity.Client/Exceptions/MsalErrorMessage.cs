@@ -133,6 +133,8 @@ namespace Microsoft.Identity.Core
             "Null account was passed in AcquiretokenSilent API. Pass in an account object or call acquireToken to authenticate.";
 
         public const string UserMismatchSaveToken = "Returned user identifier does not match the sent user identifier when saving the token to the cache.";
+        public const string IwaNotSupportedForManagedUser = "Integrated Windows Auth is not supported for managed users. See https://aka.ms/msal-net-iwa for details.";
+
     }
 
 }
