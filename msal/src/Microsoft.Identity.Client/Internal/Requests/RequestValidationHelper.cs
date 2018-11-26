@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal static class RequestValidationHelper
     {
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
+#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) && !iOS
         /// <summary>
         /// Determines whether or not the cached client assertion can be used again for the next authentication request by checking it's
         /// values against incoming request parameters.
