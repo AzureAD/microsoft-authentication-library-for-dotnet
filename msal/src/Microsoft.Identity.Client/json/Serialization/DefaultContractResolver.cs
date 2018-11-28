@@ -859,7 +859,7 @@ namespace Microsoft.Identity.Json.Serialization
                 foreach (MethodInfo method in baseType.GetMethods(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly))
                 {
                     // compact framework errors when getting parameters for a generic method
-                    // lame, but generic methods should not be callbacks anyway
+                    // but generic methods should not be callbacks anyway
                     if (method.ContainsGenericParameters)
                     {
                         continue;
