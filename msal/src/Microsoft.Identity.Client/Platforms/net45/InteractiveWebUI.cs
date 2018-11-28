@@ -32,6 +32,8 @@ namespace Microsoft.Identity.Client.Internal.UI
 {
     internal class InteractiveWebUI : WebUI
     {
+#pragma warning disable 618 // WindowsFormsWebAuthenticationDialog is marked obsolete
+
         private WindowsFormsWebAuthenticationDialog dialog;
 
         protected override AuthorizationResult OnAuthenticate()
@@ -45,5 +47,6 @@ namespace Microsoft.Identity.Client.Internal.UI
 
             return result;
         }
+#pragma warning restore 618
     }
 }

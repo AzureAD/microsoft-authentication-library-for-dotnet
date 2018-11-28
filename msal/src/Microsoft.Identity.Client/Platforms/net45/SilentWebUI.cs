@@ -47,7 +47,10 @@ namespace Microsoft.Identity.Client.Internal.UI
         /// </summary>
         private const int NavigationOverallTimeout = 2000;
 
+#pragma warning disable 618 // WindowsFormsWebAuthenticationDialog is marked obsolete
         private SilentWindowsFormsAuthenticationDialog dialog;
+#pragma warning restore 618
+
         private bool disposed;
         private WindowsFormsSynchronizationContext formsSyncContext;
         private AuthorizationResult result;
@@ -113,11 +116,13 @@ namespace Microsoft.Identity.Client.Internal.UI
                     {
                         formsSyncContext = new WindowsFormsSynchronizationContext();
 
+#pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
                         dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs,
                             RequestContext = RequestContext
                         };
+#pragma warning restore 618
 
                         dialog.Done += UIDoneHandler;
 
@@ -222,10 +227,14 @@ namespace Microsoft.Identity.Client.Internal.UI
                 uiException = e.TransferedException;
             }
 
+#pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
+
             // We need call dispose, while message loop is running.
             // WM_QUIT message from ExitThread will delayed, if Dispose will create a set of new messages (we suspect that it happens).
             ((SilentWindowsFormsAuthenticationDialog)sender).Dispose();
             Application.ExitThread();
+
+#pragma warning restore 618
         }
     }
 }

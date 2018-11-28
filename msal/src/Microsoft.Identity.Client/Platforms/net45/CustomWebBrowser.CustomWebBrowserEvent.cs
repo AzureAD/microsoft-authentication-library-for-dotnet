@@ -49,8 +49,10 @@ namespace Microsoft.Identity.Client.Internal.UI
                 string frameString = (frame == null) ? "" : ((string) frame);
                 int statusCodeInt = (statusCode == null) ? 0 : ((int) statusCode);
 
+#pragma warning disable 618 // WebBrowserNavigateErrorEventArgs is marked obsolete
                 WebBrowserNavigateErrorEventArgs e = new WebBrowserNavigateErrorEventArgs(uriString, frameString,
                     statusCodeInt, pDisp);
+#pragma warning restore 618
                 parent.OnNavigateError(e);
                 cancel = e.Cancel;
             }

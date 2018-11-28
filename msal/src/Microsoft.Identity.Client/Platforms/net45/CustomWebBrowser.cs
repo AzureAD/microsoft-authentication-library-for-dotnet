@@ -79,6 +79,7 @@ namespace Microsoft.Identity.Client.Internal.UI
             base.DetachSink();
         }
 
+#pragma warning disable 618 // WebBrowserNavigateErrorEventArgs is marked obsolete
         protected virtual void OnNavigateError(WebBrowserNavigateErrorEventArgs e)
         {
             if (NavigateError != null)
@@ -86,6 +87,7 @@ namespace Microsoft.Identity.Client.Internal.UI
                 NavigateError(this, e);
             }
         }
+#pragma warning restore 618
 
         public event WebBrowserNavigateErrorEventHandler NavigateError;
 
@@ -259,7 +261,9 @@ namespace Microsoft.Identity.Client.Internal.UI
         }
     }
 
+#pragma warning disable 618 // WebBrowserNavigateErrorEventArgs is marked obsolete
     /// <summary>
     /// </summary>
     internal delegate void WebBrowserNavigateErrorEventHandler(object sender, WebBrowserNavigateErrorEventArgs e);
+#pragma warning restore 618
 }

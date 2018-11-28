@@ -842,7 +842,7 @@ namespace Microsoft.Identity.Json.Linq
                         property.SetLineInfo(lineInfo, settings);
                         JObject parentObject = (JObject)parent;
                         // handle multiple properties with the same name in JSON
-                        JProperty existingPropertyWithName = parentObject.Property(propertyName);
+                        JProperty existingPropertyWithName = parentObject.Property(propertyName, StringComparison.OrdinalIgnoreCase);
                         if (existingPropertyWithName == null)
                         {
                             parent.Add(property);

@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Json
 
                         if (writer == null)
                         {
-                            writer = new StringWriter(sb);
+                            writer = new StringWriter(sb, CultureInfo.InvariantCulture);
                         }
 
                         JavaScriptUtils.WriteEscapedJavaScriptString(writer, propertyName, '\'', false, JavaScriptUtils.SingleQuoteCharEscapeFlags, StringEscapeHandling.Default, null, ref buffer);
