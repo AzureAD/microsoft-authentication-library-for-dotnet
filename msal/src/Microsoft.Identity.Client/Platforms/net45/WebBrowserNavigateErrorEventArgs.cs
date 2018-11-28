@@ -25,12 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.ComponentModel;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {
     /// <summary>
     /// </summary>
+    [Obsolete("This type should not be used and will be made internal.")]
     public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
     {
         private readonly int statusCode;

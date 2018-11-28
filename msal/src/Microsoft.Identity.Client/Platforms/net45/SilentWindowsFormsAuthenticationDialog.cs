@@ -39,6 +39,7 @@ namespace Microsoft.Identity.Client.Internal.UI
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("This type should not be used and will be made internal.")]
     public class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
         private bool doneSignaled;

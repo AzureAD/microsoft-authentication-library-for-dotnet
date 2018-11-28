@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.Internal.UI
     /// <summary>
     /// The browser dialog used for user authentication
     /// </summary>
+    [Obsolete("This type should not be used and will be made internal.")]
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
@@ -124,14 +125,14 @@ namespace Microsoft.Identity.Client.Internal.UI
 
         private void SetBrowserControlZoom(int zoomPercent)
         {
-            NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2) WebBrowser.ActiveXInstance;
+            NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2)WebBrowser.ActiveXInstance;
             NativeWrapper.IOleCommandTarget cmdTarget = browser2.Document as NativeWrapper.IOleCommandTarget;
             if (cmdTarget != null)
             {
                 const int OLECMDID_OPTICAL_ZOOM = 63;
                 const int OLECMDEXECOPT_DONTPROMPTUSER = 2;
 
-                object[] commandInput = {zoomPercent};
+                object[] commandInput = { zoomPercent };
 
                 int hResult = cmdTarget.Exec(
                     IntPtr.Zero, OLECMDID_OPTICAL_ZOOM, OLECMDEXECOPT_DONTPROMPTUSER, commandInput, IntPtr.Zero);
