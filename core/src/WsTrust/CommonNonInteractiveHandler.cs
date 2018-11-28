@@ -37,19 +37,16 @@ namespace Microsoft.Identity.Core.WsTrust
     {
         private readonly RequestContext _requestContext;
         private readonly IUsernameInput _usernameInput;
-        private readonly IPlatformProxy _platformProxy;
-        private readonly IWsTrustWebRequestManager _wsTrustWebRequestManager;
+        private readonly IServiceBundle _serviceBundle;
 
         public CommonNonInteractiveHandler(
             RequestContext requestContext,
             IUsernameInput usernameInput,
-            IWsTrustWebRequestManager wsTrustWebRequestManager,
-            IPlatformProxy platformProxy = null)
+            IServiceBundle serviceBundle)
         {
             _requestContext = requestContext;
             _usernameInput = usernameInput;
-            _platformProxy = platformProxy ?? PlatformProxyFactory.GetPlatformProxy();
-            _wsTrustWebRequestManager = wsTrustWebRequestManager;
+            _serviceBundle = serviceBundle;
         }
 
         /// <summary>
@@ -57,7 +54,7 @@ namespace Microsoft.Identity.Core.WsTrust
         /// </summary>
         public async Task<string> GetPlatformUserAsync()
         {
-            string platformUsername = await _platformProxy.GetUserPrincipalNameAsync().ConfigureAwait(false);
+            string platformUsername = await _serviceBundle.PlatformProxy.GetUserPrincipalNameAsync().ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(platformUsername))
             {
                 _requestContext.Logger.Error("Could not find UPN for logged in user.");
@@ -73,7 +70,7 @@ namespace Microsoft.Identity.Core.WsTrust
 
         public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUriPrefix)
         {
-            var userRealmResponse = await _wsTrustWebRequestManager.GetUserRealmAsync(
+            var userRealmResponse = await _serviceBundle.WsTrustWebRequestManager.GetUserRealmAsync(
                 userRealmUriPrefix,
                 _usernameInput.UserName,
                 _requestContext).ConfigureAwait(false);
@@ -99,7 +96,7 @@ namespace Microsoft.Identity.Core.WsTrust
 
             try
             {
-                mexDocument = await _wsTrustWebRequestManager.GetMexDocumentAsync(
+                mexDocument = await _serviceBundle.WsTrustWebRequestManager.GetMexDocumentAsync(
                 federationMetadataUrl, _requestContext).ConfigureAwait(false);
             }
             catch (XmlException ex)
@@ -153,7 +150,7 @@ namespace Microsoft.Identity.Core.WsTrust
 
             try
             {
-                WsTrustResponse wsTrustResponse = await _wsTrustWebRequestManager.GetWsTrustResponseAsync(
+                WsTrustResponse wsTrustResponse = await _serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(
                     endpoint, wsTrustRequestMessage, _requestContext).ConfigureAwait(false);
 
                 _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint");

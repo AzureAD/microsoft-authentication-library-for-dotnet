@@ -194,9 +194,10 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 TestInitialize(httpManager);
 
-                PublicClientApplication app = new PublicClientApplication(httpManager, null, ClientId, RequestAuthority);
+                PublicClientApplication app = new PublicClientApplication(serviceBundle, ClientId, RequestAuthority);
                 MockWebUI ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(AuthorizationStatus.Success,

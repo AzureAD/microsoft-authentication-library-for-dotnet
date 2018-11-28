@@ -41,12 +41,12 @@ namespace Microsoft.Identity.Core.WsTrust
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly ICoreExceptionFactory _coreExceptionFactory;
+        private readonly ICoreExceptionFactory _exceptionFactory;
 
-        public WsTrustWebRequestManager(IHttpManager httpManager, ICoreExceptionFactory coreExceptionFactory = null)
+        public WsTrustWebRequestManager(IHttpManager httpManager, ICoreExceptionFactory exceptionFactory)
         {
             _httpManager = httpManager;
-            _coreExceptionFactory = coreExceptionFactory ?? CoreExceptionFactory.Instance;
+            _exceptionFactory = exceptionFactory;
         }
 
         /// <inheritdoc/>
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Core.WsTrust
             HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw _coreExceptionFactory.GetServiceException(
+                throw _exceptionFactory.GetServiceException(
                     CoreErrorCodes.AccessingWsMetadataExchangeFailed,
                     string.Format(CultureInfo.CurrentCulture,
                         CoreErrorMessages.HttpRequestUnsuccessful,
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Core.WsTrust
                     errorMessage = resp.Body;
                 }
 
-                throw _coreExceptionFactory.GetServiceException(
+                throw _exceptionFactory.GetServiceException(
                     CoreErrorCodes.FederatedServiceReturnedError,
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Core.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
-                throw _coreExceptionFactory.GetClientException(
+                throw _exceptionFactory.GetClientException(
                     CoreErrorCodes.ParsingWsTrustResponseFailed, CoreErrorCodes.ParsingWsTrustResponseFailed, ex);
             }
         }

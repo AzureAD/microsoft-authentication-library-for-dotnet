@@ -30,8 +30,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Core;
 
 namespace Test.MSAL.NET.Unit.RequestsTests
 {
@@ -42,14 +41,12 @@ namespace Test.MSAL.NET.Unit.RequestsTests
     {
         public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
 
-        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
-        private IAadInstanceDiscovery _aadInstanceDiscovery;
+        private IServiceBundle _serviceBundle;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
-            _aadInstanceDiscovery = new AadInstanceDiscovery(new HttpManager(), new TelemetryManager());
+            _serviceBundle = ServiceBundle.CreateDefault();
         }
 
         [TestMethod]
@@ -72,8 +69,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientCredential = credential,
                 SendCertificate = false,
                 Authority = Authority.CreateAuthority(
-                    _validatedAuthoritiesCache,
-                    _aadInstanceDiscovery,
+                    _serviceBundle,
                     MsalTestConstants.AuthorityCommonTenant,
                     false)
             };
@@ -125,8 +121,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                 ClientCredential = credential,
                 SendCertificate = false,
                 Authority = Authority.CreateAuthority(
-                    _validatedAuthoritiesCache,
-                    _aadInstanceDiscovery,
+                    _serviceBundle,
                     MsalTestConstants.AuthorityCommonTenant,
                     false)
             };

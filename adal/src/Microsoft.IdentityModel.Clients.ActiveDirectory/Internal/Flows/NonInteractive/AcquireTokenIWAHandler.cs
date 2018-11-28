@@ -44,7 +44,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private UserAssertion _userAssertion;
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
 
-        public AcquireTokenIWAHandler(IWsTrustWebRequestManager wsTrustWebRequestManager, RequestData requestData, IntegratedWindowsAuthInput iwaInput)
+        public AcquireTokenIWAHandler(IServiceBundle serviceBundle, RequestData requestData, IntegratedWindowsAuthInput iwaInput)
             : base(requestData)
         {
             if (iwaInput == null)
@@ -61,7 +61,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             _iwaInput = iwaInput;
             DisplayableId = iwaInput.UserName;
 
-            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, _iwaInput, wsTrustWebRequestManager);
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, _iwaInput, serviceBundle);
         }
 
         protected override async Task PreRunAsync()

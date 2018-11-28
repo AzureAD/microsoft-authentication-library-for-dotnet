@@ -103,13 +103,14 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
                     httpManager,
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                _cache.AadInstanceDiscovery = aadInstanceDiscovery;
+                _cache.ServiceBundle = serviceBundle;
                 
                 // Check that cache is empty
                 Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
@@ -119,11 +120,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
                 DeviceCodeResult actualDeviceCodeResult = null;
                 var request = new DeviceCodeRequest(
-                    httpManager,
-                    PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
-                    new TelemetryManager(),
-                    _validatedAuthoritiesCache,
-                    aadInstanceDiscovery,
+                    serviceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     result =>
@@ -160,24 +157,20 @@ namespace Test.MSAL.NET.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 const int NumberOfAuthorizationPendingRequestsToInject = 0;
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
                     httpManager,
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                _cache.AadInstanceDiscovery = aadInstanceDiscovery;
+                _cache.ServiceBundle = serviceBundle;
 
                 var cancellationSource = new CancellationTokenSource();
 
                 DeviceCodeResult actualDeviceCodeResult = null;
                 var request = new DeviceCodeRequest(
-                    httpManager,
-                    PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
-                    new TelemetryManager(),
-                    _validatedAuthoritiesCache,
-                    aadInstanceDiscovery,
+                    serviceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     async result =>
@@ -226,6 +219,7 @@ namespace Test.MSAL.NET.Unit.RequestsTests
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 try
                 {
                     const int NumberOfAuthorizationPendingRequestsToInject = 2;
@@ -235,14 +229,10 @@ namespace Test.MSAL.NET.Unit.RequestsTests
                         out HashSet<string> expectedScopes);
 
                     var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                    _cache.AadInstanceDiscovery = aadInstanceDiscovery;
+                    _cache.ServiceBundle = serviceBundle;
 
                     var request = new DeviceCodeRequest(
-                        httpManager,
-                        PlatformProxyFactory.GetPlatformProxy().CryptographyManager,
-                        new TelemetryManager(),
-                        _validatedAuthoritiesCache,
-                        aadInstanceDiscovery,
+                        serviceBundle,
                         parameters,
                         ApiEvent.ApiIds.None,
                         result => Task.FromResult(0));
@@ -290,13 +280,13 @@ namespace Test.MSAL.NET.Unit.RequestsTests
             int numAuthorizationPendingResults,
             out HashSet<string> expectedScopes)
         {
-            var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
+            var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-            var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, MsalTestConstants.AuthorityHomeTenant, false);
+            var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
             _cache = new TokenCache()
             {
                 ClientId = MsalTestConstants.ClientId,
-                AadInstanceDiscovery = aadInstanceDiscovery
+                ServiceBundle = serviceBundle
             };
 
             var parameters = new AuthenticationRequestParameters()

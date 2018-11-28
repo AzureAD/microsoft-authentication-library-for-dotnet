@@ -58,19 +58,17 @@ namespace Microsoft.Identity.Client
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
-        private ITelemetryManager _telemetryManager = new TelemetryManager();
+        private IServiceBundle _serviceBundle = Microsoft.Identity.Core.ServiceBundle.CreateDefault();
 
-        internal ITelemetryManager TelemetryManager
+        internal IServiceBundle ServiceBundle
         {
-            get => _telemetryManager;
+            get => _serviceBundle;
             set
             {
-                _telemetryManager = value;
-                TokenCacheAccessor.TelemetryManager = value;
+                _serviceBundle = value;
+                TokenCacheAccessor.TelemetryManager = _serviceBundle.TelemetryManager;
             }
         }
-
-        internal IAadInstanceDiscovery AadInstanceDiscovery { get; set; }
 
         static TokenCache()
         {
@@ -155,13 +153,11 @@ namespace Microsoft.Identity.Client
         }
 
         internal Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
             // todo: could we look into modifying this to take tenantId to reduce the dependency on IValidatedAuthoritiesCache?
-            var tenantId = Authority.CreateAuthority(validatedAuthoritiesCache, aadInstanceDiscovery, requestParams.TenantUpdatedCanonicalAuthority, false)
+            var tenantId = Authority.CreateAuthority(ServiceBundle, requestParams.TenantUpdatedCanonicalAuthority, false)
                 .GetTenantId();
 
             IdToken idToken = IdToken.Parse(response.IdToken);
@@ -304,7 +300,7 @@ namespace Microsoft.Identity.Client
 
     internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
     {
-        using (TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
+        using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
             new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT }))
         {
             ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -474,7 +470,7 @@ namespace Microsoft.Identity.Client
 
     internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)
     {
-        using (TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
+        using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
             new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
         {
             return await FindRefreshTokenCommonAsync(requestParams).ConfigureAwait(false);
@@ -715,7 +711,7 @@ namespace Microsoft.Identity.Client
         if (authorityType == Core.Instance.AuthorityType.Aad ||
             authorityHost.Host.Equals(MicrosoftLogin, StringComparison.OrdinalIgnoreCase))
         {
-            var instanceDiscoveryMetadata = await AadInstanceDiscovery.GetMetadataEntryAsync(
+            var instanceDiscoveryMetadata = await ServiceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
                 new Uri(authority),
                 validateAuthority,
                 requestContext).ConfigureAwait(false);
@@ -726,7 +722,7 @@ namespace Microsoft.Identity.Client
 
     private InstanceDiscoveryMetadataEntry GetCachedAuthorityMetaData(string authority)
     {
-        if (AadInstanceDiscovery == null)
+        if (ServiceBundle?.AadInstanceDiscovery == null)
         {
             return null;
         }
@@ -735,7 +731,7 @@ namespace Microsoft.Identity.Client
         var authorityType = Authority.GetAuthorityType(authority);
         if (authorityType == Core.Instance.AuthorityType.Aad || authorityType == Core.Instance.AuthorityType.B2C)
         {
-            AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
+            ServiceBundle.AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
         }
         return instanceDiscoveryMetadata;
     }

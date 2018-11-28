@@ -51,22 +51,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
 
         public InteractiveRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
             UIBehavior uiBehavior,
             IWebUI webUi)
             : this(
-                httpManager,
-                cryptographyManager,
-                telemetryManager,
-                validatedAuthoritiesCache,
-                aadInstanceDiscovery,
+                serviceBundle,
                 authenticationRequestParameters,
                 apiId,
                 extraScopesToConsent,
@@ -77,18 +69,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         public InteractiveRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
             string loginHint,
             UIBehavior uiBehavior,
             IWebUI webUi)
-            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
             webUi?.ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
@@ -135,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var authorizationUri = CreateAuthorizationUri(true, true);
 
             var uiEvent = new UiEvent();
-            using (TelemetryManager.CreateTelemetryHelper(
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 AuthenticationRequestParameters.ClientId,
                 uiEvent))
@@ -157,8 +145,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             //this method is used in confidential clients to create authorization URLs.
             await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(
-                HttpManager,
-                TelemetryManager,
                 AuthenticationRequestParameters.LoginHint,
                 AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
             return CreateAuthorizationUri();
@@ -183,8 +169,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (addVerifier)
             {
-                _codeVerifier = CryptographyManager.GenerateCodeVerifier();
-                string codeVerifierHash = CryptographyManager.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
+                _codeVerifier = ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
+                string codeVerifierHash = ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
 
                 requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;

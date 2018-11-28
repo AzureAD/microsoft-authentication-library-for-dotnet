@@ -112,13 +112,13 @@ namespace Microsoft.Identity.Client
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : this(null, null, clientId, authority, redirectUri, clientCredential, userTokenCache, appTokenCache)
+            : this(null, clientId, authority, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
         }
 
-        internal ConfidentialClientApplication(IHttpManager httpManager, ITelemetryManager telemetryManager, string clientId, string authority, string redirectUri,
+        internal ConfidentialClientApplication(IServiceBundle serviceBundle, string clientId, string authority, string redirectUri,
                                                ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : base(clientId, authority, redirectUri, true, httpManager, telemetryManager)
+            : base(clientId, authority, redirectUri, true, serviceBundle)
         {
             ClientCredential = clientCredential;
             UserTokenCache = userTokenCache;
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="AcquireTokenOnBehalfOfAsync(IEnumerable{string}, UserAssertion, string)"/> for the on-behalf-of flow when specifying the authority
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, false)
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
             string authority)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, false)
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, true)
@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client
         async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
             string authority)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, true)
@@ -311,14 +311,14 @@ namespace Microsoft.Identity.Client
         public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string loginHint,
             string extraQueryParameters)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var requestParameters =
                 CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParameters.ClientId = ClientId;
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler =
-                new InteractiveRequest(HttpManager, CryptographyManager, TelemetryManager, ValidatedAuthoritiesCache, AadInstanceDiscovery, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
+                new InteractiveRequest(ServiceBundle, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
             return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
 
@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Client
         public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string redirectUri, string loginHint,
             string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             var requestParameters = CreateRequestParameters(authorityInstance, scopes, null,
                 UserTokenCache);
             requestParameters.RedirectUri = new Uri(redirectUri);
@@ -349,11 +349,7 @@ namespace Microsoft.Identity.Client
             requestParameters.ExtraQueryParameters = extraQueryParameters;
 
             var handler = new InteractiveRequest(
-                HttpManager,
-                CryptographyManager,
-                TelemetryManager,
-                ValidatedAuthoritiesCache,
-                AadInstanceDiscovery,
+                ServiceBundle,
                 requestParameters,
                 ApiEvent.ApiIds.None,
                 extraScopesToConsent,
@@ -376,25 +372,20 @@ namespace Microsoft.Identity.Client
                 if (_appTokenCache != null)
                 {
                     _appTokenCache.ClientId = ClientId;
-                    _appTokenCache.TelemetryManager = TelemetryManager;
-                    _appTokenCache.AadInstanceDiscovery = AadInstanceDiscovery;
+                    _appTokenCache.ServiceBundle = ServiceBundle;
                 }
             }
         }
 
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scopes, bool forceRefresh, ApiEvent.ApiIds apiId, bool sendCertificate)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scopes, null,
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
             parameters.SendCertificate = sendCertificate;
             var handler = new ClientCredentialRequest(
-                HttpManager,
-                CryptographyManager,
-                TelemetryManager,
-                ValidatedAuthoritiesCache,
-                AadInstanceDiscovery,
+                ServiceBundle,
                 parameters,
                 apiId,
                 forceRefresh);
@@ -409,11 +400,7 @@ namespace Microsoft.Identity.Client
             requestParams.UserAssertion = userAssertion;
             requestParams.SendCertificate = sendCertificate;
             var handler = new OnBehalfOfRequest(
-                HttpManager,
-                CryptographyManager,
-                TelemetryManager,
-                ValidatedAuthoritiesCache,
-                AadInstanceDiscovery,
+                ServiceBundle,
                 requestParams,
                 apiId);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
@@ -422,17 +409,13 @@ namespace Microsoft.Identity.Client
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
             IEnumerable<string> scopes, Uri redirectUri, ApiEvent.ApiIds apiId, bool sendCertificate)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;
             requestParams.SendCertificate = sendCertificate;
             var handler = new AuthorizationCodeRequest(
-                HttpManager,
-                CryptographyManager,
-                TelemetryManager,
-                ValidatedAuthoritiesCache,
-                AadInstanceDiscovery,
+                ServiceBundle,
                 requestParams,
                 apiId);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);

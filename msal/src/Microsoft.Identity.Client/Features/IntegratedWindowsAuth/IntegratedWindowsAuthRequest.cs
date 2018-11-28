@@ -32,7 +32,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
@@ -49,22 +48,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly IntegratedWindowsAuthInput _iwaInput;
 
         public IntegratedWindowsAuthRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
-            IWsTrustWebRequestManager wsTrustWebRequestManager,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IntegratedWindowsAuthInput iwaInput)
-            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             _iwaInput = iwaInput ?? throw new ArgumentNullException(nameof(iwaInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 _iwaInput,
-                wsTrustWebRequestManager);
+                serviceBundle);
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)

@@ -40,14 +40,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class AuthorizationCodeRequest : RequestBase
     {
         public AuthorizationCodeRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
-            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
             {

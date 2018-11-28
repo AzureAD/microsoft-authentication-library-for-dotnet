@@ -43,14 +43,9 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-B2CLogin.json")]
     public class B2CAuthorityTests
     {
-        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
-        private IAadInstanceDiscovery _aadInstanceDiscovery;
-
         [TestInitialize]
         public void TestInitialize()
         {
-            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
-            _aadInstanceDiscovery = new AadInstanceDiscovery(new HttpManager(), new TelemetryManager());
         }
 
         [TestCleanup]
@@ -64,15 +59,14 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             try
             {
-                var instance = Authority.CreateAuthority(_validatedAuthoritiesCache, _aadInstanceDiscovery, "https://login.microsoftonline.in/tfp/", false);
+                var serviceBundle = ServiceBundle.CreateDefault();
+                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/tfp/", false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
                 Task.Run(
                     async () =>
                     {
                         await instance.ResolveEndpointsAsync(
-                            null,
-                            null,
                             null,
                             new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
@@ -91,6 +85,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -101,7 +96,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2CLogin.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(_validatedAuthoritiesCache, _aadInstanceDiscovery,
+                Authority instance = Authority.CreateAuthority(serviceBundle,
                     "https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
@@ -109,8 +104,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     async () =>
                     {
                         await instance.ResolveEndpointsAsync(
-                            httpManager,
-                            new TelemetryManager(),
                             null,
                             new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
@@ -131,6 +124,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -142,8 +137,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     });
 
                 Authority instance = Authority.CreateAuthority(
-                    _validatedAuthoritiesCache, 
-                    _aadInstanceDiscovery, 
+                    serviceBundle, 
                     "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.B2C);
@@ -151,8 +145,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     async () =>
                     {
                         await instance.ResolveEndpointsAsync(
-                            httpManager,
-                            new TelemetryManager(),
                             null,
                             new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
@@ -171,6 +163,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("B2CAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
+            var serviceBundle = ServiceBundle.CreateDefault();
+
             const string UriNoPort = CoreTestConstants.B2CAuthority;
             const string UriNoPortTailSlash = CoreTestConstants.B2CAuthority;
 
@@ -180,16 +174,16 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/tfp/tenant/policy/";
             const string UriVanityPort = CoreTestConstants.B2CLoginAuthority;
 
-            var authority = new B2CAuthority(_validatedAuthoritiesCache, UriNoPort, false, _aadInstanceDiscovery);
+            var authority = new B2CAuthority(serviceBundle, UriNoPort, false);
             Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = new B2CAuthority(_validatedAuthoritiesCache, UriDefaultPort, false, _aadInstanceDiscovery);
+            authority = new B2CAuthority(serviceBundle, UriDefaultPort, false);
             Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = new B2CAuthority(_validatedAuthoritiesCache, UriCustomPort, false, _aadInstanceDiscovery);
+            authority = new B2CAuthority(serviceBundle, UriCustomPort, false);
             Assert.AreEqual(UriCustomPortTailSlash, authority.CanonicalAuthority);
 
-            authority = new B2CAuthority(_validatedAuthoritiesCache, UriVanityPort, false, _aadInstanceDiscovery);
+            authority = new B2CAuthority(serviceBundle, UriVanityPort, false);
             Assert.AreEqual(UriVanityPort, authority.CanonicalAuthority);
         }
     }

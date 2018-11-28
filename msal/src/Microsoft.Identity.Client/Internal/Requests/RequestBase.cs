@@ -54,34 +54,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _tokenCache = value;
                 if (_tokenCache != null)
                 {
-                    _tokenCache.TelemetryManager = TelemetryManager;
-                    _tokenCache.AadInstanceDiscovery = AadInstanceDiscovery;
+                    _tokenCache.ServiceBundle = ServiceBundle;
                 }
             }
         }
 
 
         private readonly ApiEvent.ApiIds _apiId;
-        protected IHttpManager HttpManager { get; }
-        protected ICryptographyManager CryptographyManager { get; }
-        protected ITelemetryManager TelemetryManager { get; }
-        protected IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
-        protected IAadInstanceDiscovery AadInstanceDiscovery { get; }
+        protected IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(
-            IHttpManager httpManager, 
-            ICryptographyManager cryptographyManager, 
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
         {
-            HttpManager = httpManager;
-            CryptographyManager = cryptographyManager;
-            TelemetryManager = telemetryManager;
-            ValidatedAuthoritiesCache = validatedAuthoritiesCache;
-            AadInstanceDiscovery = aadInstanceDiscovery;
+            ServiceBundle = serviceBundle;
             TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
             
@@ -156,7 +143,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
             var apiEvent = InitializeApiEvent(accountId);
 
-            using (TelemetryManager.CreateTelemetryHelper(
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 AuthenticationRequestParameters.ClientId,
                 apiEvent,
@@ -195,7 +182,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private ApiEvent InitializeApiEvent(string accountId)
         {
-            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = TelemetryManager.GenerateNewRequestId();
+            AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
             var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger)
             {
                 ApiId = _apiId,
@@ -268,7 +255,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = TokenCache.SaveAccessAndRefreshToken(ValidatedAuthoritiesCache, AadInstanceDiscovery, AuthenticationRequestParameters, msalTokenResponse);
+                var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, msalTokenResponse);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else
@@ -292,7 +279,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             await AuthenticationRequestParameters.Authority
-                .ResolveEndpointsAsync(HttpManager, TelemetryManager, AuthenticationRequestParameters.LoginHint,
+                .ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint,
                     AuthenticationRequestParameters.RequestContext)
                 .ConfigureAwait(false);
         }
@@ -301,7 +288,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters, 
             CancellationToken cancellationToken)
         {
-            OAuth2Client client = new OAuth2Client(HttpManager, TelemetryManager);
+            OAuth2Client client = new OAuth2Client(ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
             foreach (var entry in AuthenticationRequestParameters.ToParameters())

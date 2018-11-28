@@ -40,15 +40,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class SilentRequest : RequestBase
     {
         public SilentRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             bool forceRefresh)
-            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             ForceRefresh = forceRefresh;
         }

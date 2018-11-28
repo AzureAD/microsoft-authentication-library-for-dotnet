@@ -50,22 +50,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private readonly UsernamePasswordInput _usernamePasswordInput;
 
         public UsernamePasswordRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
-            IWsTrustWebRequestManager wsTrustWebRequestManager,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             UsernamePasswordInput usernamePasswordInput)
-            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 usernamePasswordInput,
-                wsTrustWebRequestManager);
+                serviceBundle);
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)

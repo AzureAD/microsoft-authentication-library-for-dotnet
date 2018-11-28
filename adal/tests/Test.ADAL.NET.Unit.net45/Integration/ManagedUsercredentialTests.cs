@@ -68,6 +68,8 @@ namespace Test.ADAL.NET.Integration
             // Arrange
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(
                         AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
@@ -87,7 +89,7 @@ namespace Test.ADAL.NET.Integration
 
                 TokenCache cache = new TokenCache();
                 var context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     cache);
@@ -114,6 +116,8 @@ namespace Test.ADAL.NET.Integration
             // Arrange
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(
                         AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
@@ -133,7 +137,7 @@ namespace Test.ADAL.NET.Integration
 
                 TokenCache cache = new TokenCache();
                 var context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     cache);
@@ -161,6 +165,8 @@ namespace Test.ADAL.NET.Integration
         {
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(
                         AdalTestConstants.GetUserRealmEndpoint(AdalTestConstants.DefaultAuthorityCommonTenant) + "/" +
@@ -194,7 +200,7 @@ namespace Test.ADAL.NET.Integration
                 TokenCache cache = new TokenCache();
 
                 var context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     cache);
@@ -254,6 +260,7 @@ namespace Test.ADAL.NET.Integration
         {
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler(AdalTestConstants.DefaultAuthorityCommonTenant + "userrealm/user2@id.com")
@@ -287,7 +294,7 @@ namespace Test.ADAL.NET.Integration
                     });
 
                 var context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     new TokenCache());
@@ -339,8 +346,10 @@ namespace Test.ADAL.NET.Integration
         {
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 var context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityHomeTenant,
                     AuthorityValidationType.True,
                     new TokenCache());
@@ -416,8 +425,10 @@ namespace Test.ADAL.NET.Integration
         {
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 AuthenticationContext context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityCommonTenant,
                     AuthorityValidationType.NotProvided,
                     TokenCache.DefaultShared);
@@ -459,8 +470,10 @@ namespace Test.ADAL.NET.Integration
 
             using (var httpManager = new Microsoft.Identity.Core.Unit.Mocks.MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 AuthenticationContext context = new AuthenticationContext(
-                    httpManager,
+                    serviceBundle,
                     AdalTestConstants.DefaultAuthorityCommonTenant,
                     AuthorityValidationType.NotProvided,
                     TokenCache.DefaultShared);

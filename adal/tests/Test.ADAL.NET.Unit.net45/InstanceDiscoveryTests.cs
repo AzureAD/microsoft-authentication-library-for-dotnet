@@ -296,6 +296,8 @@ namespace Test.ADAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 string host = "login.windows.net";
                 string preferredNetwork = "login.microsoftonline.com";
                 var authenticator = new Authenticator($"https://{host}/contoso.com/", false);
@@ -324,7 +326,7 @@ namespace Test.ADAL.NET.Unit
                 };
 
                 var handler = new AcquireTokenUsernamePasswordHandler(
-                        new WsTrustWebRequestManager(httpManager),
+                        serviceBundle,
                         requestData,
                         new UsernamePasswordInput("johndoe@contoso.com", "fakepassword"));
 

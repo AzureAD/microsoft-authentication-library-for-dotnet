@@ -197,13 +197,14 @@ namespace Test.MSAL.NET.Unit
             // Arrange
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
                 AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(httpManager);
 
                 var app =
-                    new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                    new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                         ClientApplicationBase.DefaultAuthority);
 
                 // Act
@@ -225,6 +226,7 @@ namespace Test.MSAL.NET.Unit
             // Arrange
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
 
@@ -242,7 +244,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 var app =
-                    new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                    new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                         ClientApplicationBase.DefaultAuthority);
 
                 // Act
@@ -273,6 +275,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
@@ -282,7 +285,7 @@ namespace Test.MSAL.NET.Unit
                 AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityHomeTenant);
 
                 var app =
-                    new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                    new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                         ClientApplicationBase.DefaultAuthority);
                 var result = await app
                     .AcquireTokenByIntegratedWindowsAuthAsync(MsalTestConstants.Scope, MsalTestConstants.User.Username)
@@ -304,11 +307,12 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseForFederatedAccounts(httpManager);
 
                 var app =
-                    new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                    new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                         ClientApplicationBase.DefaultAuthority);
 
                 var result = await app.AcquireTokenByUsernamePasswordAsync(
@@ -337,6 +341,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
@@ -356,7 +361,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -392,6 +397,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
@@ -402,7 +408,7 @@ namespace Test.MSAL.NET.Unit
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -436,6 +442,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
@@ -446,7 +453,7 @@ namespace Test.MSAL.NET.Unit
 
                 _cache.ClientId = MsalTestConstants.ClientId;
 
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -482,6 +489,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
@@ -492,7 +500,7 @@ namespace Test.MSAL.NET.Unit
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -530,6 +538,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
@@ -546,7 +555,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -573,6 +582,7 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
@@ -600,7 +610,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -627,6 +637,7 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
@@ -644,8 +655,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 var app = new PublicClientApplication(
-                    httpManager,
-                    _telemetryManager,
+                    serviceBundle,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority);
 
@@ -667,11 +677,12 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache
@@ -700,6 +711,7 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
@@ -721,7 +733,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 _cache.ClientId = MsalTestConstants.ClientId;
-                var app = new PublicClientApplication(httpManager, _telemetryManager, MsalTestConstants.ClientId,
+                var app = new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
                     UserTokenCache = _cache

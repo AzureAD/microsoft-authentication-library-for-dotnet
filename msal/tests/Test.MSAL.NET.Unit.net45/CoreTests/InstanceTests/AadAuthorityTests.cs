@@ -66,6 +66,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 //add mock response for instance validation
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -94,17 +96,13 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-
-                Authority instance = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, "https://login.microsoftonline.in/mytenant.com", true);
+                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 Task.Run(
                     async () =>
                     {
                         await instance.ResolveEndpointsAsync(
-                            httpManager, 
-                            new TelemetryManager(), 
                             null, 
                             new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
@@ -126,6 +124,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -136,16 +136,13 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, "https://login.microsoftonline.in/mytenant.com", false);
+                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 Task.Run(
                     async () =>
                     {
                         await instance.ResolveEndpointsAsync(
-                            httpManager, 
-                            new TelemetryManager(), 
                             null, 
                             new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
@@ -166,6 +163,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 //add mock response for instance validation
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -190,8 +189,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                             "4fa2-4f35-a59b-54b6f91a9c94\"}")
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, "https://login.microsoft0nline.com/mytenant.com", true);
+                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 try
@@ -200,8 +198,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         async () =>
                         {
                             await instance.ResolveEndpointsAsync(
-                                httpManager,
-                                new TelemetryManager(), 
                                 null,
                                 new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
@@ -221,6 +217,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 //add mock response for instance validation
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -236,7 +234,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     });
 
                 var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, "https://login.microsoft0nline.com/mytenant.com", true);
+                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 try
@@ -245,8 +243,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         async () =>
                         {
                             await instance.ResolveEndpointsAsync(
-                                httpManager,
-                                new TelemetryManager(), 
                                 null,
                                 new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
@@ -265,6 +261,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -277,7 +275,7 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                     });
 
                 var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, "https://login.microsoftonline.in/mytenant.com", false);
+                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 try
@@ -286,8 +284,6 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
                         async () =>
                         {
                             await instance.ResolveEndpointsAsync(
-                                httpManager,
-                                new TelemetryManager(), 
                                 null,
                                 new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                         }).GetAwaiter().GetResult();
@@ -304,6 +300,8 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
+            var serviceBundle = ServiceBundle.CreateDefault();
+
             const string UriNoPort = "https://login.microsoftonline.in/mytenant.com";
             const string UriNoPortTailSlash = "https://login.microsoftonline.in/mytenant.com/";
 
@@ -312,14 +310,13 @@ namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
             const string UriCustomPort = "https://login.microsoftonline.in:444/mytenant.com";
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
 
-            var aadInstanceDiscovery = new AadInstanceDiscovery(new HttpManager(), new TelemetryManager());
-            var authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, UriNoPort, false);
+            var authority = Authority.CreateAuthority(serviceBundle, UriNoPort, false);
             Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, UriDefaultPort, false);
+            authority = Authority.CreateAuthority(serviceBundle, UriDefaultPort, false);
             Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(_validatedAuthoritiesCache, aadInstanceDiscovery, UriCustomPort, false);
+            authority = Authority.CreateAuthority(serviceBundle, UriCustomPort, false);
             Assert.AreEqual(UriCustomPortTailSlash, authority.CanonicalAuthority);
         }
 

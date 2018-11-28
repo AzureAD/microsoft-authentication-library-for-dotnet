@@ -64,17 +64,12 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
-        internal IHttpManager HttpManager { get; }
-        internal ICryptographyManager CryptographyManager { get; }
-        internal IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
-        internal ITelemetryManager TelemetryManager { get; }
-        internal IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
-        internal IAadInstanceDiscovery AadInstanceDiscovery { get; }
+        internal IServiceBundle ServiceBundle { get; }
 
         internal ITelemetryReceiver TelemetryReceiver
         {
-            get => TelemetryManager.TelemetryReceiver;
-            set => TelemetryManager.TelemetryReceiver = value;
+            get => ServiceBundle.TelemetryManager.TelemetryReceiver;
+            set => ServiceBundle.TelemetryManager.TelemetryReceiver = value;
         }
 
         ///  <summary>
@@ -98,20 +93,14 @@ namespace Microsoft.Identity.Client
         ///  <param name="validateAuthority">Boolean telling MSAL.NET if the authority needs to be verified against a list of known authorities.
         ///  This should be set to <c>false</c> for Azure AD B2C authorities as those are customer specific (a list of known B2C authorities
         ///  cannot be maintained by MSAL.NET</param>
-        ///  <param name="httpManager"></param>
-        ///  <param name="telemetryManager"></param>
+        /// <param name="serviceBundle"></param>
         internal ClientApplicationBase(string clientId, string authority, string redirectUri,
-            bool validateAuthority, IHttpManager httpManager, ITelemetryManager telemetryManager)
+            bool validateAuthority, IServiceBundle serviceBundle)
         {
-            HttpManager = httpManager ?? new HttpManager();
-            CryptographyManager = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
-            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
-            TelemetryManager = telemetryManager ?? new TelemetryManager(Telemetry.GetInstance());
-            ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(false);
-            AadInstanceDiscovery = new AadInstanceDiscovery(HttpManager, TelemetryManager, false);
+            ServiceBundle = serviceBundle ?? Microsoft.Identity.Core.ServiceBundle.CreateDefault();
 
             ClientId = clientId;
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, validateAuthority);
+            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
@@ -186,8 +175,7 @@ namespace Microsoft.Identity.Client
                 if (_userTokenCache != null)
                 {
                     _userTokenCache.ClientId = ClientId;
-                    _userTokenCache.TelemetryManager = TelemetryManager;
-                    _userTokenCache.AadInstanceDiscovery = AadInstanceDiscovery;
+                    _userTokenCache.ServiceBundle = ServiceBundle;
                 }
             }
         }
@@ -289,7 +277,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = null;
             if (!string.IsNullOrEmpty(authority))
             {
-                authorityInstance = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, authority, ValidateAuthority);
+                authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             }
 
             return
@@ -315,7 +303,7 @@ namespace Microsoft.Identity.Client
 
         internal Authority GetAuthority(IAccount account)
         {
-            var authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            var authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var tenantId = authority.GetTenantId();
 
             if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId)
@@ -341,11 +329,7 @@ namespace Microsoft.Identity.Client
             }
 
             var handler = new SilentRequest(
-                HttpManager,
-                CryptographyManager,
-                TelemetryManager,
-                ValidatedAuthoritiesCache,
-                AadInstanceDiscovery,
+                ServiceBundle,
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 apiId,
                 forceRefresh);

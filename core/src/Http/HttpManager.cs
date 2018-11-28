@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Core.Http
         private readonly ICoreExceptionFactory _coreExceptionFactory;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public HttpManager(ICoreExceptionFactory coreExceptionFactory = null, IHttpClientFactory httpClientFactory = null)
+        public HttpManager(ICoreExceptionFactory coreExceptionFactory, IHttpClientFactory httpClientFactory = null)
         {
             _coreExceptionFactory = coreExceptionFactory ?? CoreExceptionFactory.Instance;
             _httpClientFactory = httpClientFactory ?? new HttpClientFactory();

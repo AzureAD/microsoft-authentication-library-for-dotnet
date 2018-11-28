@@ -42,14 +42,13 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Default authority to be used for the application</param>
         /// <param name="userTokenCache">Instance of TokenCache.</param>
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
-            : this(null, null, clientId, authority, userTokenCache)
+            : this(null, clientId, authority, userTokenCache)
         {
             UserTokenCache = userTokenCache;
         }
 
         internal PublicClientApplication(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
+            IServiceBundle serviceBundle,
             string clientId,
             string authority,
             TokenCache userTokenCache)
@@ -58,8 +57,7 @@ namespace Microsoft.Identity.Client
                 authority,
                 PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId),
                 true,
-                httpManager,
-                telemetryManager)
+                serviceBundle)
         {
             UserTokenCache = userTokenCache;
         }

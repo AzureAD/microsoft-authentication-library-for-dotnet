@@ -143,17 +143,13 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ValidatedAuthoritiesCache, AadInstanceDiscovery, Authority, ValidateAuthority);
+            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
 
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;
 
             var handler = new DeviceCodeRequest(
-                HttpManager,
-                CryptographyManager,
-                TelemetryManager,
-                ValidatedAuthoritiesCache,
-                AadInstanceDiscovery,
+                ServiceBundle,
                 requestParams,
                 ApiEvent.ApiIds.None,
                 deviceCodeResultCallback);

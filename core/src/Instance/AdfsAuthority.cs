@@ -32,9 +32,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -43,8 +41,8 @@ namespace Microsoft.Identity.Core.Instance
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
 
-        public AdfsAuthority(IValidatedAuthoritiesCache validatedAuthoritiesCache, string authority, bool validateAuthority)
-            : base(validatedAuthoritiesCache, authority, validateAuthority)
+        public AdfsAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
+            : base(serviceBundle, authority, validateAuthority)
         {
             AuthorityType = AuthorityType.Adfs;
         }
@@ -53,12 +51,12 @@ namespace Microsoft.Identity.Core.Instance
         {
             if (string.IsNullOrEmpty(userPrincipalName))
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw ServiceBundle.ExceptionFactory.GetClientException(
                     CoreErrorCodes.UpnRequired,
                     CoreErrorMessages.UpnRequiredForAuthroityValidation);
             }
 
-            if (ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out Authority authority))
+            if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out Authority authority))
             {
                 var auth = (AdfsAuthority)authority;
                 return auth._validForDomainsList.Contains(GetDomainFromUpn(userPrincipalName));
@@ -68,23 +66,19 @@ namespace Microsoft.Identity.Core.Instance
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext)
         {
             if (ValidateAuthority)
             {
                 var drsResponse = await GetMetadataFromEnrollmentServerAsync(
-                                          httpManager, 
-                                          telemetryManager,
                                           userPrincipalName, 
                                           requestContext)
                                       .ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
-                    CoreExceptionFactory.Instance.GetServiceException(
+                    ServiceBundle.ExceptionFactory.GetServiceException(
                         drsResponse.Error,
                         drsResponse.ErrorDescription,
                         ExceptionDetail.FromDrsResponse(drsResponse));
@@ -92,7 +86,7 @@ namespace Microsoft.Identity.Core.Instance
 
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
-                    throw CoreExceptionFactory.Instance.GetServiceException(
+                    throw ServiceBundle.ExceptionFactory.GetServiceException(
                         CoreErrorCodes.MissingPassiveAuthEndpoint,
                         CoreErrorMessages.CannotFindTheAuthEndpont,
                         ExceptionDetail.FromDrsResponse(drsResponse));
@@ -107,11 +101,11 @@ namespace Microsoft.Identity.Core.Instance
                     resource);
 
                 var httpResponse =
-                    await httpManager.SendGetAsync(new Uri(webfingerUrl), null, requestContext).ConfigureAwait(false);
+                    await ServiceBundle.HttpManager.SendGetAsync(new Uri(webfingerUrl), null, requestContext).ConfigureAwait(false);
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw CoreExceptionFactory.Instance.GetServiceException(
+                    throw ServiceBundle.ExceptionFactory.GetServiceException(
                         CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.AuthorityValidationFailed,
                         httpResponse);
@@ -122,7 +116,7 @@ namespace Microsoft.Identity.Core.Instance
                         a => a.Rel.Equals(DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase)) == null)
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(
+                    throw ServiceBundle.ExceptionFactory.GetClientException(
                         CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.InvalidAuthorityOpenId);
                 }
@@ -139,18 +133,16 @@ namespace Microsoft.Identity.Core.Instance
         protected override void AddToValidatedAuthorities(string userPrincipalName)
         {
             var authorityInstance = this;
-            if (ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out Authority authority))
+            if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out Authority authority))
             {
                 authorityInstance = (AdfsAuthority)authority;
             }
 
             authorityInstance._validForDomainsList.Add(GetDomainFromUpn(userPrincipalName));
-            ValidatedAuthoritiesCache.TryAddValue(CanonicalAuthority, authorityInstance);
+            ServiceBundle.ValidatedAuthoritiesCache.TryAddValue(CanonicalAuthority, authorityInstance);
         }
 
         private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext)
         {
@@ -158,8 +150,6 @@ namespace Microsoft.Identity.Core.Instance
             {
                 //attempt to connect to on-premise enrollment server first.
                 return await QueryEnrollmentServerEndpointAsync(
-                           httpManager,
-                           telemetryManager,
                            string.Format(
                                CultureInfo.InvariantCulture,
                                "https://enterpriseregistration.{0}/enrollmentserver/contract",
@@ -174,8 +164,6 @@ namespace Microsoft.Identity.Core.Instance
             }
 
             return await QueryEnrollmentServerEndpointAsync(
-                       httpManager,
-                       telemetryManager,
                        string.Format(
                            CultureInfo.InvariantCulture,
                            "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
@@ -184,9 +172,9 @@ namespace Microsoft.Identity.Core.Instance
         }
 
         private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(
-            IHttpManager httpManager, ITelemetryManager telemetryManager, string endpoint, RequestContext requestContext)
+            string endpoint, RequestContext requestContext)
         {
-            var client = new OAuth2Client(httpManager, telemetryManager);
+            var client = new OAuth2Client(ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
             client.AddQueryParameter("api-version", "1.0");
             return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext)
                                .ConfigureAwait(false);

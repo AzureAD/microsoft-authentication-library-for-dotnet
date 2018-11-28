@@ -68,11 +68,11 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 TestInitialize(httpManager);
 
                 PublicClientApplication app = new PublicClientApplication(
-                    httpManager,
-                    null,
+                    serviceBundle,
                     MsalTestConstants.ClientId,
                     string.Format(
                         CultureInfo.InvariantCulture,

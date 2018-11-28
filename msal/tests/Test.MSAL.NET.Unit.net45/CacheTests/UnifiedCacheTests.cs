@@ -57,11 +57,12 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = new PublicClientApplication(
-                    httpManager,
-                    null,
+                    serviceBundle,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
@@ -126,6 +127,7 @@ namespace Test.MSAL.NET.Unit
 
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 // login to app
                 var tokenCache = new TokenCache();
                 tokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
@@ -138,8 +140,7 @@ namespace Test.MSAL.NET.Unit
                     });
 
                 PublicClientApplication app = new PublicClientApplication(
-                    httpManager,
-                    new TelemetryManager(),
+                    serviceBundle,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {
@@ -172,8 +173,7 @@ namespace Test.MSAL.NET.Unit
                 });
 
                 PublicClientApplication app1 = new PublicClientApplication(
-                    httpManager,
-                    new TelemetryManager(),
+                    serviceBundle,
                     MsalTestConstants.ClientId_1,
                     ClientApplicationBase.DefaultAuthority)
                 {
@@ -214,9 +214,9 @@ namespace Test.MSAL.NET.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 var app = new PublicClientApplication(
-                    httpManager,
-                    null,
+                    serviceBundle,
                     MsalTestConstants.ClientId,
                     ClientApplicationBase.DefaultAuthority)
                 {

@@ -34,7 +34,6 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
 
@@ -45,15 +44,11 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
         private readonly Func<DeviceCodeResult, Task> _deviceCodeResultCallback;
 
         public DeviceCodeRequest(
-            IHttpManager httpManager,
-            ICryptographyManager cryptographyManager,
-            ITelemetryManager telemetryManager,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache,
-            IAadInstanceDiscovery aadInstanceDiscovery,
+            IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
-            : base(httpManager, cryptographyManager, telemetryManager, validatedAuthoritiesCache, aadInstanceDiscovery, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             _deviceCodeResultCallback = deviceCodeResultCallback;
         }
@@ -62,7 +57,7 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
-            var client = new OAuth2Client(HttpManager, TelemetryManager);
+            var client = new OAuth2Client(ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
 
             var deviceCodeScopes = new HashSet<string>();
             deviceCodeScopes.UnionWith(AuthenticationRequestParameters.Scope);

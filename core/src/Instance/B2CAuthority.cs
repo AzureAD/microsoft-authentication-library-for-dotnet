@@ -27,10 +27,7 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Telemetry;
 
 namespace Microsoft.Identity.Core.Instance
 {
@@ -42,8 +39,8 @@ namespace Microsoft.Identity.Core.Instance
         public const string OpenIdConfigurationEndpoint = "v2.0/.well-known/openid-configuration";
         public const string B2CTrustedHost = "b2clogin.com";
 
-        internal B2CAuthority(IValidatedAuthoritiesCache validatedAuthoritiesCache, string authority, bool validateAuthority, IAadInstanceDiscovery aadInstanceDiscovery)
-            : base(validatedAuthoritiesCache, authority, validateAuthority, aadInstanceDiscovery)
+        internal B2CAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
+            : base(serviceBundle, authority, validateAuthority)
         {
             AuthorityType = AuthorityType.B2C;
             // Setting this to false as B2C authorities are customer specific
@@ -70,7 +67,7 @@ namespace Microsoft.Identity.Core.Instance
             }
             else
             {
-                var metadata = await AadInstanceDiscovery
+                var metadata = await ServiceBundle.AadInstanceDiscovery
                                         .GetMetadataEntryAsync(
                                      new Uri(CanonicalAuthority),
                                      ValidateAuthority,
@@ -104,8 +101,6 @@ namespace Microsoft.Identity.Core.Instance
         }
 
         protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
-            IHttpManager httpManager,
-            ITelemetryManager telemetryManager,
             string userPrincipalName,
             RequestContext requestContext)
         {

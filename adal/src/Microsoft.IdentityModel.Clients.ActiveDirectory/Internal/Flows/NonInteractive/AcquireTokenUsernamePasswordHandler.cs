@@ -41,7 +41,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
         private UserAssertion _userAssertion;
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
 
-        public AcquireTokenUsernamePasswordHandler(IWsTrustWebRequestManager wsTrustWebRequestManager, RequestData requestData, UsernamePasswordInput userPasswordInput)
+        public AcquireTokenUsernamePasswordHandler(IServiceBundle serviceBundle, RequestData requestData, UsernamePasswordInput userPasswordInput)
             : base(requestData)
         {
             // We enable ADFS support only when it makes sense to do so
@@ -51,7 +51,7 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory.Internal.Flows
             }
 
             _userPasswordInput = userPasswordInput ?? throw new ArgumentNullException(nameof(userPasswordInput));
-            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, _userPasswordInput, wsTrustWebRequestManager);
+            _commonNonInteractiveHandler = new CommonNonInteractiveHandler(RequestContext, _userPasswordInput, serviceBundle);
             DisplayableId = userPasswordInput.UserName;
         }
 
