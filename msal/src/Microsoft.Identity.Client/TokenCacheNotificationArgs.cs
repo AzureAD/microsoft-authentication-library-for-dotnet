@@ -48,5 +48,11 @@ namespace Microsoft.Identity.Client
         /// Gets the account involved in the cache transaction.
         /// </summary>
         public IAccount Account { get; internal set; }
+
+        /// <summary>
+        /// Indicates whether the state of the cache has changed, for example when tokens are being added or removed. 
+        /// Not all cache operations modify the state of the cache.
+        /// </summary>
+        public bool HasStateChanged { get; internal set; }
     }
 }

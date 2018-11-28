@@ -120,7 +120,7 @@ namespace Test.MSAL.NET.Integration
 
         private void MsalDoAfter(msal::Microsoft.Identity.Client.TokenCacheNotificationArgs args)
         {
-            if (args.TokenCache.HasStateChanged)
+            if (args.HasStateChanged)
             {
                 msal::Microsoft.Identity.Core.Cache.CacheData cacheData =
                     msal::Microsoft.Identity.Client.TokenCacheExtensions.SerializeUnifiedAndAdalCache(args.TokenCache);

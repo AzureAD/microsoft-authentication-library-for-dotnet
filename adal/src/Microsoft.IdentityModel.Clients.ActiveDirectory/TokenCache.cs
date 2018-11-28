@@ -107,7 +107,6 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         /// </summary>
         public TokenCacheNotification BeforeAccess { get; set; }
 
-
         /// <summary>
         /// Notification method called before any library method writes to the cache. This notification can be used to reload
         /// the cache state from a row in database and lock that row. That database row can then be unlocked in <see cref="AfterAccess"/> notification.
@@ -143,22 +142,16 @@ namespace Microsoft.IdentityModel.Clients.ActiveDirectory
         }
 
         /// <summary>
-        /// Gets the number of items in the cache.
+        /// Gets the number of items in the cache. 
         /// </summary>
+        /// <remarks>Does not trigger token cache notifications.</remarks>
         public int Count
         {
             get
             {
                 lock (cacheLock)
                 {
-                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs { TokenCache = this };
-                    this.OnBeforeAccess(args);
-
-                    var count = this.tokenCacheDictionary.Count;
-
-                    this.OnAfterAccess(args);
-
-                    return count;
+                    return this.tokenCacheDictionary.Count;
                 }
             }
         }

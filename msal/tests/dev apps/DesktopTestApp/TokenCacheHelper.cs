@@ -61,14 +61,12 @@ namespace DesktopTestApp
         public static void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
-            if (args.TokenCache.HasStateChanged)
+            if (args.HasStateChanged)
             {
                 lock (FileLock)
                 {
                     // reflect changesgs in the persistent store
                     File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
-                    // once the write operationtakes place restore the HasStateChanged bit to filse
-                    args.TokenCache.HasStateChanged = false;
                 }
             }
         }

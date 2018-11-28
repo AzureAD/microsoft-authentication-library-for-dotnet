@@ -36,21 +36,18 @@ namespace NetCoreTestApp
 
         public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-                args.TokenCache.Deserialize(File.Exists(CacheFilePath)
-                    ? File.ReadAllBytes(CacheFilePath)
-                    : null);
+            args.TokenCache.Deserialize(File.Exists(CacheFilePath)
+                ? File.ReadAllBytes(CacheFilePath)
+                : null);
         }
 
         public static void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
-            if (args.TokenCache.HasStateChanged)
+            if (args.HasStateChanged)
             {
-                    // reflect changesgs in the persistent store
-                    File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
-
-                    // once the write operationtakes place restore the HasStateChanged bit to filse
-                    args.TokenCache.HasStateChanged = false;
+                // reflect changesgs in the persistent store
+                File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
             }
         }
     }

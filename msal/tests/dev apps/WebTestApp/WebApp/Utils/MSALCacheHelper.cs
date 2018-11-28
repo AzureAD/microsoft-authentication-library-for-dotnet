@@ -16,13 +16,12 @@ namespace WebApp.Utils
                 LoadCacheFromSession(session, cacheId, cache);
             });
 
-            cache.SetAfterAccess(delegate
+            cache.SetAfterAccess(args => 
             {
                 // if the access operation resulted in a cache update
-                if (cache.HasStateChanged)
+                if (args.HasStateChanged)
                 {
                     PersistCacheToSession(session, cacheId, cache);
-                    cache.HasStateChanged = false;
                 }
             });
 
@@ -55,13 +54,12 @@ namespace WebApp.Utils
                 LoadCacheFromFile(cacheId, cache);
             });
 
-            cache.SetAfterAccess(delegate
+            cache.SetAfterAccess(args =>
             {
                 // if the access operation resulted in a cache update
-                if (cache.HasStateChanged)
+                if (args.HasStateChanged)
                 {
                     PersistCacheToFile(cacheId, cache);
-                    cache.HasStateChanged = false;
                 }
             });
 

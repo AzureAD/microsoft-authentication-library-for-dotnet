@@ -18,8 +18,13 @@ namespace Test.MSAL.NET.Unit.netcore
         public void CanDeserializeTokenCache()
         {
             TokenCache tokenCache = new TokenCache();
+            tokenCache.AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); };
+
             tokenCache.Deserialize(null);
+#pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
+#pragma warning restore CS0618 // Type or member is obsolete
+            
         }
     }
 #endif

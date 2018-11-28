@@ -14,13 +14,12 @@ namespace WebApp.Utils
                 LoadCache(session, cacheId, cache);
             });
 
-            cache.SetAfterAccess(delegate
+            cache.SetAfterAccess(args =>
             {
                 // if the access operation resulted in a cache update
-                if (cache.HasStateChanged)
+                if (args.HasStateChanged)
                 {
                     PersistCache(session, cacheId, cache);
-                    cache.HasStateChanged = false;
                 }
             });
 
