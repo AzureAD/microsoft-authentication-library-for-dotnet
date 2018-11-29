@@ -123,6 +123,7 @@ namespace Test.MSAL.UIAutomation
             // Enter Prompt Behavior
             controller.Tap(CoreUiTestConstants.UiBehaviorPickerID);
             controller.Tap(promptBehavior);
+            controller.Tap(CoreUiTestConstants.AcquirePageID);
         }
 
         private void ValidateUiBehaviorString(string uiBehavior)
