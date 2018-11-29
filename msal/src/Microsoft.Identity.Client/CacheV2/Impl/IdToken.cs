@@ -25,17 +25,28 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using Microsoft.Identity.Client.CacheV2.Impl.Utils;
+using Microsoft.Identity.Client.CacheV2.Schema;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    internal class IdToken : Jwt
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public IdToken(string raw)
+            : base(raw)
+        {
+        }
+
+        public string PreferredUsername => JsonUtils.GetExistingOrEmptyString(Json, "preferred_username");
+        public string GivenName => JsonUtils.GetExistingOrEmptyString(Json, StorageJsonKeys.GivenName);
+        public string FamilyName => JsonUtils.GetExistingOrEmptyString(Json, StorageJsonKeys.FamilyName);
+        public string MiddleName => JsonUtils.GetExistingOrEmptyString(Json, StorageJsonKeys.MiddleName);
+        public string Name => JsonUtils.GetExistingOrEmptyString(Json, StorageJsonKeys.Name);
+        public string AlternativeId => JsonUtils.GetExistingOrEmptyString(Json, "altsecid");
+        public string Upn => JsonUtils.GetExistingOrEmptyString(Json, "upn");
+        public string Email => JsonUtils.GetExistingOrEmptyString(Json, "email");
+        public string Subject => JsonUtils.GetExistingOrEmptyString(Json, "sub");
+        public string Oid => JsonUtils.GetExistingOrEmptyString(Json, "oid");
+        public string TenantId => JsonUtils.GetExistingOrEmptyString(Json, "tid");
     }
 }

@@ -25,17 +25,23 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System.Collections.Generic;
+using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Core.Cache;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    /// <summary>
+    /// Interface to handle transforming unified schema types to/from the ADAL Legacy cache format
+    /// and storing/retrieving them to/from the adal cache persistence.
+    /// </summary>
+    internal interface IAdalLegacyCacheManager
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        ILegacyCachePersistence LegacyCachePersistence { get; }
+
+        void WriteAdalRefreshToken();
+        Credential GetAdalRefreshToken();
+        IEnumerable<Microsoft.Identity.Client.CacheV2.Schema.Account> GetAllAdalUsers();
+        void RemoveAdalUser();
     }
 }

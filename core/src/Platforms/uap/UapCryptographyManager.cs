@@ -68,19 +68,30 @@ namespace Microsoft.Identity.Core
 
         public string CreateSha256Hash(string input)
         {
-            if (string.IsNullOrWhiteSpace(input))
+            var hashed = CreateSha256HashBuffer(input);
+            return hashed == null ? null : CryptographicBuffer.EncodeToBase64String(hashed);
+        }
+
+        private IBuffer CreateSha256HashBuffer(string input)
+        {
+            if (string.IsNullOrEmpty(input))
             {
                 return null;
             }
-            
+
             IBuffer inputBuffer = CryptographicBuffer.ConvertStringToBinary(input, BinaryStringEncoding.Utf8);
 
             var hasher = HashAlgorithmProvider.OpenAlgorithm("SHA256");
             IBuffer hashed = hasher.HashData(inputBuffer);
-
-            return CryptographicBuffer.EncodeToBase64String(hashed);
+            return hashed;
         }
-        
+
+        public byte[] CreateSha256HashBytes(string input)
+        {
+            var hashed = CreateSha256HashBuffer(input);
+            return hashed?.ToArray();
+        }
+
         public string Encrypt(string message)
         {
             if (string.IsNullOrEmpty(message))

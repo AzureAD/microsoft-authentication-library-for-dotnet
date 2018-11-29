@@ -25,17 +25,33 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
 {
-    internal interface ICryptographyManager
+    internal static class UriExtensions
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public static string GetEnvironment(this Uri uri)
+        {
+            return uri.Host;
+        }
+
+        public static string GetRealm(this Uri uri)
+        {
+            string path = uri.GetPath();
+            string[] parts = path.Split(
+                new[]
+                {
+                    '/'
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+            return parts[0];
+            // return uri.GetPath().Split('/')[0]; // todo: verify this
+        }
+
+        public static string GetPath(this Uri uri)
+        {
+            return uri.AbsolutePath; // todo: verify this
+        }
     }
 }

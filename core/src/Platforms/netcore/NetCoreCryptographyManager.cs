@@ -36,16 +36,7 @@ namespace Microsoft.Identity.Core
     {
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
-            if (string.IsNullOrEmpty(input))
-            {
-                return null;
-            }
-
-            using (SHA256 sha = SHA256.Create())
-            {
-                UTF8Encoding encoding = new UTF8Encoding();
-                return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
-            }
+            return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
         }
 
         public string GenerateCodeVerifier()
@@ -61,16 +52,14 @@ namespace Microsoft.Identity.Core
 
         public string CreateSha256Hash(string input)
         {
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return null;
-            }
+            return string.IsNullOrEmpty(input) ? null : Convert.ToBase64String(CreateSha256HashBytes(input));
+        }
 
-            using (var sha256 = SHA256.Create())
+        public byte[] CreateSha256HashBytes(string input)
+        {
+            using (var sha = SHA256.Create())
             {
-                var inputBytes = Encoding.UTF8.GetBytes(input);
-                var outputBytes = sha256.ComputeHash(inputBytes);
-                return Convert.ToBase64String(outputBytes);
+                return sha.ComputeHash(Encoding.UTF8.GetBytes(input));
             }
         }
 

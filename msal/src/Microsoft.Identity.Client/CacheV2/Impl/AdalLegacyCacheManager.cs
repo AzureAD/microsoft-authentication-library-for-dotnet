@@ -25,17 +25,44 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Core.Cache;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    internal class AdalLegacyCacheManager : IAdalLegacyCacheManager
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public AdalLegacyCacheManager(ILegacyCachePersistence legacyCachePersistence)
+        {
+            LegacyCachePersistence = legacyCachePersistence;
+        }
+
+        public ILegacyCachePersistence LegacyCachePersistence { get; }
+
+        /// <inheritdoc />
+        public void WriteAdalRefreshToken()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public Credential GetAdalRefreshToken()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<Microsoft.Identity.Client.CacheV2.Schema.Account> GetAllAdalUsers()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void RemoveAdalUser()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

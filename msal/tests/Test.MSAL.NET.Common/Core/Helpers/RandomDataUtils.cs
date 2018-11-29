@@ -25,17 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+
+namespace Test.MSAL.NET.Common.Core.Helpers
 {
-    internal interface ICryptographyManager
+    public static class RandomDataUtils
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        private static readonly Random Random = new Random();
+
+        public static byte[] GetRandomData(int size)
+        {
+            var data = new byte[size];
+            Random.NextBytes(data);
+            return data;
+        }
     }
 }

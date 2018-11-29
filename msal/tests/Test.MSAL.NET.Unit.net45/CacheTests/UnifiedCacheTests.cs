@@ -87,11 +87,11 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
-                var users =
+                var accounts =
                     app.UserTokenCache.GetAccounts(MsalTestConstants.AuthorityCommonTenant, false, requestContext);
-                foreach (IAccount user in users)
+                foreach (IAccount account in accounts)
                 {
-                    app.UserTokenCache.RemoveMsalAccount(user, requestContext);
+                    app.UserTokenCache.RemoveMsalAccount(account, requestContext);
                 }
 
                 httpManager.AddMockHandler(

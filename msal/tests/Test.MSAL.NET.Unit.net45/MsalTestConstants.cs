@@ -27,11 +27,8 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using System.Security;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
 
 namespace Test.MSAL.NET.Unit
 {
@@ -44,6 +41,8 @@ namespace Test.MSAL.NET.Unit
         public const string ScopeForAnotherResourceStr = "r2/scope1 r2/scope2";
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
+
+        public const string HomeAccountId = Uid + "." + Utid;
 
         public const string ProductionPrefNetworkEnvironment = "login.microsoftonline.com";
         public const string ProductionPrefCacheEnvironment = "login.windows.net";

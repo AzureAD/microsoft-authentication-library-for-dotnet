@@ -25,17 +25,57 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+using System.Collections.Generic;
+using Microsoft.Identity.Client.CacheV2.Impl;
+
+namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
 {
-    internal interface ICryptographyManager
+    internal class MockFileIO : ICachePathStorage
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public readonly Dictionary<string, byte[]> _fileSystem = new Dictionary<string, byte[]>();
+
+        public byte[] Read(string key)
+        {
+            if (_fileSystem.TryGetValue(key, out byte[] contents))
+            {
+                return contents;
+            }
+            else
+            {
+                return new byte[0];
+            }
+        }
+
+        public void ReadModifyWrite(string key, Func<byte[], byte[]> modify)
+        {
+            _fileSystem.TryGetValue(key, out byte[] contents);
+            if (contents == null)
+            {
+                contents = new byte[0];
+            }
+
+            _fileSystem[key] = modify(contents);
+        }
+
+        public void Write(string key, byte[] data)
+        {
+            _fileSystem[key] = data;
+        }
+
+        public void DeleteFile(string key)
+        {
+            _fileSystem.Remove(key);
+        }
+
+        public void DeleteContent(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<string> ListContent(string key)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

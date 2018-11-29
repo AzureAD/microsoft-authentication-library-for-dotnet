@@ -25,17 +25,22 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    internal class OperationStatus
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public OperationStatusType StatusType { get; set; }
+        public int Code { get; set; }
+        public string StatusDescription { get; set; }
+        public long PlatformCode { get; set; }
+        public string PlatformDomain { get; set; }
+
+        public static OperationStatus CreateSuccess()
+        {
+            return new OperationStatus
+            {
+                StatusType = OperationStatusType.Success
+            };
+        }
     }
 }

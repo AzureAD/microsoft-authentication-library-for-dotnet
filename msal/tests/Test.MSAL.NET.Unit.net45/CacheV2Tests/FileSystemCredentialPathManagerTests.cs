@@ -25,17 +25,27 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using Microsoft.Identity.Client.CacheV2.Impl;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
 {
-    internal interface ICryptographyManager
+    [TestClass]
+    public class FileSystemCredentialPathManagerTests
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        private readonly FileSystemCredentialPathManager _credentialPathManager = new FileSystemCredentialPathManager();
+
+        [TestMethod]
+        public void ToSafeFilename()
+        {
+            Assert.AreEqual("98JPIEIUEFT7FFJK", _credentialPathManager.ToSafeFilename("!@#$%^&*()-+"));
+            Assert.AreEqual("SEOC8GKOVGE196NR", _credentialPathManager.ToSafeFilename(""));
+            Assert.AreEqual("82E183VGAG9CFOF4", _credentialPathManager.ToSafeFilename("=^^="));
+            Assert.AreEqual("EOE7CM5P6N5I6EAS", _credentialPathManager.ToSafeFilename("alreadySafeButStill"));
+            Assert.AreEqual("EOE7CM5P6N5I6EAS", _credentialPathManager.ToSafeFilename("AlReAdYsAfEbUtStIlL"));
+            Assert.AreEqual(
+                "EPGP81EH0BA8BLKC",
+                _credentialPathManager.ToSafeFilename("================================================"));
+        }
     }
 }

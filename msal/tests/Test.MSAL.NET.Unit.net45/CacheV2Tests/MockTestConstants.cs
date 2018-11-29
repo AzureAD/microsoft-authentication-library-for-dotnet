@@ -1,0 +1,168 @@
+﻿// ------------------------------------------------------------------------------
+// 
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+// 
+// This code is licensed under the MIT License.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// 
+// ------------------------------------------------------------------------------
+
+using System.Globalization;
+using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Core.Helpers;
+
+namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+{
+    internal static class MockTestConstants
+    {
+        public const string AccessTokenRaw = ".eyJBY2Nlc3NUb2tlbiJ9.";
+        public const string RefreshTokenRaw = "eyJSZWZyZXNoVG9rZW4ifQ";
+        public const string Authority = "https://localhost.com/common";
+        public const string Environment = "localhost.com";
+        public const string ClientId = "d15eased-c0de-abad-d00d-feed5badf00d";
+        public const string FamilyId = "1";
+        public const string CloudAudienceUrn = "urn:federation:LocalHost";
+        public const string CorrelationId = "d77051e7-4ebb-4afa-9424-f55bd838f0bb";
+        public const string DomainName = "localhost.com";
+
+        public const string Password
+            = // [SuppressMessage("Microsoft.Security", "CS001:SecretInline", Justification="Fake Password for Test")]
+            "fakePassword"; // [SuppressMessage("Microsoft.Security", "CS001:SecretInline", Justification="Fake Password for Test")]
+
+        public const string Realm = "common";
+        public const string Redirect = "http://redirect";
+        public const string Username = "joe@localhost.com";
+        public const string GivenName = "Joe";
+        public const string FamilyName = "Doe";
+        public const string MiddleName = "Charles";
+        public const string Name = "Joe Charles Doe II";
+        public const string LocalAccountId = "test_local_account_id";
+        public const string AlternativeAccountId = "test_alternative_account_id";
+        public const string Scopes = "scope1 scope2";
+        public const AuthorityType DefaultAuthorityType = AuthorityType.Adfs;
+        public const long ExpiresIn = 3599;
+        public const long ExtendedExpiresIn = 0;
+        public const long CachedAt = (long)1 << 40;
+        public const long ExpiresOn = (long)1 << 41;
+        public const long ExtendedExpiresOn = (long)1 << 42;
+        public static string AdditionalFieldsJson = "{'my_name': 'Alex', 'age': 30, 'has_a_cat': true}";
+        public static string ClientInfoJson = "{'uid': 'test_uid', 'utid': 'test_utid'}";
+        public static string IdTokenJson = "{'given_name': 'Joe_id_token', 'family_name': 'Doe_id_token'}";
+
+        public static string GetHomeAccountId()
+        {
+            return "test_uid.test_utid";
+        }
+
+        public static Credential GetAccessToken()
+        {
+            return Credential.CreateAccessToken(
+                GetHomeAccountId(),
+                Environment,
+                Realm,
+                ClientId,
+                GetTarget(),
+                CachedAt,
+                ExpiresOn,
+                ExtendedExpiresOn,
+                AccessTokenRaw,
+                AdditionalFieldsJson);
+        }
+
+        public static string GetTarget()
+        {
+            return "scope1 scope2";
+        }
+
+        public static Credential GetRefreshToken()
+        {
+            return Credential.CreateRefreshToken(
+                GetHomeAccountId(),
+                Environment,
+                ClientId,
+                CachedAt,
+                RefreshTokenRaw,
+                AdditionalFieldsJson);
+        }
+
+        public static Credential GetFamilyRefreshToken()
+        {
+            return Credential.CreateFamilyRefreshToken(
+                GetHomeAccountId(),
+                Environment,
+                ClientId,
+                FamilyId,
+                CachedAt,
+                RefreshTokenRaw,
+                AdditionalFieldsJson);
+        }
+
+        public static Credential GetIdToken()
+        {
+            return Credential.CreateIdToken(
+                GetHomeAccountId(),
+                Environment,
+                Realm,
+                ClientId,
+                CachedAt,
+                GetRawIdToken(),
+                AdditionalFieldsJson);
+        }
+
+        private static string GetRawIdToken()
+        {
+            return string.Format(CultureInfo.InvariantCulture, ".%s.", Base64UrlEncodeUnpadded(IdTokenJson));
+        }
+
+        private static string Base64UrlEncodeUnpadded(string input)
+        {
+            return Base64UrlHelpers.Encode(input);
+        }
+
+        public static Account GetAccount()
+        {
+            return Account.Create(
+                GetHomeAccountId(),
+                Environment,
+                Realm,
+                LocalAccountId,
+                DefaultAuthorityType,
+                Username,
+                GivenName,
+                FamilyName,
+                MiddleName,
+                Name,
+                AlternativeAccountId,
+                GetClientInfo(),
+                AdditionalFieldsJson);
+        }
+
+        private static string GetClientInfo()
+        {
+            return Base64UrlEncodeUnpadded(ClientInfoJson);
+        }
+
+        public static AppMetadata GetAppMetadata()
+        {
+            return new AppMetadata(Environment, ClientId, FamilyId);
+        }
+    }
+}

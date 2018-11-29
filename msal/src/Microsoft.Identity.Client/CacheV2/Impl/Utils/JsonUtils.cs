@@ -25,17 +25,43 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using Microsoft.Identity.Json.Linq;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
 {
-    internal interface ICryptographyManager
+    internal static class JsonUtils
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public static string GetExistingOrEmptyString(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                return val.ToObject<string>();
+            }
+
+            return string.Empty;
+        }
+
+        public static string ExtractExistingOrEmptyString(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                string strVal = val.ToObject<string>();
+                json.Remove(key);
+                return strVal;
+            }
+
+            return string.Empty;
+        }
+
+        public static long ExtractParsedIntOrZero(JObject json, string key)
+        {
+            string strVal = ExtractExistingOrEmptyString(json, key);
+            if (!string.IsNullOrWhiteSpace(strVal) && long.TryParse(strVal, out long result))
+            {
+                return result;
+            }
+
+            return 0;
+        }
     }
 }

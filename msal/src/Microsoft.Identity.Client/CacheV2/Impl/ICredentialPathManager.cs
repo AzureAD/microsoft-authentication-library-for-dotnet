@@ -25,17 +25,32 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using Microsoft.Identity.Client.CacheV2.Schema;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    /// <summary>
+    /// Interface providing mechanism to transform the unified schema types into their appropriate "path"
+    /// or "key" for storage/retrieval.  For example, on Windows, this will be a relative file system path.
+    /// But on iOS/macOS is will be a path to keychain storage.
+    /// </summary>
+    internal interface ICredentialPathManager
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        string GetCredentialPath(Credential credential);
+        string ToSafeFilename(string data);
+
+        string GetCredentialPath(
+            string homeAccountId,
+            string environment,
+            string realm,
+            string clientId,
+            string familyId,
+            CredentialType credentialType);
+
+        string GetAppMetadataPath(string environment, string clientId);
+        string GetAccountPath(Microsoft.Identity.Client.CacheV2.Schema.Account account);
+        string GetAccountPath(string homeAccountId, string environment, string realm);
+        string GetAppMetadataPath(AppMetadata appMetadata);
+        string GetAccountsPath(string homeAccountId, string environment);
     }
 }

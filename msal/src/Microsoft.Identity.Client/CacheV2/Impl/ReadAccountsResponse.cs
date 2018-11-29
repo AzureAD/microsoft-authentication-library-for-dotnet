@@ -25,17 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System.Collections.Generic;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    internal class ReadAccountsResponse
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public ReadAccountsResponse(IEnumerable<Account> accounts, OperationStatus status)
+        {
+            Accounts = accounts;
+            Status = status;
+        }
+
+        public IEnumerable<Account> Accounts { get; }
+        public OperationStatus Status { get; }
     }
 }

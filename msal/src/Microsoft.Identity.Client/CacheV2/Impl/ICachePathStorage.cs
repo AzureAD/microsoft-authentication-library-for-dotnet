@@ -25,17 +25,21 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+using System.Collections.Generic;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    /// <summary>
+    /// This interface represents raw byte i/o for cache data stored using relative paths (e.g. in memory, file system).
+    /// </summary>
+    internal interface ICachePathStorage
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        byte[] Read(string relativePath);
+        void ReadModifyWrite(string relativePath, Func<byte[], byte[]> modify);
+        void Write(string relativePath, byte[] data);
+        void DeleteFile(string relativePath);
+        void DeleteContent(string relativePath);
+        IEnumerable<string> ListContent(string relativePath);
     }
 }

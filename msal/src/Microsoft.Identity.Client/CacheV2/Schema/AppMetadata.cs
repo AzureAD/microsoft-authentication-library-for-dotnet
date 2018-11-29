@@ -25,17 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.CacheV2.Schema
 {
-    internal interface ICryptographyManager
+    internal class AppMetadata
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public AppMetadata(string environment, string clientId, string familyId)
+        {
+            Environment = environment;
+            ClientId = clientId;
+            FamilyId = familyId;
+        }
+
+        public string Environment { get; }
+        public string ClientId { get; }
+        public string FamilyId { get; }
     }
 }

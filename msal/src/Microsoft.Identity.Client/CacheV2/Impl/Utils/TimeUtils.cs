@@ -25,17 +25,16 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
 {
-    internal interface ICryptographyManager
+    internal static class TimeUtils
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public static long GetSecondsFromEpochNow()
+        {
+            var t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+            return Convert.ToInt64(t.TotalSeconds);
+        }
     }
 }

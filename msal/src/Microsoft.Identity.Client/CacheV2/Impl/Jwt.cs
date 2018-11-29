@@ -25,17 +25,39 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+using Microsoft.Identity.Client.CacheV2.Impl.Utils;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Json.Linq;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl
 {
-    internal interface ICryptographyManager
+    internal class Jwt
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public Jwt(string raw)
+        {
+            Raw = raw;
+            if (string.IsNullOrWhiteSpace(Raw))
+            {
+                // warning: constructed jwt from empty string
+                return;
+            }
+
+            string[] sections = Raw.Split('.');
+            if (sections.Length != 3)
+            {
+                throw new ArgumentException("failed jwt decode: wrong number of sections", nameof(Raw));
+            }
+
+            Payload = Base64UrlHelpers.DecodeToString(sections[1]);
+            Json = JObject.Parse(Payload);
+            IsSigned = !string.IsNullOrEmpty(sections[2]);
+        }
+
+        protected JObject Json { get; }
+        public string Raw { get; }
+        public string Payload { get; }
+        public bool IsSigned { get; }
+        public bool IsEmpty => Json.IsEmpty();
     }
 }

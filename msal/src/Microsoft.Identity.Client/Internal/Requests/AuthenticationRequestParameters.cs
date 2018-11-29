@@ -71,14 +71,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool SendCertificate { get; set; }
 
-#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) && !iOS
+#if (DESKTOP || NETSTANDARD1_3 || NET_CORE)
         public ClientCredential ClientCredential { get; set; }
 #endif
 
         public IDictionary<string, string> ToParameters()
         {
             IDictionary<string, string> parameters = new Dictionary<string, string>();
-#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) && !iOS
+#if (DESKTOP || NETSTANDARD1_3 || NET_CORE)
             if (ClientCredential != null)
             {
                 if (!string.IsNullOrEmpty(ClientCredential.Secret))
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
             dict = CoreHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
             builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
-#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) && !iOS
+#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) 
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
             builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
             if (IsClientCredentialRequest)
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Extra Query Params Keys (space separated) - " + dict.Keys.AsSingleString());
             dict = CoreHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
             builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
-#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) && !iOS
+#if (DESKTOP || NETSTANDARD1_3 || NET_CORE) 
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
             builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
             if (IsClientCredentialRequest)

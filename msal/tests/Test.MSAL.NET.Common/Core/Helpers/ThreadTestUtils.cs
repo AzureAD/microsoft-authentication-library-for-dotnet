@@ -25,17 +25,36 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Test.MSAL.NET.Common.Core.Helpers
 {
-    internal interface ICryptographyManager
+    public static class ThreadTestUtils
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public static void ParallelExecute(Action action, int numExecutions = 100)
+        {
+            var actions = new List<Action>();
+            for (int i = 0; i < numExecutions; i++)
+            {
+                actions.Add(action);
+            }
+
+            Parallel.Invoke(
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = 8
+                },
+                actions.ToArray());
+        }
+
+        public static void RunActionOnThreadAndJoin(Action action)
+        {
+            var thread = new Thread(() => action());
+            thread.Start();
+            thread.Join();
+        }
     }
 }

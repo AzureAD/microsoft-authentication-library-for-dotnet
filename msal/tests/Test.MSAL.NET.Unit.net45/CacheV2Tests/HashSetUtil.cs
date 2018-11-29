@@ -25,17 +25,33 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using System.Collections.Generic;
+
+namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
 {
-    internal interface ICryptographyManager
+    public static class HashSetUtil
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public static bool AreEqual(HashSet<string> expected, HashSet<string> actual)
+        {
+            if (expected == null && actual == null)
+            {
+                return true;
+            }
+
+            if (expected == null || actual == null)
+            {
+                return false;
+            }
+
+            foreach (string key in expected)
+            {
+                if (!actual.Contains(key))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

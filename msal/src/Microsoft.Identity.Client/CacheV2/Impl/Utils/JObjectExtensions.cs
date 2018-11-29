@@ -25,17 +25,15 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+using Microsoft.Identity.Json.Linq;
+
+namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
 {
-    internal interface ICryptographyManager
+    internal static class JObjectExtensions
     {
-        string CreateBase64UrlEncodedSha256Hash(string input);
-        string GenerateCodeVerifier();
-        string CreateSha256Hash(string input);
-        byte[] CreateSha256HashBytes(string input);
-        string Encrypt(string message);
-        string Decrypt(string encryptedMessage);
-        byte[] Encrypt(byte[] message);
-        byte[] Decrypt(byte[] encryptedMessage);
+        public static bool IsEmpty(this JObject json)
+        {
+            return !json.HasValues;
+        }
     }
 }
