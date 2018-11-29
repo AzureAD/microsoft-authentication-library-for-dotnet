@@ -58,6 +58,11 @@ namespace DesktopTestApp
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
             this.publicClientTabPage = new System.Windows.Forms.TabPage();
+            this.b2cEditProfile = new System.Windows.Forms.Button();
+            this.b2cSilentFlow = new System.Windows.Forms.Button();
+            this.b2cLogin = new System.Windows.Forms.Button();
+            this.cancelOperationButton = new System.Windows.Forms.Button();
+            this.acquireTokenDeviceCode = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.IgnoreUserCbx = new System.Windows.Forms.CheckBox();
             this.passwordLabel = new System.Windows.Forms.Label();
@@ -73,6 +78,7 @@ namespace DesktopTestApp
             this.overriddenAuthority = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.noPrompt = new System.Windows.Forms.RadioButton();
             this.never = new System.Windows.Forms.RadioButton();
             this.consent = new System.Windows.Forms.RadioButton();
             this.forceLogin = new System.Windows.Forms.RadioButton();
@@ -87,8 +93,6 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.acquireTokenDeviceCode = new System.Windows.Forms.Button();
-            this.cancelOperationButton = new System.Windows.Forms.Button();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -394,6 +398,9 @@ namespace DesktopTestApp
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.b2cEditProfile);
+            this.publicClientTabPage.Controls.Add(this.b2cSilentFlow);
+            this.publicClientTabPage.Controls.Add(this.b2cLogin);
             this.publicClientTabPage.Controls.Add(this.cancelOperationButton);
             this.publicClientTabPage.Controls.Add(this.acquireTokenDeviceCode);
             this.publicClientTabPage.Controls.Add(this.progressBar1);
@@ -426,6 +433,56 @@ namespace DesktopTestApp
             this.publicClientTabPage.Size = new System.Drawing.Size(668, 788);
             this.publicClientTabPage.TabIndex = 0;
             this.publicClientTabPage.Text = "publicClientTabPage";
+            // 
+            // b2cEditProfile
+            // 
+            this.b2cEditProfile.Location = new System.Drawing.Point(15, 723);
+            this.b2cEditProfile.Name = "b2cEditProfile";
+            this.b2cEditProfile.Size = new System.Drawing.Size(126, 30);
+            this.b2cEditProfile.TabIndex = 42;
+            this.b2cEditProfile.Text = "B2C Edit Profile";
+            this.b2cEditProfile.UseVisualStyleBackColor = true;
+            this.b2cEditProfile.Click += new System.EventHandler(this.b2cEditProfile_Click);
+            // 
+            // b2cSilentFlow
+            // 
+            this.b2cSilentFlow.Location = new System.Drawing.Point(15, 689);
+            this.b2cSilentFlow.Name = "b2cSilentFlow";
+            this.b2cSilentFlow.Size = new System.Drawing.Size(126, 30);
+            this.b2cSilentFlow.TabIndex = 41;
+            this.b2cSilentFlow.Text = "B2C Silent AT";
+            this.b2cSilentFlow.UseVisualStyleBackColor = true;
+            this.b2cSilentFlow.Click += new System.EventHandler(this.b2cSilentFlow_Click);
+            // 
+            // b2cLogin
+            // 
+            this.b2cLogin.Location = new System.Drawing.Point(15, 653);
+            this.b2cLogin.Name = "b2cLogin";
+            this.b2cLogin.Size = new System.Drawing.Size(126, 30);
+            this.b2cLogin.TabIndex = 40;
+            this.b2cLogin.Text = "B2C Acquire Token";
+            this.b2cLogin.UseVisualStyleBackColor = true;
+            this.b2cLogin.Click += new System.EventHandler(this.b2cLogin_Click);
+            // 
+            // cancelOperationButton
+            // 
+            this.cancelOperationButton.Location = new System.Drawing.Point(498, 724);
+            this.cancelOperationButton.Name = "cancelOperationButton";
+            this.cancelOperationButton.Size = new System.Drawing.Size(164, 29);
+            this.cancelOperationButton.TabIndex = 39;
+            this.cancelOperationButton.Text = "Cancel Operation";
+            this.cancelOperationButton.UseVisualStyleBackColor = true;
+            this.cancelOperationButton.Click += new System.EventHandler(this.cancelOperationButton_Click);
+            // 
+            // acquireTokenDeviceCode
+            // 
+            this.acquireTokenDeviceCode.Location = new System.Drawing.Point(496, 582);
+            this.acquireTokenDeviceCode.Name = "acquireTokenDeviceCode";
+            this.acquireTokenDeviceCode.Size = new System.Drawing.Size(164, 29);
+            this.acquireTokenDeviceCode.TabIndex = 38;
+            this.acquireTokenDeviceCode.Text = "Acquire Token By DeviceCode";
+            this.acquireTokenDeviceCode.UseVisualStyleBackColor = true;
+            this.acquireTokenDeviceCode.Click += new System.EventHandler(this.acquireTokenDeviceCode_Click);
             // 
             // progressBar1
             // 
@@ -554,15 +611,26 @@ namespace DesktopTestApp
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.noPrompt);
             this.groupBox2.Controls.Add(this.never);
             this.groupBox2.Controls.Add(this.consent);
             this.groupBox2.Controls.Add(this.forceLogin);
             this.groupBox2.Controls.Add(this.selectAccount);
             this.groupBox2.Location = new System.Drawing.Point(256, 103);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(332, 51);
+            this.groupBox2.Size = new System.Drawing.Size(342, 66);
             this.groupBox2.TabIndex = 10;
             this.groupBox2.TabStop = false;
+            // 
+            // noPrompt
+            // 
+            this.noPrompt.AutoSize = true;
+            this.noPrompt.Location = new System.Drawing.Point(6, 43);
+            this.noPrompt.Name = "noPrompt";
+            this.noPrompt.Size = new System.Drawing.Size(98, 17);
+            this.noPrompt.TabIndex = 11;
+            this.noPrompt.Text = "B2C No Prompt";
+            this.noPrompt.UseVisualStyleBackColor = true;
             // 
             // never
             // 
@@ -577,7 +645,7 @@ namespace DesktopTestApp
             // consent
             // 
             this.consent.AutoSize = true;
-            this.consent.Location = new System.Drawing.Point(197, 18);
+            this.consent.Location = new System.Drawing.Point(197, 19);
             this.consent.Name = "consent";
             this.consent.Size = new System.Drawing.Size(64, 17);
             this.consent.TabIndex = 9;
@@ -587,7 +655,7 @@ namespace DesktopTestApp
             // forceLogin
             // 
             this.forceLogin.AutoSize = true;
-            this.forceLogin.Location = new System.Drawing.Point(110, 18);
+            this.forceLogin.Location = new System.Drawing.Point(110, 19);
             this.forceLogin.Name = "forceLogin";
             this.forceLogin.Size = new System.Drawing.Size(81, 17);
             this.forceLogin.TabIndex = 8;
@@ -661,7 +729,7 @@ namespace DesktopTestApp
             // 
             this.acquireTokenInteractive.Location = new System.Drawing.Point(15, 546);
             this.acquireTokenInteractive.Name = "acquireTokenInteractive";
-            this.acquireTokenInteractive.Size = new System.Drawing.Size(139, 30);
+            this.acquireTokenInteractive.Size = new System.Drawing.Size(148, 30);
             this.acquireTokenInteractive.TabIndex = 9;
             this.acquireTokenInteractive.Text = "Acquire Token Interactive";
             this.acquireTokenInteractive.UseVisualStyleBackColor = true;
@@ -709,26 +777,6 @@ namespace DesktopTestApp
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
             this.tabControl1.TabIndex = 0;
-            // 
-            // acquireTokenDeviceCode
-            // 
-            this.acquireTokenDeviceCode.Location = new System.Drawing.Point(496, 582);
-            this.acquireTokenDeviceCode.Name = "acquireTokenDeviceCode";
-            this.acquireTokenDeviceCode.Size = new System.Drawing.Size(164, 29);
-            this.acquireTokenDeviceCode.TabIndex = 38;
-            this.acquireTokenDeviceCode.Text = "Acquire Token By DeviceCode";
-            this.acquireTokenDeviceCode.UseVisualStyleBackColor = true;
-            this.acquireTokenDeviceCode.Click += new System.EventHandler(this.acquireTokenDeviceCode_Click);
-            // 
-            // cancelOperationButton
-            // 
-            this.cancelOperationButton.Location = new System.Drawing.Point(498, 724);
-            this.cancelOperationButton.Name = "cancelOperationButton";
-            this.cancelOperationButton.Size = new System.Drawing.Size(164, 29);
-            this.cancelOperationButton.TabIndex = 39;
-            this.cancelOperationButton.Text = "Cancel Operation";
-            this.cancelOperationButton.UseVisualStyleBackColor = true;
-            this.cancelOperationButton.Click += new System.EventHandler(this.cancelOperationButton_Click);
             // 
             // MainForm
             // 
@@ -823,6 +871,10 @@ namespace DesktopTestApp
         private ProgressBar progressBar1;
         private Button acquireTokenDeviceCode;
         private Button cancelOperationButton;
+        private Button b2cLogin;
+        private Button b2cSilentFlow;
+        private Button b2cEditProfile;
+        private RadioButton noPrompt;
     }
 }
 

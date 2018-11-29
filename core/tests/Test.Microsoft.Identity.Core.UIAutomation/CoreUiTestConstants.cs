@@ -29,15 +29,9 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
 {
     public static class CoreUiTestConstants
     {
-        //Applications
-        public const string UiAutomationTestClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
-        public const string MSIDLAB4ClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0"; // clientId is multi-tenant
-        public const string UIAutomationAppV2 = "1e245a30-49aa-43eb-b9c1-c11b072cc92b";
-
         //Resources
         public const string MSGraph = "https://graph.microsoft.com";
         public const string Exchange = "https://outlook.office365.com/";
-        public const string UiAutomationTestResource = "ae55a6cc-da5e-42f8-b75d-c37e41a1a0d9";
 
         //ADAL & MSAL test app
         public const string AcquireTokenID = "acquireToken";
@@ -57,7 +51,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         public const string WebPasswordID = "i0118";
         public const string WebSubmitID = "idSIButton9";
         public const string TestResultID = "testResult";
-        public const string TestResultSuccsesfulMessage = "Result: Success";
+        public const string TestResultSuccessfulMessage = "Result: Success";
         public const string TestResultFailureMessage = "Result: Failure";
 
         //MSAL test app
@@ -82,6 +76,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         public const string B2CLoginAuthority = "b2clogin.com";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
         public const string NonB2CAuthority = "non-b2c authority";
+        public const string B2CEditProfileAuthority = "Edit profile policy authority";
         public const string FacebookAccountID = "FacebookExchange";
         public const string WebUPNB2CFacebookInputID = "m_login_email";
         public const string B2CWebPasswordFacebookID = "m_login_password";
@@ -91,11 +86,13 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         public const string B2CWebPasswordGoogleID = "Passwd";
         public const string B2CGoogleNextID = "next";
         public const string B2CGoogleSignInID = "signIn";
+        public const string B2CEditProfileContinueID = "continue";
 
         // these should match the product enum values
         public const string UIBehaviorConsent = "consent";
         public const string UIBehaviorSelectAccount = "select_account";
         public const string UIBehaviorLogin = "login";
+        public const string UIBehaviorNoPrompt = "no_prompt";
 
         //Test Constants
         public const int ResultCheckPolliInterval = 1000;

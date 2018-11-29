@@ -63,7 +63,7 @@ namespace Test.MSAL.NET.Integration
         {
             if (user == null)
             {
-                user = LabUserHelper.GetLabResponseWithDefaultUser().User;
+                user = LabUserHelper.GetDefaultUser().User;
 
                 string stringPassword = LabUserHelper.GetUserPassword(user);
                 securePassword = new NetworkCredential("", stringPassword).SecurePassword;

@@ -31,7 +31,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,17 +39,21 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
+using Test.Microsoft.Identity.LabInfrastructure;
 
 namespace DesktopTestApp
 {
     public partial class MainForm : Form
     {
-        private const string publicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private string _b2CClientId = null;
 
-        private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(publicClientId);
+        private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(PublicClientId);
         private CancellationTokenSource _cancellationTokenSource;
-
+        private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
+        private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
+        private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
+        
         public MainForm()
         {
             InitializeComponent();
@@ -142,6 +145,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
+                _publicClientHandler.ApplicationId = PublicClientId;
                 _publicClientHandler.LoginHint = loginHintTextBox.Text;
                 _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
                 _publicClientHandler.InteractiveAuthority = authority.Text;
@@ -215,7 +219,7 @@ namespace DesktopTestApp
         {
             try
             {
-                _publicClientHandler.PublicClientApplication = new PublicClientApplication(publicClientId, "https://login.microsoftonline.com/organizations");
+                _publicClientHandler.PublicClientApplication = new PublicClientApplication(PublicClientId, "https://login.microsoftonline.com/organizations");
 
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication.AcquireTokenByUsernamePasswordAsync(
                     SplitScopeString(scopes.Text),
@@ -248,6 +252,7 @@ namespace DesktopTestApp
             {
                 ClearResultPageInfo();
 
+                _publicClientHandler.ApplicationId = PublicClientId;
                 _publicClientHandler.AuthorityOverride = overriddenAuthority.Text;
                 if (IgnoreUserCbx.Checked)
                 {
@@ -347,6 +352,11 @@ namespace DesktopTestApp
             if (consent.Checked)
             {
                 behavior = UIBehavior.Consent;
+            }
+
+            if (noPrompt.Checked)
+            {
+                behavior = UIBehavior.NoPrompt;
             }
 
             return behavior;
@@ -454,7 +464,7 @@ namespace DesktopTestApp
 
         private void authority_FocusLeave(object sender, EventArgs e)
         {
-            _publicClientHandler.CreateOrUpdatePublicClientApp(this.authority.Text, publicClientId);
+            _publicClientHandler.CreateOrUpdatePublicClientApp(this.authority.Text, PublicClientId);
         }
 
         private async void acquireTokenDeviceCode_Click(object sender, EventArgs e)
@@ -491,12 +501,103 @@ namespace DesktopTestApp
 
         private IEnumerable<string> SplitScopeString(string scopes)
         {
-            if (String.IsNullOrWhiteSpace(scopes))
+            if (string.IsNullOrWhiteSpace(scopes))
             {
                 return new string[] { };
             }
 
             return scopes.Split(new[] { " " }, StringSplitOptions.None);
+        }
+
+        private async void b2cLogin_Click(object sender, EventArgs e)
+        {
+            using (new UIProgressScope(this))
+            {
+                GetB2CClientIdFromLab();
+
+                ClearResultPageInfo();
+                
+                _publicClientHandler.InteractiveAuthority = B2CAuthority;
+                _publicClientHandler.ApplicationId = _b2CClientId;
+
+                try
+                {
+                    AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
+                        _b2CScopes,
+                        GetUIBehavior(),
+                        _publicClientHandler.ExtraQueryParams,
+                        new UIParent()).ConfigureAwait(true);
+
+                    SetResultPageInfo(authenticationResult);
+                    RefreshUserList();
+                }
+                catch (Exception exc)
+                {
+                    CreateException(exc);
+                }
+            }
+        }
+
+        private async void b2cEditProfile_Click(object sender, EventArgs e)
+        {
+            using (new UIProgressScope(this))
+            {
+                GetB2CClientIdFromLab();
+
+                ClearResultPageInfo();
+
+                _publicClientHandler.InteractiveAuthority = B2CEditProfileAuthority;
+                _publicClientHandler.ApplicationId = _b2CClientId;
+
+                try
+                {
+                    AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
+                        _b2CScopes,
+                        GetUIBehavior(),
+                        _publicClientHandler.ExtraQueryParams,
+                        new UIParent()).ConfigureAwait(true);
+
+                    SetResultPageInfo(authenticationResult);
+                    RefreshUserList();
+                }
+                catch (Exception exc)
+                {
+                    CreateException(exc);
+                }
+            }
+        }
+
+        private async void b2cSilentFlow_Click(object sender, EventArgs e)
+        {
+            using (new UIProgressScope(this))
+            {
+                ClearResultPageInfo();
+                
+                _publicClientHandler.InteractiveAuthority = B2CAuthority;
+                _publicClientHandler.ApplicationId = _b2CClientId;
+
+                try
+                {
+                    AuthenticationResult authenticationResult =
+                        await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes).ConfigureAwait(true);
+
+                    SetResultPageInfo(authenticationResult);
+                }
+                catch (Exception exc)
+                {
+                    CreateException(exc);
+                }
+            }
+        }
+
+        private void GetB2CClientIdFromLab()
+        {
+            if (_b2CClientId != null)
+            {
+                return;
+            }
+            LabResponse labResponse = LabUserHelper.GetB2CLocalAccount();
+            _b2CClientId = labResponse.AppId;
         }
     }
 }

@@ -70,7 +70,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenInteractiveTest()
         {
-            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithDefaultUser());
+            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenSilentTest()
         {
-            _adalMobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetLabResponseWithDefaultUser());
+            _adalMobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenInteractiveWithPromptAlwaysTest()
         {
-            _adalMobileTestHelper.AcquireTokenWithPromptBehaviorAlwaysHelper(xamarinController, LabUserHelper.GetLabResponseWithDefaultUser());
+            _adalMobileTestHelper.AcquireTokenWithPromptBehaviorAlwaysHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenADFSv4FederatedInteractiveTest()
         {
-            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithADFSUser(FederationProvider.AdfsV4));
+            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4));
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenInteractiveADFSv4NonFederatedTest()
         {
-            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithADFSUser(FederationProvider.AdfsV4, false));
+            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenADFSv3FederatedInteractiveTest()
         {
-            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithADFSUser(FederationProvider.AdfsV3));
+            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace Test.ADAL.UIAutomation
         [Test]
         public void AcquireTokenInteractiveADFSv3NonFederatedTest()
         {
-            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetLabResponseWithADFSUser(FederationProvider.AdfsV3, false));
+            _adalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, false));
         }
     }
 }

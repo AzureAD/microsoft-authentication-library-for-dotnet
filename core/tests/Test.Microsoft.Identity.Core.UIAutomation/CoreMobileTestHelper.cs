@@ -71,7 +71,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             {
                 //Test results are put into a label that is checked for messages
                 var result = controller.GetText(CoreUiTestConstants.TestResultID);
-                if (result.Contains(CoreUiTestConstants.TestResultSuccsesfulMessage))
+                if (result.Contains(CoreUiTestConstants.TestResultSuccessfulMessage))
                 {
                     return;
                 }

@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected AuthenticationResult CacheTokenResponseAndCreateAuthenticationResult(MsalTokenResponse msalTokenResponse)
         {
             // developer passed in user object.
-            AuthenticationRequestParameters.RequestContext.Logger.Info("checking client info returned from the server..");
+            AuthenticationRequestParameters.RequestContext.Logger.Info("Checking client info returned from the server..");
 
             ClientInfo fromServer = null;
 
@@ -225,26 +225,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
             }
 
-            if (fromServer!= null && AuthenticationRequestParameters?.Account?.HomeAccountId != null)
-            {
-                if (!fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.ObjectId, StringComparison.OrdinalIgnoreCase) ||
-                    !fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId, StringComparison.OrdinalIgnoreCase))
-                {
-                    AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user identifier");
-
-                    AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "Returned user identifiers (uid:{0} utid:{1}) does not match the sent user identifier (uid:{2} utid:{3})",
-                            fromServer.UniqueObjectIdentifier, 
-                            fromServer.UniqueTenantIdentifier,
-                            AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
-                            AuthenticationRequestParameters.Account.HomeAccountId.TenantId),
-                        string.Empty);
-
-                    throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
-                }
-            }
+            ValidateAccountIdentifiers(fromServer);
 
             IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
 
@@ -272,6 +253,40 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         msalTokenResponse, 
                         idToken?.TenantId));
             }
+        }
+
+        private void ValidateAccountIdentifiers(ClientInfo fromServer)
+        {
+            if (fromServer == null || AuthenticationRequestParameters?.Account?.HomeAccountId == null) return;
+
+            if (AuthenticationRequestParameters.Authority.AuthorityType == Core.Instance.AuthorityType.B2C &&
+                fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            if (fromServer.UniqueObjectIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
+                    StringComparison.OrdinalIgnoreCase) &&
+                fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            AuthenticationRequestParameters.RequestContext.Logger.Error("Returned user identifiers do not match the sent user identifier");
+
+            AuthenticationRequestParameters.RequestContext.Logger.ErrorPii(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Returned user identifiers (uid:{0} utid:{1}) does not match the sent user identifier (uid:{2} utid:{3})",
+                    fromServer.UniqueObjectIdentifier,
+                    fromServer.UniqueTenantIdentifier,
+                    AuthenticationRequestParameters.Account.HomeAccountId.ObjectId,
+                    AuthenticationRequestParameters.Account.HomeAccountId.TenantId),
+                string.Empty);
+
+            throw new MsalClientException(MsalError.UserMismatch, MsalErrorMessage.UserMismatchSaveToken);
         }
 
         internal async Task ResolveAuthorityEndpointsAsync()

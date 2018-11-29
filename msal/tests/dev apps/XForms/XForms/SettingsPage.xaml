@@ -36,6 +36,7 @@
                         <x:Array Type="{x:Type x:String}">
                             <x:String>login.microsoftonline.com</x:String>
                             <x:String>b2clogin.com</x:String>
+                            <x:String>Edit profile policy authority</x:String>
                             <x:String>non-b2c authority</x:String>
                         </x:Array>
                     </Picker.ItemsSource>

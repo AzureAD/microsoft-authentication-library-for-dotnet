@@ -101,14 +101,14 @@ namespace Test.MSAL.UIAutomation
 
         private void SetInputData(
             ITestController controller,
-            string ClientID,
+            string clientId,
             string scopes,
             string uiBehavior)
         {
             controller.Tap(CoreUiTestConstants.SettingsPageID);
 
             //Enter ClientID
-            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, ClientID, XamarinSelector.ByAutomationId);
+            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, clientId, XamarinSelector.ByAutomationId);
             controller.Tap(CoreUiTestConstants.SaveID);
 
             //Enter Scopes
@@ -117,7 +117,7 @@ namespace Test.MSAL.UIAutomation
 
             SetUiBehavior(controller, uiBehavior);
         }
-        
+
         public void SetUiBehavior(ITestController controller, string promptBehavior)
         {
             // Enter Prompt Behavior
@@ -157,6 +157,15 @@ namespace Test.MSAL.UIAutomation
         }
 
         /// <summary>
+        /// Runs through the B2C acquire token flow with Facebook Provider
+        /// and Edit Policy authority
+        /// </summary>
+        public void B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
+        {
+            PerformB2CSignInEditProfileFlow(controller, B2CIdentityProvider.Facebook);
+        }
+
+        /// <summary>
         /// Runs through the B2C acquire token flow with Google Provider
         /// </summary>
         public void B2CGoogleProviderAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
@@ -188,7 +197,7 @@ namespace Test.MSAL.UIAutomation
             //acquire token for 1st resource   
             B2CLocalAccountAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
-            B2CSilentFlowHelper(controller, labResponse);
+            B2CSilentFlowHelper(controller);
         }
 
         /// <summary>
@@ -200,7 +209,7 @@ namespace Test.MSAL.UIAutomation
             //acquire token for 1st resource   
             B2CFacebookProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
-            B2CSilentFlowHelper(controller, labResponse);
+            B2CSilentFlowHelper(controller);
         }
 
         /// <summary>
@@ -212,10 +221,10 @@ namespace Test.MSAL.UIAutomation
             //acquire token for 1st resource   
             B2CGoogleProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
-            B2CSilentFlowHelper(controller, labResponse);
+            B2CSilentFlowHelper(controller);
         }
 
-        private void B2CSilentFlowHelper(ITestController controller, LabResponse labResponse)
+        private void B2CSilentFlowHelper(ITestController controller)
         {
             //verify results of AT call
             CoreMobileTestHelper.VerifyResult(controller);
@@ -239,6 +248,13 @@ namespace Test.MSAL.UIAutomation
         {
             // Select b2clogin.com for authority
             SetAuthority(controller, CoreUiTestConstants.B2CLoginAuthority);
+        }
+
+        public void SetB2CInputDataForEditProfileAuthority(ITestController controller)
+        {
+            controller.Tap(CoreUiTestConstants.SettingsPageID);
+            // Select Edit Profile for Authority
+            SetAuthority(controller, CoreUiTestConstants.B2CEditProfileAuthority);
         }
 
         public void SetAuthority(ITestController controller, string authority)
@@ -281,7 +297,7 @@ namespace Test.MSAL.UIAutomation
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
 
-        public void PerformB2CSignInFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool isB2CLoginAuthorit)
+        public void PerformB2CSignInFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool isB2CLoginAuthority)
         {
             SetB2CAuthority(controller, true);
 
@@ -307,6 +323,22 @@ namespace Test.MSAL.UIAutomation
                 default:
                     throw new InvalidOperationException("B2CIdentityProvider unknown");
             }
+            CoreMobileTestHelper.VerifyResult(controller);
+        }
+
+        public void PerformB2CSignInEditProfileFlow(ITestController controller, B2CIdentityProvider b2CIdentityProvider)
+        {
+            SetB2CInputDataForEditProfileAuthority(controller);
+            
+            controller.Tap(CoreUiTestConstants.AcquirePageID);
+            
+            SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorNoPrompt);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+
+            controller.Tap(CoreUiTestConstants.B2CEditProfileContinueID, XamarinSelector.ByHtmlIdAttribute);
+
             CoreMobileTestHelper.VerifyResult(controller);
         }
     }

@@ -271,7 +271,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            authorizationRequestParameters[OAuth2Parameter.Prompt] = _uiBehavior.PromptValue;
+            if (_uiBehavior.PromptValue != UIBehavior.NoPrompt.PromptValue)
+            {
+                authorizationRequestParameters[OAuth2Parameter.Prompt] = _uiBehavior.PromptValue;
+            }
+            
             return authorizationRequestParameters;
         }
 

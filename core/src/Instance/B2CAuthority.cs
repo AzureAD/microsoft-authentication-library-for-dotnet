@@ -35,7 +35,6 @@ namespace Microsoft.Identity.Core.Instance
     {
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
         public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
-        public const string MicrosoftOnline = "https://login.microsoftonline.com";
         public const string OpenIdConfigurationEndpoint = "v2.0/.well-known/openid-configuration";
         public const string B2CTrustedHost = "b2clogin.com";
 
@@ -76,14 +75,6 @@ namespace Microsoft.Identity.Core.Instance
 
                 CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
             }
-        }
-
-        private string GetCanonicalAuthorityB2C()
-        {
-            Uri b2cAuthority = new Uri(CanonicalAuthority);
-
-            string canonicalAuthorityUri = string.Format(CultureInfo.InvariantCulture, MicrosoftOnline + b2cAuthority.AbsolutePath);
-            return canonicalAuthorityUri;
         }
 
         private bool IsB2CLoginHost(string host)

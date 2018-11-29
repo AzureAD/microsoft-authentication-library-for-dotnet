@@ -44,7 +44,7 @@ namespace XForms
     {
         private const string UserNotSelected = "not selected";
         private const string EmptyResult = "Result:";
-        private const string SuccsessfulResult = "Result: Success";
+        private const string SuccessfulResult = "Result: Success";
 
         public AcquirePage()
         {
@@ -74,7 +74,8 @@ namespace XForms
             {
                 UIBehavior.SelectAccount.PromptValue,
                 UIBehavior.ForceLogin.PromptValue,
-                UIBehavior.Consent.PromptValue
+                UIBehavior.Consent.PromptValue,
+                UIBehavior.NoPrompt.PromptValue
             };
 
             UIBehaviorPicker.ItemsSource = options;
@@ -93,6 +94,11 @@ namespace XForms
             if (UIBehavior.Consent.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
             {
                 return UIBehavior.Consent;
+            }
+
+            if (UIBehavior.NoPrompt.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
+            {
+                return UIBehavior.NoPrompt;
             }
 
             return UIBehavior.SelectAccount;
@@ -174,7 +180,7 @@ namespace XForms
 
                 if (resText.Contains("AccessToken"))
                 {
-                    acquireResponseTitleLabel.Text = SuccsessfulResult;
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
                 }
 
                 acquireResponseLabel.Text = resText;
@@ -217,7 +223,7 @@ namespace XForms
 
                 if (resText.Contains("AccessToken"))
                 {
-                    acquireResponseTitleLabel.Text = SuccsessfulResult;
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
                 }
 
                 acquireResponseLabel.Text = resText;
@@ -251,7 +257,7 @@ namespace XForms
 
                 if (resText.Contains("AccessToken"))
                 {
-                    acquireResponseTitleLabel.Text = SuccsessfulResult;
+                    acquireResponseTitleLabel.Text = SuccessfulResult;
                 }
 
                 acquireResponseLabel.Text = resText;

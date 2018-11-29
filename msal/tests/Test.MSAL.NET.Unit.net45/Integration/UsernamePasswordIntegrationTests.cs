@@ -62,7 +62,7 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()
         {
-            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
+            var user = LabUserHelper.GetDefaultUser().User;
 
             SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
@@ -86,7 +86,7 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithFederatedUsernamePasswordAsync()
         {
-            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
+            var user = LabUserHelper.GetDefaultUser().User;
 
             SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
@@ -109,7 +109,7 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithManagedUsernameIncorrectPassword()
         {
-            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
+            var user = LabUserHelper.GetDefaultUser().User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
@@ -125,7 +125,7 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithFederatedUsernameIncorrectPassword()
         {
-            var user = LabUserHelper.GetLabResponseWithDefaultUser().User;
+            var user = LabUserHelper.GetDefaultUser().User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');

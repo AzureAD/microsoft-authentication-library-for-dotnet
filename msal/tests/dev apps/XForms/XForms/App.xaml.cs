@@ -41,13 +41,14 @@ namespace XForms
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
-        public static string RedirectUriOnAndroid = Microsoft.Identity.Core.Constants.DefaultRedirectUri; // will not work with embedded browser
+        public static string RedirectUriOnAndroid = Microsoft.Identity.Core.Constants.DefaultRedirectUri; // will not work with system browser
         public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
         public const string B2cAuthority = "https://login.microsoftonline.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         public const string B2CLoginAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
+        public const string B2CEditProfilePolicyAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
 
         public static string[] DefaultScopes = {"User.Read"};
         public static string[] B2cScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };

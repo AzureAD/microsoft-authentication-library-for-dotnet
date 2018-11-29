@@ -47,55 +47,30 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             _labService = new LabServiceApi(_keyVaultSecretsProvider);
         }
 
-        public static UserQueryParameters DefaultUserQuery
+        public static UserQueryParameters DefaultUserQuery => new UserQueryParameters
         {
-            get
-            {
-                return new UserQueryParameters
-                {
-                    IsMamUser = false,
-                    IsMfaUser = false,
-                    IsFederatedUser = false
-                };
-            }
-        }
+            IsMamUser = false,
+            IsMfaUser = false,
+            IsFederatedUser = false
+        };
 
-        public static UserQueryParameters B2CLocalAccountUserQuery
+        public static UserQueryParameters B2CLocalAccountUserQuery => new UserQueryParameters
         {
-            get
-            {
-                return new UserQueryParameters
-                {
-                    UserType = UserType.B2C,
-                    B2CIdentityProvider = B2CIdentityProvider.Local
-                };
-            }
-        }
+            UserType = UserType.B2C,
+            B2CIdentityProvider = B2CIdentityProvider.Local
+        };
 
-        public static UserQueryParameters B2CFacebookUserQuery
+        public static UserQueryParameters B2CFacebookUserQuery => new UserQueryParameters
         {
-            get
-            {
-                return new UserQueryParameters
-                {
-                    UserType = UserType.B2C,
-                    B2CIdentityProvider = B2CIdentityProvider.Facebook
-                };
-            }
-        }
+            UserType = UserType.B2C,
+            B2CIdentityProvider = B2CIdentityProvider.Facebook
+        };
 
-        public static UserQueryParameters B2CGoogleUserQuery
+        public static UserQueryParameters B2CGoogleUserQuery => new UserQueryParameters
         {
-            get
-            {
-                return new UserQueryParameters
-                {
-
-                    UserType = UserType.B2C,
-                    B2CIdentityProvider = B2CIdentityProvider.Google
-                };
-            }
-        }
+            UserType = UserType.B2C,
+            B2CIdentityProvider = B2CIdentityProvider.Google
+        };
 
         public static LabResponse GetLabUserData(UserQueryParameters query)
         {
@@ -107,7 +82,7 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             return user;
         }
 
-        public static LabResponse GetLabResponseWithDefaultUser()
+        public static LabResponse GetDefaultUser()
         {
             if (_defaultLabResponse == null)
             {
@@ -117,25 +92,25 @@ namespace Test.Microsoft.Identity.LabInfrastructure
             return _defaultLabResponse;
         }
 
-        public static LabResponse GetLabResponseWithB2CLocalAccountProvider()
+        public static LabResponse GetB2CLocalAccount()
         {
             var user = B2CLocalAccountUserQuery;
             return GetLabUserData(user);
         }
 
-        public static LabResponse GetLabResponseWithB2CFacebookProvider()
+        public static LabResponse GetB2CFacebookAccount()
         {
             var user = B2CFacebookUserQuery;
             return GetLabUserData(user);
         }
 
-        public static LabResponse GetLabResponseWithB2CGoogleProvider()
+        public static LabResponse GetB2CGoogleAccount()
         {
             var user = B2CGoogleUserQuery;
             return GetLabUserData(user);
         }
 
-        public static LabResponse GetLabResponseWithADFSUser(FederationProvider federationProvider, bool federated = true)
+        public static LabResponse GetAdfsUser(FederationProvider federationProvider, bool federated = true)
         {
             var user = DefaultUserQuery;
             user.FederationProvider = federationProvider;

@@ -61,6 +61,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public static readonly UIBehavior Consent = new UIBehavior("consent");
 
+        /// <summary>
+        /// Does not request any specific UI to the service, which therefore decides based on the 
+        /// number of signed-in identities. 
+        /// This UIBehavior is, for the moment, recommended for Azure AD B2C scenarios where
+        /// the developer does not want the user to re-select the account (for instance apply 
+        /// policies like EditProfile, or ResetPassword, which should apply to the currently signed-in account.
+        /// It's not recommended to use this UIBehavior in Azure AD scenarios for the moment.
+        /// </summary>
+        public static readonly UIBehavior NoPrompt = new UIBehavior("no_prompt");
 
 #if DESKTOP || WINDOWS_APP
         /// <summary>
