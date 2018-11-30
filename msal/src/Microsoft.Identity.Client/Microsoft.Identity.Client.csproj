@@ -1,5 +1,4 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-
   
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
@@ -7,6 +6,26 @@
 
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
   <Import Project="../MSAL.Common.props" />
+
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
+    <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
+    <DefineConstants>$(DefineConstants);WINDOWS_APP_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
+    <DefineConstants>$(DefineConstants);ANDROID_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+    <DefineConstants>$(DefineConstants);DESKTOP_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+    <DefineConstants>$(DefineConstants);iOS_RUNTIME</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />

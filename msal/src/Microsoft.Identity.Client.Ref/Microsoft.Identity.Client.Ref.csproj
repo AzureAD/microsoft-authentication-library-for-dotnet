@@ -4,8 +4,29 @@
   See https://oren.codes/2018/07/09/create-and-pack-reference-assemblies-made-easy/ for details-->
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
+    <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
   </PropertyGroup>
 
+
   <Import Project="../MSAL.Common.props" />
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
+    <DefineConstants>$(DefineConstants);NET_CORE_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
+    <DefineConstants>$(DefineConstants);WINDOWS_APP_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
+    <DefineConstants>$(DefineConstants);ANDROID_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+    <DefineConstants>$(DefineConstants);DESKTOP_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+    <DefineConstants>$(DefineConstants);iOS_BUILD</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD_BUILD</DefineConstants>
+  </PropertyGroup>
 
 </Project>

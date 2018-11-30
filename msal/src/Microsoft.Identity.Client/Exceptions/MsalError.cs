@@ -187,5 +187,10 @@ namespace Microsoft.Identity.Client
         /// Integrated Windows Auth is only supported for "federated" users
         /// </summary>
         public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
+
+        /// <summary>
+        /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
+        /// </summary>
+        public const string ActivityRequired = "activity_required";
     }
 }
