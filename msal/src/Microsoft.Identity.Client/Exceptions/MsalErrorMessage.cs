@@ -135,13 +135,6 @@ namespace Microsoft.Identity.Client
         public const string UserMismatchSaveToken = "Returned user identifier does not match the sent user identifier when saving the token to the cache.";
         public const string IwaNotSupportedForManagedUser = "Integrated Windows Auth is not supported for managed users. See https://aka.ms/msal-net-iwa for details.";
         public const string ActivityRequired = "On the Android platform, you have to pass the Activity to the UIParent object. See https://aka.ms/msal-interactive-android for details.";
-
-        public const string InteractiveNotSupportedOnNetCore = "On .NET Core, interactive authentication is not supported. Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow"+
-        " or Integrated Windows Auth https://aka.ms/msal-net-iwa";
-
-        public const string InteractiveUIParentAndroid = "On Android, please use an overload of AcquireTokenAsync that uses UIParent. " 
-            + "Intialize the UIParent using an Activity, to which the auth webview will be assosiated with. See https://aka.ms/msal-interactive-android";
-
     }
 
 }

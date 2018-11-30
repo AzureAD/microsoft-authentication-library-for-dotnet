@@ -112,7 +112,8 @@ namespace Microsoft.Identity.Client
         }
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
-#if !NET_CORE
+        // however include the signatures at runtime only to prevent MissingMethodExceptions from NetStandard
+#if !NET_CORE_BUILDTIME // include for other platforms and for runtime
 
 #if iOS
         private string keychainSecurityGroup;
@@ -146,7 +147,9 @@ namespace Microsoft.Identity.Client
         public bool UseCorporateNetwork { get; set; }
 #endif
 
-#if !ANDROID
+        // Android does not support AcquireToken* without UIParent params, but include it at runtime
+        // only to avoid MissingMethodExceptions from NetStandard
+#if !ANDROID_BUILDTIME // include for other other platform and for runtime
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The user is required to select an account
         /// </summary>
@@ -156,6 +159,9 @@ namespace Microsoft.Identity.Client
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -172,6 +178,9 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -190,6 +199,9 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             IAccount account)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -210,6 +222,9 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -230,6 +245,9 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -254,6 +272,9 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
@@ -278,6 +299,9 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
+            GuardNetCore();
+            GuardUIParentAndroid();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
@@ -297,6 +321,8 @@ namespace Microsoft.Identity.Client
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -315,6 +341,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and login</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -334,6 +362,8 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             IAccount account, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -355,6 +385,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -376,6 +408,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -401,6 +435,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
@@ -426,6 +462,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
         UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
+            GuardNetCore();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
@@ -454,14 +492,27 @@ namespace Microsoft.Identity.Client
             return PlatformPlugin.GetWebUiFactory().CreateAuthenticationDialog(parent.CoreUIParent, requestContext);
         }
 
+        private void GuardNetCore()
+        {
+            throw new PlatformNotSupportedException("On .NET Core, interactive authentication is not supported. " + 
+                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa");
+        }
+
+        private void GuardUIParentAndroid()
+        {
+            throw new PlatformNotSupportedException("To enable interactive authentication on Android, please call an overload of AcquireTokenAsync that " +
+                "takes in an UIParent object, which you should initialize to an Activity. " + 
+                "See https://aka.ms/msal-interactive-android for details.");
+        }
+
         private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(
-            Authority authority, 
+            Authority authority,
             IEnumerable<string> scopes,
-            IEnumerable<string> extraScopesToConsent, 
-            string loginHint, 
+            IEnumerable<string> extraScopesToConsent,
+            string loginHint,
             UIBehavior behavior,
-            string extraQueryParameters, 
-            UIParent parent, 
+            string extraQueryParameters,
+            UIParent parent,
             ApiEvent.ApiIds apiId)
         {
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);

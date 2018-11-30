@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
 
-#if !NET_CORE
+#if !NET_CORE_BUILDTIME
 
 #if iOS
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
 
         // expose the interactive API without UIParent only for platforms that 
         // do not need it to operate like desktop, UWP, iOS.
-#if !ANDROID
+#if !ANDROID_BUILDTIME
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The user is required to select an account
         /// </summary>

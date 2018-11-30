@@ -33,12 +33,11 @@ namespace Microsoft.Identity.Client
     /// </summary>
     /// <remarks>Only the .NET Framework platforms allows <c>UIBehavior.Never</c></remarks>
 
-    //TODO: This should be completely removed for platforms that do not support UI, however 
-    // at present it used for ConfidentialClientApplication.GetAuthorizationRequestUrlAsync
-#if !NET_CORE
-    public
-#else
+    // Hide this for .net core at build time, but it needs to be public at runtime to support NetStndard
+#if NET_CORE_BUILDTIME
     internal 
+#else
+    public
 #endif    
         struct UIBehavior
     {

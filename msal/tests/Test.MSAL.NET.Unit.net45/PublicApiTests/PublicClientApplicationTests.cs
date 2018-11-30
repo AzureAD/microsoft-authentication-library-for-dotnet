@@ -26,7 +26,7 @@
 //
 //------------------------------------------------------------------------------
 
-#if !NET_CORE
+
 
 using System;
 using System.Collections.Generic;
@@ -54,7 +54,6 @@ namespace Test.MSAL.NET.Unit
     [TestClass]
     public class PublicClientApplicationTests
     {
-        //private TokenCache _cache;
         private MyReceiver _myReceiver;
 
         [TestInitialize]
@@ -62,17 +61,10 @@ namespace Test.MSAL.NET.Unit
         {
             TestCommon.ResetStateAndInitMsal();
 
-            //_cache = new TokenCache();
             _myReceiver = new MyReceiver();
         }
 
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            //_cache.TokenCacheAccessor.ClearAccessTokens();
-            //_cache.TokenCacheAccessor.ClearRefreshTokens();
-        }
-
+#if !NET_CORE
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         [Description("Tests the public interfaces can be mocked")]
@@ -89,7 +81,7 @@ namespace Test.MSAL.NET.Unit
                tenantId: "",
                account: null,
                idToken: "id token",
-               scopes: new[] { "scope1"});
+               scopes: new[] { "scope1" });
 
             var mockApp = Substitute.For<IPublicClientApplication>();
             mockApp.AcquireTokenAsync(new string[] { "scope1", "scope2" }).ReturnsForAnyArgs(mockResult);
@@ -1372,6 +1364,75 @@ namespace Test.MSAL.NET.Unit
                 Assert.IsNotNull(result.Account);
             }
         }
+#endif
+
+#if NET_CORE
+
+        [TestMethod]
+        public void NetCore_AcquireTokenInteractive_ThrowsPlatformNotSupported()
+        {
+            // Arrange
+            PublicClientApplication pca = new PublicClientApplication("cid");
+            var account = new Account("a.b", null, null);
+
+            // All interactive auth overloads
+            IEnumerable<Func<Task<AuthenticationResult>>> acquireTokenInteractiveMethods = new List<Func<Task<AuthenticationResult>>>
+            {
+                // without UI Parent
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", UIBehavior.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, UIBehavior.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(
+                    CoreTestConstants.Scope,
+                    "login hint",
+                    UIBehavior.Consent,
+                    "extra_query_params",
+                    new[] {"extra scopes" },
+                    CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
+
+                async () => await pca.AcquireTokenAsync(
+                    CoreTestConstants.Scope,
+                    account,
+                    UIBehavior.Consent,
+                    "extra_query_params",
+                    new[] {"extra scopes" },
+                    CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
+
+                // with UIParent
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", UIBehavior.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, UIBehavior.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(
+                    CoreTestConstants.Scope,
+                    "login hint",
+                    UIBehavior.Consent,
+                    "extra_query_params",
+                    new[] {"extra scopes" },
+                    CoreTestConstants.AuthorityCommonTenant,
+                    (UIParent)null).ConfigureAwait(false),
+
+                async () => await pca.AcquireTokenAsync(
+                    CoreTestConstants.Scope,
+                    account,
+                    UIBehavior.Consent,
+                    "extra_query_params",
+                    new[] {"extra scopes" },
+                    CoreTestConstants.AuthorityCommonTenant,
+                    (UIParent)null).ConfigureAwait(false),
+
+            };
+
+            // Act and Assert
+            foreach (var acquireTokenInteractiveMethod in acquireTokenInteractiveMethods)
+            {
+                AssertException.TaskThrows<PlatformNotSupportedException>(acquireTokenInteractiveMethod);
+            }
+        }
+
+#endif
     }
 }
-#endif
