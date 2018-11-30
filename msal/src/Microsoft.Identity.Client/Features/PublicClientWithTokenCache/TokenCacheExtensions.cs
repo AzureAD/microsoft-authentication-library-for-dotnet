@@ -35,6 +35,7 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client
 {
+    #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
     /// <summary>
     /// Extension methods used to subscribe to cache serialization events, and to effectively serialize and deserialize the cache
     /// </summary>
@@ -53,6 +54,7 @@ namespace Microsoft.Identity.Client
         /// want to call <see cref="Deserialize(TokenCache, byte[])"/></remarks>
         public static void SetBeforeAccess(this TokenCache tokencache, TokenCache.TokenCacheNotification beforeAccess)
         {
+            GuardOnMobilePlatforms();
             tokencache.BeforeAccess = beforeAccess;
         }
 
@@ -68,6 +70,7 @@ namespace Microsoft.Identity.Client
         /// want to call <see cref="Serialize(TokenCache)"/></remarks>
         public static void SetAfterAccess(this TokenCache tokencache, TokenCache.TokenCacheNotification afterAccess)
         {
+            GuardOnMobilePlatforms();
             tokencache.AfterAccess = afterAccess;
         }
 
@@ -80,6 +83,7 @@ namespace Microsoft.Identity.Client
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
         public static void SetBeforeWrite(this TokenCache tokencache, TokenCache.TokenCacheNotification beforeWrite)
         {
+            GuardOnMobilePlatforms();
             tokencache.BeforeWrite = beforeWrite;
         }
 
@@ -93,6 +97,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public static void Deserialize(this TokenCache tokenCache, byte[] unifiedState)
         {
+            GuardOnMobilePlatforms();
             lock (tokenCache.LockObject)
             {
                 RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
@@ -107,6 +112,7 @@ namespace Microsoft.Identity.Client
         /// <param name="cacheData">Array of bytes containing serialicache data</param>
         public static void DeserializeUnifiedAndAdalCache(this TokenCache tokenCache, CacheData cacheData)
         {
+            GuardOnMobilePlatforms();
             lock (tokenCache.LockObject)
             {
                 RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
@@ -123,6 +129,7 @@ namespace Microsoft.Identity.Client
         /// <returns>array of bytes containing the serialized unified cache</returns>
         public static byte[] Serialize(this TokenCache tokenCache)
         {
+            GuardOnMobilePlatforms();
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (tokenCache.LockObject)
             {
@@ -137,6 +144,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Serialized token cache <see cref="CacheData"/></returns>
         public static CacheData SerializeUnifiedAndAdalCache(this TokenCache tokenCache)
         {
+            GuardOnMobilePlatforms();
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (tokenCache.LockObject)
             {
@@ -150,5 +158,16 @@ namespace Microsoft.Identity.Client
                 };
             }
         }
+        
+        private static void GuardOnMobilePlatforms()
+        {
+#if ANDROID || iOS || WINDOWS_APP
+        throw new PlatformNotSupportedException("You should not use these TokenCache methods object on mobile platforms. " +
+            "They meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
+            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
+#endif
+        }
     }
+    #endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
 }

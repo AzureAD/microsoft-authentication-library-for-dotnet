@@ -98,16 +98,19 @@
     <None Include="$(PathToCoreSources)\*.md" LinkBase="Core" />
     <Compile Remove="$(PathToCoreSources)\Platforms\**\*.cs" />
     <Compile Remove="$(PathToCoreSources)\Features\**\*.*" />
+    
+    <!-- Any feature that is included in NetStandard MUST be included in ALL frameworks. 
+    Non-implementing frameworks should throw a PlatformNotImplementedEx and hide the public surface at build time-->
+    <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" LinkBase="Features\PublicClientWithTokenCache" />
+    
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Platforms\netstandard1.3" />
     <Compile Include="$(PathToCoreSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3" />
     <Compile Include="$(PathToCoreSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
-    <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" LinkBase="Features\PublicClientWithTokenCache" />
     <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs"  LinkBase="Features\ConfidentialClient" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventSource" />
-    <Compile Include="$(PathToMsalSources)\Features\TokenCache\**\*.cs" LinkBase="Features\TokenCache" />
     <Compile Include="$(PathToMsalSources)\Features\DeviceCode\**\*.cs" LinkBase="Features\DeviceCode"/>
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -127,13 +130,10 @@
 
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Features\TokenCache\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\IntegratedWindowsAuth\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\DeviceCode\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
@@ -149,8 +149,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
 
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventsSource" />
-    <Compile Include="$(PathToMsalSources)\Features\TokenCache\**\*.cs" LinkBase="Features\TokenCache" />
-    <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" LinkBase="Features\PublicClientWithTokenCache" />
     <Compile Include="$(PathToMsalSources)\Features\IntegratedWindowsAuth\**\*.cs" LinkBase="Features\IntegratedWindowsAuth" />
     <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" LinkBase="Features\UsernamePassword"/>
     <Compile Include="$(PathToMsalSources)\Features\DeviceCode\**\*.cs" LinkBase="Features\DeviceCode" />
@@ -176,7 +174,8 @@
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
     <Compile Include="$(PathToCoreSources)\Platforms\uap\**\*.cs" LinkBase="Core\Platforms\uap" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" />
+    <!-- Bug on UWP where we accidentally included this feature. Not worth removing and breaking backwards compat now -->
+    <Compile Remove="$(PathToMsalSources)\Features\PublicClientWithTokenCache\TokenCacheExtensions.cs" />
     <Compile Include="$(PathToMsalSources)\Features\IntegratedWindowsAuth\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\DeviceCode\**\*.cs" />
     <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />

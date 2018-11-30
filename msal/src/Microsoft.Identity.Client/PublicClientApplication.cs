@@ -478,7 +478,9 @@ namespace Microsoft.Identity.Client
             //create instance of UIParent and assign useCorporateNetwork to UIParent
             if (parent == null)
             {
+#pragma warning disable CS0618 // Throws a good exception on Android, but ctor cannot be removed for backwards compat reasons
                 parent = new UIParent();
+#pragma warning restore CS0618 // Type or member is obsolete
             }
 
 #if WINDOWS_APP || DESKTOP

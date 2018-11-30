@@ -29,12 +29,16 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Telemetry;
+using System;
 
 namespace Microsoft.Identity.Client
 {
+    //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
+    // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
+    // as we plan to expose the whole thing
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {
-
         /// <summary>
         /// Constructor to create application instance. This constructor is only available for Desktop and NetCore apps
         /// </summary>
@@ -44,6 +48,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
             : this(null, clientId, authority, userTokenCache)
         {
+            GuardOnMobilePlatforms();
             UserTokenCache = userTokenCache;
         }
 
@@ -61,5 +66,18 @@ namespace Microsoft.Identity.Client
         {
             UserTokenCache = userTokenCache;
         }
+
+
+        private static void GuardOnMobilePlatforms()
+        {
+#if ANDROID || iOS
+        throw new PlatformNotSupportedException("You should not use this constructor that takes in a TokenCache object on mobile platforms. " +
+            "This constructor is meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
+            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
+#endif
+        }
     }
+
+#endif
 }
