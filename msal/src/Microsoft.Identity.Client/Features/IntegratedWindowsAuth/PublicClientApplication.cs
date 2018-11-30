@@ -29,17 +29,18 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {
-// .net core does not support getting the upn from the OS, although it can be made to pull it from a Windows OS
-#if !NET_CORE
-
+#if !NET_CORE_BUILDTIME
         /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
         /// See https://aka.ms/msal-net-iwa.
@@ -54,6 +55,9 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
         public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
         {
+            GuardNonWindowsFrameworks();
+            GuardIWANetCore();
+
             return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput()).ConfigureAwait(false);
         }
 #endif
@@ -71,9 +75,9 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string username)
         {
+            GuardNonWindowsFrameworks();
             return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput(username)).ConfigureAwait(false);
         }
-
 
         private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IntegratedWindowsAuthInput iwaInput)
         {
@@ -87,5 +91,25 @@ namespace Microsoft.Identity.Client
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
+
+        private static void GuardNonWindowsFrameworks()
+        {
+#if ANDROID || iOS
+            throw new PlatformNotSupportedException("Integrated Windows Authentication is not supported on this platform. " +
+                "For details about this authentication flow, please see https://aka.ms/msal-net-iwa");
+#endif
+        }
+
+        private static void GuardIWANetCore()
+        {
+#if NET_CORE
+            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not suppored on .net core because " +
+                "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
+                "For more details see https://aka.ms/msal-net-iwa");
+#endif
+        }
+
     }
+#endif
+
 }

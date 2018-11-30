@@ -31,6 +31,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
     /// <summary>
     /// Interface to be used with desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
     /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only 
@@ -38,10 +40,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
-
-
-        // .net core does not support getting the upn from the OS, although it can be made to pull it from a Windows OS
-#if !NET_CORE
+#if !NET_CORE_BUILDTIME
 
         /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
@@ -71,4 +70,5 @@ namespace Microsoft.Identity.Client
             string username);
 
     }
+#endif
 }

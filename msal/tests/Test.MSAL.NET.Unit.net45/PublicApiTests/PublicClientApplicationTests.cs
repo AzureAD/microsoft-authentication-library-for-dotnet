@@ -1369,7 +1369,7 @@ namespace Test.MSAL.NET.Unit
 #if NET_CORE
 
         [TestMethod]
-        public void NetCore_AcquireTokenInteractive_ThrowsPlatformNotSupported()
+        public void NetCore_AcquireToken_ThrowsPlatformNotSupported()
         {
             // Arrange
             PublicClientApplication pca = new PublicClientApplication("cid");
@@ -1423,6 +1423,8 @@ namespace Test.MSAL.NET.Unit
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant,
                     (UIParent)null).ConfigureAwait(false),
+
+                async () => await pca.AcquireTokenByIntegratedWindowsAuthAsync(CoreTestConstants.Scope).ConfigureAwait(false)
 
             };
 
