@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Core", "core\src\Microsoft.Identity.Core.csproj", "{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979-0A13-456D-B9F9-CED41F935FD9}"
@@ -21,9 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.net45", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Common", "msal\tests\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj", "{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{E22918A8-8FE6-47D2-B65E-34436918C5D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "msal\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{E22918A8-8FE6-47D2-B65E-34436918C5D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.SideBySide", "core\tests\Test.Microsoft.Identity.SideBySide\Test.Microsoft.Identity.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.SideBySide", "msal\tests\Test.Microsoft.Identity.SideBySide\Test.Microsoft.Identity.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{6F170F63-0A04-4E2C-9261-837C5FDF349B}"
 EndProject
@@ -35,10 +33,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9DF4D5CB-4C6F-4869-AB32-2639695D4C07}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Release|Any CPU.ActiveCfg = Release|Any CPU

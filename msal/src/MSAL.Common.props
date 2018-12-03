@@ -39,7 +39,6 @@
 
   <PropertyGroup>
     <PathToMsalSources>$(MSBuildThisFileDirectory)\Microsoft.Identity.Client</PathToMsalSources>
-    <PathToCoreSources>$(MSBuildThisFileDirectory)\..\..\core\src</PathToCoreSources>
     <!-- Need to include / exclude / remove cs files manually so that they are present in both assemblies -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <NoWarn>$(NoWarn);CS8002</NoWarn>
@@ -90,15 +89,6 @@
 
     <EmbeddedResource Include="$(PathToMsalSources)\Properties\Microsoft.Identity.Client.rd.xml" />
 
-    <!-- Include Core as files, not as a project reference -->
-    <Compile Include="$(PathToCoreSources)\**\*.cs" Exclude="$(PathToCoreSources)\obj\**\*.*;$(PathToCoreSources)\properties\**\*.*" LinkBase="Core" />
-
-    <None Include="$(PathToCoreSources)\Platforms\**\*.cs" LinkBase="Core\Platforms" />
-    <None Include="$(PathToCoreSources)\Features\**\*.cs" LinkBase="Core\Features" />
-    <None Include="$(PathToCoreSources)\*.md" LinkBase="Core" />
-    <Compile Remove="$(PathToCoreSources)\Platforms\**\*.cs" />
-    <Compile Remove="$(PathToCoreSources)\Features\**\*.*" />
-
     <!-- Any feature that is included in NetStandard MUST be included in ALL frameworks. 
     Non-implementing frameworks should throw a PlatformNotImplementedEx and hide the public surface at build time-->
     <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" LinkBase="Features\PublicClientWithTokenCache" />
@@ -110,8 +100,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Platforms\netstandard1.3" />
-    <Compile Include="$(PathToCoreSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3" />
-    <Compile Include="$(PathToCoreSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
+    <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventSource" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -127,8 +116,7 @@
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.0' ">
 
-    <Compile Include="$(PathToCoreSources)\Platforms\netcore\**\*.cs" LinkBase="Core\Platforms\netcore" />
-    <Compile Include="$(PathToCoreSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
+    <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
 
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
@@ -144,8 +132,7 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Compile Include="$(PathToCoreSources)\Platforms\net45\**\*.cs" LinkBase="Core\Platforms\net45" />
-    <Compile Include="$(PathToCoreSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache"/>
+    <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache"/>
 
     <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
 
@@ -170,7 +157,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
-    <Compile Include="$(PathToCoreSources)\Platforms\uap\**\*.cs" LinkBase="Core\Platforms\uap" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
     <!-- Bug on UWP where we accidentally included this feature. Not worth removing and breaking backwards compat now -->
     <Compile Remove="$(PathToMsalSources)\Features\PublicClientWithTokenCache\TokenCacheExtensions.cs" />
@@ -183,7 +169,6 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
-    <Compile Include="$(PathToCoreSources)\Platforms\iOS\**\*.cs" LinkBase="Core\Platforms\iOS" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -199,7 +184,6 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
-    <Compile Include="$(PathToCoreSources)\Platforms\Android\**\*.cs" LinkBase="Core\Platforms\" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />

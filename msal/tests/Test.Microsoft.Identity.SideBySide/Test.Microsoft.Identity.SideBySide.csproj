@@ -26,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj" />
+    <ProjectReference Include="..\..\..\msal\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj" />
     <ProjectReference Include="..\..\..\msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Aliases>msal</Aliases>
     </ProjectReference>
