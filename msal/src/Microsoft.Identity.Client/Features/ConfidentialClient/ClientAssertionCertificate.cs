@@ -28,12 +28,12 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// Certificate for a client assertion. This class is used in one of the constructors of <see cref="ClientCredential"/>. ClientCredential
     /// is itself used in the constructor of <see cref="ConfidentialClientApplication"/> to pass to Azure AD a shared secret (registered in the 
@@ -51,10 +51,12 @@ namespace Microsoft.Identity.Client
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         public ClientAssertionCertificate(X509Certificate2 certificate)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             Certificate = certificate ?? throw new ArgumentNullException(nameof(certificate));
 
 #if DESKTOP
-            if (certificate.PublicKey. Key.KeySize < MinKeySizeInBits)
+            if (certificate.PublicKey.Key.KeySize < MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
@@ -63,6 +65,7 @@ namespace Microsoft.Identity.Client
 #endif
 
         }
+
 
         /// <summary>
         /// Gets minimum X509 certificate key size in bits
@@ -76,17 +79,20 @@ namespace Microsoft.Identity.Client
         /// Gets the X509 certificate used as credentials to prove the identity of the application to Azure AD.
         /// </summary>
         public X509Certificate2 Certificate { get; }
-        
+
+
         internal byte[] Sign(string message)
         {
             CryptographyHelper helper = new CryptographyHelper();
             return helper.SignWithCertificate(message, Certificate);
         }
-        
+
         internal string Thumbprint
         {
             // Thumbprint should be url encoded
             get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); }
         }
     }
+#endif
+
 }

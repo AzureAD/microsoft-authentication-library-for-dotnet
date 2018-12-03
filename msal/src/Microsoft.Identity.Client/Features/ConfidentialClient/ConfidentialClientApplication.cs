@@ -38,6 +38,8 @@ using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// Class to be used for confidential client applications (Web Apps, Web APIs, and daemon applications).
     /// </summary>
@@ -78,6 +80,7 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(clientId, DefaultAuthority, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
+            GuardMobileFrameworks();
         }
 
         /// <summary>
@@ -114,12 +117,15 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(null, clientId, authority, redirectUri, clientCredential, userTokenCache, appTokenCache)
         {
+            GuardMobileFrameworks();
         }
 
         internal ConfidentialClientApplication(IServiceBundle serviceBundle, string clientId, string authority, string redirectUri,
                                                ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : base(clientId, authority, redirectUri, true, serviceBundle)
         {
+            GuardMobileFrameworks();
+
             ClientCredential = clientCredential;
             UserTokenCache = userTokenCache;
             AppTokenCache = appTokenCache;
@@ -138,6 +144,8 @@ namespace Microsoft.Identity.Client
         /// <seealso cref="AcquireTokenOnBehalfOfAsync(IEnumerable{string}, UserAssertion, string)"/> for the on-behalf-of flow when specifying the authority
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
+            GuardMobileFrameworks();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -160,6 +168,8 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
             string authority)
         {
+            GuardMobileFrameworks();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
@@ -180,6 +190,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
+            GuardMobileFrameworks();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
@@ -202,6 +214,8 @@ namespace Microsoft.Identity.Client
         async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
             string authority)
         {
+            GuardMobileFrameworks();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
@@ -221,6 +235,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scopes)
         {
+            GuardMobileFrameworks();
+
             return
                 await
                     AcquireTokenByAuthorizationCodeCommonAsync(
@@ -239,6 +255,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing the token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes)
         {
+            GuardMobileFrameworks();
+
             return
                 await
                     AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, false).ConfigureAwait(false);
@@ -256,6 +274,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
+            GuardMobileFrameworks();
+
             return
                 await
                     AcquireTokenForClientCommonAsync(scopes, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh, false).ConfigureAwait(false);
@@ -273,6 +293,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes)
         {
+            GuardMobileFrameworks();
+
             return
                 await
                     AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, true).ConfigureAwait(false);
@@ -292,6 +314,8 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
+            GuardMobileFrameworks();
+
             return
                 await
                     AcquireTokenForClientCommonAsync(scopes, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh, true).ConfigureAwait(false);
@@ -311,6 +335,8 @@ namespace Microsoft.Identity.Client
         public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string loginHint,
             string extraQueryParameters)
         {
+            GuardMobileFrameworks();
+
             Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var requestParameters =
                 CreateRequestParameters(authority, scopes, null, UserTokenCache);
@@ -341,6 +367,8 @@ namespace Microsoft.Identity.Client
         public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string redirectUri, string loginHint,
             string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
+            GuardMobileFrameworks();
+
             Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             var requestParameters = CreateRequestParameters(authorityInstance, scopes, null,
                 UserTokenCache);
@@ -429,5 +457,16 @@ namespace Microsoft.Identity.Client
 
             return parameters;
         }
+
+        internal static void GuardMobileFrameworks()
+        {
+#if ANDROID || iOS || WINDOWS_APP
+            throw new PlatformNotSupportedException(
+                "Confidential Client flows are not available on mobile platforms. " +
+                "See https://aka.ms/msal-net-confidential-availability for details.");
+#endif
+        }
     }
+
+#endif 
 }

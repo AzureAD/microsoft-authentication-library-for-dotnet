@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         public bool SendCertificate { get; set; }
 
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE 
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
         public ClientCredential ClientCredential { get; set; }
 #endif
 

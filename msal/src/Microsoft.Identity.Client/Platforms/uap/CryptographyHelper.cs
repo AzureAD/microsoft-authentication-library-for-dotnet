@@ -35,6 +35,7 @@ using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client
 {
@@ -94,6 +95,12 @@ namespace Microsoft.Identity.Client
             IBuffer buffer =
                 RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
             return buffer.ToArray(0, (int)buffer.Length);
+        }
+
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        {
+            // Used by Confidential Client, which is hidden on UWP
+            throw new NotImplementedException();
         }
 
         private static T RunAsyncTaskAndWait<T>(Task<T> task)

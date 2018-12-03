@@ -29,6 +29,8 @@ using System;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// Meant to be used in confidential client applications, an instance of <c>ClientCredential</c> is passed 
     /// to the constructors of (<see cref="ConfidentialClientApplication"/>)
@@ -46,6 +48,8 @@ namespace Microsoft.Identity.Client
         /// registration to prove the identity of the application (the client) requesting the tokens.</param>
         public ClientCredential(ClientAssertionCertificate certificate)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             Certificate = certificate;
         }
 
@@ -62,6 +66,8 @@ namespace Microsoft.Identity.Client
         /// of the application (the client) requesting the tokens.</param>
         public ClientCredential(string secret)
         {
+            ConfidentialClientApplication.GuardMobileFrameworks();
+
             if (string.IsNullOrWhiteSpace(secret))
             {
                 throw new ArgumentNullException(nameof(secret));
@@ -72,4 +78,5 @@ namespace Microsoft.Identity.Client
 
         internal string Secret { get; private set; }
     }
+#endif
 }

@@ -34,9 +34,11 @@ using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Client.Internal.Jwt
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     internal class JsonWebTokenConstants
     {
-        public const uint JwtToAadLifetimeInSeconds = 60*10; // Ten minutes
+        public const uint JwtToAadLifetimeInSeconds = 60 * 10; // Ten minutes
         public const string HeaderType = "JWT";
 
         internal class Algorithms
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Client.Internal.Jwt
         {
             var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             TimeSpan diff = time - startTime;
-            return (long) (diff.TotalSeconds);
+            return (long)(diff.TotalSeconds);
         }
 
         private string Encode(ClientAssertionCertificate credential, bool sendCertificate)
@@ -227,4 +229,5 @@ namespace Microsoft.Identity.Client.Internal.Jwt
             public string X509CertificatePublicCertValue { get; set; }
         }
     }
+#endif
 }

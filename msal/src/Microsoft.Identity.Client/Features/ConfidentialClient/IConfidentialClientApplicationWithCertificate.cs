@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// Component to be used with confidential client applications like Web Apps/API.
     /// This component supports Subject Name + Issuer authentication in order to help, in the future,
@@ -56,4 +58,5 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         Task<AuthenticationResult> AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion, string authority);
     }
+#endif
 }

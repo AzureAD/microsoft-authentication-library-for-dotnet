@@ -104,6 +104,7 @@
     <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" LinkBase="Features\PublicClientWithTokenCache" />
     <Compile Include="$(PathToMsalSources)\Features\DeviceCode\**\*.cs" LinkBase="Features\DeviceCode" />
     <Compile Include="$(PathToMsalSources)\Features\IntegratedWindowsAuth\**\*.cs" LinkBase="Features\IntegratedWindowsAuth" />
+    <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs" LinkBase="Features\ConfidentialClient" />
 
   </ItemGroup>
 
@@ -111,7 +112,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Platforms\netstandard1.3" />
     <Compile Include="$(PathToCoreSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Core\Platforms\netstandard1.3" />
     <Compile Include="$(PathToCoreSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
-    <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs"  LinkBase="Features\ConfidentialClient" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventSource" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
@@ -131,7 +131,6 @@
     <Compile Include="$(PathToCoreSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
 
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
     <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" LinkBase="Features\UsernamePassword"/>
     
@@ -152,7 +151,6 @@
 
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventsSource" />
     <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" LinkBase="Features\UsernamePassword"/>
-    <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs" LinkBase="Features\ConfidentialClient" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
