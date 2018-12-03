@@ -496,15 +496,19 @@ namespace Microsoft.Identity.Client
 
         private void GuardNetCore()
         {
+#if NET_CORE
             throw new PlatformNotSupportedException("On .NET Core, interactive authentication is not supported. " + 
                 "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa");
+#endif
         }
 
         private void GuardUIParentAndroid()
         {
+#if ANDROID
             throw new PlatformNotSupportedException("To enable interactive authentication on Android, please call an overload of AcquireTokenAsync that " +
-                "takes in an UIParent object, which you should initialize to an Activity. " + 
+                "takes in an UIParent object, which you should initialize to an Activity. " +
                 "See https://aka.ms/msal-interactive-android for details.");
+#endif
         }
 
         private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(
