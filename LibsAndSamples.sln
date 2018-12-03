@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{88E00ABD-6C6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9B0B5396-4D95-4C15-82ED-DC22B5A3123F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{16EFED33-2014-430A-B76A-F75BC08B18E2}"
 EndProject
@@ -21,41 +21,41 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7F158B29
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "automation", "automation", "{F578B51B-9A88-4230-A05A-DB5A23FABB07}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dev apps", "dev apps", "{34BE693E-3496-45A4-B1D2-D3A0E068EEDB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "devapps", "devapps", "{34BE693E-3496-45A4-B1D2-D3A0E068EEDB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationApp", "msal\tests\AutomationApp\AutomationApp.csproj", "{B1756937-89A6-4165-A832-7C7200D61E7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationApp", "tests\AutomationApp\AutomationApp.csproj", "{B1756937-89A6-4165-A832-7C7200D61E7E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "web apps", "web apps", "{872F4304-ECC2-45EE-B0D4-F36523037481}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xamarin forms", "xamarin forms", "{3761DEF3-458C-4CE2-BE94-4FC9D12217CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "msal\tests\dev apps\XForms\XForms\XForms.csproj", "{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "tests\devapps\XForms\XForms\XForms.csproj", "{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "msal\tests\dev apps\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "tests\devapps\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "msal\tests\dev apps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "tests\devapps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.UWP", "msal\tests\dev apps\XForms\XForms.UWP\XForms.UWP.csproj", "{0B22271B-163F-429B-A472-4C7BF531CEE9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.UWP", "tests\devapps\XForms\XForms.UWP\XForms.UWP.csproj", "{0B22271B-163F-429B-A472-4C7BF531CEE9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "msal\tests\dev apps\WebTestApp\WebApi\WebApi.csproj", "{9E6B4A2F-FE3C-4162-AA07-541749F54745}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "tests\devapps\WebTestApp\WebApi\WebApi.csproj", "{9E6B4A2F-FE3C-4162-AA07-541749F54745}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "msal\tests\dev apps\WebTestApp\WebApp\WebApp.csproj", "{BA4DEDA3-287D-4B04-AA19-6B071BF822DA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApp", "tests\devapps\WebTestApp\WebApp\WebApp.csproj", "{BA4DEDA3-287D-4B04-AA19-6B071BF822DA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "msal\tests\dev apps\NetCoreTestApp\NetCoreTestApp.csproj", "{72F0ADCA-3A0B-44AA-8129-21A1B27CD841}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetCoreTestApp", "tests\devapps\NetCoreTestApp\NetCoreTestApp.csproj", "{72F0ADCA-3A0B-44AA-8129-21A1B27CD841}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "msal\tests\dev apps\DesktopTestApp\DesktopTestApp.csproj", "{3A8EC886-C71D-4384-BFE4-73378CC7293D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopTestApp", "tests\devapps\DesktopTestApp\DesktopTestApp.csproj", "{3A8EC886-C71D-4384-BFE4-73378CC7293D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample app", "sample app", "{F8769319-0EE8-45D6-8707-214AFA05B3DD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "msal\samples\desktop\SampleApp\SampleApp.csproj", "{85397CDA-120A-4626-9865-AD79EBFAC794}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "samples\desktop\SampleApp\SampleApp.csproj", "{85397CDA-120A-4626-9865-AD79EBFAC794}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Microsoft.Identity.Core.UIAutomation", "core\tests\Test.Microsoft.Identity.Core.UIAutomation\Test.Microsoft.Identity.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Core.UIAutomation", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.MSAL.UIAutomation", "msal\tests\Test.MSAL.NET.UIAutomation\Test.MSAL.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.UIAutomation", "tests\Microsoft.Identity.Test.UIAutomation\Microsoft.Identity.Test.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWP", "msal\tests\dev apps\UWP\UWP.csproj", "{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UWP", "tests\devapps\UWP\UWP.csproj", "{FD564645-7B8D-4CD6-9B88-9C1651D9D1EF}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
 	ProjectSection(SolutionItems) = preProject
@@ -63,15 +63,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.net45", "msal\tests\Test.MSAL.NET.Unit.net45\Test.MSAL.NET.Unit.net45.csproj", "{EC3F88FE-D7DE-433F-B300-1A44FF7AEB23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.net45", "tests\Microsoft.Identity.Test.Unit.net45\Microsoft.Identity.Test.Unit.net45.csproj", "{EC3F88FE-D7DE-433F-B300-1A44FF7AEB23}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.netcore", "msal\tests\Test.MSAL.NET.Unit.netcore\Test.MSAL.NET.Unit.netcore.csproj", "{D0C75B09-C8E9-452E-BFEC-2B88E42B2A7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.netcore", "tests\Microsoft.Identity.Test.Unit.netcore\Microsoft.Identity.Test.Unit.netcore.csproj", "{D0C75B09-C8E9-452E-BFEC-2B88E42B2A7F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Common", "msal\tests\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj", "{18559D36-C735-4933-AA86-398C8222D4F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{18559D36-C735-4933-AA86-398C8222D4F6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.SideBySide", "core\tests\Test.Microsoft.Identity.SideBySide\Test.Microsoft.Identity.SideBySide.csproj", "{6E5B8BA5-182C-4A8D-A262-8BAAC7349E60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.SideBySide", "tests\Microsoft.Identity.Test.SideBySide\Microsoft.Identity.Test.SideBySide.csproj", "{6E5B8BA5-182C-4A8D-A262-8BAAC7349E60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "msal\src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <DefineConstants>$(DefineConstants);NET_CORE;MSAL_TEST</DefineConstants>
+
+    <IsPackable>false</IsPackable>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+    <AssemblyName>Microsoft.Identity.Test.Unit.netcore</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+
+    <Compile Include="..\Test.MSAL.NET.Unit.net45\**\*.cs" Exclude="..\Test.MSAL.NET.Unit.net45\obj\**\*;..\Test.MSAL.NET.Unit.net45\bin\**\*" />
+    <None Include="..\Test.MSAL.NET.Unit.net45\Resources\**\*" LinkBase="Resources">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
+
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.4.0-beta" />
+    <PackageReference Include="MSTest.TestFramework" Version="1.4.0-beta" />
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+
+    <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
+
+    <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
+  </ItemGroup>
+</Project>

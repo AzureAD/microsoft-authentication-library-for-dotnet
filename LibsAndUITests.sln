@@ -3,29 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Core", "core\src\Microsoft.Identity.Core.csproj", "{3EEF5981-8F11-4F54-9DDF-2F63C574D028}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Core", "src\Microsoft.Identity.Core.csproj", "{3EEF5981-8F11-4F54-9DDF-2F63C574D028}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msal", "msal", "{68B4CCE9-FBC2-4537-9AD8-C4692CD6661B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{1B80E121-55C5-48A5-8285-0AB9719244E6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationApp", "msal\tests\AutomationApp\AutomationApp.csproj", "{B1756937-89A6-4165-A832-7C7200D61E7E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutomationApp", "tests\AutomationApp\AutomationApp.csproj", "{B1756937-89A6-4165-A832-7C7200D61E7E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xamarin forms", "xamarin forms", "{3761DEF3-458C-4CE2-BE94-4FC9D12217CC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "msal\tests\dev apps\XForms\XForms\XForms.csproj", "{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "tests\devapps\XForms\XForms\XForms.csproj", "{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "msal\tests\dev apps\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "tests\devapps\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "msal\tests\dev apps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "tests\devapps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Microsoft.Identity.Core.UIAutomation", "core\tests\Test.Microsoft.Identity.Core.UIAutomation\Test.Microsoft.Identity.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Core.UIAutomation", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.MSAL.UIAutomation", "msal\tests\Test.MSAL.NET.UIAutomation\Test.MSAL.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.UIAutomation", "tests\Microsoft.Identity.Test.UIAutomation\Microsoft.Identity.Test.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{E19B0572-BBD7-424E-81D5-E59E6884EB3A}"
 	ProjectSection(SolutionItems) = preProject

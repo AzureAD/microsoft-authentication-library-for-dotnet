@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979-0A13-456D-B9F9-CED41F935FD9}"
 EndProject
@@ -13,19 +13,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.netcore", "msal\tests\Test.MSAL.NET.Unit.netcore\Test.MSAL.NET.Unit.netcore.csproj", "{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.netcore", "tests\Microsoft.Identity.Test.Unit.netcore\Microsoft.Identity.Test.Unit.netcore.csproj", "{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Unit.net45", "msal\tests\Test.MSAL.NET.Unit.net45\Test.MSAL.NET.Unit.net45.csproj", "{DA8E7933-0A56-4668-9786-ECECA3D16944}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.net45", "tests\Microsoft.Identity.Test.Unit.net45\Microsoft.Identity.Test.Unit.net45.csproj", "{DA8E7933-0A56-4668-9786-ECECA3D16944}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.MSAL.NET.Common", "msal\tests\Test.MSAL.NET.Common\Test.MSAL.NET.Common.csproj", "{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Common", "tests\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj", "{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.LabInfrastructure", "msal\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj", "{E22918A8-8FE6-47D2-B65E-34436918C5D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{E22918A8-8FE6-47D2-B65E-34436918C5D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test.Microsoft.Identity.SideBySide", "msal\tests\Test.Microsoft.Identity.SideBySide\Test.Microsoft.Identity.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.SideBySide", "tests\Microsoft.Identity.Test.SideBySide\Microsoft.Identity.Test.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{6F170F63-0A04-4E2C-9261-837C5FDF349B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "msal\src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{528C5488-C0D8-45C3-BEAC-3E52C22631C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{528C5488-C0D8-45C3-BEAC-3E52C22631C9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
