@@ -51,10 +51,6 @@
       <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
-      <Project>{AECE489D-9ED4-442D-8D8F-0F383AEBB781}</Project>
-      <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.Identity.Core.csproj">
       <Project>{3eef5981-8f11-4f54-9ddf-2f63c574d028}</Project>
       <Name>Microsoft.Identity.Core</Name>
