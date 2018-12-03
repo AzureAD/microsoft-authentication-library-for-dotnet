@@ -33,13 +33,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.MSAL.NET.Common.Core.Helpers;
-#if NETFRAMEWORK
 using Microsoft.Identity.Core.Platforms.net45.CacheV2;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+#if NETFRAMEWORK
+
 #endif
 
-namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
 #if NETFRAMEWORK
     [TestClass]

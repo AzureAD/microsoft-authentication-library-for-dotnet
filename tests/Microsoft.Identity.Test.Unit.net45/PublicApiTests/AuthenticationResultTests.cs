@@ -25,15 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Identity.Client;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     public class AuthenticationResultTests

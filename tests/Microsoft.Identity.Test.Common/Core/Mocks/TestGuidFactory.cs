@@ -28,7 +28,7 @@
 using System;
 using Microsoft.Identity.Core.Helpers;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class TestGuidFactory : IGuidFactory
     {

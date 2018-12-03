@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using Newtonsoft.Json;
 
-namespace Test.Microsoft.Identity.LabInfrastructure
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
     /// <summary>
     /// Wrapper for new lab service API

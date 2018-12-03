@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks.Exceptions
 {
     public class TestException : Exception
     {

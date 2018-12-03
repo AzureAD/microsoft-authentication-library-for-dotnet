@@ -27,10 +27,10 @@
 
 using System;
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.MSAL.NET.Common.Core.Helpers;
 
-namespace Test.MSAL.NET.Unit.net45
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class PlatformProxyPerformanceTests

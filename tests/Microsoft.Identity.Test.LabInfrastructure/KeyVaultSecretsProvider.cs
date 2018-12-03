@@ -25,14 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Azure.KeyVault;
-using Microsoft.Azure.KeyVault.Models;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Azure.KeyVault;
+using Microsoft.Azure.KeyVault.Models;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace Test.Microsoft.Identity.LabInfrastructure
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class KeyVaultSecretsProvider : IDisposable
     {

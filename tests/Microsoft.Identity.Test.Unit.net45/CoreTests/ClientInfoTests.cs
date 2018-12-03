@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Test.Unit.CoreTests
 {
     [TestClass]
     public class ClientInfoTests

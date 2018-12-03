@@ -29,7 +29,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Common.Core.Helpers
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public class PerformanceValidator : IDisposable
     {

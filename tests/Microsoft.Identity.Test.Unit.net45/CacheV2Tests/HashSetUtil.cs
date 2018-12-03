@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     public static class HashSetUtil
     {

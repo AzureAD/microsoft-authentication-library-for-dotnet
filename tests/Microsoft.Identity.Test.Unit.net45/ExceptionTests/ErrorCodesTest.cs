@@ -1,12 +1,12 @@
-﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit.ExceptionTests
+namespace Microsoft.Identity.Test.Unit.ExceptionTests
 {
     [TestClass]
     public class ErrorCodesTest

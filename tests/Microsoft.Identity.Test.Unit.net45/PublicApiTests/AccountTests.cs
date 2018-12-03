@@ -27,9 +27,8 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     public class AccountTests

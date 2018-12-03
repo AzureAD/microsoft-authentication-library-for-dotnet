@@ -25,14 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using Microsoft.Identity.Core;
 
-namespace Test.MSAL.NET.Unit.RequestsTests
+namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
 #if !WINDOWS_APP && !ANDROID && !iOS // Confidential Client not available
 

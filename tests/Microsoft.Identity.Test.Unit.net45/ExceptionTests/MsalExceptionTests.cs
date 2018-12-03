@@ -24,11 +24,12 @@
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
+
+using System;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
-namespace Test.Microsoft.Identity.Unit.PublicApi
+namespace Microsoft.Identity.Test.Unit.ExceptionTests
 {
     [TestClass]
     public class MsalExceptionTests

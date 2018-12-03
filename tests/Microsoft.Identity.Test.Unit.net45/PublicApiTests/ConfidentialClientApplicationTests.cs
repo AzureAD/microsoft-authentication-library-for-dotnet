@@ -39,13 +39,13 @@ using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
 
 #if !ANDROID && !iOS && !WINDOWS_APP // No Confidential Client
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\valid.crtfile")]

@@ -28,9 +28,9 @@
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Instance;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit
 {
     internal static class TestCommon
     {

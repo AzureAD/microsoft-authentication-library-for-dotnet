@@ -30,11 +30,11 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-namespace Test.Microsoft.Identity.Unit.OAuth2Tests
+namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 {
     [TestClass]
     public class TokenResponseTests

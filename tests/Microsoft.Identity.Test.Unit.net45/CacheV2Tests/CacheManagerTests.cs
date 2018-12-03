@@ -25,7 +25,6 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
 using Microsoft.Identity.Client.CacheV2;
 using Microsoft.Identity.Client.CacheV2.Impl;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
@@ -37,7 +36,7 @@ using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using AuthorityType = Microsoft.Identity.Client.CacheV2.Schema.AuthorityType;
 
-namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     [TestClass]
     public class CacheManagerTests

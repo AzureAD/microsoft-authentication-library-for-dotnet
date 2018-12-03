@@ -25,17 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
-using System.Net;
-using Test.Microsoft.Identity.Core.Unit;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.ExceptionTests
 {
     [TestClass]
     public class MsalExceptionFactoryTests

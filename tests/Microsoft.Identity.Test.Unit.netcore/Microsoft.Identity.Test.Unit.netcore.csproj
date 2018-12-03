@@ -8,6 +8,7 @@
     <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
     <AssemblyName>Microsoft.Identity.Test.Unit.netcore</AssemblyName>
+    <RootNamespace>Microsoft.Identity.Test.Unit</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
 

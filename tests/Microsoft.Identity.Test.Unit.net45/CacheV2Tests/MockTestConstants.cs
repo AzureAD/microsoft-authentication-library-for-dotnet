@@ -29,7 +29,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Core.Helpers;
 
-namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     internal static class MockTestConstants
     {

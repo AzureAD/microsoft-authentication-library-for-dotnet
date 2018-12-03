@@ -27,15 +27,13 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Telemetry;
-using Microsoft.Identity.Core.Instance;
-using Test.Microsoft.Identity.Core.Unit;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     public class MyReceiver : ITelemetryReceiver
     {

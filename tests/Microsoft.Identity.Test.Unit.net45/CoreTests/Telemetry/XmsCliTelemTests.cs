@@ -32,7 +32,7 @@ using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
-namespace Test.MSAL.NET.Unit.net45.CoreTests.Telemetry
+namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 {
     [TestClass]
     public class XmsCliTelemTests

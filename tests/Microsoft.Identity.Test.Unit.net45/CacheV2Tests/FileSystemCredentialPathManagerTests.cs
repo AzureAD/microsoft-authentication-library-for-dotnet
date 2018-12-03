@@ -28,7 +28,7 @@
 using Microsoft.Identity.Client.CacheV2.Impl;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     [TestClass]
     public class FileSystemCredentialPathManagerTests

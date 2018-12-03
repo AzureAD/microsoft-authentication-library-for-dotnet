@@ -1,8 +1,7 @@
 ﻿using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Collections.Generic;
 
-namespace Test.MSAL.NET.Unit.netcore
+namespace Microsoft.Identity.Test.Unit.CacheTests
 {
 #if !ANDROID && !iOS && !WINDOWS_APP // custom token cache serialization not available 
     [TestClass]

@@ -26,13 +26,9 @@
 //
 //------------------------------------------------------------------------------
 
-
-using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using Test.Microsoft.Identity.Core.Unit;
 
-namespace Test.MSAL.NET.Unit.net45.PublicApiTests
+namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     public class UIParentTests

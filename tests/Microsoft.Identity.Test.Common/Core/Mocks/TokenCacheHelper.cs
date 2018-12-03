@@ -26,12 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class TokenCacheHelper
     {

@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Cache;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
+using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit.CacheTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 {
     [TestClass]
     public class MsalTokenCacheKeysTests

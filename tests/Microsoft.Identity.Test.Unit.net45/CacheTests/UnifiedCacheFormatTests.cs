@@ -25,29 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.UI;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
-using Test.MSAL.NET.Unit.Mocks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 #if !NET_CORE
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.CacheTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\AADTestData.txt")]

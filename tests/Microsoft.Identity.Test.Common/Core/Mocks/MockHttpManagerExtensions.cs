@@ -26,13 +26,13 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal static class MockHttpManagerExtensions
     {

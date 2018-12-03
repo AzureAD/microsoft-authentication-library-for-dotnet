@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Core.Helpers;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class TestGuidQueueFactory : IGuidFactory
     {

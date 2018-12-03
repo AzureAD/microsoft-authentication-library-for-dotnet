@@ -28,7 +28,7 @@
 using System;
 using Microsoft.Identity.Core;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class TestLogger : CoreLoggerBase
     {

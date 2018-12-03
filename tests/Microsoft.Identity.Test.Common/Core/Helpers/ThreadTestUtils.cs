@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Test.MSAL.NET.Common.Core.Helpers
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public static class ThreadTestUtils
     {

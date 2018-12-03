@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Test.Unit
 {    
     public class ResourceHelper
     {

@@ -26,19 +26,12 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-namespace Test.Microsoft.Identity.Unit.HttpTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
     public class RedirectUriHelperTests

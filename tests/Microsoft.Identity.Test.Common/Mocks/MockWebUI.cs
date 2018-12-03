@@ -35,7 +35,7 @@ using Microsoft.Identity.Core.OAuth2;
 using Microsoft.Identity.Core.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Mocks
 {
     internal class MockWebUI : IWebUI
     {

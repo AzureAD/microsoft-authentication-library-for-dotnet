@@ -25,13 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-
-using Microsoft.Identity.Core;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Security;
+using Microsoft.Identity.Core;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit.WsTrustTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
 #if !ANDROID && !iOS && !WINDOWS_APP
     [TestClass]

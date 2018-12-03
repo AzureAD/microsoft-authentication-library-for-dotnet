@@ -26,12 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Test.Microsoft.Identity.LabInfrastructure
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
     //TODO: add a layer of user and password caching to speed up the tests
     public static class LabUserHelper

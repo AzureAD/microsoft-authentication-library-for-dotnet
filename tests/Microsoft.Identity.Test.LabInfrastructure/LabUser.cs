@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Test.Microsoft.Identity.LabInfrastructure
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class LabUser
     {

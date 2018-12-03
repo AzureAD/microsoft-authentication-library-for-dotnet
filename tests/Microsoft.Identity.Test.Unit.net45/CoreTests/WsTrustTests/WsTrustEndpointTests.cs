@@ -28,10 +28,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Core.WsTrust;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-namespace Test.Microsoft.Identity.Core.Unit.WsTrustTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
     [TestClass]
     public class WsTrustEndpointTests

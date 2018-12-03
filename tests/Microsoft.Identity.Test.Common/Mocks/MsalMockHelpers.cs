@@ -25,20 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Net;
-using System.Net.Http;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.UI;
 using NSubstitute;
 
-namespace Test.MSAL.NET.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Mocks
 {
     internal static class MsalMockHelpers
     {

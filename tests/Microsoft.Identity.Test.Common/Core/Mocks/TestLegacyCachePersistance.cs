@@ -26,13 +26,8 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Core.Cache;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     public class TestLegacyCachePersistance : ILegacyCachePersistence
     {

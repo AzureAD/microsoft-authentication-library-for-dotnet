@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Test.MSAL.NET.Common.Core.Helpers
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public static class RandomDataUtils
     {

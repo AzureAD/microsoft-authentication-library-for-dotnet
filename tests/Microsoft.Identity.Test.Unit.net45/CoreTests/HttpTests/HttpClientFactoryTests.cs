@@ -30,7 +30,7 @@ using System.Net.Http.Headers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Unit.HttpTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 {
     [TestClass]
     public class HttpClientFactoryTests

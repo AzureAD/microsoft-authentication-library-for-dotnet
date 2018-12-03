@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Test.Microsoft.Identity.LabInfrastructure
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public class UserQueryParameters
     {

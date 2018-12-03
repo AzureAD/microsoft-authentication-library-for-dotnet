@@ -27,7 +27,7 @@
 
 using Microsoft.Identity.Core.Telemetry;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class TestTelemetry : ITelemetry
     {

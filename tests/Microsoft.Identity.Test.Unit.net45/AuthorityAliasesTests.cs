@@ -36,11 +36,11 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
-using Test.MSAL.NET.Unit.Mocks;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class AuthorityAliasesTests

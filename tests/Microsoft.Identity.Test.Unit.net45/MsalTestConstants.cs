@@ -30,7 +30,7 @@ using System.Globalization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Core.Cache;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit
 {
     class MsalTestConstants
     {

@@ -25,11 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Linq;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit
+namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public static class CoreAssert
     {

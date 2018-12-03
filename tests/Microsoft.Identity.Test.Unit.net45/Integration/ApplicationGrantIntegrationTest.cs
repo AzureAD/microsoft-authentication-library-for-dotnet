@@ -25,16 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Test.Microsoft.Identity.LabInfrastructure;
 
-namespace Test.MSAL.NET.Unit.net45.Integration
+namespace Microsoft.Identity.Test.Unit.Integration
 {
     [TestClass]
     public class ApplicationGrantIntegrationTest

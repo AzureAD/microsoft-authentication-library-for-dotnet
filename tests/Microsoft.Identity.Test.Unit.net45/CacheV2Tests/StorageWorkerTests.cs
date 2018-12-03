@@ -28,12 +28,12 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Identity.Client.CacheV2.Impl;
-using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
+using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit.net45.CacheV2Tests
+namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     [TestClass]
     public class StorageWorkerTests

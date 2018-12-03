@@ -25,16 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit
 {
 #if !WINDOWS_APP // not available on UWP
     [TestClass]

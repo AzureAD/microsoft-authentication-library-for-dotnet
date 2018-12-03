@@ -34,7 +34,7 @@ using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal sealed class MockHttpManager : HttpManager,
                                             IDisposable

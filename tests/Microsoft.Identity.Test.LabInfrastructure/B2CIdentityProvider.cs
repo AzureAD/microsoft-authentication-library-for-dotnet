@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Test.Microsoft.Identity.LabInfrastructure
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public enum B2CIdentityProvider
     {

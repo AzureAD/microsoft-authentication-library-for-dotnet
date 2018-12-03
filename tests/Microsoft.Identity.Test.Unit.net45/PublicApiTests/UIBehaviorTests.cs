@@ -26,16 +26,10 @@
 //------------------------------------------------------------------------------
 
 #if !NET_CORE
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
     public class UIBehaviorTests

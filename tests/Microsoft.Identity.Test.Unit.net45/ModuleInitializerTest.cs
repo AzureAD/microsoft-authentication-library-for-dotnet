@@ -31,7 +31,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class ModuleInitializerTest

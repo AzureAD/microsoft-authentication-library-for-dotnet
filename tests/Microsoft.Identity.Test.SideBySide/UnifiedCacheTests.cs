@@ -26,16 +26,15 @@
 //------------------------------------------------------------------------------
 
 extern alias msal;
-
-using Test.Microsoft.Identity.LabInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Security;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Globalization;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.MSAL.NET.Integration
+namespace Microsoft.Identity.Test.SideBySide
 {
     [TestClass]
     public class UnifiedCacheTests

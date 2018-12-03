@@ -25,18 +25,17 @@
 //
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
+using Microsoft.Identity.Core;
+using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit.InstanceTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
     [TestClass]
     [DeploymentItem("Resources\\OpenidConfiguration-B2C.json")]

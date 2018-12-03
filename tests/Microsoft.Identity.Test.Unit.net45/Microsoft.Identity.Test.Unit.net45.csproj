@@ -7,7 +7,8 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-    <AssemblyName>Microsoft.Identity.Test.Unit.netcore</AssemblyName>
+    <AssemblyName>Microsoft.Identity.Test.Unit.net45</AssemblyName>
+    <RootNamespace>Microsoft.Identity.Test.Unit</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

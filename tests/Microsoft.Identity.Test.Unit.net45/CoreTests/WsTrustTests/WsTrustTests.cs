@@ -31,14 +31,12 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.WsTrust;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
-using Test.Microsoft.Identity.Unit.HttpTests;
 
-namespace Test.Microsoft.Identity.Unit.WsTrustTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 {
     [TestClass]
     [DeploymentItem(@"Resources\WsTrustResponse13.xml")]

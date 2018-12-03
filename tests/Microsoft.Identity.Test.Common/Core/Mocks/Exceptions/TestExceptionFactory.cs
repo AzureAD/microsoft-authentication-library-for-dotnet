@@ -29,7 +29,7 @@ using System;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Http;
 
-namespace Test.Microsoft.Identity.Core.Unit.Mocks
+namespace Microsoft.Identity.Test.Common.Core.Mocks.Exceptions
 {
     internal class TestExceptionFactory : CoreExceptionFactory
     {

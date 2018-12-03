@@ -29,22 +29,18 @@
 // Test should run on net core. Please re-enable once bug
 // https://identitydivision.visualstudio.com/DevEx/_workitems/edit/574705 is fixed
 #if !ANDROID && !iOS && !WINDOWS_APP && !NET_CORE
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Test.Microsoft.Identity.Core.Unit;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-namespace Test.MSAL.NET.Unit
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     [DeploymentItem(@"Resources\valid_cert.pfx")]

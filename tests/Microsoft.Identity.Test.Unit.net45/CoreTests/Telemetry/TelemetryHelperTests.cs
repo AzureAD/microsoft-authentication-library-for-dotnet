@@ -25,12 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Core.Telemetry;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Test.Microsoft.Identity.Core.Unit.Telemetry
+namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 {
     [TestClass]
     public class TelemetryHelperTests

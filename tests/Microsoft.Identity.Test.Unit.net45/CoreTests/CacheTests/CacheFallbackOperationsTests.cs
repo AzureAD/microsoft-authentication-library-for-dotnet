@@ -30,12 +30,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using Test.Microsoft.Identity.Core.Unit.Mocks;
 
-namespace Test.Microsoft.Identity.Core.Unit.CacheTests
+namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 {
     [TestClass]
     public class CacheFallbackOperationsTests
