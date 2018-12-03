@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public void TestInitialize()
         {
             TestCleanup();
-            _io = new WindowsFileSystemCacheKeyStorage(Path.Combine(AssemblyUtils.GetExecutingAssemblyDirectory(), TestFolder));
+            _io = new WindowsFileSystemCacheKeyStorage(Path.Combine(AssemblyUtilsEx.GetExecutingAssemblyDirectory(), TestFolder));
             _data = RandomDataUtils.GetRandomData(1024);
         }
 
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public void CurrentPathFormat()
         {
             Debug.WriteLine("TEST START: CurrentPathFormat");
-            Assert.IsTrue(Path.IsPathRooted(AssemblyUtils.GetExecutingAssemblyDirectory()));
+            Assert.IsTrue(Path.IsPathRooted(AssemblyUtilsEx.GetExecutingAssemblyDirectory()));
         }
 
         [TestMethod]
@@ -113,13 +113,13 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 
             var expectedEntriesPaths = new HashSet<string>
             {
-                Path.Combine(AssemblyUtils.GetExecutingAssemblyDirectory(), TestFolder, "a.txt"),
-                Path.Combine(AssemblyUtils.GetExecutingAssemblyDirectory(), TestFolder, "b.txt"),
-                Path.Combine(AssemblyUtils.GetExecutingAssemblyDirectory(), TestFolder, "x")
+                Path.Combine(AssemblyUtilsEx.GetExecutingAssemblyDirectory(), TestFolder, "a.txt"),
+                Path.Combine(AssemblyUtilsEx.GetExecutingAssemblyDirectory(), TestFolder, "b.txt"),
+                Path.Combine(AssemblyUtilsEx.GetExecutingAssemblyDirectory(), TestFolder, "x")
             };
 
             var actualEntriesPaths = new HashSet<string>(
-                Directory.EnumerateFileSystemEntries(Path.Combine(AssemblyUtils.GetExecutingAssemblyDirectory(), TestFolder)));
+                Directory.EnumerateFileSystemEntries(Path.Combine(AssemblyUtilsEx.GetExecutingAssemblyDirectory(), TestFolder)));
 
             // When iterating over an absolute path, it produces absolute paths
             Assert.IsTrue(HashSetUtil.AreEqual(actualEntriesPaths, expectedEntriesPaths));

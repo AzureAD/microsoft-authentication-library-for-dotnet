@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core

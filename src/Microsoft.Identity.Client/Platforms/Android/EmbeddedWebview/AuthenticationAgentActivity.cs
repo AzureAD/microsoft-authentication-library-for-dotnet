@@ -33,6 +33,7 @@ using Android.Content;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Helpers;
 
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview

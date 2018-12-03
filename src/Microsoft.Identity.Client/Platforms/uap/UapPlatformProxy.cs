@@ -40,6 +40,7 @@ using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage;
 using Windows.System;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Core
 {

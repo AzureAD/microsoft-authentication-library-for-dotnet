@@ -32,6 +32,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Core.Http
 {

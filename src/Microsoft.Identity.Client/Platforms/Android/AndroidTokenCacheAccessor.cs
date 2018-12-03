@@ -30,6 +30,7 @@ using System.Linq;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 using System;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Core
 {

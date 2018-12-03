@@ -31,6 +31,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Instance;
 using Microsoft.Identity.Test.Common.Core.Helpers;

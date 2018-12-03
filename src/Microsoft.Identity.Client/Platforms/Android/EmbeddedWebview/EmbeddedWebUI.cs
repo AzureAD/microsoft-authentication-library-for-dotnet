@@ -29,6 +29,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview

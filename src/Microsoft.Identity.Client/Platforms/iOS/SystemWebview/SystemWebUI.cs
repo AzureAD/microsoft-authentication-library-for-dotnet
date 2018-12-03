@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using SafariServices;
 using UIKit;
 using System.Threading;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core.UI.SystemWebview

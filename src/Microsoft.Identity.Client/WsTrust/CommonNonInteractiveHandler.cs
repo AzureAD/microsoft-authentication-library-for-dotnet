@@ -29,6 +29,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Realm;
 
 namespace Microsoft.Identity.Core.WsTrust

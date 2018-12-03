@@ -1,12 +1,11 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-  
+
   <PropertyGroup>
     <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
   </PropertyGroup>
 
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
   <Import Project="../MSAL.Common.props" />
-
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
     <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>

@@ -79,6 +79,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- This None is here so the conditionally included files show up in the Solution Explorer -->
     <None Include="$(PathToMsalSources)\**\*.cs;$(PathToMsalSources)\**\*.xml;$(PathToMsalSources)\**\*.axml"
           Exclude="$(PathToMsalSources)\obj\**\*.*;$(PathToMsalSources)\bin\**\*.*" />

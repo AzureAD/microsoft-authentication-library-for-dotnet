@@ -32,6 +32,7 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Instance;

@@ -26,6 +26,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

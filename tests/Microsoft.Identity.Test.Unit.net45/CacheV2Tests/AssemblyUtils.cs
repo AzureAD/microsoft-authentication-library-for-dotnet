@@ -30,7 +30,7 @@ using System.Reflection;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
-    public static class AssemblyUtils
+    public static class AssemblyUtilsEx
     {
         public static string GetExecutingAssemblyDirectory()
         {

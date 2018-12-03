@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using CoreFoundation;
 using Foundation;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.Helpers;
 using UIKit;

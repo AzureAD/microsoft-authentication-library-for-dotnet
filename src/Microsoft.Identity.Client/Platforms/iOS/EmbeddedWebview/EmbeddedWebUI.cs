@@ -30,6 +30,7 @@ using Microsoft.Identity.Core.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Exceptions;
 using UIKit;
 
 namespace Microsoft.Identity.Core.UI.EmbeddedWebview

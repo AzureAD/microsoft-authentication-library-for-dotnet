@@ -32,6 +32,7 @@ using Foundation;
 using Microsoft.Identity.Core.Cache;
 using Microsoft.Identity.Core.Helpers;
 using System.Globalization;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Core
 {

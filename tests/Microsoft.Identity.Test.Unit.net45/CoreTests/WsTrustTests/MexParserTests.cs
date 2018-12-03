@@ -30,6 +30,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core;
 using Microsoft.Identity.Core.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;

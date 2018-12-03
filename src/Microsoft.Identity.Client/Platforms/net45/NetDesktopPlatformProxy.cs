@@ -36,6 +36,7 @@ using Microsoft.Identity.Core.Cache;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using System.Linq;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Http;
 
 namespace Microsoft.Identity.Core

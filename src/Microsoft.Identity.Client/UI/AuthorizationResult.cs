@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.OAuth2;
 

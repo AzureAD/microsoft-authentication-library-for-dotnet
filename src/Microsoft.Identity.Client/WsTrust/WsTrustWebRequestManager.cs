@@ -32,6 +32,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Core.Helpers;
 using Microsoft.Identity.Core.Http;
 using Microsoft.Identity.Core.Realm;
