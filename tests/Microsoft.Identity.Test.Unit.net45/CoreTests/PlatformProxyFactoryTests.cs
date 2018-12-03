@@ -26,7 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

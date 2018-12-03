@@ -32,7 +32,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Core.Instance
+namespace Microsoft.Identity.Client.Instance
 {
     [DataContract]
     internal sealed class InstanceDiscoveryMetadataEntry

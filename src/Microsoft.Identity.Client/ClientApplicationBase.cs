@@ -32,13 +32,14 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.WsTrust;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
 {
@@ -97,10 +98,10 @@ namespace Microsoft.Identity.Client
         internal ClientApplicationBase(string clientId, string authority, string redirectUri,
             bool validateAuthority, IServiceBundle serviceBundle)
         {
-            ServiceBundle = serviceBundle ?? Microsoft.Identity.Core.ServiceBundle.CreateDefault();
+            ServiceBundle = serviceBundle ?? Core.ServiceBundle.CreateDefault();
 
             ClientId = clientId;
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, validateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, validateAuthority);
             Authority = authorityInstance.CanonicalAuthority;
             RedirectUri = redirectUri;
             ValidateAuthority = validateAuthority;
@@ -277,7 +278,7 @@ namespace Microsoft.Identity.Client
             Authority authorityInstance = null;
             if (!string.IsNullOrEmpty(authority))
             {
-                authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+                authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             }
 
             return
@@ -303,10 +304,10 @@ namespace Microsoft.Identity.Client
 
         internal Authority GetAuthority(IAccount account)
         {
-            var authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            var authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var tenantId = authority.GetTenantId();
 
-            if (Core.Instance.Authority.TenantlessTenantNames.Contains(tenantId)
+            if (Instance.Authority.TenantlessTenantNames.Contains(tenantId)
                 && account.HomeAccountId?.TenantId != null)
             {
                 authority.UpdateTenantId(account.HomeAccountId.TenantId);

@@ -31,7 +31,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

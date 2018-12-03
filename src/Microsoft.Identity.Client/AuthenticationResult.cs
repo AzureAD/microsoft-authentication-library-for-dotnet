@@ -28,8 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Helpers;
 
 namespace Microsoft.Identity.Client
 {

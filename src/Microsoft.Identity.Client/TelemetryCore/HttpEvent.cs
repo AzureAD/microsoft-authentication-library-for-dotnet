@@ -27,9 +27,9 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class HttpEvent : EventBase
     {

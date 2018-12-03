@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Features.DeviceCode;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client
 {
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
 
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.ExtraQueryParameters = extraQueryParameters;

@@ -32,8 +32,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     internal class AdalCacheOperations
     {

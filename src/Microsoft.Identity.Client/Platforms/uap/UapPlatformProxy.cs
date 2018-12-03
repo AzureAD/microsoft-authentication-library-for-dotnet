@@ -26,9 +26,9 @@
 //------------------------------------------------------------------------------
 
 
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Platforms;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Platforms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,9 +40,10 @@ using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage;
 using Windows.System;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 

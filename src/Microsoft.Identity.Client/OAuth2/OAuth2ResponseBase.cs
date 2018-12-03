@@ -27,7 +27,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Identity.Core.OAuth2
+namespace Microsoft.Identity.Client.OAuth2
 {
     internal class OAuth2ResponseBaseClaim
     {

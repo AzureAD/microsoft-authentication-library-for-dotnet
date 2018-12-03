@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core.UI
+using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.UI
 {
     internal interface IWebUIFactory
     {

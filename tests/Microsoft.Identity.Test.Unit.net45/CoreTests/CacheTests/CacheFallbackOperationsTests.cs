@@ -28,8 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;

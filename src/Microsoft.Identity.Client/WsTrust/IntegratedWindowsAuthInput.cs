@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     internal interface IUsernameInput
     {

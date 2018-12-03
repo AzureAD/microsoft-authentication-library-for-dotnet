@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     /// <summary>
     /// Common operations for extracting platform / operating system specifics

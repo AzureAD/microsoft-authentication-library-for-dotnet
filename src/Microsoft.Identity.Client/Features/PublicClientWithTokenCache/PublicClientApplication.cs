@@ -26,10 +26,11 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.TelemetryCore;
 using System;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
 {

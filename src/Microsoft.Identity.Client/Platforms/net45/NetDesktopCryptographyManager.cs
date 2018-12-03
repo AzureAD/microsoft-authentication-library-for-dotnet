@@ -28,9 +28,10 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     internal class NetDesktopCryptographyManager : ICryptographyManager
     {

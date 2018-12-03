@@ -27,7 +27,7 @@
 
 using System.Linq;
 using System.Security;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests

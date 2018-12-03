@@ -32,12 +32,13 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Realm;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Realm;
 
-namespace Microsoft.Identity.Core.WsTrust
+namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {

@@ -31,7 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Core.Instance
+namespace Microsoft.Identity.Client.Instance
 {
     internal enum AuthorityType
     {

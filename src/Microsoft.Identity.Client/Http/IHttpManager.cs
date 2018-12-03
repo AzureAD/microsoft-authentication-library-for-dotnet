@@ -29,8 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Http
+namespace Microsoft.Identity.Client.Http
 {
     internal interface IHttpManager
     {

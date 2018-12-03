@@ -30,7 +30,7 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 
-namespace Microsoft.Identity.Core.Platforms.net45.CacheV2
+namespace Microsoft.Identity.Client.Platforms.net45.CacheV2
 {
     internal class FileMutex : IDisposable
     {

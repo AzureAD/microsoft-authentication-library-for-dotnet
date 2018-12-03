@@ -27,9 +27,9 @@
 
 using System;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Core.Instance
+namespace Microsoft.Identity.Client.Instance
 {
     internal class DrsMetadataResponseClaim : OAuth2ResponseBaseClaim
     {

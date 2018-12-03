@@ -28,7 +28,7 @@
 using System;
 using System.Linq;
 using Microsoft.Identity.Client.CacheV2.Impl;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.CacheV2
 {

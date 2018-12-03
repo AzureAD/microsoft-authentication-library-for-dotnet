@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     internal enum AuthorityType
     {

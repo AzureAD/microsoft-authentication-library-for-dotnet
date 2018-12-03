@@ -36,12 +36,12 @@
 //using System.Threading.Tasks;
 //using System.Xml;
 //using System.Xml.Schema;
-//using Microsoft.Identity.Core;
-//using Microsoft.Identity.Core.Http;
-//using Microsoft.Identity.Core.WsTrust;
+//using Microsoft.Identity.Client;
+//using Microsoft.Identity.Client.Http;
+//using Microsoft.Identity.Client.WsTrust;
 //using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using Test.Microsoft.Identity.Core.Unit;
-//using Test.Microsoft.Identity.Core.Unit.Mocks;
+//using Test.Microsoft.Identity.Client.Unit;
+//using Test.Microsoft.Identity.Client.Unit.Mocks;
 
 //namespace Test.Microsoft.Identity.Unit.WsTrustTests
 //{

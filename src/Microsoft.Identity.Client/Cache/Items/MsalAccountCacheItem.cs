@@ -25,10 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     [DataContract]
     internal class MsalAccountCacheItem : MsalCacheItemBase

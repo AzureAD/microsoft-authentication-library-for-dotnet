@@ -30,7 +30,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class TelemetryManager : ITelemetryManager,
                                       ITelemetry

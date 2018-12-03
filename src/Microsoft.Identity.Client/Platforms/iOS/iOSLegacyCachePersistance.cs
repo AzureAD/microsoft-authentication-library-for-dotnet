@@ -28,8 +28,9 @@
 using Foundation;
 using Security;
 using System;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     internal class iOSLegacyCachePersistence : ILegacyCachePersistence
     {

@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class UiEvent : EventBase
     {

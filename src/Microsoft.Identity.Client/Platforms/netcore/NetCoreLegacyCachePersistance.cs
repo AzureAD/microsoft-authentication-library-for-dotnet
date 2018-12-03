@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     internal class NetCoreLegacyCachePersistence : ILegacyCachePersistence
     {

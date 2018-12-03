@@ -27,11 +27,12 @@
 
 using Foundation;
 using System;
+using Microsoft.Identity.Client.Core;
 using UIKit;
 using WebKit;
-using static Microsoft.Identity.Core.UI.EmbeddedWebview.WKWebNavigationDelegate;
+using static Microsoft.Identity.Client.UI.EmbeddedWebview.WKWebNavigationDelegate;
 
-namespace Microsoft.Identity.Core.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 {
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController

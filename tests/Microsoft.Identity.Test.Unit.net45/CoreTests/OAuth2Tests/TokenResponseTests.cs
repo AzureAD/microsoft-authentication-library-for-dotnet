@@ -27,9 +27,10 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

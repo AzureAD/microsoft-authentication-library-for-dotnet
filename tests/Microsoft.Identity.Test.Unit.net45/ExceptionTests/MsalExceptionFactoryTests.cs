@@ -30,8 +30,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

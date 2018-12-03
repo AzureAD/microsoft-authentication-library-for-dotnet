@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core.UI.SystemWebview
+namespace Microsoft.Identity.Client.UI.SystemWebview
 {
     internal static class AndroidConstants
     {

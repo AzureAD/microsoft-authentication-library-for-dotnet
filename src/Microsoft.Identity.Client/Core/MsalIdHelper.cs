@@ -30,8 +30,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     internal static class MsalIdParameter
     {

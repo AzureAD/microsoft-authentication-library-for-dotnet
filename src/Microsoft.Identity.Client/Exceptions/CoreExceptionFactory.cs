@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 using System;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Abstract factory for spewing exceptions for Adal and Msal. Use the <see cref="Instance"/>

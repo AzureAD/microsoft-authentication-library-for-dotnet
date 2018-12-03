@@ -25,13 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Client.Instance;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal abstract class EventBase : Dictionary<string, string>
     {

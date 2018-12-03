@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {

@@ -26,14 +26,15 @@
 //------------------------------------------------------------------------------
 
 using Foundation;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using UIKit;
 
-namespace Microsoft.Identity.Core.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 {
     internal class EmbeddedWebUI : WebviewBase, IDisposable
     {

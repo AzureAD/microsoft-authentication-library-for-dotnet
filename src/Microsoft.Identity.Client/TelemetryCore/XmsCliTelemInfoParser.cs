@@ -27,8 +27,9 @@
 
 using System.Globalization;
 using System.Text.RegularExpressions;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class XmsCliTelemInfoParser
     {

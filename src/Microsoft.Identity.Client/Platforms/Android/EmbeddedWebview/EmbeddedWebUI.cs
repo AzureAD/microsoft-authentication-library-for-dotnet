@@ -29,10 +29,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Core.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 {
     internal class EmbeddedWebUI : WebviewBase
     {

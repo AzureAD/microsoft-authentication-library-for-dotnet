@@ -27,7 +27,7 @@
 
 using System.Linq;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests

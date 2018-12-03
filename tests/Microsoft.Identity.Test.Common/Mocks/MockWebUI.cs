@@ -28,11 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Mocks

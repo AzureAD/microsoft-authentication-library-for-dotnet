@@ -28,7 +28,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Test.Unit
 {

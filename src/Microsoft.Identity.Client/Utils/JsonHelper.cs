@@ -28,8 +28,9 @@
 using System.IO;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Helpers
+namespace Microsoft.Identity.Client.Helpers
 {
     internal static class JsonHelper
     {

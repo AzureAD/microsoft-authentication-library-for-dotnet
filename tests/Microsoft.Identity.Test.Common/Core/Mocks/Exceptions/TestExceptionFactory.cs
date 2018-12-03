@@ -26,8 +26,8 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks.Exceptions
 {

@@ -31,7 +31,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
     /// Data class, common to ADAL.NET and MSAL.NET used for the token cache serialization 

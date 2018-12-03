@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class TelemetryTokenCacheAccessor : ITokenCacheAccessor
     {

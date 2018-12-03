@@ -29,9 +29,10 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     internal class ClientInfoClaim
     {

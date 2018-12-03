@@ -27,9 +27,10 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 
-namespace Microsoft.Identity.Core.Http
+namespace Microsoft.Identity.Client.Http
 {
     internal class RedirectUriHelper
     {

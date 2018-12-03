@@ -27,11 +27,12 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Cache;
 using System.Reflection;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 

@@ -30,11 +30,12 @@ using System.Collections.Concurrent;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
 
-namespace Microsoft.Identity.Core.Instance
+namespace Microsoft.Identity.Client.Instance
 {
     internal class AadInstanceDiscovery : IAadInstanceDiscovery
     {

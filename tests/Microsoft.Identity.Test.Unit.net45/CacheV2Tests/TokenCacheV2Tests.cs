@@ -32,9 +32,10 @@ using Microsoft.Identity.Client.CacheV2.Impl;
 using Microsoft.Identity.Client.CacheV2.Impl.InMemory;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

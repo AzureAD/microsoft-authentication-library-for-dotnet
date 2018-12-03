@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Platforms
+namespace Microsoft.Identity.Client.Platforms
 {
     internal static class WindowsNativeMethods
     {

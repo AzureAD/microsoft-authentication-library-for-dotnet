@@ -27,7 +27,7 @@
 
 using System.Text;
 
-namespace Microsoft.Identity.Core.Helpers
+namespace Microsoft.Identity.Client.Helpers
 {
     internal static class StringExtensions
     {

@@ -32,9 +32,10 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

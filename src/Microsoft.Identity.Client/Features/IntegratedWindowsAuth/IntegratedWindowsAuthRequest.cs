@@ -31,11 +31,12 @@ using System.Globalization;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.Telemetry;
-using Microsoft.Identity.Core.WsTrust;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {

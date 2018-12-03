@@ -30,12 +30,13 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Collections.Generic;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.UI;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client
 {
@@ -162,7 +163,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
@@ -181,7 +182,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -202,7 +203,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account,
@@ -225,7 +226,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -248,7 +249,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
@@ -275,7 +276,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
@@ -302,7 +303,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
@@ -323,7 +324,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
@@ -343,7 +344,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -364,7 +365,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account,
@@ -387,7 +388,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -410,7 +411,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
@@ -437,7 +438,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
@@ -464,7 +465,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,

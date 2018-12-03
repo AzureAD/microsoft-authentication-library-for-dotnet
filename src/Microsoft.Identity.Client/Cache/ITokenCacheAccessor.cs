@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     internal interface ITokenCacheAccessor
     {

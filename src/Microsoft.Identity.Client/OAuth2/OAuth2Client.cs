@@ -32,13 +32,14 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
 
-namespace Microsoft.Identity.Core.OAuth2
+namespace Microsoft.Identity.Client.OAuth2
 {
     internal class OAuth2Client
     {

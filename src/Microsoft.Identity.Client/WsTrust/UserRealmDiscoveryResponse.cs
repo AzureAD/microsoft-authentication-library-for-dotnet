@@ -29,10 +29,10 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Core.Realm
+namespace Microsoft.Identity.Client.Realm
 {
     [DataContract]
     internal sealed class UserRealmDiscoveryResponse

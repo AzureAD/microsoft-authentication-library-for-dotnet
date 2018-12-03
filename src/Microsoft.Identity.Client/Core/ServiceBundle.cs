@@ -25,12 +25,13 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Http;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
-using Microsoft.Identity.Core.WsTrust;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.WsTrust;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     internal class ServiceBundle : IServiceBundle
     {

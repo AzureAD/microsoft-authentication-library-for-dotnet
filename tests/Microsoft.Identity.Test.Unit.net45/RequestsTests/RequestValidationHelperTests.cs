@@ -27,9 +27,9 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests

@@ -31,15 +31,16 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Text;
 using System.Security.Principal;
-using Microsoft.Identity.Core.Platforms;
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Platforms;
+using Microsoft.Identity.Client.Cache;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using System.Linq;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Platform / OS specific logic.

@@ -25,9 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.UI.SystemWebview;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI.SystemWebview;
 
-namespace Microsoft.Identity.Core.UI
+namespace Microsoft.Identity.Client.UI
 {
     internal class WebUIFactory : IWebUIFactory
     {

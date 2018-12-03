@@ -28,10 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {

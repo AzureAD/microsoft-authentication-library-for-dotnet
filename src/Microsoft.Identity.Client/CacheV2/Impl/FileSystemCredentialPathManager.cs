@@ -29,7 +29,8 @@ using System;
 using System.IO;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.CacheV2.Impl
 {

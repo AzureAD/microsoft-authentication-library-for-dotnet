@@ -27,8 +27,9 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 

@@ -35,7 +35,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     [DataContract]
     internal class AdalResultWrapper

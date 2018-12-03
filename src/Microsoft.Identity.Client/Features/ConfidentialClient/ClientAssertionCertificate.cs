@@ -28,7 +28,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
 namespace Microsoft.Identity.Client
 {

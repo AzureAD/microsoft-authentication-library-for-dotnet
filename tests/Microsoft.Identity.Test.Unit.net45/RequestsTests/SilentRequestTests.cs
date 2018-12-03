@@ -31,13 +31,13 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

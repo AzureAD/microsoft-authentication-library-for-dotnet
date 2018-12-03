@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.UI;
 using System;
 using System.ComponentModel;
 

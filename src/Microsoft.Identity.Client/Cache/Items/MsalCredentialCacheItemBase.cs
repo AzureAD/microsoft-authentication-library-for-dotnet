@@ -27,7 +27,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     [DataContract]
     internal class MsalCredentialCacheItemBase : MsalCacheItemBase

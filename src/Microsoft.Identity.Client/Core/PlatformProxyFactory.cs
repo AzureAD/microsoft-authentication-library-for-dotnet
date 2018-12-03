@@ -26,8 +26,9 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.

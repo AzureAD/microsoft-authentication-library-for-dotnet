@@ -29,10 +29,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Core.UI
+namespace Microsoft.Identity.Client.UI
 {
     internal enum AuthorizationStatus
     {

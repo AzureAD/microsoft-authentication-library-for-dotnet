@@ -36,7 +36,7 @@ using Android.Content.PM;
 
 
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {

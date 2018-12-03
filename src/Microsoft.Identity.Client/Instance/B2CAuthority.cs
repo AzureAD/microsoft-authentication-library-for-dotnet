@@ -28,8 +28,9 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Instance
+namespace Microsoft.Identity.Client.Instance
 {
     internal class B2CAuthority : AadAuthority
     {

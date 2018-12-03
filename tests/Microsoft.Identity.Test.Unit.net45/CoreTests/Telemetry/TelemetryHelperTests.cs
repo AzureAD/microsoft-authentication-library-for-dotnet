@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry

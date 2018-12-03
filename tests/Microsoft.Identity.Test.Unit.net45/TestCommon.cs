@@ -27,7 +27,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit

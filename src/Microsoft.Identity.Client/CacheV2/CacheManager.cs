@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.CacheV2.Impl;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.CacheV2
 {

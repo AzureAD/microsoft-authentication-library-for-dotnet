@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Core.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class DeviceAuthHelper

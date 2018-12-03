@@ -27,7 +27,8 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Internal
 {

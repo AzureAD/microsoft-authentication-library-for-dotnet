@@ -26,9 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Realm;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Realm;
 
-namespace Microsoft.Identity.Core.WsTrust
+namespace Microsoft.Identity.Client.WsTrust
 {
     /// <summary>
     /// 

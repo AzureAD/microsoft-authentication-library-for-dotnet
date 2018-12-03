@@ -25,18 +25,60 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core.Telemetry
+using System;
+
+namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal interface ITelemetryManager
+    internal class TelemetryHelper : IDisposable
     {
-        ITelemetryReceiver TelemetryReceiver { get; set; }
+        private readonly EventBase _eventToEnd;
+        private readonly string _requestId;
+        private readonly string _clientId;
+        private readonly bool _shouldFlush;
+        private readonly ITelemetry _telemetry;
 
-        string GenerateNewRequestId();
-
-        TelemetryHelper CreateTelemetryHelper(
+        public TelemetryHelper(
+            ITelemetry telemetry,
             string requestId,
             string clientId,
             EventBase eventBase,
-            bool shouldFlush = false);
+            bool shouldFlush)
+        {
+            _telemetry = telemetry;
+            _requestId = requestId;
+            _clientId = clientId;
+            _eventToEnd = eventBase;
+            _shouldFlush = shouldFlush;
+            _telemetry?.StartEvent(_requestId, eventBase);
+        }
+
+        #region IDisposable Support
+
+        private bool _disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _telemetry?.StopEvent(_requestId, _eventToEnd);
+                    if (_shouldFlush)
+                    {
+                        _telemetry?.Flush(_requestId, _clientId);
+                    }
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        #endregion
     }
 }

@@ -27,7 +27,7 @@
 
 using System.Globalization;
 using Microsoft.Identity.Client.CacheV2.Schema;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {

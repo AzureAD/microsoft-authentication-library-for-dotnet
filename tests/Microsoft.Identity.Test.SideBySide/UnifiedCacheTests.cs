@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 extern alias msal;
+
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -105,9 +106,9 @@ namespace Microsoft.Identity.Test.SideBySide
 
         private void MsalDoBefore(msal::Microsoft.Identity.Client.TokenCacheNotificationArgs args)
         {
-            msal::Microsoft.Identity.Core.Cache.CacheData cacheData;
+            msal::Microsoft.Identity.Client.Cache.CacheData cacheData;
 
-            cacheData = new msal::Microsoft.Identity.Core.Cache.CacheData()
+            cacheData = new msal::Microsoft.Identity.Client.Cache.CacheData()
             {
                 AdalV3State = AdalV3StateStorage,
                 UnifiedState = UnifiedStateStorage
@@ -120,7 +121,7 @@ namespace Microsoft.Identity.Test.SideBySide
         {
             if (args.HasStateChanged)
             {
-                msal::Microsoft.Identity.Core.Cache.CacheData cacheData =
+                msal::Microsoft.Identity.Client.Cache.CacheData cacheData =
                     msal::Microsoft.Identity.Client.TokenCacheExtensions.SerializeUnifiedAndAdalCache(args.TokenCache);
 
                 AdalV3StateStorage = cacheData.AdalV3State;

@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
 using System;
 using System.Globalization;
 using System.Text;

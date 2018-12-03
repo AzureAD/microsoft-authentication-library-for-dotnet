@@ -27,7 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Core.WsTrust;
+using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

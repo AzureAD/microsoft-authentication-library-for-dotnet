@@ -27,8 +27,9 @@
 
 using System;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
     /// An object representing the key of the token cache AT dictionary. The 

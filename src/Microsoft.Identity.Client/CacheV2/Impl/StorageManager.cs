@@ -28,7 +28,8 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.CacheV2.Schema;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.CacheV2.Impl
 {

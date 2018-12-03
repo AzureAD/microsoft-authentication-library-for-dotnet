@@ -32,9 +32,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core.WsTrust
+namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustEndpoint
     {

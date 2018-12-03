@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,19 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryError
+    internal interface ITelemetry
     {
-        public const string XmsCliTelemMalformed = "Malformed x-ms-clitelem header: '{0}'";
-        public const string XmsUnrecognizedHeaderVersion = "Header version '{0}' unrecognized";
-    }
-
-    internal class TelemetryEventProperties
-    {
-        public const string MsalDefaultEvent = "msal.default_event";
-        public const string MsalHttpEventCount = "msal.http_event_count";
-        public const string MsalCacheEventCount = "msal.cache_event_count";
-        public const string MsalUiEventCount = "msal.ui_event_count";
+        void StartEvent(string requestId, EventBase eventToStart);
+        void StopEvent(string requestId, EventBase eventToStop);
+        void Flush(string requestId, string clientId);
     }
 }

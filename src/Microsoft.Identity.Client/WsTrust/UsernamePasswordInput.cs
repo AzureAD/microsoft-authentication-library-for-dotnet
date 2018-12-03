@@ -39,7 +39,7 @@ using static System.Runtime.InteropServices.Marshal;
 
 using System;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
 
     internal sealed class UsernamePasswordInput : IUsernameInput

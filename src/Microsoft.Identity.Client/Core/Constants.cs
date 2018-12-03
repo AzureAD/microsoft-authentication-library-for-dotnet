@@ -25,10 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Xml.Linq;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     internal static class Constants
     {

@@ -31,10 +31,11 @@ using System.Threading.Tasks;
 using SafariServices;
 using UIKit;
 using System.Threading;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Core.UI.SystemWebview
+namespace Microsoft.Identity.Client.UI.SystemWebview
 {
     internal class SystemWebUI : WebviewBase, IDisposable
     {

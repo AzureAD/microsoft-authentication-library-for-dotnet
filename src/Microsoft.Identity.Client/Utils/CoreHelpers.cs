@@ -29,8 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Helpers
+namespace Microsoft.Identity.Client.Helpers
 {
     internal static class CoreHelpers
     {

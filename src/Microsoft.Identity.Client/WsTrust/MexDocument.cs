@@ -29,8 +29,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.WsTrust
+namespace Microsoft.Identity.Client.WsTrust
 {
     internal enum WsTrustVersion
     {

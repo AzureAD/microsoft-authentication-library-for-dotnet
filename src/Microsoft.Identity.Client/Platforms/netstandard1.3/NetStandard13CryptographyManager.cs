@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     internal class NetStandard13CryptographyManager : ICryptographyManager
     {

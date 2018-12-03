@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 using Foundation;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.UI;
 using System;
 
 namespace Microsoft.Identity.Client

@@ -29,7 +29,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace Microsoft.Identity.Core.Cache
+namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
     /// Determines what type of subject the token was issued for.

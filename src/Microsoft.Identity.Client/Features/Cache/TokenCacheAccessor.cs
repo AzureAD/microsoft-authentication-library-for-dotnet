@@ -28,10 +28,10 @@ using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {

@@ -33,7 +33,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Platforms.net45.CacheV2;
+using Microsoft.Identity.Client.Platforms.net45.CacheV2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 #if NETFRAMEWORK

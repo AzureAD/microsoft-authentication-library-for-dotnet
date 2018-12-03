@@ -33,10 +33,11 @@ using Android.Content;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 {
     [Activity(Label = "Sign in")]
     internal class AuthenticationAgentActivity : Activity

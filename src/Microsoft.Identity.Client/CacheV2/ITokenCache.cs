@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Cache;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.CacheV2
 {

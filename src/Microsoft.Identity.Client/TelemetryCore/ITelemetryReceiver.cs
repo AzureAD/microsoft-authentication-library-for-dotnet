@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal interface ITelemetryReceiver
     {

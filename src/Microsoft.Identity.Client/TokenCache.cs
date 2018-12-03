@@ -30,15 +30,16 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
-using Microsoft.Identity.Core.Instance;
-using Microsoft.Identity.Core.OAuth2;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client
 {
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
-        private IServiceBundle _serviceBundle = Microsoft.Identity.Core.ServiceBundle.CreateDefault();
+        private IServiceBundle _serviceBundle = Core.ServiceBundle.CreateDefault();
 
         internal IServiceBundle ServiceBundle
         {
@@ -235,7 +236,7 @@ namespace Microsoft.Identity.Client
 
                 // save RT in ADAL cache for public clients
                 // do not save RT in ADAL cache for MSAL B2C scenarios
-                if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Core.Instance.AuthorityType.B2C))
+                if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Instance.AuthorityType.B2C))
                 {
                     CacheFallbackOperations.WriteAdalRefreshToken
                         (LegacyCachePersistence, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
@@ -315,7 +316,7 @@ namespace Microsoft.Identity.Client
                 environmentAliases.UnionWith
                     (GetEnvironmentAliases(requestParams.Authority.CanonicalAuthority, instanceDiscoveryMetadataEntry));
 
-                if (requestParams.Authority.AuthorityType != Core.Instance.AuthorityType.B2C)
+                if (requestParams.Authority.AuthorityType != Instance.AuthorityType.B2C)
                 {
                     preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                 }
@@ -708,7 +709,7 @@ namespace Microsoft.Identity.Client
 
         Uri authorityHost = new Uri(authority);
         var authorityType = Authority.GetAuthorityType(authority);
-        if (authorityType == Core.Instance.AuthorityType.Aad ||
+        if (authorityType == Instance.AuthorityType.Aad ||
             authorityHost.Host.Equals(MicrosoftLogin, StringComparison.OrdinalIgnoreCase))
         {
             var instanceDiscoveryMetadata = await ServiceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
@@ -729,7 +730,7 @@ namespace Microsoft.Identity.Client
 
         InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
         var authorityType = Authority.GetAuthorityType(authority);
-        if (authorityType == Core.Instance.AuthorityType.Aad || authorityType == Core.Instance.AuthorityType.B2C)
+        if (authorityType == Instance.AuthorityType.Aad || authorityType == Instance.AuthorityType.B2C)
         {
             ServiceBundle.AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
         }

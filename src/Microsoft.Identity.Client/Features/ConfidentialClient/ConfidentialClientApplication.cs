@@ -29,12 +29,13 @@ using Microsoft.Identity.Client.Internal.Requests;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Core.Instance;
+using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Telemetry;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client
 {
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, false)
@@ -170,7 +171,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, false)
@@ -192,7 +193,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, true)
@@ -216,7 +217,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             return
                 await
                     AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, true)
@@ -337,7 +338,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var requestParameters =
                 CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParameters.ClientId = ClientId;
@@ -369,7 +370,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Core.Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
             var requestParameters = CreateRequestParameters(authorityInstance, scopes, null,
                 UserTokenCache);
             requestParameters.RedirectUri = new Uri(redirectUri);
@@ -407,7 +408,7 @@ namespace Microsoft.Identity.Client
 
         private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scopes, bool forceRefresh, ApiEvent.ApiIds apiId, bool sendCertificate)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scopes, null,
                 AppTokenCache);
             parameters.IsClientCredentialRequest = true;
@@ -437,7 +438,7 @@ namespace Microsoft.Identity.Client
         private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
             IEnumerable<string> scopes, Uri redirectUri, ApiEvent.ApiIds apiId, bool sendCertificate)
         {
-            Authority authority = Core.Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
             requestParams.AuthorizationCode = authorizationCode;
             requestParams.RedirectUri = redirectUri;

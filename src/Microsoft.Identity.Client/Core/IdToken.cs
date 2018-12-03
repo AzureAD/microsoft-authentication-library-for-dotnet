@@ -30,9 +30,10 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     internal class IdTokenClaim
     {

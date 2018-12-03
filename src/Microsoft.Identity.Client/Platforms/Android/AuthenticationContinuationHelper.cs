@@ -30,9 +30,10 @@ using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Internal;
 using System;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.UI.SystemWebview;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.UI.SystemWebview;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {

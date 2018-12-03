@@ -25,8 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

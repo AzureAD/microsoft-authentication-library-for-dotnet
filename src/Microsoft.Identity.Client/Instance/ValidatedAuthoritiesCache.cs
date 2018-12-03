@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Concurrent;
 
-namespace Microsoft.Identity.Core.Instance
+namespace Microsoft.Identity.Client.Instance
 {
     internal class ValidatedAuthoritiesCache : IValidatedAuthoritiesCache
     {

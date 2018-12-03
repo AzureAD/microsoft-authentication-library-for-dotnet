@@ -28,7 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {

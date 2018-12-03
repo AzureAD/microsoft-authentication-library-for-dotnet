@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.UI;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Internal
 {
@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal
             }
 
 #if ANDROID || iOS
-            return new Microsoft.Identity.Core.UI.WebUIFactory();
+            return new Microsoft.Identity.Client.UI.WebUIFactory();
 #else
             return new UI.WebUIFactory();
 #endif

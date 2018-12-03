@@ -30,8 +30,8 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks

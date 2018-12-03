@@ -32,7 +32,7 @@ using Foundation;
 using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
 #endif
 
-namespace Microsoft.Identity.Core.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 {
     internal class CoreCustomUrlProtocol : NSUrlProtocol
     {

@@ -27,8 +27,9 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.UI
+namespace Microsoft.Identity.Client.UI
 {
     internal interface IWebUI
     {

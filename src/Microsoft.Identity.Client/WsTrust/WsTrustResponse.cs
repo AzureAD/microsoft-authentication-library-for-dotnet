@@ -30,9 +30,10 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
-using Microsoft.Identity.Core;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Core.WsTrust
+namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustResponse
     {

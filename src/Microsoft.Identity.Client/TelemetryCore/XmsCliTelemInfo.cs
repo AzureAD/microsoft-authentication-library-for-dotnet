@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,36 +25,38 @@
 //
 //------------------------------------------------------------------------------
 
-using Android.App;
-using Android.Content;
-using Android.OS;
-using Microsoft.Identity.Client.UI.SystemWebview;
-using System;
-
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.TelemetryCore
 {
-    /// <summary>
-    /// BrowserTabActivity to get the redirect with code from authorize endpoint. Intent filter has to be declared in the
-    /// manifest for this activity. When chrome custom tab is launched, and we're redirected back with the redirect
-    /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
-    /// and the BrowserTabActivity will be launched.
-    /// </summary>
-    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
-    [CLSCompliant(false)]
-    public class BrowserTabActivity : Activity
+    internal class XmsCliTelemInfo
     {
         /// <summary>
-        /// 
+        /// Monotonically increasing integer specifying 
+        /// x-ms-cliteleminfo header version
         /// </summary>
-        /// <param name="savedInstanceState"></param>
-        protected override void OnCreate(Bundle savedInstanceState)
-        {
-            base.OnCreate(savedInstanceState);
+        public string Version { get; set; }
 
-            Intent intent = new Intent(this, typeof (AuthenticationActivity));
-            intent.PutExtra(AndroidConstants.CustomTabRedirect, Intent.DataString);
-            intent.SetFlags(ActivityFlags.ClearTop | ActivityFlags.SingleTop);
-            StartActivity(intent);
-        }
+        /// <summary>
+        /// Bundle id for server error.
+        /// </summary>
+        public string ServerErrorCode { get; set; }
+
+        /// <summary>
+        /// Bundle id for server suberror.
+        /// </summary>
+        public string ServerSubErrorCode { get; set; }
+
+        /// <summary>
+        /// Bundle id for refresh token age.
+        /// Floating-point value with a unit of milliseconds 
+        /// </summary>
+        public string TokenAge { get; set; }
+
+        /// <summary>
+        /// Bundle id for spe_ring info. Indicates whether the request was executed 
+        /// on a ring serving SPE traffic. An empty string indicates this occurred on 
+        /// an outer ring, and the string "I" indicates the request occurred on the 
+        /// inner ring
+        /// </summary>
+        public string SpeInfo { get; set; }
     }
 }

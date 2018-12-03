@@ -23,10 +23,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.Identity.Core.UI.EmbeddedWebview;
-using Microsoft.Identity.Core.UI.SystemWebview;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI.EmbeddedWebview;
+using Microsoft.Identity.Client.UI.SystemWebview;
 
-namespace Microsoft.Identity.Core.UI
+namespace Microsoft.Identity.Client.UI
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUIFactory : IWebUIFactory

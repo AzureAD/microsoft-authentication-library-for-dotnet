@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {

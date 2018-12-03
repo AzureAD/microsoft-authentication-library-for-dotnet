@@ -31,9 +31,10 @@ using System.Threading.Tasks;
 using Windows.Security.Authentication.Web;
 using Windows.Networking.Connectivity;
 using Windows.ApplicationModel.Core;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.UI;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.Internal.UI
 {

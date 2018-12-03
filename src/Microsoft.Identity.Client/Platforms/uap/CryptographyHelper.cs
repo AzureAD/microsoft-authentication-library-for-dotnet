@@ -33,9 +33,10 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Helpers;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
 {

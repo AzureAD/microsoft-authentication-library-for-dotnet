@@ -35,8 +35,8 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

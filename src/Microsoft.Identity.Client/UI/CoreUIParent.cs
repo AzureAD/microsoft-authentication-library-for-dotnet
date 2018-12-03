@@ -33,7 +33,7 @@ using Android.App;
 using UIKit;
 #endif
 
-namespace Microsoft.Identity.Core.UI
+namespace Microsoft.Identity.Client.UI
 {
     internal class CoreUIParent
     {

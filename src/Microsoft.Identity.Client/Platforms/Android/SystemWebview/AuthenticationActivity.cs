@@ -33,11 +33,12 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Support.CustomTabs;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.OAuth2;
+using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
 
-namespace Microsoft.Identity.Core.UI.SystemWebview
+namespace Microsoft.Identity.Client.UI.SystemWebview
 {
     /// <summary>
     /// </summary>

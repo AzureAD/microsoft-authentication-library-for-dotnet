@@ -29,10 +29,11 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Realm;
+using Microsoft.Identity.Client.Realm;
 
-namespace Microsoft.Identity.Core.WsTrust
+namespace Microsoft.Identity.Client.WsTrust
 {
     internal class CommonNonInteractiveHandler
     {

@@ -29,11 +29,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Android.Content;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Core.Http;
+using Microsoft.Identity.Client.Http;
 using Uri = System.Uri;
 
-namespace Microsoft.Identity.Core.UI.SystemWebview
+namespace Microsoft.Identity.Client.UI.SystemWebview
 {
     [Android.Runtime.Preserve(AllMembers = true)]
     internal class SystemWebUI : WebviewBase

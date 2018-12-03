@@ -33,9 +33,10 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client
 {
     internal class UapCryptographyManager : ICryptographyManager
     {

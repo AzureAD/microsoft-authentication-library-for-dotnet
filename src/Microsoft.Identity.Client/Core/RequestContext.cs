@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace Microsoft.Identity.Core
+namespace Microsoft.Identity.Client.Core
 {
     internal class RequestContext
     {

@@ -27,8 +27,9 @@
 
 using System.Collections.Generic;
 using System.Globalization;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Core.Telemetry
+namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class DefaultEvent : EventBase
     {

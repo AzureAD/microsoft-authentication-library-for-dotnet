@@ -28,7 +28,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-namespace Microsoft.Identity.Core.Http
+namespace Microsoft.Identity.Client.Http
 {
     internal interface IHttpClientFactory
     {
