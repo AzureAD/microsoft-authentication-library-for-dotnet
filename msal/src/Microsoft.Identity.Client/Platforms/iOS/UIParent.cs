@@ -76,5 +76,15 @@ namespace Microsoft.Identity.Client
         {
         }
 #endif
+
+        /// <summary>
+        /// Checks if the system weview can be used. 
+        /// Currently, on iOS, only the embedded webview is available, so this always returns false.
+        /// </summary>
+        public static bool IsSystemWebviewAvailable() // This is part of the NetStandard "interface" 
+        {
+            return true;
+        }
+
     }
 }

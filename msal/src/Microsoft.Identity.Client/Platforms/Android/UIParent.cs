@@ -134,8 +134,7 @@ namespace Microsoft.Identity.Client
         /// App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity, !useSystemBrowser);
         /// </code>
         /// </example>
-        
-        public static bool IsSystemWebviewAvailable()
+        public static bool IsSystemWebviewAvailable() // This is part of the NetStandard "interface" 
         {
             bool isBrowserWithCustomTabSupportAvailable = IsBrowserWithCustomTabSupportAvailable();
             return (isBrowserWithCustomTabSupportAvailable || IsChromeEnabled()) &&

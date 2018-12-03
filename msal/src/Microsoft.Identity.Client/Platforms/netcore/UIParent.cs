@@ -32,7 +32,7 @@ using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
-// This entire class exists only at runtime, to provide avoid MissingMethodException on NetStandard
+    // This entire class exists only at runtime, to provide avoid MissingMethodException on NetStandard
 #if NET_CORE_RUNTIME
 
     /// <summary>
@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Client
     /// </summary>     
     public sealed class UIParent
     {
-
         internal CoreUIParent CoreUIParent { get; }
 
         static UIParent()
@@ -67,7 +66,16 @@ namespace Microsoft.Identity.Client
             ThrowPlatformNotSupportedException();
         }
 
-        private void ThrowPlatformNotSupportedException()
+        /// <summary>
+        /// Checks if the system weview can be used. 
+        /// Currently, on .NET Core, no webviews are available, so this throws.
+        /// </summary>
+        public static bool IsSystemWebviewAvailable() // This is part of the NetStandard "interface" 
+        {
+            return false;
+        }
+
+        private static void ThrowPlatformNotSupportedException()
         {
             throw new PlatformNotSupportedException("Interactive Authentication flows are not supported on .net core. " +
                                                     "Consider using Device Code Flow https://aka.ms/msal-device-code-flow or " +

@@ -68,10 +68,19 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Checks if the system weview can be used. 
+        /// </summary>
+        public static bool IsSystemWebviewAvailable() // This is part of the NetStandard "interface" 
+        {
+            ThrowPlatformNotSupported();
+            return false;
+        }
+
+        /// <summary>
         /// For the rare case when an application actually uses the netstandard implementation
         /// i.e. other frameworks - e.g. Xamarin.MAC - or MSAL.netstandard loaded via reflection
         /// </summary>
-        private void ThrowPlatformNotSupported()
+        private static void ThrowPlatformNotSupported()
         {
             throw new PlatformNotSupportedException("Interactive Authentication flows are not supported when the NetStandard assembly is used at runtime. " +
                                                     "Consider using Device Code Flow https://aka.ms/msal-device-code-flow or " +

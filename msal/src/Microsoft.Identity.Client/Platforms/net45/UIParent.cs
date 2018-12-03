@@ -75,6 +75,14 @@ namespace Microsoft.Identity.Client
         {
         }
 #endif
+        /// <summary>
+        /// Checks if the system weview can be used. 
+        /// Currently, on .NET Desktop, only the embedded webview can used, so this always returns false
+        /// </summary>
+        public static bool IsSystemWebviewAvailable() // This is part of the NetStandard "interface" 
+        {
+            return false;
+        }
 
         /// <summary>
         /// Hidden webview can be used in both UWP and desktop applications.

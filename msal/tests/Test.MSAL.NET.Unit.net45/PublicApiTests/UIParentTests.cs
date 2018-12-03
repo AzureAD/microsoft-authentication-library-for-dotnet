@@ -43,6 +43,8 @@ namespace Test.MSAL.NET.Unit.net45.PublicApiTests
         {
             AssertException.Throws<PlatformNotSupportedException>(() => new UIParent());
             AssertException.Throws<PlatformNotSupportedException>(() => new UIParent("parent", true));
+            AssertException.Throws<PlatformNotSupportedException>(() => UIParent.IsSystemWebviewAvailable());
+
         }
 #endif
 
@@ -73,6 +75,12 @@ namespace Test.MSAL.NET.Unit.net45.PublicApiTests
             Assert.IsTrue(uiParent.UseHiddenBrowser);
             Assert.IsTrue(uiParent.CoreUIParent.UseHiddenBrowser);
             Assert.AreSame(parent, uiParent.CoreUIParent.OwnerWindow);
+        }
+
+        [TestMethod]
+        public void IsSystemWebview()
+        {
+            Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
         }
 #endif
     }
