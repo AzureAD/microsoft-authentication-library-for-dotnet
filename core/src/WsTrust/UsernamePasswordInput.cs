@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+#if DESKTOP
 using System.Security;
-
-#if DESKTOP 
 using static System.Runtime.InteropServices.Marshal;
 #endif
 
-#if NET_CORE || NETSTANDARD
+#if NET_CORE
+using System.Security;
 using static System.Security.SecureStringMarshal;
 using static System.Runtime.InteropServices.Marshal;
 #endif
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Core
     internal sealed class UsernamePasswordInput : IUsernameInput
     {
         public string UserName { get; set; }
-#if DESKTOP || NET_CORE || NETSTANDARD //TODO: remove once MSAL is split 
+#if DESKTOP || NET_CORE
         private SecureString securePassword;
 #endif
         private string password;
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Core
             this.UserName = userName;
         }
 
-#if DESKTOP || NET_CORE || NETSTANDARD
+#if DESKTOP || NET_CORE
         public UsernamePasswordInput(string userName, SecureString securePassword)
         {
             this.securePassword = securePassword;
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Core
         public char[] PasswordToCharArray() 
         {
             
-#if DESKTOP || NET_CORE || NETSTANDARD
+#if DESKTOP || NET_CORE
             if (securePassword != null)
             {
                 var output = new char[securePassword.Length];
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Core
         {
 
             bool hasSecurePassword = false;
-#if DESKTOP || NET_CORE || NETSTANDARD
+#if DESKTOP || NET_CORE
             hasSecurePassword = this.securePassword != null;
 #endif
             bool hasPlainPassowrd = !string.IsNullOrEmpty(password);

@@ -25,13 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
-
+    /// <summary>
+    /// Interface to be used with desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).
+    /// public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only 
+    /// (they only support public client flows). For details see https://aka.ms/msal-net-client-applications
+    /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
         /// <summary>
@@ -48,5 +52,4 @@ namespace Microsoft.Identity.Client
             string username,
             System.Security.SecureString securePassword);
     }
-#endif
 }
