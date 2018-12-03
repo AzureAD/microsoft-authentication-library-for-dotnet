@@ -1,3 +1,20 @@
+**/.vs/
+**/bin/
+**/obj/
+**/packages/
+**/TestResults/
+!.nuget/NuGet.exe
+**/ADAL.NET.sdf
+**/.nuget/NuGet.Config
+**/*.suo
+src/ADAL.PCL.Android/ADAL.PCL.Android.csproj.bak
+.DS_Store
+*.userprefs
+AppPackages
+Microsoft.IdentityModel.Clients.ActiveDirectory.XML
+*.htm
+.nugetPackageRoot/
+
 # Created by https://www.gitignore.io/api/visualstudio
 
 ### VisualStudio ###
@@ -26,7 +43,6 @@ bld/
 
 # Visual Studio 2015 cache/options directory
 .vs/
-.vscode/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
@@ -139,7 +155,7 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
-# TODO: Comment the next line if you want to checkin your web deploy settings 
+# TODO: Comment the next line if you want to checkin your web deploy settings
 # but database connection strings (with potential passwords) will be unencrypted
 *.pubxml
 *.publishproj
@@ -222,4 +238,14 @@ _Pvt_Extensions
 *.nuget.targets
 project.lock.json
 *.project.lock.json
-/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
+msal/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
+
+# ignore Xamarin.Android Resource.Designer.cs files
+**/[Rr]esources/[Rr]esource.[Dd]esigner.cs
+**/*.Droid/**/[Rr]esource.[Dd]esigner.cs
+**/*.Android/**/[Rr]esource.[Dd]esigner.cs
+**/Android/**/[Rr]esource.[Dd]esigner.cs
+**/Droid/**/[Rr]esource.[Dd]esigner.cs
+
+/msal/src/Microsoft.Identity.Client/docfx_project
+/msal/src/Microsoft.Identity.Client/_api

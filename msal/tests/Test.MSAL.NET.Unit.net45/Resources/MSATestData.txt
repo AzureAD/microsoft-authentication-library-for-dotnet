@@ -1,0 +1,80 @@
+﻿{
+  "client_id": "b6c69a37-df96-4db0-9088-2ab96e1d8215",
+  "authority": "https://login.microsoftonline.com/common",
+  "token_response": {
+    "token_type": "Bearer",
+    "scope": "Tasks.Read User.Read openid profile",
+    "expires_in": 3600,
+    "ext_expires_in": 0,
+    "access_token": "<removed_at>",
+    "refresh_token": "<removed_rt>",
+    "id_token": "{0}",
+    "client_info": "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ"
+  },
+  "id_token_response": {
+    "ver": "2.0",
+    "iss": "https://login.microsoftonline.com/9188040d-6c67-4c5b-b112-36a304b66dad/v2.0",
+    "sub": "AAAAAAAAAAAAAAAAAAAAAMNeAFpSLglHiOTr9IZHJEA",
+    "aud": "b6c69a37-df96-4db0-9088-2ab96e1d8215",
+    "exp": 1538885254,
+    "iat": 1538798554,
+    "nbf": 1538798554,
+    "name": "Test Username",
+    "preferred_username": "msalsdktest@outlook.com",
+    "oid": "00000000-0000-0000-40c0-3bac188d01d1",
+    "tid": "9188040d-6c67-4c5b-b112-36a304b66dad",
+    "aio": "DWgKnl!EsfVkSU8jFVbxM6PhZaR2EyXsMBymRGSXvREu4i*FmBU1RBl5hHvNvoGSGlqdBJFxndAsA6*Z3qZBr0c9vaIRwUpeICV*SXZjw8!B"
+  },
+  "at_cache_key": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net-accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-tasks.read user.read openid profile",
+  "at_cache_key_ios_service": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-tasks.read user.read openid profile",
+  "at_cache_key_ios_account": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net",
+  "at_cache_key_ios_generic": "accesstoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad",
+  "at_cache_value": {
+    "secret": "<removed_at>",
+    "target": "Tasks.Read User.Read openid profile",
+    "credential_type": "AccessToken",
+    "environment": "login.windows.net",
+    "realm": "9188040d-6c67-4c5b-b112-36a304b66dad",
+    "expires_on": "1538802835",
+    "cached_at": "1538799235",
+    "client_id": "b6c69a37-df96-4db0-9088-2ab96e1d8215",
+    "home_account_id": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad"
+  },
+  "id_token_cache_key": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net-idtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-",
+  "id_token_cache_key_ios_service": "idtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad-",
+  "id_token_cache_key_ios_account": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net",
+  "id_token_cache_key_ios_generic": "idtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-9188040d-6c67-4c5b-b112-36a304b66dad",
+  "id_token_cache_value": {
+    "secret": "{0}",
+    "credential_type": "IdToken",
+    "environment": "login.windows.net",
+    "home_account_id": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad",
+    "realm": "9188040d-6c67-4c5b-b112-36a304b66dad",
+    "client_id": "b6c69a37-df96-4db0-9088-2ab96e1d8215"
+  },
+  "rt_cache_key": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net-refreshtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215--",
+  "rt_cache_key_ios_service": "refreshtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215--",
+  "rt_cache_key_ios_account": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net",
+  "rt_cache_key_ios_generic": "refreshtoken-b6c69a37-df96-4db0-9088-2ab96e1d8215-",
+  "rt_cache_value": {
+    "client_id": "b6c69a37-df96-4db0-9088-2ab96e1d8215",
+    "secret": "<removed_rt>",
+    "environment": "login.windows.net",
+    "credential_type": "RefreshToken",
+    "home_account_id": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad"
+  },
+  "account_cache_key": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net-9188040d-6c67-4c5b-b112-36a304b66dad",
+  "account_cache_key_ios_service": "9188040d-6c67-4c5b-b112-36a304b66dad",
+  "account_cache_key_ios_account": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad-login.windows.net",
+  "account_cache_key_ios_generic": "msalsdktest@outlook.com",
+  "account_cache_value": {
+    "local_account_id": "00000000-0000-0000-40c0-3bac188d01d1",
+    "home_account_id": "00000000-0000-0000-40c0-3bac188d01d1.9188040d-6c67-4c5b-b112-36a304b66dad",
+    "username": "msalsdktest@outlook.com",
+    "environment": "login.windows.net",
+    "realm": "9188040d-6c67-4c5b-b112-36a304b66dad",
+    "authority_type": "MSSTS",
+    "name": "Test Username",
+	"client_info": "eyJ2ZXIiOiIxLjAiLCJzdWIiOiJBQUFBQUFBQUFBQUFBQUFBQUFBQUFNTmVBRnBTTGdsSGlPVHI5SVpISkVBIiwibmFtZSI6Ik9sZ2EgRGFsdG9tIiwicHJlZmVycmVkX3VzZXJuYW1lIjoibXNhbHNka3Rlc3RAb3V0bG9vay5jb20iLCJvaWQiOiIwMDAwMDAwMC0wMDAwLTAwMDAtNDBjMC0zYmFjMTg4ZDAxZDEiLCJ0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQiLCJob21lX29pZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInVpZCI6IjAwMDAwMDAwLTAwMDAtMDAwMC00MGMwLTNiYWMxODhkMDFkMSIsInV0aWQiOiI5MTg4MDQwZC02YzY3LTRjNWItYjExMi0zNmEzMDRiNjZkYWQifQ"
+  }
+}

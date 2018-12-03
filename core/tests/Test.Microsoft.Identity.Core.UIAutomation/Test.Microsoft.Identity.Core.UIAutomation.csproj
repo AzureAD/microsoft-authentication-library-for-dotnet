@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Test.Microsoft.Identity.Core.UIAutomation</RootNamespace>
+    <AssemblyName>Test.Microsoft.Identity.Core.UIAutomation</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers">
+      <Version>1.0.0-alpha003</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
+      <Version>2.6.2</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Xamarin.UITest" Version="2.2.6" />
+    <PackageReference Include="Microsoft.Azure.KeyVault" Version="2.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
+      <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\adal\src\Microsoft.IdentityModel.Clients.ActiveDirectory\Microsoft.IdentityModel.Clients.ActiveDirectory.csproj">
+      <Project>{AECE489D-9ED4-442D-8D8F-0F383AEBB781}</Project>
+      <Name>Microsoft.IdentityModel.Clients.ActiveDirectory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Core.csproj">
+      <Project>{3eef5981-8f11-4f54-9ddf-2f63c574d028}</Project>
+      <Name>Microsoft.Identity.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj">
+      <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
+      <Name>Test.Microsoft.Identity.LabInfrastructure</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <!-- Set this env variable locally to overcome issue with VS not being able to run Nunit 2.6 tests-->
+  <Target Name="NunitHack" BeforeTargets="Build">
+    <Message Text="NUNIT_HACK = $(NUNIT_HACK)" Importance="High" />
+  </Target>
+  <ItemGroup Condition="'$(NUNIT_HACK)' != ''">
+    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
+  </ItemGroup>
+  <!-- This is how it runs in AppCenter -->
+  <ItemGroup Condition="'$(NUNIT_HACK)' == ''">
+    <!--<PackageReference Include="Newtonsoft.Json" Version="6.0.8"/>-->
+    <PackageReference Include="NUnit" Version="2.6.4" />
+    <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppFactory.cs" />
+    <Compile Include="CoreMobileTestHelper.cs" />
+    <Compile Include="ITestController.cs" />
+    <Compile Include="PlatformNotSupportedException.cs" />
+    <Compile Include="ResultVerificationFailureException.cs" />
+    <Compile Include="CoreUiTestConstants.cs" />
+    <Compile Include="UserInformationFieldIds.cs" />
+    <Compile Include="XamarinUITestController.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+</Project>
