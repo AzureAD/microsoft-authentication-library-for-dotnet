@@ -43,8 +43,13 @@ namespace Test.MSAL.NET.Unit.net45.PublicApiTests
         {
             AssertException.Throws<PlatformNotSupportedException>(() => new UIParent());
             AssertException.Throws<PlatformNotSupportedException>(() => new UIParent("parent", true));
-            AssertException.Throws<PlatformNotSupportedException>(() => UIParent.IsSystemWebviewAvailable());
 
+        }
+
+        [TestMethod]
+        public void UIParent_IsSystemAvailable()
+        {
+             Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
         }
 #endif
 
