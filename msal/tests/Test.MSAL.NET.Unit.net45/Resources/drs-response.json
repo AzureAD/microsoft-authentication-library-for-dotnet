@@ -1,0 +1,14 @@
+﻿{
+  "DeviceRegistrationService": {
+    "RegistrationEndpoint": "https://enterpriseregistration.windows.net/EnrollmentServer/DeviceEnrollmentWebService.svc",
+    "RegistrationResourceId": "urn:ms-drs:enterpriseregistration.windows.net",
+    "ServiceVersion": "1.0"
+  },
+  "AuthenticationService": {
+    "OAuth2": {
+      "AuthCodeEndpoint": "https://fs.fabrikam.com/adfs/oauth2/authorize",
+      "TokenEndpoint": "https://fs.fabrikam.com/adfs/oauth2/token"
+    }
+  },
+  "IdentityProviderService": { "PassiveAuthEndpoint": "https://fs.fabrikam.com/adfs/ls" }
+}

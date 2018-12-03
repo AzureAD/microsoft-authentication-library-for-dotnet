@@ -1,0 +1,132 @@
+2.5.0-preview
+=============
+- **Improved the testability of apps using MSAL.NET**: MSAL.NET was not easily mockable because the AuthenticationResult was an immutable sealed class with no public constructors. AuthenticationResult now has a public constructor for testing. [MSAL issue #682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/682)
+- **Improved support for Azure AD B2C**: apps constructors now understand to b2clogin.com based authorities, Developer no longer needs to set ValidateAuthority=false, as the library handles this now. [MSAL issue #686](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/686)
+- **GetAccountsAsync() can now be called when the device / computer is offline**. It was making an network call to the instance discovery endpoint to determine the environments (equivalent clouds base URLs) for caching, which meant GetAccountsAsync() did not work off-line. This has been fixed and GetAccountsAsync() is not dependent on a network call and works off-line. [MSAL issue #630](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/630)
+
+2.4.1-preview
+=============
+Hot fix release includes:
+- Fix performance issue [1406] for degredation in .NET Framework compared to .NET Core
+
+2.4.0-preview
+=============
+Improvements and fixes to the token cache
+- The serialized token cache can now be shared by different applications, therefore providing SSO if the same user signs-in in both applications
+  - See [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1365) and [MSAL Issue #653](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/654)
+- On .NET Core, the Token cache was shared by all instances of applications in memory. This is now fixed (See MSAL.NET issue #656 and [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1360))
+- Fixes consistency issues for advanced token cache migration scenarios from ADAL v3.x to ADAL v4.x to MSAL v2.x 
+  - [MSAL Issue #652](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/652)
+  - [MSAL Issue #651](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/651)
+- Cache lookups were optimized. Work done in conjunction with ADAL.iOS and MSAL.iOS native) [PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1350)
+
+More browsers are now supported on Xamarin.Android when you choose to use system web browsers.
+- Removed chrome dependency for system browser on Android devices. See https://aka.ms/msal-net-system-browsers for more information. [MSAL issue #664](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/664)
+
+Azure AD B2C improvement
+- Add support for b2clogin.com for b2c authorities [MSAL issue #669](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/669) [#632](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/632)
+
+2.3.1-preview
+=============
+This release includes:
+- Fix for device code flow where server is now expecting device_code as the body parameter.
+
+2.3.0-preview
+=============
+This release includes:
+- Fix for cross-thread exception when setting the ownerWindow [ADAL issue #1277](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet)
+- Ensure error codes are public [MSAL issue #638](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/638)
+- Add device code flow api to iOS and Android platforms [MSAL issue #642](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/642)
+
+2.2.1-preview
+=============
+This release contains bug fixes on top of MSAL 2.2.0-preview:
+- Due to static initialization, there was a race condition which appeared randomly. [MSAL issue #629](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/629)
+- For iOS, TeamId is now accessible when the device is locked. [MSAL issue #626](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/626)
+- For iOS, MSAL returns a useful error message, and an [aka.ms link](https://aka.ms/msal-net-enable-keychain-groups), when keychain access groups have not been set in the Entitlements.plist. [MSAL issue #633](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/633)
+- Cache serialization for [.NetCore](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/637)
+- Improve logging for device code flow to handle "authorization_pending" exceptions as info messages [MSAL issue #631](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/631)
+
+2.2.0-preview
+=============
+- MSAL.NET 2.2.0 now supports Device Code Flow. For details see https://aka.ms/msal-device-code-flow
+- Xamarin.iOS applications using the system web view now benefit from the integration with SFAuthenticationSession for iOS11 and ASWebAuthenticationSession for iOS12+ [MSAL issue 489](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/489)
+- A clear MsalClientException message is now returned when the application is not able to access keychain, with instructions. See https://aka.ms/msal-net-enable-keychain-access for details.
+- Removed double-logging in log files and callbacks.  https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1289
+- Improved 429 server error handling by exposing the Http Response headers in MsalServiceException. See https://aka.ms/msal-net-retry-after
+- UWP cache fix. The key of the storage on UWP should be 255 characters or less. When using several scopes the key could exceed 255 characters. Now hashing scopes and environment on UWP.  [612](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/612)
+
+2.1.0-preview
+=============
+- Integrated Windows Authentication and Username / Password authentication flows. For details see https://aka.ms/msal-net-iwa and https://aka.ms/msal-net-up
+
+2.0.1-preview
+=============
+This release contains bug fixes on top of MSAL 2.0.0-preview:
+- When using MSAL 2.0.0-preview with Azure AD B2C, the cache was never hit. (See MSAL#[604](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/604)), 
+   and the accounts were not removed correctly (See MSAL #[613](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/613))
+- The TokenCacheExtensions.Deserialize was throwing if a null array of bytes was passed as arguments instead of silently not doing anything.
+   (See MSAL #[603](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/603))
+- When migrating a token cache from ADAL v3 or ADAL v4 to MSAL 2.0, the override of acquire token silent without authority used to work incorrectly (cache was missed)
+
+2.0.0-preview
+=============
+This release contains:
+- Remove support for Windows 8/8.1 and Windows phone 8/8.1
+- Add support for .NETCore (Netcoreapp1.0 for portable desktop and web apps) and Uap10.0 for Windows 10 Applications
+- Define the notion of Account (through the IAccount interface), instead of User. This breaking change provides the right semantics: 
+   the fact that the same user can have several accounts, in different Azure AD directories.
+- The methods and properties returning IAccount are now all asynchronous, as in some cases getting the information might require querying the identity provider.
+- The types that had fields or properties of type IUser in MSAL.NET 1.x now reference IAccount. 
+- In the Xamarin.iOS platform, PublicClientApplication has a new property named KeychainSecurityGroup. 
+   This Xamarin iOS specific property enables you to direct the application to share the token cache with other applications sharing the same keychain security group. 
+   If you provide this key, you must add the capability to your Application Entitlement. For more info, see https://aka.ms/msal-net-sharing-cache-on-ios.  This API may change in a future release.
+- In the previous versions of MSAL.NET, Xamarin.Android and Xamarin.iOS used the System web browser interacting with Chrome tabs. 
+   This was great if you wanted to benefit from SSO, but that was not working on some Android phones which device manufacturers did not provide Chrome, or if the end user had disabled Chrome. 
+   As an app developer, you can now leverage an embedded browser. To support this, the UIParent class now has a constructor taking a Boolean to specify if you want to choose the embedded browser. 
+   It also has a static method, IsSystemWebviewAvailable(), to help you decide if you want to use it. 
+   For more details about this possibility see the article in MSAL’s conceptual documentation: https://aka.ms/msal-net-uses-web-browser. 
+   Also the web view implementation might change in the future
+- If migrating from MSAL 1.x to MSAL 2.x, you’ll get a number of compilation errors, but they are pretty straightforward to fix. In most cases you will only need to: 
+   - Replace IUser by IAccount 
+   - Replace the calls to application.Users to asynchronous calls to application.GetAccountsAsync 
+   - In advanced multi-account applications, where you were using the IUser.Identifier, you will now need to use the IAccount.HomeAccount.Identifier. 
+   We have provided meaningful and actionable compiler errors that will tell you exactly what to do and will link to documentation to help you migrate. 
+- To preserve the single-sign-on (SSO) state, the new versions of ADAL(v4) and MSAL(v2) share the same token cache, are capable of reading the ADAL 3.x token cache and are 
+   capable of writing the ADAL 3.x token cache in addition to the new cache format (named unified cache), see https://aka.ms/adal-net-to-msal-net. 
+- For more info on the release, checkout https://aka.ms/msal-net-2-released
+
+1.1.4-preview
+=============
+Hot fix of null pointer in iOS TokenCacheAccessor(#570)
+
+1.1.3-preview
+=============
+This release contains updates to Xamarin.Android.Support v27.0.2 and MonoAndroid8.1 (#553 #520).
+
+1.1.2-preview
+=============
+This release fixes references issues for Xamarin Android (for instance #520 & #524).
+When you create a new Xamarin Forms project and reference MSAL this now works out of the box. 
+If you want to migrate an existing project to MSAL 1.1.2, please read this [wiki] 
+(https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Troubleshooting-Xamarin.Android-issues-with-MSAL) page.
+
+1.1.1-preview
+=============
+This release contains -
+- Added support to use RSACng in .net 4.7 (#448)
+- Expose claims as an attribute for MSALUiRequiredException (#459)
+- Updated Xamarin Forms Android support libraries to 25.3.1 (#450)
+- Added Arlington URL to list of trusted authorities (#495)
+- Changes for GDPR complicance with PiiLogs (#492)
+- Several bug fixes
+
+1.1.0-preview
+=============
+This release marks the seconds preview of the library which brings in several features and changes - 
+- Support for NetStandard
+- Client Certificate Assertion in NetCore
+- Support for system webviews in iOS/Android
+- Updated Object Model
+- Updated to JSON cache storage
+- Several bug fixes

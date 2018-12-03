@@ -1,0 +1,1 @@
+call buildVS2017.cmd %1 %2 %3

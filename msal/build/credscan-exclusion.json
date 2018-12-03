@@ -1,0 +1,15 @@
+{
+  "tool": "Credential Scanner",
+  "suppressions": [
+	{
+
+     "file": "XForms.UWP_TemporaryKey.pfx", 
+      "_justification": "Legitimate UWP app certificate file with private key required for the app to function. this is sample test app."
+    },
+
+	{
+	 "file": "CryptographyTests.cs", 
+      "_justification": "Password contained within this file is not used for any production application/code. It is used as a means to access a self signed certificate used only for testing."
+	}
+  ]
+}
