@@ -24,12 +24,12 @@
 // THE SOFTWARE.
 
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.UI.EmbeddedWebview;
-using Microsoft.Identity.Client.UI.SystemWebview;
+using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
+using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 
 namespace Microsoft.Identity.Client.UI
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class WebUIFactory : IWebUIFactory
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)

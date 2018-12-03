@@ -29,9 +29,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class DeviceAuthHelper
     {
         public static bool CanHandleDeviceAuthChallenge {

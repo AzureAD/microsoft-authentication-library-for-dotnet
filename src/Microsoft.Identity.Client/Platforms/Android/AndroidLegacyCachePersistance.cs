@@ -25,14 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Android.App;
 using Android.Content;
-using System;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Platforms.Android
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidLegacyCachePersistence : ILegacyCachePersistence
     {
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";

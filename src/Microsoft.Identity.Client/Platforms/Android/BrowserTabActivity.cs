@@ -25,13 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Android.App;
 using Android.Content;
 using Android.OS;
-using Microsoft.Identity.Client.UI.SystemWebview;
-using System;
+using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.Android
 {
     /// <summary>
     /// BrowserTabActivity to get the redirect with code from authorize endpoint. Intent filter has to be declared in the

@@ -23,13 +23,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Microsoft.Identity.Client.Http;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.UI
+namespace Microsoft.Identity.Client.Platforms.Android
 {
     internal abstract class WebviewBase : IWebUI
     {

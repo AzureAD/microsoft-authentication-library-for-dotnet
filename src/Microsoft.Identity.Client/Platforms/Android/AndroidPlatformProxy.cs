@@ -29,16 +29,15 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.Android
 {
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    [Android.Runtime.Preserve(AllMembers = true)]
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidPlatformProxy : IPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
@@ -76,12 +75,12 @@ namespace Microsoft.Identity.Client
 
         public string GetProcessorArchitecture()
         {
-            if (Android.OS.Build.VERSION.SdkInt < Android.OS.BuildVersionCodes.Lollipop)
+            if (global::Android.OS.Build.VERSION.SdkInt < global::Android.OS.BuildVersionCodes.Lollipop)
             {
-                return Android.OS.Build.CpuAbi;
+                return global::Android.OS.Build.CpuAbi;
             }
 
-            IList<string> supportedABIs = Android.OS.Build.SupportedAbis;
+            IList<string> supportedABIs = global::Android.OS.Build.SupportedAbis;
             if (supportedABIs != null && supportedABIs.Count > 0)
             {
                 return supportedABIs[0];
@@ -92,12 +91,12 @@ namespace Microsoft.Identity.Client
 
         public string GetOperatingSystem()
         {
-            return Android.OS.Build.VERSION.Sdk;
+            return global::Android.OS.Build.VERSION.Sdk;
         }
 
         public string GetDeviceModel()
         {
-            return Android.OS.Build.Model;
+            return global::Android.OS.Build.Model;
         }
 
         /// <inheritdoc />
@@ -125,7 +124,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Name of the calling application</returns>
         public string GetCallingApplicationName()
         {
-            return Android.App.Application.Context.ApplicationInfo?.LoadLabel(Android.App.Application.Context.PackageManager);
+            return global::Android.App.Application.Context.ApplicationInfo?.LoadLabel(global::Android.App.Application.Context.PackageManager);
         }
 
         /// <summary>
@@ -134,7 +133,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Version of the calling application</returns>
         public string GetCallingApplicationVersion()
         {
-            return Android.App.Application.Context.PackageManager.GetPackageInfo(Android.App.Application.Context.PackageName, 0)?.VersionName;
+            return global::Android.App.Application.Context.PackageManager.GetPackageInfo(global::Android.App.Application.Context.PackageName, 0)?.VersionName;
         }
 
         /// <summary>
@@ -143,9 +142,9 @@ namespace Microsoft.Identity.Client
         /// <returns>Device identifier</returns>
         public string GetDeviceId()
         {
-            return Android.Provider.Settings.Secure.GetString(
-                Android.App.Application.Context.ContentResolver,
-                Android.Provider.Settings.Secure.AndroidId);
+            return global::Android.Provider.Settings.Secure.GetString(
+                global::Android.App.Application.Context.ContentResolver,
+                global::Android.Provider.Settings.Secure.AndroidId);
         }
 
         /// <inheritdoc />

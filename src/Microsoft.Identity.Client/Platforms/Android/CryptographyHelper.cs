@@ -26,11 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
-using Microsoft.Identity.Client.Internal;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 
 namespace Microsoft.Identity.Client
 {

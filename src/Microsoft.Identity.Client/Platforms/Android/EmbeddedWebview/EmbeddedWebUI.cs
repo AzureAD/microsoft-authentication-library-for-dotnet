@@ -32,8 +32,9 @@ using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
     internal class EmbeddedWebUI : WebviewBase
     {

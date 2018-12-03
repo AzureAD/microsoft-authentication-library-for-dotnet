@@ -27,7 +27,6 @@
 
 using System;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Internal
 {

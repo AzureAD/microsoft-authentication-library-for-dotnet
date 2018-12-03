@@ -31,9 +31,9 @@ using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.Android
 {
-    [Android.Runtime.Preserve(AllMembers = true)]
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AndroidCryptographyManager : ICryptographyManager
     {
         public string CreateBase64UrlEncodedSha256Hash(string input)

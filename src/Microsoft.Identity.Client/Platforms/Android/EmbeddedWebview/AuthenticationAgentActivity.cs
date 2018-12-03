@@ -37,7 +37,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Helpers;
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {
     [Activity(Label = "Sign in")]
     internal class AuthenticationAgentActivity : Activity
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Client.UI.EmbeddedWebview
                 };
 
                 String link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
-                Intent intent = new Intent(Intent.ActionView, Android.Net.Uri.Parse(link));
+                Intent intent = new Intent(Intent.ActionView, global::Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }
 
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client.UI.EmbeddedWebview
                 base.OnPageFinished(view, url);
             }
 
-            public override void OnPageStarted(WebView view, string url, Android.Graphics.Bitmap favicon)
+            public override void OnPageStarted(WebView view, string url, global::Android.Graphics.Bitmap favicon)
             {
                 if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
                 {

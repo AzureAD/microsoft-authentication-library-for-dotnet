@@ -25,11 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Android.Util;
-using Microsoft.Identity.Client;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client
 {
     internal class PlatformLogger
     {

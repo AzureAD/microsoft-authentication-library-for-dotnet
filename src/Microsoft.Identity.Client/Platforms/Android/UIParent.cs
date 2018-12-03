@@ -25,18 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.UI;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
-
-
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {

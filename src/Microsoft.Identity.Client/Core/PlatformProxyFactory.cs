@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -41,7 +40,7 @@ namespace Microsoft.Identity.Client.Core
 #if NET_CORE
             new NetCorePlatformProxy(IsMsal())
 #elif ANDROID
-            new AndroidPlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(IsMsal())
 #elif iOS
             new iOSPlatformProxy(IsMsal())
 #elif WINDOWS_APP

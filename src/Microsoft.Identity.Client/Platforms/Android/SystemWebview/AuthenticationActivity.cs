@@ -38,12 +38,12 @@ using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
 
-namespace Microsoft.Identity.Client.UI.SystemWebview
+namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 {
     /// <summary>
     /// </summary>
     [Activity(Name = "microsoft.identity.client.AuthenticationActivity")]
-    [Android.Runtime.Preserve(AllMembers = true)]
+    [global::Android.Runtime.Preserve(AllMembers = true)]
     internal class AuthenticationActivity : Activity
     {
         internal static RequestContext RequestContext { get; set; }
