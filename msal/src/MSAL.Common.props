@@ -74,7 +74,7 @@
     <DefineConstants>$(DefineConstants);HAVE_ASYNC;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+    <DefineConstants>$(DefineConstants);R</DefineConstants>
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);PORTABLE;HAVE_ASYNC;HAVE_BIG_INTEGER;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_OBSOLETE_FORMATTER_ASSEMBLY_STYLE;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
@@ -104,6 +104,7 @@
     <Compile Include="$(PathToMsalSources)\Features\PublicClientWithTokenCache\**\*.cs" LinkBase="Features\PublicClientWithTokenCache" />
     <Compile Include="$(PathToMsalSources)\Features\DeviceCode\**\*.cs" LinkBase="Features\DeviceCode" />
     <Compile Include="$(PathToMsalSources)\Features\IntegratedWindowsAuth\**\*.cs" LinkBase="Features\IntegratedWindowsAuth" />
+    <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" LinkBase="Features\UsernamePassword"/>
     <Compile Include="$(PathToMsalSources)\Features\ConfidentialClient\**\*.cs" LinkBase="Features\ConfidentialClient" />
 
   </ItemGroup>
@@ -132,7 +133,6 @@
 
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" LinkBase="Features\UsernamePassword"/>
     
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
@@ -150,7 +150,6 @@
     <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
 
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventsSource" />
-    <Compile Include="$(PathToMsalSources)\Features\UsernamePassword\**\*.cs" LinkBase="Features\UsernamePassword"/>
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
@@ -180,6 +179,7 @@
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
     <PackageReference Include="System.Net.NameResolution" Version="4.3.0" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'Xamarin.iOS10' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
@@ -196,6 +196,7 @@
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'MonoAndroid8.1' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
@@ -210,6 +211,7 @@
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="Xamarin.Android.Support.CustomTabs" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
+    <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
 
   <!-- This is here to workaround designer issues so VS sees them appropriately -->
