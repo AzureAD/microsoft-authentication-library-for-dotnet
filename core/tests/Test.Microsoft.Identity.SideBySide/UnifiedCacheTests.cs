@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 extern alias msal;
-extern alias adal;
 
 using Test.Microsoft.Identity.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -78,11 +77,11 @@ namespace Test.MSAL.NET.Integration
         }
 
         private void AdalDoBefore(
-            adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs args)
+            global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs args)
         {
-            adal::Microsoft.Identity.Core.Cache.CacheData cacheData;
+            global::Microsoft.Identity.Core.Cache.CacheData cacheData;
 
-            cacheData = new adal::Microsoft.Identity.Core.Cache.CacheData()
+            cacheData = new global::Microsoft.Identity.Core.Cache.CacheData()
             {
                 AdalV3State = AdalV3StateStorage,
                 UnifiedState = UnifiedStateStorage
@@ -92,11 +91,11 @@ namespace Test.MSAL.NET.Integration
         }
 
         private void AdalDoAfter(
-            adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs args)
+            global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs args)
         {
             if (args.TokenCache.HasStateChanged)
             {
-                adal::Microsoft.Identity.Core.Cache.CacheData cacheData = args.TokenCache.SerializeAdalAndUnifiedCache();
+                global::Microsoft.Identity.Core.Cache.CacheData cacheData = args.TokenCache.SerializeAdalAndUnifiedCache();
 
                 AdalV3StateStorage = cacheData.AdalV3State;
                 UnifiedStateStorage = cacheData.UnifiedState;
@@ -130,17 +129,17 @@ namespace Test.MSAL.NET.Integration
             }
         }
 
-        private adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext adalContext;
-        private adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache adalCache;
-        private adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationResult adalAuthResult;
+        private global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext adalContext;
+        private global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache adalCache;
+        private global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationResult adalAuthResult;
         private void InitAdal()
         {
-            adalCache = new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache()
+            adalCache = new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCache()
             {
                 BeforeAccess = AdalDoBefore,
                 AfterAccess = AdalDoAfter
             };
-            adalContext = new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(
+            adalContext = new global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContext(
                 authority, adalCache);
         }
 
@@ -184,9 +183,9 @@ namespace Test.MSAL.NET.Integration
             AssertMsalCacheIsEmpty();
 
             // passing empty password to make sure that token returned silenlty - using RT
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
         }
@@ -217,9 +216,9 @@ namespace Test.MSAL.NET.Integration
             AssertAdalCacheIsEmpty();
 
             // passing empty password to make sure that token returned silenlty - using RT
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
         }
@@ -242,15 +241,15 @@ namespace Test.MSAL.NET.Integration
 
         private async Task AcquireTokensUsingAdalAsync()
         {
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
 
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource2, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
         }
 
@@ -291,9 +290,9 @@ namespace Test.MSAL.NET.Integration
             AssertAdalCacheIsEmpty();
 
             // passing empty password to make sure that token returned silenlty - using RT
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
         }
@@ -324,16 +323,16 @@ namespace Test.MSAL.NET.Integration
             AssertMsalCacheIsEmpty();
 
             // passing empty password to make sure that token returned silenlty - using RT
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, "")).ConfigureAwait(false);
 
             ValidateAdalAuthResult();
         }
 
         private void ClearAdalCache()
         {
-            adalCache.BeforeAccess(new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
+            adalCache.BeforeAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = adalCache
             });
@@ -341,7 +340,7 @@ namespace Test.MSAL.NET.Integration
             adalCache.ClearAdalCache();
             adalCache.HasStateChanged = true;
 
-            adalCache.AfterAccess(new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
+            adalCache.AfterAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = adalCache
             });
@@ -349,7 +348,7 @@ namespace Test.MSAL.NET.Integration
 
         private void ClearMsalCache()
         {
-            adalCache.BeforeAccess(new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
+            adalCache.BeforeAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = adalCache
             });
@@ -357,7 +356,7 @@ namespace Test.MSAL.NET.Integration
             adalCache.ClearMsalCache();
             adalCache.HasStateChanged = true;
 
-            adalCache.AfterAccess(new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
+            adalCache.AfterAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = adalCache
             });
@@ -365,7 +364,7 @@ namespace Test.MSAL.NET.Integration
 
         private void UpdateAdalCacheSetClientInfoToNull()
         {
-            adalCache.BeforeAccess(new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
+            adalCache.BeforeAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = adalCache
             });
@@ -375,7 +374,7 @@ namespace Test.MSAL.NET.Integration
                 adalResultWrapper.RawClientInfo = null;
             }
             adalCache.HasStateChanged = true;
-            adalCache.AfterAccess(new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
+            adalCache.AfterAccess(new global::Microsoft.IdentityModel.Clients.ActiveDirectory.TokenCacheNotificationArgs
             {
                 TokenCache = adalCache
             });
@@ -386,14 +385,14 @@ namespace Test.MSAL.NET.Integration
         public async Task UnifiedCache_Adalv3ToMsal2MigrationIntegrationTestAsync()
         {
             // acquire adal tokens using adalV4
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource2, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
             // simulate adalV3 token cache state by setting client info in adal cache entities to null 
@@ -430,9 +429,9 @@ namespace Test.MSAL.NET.Integration
         public async Task UnifiedCache_Adalv3ToAdalV4ToMsal2MigrationIntegrationTestAsync()
         {
             // acquire adal tokens using adalV4
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
             // simulate adalV3 token cache state by setting client info in adal cache entities to null 
@@ -450,9 +449,9 @@ namespace Test.MSAL.NET.Integration
             Assert.AreEqual(1, adalCache.ReadItems().Count());
 
             // acquire token to different resource
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource2, ClientId,
-                new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+                new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
             ValidateAdalAuthResult();
 
             // At this poing Adal cache contains RTs for the same account in diff format v3 and v4
@@ -491,9 +490,9 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UnifiedCache_IntegrationTests")]
         public async Task UnifiedCache_Adal_ClearCacheAsync()
         {
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-            new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+            new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
 
             Assert.IsTrue(adalCache.ReadItems().Count() > 0);
             var accounts = await msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
@@ -509,9 +508,9 @@ namespace Test.MSAL.NET.Integration
         [TestCategory("UnifiedCache_IntegrationTests")]
         public async Task UnifiedCache_Msal_ClearCacheAsync()
         {
-            adalAuthResult = await adal::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
+            adalAuthResult = await global::Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationContextIntegratedAuthExtensions.
                 AcquireTokenAsync(adalContext, AdalResource1, ClientId,
-            new adal::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
+            new global::Microsoft.IdentityModel.Clients.ActiveDirectory.UserPasswordCredential(user.Upn, securePassword)).ConfigureAwait(false);
 
             Assert.IsTrue(adalCache.ReadItems().Count() > 0);
             var accounts = await msalPublicClient.GetAccountsAsync().ConfigureAwait(false);
