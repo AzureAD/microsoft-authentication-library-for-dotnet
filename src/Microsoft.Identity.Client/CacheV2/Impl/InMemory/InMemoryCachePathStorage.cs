@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.CacheV2.Impl.InMemory
                     }
 
                     keyToPrepend = key;
-                    if (!keyToPrepend.EndsWith("/"))
+                    if (!keyToPrepend.EndsWith("/", StringComparison.Ordinal))
                     {
                         keyToPrepend += "/";
                     }
