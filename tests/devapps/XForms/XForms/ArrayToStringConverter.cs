@@ -29,8 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core.Helpers;
+using Microsoft.Identity.Client.Utils;
 using Xamarin.Forms;
 
 namespace XForms

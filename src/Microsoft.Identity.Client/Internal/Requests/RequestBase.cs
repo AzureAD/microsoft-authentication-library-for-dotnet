@@ -34,11 +34,11 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Helpers;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -258,7 +258,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
         {
-            if (fromServer == null || AuthenticationRequestParameters?.Account?.HomeAccountId == null) return;
+            if (fromServer == null || AuthenticationRequestParameters?.Account?.HomeAccountId == null)
+            {
+                return;
+            }
 
             if (AuthenticationRequestParameters.Authority.AuthorityType == Instance.AuthorityType.B2C &&
                 fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,

@@ -1,22 +1,16 @@
-﻿using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace XForms
 {
-	[XamlCompilation(XamlCompilationOptions.Compile)]
-	public partial class IdTokenCacheItemDetails : ContentPage
-	{
-        internal IdTokenCacheItemDetails (MsalIdTokenCacheItem msalIdTokenCacheItem)
-		{
-			InitializeComponent ();
+    [XamlCompilation(XamlCompilationOptions.Compile)]
+    public partial class IdTokenCacheItemDetails : ContentPage
+    {
+        internal IdTokenCacheItemDetails(MsalIdTokenCacheItem msalIdTokenCacheItem)
+        {
+            InitializeComponent();
 
             credentialTypeLabel.Text = msalIdTokenCacheItem.CredentialType;
 
@@ -40,8 +34,6 @@ namespace XForms
             //userDisplayableIdLabel.Text = MsalAccountCacheItem.PreferredUsername;
             //userNameLabel.Text = MsalAccountCacheItem.Name;
             //userIdentityProviderLabel.Text = MsalAccountCacheItem.IdentityProvider;
-
-
         }
-	}
+    }
 }

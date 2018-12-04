@@ -23,8 +23,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Lab
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.SideBySide", "tests\Microsoft.Identity.Test.SideBySide\Microsoft.Identity.Test.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{6F170F63-0A04-4E2C-9261-837C5FDF349B}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{528C5488-C0D8-45C3-BEAC-3E52C22631C9}"
 EndProject
 Global
@@ -71,7 +69,6 @@ Global
 		{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{E22918A8-8FE6-47D2-B65E-34436918C5D7} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
-		{528C5488-C0D8-45C3-BEAC-3E52C22631C9} = {6F170F63-0A04-4E2C-9261-837C5FDF349B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C88EF77-AF03-4F82-B666-1831DABAA119}

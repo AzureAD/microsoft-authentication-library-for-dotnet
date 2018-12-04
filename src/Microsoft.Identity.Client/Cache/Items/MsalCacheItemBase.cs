@@ -29,7 +29,6 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Helpers;
 
 namespace Microsoft.Identity.Client.Cache
 {

@@ -32,7 +32,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.WsTrust
 {

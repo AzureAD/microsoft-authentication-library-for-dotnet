@@ -25,16 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Xamarin.UITest;
-using Xamarin.UITest.Queries;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     /// <summary>
     /// Initializes the app object that represents the main gateway to interact with the app on the device
     /// </summary>
-	public class AppFactory
+	public static class AppFactory
 	{
         public static IApp StartApp(Platform platform, string targetApp)
         {

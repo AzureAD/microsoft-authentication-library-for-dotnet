@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
 
 namespace DesktopTestApp
 {

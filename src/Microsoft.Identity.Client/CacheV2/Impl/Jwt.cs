@@ -27,7 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.CacheV2.Impl

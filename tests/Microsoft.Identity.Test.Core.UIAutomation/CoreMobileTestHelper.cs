@@ -25,14 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using NUnit.Framework;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
-using Test.Microsoft.Identity.LabInfrastructure;
-using Xamarin.UITest.Queries;
+using Microsoft.Identity.Test.LabInfrastructure;
+using NUnit.Framework;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     public class CoreMobileTestHelper
     {
@@ -52,13 +50,13 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
 
-        public void PerformSignInFlowWithoutUI(ITestController controller)
+        public static void PerformSignInFlowWithoutUI(ITestController controller)
         {
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenID);
         }
 
-        public UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
+        public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
         {
             UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds();
             userInformationFieldIds.DetermineFieldIds(user);
@@ -86,7 +84,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             });
         }
 
-        private void RetryVerificationHelper(Action verification)
+        private static void RetryVerificationHelper(Action verification)
         {
             //There may be a delay in the amount of time it takes for an authentication request to complete.
             //Thus this method will check the result once a second for 20 seconds.
@@ -102,7 +100,9 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
                 catch (ResultVerificationFailureException ex)
                 {
                     if (attempts == CoreUiTestConstants.MaximumResultCheckRetryAttempts)
+                    {
                         Assert.Fail("Could not Verify test result");
+                    }
 
                     switch (ex.Error)
                     {

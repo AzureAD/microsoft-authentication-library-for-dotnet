@@ -34,7 +34,6 @@ using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Helpers;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 

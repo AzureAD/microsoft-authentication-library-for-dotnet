@@ -31,7 +31,7 @@ using CoreFoundation;
 using Foundation;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 using UIKit;
 using WebKit;
 

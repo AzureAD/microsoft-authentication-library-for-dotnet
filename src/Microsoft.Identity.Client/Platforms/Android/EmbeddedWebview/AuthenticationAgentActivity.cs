@@ -35,7 +35,7 @@ using Android.Webkit;
 using Android.Widget;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 {

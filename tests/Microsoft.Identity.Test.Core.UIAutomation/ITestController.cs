@@ -26,11 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Test.Microsoft.Identity.LabInfrastructure;
 using Xamarin.UITest;
 using Xamarin.UITest.Queries;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     public interface ITestController
     {

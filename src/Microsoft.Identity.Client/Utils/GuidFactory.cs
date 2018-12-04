@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client.Helpers
+namespace Microsoft.Identity.Client.Utils
 {
     internal class GuidFactory : IGuidFactory
     {

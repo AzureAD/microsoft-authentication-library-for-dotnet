@@ -62,6 +62,6 @@
   </Target>
 
 	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 </Project>

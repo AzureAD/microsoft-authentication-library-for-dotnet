@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using Test.Microsoft.Identity.LabInfrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     public class UserInformationFieldIds
     {

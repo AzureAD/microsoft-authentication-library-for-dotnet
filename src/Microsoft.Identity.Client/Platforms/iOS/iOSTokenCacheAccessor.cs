@@ -30,10 +30,10 @@ using System.Collections.Generic;
 using Security;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Helpers;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {

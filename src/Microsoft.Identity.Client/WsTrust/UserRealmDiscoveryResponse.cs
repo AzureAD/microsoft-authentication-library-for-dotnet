@@ -29,7 +29,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Helpers;
 using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.Realm

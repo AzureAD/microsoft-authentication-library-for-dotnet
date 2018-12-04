@@ -31,7 +31,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks

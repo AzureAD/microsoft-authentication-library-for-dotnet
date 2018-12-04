@@ -29,8 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Client.Helpers;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {

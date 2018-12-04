@@ -29,7 +29,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
-namespace Microsoft.Identity.Client.Helpers
+namespace Microsoft.Identity.Client.Utils
 {
     internal class StringWriterWithEncoding : StringWriter
     {

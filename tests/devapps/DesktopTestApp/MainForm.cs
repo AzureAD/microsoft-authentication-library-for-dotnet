@@ -36,10 +36,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Core;
-using Microsoft.Identity.Core.Cache;
-using Test.Microsoft.Identity.LabInfrastructure;
+using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace DesktopTestApp
 {

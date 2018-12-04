@@ -25,10 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Core.Cache;
-using Microsoft.Identity.Core.Helpers;
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Utils;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 

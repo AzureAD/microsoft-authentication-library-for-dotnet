@@ -29,7 +29,7 @@ using Microsoft.Identity.Client;
 using System;
 using System.Runtime.Serialization;
 using System.Text;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Jwt
 {

@@ -27,7 +27,7 @@
 
 using System.Reflection;
 
-namespace Microsoft.Identity.Client.Helpers
+namespace Microsoft.Identity.Client.Utils
 {
     internal static class AssemblyUtils
     {
