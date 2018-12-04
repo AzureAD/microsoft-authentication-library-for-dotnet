@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Text;
 using Microsoft.Identity.Json.Linq;
 
@@ -229,18 +230,18 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
         {
             var sb = new StringBuilder();
             sb.Append("Credential(\n");
-            sb.Append($"  HomeAccountId: {HomeAccountId}\n");
-            sb.Append($"  Environment: {Environment}\n");
-            sb.Append($"  Realm: {Realm}\n");
-            sb.Append($"  CredentialType: {CredentialType}\n");
-            sb.Append($"  ClientId: {ClientId}\n");
-            sb.Append($"  FamilyId: {FamilyId}\n");
-            sb.Append($"  Target: {Target}\n");
-            sb.Append($"  CachedAt: {CachedAt}\n");
-            sb.Append($"  ExpiresOn: {ExpiresOn}\n");
-            sb.Append($"  ExtendedExpiresOn: {ExtendedExpiresOn}\n");
-            sb.Append($"  Secret: {Secret}\n");
-            sb.Append($"  AdditionalFieldsJson: {AdditionalFieldsJson}\n");
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  HomeAccountId: {0}\n", HomeAccountId));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  Environment: {0}\n", Environment));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  Realm: {0}\n", Realm));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  CredentialType: {0}\n", CredentialType));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  ClientId: {0}\n", ClientId));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  FamilyId: {0}\n", FamilyId));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  Target: {0}\n", Target));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  CachedAt: {0}\n", CachedAt));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  ExpiresOn: {0}\n", ExpiresOn));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  ExtendedExpiresOn: {0}\n", ExtendedExpiresOn));
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  Secret: {0}\n", Secret);
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  AdditionalFieldsJson: {0}\n", AdditionalFieldsJson));
             sb.Append(")");
             return sb.ToString();
         }

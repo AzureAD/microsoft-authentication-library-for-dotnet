@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Client.CacheV2.Impl
                 throw new ArgumentException("target field missing from access token", nameof(tokenToAdd));
             }
 
-            string requestedTarget = tokenToAdd.GetValue(StorageJsonKeys.Target).ToObject<string>();
+            string requestedTarget = tokenToAdd.GetValue(StorageJsonKeys.Target, StringComparison.Ordinal).ToObject<string>();
             HashSet<string> requestedScopes = SplitAndNormalizeScopes(requestedTarget);
 
             if (!requestedScopes.Any())

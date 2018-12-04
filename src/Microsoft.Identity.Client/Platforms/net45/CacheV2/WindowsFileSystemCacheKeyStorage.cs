@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client.Platforms.net45.CacheV2
             if (IsDirectory(fullPath))
             {
                 startingPath = startingPath.Trim();
-                if (startingPath.EndsWith("/") || startingPath.EndsWith("\\"))
+                if (startingPath.EndsWith("/", StringComparison.Ordinal) || startingPath.EndsWith("\\", StringComparison.Ordinal))
                 {
                     startingPath = startingPath.Substring(0, fullPath.Length - 1);
                 }
