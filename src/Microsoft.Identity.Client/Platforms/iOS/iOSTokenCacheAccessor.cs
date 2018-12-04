@@ -27,15 +27,15 @@
 
 using System;
 using System.Collections.Generic;
-using Security;
+using System.Globalization;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
-using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
+using Security;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class iOSTokenCacheAccessor : ITokenCacheAccessor
     {
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client
                 return match.AccessGroup.Split('.')[0];
             }
 
-            throw CoreExceptionFactory.Instance.GetClientException(
+            throw MsalExceptionFactory.GetClientException(
                 CoreErrorCodes.CannotAccessPublisherKeyChain,
                 CoreErrorMessages.CannotAccessPublisherKeyChain);
         }
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Client
 
             if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                 CoreErrorCodes.MissingEntitlements,
                 string.Format(
                     CultureInfo.InvariantCulture,

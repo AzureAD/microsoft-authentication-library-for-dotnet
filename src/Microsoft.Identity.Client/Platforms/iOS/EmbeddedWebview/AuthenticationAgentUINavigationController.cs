@@ -28,7 +28,7 @@
 using CoreGraphics;
 using UIKit;
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     [Foundation.Register("UniversalView")]
     internal class UniversalView : UIView

@@ -28,7 +28,7 @@
 using System;
 using System.ComponentModel;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     /// <summary>
     /// </summary>

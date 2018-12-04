@@ -37,7 +37,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Guid = System.Guid;
 
@@ -450,7 +449,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         }).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }
-                catch (TestServiceException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.AreEqual(CoreErrorCodes.TenantDiscoveryFailedError, exc.ErrorCode);
                 }

@@ -28,15 +28,14 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Windows.Security.Authentication.Web;
-using Windows.Networking.Connectivity;
 using Windows.ApplicationModel.Core;
+using Windows.Networking.Connectivity;
+using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal class WebUI : IWebUI
     {

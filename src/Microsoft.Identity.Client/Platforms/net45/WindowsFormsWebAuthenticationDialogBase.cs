@@ -33,11 +33,10 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     /// <summary>
     /// </summary>

@@ -27,23 +27,20 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
     internal class Netstandard13PlatformProxy : IPlatformProxy
     {
-        private readonly bool _isMsal;
-
-        public Netstandard13PlatformProxy(bool isMsal)
-        {
-            _isMsal = isMsal;
-        }
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         /// Get the user logged in
@@ -67,15 +64,13 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string clientId)
         {
-            return _isMsal ?
-             Constants.DefaultRedirectUri :
-             null; // Adal does not specify a default
+            return Constants.DefaultRedirectUri;
         }
 
         /// <inheritdoc />
         public string GetProductName()
         {
-            return _isMsal ? "MSAL.CoreCLR" : "PCL.CoreCLR";
+            return "MSAL.CoreCLR";
         }
 
         public bool IsDomainJoined()
@@ -147,5 +142,20 @@ namespace Microsoft.Identity.Client
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new NetStandard13CryptographyManager();
+
+        /// <inheritdoc />
+        public IPlatformLogger PlatformLogger => _platformLogger.Value;
+
+        /// <inheritdoc />
+        public IWebUIFactory GetWebUiFactory()
+        {
+            return _overloadWebUiFactory ?? new WebUIFactory();
+        }
+
+        /// <inheritdoc />
+        public void SetWebUiFactory(IWebUIFactory webUiFactory)
+        {
+            _overloadWebUiFactory = webUiFactory;
+        }
     }
 }

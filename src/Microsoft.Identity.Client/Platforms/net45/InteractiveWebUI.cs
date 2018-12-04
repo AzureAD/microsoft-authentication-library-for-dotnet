@@ -25,10 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class InteractiveWebUI : WebUI
     {

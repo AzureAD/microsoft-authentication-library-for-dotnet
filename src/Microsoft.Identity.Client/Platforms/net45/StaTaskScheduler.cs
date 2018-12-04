@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -35,7 +34,7 @@ using System.Threading.Tasks;
 
 // Moving the code to the library's main namespace
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     // This IDisposable class doe not need to implement Dispose method in standard way, because it is sealed. 
     // If it ever needs to become inheritable, it should follow the standard pattern as desribed in http://msdn.microsoft.com/en-us/library/fs2xkftw(v=vs.110).aspx.
@@ -99,7 +98,10 @@ namespace Microsoft.Identity.Client
                 _tasks.CompleteAdding();
 
                 // Wait for all threads to finish processing tasks
-                foreach (var thread in _threads) thread.Join();
+                foreach (var thread in _threads)
+                {
+                    thread.Join();
+                }
 
                 // Cleanup
                 _tasks.Dispose();

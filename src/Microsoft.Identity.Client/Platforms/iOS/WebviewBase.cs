@@ -26,13 +26,14 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using SafariServices;
-using Foundation;
 using AuthenticationServices;
+using Foundation;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI;
+using SafariServices;
 using UIKit;
 
-namespace Microsoft.Identity.Client.UI
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal abstract class WebviewBase : NSObject, IWebUI, ISFSafariViewControllerDelegate
     {

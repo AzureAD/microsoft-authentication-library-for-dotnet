@@ -29,7 +29,7 @@ using System;
 using System.Threading.Tasks;
 using Windows.UI.Core;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal static class DispatcherTaskExtensions
     {

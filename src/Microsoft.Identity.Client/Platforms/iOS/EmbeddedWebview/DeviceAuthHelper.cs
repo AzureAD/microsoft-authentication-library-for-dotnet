@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     internal class DeviceAuthHelper
     {

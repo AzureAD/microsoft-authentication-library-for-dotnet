@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class BrokerConstants
     {

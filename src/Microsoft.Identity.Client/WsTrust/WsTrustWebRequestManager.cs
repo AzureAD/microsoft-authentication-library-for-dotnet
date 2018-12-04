@@ -43,12 +43,10 @@ namespace Microsoft.Identity.Client.WsTrust
     internal class WsTrustWebRequestManager : IWsTrustWebRequestManager
     {
         private readonly IHttpManager _httpManager;
-        private readonly ICoreExceptionFactory _exceptionFactory;
 
-        public WsTrustWebRequestManager(IHttpManager httpManager, ICoreExceptionFactory exceptionFactory)
+        public WsTrustWebRequestManager(IHttpManager httpManager)
         {
             _httpManager = httpManager;
-            _exceptionFactory = exceptionFactory;
         }
 
         /// <inheritdoc/>
@@ -58,7 +56,7 @@ namespace Microsoft.Identity.Client.WsTrust
             HttpResponse httpResponse = await _httpManager.SendGetAsync(uri.Uri, null, requestContext).ConfigureAwait(false);
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw _exceptionFactory.GetServiceException(
+                throw MsalExceptionFactory.GetServiceException(
                     CoreErrorCodes.AccessingWsMetadataExchangeFailed,
                     string.Format(CultureInfo.CurrentCulture,
                         CoreErrorMessages.HttpRequestUnsuccessful,
@@ -109,7 +107,7 @@ namespace Microsoft.Identity.Client.WsTrust
                     errorMessage = resp.Body;
                 }
 
-                throw _exceptionFactory.GetServiceException(
+                throw MsalExceptionFactory.GetServiceException(
                     CoreErrorCodes.FederatedServiceReturnedError,
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -130,7 +128,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (System.Xml.XmlException ex)
             {
-                throw _exceptionFactory.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.ParsingWsTrustResponseFailed, CoreErrorCodes.ParsingWsTrustResponseFailed, ex);
             }
         }

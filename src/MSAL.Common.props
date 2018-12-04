@@ -10,7 +10,6 @@
     <!-- The MSAL.snk has both private and public keys -->
     <DelaySign>false</DelaySign>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>$(DefineConstants);IS_MSAL</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">
@@ -104,7 +103,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <Compile Include="$(PathToMsalSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Platforms\netstandard1.3" />
+    <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
     <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventSource" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />

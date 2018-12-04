@@ -45,11 +45,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             set;
         } = new Queue<HttpMessageHandler>();
 
-        public MockHttpManager(ICoreExceptionFactory coreExceptionFactory = null)
-            : base(coreExceptionFactory)
-        {
-        }
-
         /// <inheritdoc />
         public void Dispose()
         {

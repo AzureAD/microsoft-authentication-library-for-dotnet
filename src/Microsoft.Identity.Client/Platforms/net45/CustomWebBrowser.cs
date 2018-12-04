@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal partial class CustomWebBrowser : WebBrowser
     {

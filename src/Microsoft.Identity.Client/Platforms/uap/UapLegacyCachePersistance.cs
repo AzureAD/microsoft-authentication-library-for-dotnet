@@ -28,9 +28,10 @@
 using System;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal class UapLegacyCachePersistence : ILegacyCachePersistence
     {

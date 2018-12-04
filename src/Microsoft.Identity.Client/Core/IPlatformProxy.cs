@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -70,5 +71,10 @@ namespace Microsoft.Identity.Client.Core
         ITokenCacheAccessor CreateTokenCacheAccessor();
 
         ICryptographyManager CryptographyManager { get; }
+
+        IPlatformLogger PlatformLogger { get; }
+
+        IWebUIFactory GetWebUiFactory();
+        void SetWebUiFactory(IWebUIFactory webUiFactory);
     }
 }

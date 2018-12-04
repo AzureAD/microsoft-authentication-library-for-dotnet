@@ -33,8 +33,11 @@ namespace Microsoft.Identity.Client.Internal
 {
     internal class MsalLogger : CoreLoggerBase
     {
+        private readonly IPlatformLogger _platformLogger;
+
         internal MsalLogger(Guid correlationId, string component) : base(correlationId)
         {
+            _platformLogger = PlatformProxyFactory.GetPlatformProxy().PlatformLogger;
             Component = string.Empty;
             if (!string.IsNullOrEmpty(component))
             {
@@ -160,16 +163,16 @@ namespace Microsoft.Identity.Client.Internal
                 switch (Logger.Level)
                 {
                     case LogLevel.Error:
-                        PlatformLogger.Error(log);
+                        _platformLogger.Error(log);
                         break;
                     case LogLevel.Warning:
-                        PlatformLogger.Warning(log);
+                        _platformLogger.Warning(log);
                         break;
                     case LogLevel.Info:
-                        PlatformLogger.Information(log);
+                        _platformLogger.Information(log);
                         break;
                     case LogLevel.Verbose:
-                        PlatformLogger.Verbose(log);
+                        _platformLogger.Verbose(log);
                         break;
                 }
             }

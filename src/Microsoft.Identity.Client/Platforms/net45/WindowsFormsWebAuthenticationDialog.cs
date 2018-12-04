@@ -29,10 +29,9 @@ using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     /// <summary>
     /// The browser dialog used for user authentication
@@ -42,8 +41,8 @@ namespace Microsoft.Identity.Client.Internal.UI
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
-        private int statusCode;
-        private bool zoomed;
+        private int _statusCode;
+        private bool _zoomed;
 
         /// <summary>
         /// Default constructor
@@ -60,8 +59,8 @@ namespace Microsoft.Identity.Client.Internal.UI
         /// </summary>
         protected override void OnAuthenticate()
         {
-            zoomed = false;
-            statusCode = 0;
+            _zoomed = false;
+            _statusCode = 0;
             ShowBrowser();
 
             base.OnAuthenticate();
@@ -82,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.UI
                     Result = new AuthorizationResult(AuthorizationStatus.UserCancel, null);
                     break;
                 default:
-                    throw CreateExceptionForAuthenticationUiFailed(statusCode);
+                    throw CreateExceptionForAuthenticationUiFailed(_statusCode);
             }
         }
 
@@ -105,21 +104,21 @@ namespace Microsoft.Identity.Client.Internal.UI
         /// </summary>
         protected override void OnNavigationCanceled(int inputStatusCode)
         {
-            statusCode = inputStatusCode;
+            _statusCode = inputStatusCode;
             DialogResult = (inputStatusCode == 0) ? DialogResult.Cancel : DialogResult.Abort;
         }
 
         private void SetBrowserZoom()
         {
             int windowsZoomPercent = DpiHelper.ZoomPercent;
-            if (NativeWrapper.NativeMethods.IsProcessDPIAware() && 100 != windowsZoomPercent && !zoomed)
+            if (NativeWrapper.NativeMethods.IsProcessDPIAware() && 100 != windowsZoomPercent && !_zoomed)
             {
                 // There is a bug in some versions of the IE browser control that causes it to 
                 // ignore scaling unless it is changed.
                 SetBrowserControlZoom(windowsZoomPercent - 1);
                 SetBrowserControlZoom(windowsZoomPercent);
 
-                zoomed = true;
+                _zoomed = true;
             }
         }
 

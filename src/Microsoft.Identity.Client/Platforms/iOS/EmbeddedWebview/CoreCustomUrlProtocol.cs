@@ -25,14 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-
 using System;
 using Foundation;
+
 #if MAC
 using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
 #endif
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     internal class CoreCustomUrlProtocol : NSUrlProtocol
     {

@@ -26,35 +26,36 @@
 //------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.EventsSource;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal class PlatformLogger
+    internal class EventSourcePlatformLogger : IPlatformLogger
     {
-        static PlatformLogger()
+        static EventSourcePlatformLogger()
         {
             MsalEventSource = new MsalEventSource();
         }
 
         internal static MsalEventSource MsalEventSource { get; }
 
-        public static void Error(string message)
+        public void Error(string message)
         {
             MsalEventSource.Error(message);
         }
 
-        public static void Warning(string message)
+        public void Warning(string message)
         {
             MsalEventSource.Error(message);
         }
 
-        public static void Verbose(string message)
+        public void Verbose(string message)
         {
             MsalEventSource.Error(message);
         }
 
-        public static void Information(string message)
+        public void Information(string message)
         {
             MsalEventSource.Error(message);
         }

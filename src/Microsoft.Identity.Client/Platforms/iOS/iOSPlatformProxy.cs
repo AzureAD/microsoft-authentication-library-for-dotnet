@@ -28,13 +28,13 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Cache;
-using UIKit;
 using Foundation;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.UI;
+using UIKit;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     /// <summary>
     ///     Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
@@ -42,12 +42,8 @@ namespace Microsoft.Identity.Client
     internal class iOSPlatformProxy : IPlatformProxy
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
-        private readonly bool _isMsal;
-
-        public iOSPlatformProxy(bool isMsal)
-        {
-            _isMsal = isMsal;
-        }
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new IosPlatformLogger());
+        private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         ///     Get the user logged
@@ -97,17 +93,12 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string clientId)
         {
-            return _isMsal ?
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    IosDefaultRedirectUriTemplate,
-                    clientId)
-                : null; // ADAL does not provide a default
+            return string.Format(CultureInfo.InvariantCulture, IosDefaultRedirectUriTemplate, clientId);
         }
 
         public string GetProductName()
         {
-            return _isMsal ? "MSAL.Xamarin.iOS" : "PCL.iOS";
+            return "MSAL.Xamarin.iOS";
         }
 
         /// <summary>
@@ -149,5 +140,20 @@ namespace Microsoft.Identity.Client
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new iOSCryptographyManager();
+
+        /// <inheritdoc />
+        public IPlatformLogger PlatformLogger => _platformLogger.Value;
+
+        /// <inheritdoc />
+        public IWebUIFactory GetWebUiFactory()
+        {
+            return _overloadWebUiFactory ?? new IosWebUIFactory();
+        }
+
+        /// <inheritdoc />
+        public void SetWebUiFactory(IWebUIFactory webUiFactory)
+        {
+            _overloadWebUiFactory = webUiFactory;
+        }
     }
 }

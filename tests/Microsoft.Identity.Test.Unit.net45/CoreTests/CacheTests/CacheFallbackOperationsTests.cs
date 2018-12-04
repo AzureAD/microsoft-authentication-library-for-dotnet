@@ -33,7 +33,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -49,7 +48,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
-            CoreExceptionFactory.Instance = null;
             CoreLoggerBase.Default = Substitute.For<CoreLoggerBase>();
 
             // Use the net45 accessor for tests
@@ -290,7 +288,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             // Arrange
             _legacyCachePersistence.ThrowOnWrite = true;
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
 
             var rtItem = new MsalRefreshTokenCacheItem(
                 CoreTestConstants.ProductionPrefNetworkEnvironment,

@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Cache
+using Microsoft.Identity.Client.Cache;
+
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class NetDesktopLegacyCachePersistence : ILegacyCachePersistence
     {

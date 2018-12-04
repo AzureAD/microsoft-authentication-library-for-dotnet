@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 }
                 catch (ActivityNotFoundException ex)
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                            CoreErrorCodes.AndroidActivityNotFound,
                            CoreErrorMessages.AndroidActivityNotFound, ex);
                 }

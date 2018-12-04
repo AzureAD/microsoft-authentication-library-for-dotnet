@@ -27,32 +27,28 @@
 
 using System;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Text;
-using System.Security.Principal;
-using Microsoft.Identity.Client.Platforms;
-using Microsoft.Identity.Client.Cache;
-using System.Reflection;
-using System.Net.NetworkInformation;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     /// <summary>
     /// Platform / OS specific logic.
     /// </summary>
     internal class NetDesktopPlatformProxy : IPlatformProxy
     {
-        private readonly bool _isMsal;
-
-        public NetDesktopPlatformProxy(bool isMsal)
-        {
-            _isMsal = isMsal;
-        }
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         /// Get the user logged in to Windows or throws
@@ -70,7 +66,7 @@ namespace Microsoft.Identity.Client
                 WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
                 if (userNameSize == 0)
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.GetUserNameFailed,
                         CoreErrorMessages.GetUserNameFailed,
                         new Win32Exception(Marshal.GetLastWin32Error()));
@@ -79,7 +75,7 @@ namespace Microsoft.Identity.Client
                 StringBuilder sb = new StringBuilder((int)userNameSize);
                 if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                        CoreErrorCodes.GetUserNameFailed,
                        CoreErrorMessages.GetUserNameFailed,
                        new Win32Exception(Marshal.GetLastWin32Error()));
@@ -188,15 +184,13 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string clientId)
         {
-            return _isMsal ?
-              Constants.DefaultRedirectUri :
-              null; // Adal does not specify a default
+            return Constants.DefaultRedirectUri;
         }
 
         /// <inheritdoc />
         public string GetProductName()
         {
-            return _isMsal ? "MSAL.Desktop" : "PCL.Desktop";
+            return "MSAL.Desktop";
         }
 
         /// <summary>
@@ -244,5 +238,20 @@ namespace Microsoft.Identity.Client
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new NetDesktopCryptographyManager();
+
+        /// <inheritdoc />
+        public IPlatformLogger PlatformLogger => _platformLogger.Value;
+
+        /// <inheritdoc />
+        public IWebUIFactory GetWebUiFactory()
+        {
+            return _overloadWebUiFactory ?? new WebUIFactory();
+        }
+
+        /// <inheritdoc />
+        public void SetWebUiFactory(IWebUIFactory webUiFactory)
+        {
+            _overloadWebUiFactory = webUiFactory;
+        }
     }
 }

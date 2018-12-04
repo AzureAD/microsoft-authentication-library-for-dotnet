@@ -25,16 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
-{
-    internal static class MsalErrorIOSEx
-    {
-        public const string BrokerApplicationRequired = "broker_application_required";
-    }
+using System;
+using Microsoft.Identity.Client.Core;
 
-    internal static class MsalErrorMessageIOSEx
+namespace Microsoft.Identity.Client.Platforms.iOS
+{
+    internal class IosPlatformLogger : IPlatformLogger
     {
-        public const string BrokerApplicationRequired =
-            "Broker application must be installed to continue authentication";
+        // NOTE: Console.WriteLine writes to NSLog by default
+
+        public void Error(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void Warning(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void Verbose(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void Information(string message)
+        {
+            Console.WriteLine(message);
+        }
     }
 }

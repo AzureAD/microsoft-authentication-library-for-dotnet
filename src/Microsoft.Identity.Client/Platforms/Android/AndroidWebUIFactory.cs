@@ -22,33 +22,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using System;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
+using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal class PlatformLogger
+    [global::Android.Runtime.Preserve(AllMembers = true)]
+    internal class AndroidWebUIFactory : IWebUIFactory
     {
-        public static void Error(string message)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
-        }
+            if (coreUIParent.UseEmbeddedWebview)
+            {
+                return new EmbeddedWebUI(coreUIParent)
+                {
+                    RequestContext = requestContext
+                };
+            }
 
-        public static void Warning(string message)
-        {
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
-        }
-
-        public static void Verbose(string message)
-        {
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
-        }
-
-        public static void Information(string message)
-        {
-            Console.WriteLine(message); //Console.writeline writes to NSLog by default
+            return new SystemWebUI(coreUIParent)
+            {
+                RequestContext = requestContext
+            };
         }
     }
 }

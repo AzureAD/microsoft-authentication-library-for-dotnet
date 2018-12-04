@@ -26,27 +26,28 @@
 //------------------------------------------------------------------------------
 
 using Android.Util;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal class PlatformLogger
+    internal class AndroidPlatformLogger : IPlatformLogger
     {
-        public static void Error(string errorMessage)
+        public void Error(string errorMessage)
         {
             Log.Error(null, errorMessage);
         }
 
-        public static void Warning(string message)
+        public void Warning(string message)
         {
             Log.Warn(null, message);
         }
 
-        public static void Verbose(string message)
+        public void Verbose(string message)
         {
             Log.Verbose(null, message);
         }
 
-        public static void Information(string message)
+        public void Information(string message)
         {
             Log.Info(null, message);
         }

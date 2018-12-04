@@ -25,14 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using Foundation;
 using System;
+using Foundation;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI;
 using UIKit;
 using WebKit;
-using static Microsoft.Identity.Client.UI.EmbeddedWebview.WKWebNavigationDelegate;
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     [Foundation.Register("AuthenticationAgentUIViewController")]
     internal class AuthenticationAgentUIViewController : UIViewController
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.UI.EmbeddedWebview
 
             wkWebView = new WKWebView(View.Bounds, wkconfg)
             {
-                UIDelegate = new WKWebViewUIDelegate(this),
+                UIDelegate = new WKWebNavigationDelegate.WKWebViewUIDelegate(this),
                 NavigationDelegate = new WKWebNavigationDelegate(this),
                 AutoresizingMask = UIViewAutoresizing.FlexibleWidth | UIViewAutoresizing.FlexibleHeight
             };

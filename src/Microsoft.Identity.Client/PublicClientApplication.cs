@@ -36,7 +36,6 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client
 {
@@ -492,7 +491,7 @@ namespace Microsoft.Identity.Client
 #endif
 #endif
 
-            return PlatformPlugin.GetWebUiFactory().CreateAuthenticationDialog(parent.CoreUIParent, requestContext);
+            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(parent.CoreUIParent, requestContext);
         }
 
         private void GuardNetCore()

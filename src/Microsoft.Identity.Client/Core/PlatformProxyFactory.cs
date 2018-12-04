@@ -38,35 +38,24 @@ namespace Microsoft.Identity.Client.Core
         private static readonly Lazy<IPlatformProxy> PlatformProxyLazy = new Lazy<IPlatformProxy>(
             () =>
 #if NET_CORE
-            new NetCorePlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy()
 #elif ANDROID
-            new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy()
 #elif iOS
-            new iOSPlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy()
 #elif WINDOWS_APP
-            new UapPlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy()
 #elif FACADE
             new NetStandard11PlatformProxy(IsMsal())
 #elif NETSTANDARD1_3
-            new Netstandard13PlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy()
 #elif DESKTOP
-            new NetDesktopPlatformProxy(IsMsal())
+            new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy()
 #endif
         );
 
         private PlatformProxyFactory()
         {
-        }
-
-        private static bool IsMsal()
-        {
-#if IS_ADAL
-            return false;
-#elif IS_MSAL
-            return true;
-#else
-            throw new InvalidOperationException("Neither IS_ADAL nor IS_MSAL are set.");
-#endif
         }
 
         /// <summary>

@@ -26,20 +26,18 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
-using Microsoft.Identity.Client.Internal;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
-    internal class CryptographyHelper
+    internal class WebUIFactory : IWebUIFactory
     {
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
-            // Used by Confidential Client, which is hidden on iOS
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException("Possible Cause: If you are using an XForms app, or generally a netstandard assembly, " +
+                "make sure you add a reference to Microsoft.Identity.Client.dll from each platform assembly " +
+                "(e.g. UWP, Android, iOS), not just from the common netstandard assembly");
         }
     }
 }

@@ -26,17 +26,19 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.UI.SystemWebview;
+using Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview;
+using Microsoft.Identity.Client.Platforms.iOS.SystemWebview;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.UI
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class IosWebUIFactory : IWebUIFactory
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
             if (coreUIParent.UseEmbeddedWebview)
             {
-                return new EmbeddedWebview.EmbeddedWebUI()
+                return new EmbeddedWebUI()
                 {
                     RequestContext = requestContext,
                     CoreUIParent = coreUIParent

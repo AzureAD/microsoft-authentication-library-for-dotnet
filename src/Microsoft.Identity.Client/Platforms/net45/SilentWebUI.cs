@@ -28,12 +28,9 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class SilentWebUI : WebUI, IDisposable
     {

@@ -27,11 +27,12 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.netcore
 {
     internal class NetCoreCryptographyManager : ICryptographyManager
     {
@@ -82,6 +83,15 @@ namespace Microsoft.Identity.Client
         public byte[] Decrypt(byte[] encryptedMessage)
         {
             throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        {
+            using (var key = certificate.GetRSAPrivateKey())
+            {
+                return key.SignData(Encoding.UTF8.GetBytes(message), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+            }
         }
     }
 }

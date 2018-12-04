@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             if (_accessTokenSharedPreference == null || _refreshTokenSharedPreference == null
                 || _idTokenSharedPreference == null || _accountSharedPreference == null)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.FailedToCreateSharedPreference,
                     "Fail to create SharedPreference");
             }

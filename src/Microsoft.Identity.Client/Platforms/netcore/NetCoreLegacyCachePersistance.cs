@@ -25,9 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
+using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Platforms.netcore
 {
     internal class NetCoreLegacyCachePersistence : ILegacyCachePersistence
     {
