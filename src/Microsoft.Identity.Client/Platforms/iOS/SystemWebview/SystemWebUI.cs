@@ -25,23 +25,24 @@
 //
 //------------------------------------------------------------------------------
 
-using Foundation;
 using System;
-using System.Threading.Tasks;
-using SafariServices;
-using UIKit;
 using System.Threading;
+using System.Threading.Tasks;
+using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.UI;
+using SafariServices;
+using UIKit;
 
-namespace Microsoft.Identity.Client.UI.SystemWebview
+namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 {
     internal class SystemWebUI : WebviewBase, IDisposable
     {
         public RequestContext RequestContext { get; set; }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
             viewController = null;

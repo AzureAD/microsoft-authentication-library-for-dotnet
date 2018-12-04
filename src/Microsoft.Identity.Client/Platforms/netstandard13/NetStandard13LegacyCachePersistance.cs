@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -18,38 +18,29 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
-    internal static class PlatformPlugin
+    internal class NetStandard13LegacyCachePersistence : ILegacyCachePersistence
     {
-        public static IWebUIFactory GetWebUiFactory()
-        {
-            if (_overloadWebUiFactory != null)
-            {
-                return _overloadWebUiFactory;
-            }
+        private byte[] data;
 
-#if ANDROID || iOS
-            return new Microsoft.Identity.Client.UI.WebUIFactory();
-#else
-            return new UI.WebUIFactory();
-#endif
+        byte[] ILegacyCachePersistence.LoadCache()
+        {
+            return data;
         }
 
-        private static IWebUIFactory _overloadWebUiFactory = null;
-        
-        public static void SetWebUiFactory(IWebUIFactory webUiFactory)
+        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
         {
-            _overloadWebUiFactory = webUiFactory;
+            data = serializedCache;
         }
     }
 }

@@ -10,7 +10,6 @@
     <!-- The MSAL.snk has both private and public keys -->
     <DelaySign>false</DelaySign>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-    <DefineConstants>$(DefineConstants);IS_MSAL</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Label="NuGet and AssemblyInfo metadata">

@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -39,13 +40,13 @@ namespace Microsoft.Identity.Client
     /// is itself used in the constructor of <see cref="ConfidentialClientApplication"/> to pass to Azure AD a shared secret (registered in the 
     /// Azure AD application)
     /// </summary>
-    /// <seealso cref="ClientCredential.ClientCredential(ClientAssertionCertificate)"/> for the constructor of <seealso cref="ClientCredential"/> 
-    /// with a certificate, and <seealso cref="ConfidentialClientApplication.ConfidentialClientApplication(string, string, ClientCredential, TokenCache, TokenCache)"/>
+    /// <seealso cref="ClientCredential"/> for the constructor of <seealso cref="ClientCredential"/> 
+    /// with a certificate, and <seealso cref="ConfidentialClientApplication"/>
     /// <remarks>To understand the difference between public client applications and confidential client applications, see https://aka.ms/msal-net-client-applications</remarks>
     public sealed class ClientAssertionCertificate
     {
         /// <summary>
-        /// Constructor to create certificate information used in <see cref="ClientCredential.ClientCredential(ClientAssertionCertificate)"/>
+        /// Constructor to create certificate information used in <see cref="ClientCredential"/>
         /// to instantiate a <see cref="ClientCredential"/> used in the constructors of <see cref="ConfidentialClientApplication"/>
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
@@ -83,8 +84,8 @@ namespace Microsoft.Identity.Client
 
         internal byte[] Sign(string message)
         {
-            CryptographyHelper helper = new CryptographyHelper();
-            return helper.SignWithCertificate(message, Certificate);
+            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
+            return crypto.SignWithCertificate(message, Certificate);
         }
 
         internal string Thumbprint

@@ -25,10 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Platforms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,22 +36,22 @@ using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage;
 using Windows.System;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.UI;
+using String = System.String;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.uap
 {
     /// <summary>
     /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
     internal class UapPlatformProxy : IPlatformProxy
     {
-        private readonly bool _isMsal;
-
-        public UapPlatformProxy(bool isMsal)
-        {
-            _isMsal = isMsal;
-        }
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         /// Get the user logged in to Windows or throws
@@ -161,25 +157,18 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public string GetBrokerOrRedirectUri(Uri redirectUri)
         {
-            if (!_isMsal)
-            {
-                return string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase)
-                           ? WebAuthenticationBroker.GetCurrentApplicationCallbackUri().OriginalString
-                           : redirectUri.OriginalString;
-            }
-
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string correlationId)
         {
-            return _isMsal ? Constants.DefaultRedirectUri : Constants.UapWEBRedirectUri; // ADAL uses WEB
+            return Constants.DefaultRedirectUri;
         }
 
         public string GetProductName()
         {
-            return _isMsal ? "MSAL.UAP" : "PCL.UAP";
+            return "MSAL.UAP";
         }
 
         /// <summary>
@@ -221,5 +210,20 @@ namespace Microsoft.Identity.Client
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new UapCryptographyManager();
+
+        /// <inheritdoc />
+        public IPlatformLogger PlatformLogger => _platformLogger.Value;
+
+        /// <inheritdoc />
+        public IWebUIFactory GetWebUiFactory()
+        {
+            return _overloadWebUiFactory ?? new WebUIFactory();
+        }
+
+        /// <inheritdoc />
+        public void SetWebUiFactory(IWebUIFactory webUiFactory)
+        {
+            _overloadWebUiFactory = webUiFactory;
+        }
     }
 }

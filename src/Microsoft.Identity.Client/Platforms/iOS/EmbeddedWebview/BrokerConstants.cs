@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace Microsoft.Identity.Client.UI.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     internal static class BrokerConstants
     {

@@ -18,29 +18,38 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
 //------------------------------------------------------------------------------
 
-using System;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview;
+using Microsoft.Identity.Client.Platforms.iOS.SystemWebview;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
-    internal class NetStandard13LegacyCachePersistence : ILegacyCachePersistence
+    internal class IosWebUIFactory : IWebUIFactory
     {
-        private byte[] data;
-
-        byte[] ILegacyCachePersistence.LoadCache()
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
-            return data;
-        }
+            if (coreUIParent.UseEmbeddedWebview)
+            {
+                return new EmbeddedWebUI()
+                {
+                    RequestContext = requestContext,
+                    CoreUIParent = coreUIParent
+                };
+            }
 
-        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
-        {
-            data = serializedCache;
+            //there is no need to pass UIParent.
+            return new SystemWebUI()
+            {
+                RequestContext = requestContext
+            };
         }
     }
 }

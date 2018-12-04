@@ -22,24 +22,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
 
-using System;
-using System.Globalization;
-using Microsoft.Identity.Client.Internal;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview;
+using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
+using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.Android
 {
-    internal class CryptographyHelper
+    [global::Android.Runtime.Preserve(AllMembers = true)]
+    internal class AndroidWebUIFactory : IWebUIFactory
     {
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
-            // Used by Confidential Client, which is hidden on iOS
-            throw new NotImplementedException();
+            if (coreUIParent.UseEmbeddedWebview)
+            {
+                return new EmbeddedWebUI(coreUIParent)
+                {
+                    RequestContext = requestContext
+                };
+            }
+
+            return new SystemWebUI(coreUIParent)
+            {
+                RequestContext = requestContext
+            };
         }
     }
 }

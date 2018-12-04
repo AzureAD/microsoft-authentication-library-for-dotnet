@@ -25,6 +25,8 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace Microsoft.Identity.Client.Core
 {
     internal interface ICryptographyManager
@@ -37,5 +39,6 @@ namespace Microsoft.Identity.Client.Core
         string Decrypt(string encryptedMessage);
         byte[] Encrypt(byte[] message);
         byte[] Decrypt(byte[] encryptedMessage);
+        byte[] SignWithCertificate(string message, X509Certificate2 certificate);
     }
 }

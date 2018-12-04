@@ -27,7 +27,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal enum NavigateErrorStatusCode
     {

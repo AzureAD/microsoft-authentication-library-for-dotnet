@@ -26,16 +26,32 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
-    internal class CryptographyHelper
+    internal class IosPlatformLogger : IPlatformLogger
     {
-        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        // NOTE: Console.WriteLine writes to NSLog by default
+
+        public void Error(string message)
         {
-            // Used by Confidential Client, which is hidden on Android
-            throw new NotImplementedException();
+            Console.WriteLine(message);
+        }
+
+        public void Warning(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void Verbose(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+        public void Information(string message)
+        {
+            Console.WriteLine(message);
         }
     }
 }

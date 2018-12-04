@@ -25,12 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using Foundation;
-using Security;
 using System;
+using Foundation;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Security;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class iOSLegacyCachePersistence : ILegacyCachePersistence
     {

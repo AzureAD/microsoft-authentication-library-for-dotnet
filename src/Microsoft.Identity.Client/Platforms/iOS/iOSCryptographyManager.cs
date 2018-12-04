@@ -27,11 +27,12 @@
 
 using System;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class iOSCryptographyManager : ICryptographyManager
     {
@@ -81,6 +82,13 @@ namespace Microsoft.Identity.Client
 
         public byte[] Decrypt(byte[] encryptedMessage)
         {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        {
+            // Used by Confidential Client, which is hidden on iOS
             throw new NotImplementedException();
         }
     }

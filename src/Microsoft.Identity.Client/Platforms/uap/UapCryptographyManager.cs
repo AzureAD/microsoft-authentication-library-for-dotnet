@@ -27,8 +27,8 @@
 
 using System;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Security.Cryptography.DataProtection;
@@ -36,7 +36,7 @@ using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.uap
 {
     internal class UapCryptographyManager : ICryptographyManager
     {
@@ -141,6 +141,13 @@ namespace Microsoft.Identity.Client
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer buffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
             return buffer.ToArray(0, (int)buffer.Length);
+        }
+
+        /// <inheritdoc />
+        public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
+        {
+            // Used by Confidential Client, which is hidden on UWP
+            throw new NotImplementedException();
         }
 
         private static T RunAsyncTaskAndWait<T>(Task<T> task)

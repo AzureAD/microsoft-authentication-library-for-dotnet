@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -42,12 +43,8 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
 
-        private readonly bool _isMsal;
-
-        public AndroidPlatformProxy(bool isMsal)
-        {
-            _isMsal = isMsal;
-        }
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new AndroidPlatformLogger());
+        private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         /// Get the user logged in 
@@ -108,14 +105,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// <inheritdoc />
         public string GetDefaultRedirectUri(string clientId)
         {
-            return _isMsal ?
-                string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId) :
-                null; // Adal does not specify a default
+            return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
         }
 
         public string GetProductName()
         {
-            return _isMsal ? "MSAL.Xamarin.Android" : "PCL.Android";
+            return "MSAL.Xamarin.Android";
         }
 
         /// <summary>
@@ -161,5 +156,20 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         /// <inheritdoc />
         public ICryptographyManager CryptographyManager { get; } = new AndroidCryptographyManager();
+
+        /// <inheritdoc />
+        public IPlatformLogger PlatformLogger => _platformLogger.Value;
+
+        /// <inheritdoc />
+        public IWebUIFactory GetWebUiFactory()
+        {
+            return _overloadWebUiFactory ?? new AndroidWebUIFactory();
+        }
+
+        /// <inheritdoc />
+        public void SetWebUiFactory(IWebUIFactory webUiFactory)
+        {
+            _overloadWebUiFactory = webUiFactory;
+        }
     }
 }

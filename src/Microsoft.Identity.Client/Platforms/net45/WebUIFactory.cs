@@ -25,12 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client.Internal.UI
+namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class WebUIFactory : IWebUIFactory
     {

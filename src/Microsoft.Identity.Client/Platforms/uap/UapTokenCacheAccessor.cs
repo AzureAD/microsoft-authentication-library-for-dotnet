@@ -26,11 +26,11 @@
 using System;
 using System.Collections.Generic;
 using Windows.Storage;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.uap
 {
     /// <remarks>On UWP, the ApplicationDataCompositeValue storage has a size limitation for keys 
     /// of no more than 255 chars. As such, keys cannot contain arbitrately long strings, i.e. they cannot contain the scopes. 

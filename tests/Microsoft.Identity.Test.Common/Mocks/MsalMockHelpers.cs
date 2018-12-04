@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Common.Mocks
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
-            PlatformPlugin.SetWebUiFactory(mockFactory);
+            PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(mockFactory);
         }
     }
 }
