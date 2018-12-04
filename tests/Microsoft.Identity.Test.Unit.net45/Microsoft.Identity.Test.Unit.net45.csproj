@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
-    <DefineConstants>$(DefineConstants);DESKTOP;MSAL_TEST</DefineConstants>
+    <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
     <IsPackable>false</IsPackable>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
