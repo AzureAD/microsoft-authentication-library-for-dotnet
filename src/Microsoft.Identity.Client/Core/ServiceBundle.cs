@@ -25,7 +25,6 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -36,7 +35,6 @@ namespace Microsoft.Identity.Client.Core
     internal class ServiceBundle : IServiceBundle
     {
         internal ServiceBundle(
-            ICoreExceptionFactory coreExceptionFactory = null,
             IHttpClientFactory httpClientFactory = null,
             IHttpManager httpManager = null,
             ITelemetryReceiver telemetryReceiver = null,
@@ -45,12 +43,11 @@ namespace Microsoft.Identity.Client.Core
             IWsTrustWebRequestManager wsTrustWebRequestManager = null,
             bool shouldClearCaches = false)
         {
-            ExceptionFactory = coreExceptionFactory ?? CoreExceptionFactory.Instance;
-            HttpManager = httpManager ?? new HttpManager(coreExceptionFactory, httpClientFactory);
+            HttpManager = httpManager ?? new HttpManager(httpClientFactory);
             TelemetryManager = new TelemetryManager(telemetryReceiver);
             ValidatedAuthoritiesCache = validatedAuthoritiesCache ?? new ValidatedAuthoritiesCache(shouldClearCaches);
             AadInstanceDiscovery = aadInstanceDiscovery ?? new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
-            WsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager(HttpManager, ExceptionFactory);
+            WsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager(HttpManager);
             PlatformProxy = PlatformProxyFactory.GetPlatformProxy();
         }
 
@@ -65,9 +62,6 @@ namespace Microsoft.Identity.Client.Core
 
         /// <inheritdoc />
         public IAadInstanceDiscovery AadInstanceDiscovery { get; }
-
-        /// <inheritdoc />
-        public ICoreExceptionFactory ExceptionFactory { get; }
 
         /// <inheritdoc />
         public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }

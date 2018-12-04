@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     }
                     catch (SerializationException) // in the rare case we get an error response we cannot deserialize
                     {
-                        throw CoreExceptionFactory.Instance.GetServiceException(
+                        throw MsalExceptionFactory.GetServiceException(
                             CoreErrorCodes.NonParsableOAuthError,
                             CoreErrorMessages.NonParsableOAuthError,
                             response);
@@ -176,14 +176,14 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw CoreExceptionFactory.Instance.GetUiRequiredException(
+                    throw MsalExceptionFactory.GetUiRequiredException(
                         CoreErrorCodes.InvalidGrantError,
                         msalTokenResponse.ErrorDescription,
                         null,
                         ExceptionDetail.FromHttpResponse(response));
                 }
 
-                serviceEx = CoreExceptionFactory.Instance.GetServiceException(
+                serviceEx = MsalExceptionFactory.GetServiceException(
                     msalTokenResponse.Error,
                     msalTokenResponse.ErrorDescription,
                     response);
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
             catch (SerializationException ex)
             {
-                serviceEx = CoreExceptionFactory.Instance.GetClientException(CoreErrorCodes.UnknownError, response.Body, ex);
+                serviceEx = MsalExceptionFactory.GetClientException(CoreErrorCodes.UnknownError, response.Body, ex);
             }
 
             if (shouldLogAsError)

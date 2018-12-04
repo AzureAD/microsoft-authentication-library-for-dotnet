@@ -52,7 +52,6 @@
 //        [TestInitialize]
 //        public void TestInitialize()
 //        {
-//            CoreExceptionFactory.Instance = new TestExceptionFactory();
 //        }
 
 //        [TestMethod]

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.Http
         {
             if (redirectUri == null)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.NoRedirectUri,
                     CoreErrorMessages.NoRedirectUri);
 
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.Http
             if (usesSystemBrowser &&
                 Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.DefaultRedirectUriIsInvalid,
                     String.Format(
                         CultureInfo.InvariantCulture,

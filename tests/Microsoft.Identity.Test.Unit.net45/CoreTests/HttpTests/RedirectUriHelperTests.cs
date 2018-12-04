@@ -29,7 +29,6 @@ using System;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
@@ -37,17 +36,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     [TestClass]
     public class RedirectUriHelperTests
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
-        }
-
         [TestMethod]
         public void ValidateRedirectUri_Throws()
         {
           
-            Assert.ThrowsException<TestClientException>(
+            Assert.ThrowsException<MsalClientException>(
                 () => RedirectUriHelper.Validate(null));
 
             Assert.ThrowsException<ArgumentException>(
@@ -71,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestMethod]
         public void ValidateRedirectUri_NoOAuth2DefaultWhenUsingSystemBrowser()
         {
-            Assert.ThrowsException<TestClientException>(() =>
+            Assert.ThrowsException<MsalClientException>(() =>
                 RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), true));
 
               RedirectUriHelper.Validate(new Uri(Constants.DefaultRedirectUri), false);

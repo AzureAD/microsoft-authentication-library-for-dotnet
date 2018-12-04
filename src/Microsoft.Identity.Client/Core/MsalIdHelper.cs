@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Core
                 var platformProxy = PlatformProxyFactory.GetPlatformProxy();
                 if (platformProxy == null)
                 {
-                    throw CoreExceptionFactory.Instance.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.PlatformNotSupported,
                         CoreErrorMessages.PlatformNotSupported);
                 }

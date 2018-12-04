@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             IReadOnlyList<User> users = await User.FindAllAsync();
             if (users == null || !users.Any())
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
                     CoreErrorMessages.UapCannotFindDomainUser);
             }
@@ -106,13 +106,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
             // user has domain name, but no upn -> missing Enterprise Auth capability
             if (userDetails.Any(d => !String.IsNullOrWhiteSpace(d.Domain)))
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                    CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
                    CoreErrorMessages.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
-            throw CoreExceptionFactory.Instance.GetClientException(
+            throw MsalExceptionFactory.GetClientException(
                 CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
                 CoreErrorMessages.UapCannotFindDomainUser);
 

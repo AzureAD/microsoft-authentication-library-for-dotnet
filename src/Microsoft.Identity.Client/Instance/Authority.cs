@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.Instance
             switch (GetAuthorityType(authority))
             {
             case AuthorityType.Adfs:
-                throw serviceBundle.ExceptionFactory.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.InvalidAuthorityType,
                     "ADFS is not a supported authority");
 
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Instance
                 return new AadAuthority(serviceBundle, authority, validateAuthority);
 
             default:
-                throw serviceBundle.ExceptionFactory.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.InvalidAuthorityType,
                     "Unsupported authority type");
             }
@@ -213,21 +213,21 @@ namespace Microsoft.Identity.Client.Instance
 
                 if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
                 {
-                    throw ServiceBundle.ExceptionFactory.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.TenantDiscoveryFailedError,
                         "Authorize endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.TokenEndpoint))
                 {
-                    throw ServiceBundle.ExceptionFactory.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.TenantDiscoveryFailedError,
                         "Token endpoint was not found in the openid configuration");
                 }
 
                 if (string.IsNullOrEmpty(edr.Issuer))
                 {
-                    throw ServiceBundle.ExceptionFactory.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.TenantDiscoveryFailedError,
                         "Issuer was not found in the openid configuration");
                 }

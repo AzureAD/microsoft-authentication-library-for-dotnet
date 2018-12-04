@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.WsTrust
             {
                 _requestContext.Logger.Error("Could not find UPN for logged in user.");
 
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.UnknownUser,
                     CoreErrorMessages.UnknownUser);
             }
@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             if (userRealmResponse == null)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.UserRealmDiscoveryFailed,
                     CoreErrorMessages.UserRealmDiscoveryFailed);
             }
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (XmlException ex)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.ParsingWsMetadataExchangeFailed,
                     CoreErrorMessages.ParsingMetadataDocumentFailed,
                     ex);
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.WsTrust
 
             if (wsTrustEndpoint == null)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                   CoreErrorCodes.WsTrustEndpointNotFoundInMetadataDocument,
                   CoreErrorMessages.WsTrustEndpointNotFoundInMetadataDocument);
             }
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
             catch (Exception ex)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.ParsingWsTrustResponseFailed,
                     ex.Message,
                     ex);

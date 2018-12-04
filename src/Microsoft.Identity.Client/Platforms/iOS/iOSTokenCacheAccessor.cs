@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return match.AccessGroup.Split('.')[0];
             }
 
-            throw CoreExceptionFactory.Instance.GetClientException(
+            throw MsalExceptionFactory.GetClientException(
                 CoreErrorCodes.CannotAccessPublisherKeyChain,
                 CoreErrorMessages.CannotAccessPublisherKeyChain);
         }
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                 CoreErrorCodes.MissingEntitlements,
                 string.Format(
                     CultureInfo.InvariantCulture,

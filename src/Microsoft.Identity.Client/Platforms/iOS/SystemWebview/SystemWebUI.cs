@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
             catch (Exception ex)
             {
                 requestContext.Logger.ErrorPii(ex);
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.AuthenticationUiFailedError,
                     "Failed to invoke SFSafariViewController",
                     ex);

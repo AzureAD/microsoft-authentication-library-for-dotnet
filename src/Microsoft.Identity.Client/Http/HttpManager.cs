@@ -39,12 +39,10 @@ namespace Microsoft.Identity.Client.Http
 {
     internal class HttpManager : IHttpManager
     {
-        private readonly ICoreExceptionFactory _coreExceptionFactory;
         private readonly IHttpClientFactory _httpClientFactory;
 
-        public HttpManager(ICoreExceptionFactory coreExceptionFactory, IHttpClientFactory httpClientFactory = null)
+        public HttpManager(IHttpClientFactory httpClientFactory = null)
         {
-            _coreExceptionFactory = coreExceptionFactory ?? CoreExceptionFactory.Instance;
             _httpClientFactory = httpClientFactory ?? new HttpClientFactory();
         }
 
@@ -174,7 +172,7 @@ namespace Microsoft.Identity.Client.Http
                 requestContext.Logger.Info("Request retry failed.");
                 if (timeoutException != null)
                 {
-                    throw _coreExceptionFactory.GetServiceException(
+                    throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.RequestTimeout,
                         "Request to the endpoint timed out.",
                         timeoutException, 
@@ -186,7 +184,7 @@ namespace Microsoft.Identity.Client.Http
                     return response;
                 }
 
-                throw _coreExceptionFactory.GetServiceException(
+                throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.ServiceNotAvailable,
                         "Service is unavailable to process the request",
                         response);

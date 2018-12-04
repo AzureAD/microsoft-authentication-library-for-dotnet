@@ -37,7 +37,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
@@ -53,7 +52,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         public void TestInitialize()
         {
             _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
         }
 
         [TestCleanup]
@@ -207,8 +205,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 }
                 catch (Exception exc)
                 {
-                    Assert.IsTrue(exc is TestServiceException);
-                    Assert.AreEqual(((TestServiceException)exc).ErrorCode, "invalid_instance");
+                    Assert.IsTrue(exc is MsalServiceException);
+                    Assert.AreEqual(((MsalServiceException)exc).ErrorCode, "invalid_instance");
                 }
             }
         }
@@ -291,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         }).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }
-                catch (TestClientException exc)
+                catch (MsalClientException exc)
                 {
                     Assert.AreEqual(CoreErrorCodes.TenantDiscoveryFailedError, exc.ErrorCode);
                 }

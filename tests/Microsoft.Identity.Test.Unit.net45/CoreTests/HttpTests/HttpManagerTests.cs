@@ -35,7 +35,6 @@ using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
@@ -43,12 +42,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
     [TestClass]
     public class HttpManagerTests
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
-        }
-
         [TestMethod]
         [TestCategory("HttpManagerTests")]
         public void TestSendPostNullHeaderNullBody()
@@ -143,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
-                catch (TestServiceException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(CoreErrorCodes.ServiceNotAvailable, exc.ErrorCode);
@@ -190,7 +183,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
-                catch (TestServiceException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(CoreErrorCodes.ServiceNotAvailable, exc.ErrorCode);
@@ -216,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
-                catch (TestServiceException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(CoreErrorCodes.RequestTimeout, exc.ErrorCode);
@@ -244,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
-                catch (TestServiceException exc)
+                catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
                     Assert.AreEqual(CoreErrorCodes.RequestTimeout, exc.ErrorCode);

@@ -25,7 +25,6 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -39,7 +38,6 @@ namespace Microsoft.Identity.Client.Core
         ITelemetryManager TelemetryManager { get; }
         IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
         IAadInstanceDiscovery AadInstanceDiscovery { get; }
-        ICoreExceptionFactory ExceptionFactory { get; }
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
     }

@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (string.IsNullOrEmpty(userPrincipalName))
             {
-                throw ServiceBundle.ExceptionFactory.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.UpnRequired,
                     CoreErrorMessages.UpnRequiredForAuthroityValidation);
             }
@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Instance
 
                 if (!string.IsNullOrEmpty(drsResponse.Error))
                 {
-                    ServiceBundle.ExceptionFactory.GetServiceException(
+                    MsalExceptionFactory.GetServiceException(
                         drsResponse.Error,
                         drsResponse.ErrorDescription,
                         ExceptionDetail.FromDrsResponse(drsResponse));
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Instance
 
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
-                    throw ServiceBundle.ExceptionFactory.GetServiceException(
+                    throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.MissingPassiveAuthEndpoint,
                         CoreErrorMessages.CannotFindTheAuthEndpont,
                         ExceptionDetail.FromDrsResponse(drsResponse));
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.Instance
 
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw ServiceBundle.ExceptionFactory.GetServiceException(
+                    throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.AuthorityValidationFailed,
                         httpResponse);
@@ -118,7 +118,7 @@ namespace Microsoft.Identity.Client.Instance
                         a => a.Rel.Equals(DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase)) == null)
                 {
-                    throw ServiceBundle.ExceptionFactory.GetClientException(
+                    throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.InvalidAuthority,
                         CoreErrorMessages.InvalidAuthorityOpenId);
                 }

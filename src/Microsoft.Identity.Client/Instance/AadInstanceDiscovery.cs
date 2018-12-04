@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (instanceDiscoveryResponse.TenantDiscoveryEndpoint == null)
             {
-                throw CoreExceptionFactory.Instance.GetClientException(
+                throw MsalExceptionFactory.GetClientException(
                     instanceDiscoveryResponse.Error,
                     instanceDiscoveryResponse.ErrorDescription);
             }

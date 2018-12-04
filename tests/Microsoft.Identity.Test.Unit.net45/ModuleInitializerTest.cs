@@ -47,10 +47,8 @@ namespace Microsoft.Identity.Test.Unit
             ModuleInitializer.EnsureModuleInitialized();
 
             // Assert
-            MsalExceptionFactory factory = CoreExceptionFactory.Instance as MsalExceptionFactory;
             MsalLogger logger = CoreLoggerBase.Default as MsalLogger;
             Telemetry telemetry = Telemetry.GetInstance();
-            Assert.IsNotNull(factory);
             Assert.IsNotNull(logger);
             Assert.IsNotNull(telemetry);
 
@@ -58,7 +56,6 @@ namespace Microsoft.Identity.Test.Unit
             ModuleInitializer.EnsureModuleInitialized();
 
             // Assert
-            Assert.AreEqual(factory, CoreExceptionFactory.Instance, "Initialization should have happened only once");
             Assert.AreEqual(logger, CoreLoggerBase.Default, "Initialization should have happened only once");
             Assert.AreEqual(telemetry, Telemetry.GetInstance(), "Initialization should have happened only once");
         }

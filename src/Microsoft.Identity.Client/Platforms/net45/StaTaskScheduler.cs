@@ -98,7 +98,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 _tasks.CompleteAdding();
 
                 // Wait for all threads to finish processing tasks
-                foreach (var thread in _threads) thread.Join();
+                foreach (var thread in _threads)
+                {
+                    thread.Join();
+                }
 
                 // Cleanup
                 _tasks.Dispose();

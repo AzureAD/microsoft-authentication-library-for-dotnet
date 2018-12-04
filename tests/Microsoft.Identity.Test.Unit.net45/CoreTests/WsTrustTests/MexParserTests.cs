@@ -35,7 +35,6 @@ using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
@@ -50,7 +49,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         [TestInitialize]
         public void TestInitialize()
         {
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
             _requestContext = new RequestContext(null, new TestLogger(Guid.NewGuid()));
         }
 
@@ -95,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                     await serviceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost", _requestContext).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
-                catch (TestException ex)
+                catch (MsalException ex)
                 {
                     Assert.AreEqual(CoreErrorCodes.AccessingWsMetadataExchangeFailed, ex.ErrorCode);
                 }

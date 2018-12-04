@@ -35,7 +35,6 @@ using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Core.Mocks.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
@@ -44,12 +43,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
     [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
     public class WsTrustTests
     {
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            CoreExceptionFactory.Instance = new TestExceptionFactory();
-        }
-
         [TestMethod]
         [Description("WS-Trust Request Test")]
         public async Task WsTrustRequestTestAsync()
@@ -102,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
-                catch (TestException ex)
+                catch (MsalException ex)
                 {
                     Assert.AreEqual(CoreErrorCodes.FederatedServiceReturnedError, ex.ErrorCode);
                 }
