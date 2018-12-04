@@ -4,7 +4,7 @@ The MSAL library for .NET gives your app the ability to begin using the [Microso
 
 Quick links:
 
-| [Conceptual documentation](https://aka.ms/msal-net) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-windows-desktop) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/azure/active-directory/develop/active-directory-v2-libraries) | [Support](README.md#community-help-and-support) |
+| [Conceptual documentation](https://aka.ms/msalnet) | [Getting Started](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-windows-desktop) | [Sample Code](https://aka.ms/aaddevsamplesv2) | [Library Reference](https://docs.microsoft.com/dotnet/api/microsoft.identity.client?view=azure-dotnet) | [Support](README.md#community-help-and-support) |
 | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------- |
 
 ## Nuget packages
