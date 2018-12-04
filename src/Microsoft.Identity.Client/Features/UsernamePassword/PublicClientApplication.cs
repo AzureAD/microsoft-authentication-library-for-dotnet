@@ -33,9 +33,12 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.WsTrust;
+using System;
 
 namespace Microsoft.Identity.Client
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {
         /// <summary>
@@ -49,8 +52,9 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, System.Security.SecureString securePassword)
         {
-            UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, securePassword);
+            GuardMobilePlatforms();
 
+            UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, securePassword);
             return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
         }
 
@@ -66,5 +70,14 @@ namespace Microsoft.Identity.Client
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
+
+        private static void GuardMobilePlatforms()
+        {
+#if ANDROID || iOS || WINDOWS_APP
+            throw new PlatformNotSupportedException("The Username / Password flow is not supported on Xamarin.Android, Xamarin.iOS and UWP. " +
+               "For more details see https://aka.ms/msal-net-up");
+#endif
+        }
     }
+#endif
 }

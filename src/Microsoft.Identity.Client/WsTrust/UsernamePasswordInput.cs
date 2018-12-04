@@ -25,12 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#if DESKTOP
+#if DESKTOP || ANDROID || iOS
 using System.Security;
 using static System.Runtime.InteropServices.Marshal;
-#endif
-
-#if NET_CORE
+#else
 using System.Security;
 using static System.Security.SecureStringMarshal;
 using static System.Runtime.InteropServices.Marshal;
@@ -45,9 +43,7 @@ namespace Microsoft.Identity.Client
     internal sealed class UsernamePasswordInput : IUsernameInput
     {
         public string UserName { get; set; }
-#if DESKTOP || NET_CORE
         private SecureString securePassword;
-#endif
         private string password;
 
 
@@ -57,18 +53,14 @@ namespace Microsoft.Identity.Client
             this.UserName = userName;
         }
 
-#if DESKTOP || NET_CORE
         public UsernamePasswordInput(string userName, SecureString securePassword)
         {
             this.securePassword = securePassword;
             this.UserName = userName;
         }
-#endif
 
         public char[] PasswordToCharArray() 
         {
-            
-#if DESKTOP || NET_CORE
             if (securePassword != null)
             {
                 var output = new char[securePassword.Length];
@@ -83,7 +75,6 @@ namespace Microsoft.Identity.Client
                 return output;
             }
 
-#endif
             return (this.password != null) ? this.password.ToCharArray() : null;
         }
 
@@ -91,9 +82,7 @@ namespace Microsoft.Identity.Client
         {
 
             bool hasSecurePassword = false;
-#if DESKTOP || NET_CORE
             hasSecurePassword = this.securePassword != null;
-#endif
             bool hasPlainPassowrd = !string.IsNullOrEmpty(password);
 
             return hasSecurePassword || hasPlainPassowrd;
