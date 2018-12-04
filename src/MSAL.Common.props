@@ -103,7 +103,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
-    <Compile Include="$(PathToMsalSources)\Platforms\netstandard1.3\**\*.cs" LinkBase="Platforms\netstandard1.3" />
+    <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
     <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
     <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventSource" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />

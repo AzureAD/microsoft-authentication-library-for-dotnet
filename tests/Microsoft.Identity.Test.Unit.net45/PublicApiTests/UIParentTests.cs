@@ -27,7 +27,6 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests

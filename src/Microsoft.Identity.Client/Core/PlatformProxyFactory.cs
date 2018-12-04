@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Core
 #elif FACADE
             new NetStandard11PlatformProxy(IsMsal())
 #elif NETSTANDARD1_3
-            new Microsoft.Identity.Client.Platforms.NetStandard13.Netstandard13PlatformProxy()
+            new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy()
 #elif DESKTOP
             new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy()
 #endif
