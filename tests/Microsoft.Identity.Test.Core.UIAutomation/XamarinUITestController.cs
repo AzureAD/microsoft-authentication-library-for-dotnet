@@ -26,12 +26,12 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Linq;
 using Xamarin.UITest;
-using System.Globalization;
 using Xamarin.UITest.Queries;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     public enum XamarinSelector
     {

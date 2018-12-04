@@ -25,16 +25,14 @@
 //
 //------------------------------------------------------------------------------
 
-using Test.Microsoft.Identity.LabInfrastructure;
-using NUnit.Framework;
-using Test.Microsoft.Identity.Core.UIAutomation;
-using System.Threading;
 using System;
-using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.Identity.Test.LabInfrastructure;
+using NUnit.Framework;
 using Xamarin.UITest.Queries;
+using Microsoft.Identity.Test.Core.UIAutomation;
 
-namespace Test.MSAL.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation
 {
     /// <summary>
     /// Contains the core test functionality that will be used by Android and iOS tests

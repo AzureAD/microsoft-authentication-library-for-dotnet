@@ -27,11 +27,13 @@
 
 using System;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     /// <summary>
     /// Exception thrown when AppFactory tries to initialize an unsupported platform
     /// </summary>
+#pragma warning disable 1032  // add constructor for exception that takes message
+    [Serializable]
     public class PlatformNotSupportedException : Exception
     {
         private const string message = "Platform not supported.";
@@ -40,4 +42,5 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         {
         }
     }
+#pragma warning restore 1032
 }

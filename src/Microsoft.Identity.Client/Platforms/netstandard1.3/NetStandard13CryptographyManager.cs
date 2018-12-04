@@ -25,11 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Helpers;
 using System;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {

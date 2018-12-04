@@ -25,12 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Helpers;
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Instance;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {

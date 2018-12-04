@@ -195,10 +195,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
 	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 </Project>

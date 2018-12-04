@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {

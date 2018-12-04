@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
     public static class CoreUiTestConstants
     {
@@ -68,7 +68,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
         public const string RedirectUriEntryID = "redirectUriEntry";
 
         //MSAL B2C
-        public static string B2cScopes = "https://sometenant.onmicrosoft.com/some/scope";
+        public const string B2cScopes = "https://sometenant.onmicrosoft.com/some/scope";
         public const string AuthorityPickerID = "b2cAuthorityPicker";
         public const string WebUPNB2CLocalInputID = "logonIdentifier";
         public const string B2CWebSubmitID = "next";

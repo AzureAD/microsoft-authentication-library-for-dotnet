@@ -47,17 +47,13 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\msal\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.Identity.Core.csproj">
-      <Project>{3eef5981-8f11-4f54-9ddf-2f63c574d028}</Project>
-      <Name>Microsoft.Identity.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj">
+    <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
-      <Name>Test.Microsoft.Identity.LabInfrastructure</Name>
+      <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
     </ProjectReference>
   </ItemGroup>
   <!-- Set this env variable locally to overcome issue with VS not being able to run Nunit 2.6 tests-->
@@ -86,6 +82,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 </Project>

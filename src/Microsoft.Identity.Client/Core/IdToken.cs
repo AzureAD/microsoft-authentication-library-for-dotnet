@@ -31,7 +31,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Helpers;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Core
 {

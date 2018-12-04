@@ -65,13 +65,13 @@
     <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.Core.UIAutomation\Test.Microsoft.Identity.Core.UIAutomation.csproj">
+    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj">
       <Project>{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}</Project>
-      <Name>Test.Microsoft.Identity.Core.UIAutomation</Name>
+      <Name>Microsoft.Identity.Test.Core.UIAutomation</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\core\tests\Test.Microsoft.Identity.LabInfrastructure\Test.Microsoft.Identity.LabInfrastructure.csproj">
+    <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
-      <Name>Test.Microsoft.Identity.LabInfrastructure</Name>
+      <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -85,6 +85,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 </Project>

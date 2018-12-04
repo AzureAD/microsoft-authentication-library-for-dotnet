@@ -26,13 +26,11 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Test.Microsoft.Identity.Core.UIAutomation
+namespace Microsoft.Identity.Test.Core.UIAutomation
 {
+#pragma warning disable 1032  // add constructor for exception that takes message
+    [Serializable]
     public class ResultVerificationFailureException : Exception
     {
         public VerificationError Error { get; private set; }
@@ -42,6 +40,7 @@ namespace Test.Microsoft.Identity.Core.UIAutomation
             Error = error;
         }
     }
+#pragma warning restore 1032
 
     public enum VerificationError
     {

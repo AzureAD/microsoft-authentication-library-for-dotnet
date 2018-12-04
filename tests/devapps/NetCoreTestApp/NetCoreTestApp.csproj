@@ -8,7 +8,7 @@
 
     <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +28,6 @@
   </ItemGroup>
 
 	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
 	</PropertyGroup>
 </Project>
