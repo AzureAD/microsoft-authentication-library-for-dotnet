@@ -240,7 +240,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             sb.Append(string.Format(CultureInfo.InvariantCulture, "  CachedAt: {0}\n", CachedAt));
             sb.Append(string.Format(CultureInfo.InvariantCulture, "  ExpiresOn: {0}\n", ExpiresOn));
             sb.Append(string.Format(CultureInfo.InvariantCulture, "  ExtendedExpiresOn: {0}\n", ExtendedExpiresOn));
-            sb.Append(string.Format(CultureInfo.InvariantCulture, "  Secret: {0}\n", Secret);
+            sb.Append(string.Format(CultureInfo.InvariantCulture, "  Secret: {0}\n", Secret));
             sb.Append(string.Format(CultureInfo.InvariantCulture, "  AdditionalFieldsJson: {0}\n", AdditionalFieldsJson));
             sb.Append(")");
             return sb.ToString();
