@@ -25,6 +25,8 @@
 // 
 // ------------------------------------------------------------------------------
 
+#if DESKTOP
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -36,13 +38,9 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Platforms.net45.CacheV2;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-#if NETFRAMEWORK
-
-#endif
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
-#if NETFRAMEWORK
     [TestClass]
     public class FileIOTests
     {
@@ -776,5 +774,6 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             }
         }
     }
-#endif
 }
+
+#endif

@@ -27,7 +27,9 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
