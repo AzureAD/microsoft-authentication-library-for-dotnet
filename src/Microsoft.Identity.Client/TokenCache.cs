@@ -377,6 +377,16 @@ namespace Microsoft.Identity.Client
                             .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                             .ToList();
                 }
+
+                if (tokenCacheItems.Count > 1)
+                {
+                    requestParams.RequestContext.Logger.Info("Filtering by canonical authority...");
+                    tokenCacheItems =
+                        tokenCacheItems
+                            .Where(item => item.Authority.Equals(requestParams.Authority.CanonicalAuthority,
+                                StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+                }
             }
 
             // no match found after initial filtering
@@ -391,35 +401,38 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAccessTokenCacheItem> filteredItems =
                 tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
 
-            requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
+            IEnumerable<MsalAccessTokenCacheItem> msalAccessTokenCacheItems = filteredItems.ToList();
+            requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + msalAccessTokenCacheItems.Count());
 
             // filter by authority
             IEnumerable<MsalAccessTokenCacheItem> filteredByPreferredAlias =
-                filteredItems.Where
+                msalAccessTokenCacheItems.Where
                 (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase));
 
-            if (filteredByPreferredAlias.Any())
+            IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = filteredByPreferredAlias.ToList();
+            if (accessTokenCacheItems.Any())
             {
-                filteredItems = filteredByPreferredAlias;
+                filteredItems = accessTokenCacheItems;
             }
             else
             {
-                filteredItems = filteredItems.Where(
+                filteredItems = msalAccessTokenCacheItems.Where(
                     item => environmentAliases.Contains(item.Environment) &&
                     item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
             }
 
             // no match
-            if (!filteredItems.Any())
+            IEnumerable<MsalAccessTokenCacheItem> cacheItems = filteredItems.ToList();
+            if (!cacheItems.Any())
             {
                 requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
                 return null;
             }
 
             // if only one cached token found
-            if (filteredItems.Count() == 1)
+            if (cacheItems.Count() == 1)
             {
-                msalAccessTokenCacheItem = filteredItems.First();
+                msalAccessTokenCacheItem = cacheItems.First();
             }
             else
             {
