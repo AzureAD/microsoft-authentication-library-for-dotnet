@@ -16,6 +16,8 @@ Released     | Nightly
 ## Branches
 
 **dev**: Contains newest development of MSAL (v2+). This is where all current and future development of MSAL takes place.  
+[DEV Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20&%20PR%20&%20Nightly?branchName=dev)
+
 
 ## Using MSAL.NET
 
