@@ -30,11 +30,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class CacheFallbackOperations
+    internal static class CacheFallbackOperations
     {
         internal /* internal for testing only */ const string DifferentEnvError = 
             "Not expecting the RT and IdT to have different env when adding to legacy cache";
@@ -47,19 +48,19 @@ namespace Microsoft.Identity.Client.Cache
         {
             if (string.IsNullOrEmpty(resultWrapper.RawClientInfo))
             {
-                CoreLoggerBase.Default.Info("Client Info is missing. Skipping MSAL refresh token cache write");
+                MsalLogger.Default.Info("Client Info is missing. Skipping MSAL refresh token cache write");
                 return;
             }
 
             if (string.IsNullOrEmpty(resultWrapper.RefreshToken))
             {
-                CoreLoggerBase.Default.Info("Refresh Token is missing. Skipping MSAL refresh token cache write");
+                MsalLogger.Default.Info("Refresh Token is missing. Skipping MSAL refresh token cache write");
                 return;
             }
 
             if (string.IsNullOrEmpty(resultWrapper.Result.IdToken))
             {
-                CoreLoggerBase.Default.Info("Id Token is missing. Skipping MSAL refresh token cache write");
+                MsalLogger.Default.Info("Id Token is missing. Skipping MSAL refresh token cache write");
                 return;
             }
 
@@ -76,7 +77,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(
+                MsalLogger.Default.WarningPiiWithPrefix(
                     ex, 
                     "An error occurred while writing ADAL refresh token to the cache in MSAL format. " 
                     + "For details please see https://aka.ms/net-cache-persistence-errors. ");
@@ -95,7 +96,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 if (rtItem == null)
                 {
-                    CoreLoggerBase.Default.Info("No refresh token available. Skipping MSAL refresh token cache write");
+                    MsalLogger.Default.Info("No refresh token available. Skipping MSAL refresh token cache write");
                     return;
                 }
 
@@ -126,17 +127,17 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                if (!String.Equals(rtItem?.Environment, idItem?.Environment, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(rtItem?.Environment, idItem?.Environment, StringComparison.OrdinalIgnoreCase))
                 {
-                    CoreLoggerBase.Default.Error(DifferentEnvError);
+                    MsalLogger.Default.Error(DifferentEnvError);
                 }
 
-                if (!String.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase))
                 {
-                    CoreLoggerBase.Default.Error(DifferentAuthorityError);
+                    MsalLogger.Default.Error(DifferentAuthorityError);
                 }
 
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while writing MSAL refresh token to the cache in ADAL format. " +
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "An error occurred while writing MSAL refresh token to the cache in ADAL format. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
         }
@@ -150,14 +151,14 @@ namespace Microsoft.Identity.Client.Cache
         public static Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
             (ILegacyCachePersistence legacyCachePersistence, string clientId)
         {
-            Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
-            List<AdalUserInfo> adalUsersWithoutClientInfo = new List<AdalUserInfo>();
+            var clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
+            var adalUsersWithoutClientInfo = new List<AdalUserInfo>();
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                     AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
-                //filter by client id and environment first
-                //TODO - authority check needs to be updated for alias check
+                // filter by client id and environment first
+                // TODO - authority check needs to be updated for alias check
                 List<KeyValuePair<AdalTokenCacheKey, AdalResultWrapper>> listToProcess =
                     dictionary.Where(p =>
                         p.Key.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -176,7 +177,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
                 return Tuple.Create(new Dictionary<string, AdalUserInfo>(), new List<AdalUserInfo>());
@@ -208,7 +209,7 @@ namespace Microsoft.Identity.Client.Cache
             try
             {
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
+                    AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
 
                 if (!string.IsNullOrEmpty(accountOrUserId))
                 {
@@ -216,12 +217,11 @@ namespace Microsoft.Identity.Client.Cache
                 }
 
                 RemoveEntriesWithMatchingName(clientId, displayableId, adalCache);
-
                 legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(adalCache));
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while deleting account in ADAL format from the cache. " +
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "An error occurred while deleting account in ADAL format from the cache. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
         }
@@ -231,21 +231,21 @@ namespace Microsoft.Identity.Client.Cache
             string displayableId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
         {
-            if (String.IsNullOrEmpty(displayableId))
+            if (string.IsNullOrEmpty(displayableId))
             {
-                CoreLoggerBase.Default.Error(CoreErrorMessages.InternalErrorCacheEmptyUsername);
+                MsalLogger.Default.Error(CoreErrorMessages.InternalErrorCacheEmptyUsername);
                 return;
             }
 
-            List<AdalTokenCacheKey> keysToRemove = new List<AdalTokenCacheKey>();
+            var keysToRemove = new List<AdalTokenCacheKey>();
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
                 string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
-                string cachedAcccountDisplayableId = kvp.Key.DisplayableId;
+                string cachedAccountDisplayableId = kvp.Key.DisplayableId;
                 string cachedClientId = kvp.Key.ClientId;
 
-                if (string.Equals(displayableId, cachedAcccountDisplayableId, StringComparison.OrdinalIgnoreCase) &&
+                if (string.Equals(displayableId, cachedAccountDisplayableId, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(clientId, cachedClientId, StringComparison.OrdinalIgnoreCase))
                 {
                     keysToRemove.Add(kvp.Key);
@@ -263,13 +263,13 @@ namespace Microsoft.Identity.Client.Cache
             string accountOrUserId,
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache)
         {
-            List<AdalTokenCacheKey> keysToRemove = new List<AdalTokenCacheKey>();
+            var keysToRemove = new List<AdalTokenCacheKey>();
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {
                 string rawClientInfo = kvp.Value.RawClientInfo;
 
-                if (!String.IsNullOrEmpty(rawClientInfo))
+                if (!string.IsNullOrEmpty(rawClientInfo))
                 {
                     string cachedAccountId = ClientInfo.CreateFromJson(rawClientInfo).ToAccountIdentifier();
                     string cachedEnvironment = new Uri(kvp.Key.Authority).Host;
@@ -348,7 +348,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in ADAL format in the cache for MSAL. " +
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in ADAL format in the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
                 return new List<MsalRefreshTokenCacheItem>();
@@ -420,7 +420,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in MSAL format in the cache for ADAL. " +
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in MSAL format in the cache for ADAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
             }
 

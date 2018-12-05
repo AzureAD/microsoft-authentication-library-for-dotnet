@@ -207,7 +207,6 @@ namespace Microsoft.Identity.Client
 
 #endif
 
-
         /// <summary>
         /// Initializes a new instance of the exception class with a specified
         /// error code.

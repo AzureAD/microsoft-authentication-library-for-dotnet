@@ -26,14 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
-using System.Security;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -55,19 +51,12 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
-        internal bool IsMultipleResourceRefreshToken
-        {
-            get
-            {
-                return (!string.IsNullOrWhiteSpace(this.RefreshToken) && !string.IsNullOrWhiteSpace(this.ResourceInResponse));
-            }            
-        }
+        internal bool IsMultipleResourceRefreshToken => (!string.IsNullOrWhiteSpace(RefreshToken) && !string.IsNullOrWhiteSpace(ResourceInResponse));
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.
         [DataMember]
         internal string ResourceInResponse { get; set; }
-
 
         /// <summary>
         /// Serializes the object to a JSON string
@@ -104,7 +93,7 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         internal Exception Exception { get; set; }
-        
+
         [DataMember]
         public string UserAssertionHash { get; set; }
 

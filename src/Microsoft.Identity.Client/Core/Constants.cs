@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Client.Core
     }
 
 
-    internal class XmlNamespace
+    internal static class XmlNamespace
     {
         public static readonly XNamespace Wsdl = "http://schemas.xmlsoap.org/wsdl/";
         public static readonly XNamespace Wsp = "http://schemas.xmlsoap.org/ws/2004/09/policy";

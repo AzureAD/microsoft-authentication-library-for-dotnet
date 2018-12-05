@@ -26,21 +26,16 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.WsTrust
 {
     internal class WsTrustResponse
     {
         public const string Saml1Assertion = "urn:oasis:names:tc:SAML:1.0:assertion";
-
         public string Token { get; private set; }
-
         public string TokenType { get; private set; }
 
         public static WsTrustResponse CreateFromResponse(string response, WsTrustVersion version)

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -35,6 +36,7 @@ using Android.OS;
 using Android.Support.CustomTabs;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Uri = Android.Net.Uri;
 
@@ -127,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 Intent browserIntent = new Intent(Intent.ActionView, Uri.Parse(_requestUrl));
                 browserIntent.AddCategory(Intent.CategoryBrowsable);
 
-                CoreLoggerBase.Default.Warning(
+                MsalLogger.Default.Warning(
                     "Browser with custom tabs package not available. " +
                     "Launching with alternate browser. See https://aka.ms/msal-net-system-browsers for details.");
 
@@ -144,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             }
             else
             {
-                CoreLoggerBase.Default.Info(
+                MsalLogger.Default.Info(
                     string.Format(
                     CultureInfo.CurrentCulture,
                     "Browser with custom tabs package available. Using {0}. ",

@@ -29,12 +29,11 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Core
 {
-    internal class ClientInfoClaim
+    internal static class ClientInfoClaim
     {
         public const string UniqueIdentifier = "uid";
         public const string UnqiueTenantIdentifier = "utid";

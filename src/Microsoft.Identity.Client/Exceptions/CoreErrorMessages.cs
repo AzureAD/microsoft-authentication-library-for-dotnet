@@ -28,7 +28,7 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal class CoreErrorMessages
+    internal static class CoreErrorMessages
     {
         public const string UnknownUser = "Could not identify the user logged into the OS. See http://aka.ms/msal-net-iwa for details.";
 

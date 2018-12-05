@@ -28,15 +28,17 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Internal
 {
-    internal class MsalLogger : CoreLoggerBase
+    internal class MsalLogger : ICoreLogger
     {
         private readonly IPlatformLogger _platformLogger;
 
-        internal MsalLogger(Guid correlationId, string component) : base(correlationId)
+        internal MsalLogger(Guid correlationId, string component)
         {
+            CorrelationId = correlationId;
             _platformLogger = PlatformProxyFactory.GetPlatformProxy().PlatformLogger;
             Component = string.Empty;
             if (!string.IsNullOrEmpty(component))
@@ -46,76 +48,80 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public override bool PiiLoggingEnabled => Logger.PiiLoggingEnabled;
+        public static ICoreLogger Default { get; set; }
 
-        internal string Component { get; set; }
+        public Guid CorrelationId { get; set; }
 
-        public override void Info(string messageScrubbed)
+        public bool PiiLoggingEnabled => Logger.PiiLoggingEnabled;
+
+        internal string Component { get; }
+
+        public void Info(string messageScrubbed)
         {
             Log(LogLevel.Info, string.Empty, messageScrubbed);
         }
 
-        public override void InfoPii(string messageWithPii, string messageScrubbed)
+        public void InfoPii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Info, messageWithPii, messageScrubbed);
         }
 
-        public override void InfoPii(Exception exWithPii)
+        public void InfoPii(Exception exWithPii)
         {
             Log(LogLevel.Info, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
-        public override void InfoPiiWithPrefix(Exception exWithPii, string prefix)
+        public void InfoPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Log(LogLevel.Info, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
-        public override void Verbose(string messageScrubbed)
+        public void Verbose(string messageScrubbed)
         {
             Log(LogLevel.Verbose, string.Empty, messageScrubbed);
         }
 
-        public override void VerbosePii(string messageWithPii, string messageScrubbed)
+        public void VerbosePii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Verbose, messageWithPii, messageScrubbed);
         }
 
-        public override void Warning(string messageScrubbed)
+        public void Warning(string messageScrubbed)
         {
             Log(LogLevel.Warning, string.Empty, messageScrubbed);
         }
 
-        public override void WarningPii(string messageWithPii, string messageScrubbed)
+        public void WarningPii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Warning, messageWithPii, messageScrubbed);
         }
 
-        public override void WarningPii(Exception exWithPii)
+        public void WarningPii(Exception exWithPii)
         {
             Log(LogLevel.Warning, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
-        public override void WarningPiiWithPrefix(Exception exWithPii, string prefix)
+        public void WarningPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Log(LogLevel.Warning, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
-        public override void Error(string messageScrubbed)
+        public void Error(string messageScrubbed)
         {
             Log(LogLevel.Error, string.Empty, messageScrubbed);
         }
 
-        public override void ErrorPii(Exception exWithPii)
+        public void ErrorPii(Exception exWithPii)
         {
             Log(LogLevel.Error, exWithPii.ToString(), MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
-        public override void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
+        public void ErrorPiiWithPrefix(Exception exWithPii, string prefix)
         {
             Log(LogLevel.Error, prefix + exWithPii.ToString(), prefix + MsalExceptionFactory.GetPiiScrubbedExceptionDetails(exWithPii));
         }
 
-        public override void ErrorPii(string messageWithPii, string messageScrubbed)
+        public void ErrorPii(string messageWithPii, string messageScrubbed)
         {
             Log(LogLevel.Error, messageWithPii, messageScrubbed);
         }

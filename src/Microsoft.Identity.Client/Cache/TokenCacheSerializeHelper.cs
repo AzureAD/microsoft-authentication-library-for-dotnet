@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
@@ -53,7 +54,7 @@ namespace Microsoft.Identity.Client.Cache
 
             if (cacheDict == null || cacheDict.Count == 0)
             {
-                CoreLoggerBase.Default.Info("Msal Cache is empty.");
+                MsalLogger.Default.Info("Msal Cache is empty.");
                 return;
             }
 

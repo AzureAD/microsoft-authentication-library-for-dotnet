@@ -31,7 +31,6 @@ using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Realm;
 
 namespace Microsoft.Identity.Client.WsTrust
 {

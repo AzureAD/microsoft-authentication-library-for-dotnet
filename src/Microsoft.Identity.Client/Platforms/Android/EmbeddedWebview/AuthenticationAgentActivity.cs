@@ -33,8 +33,8 @@ using Android.Content;
 using Android.OS;
 using Android.Webkit;
 using Android.Widget;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
@@ -43,8 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
     internal class AuthenticationAgentActivity : Activity
     {
         private const string AboutBlankUri = "about:blank";
-
-        private CoreWebViewClient client;
+        private CoreWebViewClient _client;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -57,12 +56,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             relativeLayout.AddView(webView);
             SetContentView(relativeLayout);
-            
+
             string url = Intent.GetStringExtra("Url");
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
-            CoreLoggerBase.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
+            MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
 
             webSettings.JavaScriptEnabled = true;
 
@@ -71,33 +70,33 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             webSettings.UseWideViewPort = true;
             webSettings.BuiltInZoomControls = true;
 
-            this.client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
-            webView.SetWebViewClient(client);
+            this._client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
+            webView.SetWebViewClient(_client);
             webView.LoadUrl(url);
         }
 
         public override void Finish()
         {
-            if (this.client.ReturnIntent != null)
+            if (_client.ReturnIntent != null)
             {
-                this.SetResult(Result.Ok, this.client.ReturnIntent);
+                SetResult(Result.Ok, _client.ReturnIntent);
             }
             else
             {
-                this.SetResult(Result.Canceled, new Intent("ReturnFromEmbeddedWebview"));
+                SetResult(Result.Canceled, new Intent("ReturnFromEmbeddedWebview"));
             }
             base.Finish();
         }
 
-        sealed class CoreWebViewClient : WebViewClient
+        private sealed class CoreWebViewClient : WebViewClient
         {
-            private readonly string callback;
+            private readonly string _callback;
             private Activity Activity { get; set; }
 
             public CoreWebViewClient(string callback, Activity activity)
             {
-                this.callback = callback;
-                this.Activity = activity;
+                _callback = callback;
+                Activity = activity;
             }
 
             public Intent ReturnIntent { get; private set; }
@@ -106,10 +105,10 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             {
                 base.OnLoadResource(view, url);
 
-                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
+                if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnLoadResource(view, url);
-                    this.Finish(Activity, url);
+                    Finish(Activity, url);
                 }
 
             }
@@ -120,7 +119,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    CoreLoggerBase.Default.Verbose("It is browser launch request");
+                    MsalLogger.Default.Verbose("It is browser launch request");
                     OpenLinkInBrowser(url, Activity);
                     view.StopLoading();
                     Activity.Finish();
@@ -129,9 +128,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                 if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    CoreLoggerBase.Default.Verbose("It is an azure authenticator install request");
+                    MsalLogger.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
-                    this.Finish(Activity, url);
+                    Finish(Activity, url);
                     return true;
                 }
 
@@ -145,28 +144,34 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                     Dictionary<string, string> keyPair = CoreHelpers.ParseKeyValueList(query, '&', true, false, null);
                     string responseHeader = DeviceAuthHelper.CreateDeviceAuthChallengeResponseAsync(keyPair).Result;
-                    Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>();
-                    pkeyAuthEmptyResponse[BrokerConstants.ChallangeResponseHeader] = responseHeader;
+                    Dictionary<string, string> pkeyAuthEmptyResponse = new Dictionary<string, string>
+                    {
+                        [BrokerConstants.ChallangeResponseHeader] = responseHeader
+                    };
                     view.LoadUrl(keyPair["SubmitUrl"], pkeyAuthEmptyResponse);
                     return true;
                 }
 
-                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
+                if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
-                    this.Finish(Activity, url);
+                    Finish(Activity, url);
                     return true;
                 }
 
 
                 if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {
-                    UriBuilder errorUri = new UriBuilder(callback);
-                    errorUri.Query = string.Format(CultureInfo.InvariantCulture, "error={0}&error_description={1}",
-                        CoreErrorCodes.NonHttpsRedirectNotSupported, CoreErrorMessages.NonHttpsRedirectNotSupported);
-                    this.Finish(Activity, errorUri.ToString());
+                    UriBuilder errorUri = new UriBuilder(_callback)
+                    {
+                        Query = string.Format(
+                            CultureInfo.InvariantCulture,
+                            "error={0}&error_description={1}",
+                            CoreErrorCodes.NonHttpsRedirectNotSupported,
+                            CoreErrorMessages.NonHttpsRedirectNotSupported)
+                    };
+                    Finish(Activity, errorUri.ToString());
                     return true;
                 }
-
 
                 return false;
             }
@@ -186,7 +191,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             public override void OnPageFinished(WebView view, string url)
             {
-                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
+                if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageFinished(view, url);
                     this.Finish(Activity, url);
@@ -197,7 +202,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             public override void OnPageStarted(WebView view, string url, global::Android.Graphics.Bitmap favicon)
             {
-                if (url.StartsWith(callback, StringComparison.OrdinalIgnoreCase))
+                if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageStarted(view, url, favicon);
                 }
@@ -207,8 +212,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             private void Finish(Activity activity, string url)
             {
-                this.ReturnIntent = new Intent("ReturnFromEmbeddedWebview");
-                this.ReturnIntent.PutExtra("ReturnedUrl", url);
+                ReturnIntent = new Intent("ReturnFromEmbeddedWebview");
+                ReturnIntent.PutExtra("ReturnedUrl", url);
                 activity.Finish();
             }
         }

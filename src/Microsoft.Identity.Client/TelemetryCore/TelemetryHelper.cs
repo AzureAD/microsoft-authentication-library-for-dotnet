@@ -29,7 +29,7 @@ using System;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryHelper : IDisposable
+    internal sealed class TelemetryHelper : IDisposable
     {
         private readonly EventBase _eventToEnd;
         private readonly string _requestId;
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         private bool _disposedValue = false;
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {

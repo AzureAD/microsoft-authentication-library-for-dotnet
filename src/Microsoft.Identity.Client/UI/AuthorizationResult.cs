@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.UI
         UserCancel,
         UnknownError
     }
-    
+
     [DataContract]
     internal class AuthorizationResult
     {

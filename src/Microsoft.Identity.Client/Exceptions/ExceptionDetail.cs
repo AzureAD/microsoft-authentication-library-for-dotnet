@@ -25,13 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
-
+using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
-using System.Collections.Generic;
-using System.Net.Http.Headers;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Exceptions
 {
     internal class ExceptionDetail
     {

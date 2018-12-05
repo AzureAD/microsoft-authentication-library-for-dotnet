@@ -31,7 +31,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
-    class CoreTestConstants
+    public static class CoreTestConstants
     {
         public static readonly string ScopeStr = "scope1 scope2";
         public static readonly string ScopeForAnotherResourceStr = "scope3 scope4";
@@ -59,11 +59,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         public static readonly string Utid= "my-utid";
         public static readonly string DiscoveryEndPoint = "discovery/instance";
 
-        public static readonly string UserIdentifier = CreateUserIdentifer();
+        public static readonly string UserIdentifier = CreateUserIdentifier();
 
-        public static string CreateUserIdentifer()
+        public static string CreateUserIdentifier()
         {
-            return CreateUserIdentifer(Uid, Utid);
+            return CreateUserIdentifier(Uid, Utid);
         }
 
         public static string GetDiscoveryEndpoint(string authority)
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return authority + DiscoveryEndPoint;
         }
 
-        public static string CreateUserIdentifer(string uid, string utid)
+        public static string CreateUserIdentifier(string uid, string utid)
         {
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}",
                 Base64UrlHelpers.Encode(uid),

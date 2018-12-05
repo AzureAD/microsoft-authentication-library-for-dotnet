@@ -25,10 +25,10 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -38,22 +38,21 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
     [TestClass]
     public class XmsCliTelemTests
     {
-        private CoreLoggerBase _coreLoggerBase;
+        private RequestContext _requestContext;
+        private ICoreLogger _coreLogger;
 
         [TestInitialize]
         public void TestInitialize()
         {
             // Methods in XmsCliTelemTests log errors when parsing response headers;
-            _coreLoggerBase = Substitute.For<CoreLoggerBase>();
+            _coreLogger = Substitute.For<ICoreLogger>();
+            _requestContext = new RequestContext(null, _coreLogger);
         }
 
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]
         public void XmsClientTelemInfoParseTest_XmsCliTelemInfoCorrectFormat()
         {
-            //Arrange
-            var requestContext = new RequestContext(null, _coreLoggerBase);
-
             //Act - Parse correctly formatted header
             var responseHeaders = new Dictionary<string, string>
             {
@@ -61,7 +60,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             };
 
             var xmsCliTeleminfo =
-                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], requestContext);
+                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _requestContext);
 
             // Assert
             Assert.AreEqual(xmsCliTeleminfo.Version, "1");
@@ -75,9 +74,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryInternalAPI")]
         public void XmsClientTelemInfoParseTest_IncorrectFormat()
         {
-            //Arrange
-            var requestContext = new RequestContext(null, _coreLoggerBase);
-
             //Act - Parse malformed header - 6 values
             var responseHeaders = new Dictionary<string, string>
             {
@@ -85,10 +81,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             };
 
             var xmsCliTeleminfo =
-                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], requestContext);
+                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _requestContext);
 
             // Assert
-            _coreLoggerBase.Received().Warning(
+            _coreLogger.Received().Warning(
                 Arg.Is(
                     string.Format(
                         CultureInfo.InvariantCulture,
@@ -100,9 +96,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryInternalAPI")]
         public void XmsClientTelemInfoParseTest_IncorrectHeaderVersion()
         {
-            //Arrange
-            var requestContext = new RequestContext(null, _coreLoggerBase);
-
             //Act - Parse wrong version of header - should be "1"
             var responseHeaders = new Dictionary<string, string>
             {
@@ -110,10 +103,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
             };
 
             var xmsCliTeleminfo =
-                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], requestContext);
+                new XmsCliTelemInfoParser().ParseXMsTelemHeader(responseHeaders["x-ms-clitelem"], _requestContext);
 
             // Assert
-            _coreLoggerBase.Received().Warning(
+            _coreLogger.Received().Warning(
                 Arg.Is(
                     string.Format(
                         CultureInfo.InvariantCulture,

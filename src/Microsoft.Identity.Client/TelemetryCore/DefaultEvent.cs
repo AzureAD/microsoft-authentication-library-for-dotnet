@@ -55,6 +55,5 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
             return eventCount[eventName].ToString(CultureInfo.InvariantCulture);
         }
-
     }
 }

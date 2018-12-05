@@ -37,7 +37,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string AuthenticationFailed = "authentication_failed";
 
-
         /// <summary>
         /// Authority validation failed.
         /// </summary>
@@ -137,8 +136,6 @@ namespace Microsoft.Identity.Client
         /// Unknown User Type.
         /// </summary>
         public const string UnknownUserType = "unknown_user_type";
-
-
 
         /// <summary>
         /// Unknown User.

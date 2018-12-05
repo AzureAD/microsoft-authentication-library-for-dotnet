@@ -28,6 +28,7 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45

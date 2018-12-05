@@ -63,12 +63,12 @@ namespace Microsoft.Identity.Client.Cache
 
         internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, string uniqueId, string displayableId)
         {
-            this.Authority = authority;
-            this.Resource = resource;
-            this.ClientId = clientId;
-            this.TokenSubjectType = tokenSubjectType;
-            this.UniqueId = uniqueId;
-            this.DisplayableId = displayableId;
+            Authority = authority;
+            Resource = resource;
+            ClientId = clientId;
+            TokenSubjectType = tokenSubjectType;
+            UniqueId = uniqueId;
+            DisplayableId = displayableId;
         }
 
         public string Authority { get; }
@@ -92,8 +92,7 @@ namespace Microsoft.Identity.Client.Cache
         /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
-            AdalTokenCacheKey other = obj as AdalTokenCacheKey;
-            return (other != null) && this.Equals(other);
+            return (obj is AdalTokenCacheKey other) && Equals(other);
         }
 
         /// <summary>
@@ -111,12 +110,12 @@ namespace Microsoft.Identity.Client.Cache
             }
 
             return other != null
-                && other.Authority == this.Authority
-                && this.ResourceEquals(other.Resource)
-                && this.ClientIdEquals(other.ClientId)
-                && other.UniqueId == this.UniqueId
-                && this.DisplayableIdEquals(other.DisplayableId)
-                && other.TokenSubjectType == this.TokenSubjectType;
+                && other.Authority == Authority
+                && ResourceEquals(other.Resource)
+                && ClientIdEquals(other.ClientId)
+                && other.UniqueId == UniqueId
+                && DisplayableIdEquals(other.DisplayableId)
+                && other.TokenSubjectType == TokenSubjectType;
         }
 
         /// <summary>
@@ -127,13 +126,13 @@ namespace Microsoft.Identity.Client.Cache
         /// </returns>
         public override int GetHashCode()
         {
-            const string delimiter = ":::";
-            var hashString = this.Authority + delimiter
-                           + this.Resource.ToLowerInvariant() + delimiter
-                           + this.ClientId.ToLowerInvariant() + delimiter
-                           + this.UniqueId + delimiter
-                           + this.DisplayableId?.ToLowerInvariant() + delimiter
-                           + (int) this.TokenSubjectType;
+            const string Delimiter = ":::";
+            var hashString = Authority + Delimiter
+                           + Resource.ToLowerInvariant() + Delimiter
+                           + ClientId.ToLowerInvariant() + Delimiter
+                           + UniqueId + Delimiter
+                           + DisplayableId?.ToLowerInvariant() + Delimiter
+                           + (int)TokenSubjectType;
             return hashString.GetHashCode();
         }
 
@@ -152,12 +151,10 @@ namespace Microsoft.Identity.Client.Cache
             return (string.Compare(otherDisplayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) == 0);
         }
 
-        private string DebuggerDisplay
-        {
-            get { return string.Format(
+        private string DebuggerDisplay =>
+            string.Format(
                 CultureInfo.InvariantCulture, 
                 "AdalTokenCacheKey: {0} {1} {2} {3} {4}", 
-                Authority, Resource, ClientId, UniqueId, DisplayableId); }
-        }
+                Authority, Resource, ClientId, UniqueId, DisplayableId);
     }
 }

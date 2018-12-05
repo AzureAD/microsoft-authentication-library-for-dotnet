@@ -29,14 +29,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal class AdalCacheOperations
+    internal static class AdalCacheOperations
     {
         private const int SchemaVersion = 3;
         private const string Delimiter = ":::";
@@ -47,7 +45,7 @@ namespace Microsoft.Identity.Client.Cache
             {
                 BinaryWriter writer = new BinaryWriter(stream);
                 writer.Write(SchemaVersion);
-                CoreLoggerBase.Default.Info(string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
+                MsalLogger.Default.Info(string.Format(CultureInfo.CurrentCulture, "Serializing token cache with {0} items.",
                     tokenCacheDictionary.Count));
 
                 writer.Write(tokenCacheDictionary.Count);
@@ -85,10 +83,10 @@ namespace Microsoft.Identity.Client.Cache
                 int blobSchemaVersion = reader.ReadInt32();
                 if (blobSchemaVersion != SchemaVersion)
                 {
-                    CoreLoggerBase.Default.Warning("The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
+                    MsalLogger.Default.Warning("The version of the persistent state of the cache does not match the current schema, so skipping deserialization.");
                     return dictionary;
                 }
-                
+
                 int count = reader.ReadInt32();
                 for (int n = 0; n < count; n++)
                 {
@@ -103,7 +101,7 @@ namespace Microsoft.Identity.Client.Cache
                     dictionary.Add(key, resultEx);
                 }
 
-                CoreLoggerBase.Default.Info(string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
+                MsalLogger.Default.Info(string.Format(CultureInfo.CurrentCulture, "Deserialized {0} items to token cache.", count));
             }
 
             return dictionary;

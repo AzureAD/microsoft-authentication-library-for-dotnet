@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             MsalAccessTokenCacheKey key1 = new MsalAccessTokenCacheKey("env", "tid", "uid", "cid", "scope1 scope2");
             MsalAccessTokenCacheKey key2 = new MsalAccessTokenCacheKey("env", "tid", "uid", "cid", 
-                String.Join(" ", Enumerable.Range(1, 100).Select(i => "scope" + i)));
+                string.Join(" ", Enumerable.Range(1, 100).Select(i => "scope" + i)));
 
             Assert.AreNotEqual(key1.GetUWPFixedSizeKey(), key2.GetUWPFixedSizeKey());
             Assert.IsTrue(key2.GetUWPFixedSizeKey().Length < 255);

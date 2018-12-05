@@ -229,6 +229,5 @@ namespace Microsoft.Identity.Client.Utils
             messageBuilder.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=", delimiter, key);
             messageBuilder.Append(value);
         }
-
     }
 }

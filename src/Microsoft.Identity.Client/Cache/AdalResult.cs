@@ -26,10 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.IO;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using System.Text;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -49,10 +46,10 @@ namespace Microsoft.Identity.Client.Cache
         /// <param name="expiresOn">The point in time in which the Access Token returned in the AccessToken property ceases to be valid</param>
         internal AdalResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn)
         {
-            this.AccessTokenType = accessTokenType;
-            this.AccessToken = accessToken;
-            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
-            this.ExtendedExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            AccessTokenType = accessTokenType;
+            AccessToken = accessToken;
+            ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            ExtendedExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
         }
 
         /// <summary>
@@ -65,10 +62,10 @@ namespace Microsoft.Identity.Client.Cache
         internal AdalResult(string accessTokenType, string accessToken, DateTimeOffset expiresOn,
             DateTimeOffset extendedExpiresOn)
         {
-            this.AccessTokenType = accessTokenType;
-            this.AccessToken = accessToken;
-            this.ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
-            this.ExtendedExpiresOn = DateTime.SpecifyKind(extendedExpiresOn.DateTime, DateTimeKind.Utc);
+            AccessTokenType = accessTokenType;
+            AccessToken = accessToken;
+            ExpiresOn = DateTime.SpecifyKind(expiresOn.DateTime, DateTimeKind.Utc);
+            ExtendedExpiresOn = DateTime.SpecifyKind(extendedExpiresOn.DateTime, DateTimeKind.Utc);
         }
 
         /// <summary>
@@ -132,16 +129,16 @@ namespace Microsoft.Identity.Client.Cache
         /// <returns>Created authorization header</returns>
         public string CreateAuthorizationHeader()
         {
-            return Oauth2AuthorizationHeader + this.AccessToken;
+            return Oauth2AuthorizationHeader + AccessToken;
         }
 
         internal void UpdateTenantAndUserInfo(string tenantId, string idToken, AdalUserInfo userInfo)
         {
-            this.TenantId = tenantId;
-            this.IdToken = idToken;
+            TenantId = tenantId;
+            IdToken = idToken;
             if (userInfo != null)
             {
-                this.UserInfo = new AdalUserInfo(userInfo);
+                UserInfo = new AdalUserInfo(userInfo);
             }
         }
     }
