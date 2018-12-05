@@ -42,6 +42,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {
     [TestClass]
+    [Ignore]
     public class FileIOTests
     {
         private const string FileName = "FileIOTests.bin";
