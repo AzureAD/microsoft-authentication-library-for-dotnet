@@ -401,38 +401,35 @@ namespace Microsoft.Identity.Client
             IEnumerable<MsalAccessTokenCacheItem> filteredItems =
                 tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
 
-            IEnumerable<MsalAccessTokenCacheItem> msalAccessTokenCacheItems = filteredItems.ToList();
-            requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + msalAccessTokenCacheItems.Count());
+           requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
 
             // filter by authority
             IEnumerable<MsalAccessTokenCacheItem> filteredByPreferredAlias =
-                msalAccessTokenCacheItems.Where
+                filteredItems.Where
                 (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase));
 
-            IEnumerable<MsalAccessTokenCacheItem> accessTokenCacheItems = filteredByPreferredAlias.ToList();
-            if (accessTokenCacheItems.Any())
+            if (filteredByPreferredAlias.Any())
             {
-                filteredItems = accessTokenCacheItems;
+                filteredItems = filteredByPreferredAlias;
             }
             else
             {
-                filteredItems = msalAccessTokenCacheItems.Where(
+                filteredItems = filteredItems.Where(
                     item => environmentAliases.Contains(item.Environment) &&
                     item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
             }
 
             // no match
-            IEnumerable<MsalAccessTokenCacheItem> cacheItems = filteredItems.ToList();
-            if (!cacheItems.Any())
+            if (!filteredItems.Any())
             {
                 requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
                 return null;
             }
 
             // if only one cached token found
-            if (cacheItems.Count() == 1)
+            if (filteredItems.Count() == 1)
             {
-                msalAccessTokenCacheItem = cacheItems.First();
+                msalAccessTokenCacheItem = filteredItems.First();
             }
             else
             {
