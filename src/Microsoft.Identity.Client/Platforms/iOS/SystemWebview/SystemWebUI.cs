@@ -69,6 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
         {
             try
             {
+                #if OS != UNIX
                 if (UIDevice.CurrentDevice.CheckSystemVersion(12, 0))
                 {
                     asWebAuthenticationSession = new AuthenticationServices.ASWebAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
@@ -104,7 +105,25 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 
                     sfAuthenticationSession.Start();
                 }
+#else
+                if (UIDevice.CurrentDevice.CheckSystemVersion(11, 0))
+                {
+                    sfAuthenticationSession = new SFAuthenticationSession(new NSUrl(authorizationUri.AbsoluteUri),
+                        redirectUri.Scheme, (callbackUrl, error) =>
+                        {
+                            if (error != null)
+                            {
+                                ProcessCompletionHandlerError(error);
+                            }
+                            else
+                            {
+                                ContinueAuthentication(callbackUrl.ToString());
+                            }
+                        });
 
+                    sfAuthenticationSession.Start();
+                }
+#endif
                 else
                 {
                     safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);

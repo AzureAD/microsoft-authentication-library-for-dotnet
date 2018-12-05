@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras/1.5.4">
+﻿<Project Sdk="MSBuild.Sdk.Extras">
   <Target Name="OS" BeforeTargets="Build">
     <Message Text="OS = $(OS)" Importance="High" />
   </Target>
