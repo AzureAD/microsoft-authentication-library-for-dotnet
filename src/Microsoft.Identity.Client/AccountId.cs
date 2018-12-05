@@ -26,13 +26,8 @@
 //------------------------------------------------------------------------------
 
 
-using Microsoft.Identity.Client;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
@@ -68,14 +63,9 @@ namespace Microsoft.Identity.Client
         /// <param name="tenantId">A string representation for a GUID, which is the ID of the tenant where the account resides</param>
         public AccountId(string identifier, string objectId, string tenantId)
         {
-            if (identifier == null)
-            {
-                throw new ArgumentNullException(nameof(identifier));
-            }
-
-            this.Identifier = identifier;
-            this.ObjectId = objectId;
-            this.TenantId = tenantId;
+            Identifier = identifier ?? throw new ArgumentNullException(nameof(identifier));
+            ObjectId = objectId;
+            TenantId = tenantId;
 
             ValidateId();
         }
@@ -96,12 +86,12 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public override bool Equals(object obj)
         {
-            if (obj == null) { return false; }
+            if (!(obj is AccountId otherMsalAccountId))
+            {
+                return false;
+            }
 
-            var otherMsalAccountId = obj as AccountId;
-            if (otherMsalAccountId == null) { return false; }
-
-            return this.Identifier == otherMsalAccountId.Identifier;
+            return string.Compare(Identifier, otherMsalAccountId.Identifier, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         /// <summary>
@@ -109,7 +99,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public override int GetHashCode()
         {
-            return this.Identifier.GetHashCode();
+            return Identifier.GetHashCode();
         }
 
         /// <summary>
@@ -117,18 +107,18 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public override string ToString()
         {
-            return "AccountId: " + this.Identifier;
+            return "AccountId: " + Identifier;
         }
 
         [Conditional("DEBUG")]
         private void ValidateId()
         {
-            string expectedId = this.ObjectId + "." + this.TenantId;
-            if (!String.Equals(expectedId, this.Identifier, StringComparison.Ordinal))
+            string expectedId = ObjectId + "." + TenantId;
+            if (!string.Equals(expectedId, Identifier, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(
                     "Internal Error (debug only) - " +
-                    "Expecting Identifer = ObjectId.TenantId but have " + this.ToString());
+                    "Expecting Identifier = ObjectId.TenantId but have " + ToString());
             }
         }
     }

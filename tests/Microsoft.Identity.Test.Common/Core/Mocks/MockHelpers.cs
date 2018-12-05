@@ -41,12 +41,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public const string TooManyRequestsContent = "Too many requests error";
         public static readonly TimeSpan TestRetryAfterDuration = TimeSpan.FromSeconds(120);
 
-        public static readonly string TokenResponseTemplate =
-            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-            "\"{0}\",\"access_token\":\"some-access-token\"" +
-            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
-            ":\"{2}\",\"id_token\"" +
-            ":\"{1}\",\"id_token_expires_in\":\"3600\"}";
+        //public static readonly string TokenResponseTemplate =
+        //    "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+        //    "\"{0}\",\"access_token\":\"some-access-token\"" +
+        //    ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+        //    ":\"{2}\",\"id_token\"" +
+        //    ":\"{1}\",\"id_token_expires_in\":\"3600\"}";
 
         public static readonly string DefaultTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +

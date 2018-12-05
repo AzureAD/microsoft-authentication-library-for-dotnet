@@ -32,9 +32,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -93,13 +92,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
                 TokenCache != null,
-                this.GetType().Name);
+                GetType().Name);
 
             string messageWithoutPii = string.Format(
                 CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}",
                 TokenCache != null,
-                this.GetType().Name);
+                GetType().Name);
 
             if (authenticationRequestParameters.Authority != null &&
                 AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.Host))

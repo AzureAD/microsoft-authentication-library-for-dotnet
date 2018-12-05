@@ -80,7 +80,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public string GetEnvironmentVariable(string variable)
         {
-            if (String.IsNullOrWhiteSpace(variable))
+            if (string.IsNullOrWhiteSpace(variable))
             {
                 throw new ArgumentNullException(nameof(variable));
             }

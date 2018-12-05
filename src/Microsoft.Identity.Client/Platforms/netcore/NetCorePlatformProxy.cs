@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public string GetEnvironmentVariable(string variable)
         {
-            if (String.IsNullOrWhiteSpace(variable))
+            if (string.IsNullOrWhiteSpace(variable))
             {
                 throw new ArgumentNullException(nameof(variable));
             }

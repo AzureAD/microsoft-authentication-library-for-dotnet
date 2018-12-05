@@ -80,47 +80,43 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public ApiIds ApiId
         {
-            set { this[ApiIdKey] = ((int) value).ToString(CultureInfo.InvariantCulture); }
+            set => this[ApiIdKey] = ((int) value).ToString(CultureInfo.InvariantCulture);
         }
 
         public Uri Authority
         {
-            set { this[AuthorityKey] = ScrubTenant(value)?.ToLowerInvariant(); }
+            set => this[AuthorityKey] = ScrubTenant(value)?.ToLowerInvariant();
         }
 
         public string AuthorityType
         {
-            set { this[AuthorityTypeKey] = value?.ToLowerInvariant(); }
+            set => this[AuthorityTypeKey] = value?.ToLowerInvariant();
         }
 
         public string UiBehavior
         {
-            set { this[UiBehaviorKey] = value?.ToLowerInvariant(); }
+            set => this[UiBehaviorKey] = value?.ToLowerInvariant();
         }
 
         public string ValidationStatus
         {
-            set { this[ValidationStatusKey] = value?.ToLowerInvariant(); }
+            set => this[ValidationStatusKey] = value?.ToLowerInvariant();
         }
 
         public string TenantId
         {
-            set
-            {
+            set =>
                 this[TenantIdKey] = value != null && _logger.PiiLoggingEnabled
-                    ? HashPersonalIdentifier(value)
-                    : null;
-            }
+                                        ? HashPersonalIdentifier(value)
+                                        : null;
         }
 
         public string AccountId
         {
-            set
-            {
+            set =>
                 this[UserIdKey] = value != null && _logger.PiiLoggingEnabled
-                    ? HashPersonalIdentifier(value)
-                    : null;
-            }
+                                      ? HashPersonalIdentifier(value)
+                                      : null;
         }
 
         public bool WasSuccessful
@@ -134,12 +130,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public string CorrelationId
         {
-            set { this[CorrelationIdKey] = value; }
+            set => this[CorrelationIdKey] = value;
         }
 
         public string RequestId
         {
-            set { this[RequestIdKey] = value; }
+            set => this[RequestIdKey] = value;
         }
 
         public bool IsConfidentialClient
@@ -151,16 +147,15 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public string ApiErrorCode
         {
-            set { this[ApiErrorCodeKey] = value; }
+            set => this[ApiErrorCodeKey] = value;
         }
 
         public string LoginHint
         {
-            set {
+            set =>
                 this[LoginHintKey] = value != null && _logger.PiiLoggingEnabled
-                    ? HashPersonalIdentifier(value)
-                    : null;
-            }
+                                         ? HashPersonalIdentifier(value)
+                                         : null;
         }
     }
 }

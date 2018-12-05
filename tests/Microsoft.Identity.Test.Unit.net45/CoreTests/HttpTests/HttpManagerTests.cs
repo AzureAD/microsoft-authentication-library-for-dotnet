@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -132,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
-                                                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null)))
+                                                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
@@ -157,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                             new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                             new Dictionary<string, string>(),
                                                             new StringContent("body"),
-                                                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null)))
+                                                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
                                                         .ConfigureAwait(false);
 
                 Assert.AreEqual(HttpStatusCode.BadGateway, msalHttpResponse.StatusCode);
@@ -179,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                                 new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 (IDictionary<string, string>)null,
-                                                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null)))
+                                                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
@@ -205,7 +206,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                     var msalHttpResponse = await httpManager.SendGetAsync(
                                                                 new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
-                                                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null)))
+                                                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }
@@ -233,7 +234,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                                                                 new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 new Dictionary<string, string>(),
-                                                                new RequestContext(null, new TestLogger(Guid.NewGuid(), null)))
+                                                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
                                                             .ConfigureAwait(false);
                     Assert.Fail("request should have failed");
                 }

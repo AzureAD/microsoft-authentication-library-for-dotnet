@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -68,7 +69,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             null,
-                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
                 Assert.Fail("test should have failed");
             }
@@ -105,7 +106,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             null,
-                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         await instance.ResolveEndpointsAsync(
                             null,
-                            new RequestContext(null, new TestLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     }).GetAwaiter().GetResult();
 
                 Assert.AreEqual(

@@ -30,7 +30,7 @@ using System.Globalization;
 using System.Text;
 using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Exceptions
 {
     /// <summary>
     ///     Factory to manage and throw proper exceptions for MSAL.
@@ -60,7 +60,6 @@ namespace Microsoft.Identity.Client
         public static Exception GetServiceException(string errorCode, string errorMessage, IHttpWebResponse httpResponse)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
-
             return GetServiceException(errorCode, errorMessage, null, ExceptionDetail.FromHttpResponse(httpResponse));
         }
 

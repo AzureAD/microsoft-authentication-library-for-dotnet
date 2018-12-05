@@ -33,9 +33,7 @@ namespace Microsoft.Identity.Client.Http
     internal interface IHttpWebResponse 
     {
         HttpStatusCode StatusCode { get; }
-
         HttpResponseHeaders Headers { get; }
-
         string Body { get; }
     }
 }

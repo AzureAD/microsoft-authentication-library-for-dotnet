@@ -31,6 +31,7 @@ using System.Linq;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
-            CoreLoggerBase.Default = Substitute.For<CoreLoggerBase>();
+            MsalLogger.Default = Substitute.For<ICoreLogger>();
 
             // Use the net45 accessor for tests
             _legacyCachePersistence = new InMemoryLegacyCachePersistence();
@@ -242,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             // Assert 
             AssertCacheEntryCount(6);
 
-            CoreLoggerBase.Default.Received().Error(Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
+            MsalLogger.Default.Received().Error(Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
         }
 
         [TestMethod]
@@ -312,9 +313,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 "scope1");
 
             // Assert
-            CoreLoggerBase.Default.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentAuthorityError));
+            MsalLogger.Default.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentAuthorityError));
 
-            CoreLoggerBase.Default.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
+            MsalLogger.Default.Received().Error(Arg.Is<string>(CacheFallbackOperations.DifferentEnvError));
         }
 
         private static void PopulateLegacyCache(ILegacyCachePersistence legacyCachePersistence)

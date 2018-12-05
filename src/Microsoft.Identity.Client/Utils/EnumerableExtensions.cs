@@ -25,7 +25,6 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,10 +41,10 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (input.IsNullOrEmpty())
             {
-                return String.Empty;
+                return string.Empty;
             }
 
-            return String.Join(" ", input);
+            return string.Join(" ", input);
         }
     }
 }

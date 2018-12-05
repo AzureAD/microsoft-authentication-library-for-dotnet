@@ -111,8 +111,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
         public const string AzureAuthenticatorAppSignature = "ho040S3ffZkmxqtQrSwpTVOn9r0=";
         public const string AzureAuthenticatorAppPackageName = "com.azure.authenticator";
         public const string ClientTlsRedirect = "urn:http-auth:PKeyAuth";
-        public const string ChallangeTlsIncapable = "x-ms-PKeyAuth";
-        public const string ChallangeTlsIncapableVersion = "1.0";
+        public const string ChallengeTlsIncapable = "x-ms-PKeyAuth";
+        public const string ChallengeTlsIncapableVersion = "1.0";
         public const string RedirectPrefix = "msauth";
         public const string BrowserExtPrefix = "browser://";
         public const string BrowserExtInstallPrefix = "msauth://";

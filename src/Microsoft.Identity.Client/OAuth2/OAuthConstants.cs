@@ -27,7 +27,7 @@
 
 namespace Microsoft.Identity.Client.OAuth2
 {
-    internal class OAuth2Parameter
+    internal static class OAuth2Parameter
     {
         public const string ResponseType = "response_type";
         public const string GrantType = "grant_type";
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string ClientInfo = "client_info"; // restrict_to_hint is not standard oauth2 parameter
     }
 
-    internal class OAuth2GrantType
+    internal static class OAuth2GrantType
     {
         public const string AuthorizationCode = "authorization_code";
         public const string RefreshToken = "refresh_token";
@@ -72,22 +72,22 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string DeviceCode = "device_code";
     }
 
-    internal class OAuth2ResponseType
+    internal static class OAuth2ResponseType
     {
         public const string Code = "code";
     }
 
-    internal class OAuth2AssertionType
+    internal static class OAuth2AssertionType
     {
         public const string JwtBearer = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer";
     }
 
-    internal class OAuth2RequestedTokenUse
+    internal static class OAuth2RequestedTokenUse
     {
         public const string OnBehalfOf = "on_behalf_of";
     }
 
-    internal class OAuth2Header
+    internal static class OAuth2Header
     {
         public const string CorrelationId = "client-request-id";
         public const string RequestCorrelationIdInResponse = "return-client-request-id";
@@ -97,13 +97,13 @@ namespace Microsoft.Identity.Client.OAuth2
     /// OAuth2 errors that are only used internally. All error codes used when propagating exceptions should 
     /// be made public.
     /// </summary>
-    internal class OAuth2Error
+    internal static class OAuth2Error
     {
         public const string LoginRequired = "login_required";
         public const string AuthorizationPending = "authorization_pending";
     }
 
-    internal class OAuth2Value
+    internal static class OAuth2Value
     {
         public static readonly string[] ReservedScopes = { ScopeOpenId, ScopeProfile, ScopeOfflineAccess };
         public const string CodeChallengeMethodValue = "S256";

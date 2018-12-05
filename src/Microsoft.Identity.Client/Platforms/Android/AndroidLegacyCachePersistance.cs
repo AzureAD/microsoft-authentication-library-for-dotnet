@@ -29,7 +29,7 @@ using System;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.ErrorPiiWithPrefix(ex, "An error occurred while reading the adal cache: ");
+                MsalLogger.Default.ErrorPiiWithPrefix(ex, "An error occurred while reading the adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
 
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.ErrorPiiWithPrefix(ex, "Failed to save adal cache: ");
+                MsalLogger.Default.ErrorPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
     }

@@ -27,7 +27,7 @@
 
 using System;
 using Foundation;
-using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using UIKit;
 using WebKit;
@@ -96,11 +96,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         {
             if (err != null)
             {
-                CoreLoggerBase.Default.Info(err.LocalizedDescription);
+                MsalLogger.Default.Info(err.LocalizedDescription);
             }
             if (result != null)
             {
-                CoreLoggerBase.Default.Info(result.ToString());
+                MsalLogger.Default.Info(result.ToString());
             }
             return;
         }

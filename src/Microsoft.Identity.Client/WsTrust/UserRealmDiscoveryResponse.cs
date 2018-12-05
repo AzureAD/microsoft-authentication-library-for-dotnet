@@ -26,12 +26,9 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Http;
 
-namespace Microsoft.Identity.Client.Realm
+namespace Microsoft.Identity.Client.WsTrust
 {
     [DataContract]
     internal sealed class UserRealmDiscoveryResponse

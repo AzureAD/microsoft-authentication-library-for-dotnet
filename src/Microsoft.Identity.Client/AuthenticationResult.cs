@@ -27,7 +27,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
@@ -78,7 +77,7 @@ namespace Microsoft.Identity.Client
         {
             if (msalAccessTokenCacheItem.HomeAccountId != null)
             {
-                this.Account = new Account(
+                Account = new Account(
                     msalAccessTokenCacheItem.HomeAccountId,
                     msalIdTokenCacheItem?.IdToken?.PreferredUsername,
                     msalAccessTokenCacheItem.Environment);

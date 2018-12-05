@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.WsTrust
 {
     internal interface IUsernameInput
     {
@@ -44,13 +44,12 @@ namespace Microsoft.Identity.Client
 
         public IntegratedWindowsAuthInput()
         {
-            this.UserName = null;
+            UserName = null;
         }
 
         public IntegratedWindowsAuthInput(string userName)
         {
-            this.UserName = userName;
-        }       
-    
+            UserName = userName;
+        }
     }
 }

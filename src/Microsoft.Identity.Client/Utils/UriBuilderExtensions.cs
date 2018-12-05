@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Utils
     {
         public static void AppendQueryParameters(this UriBuilder builder, string queryParams)
         {
-            if (builder == null || String.IsNullOrEmpty(queryParams))
+            if (builder == null || string.IsNullOrEmpty(queryParams))
             {
                 return;
             }

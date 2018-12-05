@@ -33,7 +33,6 @@ namespace Microsoft.Identity.Client.Utils
 {
     internal class StringWriterWithEncoding : StringWriter
     {
-
         public StringWriterWithEncoding(Encoding encoding)
             : base(CultureInfo.InvariantCulture)
         {
