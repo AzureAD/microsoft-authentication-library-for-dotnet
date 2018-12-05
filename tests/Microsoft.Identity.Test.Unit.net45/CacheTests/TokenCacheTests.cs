@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             TestCommon.ResetStateAndInitMsal();
             _cache = new TokenCache();
-            new TestLogger(Guid.Empty);
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)

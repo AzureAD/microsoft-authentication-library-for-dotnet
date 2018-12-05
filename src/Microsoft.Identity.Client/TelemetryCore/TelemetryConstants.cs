@@ -27,13 +27,13 @@
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryError
+    internal static class TelemetryError
     {
         public const string XmsCliTelemMalformed = "Malformed x-ms-clitelem header: '{0}'";
         public const string XmsUnrecognizedHeaderVersion = "Header version '{0}' unrecognized";
     }
 
-    internal class TelemetryEventProperties
+    internal static class TelemetryEventProperties
     {
         public const string MsalDefaultEvent = "msal.default_event";
         public const string MsalHttpEventCount = "msal.http_event_count";

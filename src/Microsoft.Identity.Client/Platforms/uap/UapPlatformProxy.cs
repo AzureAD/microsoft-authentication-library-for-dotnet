@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Networking;
 using Windows.Networking.Connectivity;
-using Windows.Security.Authentication.Web;
 using Windows.Security.ExchangeActiveSyncProvisioning;
 using Windows.Storage;
 using Windows.System;
@@ -86,8 +85,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             // try to get a user that has both domain name and upn
             var userDetailWithDomainAndPn = userDetails.FirstOrDefault(
-                d => !String.IsNullOrWhiteSpace(d.Domain) &&
-                !String.IsNullOrWhiteSpace(d.PrincipalName));
+                d => !string.IsNullOrWhiteSpace(d.Domain) &&
+                !string.IsNullOrWhiteSpace(d.PrincipalName));
 
             if (userDetailWithDomainAndPn != null)
             {
@@ -96,7 +95,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             // try to get a user that at least has upn
             var userDetailWithPn = userDetails.FirstOrDefault(
-              d => !String.IsNullOrWhiteSpace(d.PrincipalName));
+              d => !string.IsNullOrWhiteSpace(d.PrincipalName));
 
             if (userDetailWithPn != null)
             {
@@ -104,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
 
             // user has domain name, but no upn -> missing Enterprise Auth capability
-            if (userDetails.Any(d => !String.IsNullOrWhiteSpace(d.Domain)))
+            if (userDetails.Any(d => !string.IsNullOrWhiteSpace(d.Domain)))
             {
                 throw MsalExceptionFactory.GetClientException(
                    CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,

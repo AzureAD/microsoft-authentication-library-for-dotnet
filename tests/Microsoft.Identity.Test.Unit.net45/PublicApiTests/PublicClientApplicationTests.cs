@@ -305,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(MsalTestConstants.CreateUserIdentifer(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
 
                 // repeat interactive call and pass in the same user
@@ -318,7 +318,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(MsalTestConstants.CreateUserIdentifer(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
             }
         }
@@ -354,7 +354,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(MsalTestConstants.CreateUserIdentifer(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(MsalTestConstants.Utid, result.TenantId);
 
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(MsalTestConstants.CreateUserIdentifer(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
 
                 // TODO: allow checking in the middle of a using block --> Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
-                Assert.AreEqual(MsalTestConstants.CreateUserIdentifer(), result.Account.HomeAccountId.Identifier);
+                Assert.AreEqual(MsalTestConstants.CreateUserIdentifier(), result.Account.HomeAccountId.Identifier);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 // TODO: Assert.IsTrue(HttpMessageHandlerFactory.IsMocksQueueEmpty, "All mocks should have been consumed");
 

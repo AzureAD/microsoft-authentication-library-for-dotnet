@@ -26,9 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
-using Microsoft.Identity.Client.Internal;
-using Exception = System.Exception;
 
 namespace Microsoft.Identity.Client
 {

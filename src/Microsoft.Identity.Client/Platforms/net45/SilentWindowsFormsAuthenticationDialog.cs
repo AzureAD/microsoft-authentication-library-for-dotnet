@@ -30,6 +30,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {

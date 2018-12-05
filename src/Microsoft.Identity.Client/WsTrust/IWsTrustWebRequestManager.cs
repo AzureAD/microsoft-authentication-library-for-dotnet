@@ -27,7 +27,6 @@
 
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Realm;
 
 namespace Microsoft.Identity.Client.WsTrust
 {

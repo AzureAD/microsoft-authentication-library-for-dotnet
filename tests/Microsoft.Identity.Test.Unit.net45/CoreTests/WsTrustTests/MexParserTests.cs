@@ -33,6 +33,7 @@ using System.Xml;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _requestContext = new RequestContext(null, new TestLogger(Guid.NewGuid()));
+            _requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
         }
 
         [TestMethod]

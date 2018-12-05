@@ -25,9 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Exceptions
 {
-
     /// <summary>
     /// The active directory authentication error message.
     /// </summary>

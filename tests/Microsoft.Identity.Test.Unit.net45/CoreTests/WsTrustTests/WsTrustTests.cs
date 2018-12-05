@@ -33,6 +33,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(null, new TestLogger(Guid.NewGuid(), null));
+                var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
                 var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
                 var wsTrustResponse = await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
                                                    .ConfigureAwait(false);
@@ -86,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
-                var requestContext = new RequestContext(null, new TestLogger(Guid.NewGuid(), null));
+                var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");

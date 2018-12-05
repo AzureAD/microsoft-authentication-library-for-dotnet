@@ -25,12 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -50,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new ArgumentException("The " + nameof(clientAssertionParameters) + " does not contain the ClientCredential");
             }
-            else if (String.IsNullOrWhiteSpace(clientAssertionParameters.ClientCredential.Assertion))
+            else if (string.IsNullOrWhiteSpace(clientAssertionParameters.ClientCredential.Assertion))
             {
                 return false;
             }

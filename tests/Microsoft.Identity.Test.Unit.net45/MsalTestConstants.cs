@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Test.Unit
 {
-    class MsalTestConstants
+    internal static class MsalTestConstants
     {
         public static readonly SortedSet<string> Scope = new SortedSet<string>(new[] { "r1/scope1", "r1/scope2" });
         public const string ScopeStr = "r1/scope1 r1/scope2";
@@ -82,14 +82,14 @@ namespace Microsoft.Identity.Test.Unit
                                 "login.microsoft.com",
                                 "sts.windows.net"};
 
-        public static readonly string UserIdentifier = CreateUserIdentifer();
+        public static readonly string UserIdentifier = CreateUserIdentifier();
 
         public static string GetDiscoveryEndpoint(string authority)
         {
             return authority + DiscoveryEndPoint;
         }
 
-        public static string CreateUserIdentifer()
+        public static string CreateUserIdentifier()
         {
             //return CreateUserIdentifier(Uid, Utid);
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Uid, Utid);

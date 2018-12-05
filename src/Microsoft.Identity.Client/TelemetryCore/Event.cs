@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
                     pieces[tenantPosition] = TenantPlaceHolder;
                 }
             }
-            string scrubbedPath = String.Join("/", pieces);
+            string scrubbedPath = string.Join("/", pieces);
             return uri.Scheme + "://" + uri.Authority + scrubbedPath;
         }
 

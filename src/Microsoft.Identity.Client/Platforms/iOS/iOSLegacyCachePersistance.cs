@@ -29,6 +29,7 @@ using System;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 using Security;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
@@ -87,7 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
             return null;
@@ -117,7 +118,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 if (err != SecStatusCode.Success)
                 {
                     string msg = "Failed to remove adal cache record: ";
-                    CoreLoggerBase.Default.WarningPii(msg + err, msg);
+                    MsalLogger.Default.WarningPii(msg + err, msg);
                 }
 
                 if (serializedCache != null && serializedCache.Length > 0)
@@ -127,13 +128,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     if (err != SecStatusCode.Success)
                     {
                         string msg = "Failed to save adal cache record: ";
-                        CoreLoggerBase.Default.WarningPii(msg + err, msg);
+                        MsalLogger.Default.WarningPii(msg + err, msg);
                     }
                 }
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
     }

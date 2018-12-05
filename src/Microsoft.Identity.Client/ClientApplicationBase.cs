@@ -32,14 +32,12 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Linq;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
 {

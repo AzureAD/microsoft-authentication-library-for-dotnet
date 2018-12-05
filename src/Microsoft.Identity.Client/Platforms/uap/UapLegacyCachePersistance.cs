@@ -30,6 +30,7 @@ using Windows.Foundation.Collections;
 using Windows.Storage;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
 
@@ -78,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
+                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
 

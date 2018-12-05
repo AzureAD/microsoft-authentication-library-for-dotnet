@@ -28,6 +28,7 @@
 using System;
 using System.Runtime.InteropServices;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPii(ex);
+                MsalLogger.Default.WarningPii(ex);
                 return "Unknown";
             }
         }

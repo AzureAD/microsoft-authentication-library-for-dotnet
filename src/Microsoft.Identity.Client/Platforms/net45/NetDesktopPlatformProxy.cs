@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
             catch (Exception ex)
             {
-                CoreLoggerBase.Default.WarningPii(ex);
+                MsalLogger.Default.WarningPii(ex);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public string GetEnvironmentVariable(string variable)
         {
-            if (String.IsNullOrWhiteSpace(variable))
+            if (string.IsNullOrWhiteSpace(variable))
             {
                 throw new ArgumentNullException(nameof(variable));
             }

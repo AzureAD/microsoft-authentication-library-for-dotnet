@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client
 
         public override string ToString()
         {
-            return String.Format(
+            return string.Format(
             CultureInfo.CurrentCulture,
             "Account username: {0} environment {1} home account id: {2}",
             Username, Environment, HomeAccountId);

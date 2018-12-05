@@ -32,6 +32,7 @@ using Windows.ApplicationModel.Core;
 using Windows.Networking.Connectivity;
 using Windows.Security.Authentication.Web;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
 

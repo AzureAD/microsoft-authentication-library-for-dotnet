@@ -50,38 +50,38 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         public Uri HttpPath
         {
-            set { this[HttpPathKey] = ScrubTenant(value); } // http path is case-sensitive
+            // http path is case-sensitive
+            set => this[HttpPathKey] = ScrubTenant(value);
         }
 
         public string UserAgent
         {
-            set { this[UserAgentKey] = value; }
+            set => this[UserAgentKey] = value;
         }
 
         public string QueryParams
         {
-            set
-            {
-                this[QueryParametersKey] = String.Join( // query parameters are case-sensitive
+            // query parameters are case-sensitive
+            set =>
+                this[QueryParametersKey] = string.Join(
                     "&",
                     CoreHelpers.ParseKeyValueList(value, '&', false, true, null)
-                        .Keys); // It turns out ParseKeyValueList(..., null) is valid
-            }
+                               .Keys);
         }
 
         public string ApiVersion
         {
-            set { this[ApiVersionKey] = value?.ToLowerInvariant(); }
+            set => this[ApiVersionKey] = value?.ToLowerInvariant();
         }
 
         public int HttpResponseStatus
         {
-            set { this[ResponseCodeKey] = value.ToString(CultureInfo.InvariantCulture); }
+            set => this[ResponseCodeKey] = value.ToString(CultureInfo.InvariantCulture);
         }
 
         public string OauthErrorCode
         {
-            set { this[OauthErrorCodeKey] = value; }
+            set => this[OauthErrorCodeKey] = value;
         }
 
         public string HttpMethod
@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         public string RequestIdHeader
         {
-            set { this[RequestIdHeaderKey] = value; }
+            set => this[RequestIdHeaderKey] = value;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         public string TokenAge
         {
-            set { this[TokenAgeKey] = value; }
+            set => this[TokenAgeKey] = value;
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         public string SpeInfo
         {
-            set { this[SpeInfoKey] = value; }
+            set => this[SpeInfoKey] = value;
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         public string ServerErrorCode
         {
-            set { this[ServerErrorCodeKey] = value; }
+            set => this[ServerErrorCodeKey] = value;
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         /// </summary>
         public string ServerSubErrorCode
         {
-            set { this[ServerSubErrorCodeKey] = value; }
+            set => this[ServerSubErrorCodeKey] = value;
         }
     }
 }
