@@ -53,11 +53,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     public class ConfidentialClientApplicationTests
     {
         private byte[] _serializedCache;
+        private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
+            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestMethod]
@@ -613,7 +615,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     httpManager.AddInstanceDiscoveryMockHandler();
                     var cache = new TokenCache();
-                    TokenCacheHelper.PopulateCacheForClientCredential(cache.TokenCacheAccessor);
+                    _tokenCacheHelper.PopulateCacheForClientCredential(cache.TokenCacheAccessor);
 
                     string authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false)
                                                 .CanonicalAuthority;
@@ -655,7 +657,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     httpManager.AddInstanceDiscoveryMockHandler();
 
                     var cache = new TokenCache();
-                    TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+                    _tokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
                     string authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false)
                                                 .CanonicalAuthority;
