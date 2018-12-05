@@ -28,11 +28,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 
@@ -61,26 +58,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Token cache is set to null. Silent requests cannot be executed.");
             }
 
-            // Look for access token.
-            var msalAccessTokenItem =
-                await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+            MsalAccessTokenCacheItem msalAccessTokenItem = null;
 
-            MsalIdTokenCacheItem msalIdTokenItem = null;
+            // Look for access token
+            if (!ForceRefresh)
+            {
+                msalAccessTokenItem =
+                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+            }
 
             if (msalAccessTokenItem != null)
             {
-                msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
+                var msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
                     msalAccessTokenItem.GetIdTokenItemKey(),
                     AuthenticationRequestParameters.RequestContext);
-            }
 
-            if (ForceRefresh)
-            {
-                msalAccessTokenItem = null;
-            }
-
-            if (msalAccessTokenItem != null)
-            {
                 return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
             }
 
