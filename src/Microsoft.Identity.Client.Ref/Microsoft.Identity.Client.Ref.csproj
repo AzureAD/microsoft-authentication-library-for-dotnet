@@ -1,4 +1,4 @@
-﻿<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="MSBuild.Sdk.Extras/1.5.4">
 
   <!-- This project is used to generate a ref assembly for MSAL. Use #if REFERENCE_ASSEMBLY in the code files. 
   See https://oren.codes/2018/07/09/create-and-pack-reference-assemblies-made-easy/ for details-->
