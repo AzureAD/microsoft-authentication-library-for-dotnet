@@ -204,584 +204,709 @@ namespace Microsoft.Identity.Client
                                     preferredUsername, preferredEnvironmentHost) :
                                     null,
                         HasStateChanged = true
-                };
+                    };
 
 #pragma warning disable CS0618 // Type or member is obsolete
-                HasStateChanged = true;
+                    HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                OnBeforeAccess(args);
-                OnBeforeWrite(args);
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
 
-                DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
-                    msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
+                    DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
+                        msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
 
-                TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem, requestParams.RequestContext);
+                    TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem, requestParams.RequestContext);
 
-                if (idToken != null)
-                {
-                    TokenCacheAccessor.SaveIdToken(msalIdTokenCacheItem, requestParams.RequestContext);
+                    if (idToken != null)
+                    {
+                        TokenCacheAccessor.SaveIdToken(msalIdTokenCacheItem, requestParams.RequestContext);
 
-                    var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
+                        var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
 
-                    TokenCacheAccessor.SaveAccount(msalAccountCacheItem, requestParams.RequestContext);
+                        TokenCacheAccessor.SaveAccount(msalAccountCacheItem, requestParams.RequestContext);
+                    }
+
+                    // if server returns the refresh token back, save it in the cache.
+                    if (response.RefreshToken != null)
+                    {
+                        msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
+                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                        TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem, requestParams.RequestContext);
+                    }
+
+                    // save RT in ADAL cache for public clients
+                    // do not save RT in ADAL cache for MSAL B2C scenarios
+                    if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Instance.AuthorityType.B2C))
+                    {
+                        CacheFallbackOperations.WriteAdalRefreshToken
+                            (LegacyCachePersistence, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
+                            Authority.UpdateHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
+                            msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
+                    }
+
+                    OnAfterAccess(args);
+
+                    return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
                 }
-
-                // if server returns the refresh token back, save it in the cache.
-                if (response.RefreshToken != null)
-                {
-                    msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
-                    requestParams.RequestContext.Logger.Info("Saving RT in cache...");
-                    TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem, requestParams.RequestContext);
-                }
-
-                // save RT in ADAL cache for public clients
-                // do not save RT in ADAL cache for MSAL B2C scenarios
-                if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Instance.AuthorityType.B2C))
-                {
-                    CacheFallbackOperations.WriteAdalRefreshToken
-                        (LegacyCachePersistence, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
-                        Authority.UpdateHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
-                        msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
-                }
-
-                OnAfterAccess(args);
-
-                return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
-            }
                 finally
-            {
+                {
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
-        }
-    }
-
-    private void DeleteAccessTokensWithIntersectingScopes(AuthenticationRequestParameters requestParams,
-       ISet<string> environmentAliases, string tenantId, SortedSet<string> scopeSet, string homeAccountId)
-    {
-        // delete all cache entries with intersecting scopes.
-        // this should not happen but we have this as a safe guard
-        // against multiple matches.
-        requestParams.RequestContext.Logger.Info("Looking for scopes for the authority in the cache which intersect with " +
-                  requestParams.Scope.AsSingleString());
-        IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
-        foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
-        {
-            MsalAccessTokenCacheItem msalAccessTokenItem =
-                JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(accessTokenString, requestParams.RequestContext);
-
-            if (msalAccessTokenItem != null && msalAccessTokenItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
-                environmentAliases.Contains(msalAccessTokenItem.Environment) &&
-                msalAccessTokenItem.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase) &&
-                msalAccessTokenItem.ScopeSet.Overlaps(scopeSet))
-            {
-                requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + msalAccessTokenItem.NormalizedScopes);
-                accessTokenItemList.Add(msalAccessTokenItem);
             }
         }
 
-        requestParams.RequestContext.Logger.Info("Intersecting scope entries count - " + accessTokenItemList.Count);
-
-        if (!requestParams.IsClientCredentialRequest)
+        private void DeleteAccessTokensWithIntersectingScopes(AuthenticationRequestParameters requestParams,
+           ISet<string> environmentAliases, string tenantId, SortedSet<string> scopeSet, string homeAccountId)
         {
-            // filter by identifier of the user instead
-            accessTokenItemList =
-                accessTokenItemList.Where(
-                        item => item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase))
-                    .ToList();
-            requestParams.RequestContext.Logger.Info("Matching entries after filtering by user - " + accessTokenItemList.Count);
-        }
-
-        foreach (var cacheItem in accessTokenItemList)
-        {
-            TokenCacheAccessor.DeleteAccessToken(cacheItem.GetKey(), requestParams.RequestContext);
-        }
-    }
-
-    internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
-    {
-        using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
-            new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT }))
-        {
-            ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            string preferredEnvironmentAlias = null;
-
-            if (requestParams.Authority != null)
+            // delete all cache entries with intersecting scopes.
+            // this should not happen but we have this as a safe guard
+            // against multiple matches.
+            requestParams.RequestContext.Logger.Info("Looking for scopes for the authority in the cache which intersect with " +
+                      requestParams.Scope.AsSingleString());
+            IList<MsalAccessTokenCacheItem> accessTokenItemList = new List<MsalAccessTokenCacheItem>();
+            foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
             {
-                var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(
-                    requestParams.Authority.CanonicalAuthority,
-                    requestParams.ValidateAuthority, requestParams.RequestContext).ConfigureAwait(false);
+                MsalAccessTokenCacheItem msalAccessTokenItem =
+                    JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(accessTokenString, requestParams.RequestContext);
 
-                environmentAliases.UnionWith
-                    (GetEnvironmentAliases(requestParams.Authority.CanonicalAuthority, instanceDiscoveryMetadataEntry));
-
-                if (requestParams.Authority.AuthorityType != Instance.AuthorityType.B2C)
+                if (msalAccessTokenItem != null && msalAccessTokenItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
+                    environmentAliases.Contains(msalAccessTokenItem.Environment) &&
+                    msalAccessTokenItem.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase) &&
+                    msalAccessTokenItem.ScopeSet.Overlaps(scopeSet))
                 {
-                    preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
+                    requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + msalAccessTokenItem.NormalizedScopes);
+                    accessTokenItemList.Add(msalAccessTokenItem);
                 }
             }
 
-            return FindAccessTokenCommon
-                (requestParams, preferredEnvironmentAlias, environmentAliases);
-        }
-    }
+            requestParams.RequestContext.Logger.Info("Intersecting scope entries count - " + accessTokenItemList.Count);
 
-    private MsalAccessTokenCacheItem FindAccessTokenCommon
-        (AuthenticationRequestParameters requestParams, string preferredEnvironmentAlias, ISet<string> environmentAliases)
-    {
-        // no authority passed
-        if (environmentAliases.Count == 0)
-        {
-            requestParams.RequestContext.Logger.Warning("No authority provided. Skipping cache lookup ");
-            return null;
-        }
-
-        lock (LockObject)
-        {
-            requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
-            MsalAccessTokenCacheItem msalAccessTokenCacheItem;
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+            if (!requestParams.IsClientCredentialRequest)
             {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = requestParams.Account
-            };
-
-            OnBeforeAccess(args);
-            // filtered by client id.
-            ICollection<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensForClient(requestParams.RequestContext);
-            OnAfterAccess(args);
-
-            // this is OBO flow. match the cache entry with assertion hash,
-            // Authority, ScopeSet and client Id.
-            if (requestParams.UserAssertion != null)
-            {
-                requestParams.RequestContext.Logger.Info("Filtering by user assertion...");
-                tokenCacheItems =
-                    tokenCacheItems.Where(
-                            item =>
-                                !string.IsNullOrEmpty(item.UserAssertionHash) &&
-                                item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase))
+                // filter by identifier of the user instead
+                accessTokenItemList =
+                    accessTokenItemList.Where(
+                            item => item.HomeAccountId.Equals(homeAccountId, StringComparison.OrdinalIgnoreCase))
                         .ToList();
+                requestParams.RequestContext.Logger.Info("Matching entries after filtering by user - " + accessTokenItemList.Count);
             }
-            else
+
+            foreach (var cacheItem in accessTokenItemList)
             {
-                if (!requestParams.IsClientCredentialRequest)
-                {
-                    requestParams.RequestContext.Logger.Info("Filtering by user identifier...");
-                    // filter by identifier of the user instead
-                    tokenCacheItems =
-                        tokenCacheItems
-                            .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                }
-
-                if (tokenCacheItems.Count > 1)
-                {
-                    requestParams.RequestContext.Logger.Info("Filtering by canonical authority...");
-                    tokenCacheItems =
-                        tokenCacheItems
-                            .Where(item => item.Authority.Equals(requestParams.Authority.CanonicalAuthority,
-                                StringComparison.OrdinalIgnoreCase))
-                            .ToList();
-                }
+                TokenCacheAccessor.DeleteAccessToken(cacheItem.GetKey(), requestParams.RequestContext);
             }
-
-            // no match found after initial filtering
-            if (!tokenCacheItems.Any())
-            {
-                requestParams.RequestContext.Logger.Info("No matching entry found for user or assertion");
-                return null;
-            }
-
-            requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count);
-
-            IEnumerable<MsalAccessTokenCacheItem> filteredItems =
-                tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
-
-           requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
-
-            // filter by authority
-            IEnumerable<MsalAccessTokenCacheItem> filteredByPreferredAlias =
-                filteredItems.Where
-                (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase));
-
-            if (filteredByPreferredAlias.Any())
-            {
-                filteredItems = filteredByPreferredAlias;
-            }
-            else
-            {
-                filteredItems = filteredItems.Where(
-                    item => environmentAliases.Contains(item.Environment) &&
-                    item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
-            }
-
-            // no match
-            if (!filteredItems.Any())
-            {
-                requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
-                return null;
-            }
-
-            // if only one cached token found
-            if (filteredItems.Count() == 1)
-            {
-                msalAccessTokenCacheItem = filteredItems.First();
-            }
-            else
-            {
-                requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
-
-                throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
-                    MsalErrorMessage.MultipleTokensMatched);
-            }
-
-            if (msalAccessTokenCacheItem != null)
-            {
-                if (msalAccessTokenCacheItem.ExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
-                {
-                    requestParams.RequestContext.Logger.Info(
-                        "Access token is not expired. Returning the found cache entry. " +
-                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-                    return msalAccessTokenCacheItem;
-                }
-
-                if (requestParams.IsExtendedLifeTimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
-                    DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
-                {
-                    requestParams.RequestContext.Logger.Info(
-                        "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
-                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-
-                    msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
-                    return msalAccessTokenCacheItem;
-                }
-
-                requestParams.RequestContext.Logger.Info(
-                    "Access token has expired or about to expire. " +
-                    GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
-            }
-
-            return null;
-        }
-    }
-
-    private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-    {
-        return string.Format(
-            CultureInfo.InvariantCulture,
-            "[Current time ({0}) - Expiration Time ({1}) - Extended Expiration Time ({2})]",
-            DateTime.UtcNow,
-            msalAccessTokenCacheItem.ExpiresOn,
-            msalAccessTokenCacheItem.ExtendedExpiresOn);
-    }
-
-    internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)
-    {
-        using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
-            new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
-        {
-            return await FindRefreshTokenCommonAsync(requestParams).ConfigureAwait(false);
-        }
-    }
-
-    private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenCommonAsync(AuthenticationRequestParameters requestParam)
-    {
-        if (requestParam.Authority == null)
-        {
-            return null;
         }
 
-        var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParam.Authority.CanonicalAuthority,
-            requestParam.ValidateAuthority, requestParam.RequestContext).ConfigureAwait(false);
-
-        var environmentAliases = GetEnvironmentAliases(requestParam.Authority.CanonicalAuthority,
-            instanceDiscoveryMetadataEntry);
-
-        var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParam.Authority.Host,
-            instanceDiscoveryMetadataEntry);
-
-        lock (LockObject)
+        internal async Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters requestParams)
         {
-            requestParam.RequestContext.Logger.Info("Looking up refresh token in the cache..");
-
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
+                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.AT }))
             {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = requestParam.Account
-            };
+                ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                string preferredEnvironmentAlias = null;
 
-            MsalRefreshTokenCacheKey key = new MsalRefreshTokenCacheKey(
-                preferredEnvironmentHost, requestParam.ClientId, requestParam.Account?.HomeAccountId?.Identifier);
-
-            OnBeforeAccess(args);
-            try
-            {
-                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =
-                JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(
-                    TokenCacheAccessor.GetRefreshToken(key), requestParam.RequestContext);
-
-                // trying to find rt by authority aliases
-                if (msalRefreshTokenCacheItem == null)
+                if (requestParams.Authority != null)
                 {
-                    var refreshTokensStr = TokenCacheAccessor.GetAllRefreshTokensAsString();
+                    var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(
+                        requestParams.Authority.CanonicalAuthority,
+                        requestParams.ValidateAuthority, requestParams.RequestContext).ConfigureAwait(false);
 
-                    foreach (var refreshTokenStr in refreshTokensStr)
+                    environmentAliases.UnionWith
+                        (GetEnvironmentAliases(requestParams.Authority.CanonicalAuthority, instanceDiscoveryMetadataEntry));
+
+                    if (requestParams.Authority.AuthorityType != Instance.AuthorityType.B2C)
                     {
-                        MsalRefreshTokenCacheItem msalRefreshToken =
-                            JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenStr, requestParam.RequestContext);
-
-                        if (msalRefreshToken != null &&
-                            msalRefreshToken.ClientId.Equals(requestParam.ClientId, StringComparison.OrdinalIgnoreCase) &&
-                            environmentAliases.Contains(msalRefreshToken.Environment) &&
-                            requestParam.Account?.HomeAccountId.Identifier == msalRefreshToken.HomeAccountId)
-                        {
-                            msalRefreshTokenCacheItem = msalRefreshToken;
-                            continue;
-                        }
+                        preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                     }
                 }
 
-                requestParam.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
+                return FindAccessTokenCommon
+                    (requestParams, preferredEnvironmentAlias, environmentAliases);
+            }
+        }
 
-                if (msalRefreshTokenCacheItem != null)
+        private MsalAccessTokenCacheItem FindAccessTokenCommon
+            (AuthenticationRequestParameters requestParams, string preferredEnvironmentAlias, ISet<string> environmentAliases)
+        {
+            // no authority passed
+            if (environmentAliases.Count == 0)
+            {
+                requestParams.RequestContext.Logger.Warning("No authority provided. Skipping cache lookup ");
+                return null;
+            }
+
+            lock (LockObject)
+            {
+                requestParams.RequestContext.Logger.Info("Looking up access token in the cache.");
+                MsalAccessTokenCacheItem msalAccessTokenCacheItem;
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
-                    return msalRefreshTokenCacheItem;
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = requestParams.Account
+                };
+
+                OnBeforeAccess(args);
+                // filtered by client id.
+                ICollection<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensForClient(requestParams.RequestContext);
+                OnAfterAccess(args);
+
+                // this is OBO flow. match the cache entry with assertion hash,
+                // Authority, ScopeSet and client Id.
+                if (requestParams.UserAssertion != null)
+                {
+                    requestParams.RequestContext.Logger.Info("Filtering by user assertion...");
+                    tokenCacheItems =
+                        tokenCacheItems.Where(
+                                item =>
+                                    !string.IsNullOrEmpty(item.UserAssertionHash) &&
+                                    item.UserAssertionHash.Equals(requestParams.UserAssertion.AssertionHash, StringComparison.OrdinalIgnoreCase))
+                            .ToList();
+                }
+                else
+                {
+                    if (!requestParams.IsClientCredentialRequest)
+                    {
+                        requestParams.RequestContext.Logger.Info("Filtering by user identifier...");
+                        // filter by identifier of the user instead
+                        tokenCacheItems =
+                            tokenCacheItems
+                                .Where(item => item.HomeAccountId.Equals(requestParams.Account?.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
+                                .ToList();
+                    }
+
+                    if (tokenCacheItems.Count > 1)
+                    {
+                        // filter by authority in the auth request params
+                       tokenCacheItems = FilterToAuthoritySpecifiedByAuthenticationRequest(requestParams, tokenCacheItems);
+                    }
                 }
 
-                requestParam.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
-
-                if (requestParam.Account == null)
+                // no match found after initial filtering
+                if (!tokenCacheItems.Any())
                 {
+                    requestParams.RequestContext.Logger.Info("No matching entry found for user or assertion");
                     return null;
                 }
-                return CacheFallbackOperations.GetAdalEntryForMsal(
-                    LegacyCachePersistence,
-                    preferredEnvironmentHost,
-                    environmentAliases,
-                    requestParam.ClientId,
-                    requestParam.LoginHint,
-                    requestParam.Account.HomeAccountId?.Identifier,
-                    null);
-            }
-            finally
-            {
-                OnAfterAccess(args);
+
+                requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count);
+
+                IEnumerable<MsalAccessTokenCacheItem> filteredItems =
+                    tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
+
+                requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
+
+                // filter by authority
+                IEnumerable<MsalAccessTokenCacheItem> filteredByPreferredAlias =
+                    filteredItems.Where
+                    (item => item.Environment.Equals(preferredEnvironmentAlias, StringComparison.OrdinalIgnoreCase));
+
+                if (filteredByPreferredAlias.Any())
+                {
+                    filteredItems = filteredByPreferredAlias;
+                }
+                else
+                {
+                    filteredItems = filteredItems.Where(
+                        item => environmentAliases.Contains(item.Environment) &&
+                        item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
+                }
+
+                // no match
+                if (!filteredItems.Any())
+                {
+                    requestParams.RequestContext.Logger.Info("No tokens found for matching authority, client_id, user and scopes.");
+                    return null;
+                }
+
+                // if only one cached token found
+                if (filteredItems.Count() == 1)
+                {
+                    msalAccessTokenCacheItem = filteredItems.First();
+                }
+                else
+                {
+                    requestParams.RequestContext.Logger.Error("Multiple tokens found for matching authority, client_id, user and scopes.");
+
+                    throw new MsalClientException(MsalClientException.MultipleTokensMatchedError,
+                        MsalErrorMessage.MultipleTokensMatched);
+                }
+
+                if (msalAccessTokenCacheItem != null)
+                {
+                    if (msalAccessTokenCacheItem.ExpiresOn >
+                        DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                    {
+                        requestParams.RequestContext.Logger.Info(
+                            "Access token is not expired. Returning the found cache entry. " +
+                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                        return msalAccessTokenCacheItem;
+                    }
+
+                    if (requestParams.IsExtendedLifeTimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
+                        DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
+                    {
+                        requestParams.RequestContext.Logger.Info(
+                            "Access token is expired.  IsExtendedLifeTimeEnabled=TRUE and ExtendedExpiresOn is not exceeded.  Returning the found cache entry. " +
+                            GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+
+                        msalAccessTokenCacheItem.IsExtendedLifeTimeToken = true;
+                        return msalAccessTokenCacheItem;
+                    }
+
+                    requestParams.RequestContext.Logger.Info(
+                        "Access token has expired or about to expire. " +
+                        GetAccessTokenExpireLogMessageContent(msalAccessTokenCacheItem));
+                }
+
+                return null;
             }
         }
-    }
 
-    internal void DeleteRefreshToken(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
-        RequestContext requestContext)
-    {
-        lock (LockObject)
+        private ICollection<MsalAccessTokenCacheItem> FilterToAuthoritySpecifiedByAuthenticationRequest(
+            AuthenticationRequestParameters requestParams, ICollection<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            try
+            requestParams.RequestContext.Logger.Info("Filtering by authority specified in the authentication request parameters...");
+            return tokenCacheItems
+                    .Where(item => item.Authority.Equals(requestParams.Authority.CanonicalAuthority,
+                                                         StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+        }
+
+        private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "[Current time ({0}) - Expiration Time ({1}) - Extended Expiration Time ({2})]",
+                DateTime.UtcNow,
+                msalAccessTokenCacheItem.ExpiresOn,
+                msalAccessTokenCacheItem.ExtendedExpiresOn);
+        }
+
+        internal async Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)
+        {
+            using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
+                new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
+            {
+                return await FindRefreshTokenCommonAsync(requestParams).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenCommonAsync(AuthenticationRequestParameters requestParam)
+        {
+            if (requestParam.Authority == null)
+            {
+                return null;
+            }
+
+            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParam.Authority.CanonicalAuthority,
+                requestParam.ValidateAuthority, requestParam.RequestContext).ConfigureAwait(false);
+
+            var environmentAliases = GetEnvironmentAliases(requestParam.Authority.CanonicalAuthority,
+                instanceDiscoveryMetadataEntry);
+
+            var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParam.Authority.Host,
+                instanceDiscoveryMetadataEntry);
+
+            lock (LockObject)
+            {
+                requestParam.RequestContext.Logger.Info("Looking up refresh token in the cache..");
+
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = requestParam.Account
+                };
+
+                MsalRefreshTokenCacheKey key = new MsalRefreshTokenCacheKey(
+                    preferredEnvironmentHost, requestParam.ClientId, requestParam.Account?.HomeAccountId?.Identifier);
+
+                OnBeforeAccess(args);
+                try
+                {
+                    MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =
+                    JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(
+                        TokenCacheAccessor.GetRefreshToken(key), requestParam.RequestContext);
+
+                    // trying to find rt by authority aliases
+                    if (msalRefreshTokenCacheItem == null)
+                    {
+                        var refreshTokensStr = TokenCacheAccessor.GetAllRefreshTokensAsString();
+
+                        foreach (var refreshTokenStr in refreshTokensStr)
+                        {
+                            MsalRefreshTokenCacheItem msalRefreshToken =
+                                JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenStr, requestParam.RequestContext);
+
+                            if (msalRefreshToken != null &&
+                                msalRefreshToken.ClientId.Equals(requestParam.ClientId, StringComparison.OrdinalIgnoreCase) &&
+                                environmentAliases.Contains(msalRefreshToken.Environment) &&
+                                requestParam.Account?.HomeAccountId.Identifier == msalRefreshToken.HomeAccountId)
+                            {
+                                msalRefreshTokenCacheItem = msalRefreshToken;
+                                continue;
+                            }
+                        }
+                    }
+
+                    requestParam.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
+
+                    if (msalRefreshTokenCacheItem != null)
+                    {
+                        return msalRefreshTokenCacheItem;
+                    }
+
+                    requestParam.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
+
+                    if (requestParam.Account == null)
+                    {
+                        return null;
+                    }
+                    return CacheFallbackOperations.GetAdalEntryForMsal(
+                        LegacyCachePersistence,
+                        preferredEnvironmentHost,
+                        environmentAliases,
+                        requestParam.ClientId,
+                        requestParam.LoginHint,
+                        requestParam.Account.HomeAccountId?.Identifier,
+                        null);
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
+            }
+        }
+
+        internal void DeleteRefreshToken(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
+            RequestContext requestContext)
+        {
+            lock (LockObject)
+            {
+                try
+                {
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = ClientId,
+                        Account = new Account(
+                            msalIdTokenCacheItem.HomeAccountId,
+                            msalIdTokenCacheItem.IdToken?.PreferredUsername, msalRefreshTokenCacheItem.Environment),
+                        HasStateChanged = true
+                    };
+
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+                    TokenCacheAccessor.DeleteRefreshToken(msalRefreshTokenCacheItem.GetKey(), requestContext);
+                    OnAfterAccess(args);
+                }
+                finally
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    HasStateChanged = false;
+#pragma warning restore CS0618 // Type or member is obsolete
+                }
+            }
+        }
+
+        internal void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
+            RequestContext requestContext)
+        {
+            lock (LockObject)
+            {
+                try
+                {
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = ClientId,
+                        Account = new Account(msalAccessTokenCacheItem.HomeAccountId,
+                            msalIdTokenCacheItem?.IdToken?.PreferredUsername, msalAccessTokenCacheItem.Environment),
+                        HasStateChanged = true
+                    };
+
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+                    TokenCacheAccessor.DeleteAccessToken(msalAccessTokenCacheItem.GetKey(), requestContext);
+                    OnAfterAccess(args);
+                }
+                finally
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    HasStateChanged = false;
+#pragma warning restore CS0618 // Type or member is obsolete
+                }
+            }
+        }
+        internal MsalAccessTokenCacheItem GetAccessTokenCacheItem(MsalAccessTokenCacheKey msalAccessTokenCacheKey, RequestContext requestContext)
+        {
+            lock (LockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
                     ClientId = ClientId,
-                    Account = new Account(
-                        msalIdTokenCacheItem.HomeAccountId,
-                        msalIdTokenCacheItem.IdToken?.PreferredUsername, msalRefreshTokenCacheItem.Environment),
-                    HasStateChanged = true
+                    Account = null
                 };
 
                 OnBeforeAccess(args);
-                OnBeforeWrite(args);
-                TokenCacheAccessor.DeleteRefreshToken(msalRefreshTokenCacheItem.GetKey(), requestContext);
+                var accessTokenStr = TokenCacheAccessor.GetAccessToken(msalAccessTokenCacheKey);
                 OnAfterAccess(args);
-            }
-            finally
-            {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-                }
-        }
-    }
 
-    internal void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
-        RequestContext requestContext)
-    {
-        lock (LockObject)
+                return JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(accessTokenStr, requestContext);
+            }
+        }
+
+        internal MsalRefreshTokenCacheItem GetRefreshTokenCacheItem(MsalRefreshTokenCacheKey msalRefreshTokenCacheKey, RequestContext requestContext)
         {
-            try
+            lock (LockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
                     ClientId = ClientId,
-                    Account = new Account(msalAccessTokenCacheItem.HomeAccountId,
-                        msalIdTokenCacheItem?.IdToken?.PreferredUsername, msalAccessTokenCacheItem.Environment),
-                    HasStateChanged = true
+                    Account = null
                 };
 
                 OnBeforeAccess(args);
-                OnBeforeWrite(args);
-                TokenCacheAccessor.DeleteAccessToken(msalAccessTokenCacheItem.GetKey(), requestContext);
+                var refreshTokenStr = TokenCacheAccessor.GetRefreshToken(msalRefreshTokenCacheKey);
                 OnAfterAccess(args);
+
+                return JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenStr, requestContext);
             }
-            finally
+        }
+
+        internal MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey, RequestContext requestContext)
+        {
+            lock (LockObject)
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-                }
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = null
+                };
+
+                OnBeforeAccess(args);
+                var idTokenStr = TokenCacheAccessor.GetIdToken(msalIdTokenCacheKey);
+                OnAfterAccess(args);
+
+                return JsonHelper.TryToDeserializeFromJson<MsalIdTokenCacheItem>(idTokenStr, requestContext);
+            }
         }
-    }
-    internal MsalAccessTokenCacheItem GetAccessTokenCacheItem(MsalAccessTokenCacheKey msalAccessTokenCacheKey, RequestContext requestContext)
-    {
-        lock (LockObject)
+
+        internal MsalAccountCacheItem GetAccountCacheItem(MsalAccountCacheKey msalAccountCacheKey, RequestContext requestContext)
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+            lock (LockObject)
             {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = null
-            };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = null
+                };
 
-            OnBeforeAccess(args);
-            var accessTokenStr = TokenCacheAccessor.GetAccessToken(msalAccessTokenCacheKey);
-            OnAfterAccess(args);
+                OnBeforeAccess(args);
+                var accountStr = TokenCacheAccessor.GetAccount(msalAccountCacheKey);
+                OnAfterAccess(args);
 
-            return JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(accessTokenStr, requestContext);
+                return JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountStr, requestContext);
+            }
         }
-    }
 
-    internal MsalRefreshTokenCacheItem GetRefreshTokenCacheItem(MsalRefreshTokenCacheKey msalRefreshTokenCacheKey, RequestContext requestContext)
-    {
-        lock (LockObject)
+        private async Task<InstanceDiscoveryMetadataEntry> GetCachedOrDiscoverAuthorityMetaDataAsync(
+            string authority,
+            bool validateAuthority,
+            RequestContext requestContext)
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+
+            Uri authorityHost = new Uri(authority);
+            var authorityType = Authority.GetAuthorityType(authority);
+            if (authorityType == Instance.AuthorityType.Aad ||
+                authorityHost.Host.Equals(MicrosoftLogin, StringComparison.OrdinalIgnoreCase))
             {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = null
-            };
-
-            OnBeforeAccess(args);
-            var refreshTokenStr = TokenCacheAccessor.GetRefreshToken(msalRefreshTokenCacheKey);
-            OnAfterAccess(args);
-
-            return JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenStr, requestContext);
-        }
-    }
-
-    internal MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey, RequestContext requestContext)
-    {
-        lock (LockObject)
-        {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-            {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = null
-            };
-
-            OnBeforeAccess(args);
-            var idTokenStr = TokenCacheAccessor.GetIdToken(msalIdTokenCacheKey);
-            OnAfterAccess(args);
-
-            return JsonHelper.TryToDeserializeFromJson<MsalIdTokenCacheItem>(idTokenStr, requestContext);
-        }
-    }
-
-    internal MsalAccountCacheItem GetAccountCacheItem(MsalAccountCacheKey msalAccountCacheKey, RequestContext requestContext)
-    {
-        lock (LockObject)
-        {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-            {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = null
-            };
-
-            OnBeforeAccess(args);
-            var accountStr = TokenCacheAccessor.GetAccount(msalAccountCacheKey);
-            OnAfterAccess(args);
-
-            return JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountStr, requestContext);
-        }
-    }
-
-    private async Task<InstanceDiscoveryMetadataEntry> GetCachedOrDiscoverAuthorityMetaDataAsync(
-        string authority,
-        bool validateAuthority,
-        RequestContext requestContext)
-    {
-
-        Uri authorityHost = new Uri(authority);
-        var authorityType = Authority.GetAuthorityType(authority);
-        if (authorityType == Instance.AuthorityType.Aad ||
-            authorityHost.Host.Equals(MicrosoftLogin, StringComparison.OrdinalIgnoreCase))
-        {
-            var instanceDiscoveryMetadata = await ServiceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
-                new Uri(authority),
-                validateAuthority,
-                requestContext).ConfigureAwait(false);
-            return instanceDiscoveryMetadata;
-        }
-        return null;
-    }
-
-    private InstanceDiscoveryMetadataEntry GetCachedAuthorityMetaData(string authority)
-    {
-        if (ServiceBundle?.AadInstanceDiscovery == null)
-        {
+                var instanceDiscoveryMetadata = await ServiceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
+                    new Uri(authority),
+                    validateAuthority,
+                    requestContext).ConfigureAwait(false);
+                return instanceDiscoveryMetadata;
+            }
             return null;
         }
 
-        InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
-        var authorityType = Authority.GetAuthorityType(authority);
-        if (authorityType == Instance.AuthorityType.Aad || authorityType == Instance.AuthorityType.B2C)
+        private InstanceDiscoveryMetadataEntry GetCachedAuthorityMetaData(string authority)
         {
-            ServiceBundle.AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
-        }
-        return instanceDiscoveryMetadata;
-    }
+            if (ServiceBundle?.AadInstanceDiscovery == null)
+            {
+                return null;
+            }
 
-    private ISet<string> GetEnvironmentAliases(string authority, InstanceDiscoveryMetadataEntry metadata)
-    {
-        ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            InstanceDiscoveryMetadataEntry instanceDiscoveryMetadata = null;
+            var authorityType = Authority.GetAuthorityType(authority);
+            if (authorityType == Instance.AuthorityType.Aad || authorityType == Instance.AuthorityType.B2C)
+            {
+                ServiceBundle.AadInstanceDiscovery.TryGetValue(new Uri(authority).Host, out instanceDiscoveryMetadata);
+            }
+            return instanceDiscoveryMetadata;
+        }
+
+        private ISet<string> GetEnvironmentAliases(string authority, InstanceDiscoveryMetadataEntry metadata)
+        {
+            ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
                 new Uri(authority).Host
             };
 
-        if (metadata != null)
-        {
-            foreach (string environmentAlias in metadata.Aliases ?? Enumerable.Empty<string>())
+            if (metadata != null)
             {
-                environmentAliases.Add(environmentAlias);
+                foreach (string environmentAlias in metadata.Aliases ?? Enumerable.Empty<string>())
+                {
+                    environmentAliases.Add(environmentAlias);
+                }
+            }
+
+            return environmentAliases;
+        }
+
+        private string GetPreferredEnvironmentHost(string environmentHost, InstanceDiscoveryMetadataEntry metadata)
+        {
+            string preferredEnvironmentHost = environmentHost;
+
+            if (metadata != null)
+            {
+                preferredEnvironmentHost = metadata.PreferredCache;
+            }
+
+            return preferredEnvironmentHost;
+        }
+
+        internal IEnumerable<IAccount> GetAccounts(string authority, bool validateAuthority, RequestContext requestContext)
+        {
+            var environment = new Uri(authority).Host;
+            lock (LockObject)
+            {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = null
+                };
+
+                OnBeforeAccess(args);
+                ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
+                ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
+
+                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, ClientId);
+                OnAfterAccess(args);
+
+                IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
+                foreach (MsalRefreshTokenCacheItem rtItem in tokenCacheItems)
+                {
+                    foreach (MsalAccountCacheItem account in accountCacheItems)
+                    {
+                        if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            clientInfoToAccountMap[rtItem.HomeAccountId] = new Account
+                                (account.HomeAccountId, account.PreferredUsername, environment);
+                            break;
+                        }
+                    }
+                }
+
+                Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
+                List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
+
+                foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)
+                {
+                    ClientInfo clientInfo = ClientInfo.CreateFromJson(pair.Key);
+                    string accountIdentifier = clientInfo.ToAccountIdentifier();
+
+                    if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
+                    {
+                        clientInfoToAccountMap[accountIdentifier] = new Account(
+                             accountIdentifier, pair.Value.DisplayableId, environment);
+                    }
+                }
+
+                var accounts = new List<IAccount>(clientInfoToAccountMap.Values);
+                List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
+
+                foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
+                {
+                    if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
+                    {
+                        accounts.Add(new Account(null, user.DisplayableId, environment));
+                        uniqueUserNames.Add(user.DisplayableId);
+                    }
+                }
+                return accounts.AsEnumerable();
             }
         }
 
-        return environmentAliases;
-    }
-
-    private string GetPreferredEnvironmentHost(string environmentHost, InstanceDiscoveryMetadataEntry metadata)
-    {
-        string preferredEnvironmentHost = environmentHost;
-
-        if (metadata != null)
+        internal ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokensForClient(RequestContext requestContext)
         {
-            preferredEnvironmentHost = metadata.PreferredCache;
+            lock (LockObject)
+            {
+                ICollection<MsalRefreshTokenCacheItem> allRefreshTokens = new List<MsalRefreshTokenCacheItem>();
+                foreach (var refreshTokenString in TokenCacheAccessor.GetAllRefreshTokensAsString())
+                {
+                    MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =
+                    JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenString, requestContext);
+
+                    if (msalRefreshTokenCacheItem != null && msalRefreshTokenCacheItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        allRefreshTokens.Add(msalRefreshTokenCacheItem);
+                    }
+                }
+                return allRefreshTokens;
+            }
         }
 
-        return preferredEnvironmentHost;
-    }
+        internal ICollection<MsalAccessTokenCacheItem> GetAllAccessTokensForClient(RequestContext requestContext)
+        {
+            lock (LockObject)
+            {
+                ICollection<MsalAccessTokenCacheItem> allAccessTokens = new List<MsalAccessTokenCacheItem>();
 
-    internal IEnumerable<IAccount> GetAccounts(string authority, bool validateAuthority, RequestContext requestContext)
-    {
-        var environment = new Uri(authority).Host;
-        lock (LockObject)
+                foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
+                {
+                    MsalAccessTokenCacheItem msalAccessTokenCacheItem =
+                    JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(accessTokenString, requestContext);
+                    if (msalAccessTokenCacheItem != null && msalAccessTokenCacheItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        allAccessTokens.Add(msalAccessTokenCacheItem);
+                    }
+                }
+
+                return allAccessTokens;
+            }
+        }
+
+        internal ICollection<MsalIdTokenCacheItem> GetAllIdTokensForClient(RequestContext requestContext)
+        {
+            lock (LockObject)
+            {
+                ICollection<MsalIdTokenCacheItem> allIdTokens = new List<MsalIdTokenCacheItem>();
+
+                foreach (var idTokenString in TokenCacheAccessor.GetAllIdTokensAsString())
+                {
+                    MsalIdTokenCacheItem msalIdTokenCacheItem =
+                    JsonHelper.TryToDeserializeFromJson<MsalIdTokenCacheItem>(idTokenString, requestContext);
+                    if (msalIdTokenCacheItem != null && msalIdTokenCacheItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        allIdTokens.Add(msalIdTokenCacheItem);
+                    }
+                }
+
+                return allIdTokens;
+            }
+        }
+
+        internal MsalAccountCacheItem GetAccount(MsalRefreshTokenCacheItem refreshTokenCacheItem, RequestContext requestContext)
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
             {
@@ -791,447 +916,328 @@ namespace Microsoft.Identity.Client
             };
 
             OnBeforeAccess(args);
-            ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
-            ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
-
-            var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, ClientId);
+            ICollection<MsalAccountCacheItem> accounts = GetAllAccounts(requestContext);
             OnAfterAccess(args);
 
-            IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
-            foreach (MsalRefreshTokenCacheItem rtItem in tokenCacheItems)
+            foreach (MsalAccountCacheItem account in accounts)
             {
-                foreach (MsalAccountCacheItem account in accountCacheItems)
+                if (refreshTokenCacheItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase) &&
+                    refreshTokenCacheItem.Environment.Equals(account.Environment, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (rtItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase))
+                    return account;
+                }
+            }
+            return null;
+        }
+
+        internal ICollection<MsalAccountCacheItem> GetAllAccounts(RequestContext requestContext)
+        {
+            lock (LockObject)
+            {
+                ICollection<MsalAccountCacheItem> allAccounts = new List<MsalAccountCacheItem>();
+
+                foreach (var accountString in TokenCacheAccessor.GetAllAccountsAsString())
+                {
+                    MsalAccountCacheItem msalAccountCacheItem =
+                    JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountString, requestContext);
+                    if (msalAccountCacheItem != null)
                     {
-                        clientInfoToAccountMap[rtItem.HomeAccountId] = new Account
-                            (account.HomeAccountId, account.PreferredUsername, environment);
-                        break;
+                        allAccounts.Add(msalAccountCacheItem);
                     }
                 }
-            }
 
-            Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
-            List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
-
-            foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)
-            {
-                ClientInfo clientInfo = ClientInfo.CreateFromJson(pair.Key);
-                string accountIdentifier = clientInfo.ToAccountIdentifier();
-
-                if (!clientInfoToAccountMap.ContainsKey(accountIdentifier))
-                {
-                    clientInfoToAccountMap[accountIdentifier] = new Account(
-                         accountIdentifier, pair.Value.DisplayableId, environment);
-                }
-            }
-
-            var accounts = new List<IAccount>(clientInfoToAccountMap.Values);
-            List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
-
-            foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
-            {
-                if (!string.IsNullOrEmpty(user.DisplayableId) && !uniqueUserNames.Contains(user.DisplayableId))
-                {
-                    accounts.Add(new Account(null, user.DisplayableId, environment));
-                    uniqueUserNames.Add(user.DisplayableId);
-                }
-            }
-            return accounts.AsEnumerable();
-        }
-    }
-
-    internal ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokensForClient(RequestContext requestContext)
-    {
-        lock (LockObject)
-        {
-            ICollection<MsalRefreshTokenCacheItem> allRefreshTokens = new List<MsalRefreshTokenCacheItem>();
-            foreach (var refreshTokenString in TokenCacheAccessor.GetAllRefreshTokensAsString())
-            {
-                MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =
-                JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(refreshTokenString, requestContext);
-
-                if (msalRefreshTokenCacheItem != null && msalRefreshTokenCacheItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
-                {
-                    allRefreshTokens.Add(msalRefreshTokenCacheItem);
-                }
-            }
-            return allRefreshTokens;
-        }
-    }
-
-    internal ICollection<MsalAccessTokenCacheItem> GetAllAccessTokensForClient(RequestContext requestContext)
-    {
-        lock (LockObject)
-        {
-            ICollection<MsalAccessTokenCacheItem> allAccessTokens = new List<MsalAccessTokenCacheItem>();
-
-            foreach (var accessTokenString in TokenCacheAccessor.GetAllAccessTokensAsString())
-            {
-                MsalAccessTokenCacheItem msalAccessTokenCacheItem =
-                JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(accessTokenString, requestContext);
-                if (msalAccessTokenCacheItem != null && msalAccessTokenCacheItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
-                {
-                    allAccessTokens.Add(msalAccessTokenCacheItem);
-                }
-            }
-
-            return allAccessTokens;
-        }
-    }
-
-    internal ICollection<MsalIdTokenCacheItem> GetAllIdTokensForClient(RequestContext requestContext)
-    {
-        lock (LockObject)
-        {
-            ICollection<MsalIdTokenCacheItem> allIdTokens = new List<MsalIdTokenCacheItem>();
-
-            foreach (var idTokenString in TokenCacheAccessor.GetAllIdTokensAsString())
-            {
-                MsalIdTokenCacheItem msalIdTokenCacheItem =
-                JsonHelper.TryToDeserializeFromJson<MsalIdTokenCacheItem>(idTokenString, requestContext);
-                if (msalIdTokenCacheItem != null && msalIdTokenCacheItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase))
-                {
-                    allIdTokens.Add(msalIdTokenCacheItem);
-                }
-            }
-
-            return allIdTokens;
-        }
-    }
-
-    internal MsalAccountCacheItem GetAccount(MsalRefreshTokenCacheItem refreshTokenCacheItem, RequestContext requestContext)
-    {
-        TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-        {
-            TokenCache = this,
-            ClientId = ClientId,
-            Account = null
-        };
-
-        OnBeforeAccess(args);
-        ICollection<MsalAccountCacheItem> accounts = GetAllAccounts(requestContext);
-        OnAfterAccess(args);
-
-        foreach (MsalAccountCacheItem account in accounts)
-        {
-            if (refreshTokenCacheItem.HomeAccountId.Equals(account.HomeAccountId, StringComparison.OrdinalIgnoreCase) &&
-                refreshTokenCacheItem.Environment.Equals(account.Environment, StringComparison.OrdinalIgnoreCase))
-            {
-                return account;
+                return allAccounts;
             }
         }
-        return null;
-    }
 
-    internal ICollection<MsalAccountCacheItem> GetAllAccounts(RequestContext requestContext)
-    {
-        lock (LockObject)
+        internal void RemoveAccount(IAccount account, RequestContext requestContext)
         {
-            ICollection<MsalAccountCacheItem> allAccounts = new List<MsalAccountCacheItem>();
-
-            foreach (var accountString in TokenCacheAccessor.GetAllAccountsAsString())
+            lock (LockObject)
             {
-                MsalAccountCacheItem msalAccountCacheItem =
-                JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountString, requestContext);
-                if (msalAccountCacheItem != null)
+                requestContext.Logger.Info("Removing user from cache..");
+
+                try
                 {
-                    allAccounts.Add(msalAccountCacheItem);
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                    {
+                        TokenCache = this,
+                        ClientId = ClientId,
+                        Account = account,
+                        HasStateChanged = true
+                    };
+
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
+
+                    RemoveMsalAccount(account, requestContext);
+                    RemoveAdalUser(account);
+
+                    OnAfterAccess(args);
+                }
+                finally
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    HasStateChanged = false;
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
             }
-
-            return allAccounts;
         }
-    }
 
-    internal void RemoveAccount(IAccount account, RequestContext requestContext)
-    {
-        lock (LockObject)
+        internal void RemoveMsalAccount(IAccount account, RequestContext requestContext)
         {
-            requestContext.Logger.Info("Removing user from cache..");
+            if (account.HomeAccountId == null)
+            {
+                // adalv3 account
+                return;
+            }
+            IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
+            {
+                TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey(), requestContext);
+            }
 
-            try
+            requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
+            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
+            {
+                TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetKey(), requestContext);
+            }
+
+            requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
+
+            IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
+            {
+                TokenCacheAccessor.DeleteIdToken(idTokenCacheItem.GetKey(), requestContext);
+            }
+
+            requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
+        }
+
+        internal void RemoveAdalUser(IAccount account)
+        {
+            CacheFallbackOperations.RemoveAdalUser(
+                LegacyCachePersistence,
+                ClientId,
+                account.Username,
+                account.HomeAccountId.Identifier);
+        }
+
+        internal ICollection<string> GetAllAccessTokenCacheItems(RequestContext requestContext)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllAccessTokensAsString();
+                return allTokens;
+            }
+        }
+
+        internal ICollection<string> GetAllRefreshTokenCacheItems(RequestContext requestContext)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllRefreshTokensAsString();
+                return allTokens;
+            }
+        }
+
+        internal ICollection<string> GetAllIdTokenCacheItems(RequestContext requestContext)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                ICollection<string> allTokens =
+                    TokenCacheAccessor.GetAllIdTokensAsString();
+                return allTokens;
+            }
+        }
+
+        internal ICollection<string> GetAllAccountCacheItems(RequestContext requestContext)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                ICollection<string> allAccounts =
+                    TokenCacheAccessor.GetAllAccountsAsString();
+                return allAccounts;
+            }
+        }
+
+        internal void AddAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem);
+            }
+        }
+
+        internal void AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+            }
+        }
+
+        internal void AddIdTokenCacheItem(MsalIdTokenCacheItem msalIdTokenCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                TokenCacheAccessor.SaveIdToken(msalIdTokenCacheItem);
+            }
+        }
+
+        internal void AddAccountCacheItem(MsalAccountCacheItem msalAccountCacheItem)
+        {
+            // this method is called by serialize and does not require
+            // delegates because serialize itself is called from delegates
+            lock (LockObject)
+            {
+                TokenCacheAccessor.SaveAccount(msalAccountCacheItem);
+            }
+        }
+
+        internal void Clear()
+        {
+            lock (LockObject)
             {
                 TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                 {
                     TokenCache = this,
                     ClientId = ClientId,
-                    Account = account,
+                    Account = null,
                     HasStateChanged = true
                 };
 
-                OnBeforeAccess(args);
-                OnBeforeWrite(args);
+                try
+                {
+                    OnBeforeAccess(args);
+                    OnBeforeWrite(args);
 
-                RemoveMsalAccount(account, requestContext);
-                RemoveAdalUser(account);
-
-                OnAfterAccess(args);
-            }
-            finally
-            {
+                    ClearMsalCache();
+                    ClearAdalCache();
+                }
+                finally
+                {
+                    OnAfterAccess(args);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
-        }
-    }
-
-    internal void RemoveMsalAccount(IAccount account, RequestContext requestContext)
-    {
-        if (account.HomeAccountId == null)
-        {
-            // adalv3 account
-            return;
-        }
-        IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
-            .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
-        {
-            TokenCacheAccessor.DeleteRefreshToken(refreshTokenCacheItem.GetKey(), requestContext);
-        }
-
-        requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-        IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
-            .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
-        {
-            TokenCacheAccessor.DeleteAccessToken(accessTokenCacheItem.GetKey(), requestContext);
-        }
-
-        requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
-
-        IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
-            .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
-            .ToList();
-        foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
-        {
-            TokenCacheAccessor.DeleteIdToken(idTokenCacheItem.GetKey(), requestContext);
-        }
-
-        requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
-    }
-
-    internal void RemoveAdalUser(IAccount account)
-    {
-        CacheFallbackOperations.RemoveAdalUser(
-            LegacyCachePersistence,
-            ClientId,
-            account.Username,
-            account.HomeAccountId.Identifier);
-    }
-
-    internal ICollection<string> GetAllAccessTokenCacheItems(RequestContext requestContext)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            ICollection<string> allTokens =
-                TokenCacheAccessor.GetAllAccessTokensAsString();
-            return allTokens;
-        }
-    }
-
-    internal ICollection<string> GetAllRefreshTokenCacheItems(RequestContext requestContext)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            ICollection<string> allTokens =
-                TokenCacheAccessor.GetAllRefreshTokensAsString();
-            return allTokens;
-        }
-    }
-
-    internal ICollection<string> GetAllIdTokenCacheItems(RequestContext requestContext)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            ICollection<string> allTokens =
-                TokenCacheAccessor.GetAllIdTokensAsString();
-            return allTokens;
-        }
-    }
-
-    internal ICollection<string> GetAllAccountCacheItems(RequestContext requestContext)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            ICollection<string> allAccounts =
-                TokenCacheAccessor.GetAllAccountsAsString();
-            return allAccounts;
-        }
-    }
-
-    internal void AddAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem);
-        }
-    }
-
-    internal void AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
-        }
-    }
-
-    internal void AddIdTokenCacheItem(MsalIdTokenCacheItem msalIdTokenCacheItem)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            TokenCacheAccessor.SaveIdToken(msalIdTokenCacheItem);
-        }
-    }
-
-    internal void AddAccountCacheItem(MsalAccountCacheItem msalAccountCacheItem)
-    {
-        // this method is called by serialize and does not require
-        // delegates because serialize itself is called from delegates
-        lock (LockObject)
-        {
-            TokenCacheAccessor.SaveAccount(msalAccountCacheItem);
-        }
-    }
-
-    internal void Clear()
-    {
-        lock (LockObject)
-        {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-            {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = null,
-                HasStateChanged = true
-            };
-
-            try
-            {
-                OnBeforeAccess(args);
-                OnBeforeWrite(args);
-
-                ClearMsalCache();
-                ClearAdalCache();
             }
-            finally
-            {
-                OnAfterAccess(args);
-#pragma warning disable CS0618 // Type or member is obsolete
-                    HasStateChanged = false;
-#pragma warning restore CS0618 // Type or member is obsolete
-                }
         }
-    }
 
-    internal void ClearAdalCache()
-    {
-        IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(LegacyCachePersistence.LoadCache());
-        dictionary.Clear();
-        LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
-    }
-
-    internal void ClearMsalCache()
-    {
-        TokenCacheAccessor.Clear();
-    }
-
-    /// <summary>
-    /// Only used by dev test apps
-    /// </summary>
-    internal void SaveAccesTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem)
-    {
-        lock (LockObject)
+        internal void ClearAdalCache()
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
-            {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = msalIdTokenCacheItem != null ? new Account(
-                    msalIdTokenCacheItem.HomeAccountId,
-                    msalIdTokenCacheItem.IdToken?.PreferredUsername,
-                    msalAccessTokenCacheItem.Environment) : null,
-                HasStateChanged = true
-            };
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(LegacyCachePersistence.LoadCache());
+            dictionary.Clear();
+            LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
+        }
 
-            try
+        internal void ClearMsalCache()
+        {
+            TokenCacheAccessor.Clear();
+        }
+
+        /// <summary>
+        /// Only used by dev test apps
+        /// </summary>
+        internal void SaveAccesTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem)
+        {
+            lock (LockObject)
             {
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = msalIdTokenCacheItem != null ? new Account(
+                        msalIdTokenCacheItem.HomeAccountId,
+                        msalIdTokenCacheItem.IdToken?.PreferredUsername,
+                        msalAccessTokenCacheItem.Environment) : null,
+                    HasStateChanged = true
+                };
+
+                try
+                {
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
                     OnBeforeAccess(args);
-                OnBeforeWrite(args);
+                    OnBeforeWrite(args);
 
-                TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem);
-            }
-            finally
-            {
-                OnAfterAccess(args);
+                    TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem);
+                }
+                finally
+                {
+                    OnAfterAccess(args);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
+            }
         }
-    }
 
-    /// <summary>
-    /// Only used by dev test apps
-    /// </summary>
-    /// <param name="msalRefreshTokenCacheItem"></param>
-    /// <param name="msalIdTokenCacheItem"></param>
-    internal void SaveRefreshTokenCacheItem(
-        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
-        MsalIdTokenCacheItem msalIdTokenCacheItem)
-    {
-        lock (LockObject)
+        /// <summary>
+        /// Only used by dev test apps
+        /// </summary>
+        /// <param name="msalRefreshTokenCacheItem"></param>
+        /// <param name="msalIdTokenCacheItem"></param>
+        internal void SaveRefreshTokenCacheItem(
+            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+            lock (LockObject)
             {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = msalIdTokenCacheItem != null ?
-                       new Account(
-                           msalIdTokenCacheItem.HomeAccountId,
-                           msalIdTokenCacheItem.IdToken.PreferredUsername,
-                           msalIdTokenCacheItem.IdToken.Name) : null,
-                HasStateChanged = true
-            };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = msalIdTokenCacheItem != null ?
+                           new Account(
+                               msalIdTokenCacheItem.HomeAccountId,
+                               msalIdTokenCacheItem.IdToken.PreferredUsername,
+                               msalIdTokenCacheItem.IdToken.Name) : null,
+                    HasStateChanged = true
+                };
 
-            try
-            {
+                try
+                {
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
                     OnBeforeAccess(args);
-                OnBeforeWrite(args);
+                    OnBeforeWrite(args);
 
-                TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
-            }
-            finally
-            {
-                OnAfterAccess(args);
+                    TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                }
+                finally
+                {
+                    OnAfterAccess(args);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
+            }
         }
     }
-}
 }
