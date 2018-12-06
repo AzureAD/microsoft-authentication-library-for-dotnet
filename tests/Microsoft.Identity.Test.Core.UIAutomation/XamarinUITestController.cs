@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         public IApp Application { get; set; }
 
+        public bool IsiOS { get; set; }
+
         public XamarinUITestController()
         {
             this.defaultSearchTimeout = new TimeSpan(0, 0, defaultSearchTimeoutSec);
@@ -170,7 +172,10 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    Application.Tap(QueryByHtmlElementValue(elementID));
+                    if (IsiOS)
+                        Application.Tap(QueryByWebViewAndCssId(elementID));
+                    else
+                        Application.Tap(QueryByCssId(elementID));
                     break;
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
@@ -189,7 +194,10 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.EnterText(x => x.Marked(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.EnterText(QueryByCssId(elementID), text);
+                    if (IsiOS)
+                        Application.EnterText(QueryByWebViewAndCssId(elementID), text);
+                    else
+                        Application.EnterText(QueryByCssId(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlValue:
                     throw new InvalidOperationException("Test error - you can't input text in an html element that has a value");
@@ -238,5 +246,9 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             return c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID));
         }
 
+        private static Func<AppQuery, AppWebQuery> QueryByWebViewAndCssId(string elementID)
+        {
+            return c => c.WebView().Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID));
+        }
     }
 }
