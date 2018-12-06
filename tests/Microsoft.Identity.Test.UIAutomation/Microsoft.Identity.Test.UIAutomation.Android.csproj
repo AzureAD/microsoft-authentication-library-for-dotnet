@@ -65,9 +65,9 @@
     <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj">
+    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj">
       <Project>{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}</Project>
-      <Name>Microsoft.Identity.Test.Core.UIAutomation</Name>
+      <Name>Microsoft.Identity.Test.UIAutomation.Infrastructure</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
@@ -75,7 +75,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MSALMobileTestHelper.cs" />
     <Compile Include="XamarinDroidMSALTests.cs" />
   </ItemGroup>
   <ItemGroup>

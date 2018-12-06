@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Test.Core.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 {
     public static class CoreUiTestConstants
     {

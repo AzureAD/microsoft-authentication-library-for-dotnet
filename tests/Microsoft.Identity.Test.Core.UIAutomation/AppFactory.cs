@@ -27,7 +27,7 @@
 
 using Xamarin.UITest;
 
-namespace Microsoft.Identity.Test.Core.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 {
     /// <summary>
     /// Initializes the app object that represents the main gateway to interact with the app on the device

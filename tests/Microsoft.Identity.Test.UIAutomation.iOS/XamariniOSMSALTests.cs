@@ -25,17 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Test.UIAutomation.infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
+using Microsoft.Identity.Test.UIAutomation.infrastructure;
 using Xamarin.UITest;
+using Xamarin.UITest.Queries;
+using System;
+using System.Linq;
 
 //NOTICE! Inorder to run UI automation tests for xamarin locally, you may need to upgrade nunit to 3.0 and above for this project and the core ui Automation project.
 //It is set to 2.6.4 because that is the maximum version that appcenter can support.
 //There is an error in visual studio that can prevent the NUnit test framework from loading the test dll properly.
 //Remember to return the version back to 2.6.4 before commiting to prevent appcenter from failing
 
-namespace Microsoft.Identity.Test.UIAutomation
+namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
 {
     /// <summary>
     /// Configures environment for core/iOS tests to run
@@ -46,7 +49,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         IApp app;
         Platform platform;
         ITestController xamarinController = new XamarinUITestController();
-        MobileTestHelper _mobileTestHelper = new MobileTestHelper();
+        MobileTestHelper _msalMobileTestHelper = new MobileTestHelper();
 
         /// <summary>
         /// Initializes Xamarin UI tests
@@ -73,7 +76,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+            _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
         /// <summary>
@@ -84,7 +87,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         {
             var labResponse = LabUserHelper.GetDefaultUser();
 
-            _mobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
+            _msalMobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
         }
 
         /// <summary>
@@ -93,7 +96,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenSilentTest()
         {
-            _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+            _msalMobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
         /// <summary>
@@ -104,7 +107,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+            _msalMobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
         }
 
         /// <summary>
@@ -115,7 +118,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CFacebookProviderWithMicrosoftAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), false);
+            _msalMobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), false);
         }
 
         /// <summary>
@@ -127,8 +130,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CFacebookProviderEditPolicyAcquireTokenTest()
         {
-            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
-            _mobileTestHelper.B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
+            _msalMobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+            _msalMobileTestHelper.B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
         }
 
         /// <summary>
@@ -142,7 +145,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             "system browser locally.")]
         public void B2CGoogleProviderWithB2CLoginAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), true);
+            _msalMobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), true);
         }
 
         /// <summary>
@@ -154,7 +157,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Ignore("UI is different in AppCenter compared w/local.")]
         public void B2CGoogleProviderWithMicrosoftAuthorityAcquireTokenTest()
         {
-            _mobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), false);
+            _msalMobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), false);
         }
 
         /// <summary>
@@ -165,7 +168,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CLocalAccountAcquireTokenTest()
         {
-            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
+            _msalMobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
         }
 
         /// <summary>
@@ -176,7 +179,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest()
         {
-            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), false);
+            _msalMobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), false);
         }
 
         /// <summary>
@@ -185,7 +188,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV4InteractiveFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(
+            _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(
                 xamarinController,
                 LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4));
         }
@@ -196,7 +199,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV3InteractiveFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
+            _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
         }
 
         /// <summary>
@@ -205,7 +208,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV4InteractiveNonFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+            _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
         }
 
         /// <summary>
@@ -214,7 +217,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void AcquireTokenADFSV3InteractiveNonFederatedTest()
         {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+            _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
         }
     }
 }

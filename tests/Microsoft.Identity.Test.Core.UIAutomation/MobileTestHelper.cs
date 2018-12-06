@@ -27,22 +27,20 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
 using Xamarin.UITest.Queries;
-using Microsoft.Identity.Test.Core.UIAutomation;
 
-namespace Microsoft.Identity.Test.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 {
     /// <summary>
     /// Contains the core test functionality that will be used by Android and iOS tests
     /// </summary>
-    public class MSALMobileTestHelper
+    public class MobileTestHelper
     {
-        public CoreMobileTestHelper CoreMobileTestHelper { get; set; } = new CoreMobileTestHelper();
-
         /// <summary>
-        /// Runs through the standard acquire token flow, using the login prompt behavior
+        /// Runs through the standard acquire token flow, using the login prompt behavior. The ui behavior of "login" is used by default.
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
         public void AcquireTokenInteractiveTestHelper(
@@ -51,7 +49,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             string promptBehavior = CoreUiTestConstants.UIBehaviorLogin)
         {
             AcquireTokenInteractiveHelper(controller, labResponse, promptBehavior);
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
         }
 
         /// <summary>
@@ -62,12 +60,12 @@ namespace Microsoft.Identity.Test.UIAutomation
         {
             //acquire token for 1st resource
             AcquireTokenInteractiveHelper(controller, labResponse, CoreUiTestConstants.UIBehaviorLogin);
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
 
             //acquire token for 2nd resource with refresh token
             SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UIBehaviorLogin);
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
         }
 
         private void AcquireTokenInteractiveHelper(
@@ -77,7 +75,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         {
             PrepareForAuthentication(controller);
             SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, promptBehavior);
-            CoreMobileTestHelper.PerformSignInFlow(controller, labResponse.User);
+            PerformSignInFlow(controller, labResponse.User);
 
             // on consent, also hit the accept button
             if (promptBehavior == CoreUiTestConstants.UIBehaviorConsent)
@@ -226,7 +224,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         private void B2CSilentFlowHelper(ITestController controller)
         {
             //verify results of AT call
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
 
             //select user
             controller.Tap(CoreUiTestConstants.SelectUser);
@@ -234,7 +232,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             controller.Tap(CoreUiTestConstants.UserMissingFromResponse);
             //acquire token silent with selected user
             controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
         }
 
         private void SetB2CInputData(ITestController controller)
@@ -300,7 +298,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         {
             SetB2CAuthority(controller, true);
 
-            UserInformationFieldIds userInformationFieldIds = CoreMobileTestHelper.DetermineUserInformationFieldIds(user);
+            UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
             controller.Tap(CoreUiTestConstants.AcquirePageID);
 
@@ -322,15 +320,15 @@ namespace Microsoft.Identity.Test.UIAutomation
                 default:
                     throw new InvalidOperationException("B2CIdentityProvider unknown");
             }
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
         }
 
         public void PerformB2CSignInEditProfileFlow(ITestController controller, B2CIdentityProvider b2CIdentityProvider)
         {
             SetB2CInputDataForEditProfileAuthority(controller);
-            
+
             controller.Tap(CoreUiTestConstants.AcquirePageID);
-            
+
             SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorNoPrompt);
 
             //Acquire token flow
@@ -338,7 +336,113 @@ namespace Microsoft.Identity.Test.UIAutomation
 
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueID, XamarinSelector.ByHtmlIdAttribute);
 
-            CoreMobileTestHelper.VerifyResult(controller);
+            VerifyResult(controller);
+        }
+
+        public void PromptBehaviorTestHelperWithConsent(ITestController controller, LabResponse labResponse)
+        {
+            // 1. Acquire token with uiBehavior set to consent
+            AcquireTokenInteractiveTestHelper(
+                controller,
+                labResponse,
+                CoreUiTestConstants.UIBehaviorConsent);
+
+            // 2. Switch ui behavior to "select account"
+            SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorSelectAccount);
+
+            // 3. Hit Acquire Token directly since we are not changing any other setting
+            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+
+            // 4. The web UI should display all users, so click on the current user
+            controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
+
+            // 5. Validate token again
+            VerifyResult(controller);
+        }
+
+        public void PerformSignInFlow(ITestController controller, LabUser user)
+        {
+            UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+
+            //i0116 = UPN text field on AAD sign in endpoint
+            controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            //idSIButton9 = Sign in button
+            controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+            //i0118 = password text field
+            controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+        }
+
+        public static void PerformSignInFlowWithoutUI(ITestController controller)
+        {
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+        }
+
+        public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
+        {
+            UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds();
+            userInformationFieldIds.DetermineFieldIds(user);
+            return userInformationFieldIds;
+        }
+
+        public void VerifyResult(ITestController controller)
+        {
+            RetryVerificationHelper(() =>
+            {
+                //Test results are put into a label that is checked for messages
+                var result = controller.GetText(CoreUiTestConstants.TestResultID);
+                if (result.Contains(CoreUiTestConstants.TestResultSuccessfulMessage))
+                {
+                    return;
+                }
+                else if (result.Contains(CoreUiTestConstants.TestResultFailureMessage))
+                {
+                    throw new ResultVerificationFailureException(VerificationError.ResultIndicatesFailure);
+                }
+                else
+                {
+                    throw new ResultVerificationFailureException(VerificationError.ResultNotFound);
+                }
+            });
+        }
+
+        private static void RetryVerificationHelper(Action verification)
+        {
+            //There may be a delay in the amount of time it takes for an authentication request to complete.
+            //Thus this method will check the result once a second for 20 seconds.
+            var attempts = 0;
+            do
+            {
+                try
+                {
+                    attempts++;
+                    verification();
+                    break;
+                }
+                catch (ResultVerificationFailureException ex)
+                {
+                    if (attempts == CoreUiTestConstants.MaximumResultCheckRetryAttempts)
+                    {
+                        Assert.Fail("Could not Verify test result");
+                    }
+
+                    switch (ex.Error)
+                    {
+                        case VerificationError.ResultIndicatesFailure:
+                            Assert.Fail("Test result indicates failure");
+                            break;
+                        case VerificationError.ResultNotFound:
+                            Task.Delay(CoreUiTestConstants.ResultCheckPolliInterval).Wait();
+                            break;
+                        default:
+                            throw;
+                    }
+                }
+            } while (true);
         }
     }
 }
