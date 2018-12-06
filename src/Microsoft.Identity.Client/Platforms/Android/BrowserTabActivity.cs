@@ -35,11 +35,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
 {
     /// <summary>
     /// BrowserTabActivity to get the redirect with code from authorize endpoint. Intent filter has to be declared in the
-    /// manifest for this activity. When chrome custom tab is launched, and we're redirected back with the redirect
+    /// android manifest for this activity. When chrome custom tab is launched, and we're redirected back with the redirect
     /// uri (redirect_uri has to be unique across apps), the os will fire an intent with the redirect,
     /// and the BrowserTabActivity will be launched.
     /// </summary>
-    //[Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
+    [Activity(Name = "microsoft.identity.client.BrowserTabActivity")]
     [CLSCompliant(false)]
     public class BrowserTabActivity : Activity
     {
