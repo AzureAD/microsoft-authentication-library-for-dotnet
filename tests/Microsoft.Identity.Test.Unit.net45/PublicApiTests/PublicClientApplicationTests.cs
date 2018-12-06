@@ -991,6 +991,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshTest()
         {
@@ -1044,6 +1046,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshMultipleTenantsTest()
         {
@@ -1080,6 +1084,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
+                // ForceRefresh=true, so skip cache lookup of Access Token
+                // Use refresh token to acquire a new Access Token
                 Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
                     MsalTestConstants.Scope.ToArray(),
                     new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
@@ -1112,6 +1118,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MsalTestConstants.AuthorityGuidTenant2,
                     true);
 
+                // Same user, scopes, clientId, but different authority
+                // Should result in new AccessToken, but same refresh token
                 AuthenticationResult result2 = task2.Result;
                 Assert.IsNotNull(result2);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result2.Account.Username);
@@ -1132,6 +1140,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
+                // Same user, scopes, clientId, but different authority
+                // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task3 = app.AcquireTokenSilentAsync(
                     MsalTestConstants.Scope.ToArray(),
                     new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
@@ -1146,7 +1156,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(3, cache.TokenCacheAccessor.AccessTokenCount);
                 Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
 
-                // Use same authority as above, should reuse token
+                // Use same authority as above, number of access tokens should remain constant
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
@@ -1174,6 +1184,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshFalseMultipleTenantsTest()
         {
@@ -1195,6 +1207,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 };
 
                 app.UserTokenCache = cache;
+                // PopulateCache() creates two access tokens
                 _tokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -1236,6 +1249,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
+                // Same user, scopes, clientId, but different authority
+                // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task2 = app.AcquireTokenSilentAsync(
                     MsalTestConstants.Scope.ToArray(),
                     new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
@@ -1262,6 +1277,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
+                // Same user, scopes, clientId, but different authority
+                // Should result in new AccessToken, but same refresh token
                 Task<AuthenticationResult> task3 = app.AcquireTokenSilentAsync(
                     MsalTestConstants.Scope.ToArray(),
                     new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
