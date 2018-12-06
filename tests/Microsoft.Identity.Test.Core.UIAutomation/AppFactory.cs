@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                 case Platform.Android:
                      return ConfigureApp.Android.InstalledApp(targetApp).StartApp();
                 case Platform.iOS:
-                    return ConfigureApp.iOS.StartApp();
+                     return ConfigureApp.iOS.InstalledApp(targetApp).StartApp();
                 default:
                     throw new PlatformNotSupportedException();
             }

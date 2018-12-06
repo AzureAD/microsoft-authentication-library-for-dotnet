@@ -40,8 +40,8 @@ namespace Microsoft.Identity.Test.UIAutomation
     /// <summary>
     /// Configures environment for core/iOS tests to run
     /// </summary>
-    [TestFixture(Platform.iOS)]
-    public class XamarinIOSMsalTests
+    [TestFixture(Platform.Android)]
+    public class XamarinDroidTests
     {
         IApp app;
         Platform platform;
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Initializes Xamarin UI tests
         /// </summary>
         /// <param name="platform">The platform where the tests will be performed</param>
-        public XamarinIOSMsalTests(Platform platform)
+        public XamarinDroidTests(Platform platform)
         {
             this.platform = platform;
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         [SetUp]
         public void InitializeBeforeTest()
         {
-            app = AppFactory.StartApp(platform, "XForms.iOS");
+            app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
             xamarinController.Application = app;
         }
 

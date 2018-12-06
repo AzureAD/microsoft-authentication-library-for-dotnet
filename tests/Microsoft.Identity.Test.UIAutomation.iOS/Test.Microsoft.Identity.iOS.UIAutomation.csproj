@@ -64,7 +64,7 @@
     <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XamariniOSMSALTests.cs" />
+    <Compile Include="XamariniOSTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
