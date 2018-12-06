@@ -378,11 +378,8 @@ namespace Microsoft.Identity.Client
                                 .ToList();
                     }
 
-                    if (tokenCacheItems.Count > 1)
-                    {
-                        // filter by authority in the auth request params
-                       tokenCacheItems = FilterToAuthoritySpecifiedByAuthenticationRequest(requestParams, tokenCacheItems);
-                    }
+                    // filter by authority in the auth request params
+                    tokenCacheItems = FilterToAuthoritySpecifiedByAuthenticationRequest(requestParams, tokenCacheItems);
                 }
 
                 // no match found after initial filtering
@@ -469,11 +466,19 @@ namespace Microsoft.Identity.Client
         private ICollection<MsalAccessTokenCacheItem> FilterToAuthoritySpecifiedByAuthenticationRequest(
             AuthenticationRequestParameters requestParams, ICollection<MsalAccessTokenCacheItem> tokenCacheItems)
         {
-            requestParams.RequestContext.Logger.Info("Filtering by authority specified in the authentication request parameters...");
-            return tokenCacheItems
-                    .Where(item => item.Authority.Equals(requestParams.Authority.CanonicalAuthority,
-                                                         StringComparison.OrdinalIgnoreCase))
-                    .ToList();
+            if (tokenCacheItems.Count <= 1)
+            {
+                return tokenCacheItems;
+            }
+
+            requestParams.RequestContext.Logger.Info(
+                "Filtering by authority specified in the authentication request parameters...");
+            tokenCacheItems = tokenCacheItems.Where(
+                item => item.Authority.Equals(
+                    requestParams.Authority.CanonicalAuthority,
+                    StringComparison.OrdinalIgnoreCase)).ToList();
+
+            return tokenCacheItems;
         }
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
