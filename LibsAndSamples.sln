@@ -39,7 +39,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleApp", "samples\deskto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.UIAutomation.Infrastructure", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.UIAutomation.Infrastructure.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Android.UIAutomation", "tests\Microsoft.Identity.Test.UIAutomation\Microsoft.Identity.Test.Android.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Android.UIAutomation", "tests\Microsoft.Identity.Test.Android.UIAutomation\Microsoft.Identity.Test.Android.UIAutomation.csproj", "{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.LabInfrastructure", "tests\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj", "{A181778D-5917-41CE-AA5F-7DAAA7B7F5BB}"
 EndProject
@@ -61,7 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Sid
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{A1BDB0D8-A1F8-4203-A95F-31D0ABC4DF7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Microsoft.Identity.iOS.UIAutomation", "tests\Microsoft.Identity.Test.UIAutomation.iOS\Test.Microsoft.Identity.iOS.UIAutomation.csproj", "{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.Microsoft.Identity.iOS.UIAutomation", "tests\Microsoft.Identity.Test.iOS.UIAutomation\Test.Microsoft.Identity.iOS.UIAutomation.csproj", "{3E6F5330-9FC1-44E9-9410-9C4A06DA74F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
