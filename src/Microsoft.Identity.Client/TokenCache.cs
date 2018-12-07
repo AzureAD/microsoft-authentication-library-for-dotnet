@@ -473,12 +473,13 @@ namespace Microsoft.Identity.Client
 
             requestParams.RequestContext.Logger.Info(
                 "Filtering by authority specified in the authentication request parameters...");
-            tokenCacheItems = tokenCacheItems.Where(
+
+            ICollection<MsalAccessTokenCacheItem> authorityCacheMatches = tokenCacheItems.Where(
                 item => item.Authority.Equals(
                     requestParams.Authority.CanonicalAuthority,
                     StringComparison.OrdinalIgnoreCase)).ToList();
 
-            return tokenCacheItems;
+            return authorityCacheMatches.Count == 0 ? authorityCacheMatches : tokenCacheItems;
         }
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
