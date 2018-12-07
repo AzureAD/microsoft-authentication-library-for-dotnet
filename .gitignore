@@ -238,6 +238,7 @@ _Pvt_Extensions
 *.nuget.targets
 project.lock.json
 *.project.lock.json
+package-lock.json
 msal/tests/dev apps/XForms/XForms.UWP/BundleArtifacts/x86.txt
 
 # ignore Xamarin.Android Resource.Designer.cs files
