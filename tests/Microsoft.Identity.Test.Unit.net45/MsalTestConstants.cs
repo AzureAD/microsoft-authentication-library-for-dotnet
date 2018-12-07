@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         public static readonly Account User = new Account(UserIdentifier, DisplayableId, ProductionPrefNetworkEnvironment);
-  
+
         public static readonly string OnPremiseAuthority = "https://fs.contoso.com/adfs/";
         public static readonly string OnPremiseClientId = "on_premise_client_id";
         public static readonly string OnPremiseUniqueId = "on_premise_unique_id";
@@ -113,11 +113,11 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly string OnPremiseClientSecret = "on_premise_client_secret";
         public static readonly string OnPremiseUid = "my-OnPremise-UID";
         public static readonly string OnPremiseUtid = "my-OnPremise-UTID";
-        
+
         public static readonly Account OnPremiseUser = new Account(
             string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
 
-        #if !ANDROID && !iOS && !WINDOWS_APP
+#if !ANDROID && !iOS && !WINDOWS_APP
         public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
 #endif
