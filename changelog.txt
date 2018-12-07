@@ -1,3 +1,15 @@
+2.6.0-preview
+=============
+- **For more info on the release, see https://aka.ms/msal-net-2-6 for details**
+- **Improved error messages for Integrated Windows Auth**: MSAL now returns better error messages for managed users using Integrated Windows Auth. [ADAL issue #1398](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/1398)
+- **New parameter for UIBehavior**: B2C developers can now use NoPrompt as a UIBehavior. For example, when envoking the edit profile policy to avoid the account selection UI and move directly to the edit profile UI. [MSAL issue #588](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/588)
+- **UIParent is available on all platforms**: The UIParent constructor now takes in (object parent, bool useEmbeddedWebview) and is available on all platforms. [MSAL issue #676](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/676)
+- **Remove dependency on Newtonsoft.Json**: MSAL now uses Microsoft.Identity.Json [MSAL PR](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1430)
+- **Deprecate `HasStateChanged`**: MSAL was not using this flag, so it has been deprecated [ADAL issue #1186](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/1186)
+- **Obsolete public WebUI net45 types from Internal.UI namespace**: [MSAL](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1438)
+- **NetStandard Unification**:  MSAL.NET helps you build multi-platform applications more easily by rationalizing the .NET Standard 1.3 platform. For details see blog post about this release available from: https://aka.ms/msal-net-2-6
+- **Move MSAL code to the MSAL repo**
+
 2.5.0-preview
 =============
 - **Improved the testability of apps using MSAL.NET**: MSAL.NET was not easily mockable because the AuthenticationResult was an immutable sealed class with no public constructors. AuthenticationResult now has a public constructor for testing. [MSAL issue #682](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/682)
