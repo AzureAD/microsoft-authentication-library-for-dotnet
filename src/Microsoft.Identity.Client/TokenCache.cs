@@ -378,7 +378,6 @@ namespace Microsoft.Identity.Client
                                 .ToList();
                     }
 
-                    // filter by authority in the auth request params
                     tokenCacheItems = FilterToAuthoritySpecifiedByAuthenticationRequest(requestParams, tokenCacheItems);
                 }
 
@@ -479,7 +478,7 @@ namespace Microsoft.Identity.Client
                     requestParams.Authority.CanonicalAuthority,
                     StringComparison.OrdinalIgnoreCase)).ToList();
 
-            return authorityCacheMatches.Count == 0 ? authorityCacheMatches : tokenCacheItems;
+            return authorityCacheMatches.Count > 0 ? tokenCacheItems : authorityCacheMatches;
         }
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
