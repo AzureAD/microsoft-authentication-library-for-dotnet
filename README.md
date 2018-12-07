@@ -14,8 +14,7 @@ Released     | Nightly
  [![NuGet](https://img.shields.io/nuget/v/Microsoft.Identity.Client.svg?style=flat-square&label=nuget&colorB=00b200)](https://www.nuget.org/packages/Microsoft.Identity.Client/) | [![MyGet](https://img.shields.io/myget/aad-clients-nightly/vpre/Microsoft.Identity.Client.svg?style=flat-square&label=myget&colorB=ff0000)](https://www.myget.org/feed/aad-clients-nightly/package/nuget/Microsoft.Identity.Client)
 
 ## Build Status
-
-**dev**: Contains newest development of MSAL (v2+). This is where all current and future development of MSAL takes place.  
+ 
 ![DEV Build Status](https://identitydivision.visualstudio.com/IDDP/_apis/build/status/CI/DotNet/.NET%20MSAL%20CI%20&%20PR%20&%20Nightly?branchName=master)
 
 
