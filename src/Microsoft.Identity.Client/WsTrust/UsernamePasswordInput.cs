@@ -25,12 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
-#if DESKTOP
+#if DESKTOP || ANDROID || iOS
 using System.Security;
 using static System.Runtime.InteropServices.Marshal;
-#endif
-
-#if NET_CORE
+#else
 using System.Security;
 using static System.Security.SecureStringMarshal;
 using static System.Runtime.InteropServices.Marshal;
@@ -44,10 +42,8 @@ namespace Microsoft.Identity.Client
     internal sealed class UsernamePasswordInput : IUsernameInput
     {
         public string UserName { get; set; }
-#if DESKTOP || NET_CORE
-        private readonly SecureString _securePassword;
-#endif
-        private readonly string _password;
+        private SecureString _securePassword;
+        private string _password;
 
         public UsernamePasswordInput(string userName, string password)
         {
@@ -55,17 +51,14 @@ namespace Microsoft.Identity.Client
             UserName = userName;
         }
 
-#if DESKTOP || NET_CORE
         public UsernamePasswordInput(string userName, SecureString securePassword)
         {
             _securePassword = securePassword;
             UserName = userName;
         }
-#endif
 
         public char[] PasswordToCharArray()
         {
-#if DESKTOP || NET_CORE
             if (_securePassword != null)
             {
                 var output = new char[_securePassword.Length];
@@ -79,16 +72,15 @@ namespace Microsoft.Identity.Client
                 ZeroFreeCoTaskMemUnicode(secureStringPtr);
                 return output;
             }
-#endif
+
             return _password?.ToCharArray();
         }
 
         public bool HasPassword()
         {
             bool hasSecurePassword = false;
-#if DESKTOP || NET_CORE
+
             hasSecurePassword = _securePassword != null;
-#endif
             bool hasPlainPassword = !string.IsNullOrEmpty(_password);
             return hasSecurePassword || hasPlainPassword;
         }
