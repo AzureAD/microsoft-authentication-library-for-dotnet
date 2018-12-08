@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         private static Func<AppQuery, AppWebQuery> QueryByWebViewAndCssId(string elementID)
         {
-            return c => c.WebView().Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID));
+            return c => c.WebView().Css(String.Format(CultureInfo.InvariantCulture, "#{0}", elementID));
         }
     }
 }

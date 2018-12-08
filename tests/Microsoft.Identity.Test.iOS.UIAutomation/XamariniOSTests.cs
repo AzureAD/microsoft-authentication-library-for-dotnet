@@ -77,6 +77,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         [Test]
         public void AcquireTokenTest()
         {
+            xamarinController.IsiOS = true;
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
