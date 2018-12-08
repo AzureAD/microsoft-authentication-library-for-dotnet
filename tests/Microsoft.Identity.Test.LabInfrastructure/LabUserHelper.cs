@@ -50,6 +50,13 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             IsFederatedUser = false
         };
 
+        public static UserQueryParameters MsaUserQuery => new UserQueryParameters
+        {
+            IsExternalUser = true,
+            UserContains = "MSIDLAB4_Outlook",
+            AppName = "Lab4V2App"
+        };
+
         public static UserQueryParameters B2CLocalAccountUserQuery => new UserQueryParameters
         {
             UserType = UserType.B2C,
@@ -90,20 +97,22 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static LabResponse GetB2CLocalAccount()
         {
-            var user = B2CLocalAccountUserQuery;
-            return GetLabUserData(user);
+            return GetLabUserData(B2CLocalAccountUserQuery);
+        }
+
+        public static LabResponse GetMsaUser()
+        {
+            return GetLabUserData(MsaUserQuery);
         }
 
         public static LabResponse GetB2CFacebookAccount()
         {
-            var user = B2CFacebookUserQuery;
-            return GetLabUserData(user);
+            return GetLabUserData(B2CFacebookUserQuery);
         }
 
         public static LabResponse GetB2CGoogleAccount()
         {
-            var user = B2CGoogleUserQuery;
-            return GetLabUserData(user);
+            return GetLabUserData(B2CGoogleUserQuery);
         }
 
         public static LabResponse GetAdfsUser(FederationProvider federationProvider, bool federated = true)

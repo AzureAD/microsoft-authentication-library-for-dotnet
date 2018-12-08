@@ -56,20 +56,20 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
         private void DetermineB2CFieldIds(LabUser user)
         {
-            if (user.B2CIdentityProvider == B2CIdentityProvider.Local)
+            switch (user.B2CIdentityProvider)
             {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
-                SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
-            }
-            if (user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
-            {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
-                SignInButtonId = CoreUiTestConstants.B2CFacebookSubmitID;
-            }
-            if (user.B2CIdentityProvider == B2CIdentityProvider.Google)
-            {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
-                SignInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
+                case B2CIdentityProvider.Local:
+                    PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
+                    SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+                    break;
+                case B2CIdentityProvider.Facebook:
+                    PasswordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
+                    SignInButtonId = CoreUiTestConstants.B2CFacebookSubmitID;
+                    break;
+                case B2CIdentityProvider.Google:
+                    PasswordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
+                    SignInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
+                    break;
             }
         }
     }

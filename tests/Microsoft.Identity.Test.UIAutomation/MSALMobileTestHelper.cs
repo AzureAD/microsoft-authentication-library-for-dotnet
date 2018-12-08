@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Runs through the B2C acquire token silent flow with Facebook identity provider
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void B2CFacebookProviderAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CFacebookAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             //acquire token for 1st resource   
             B2CFacebookProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Runs through the B2C acquire token silent flow with Google identity provider
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void B2CGoogleProviderAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CGoogleAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             //acquire token for 1st resource   
             B2CGoogleProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);

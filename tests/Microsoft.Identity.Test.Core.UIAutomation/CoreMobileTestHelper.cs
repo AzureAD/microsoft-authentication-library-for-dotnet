@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             controller.Tap(CoreUiTestConstants.AcquireTokenID);
 
             //i0116 = UPN text field on AAD sign in endpoint
-            controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.HomeUPN, XamarinSelector.ByHtmlIdAttribute);
             //idSIButton9 = Sign in button
             controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
             //i0118 = password text field
