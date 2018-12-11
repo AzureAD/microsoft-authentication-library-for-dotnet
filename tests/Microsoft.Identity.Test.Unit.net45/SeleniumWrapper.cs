@@ -26,12 +26,14 @@ namespace Microsoft.Identity.Test.Unit
 
         public IWebDriver Driver { get; }
 
+        private static readonly int picNumber = 1;
 
-        public void SaveScreenshot(TestContext testContext)
+        public void SaveScreenshot(TestContext testContext, string name = "failure")
         {
 #if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
             Screenshot ss = ((ITakesScreenshot)Driver).GetScreenshot();
-            string failurePicturePath = Path.Combine(testContext.ResultsDirectory, testContext.TestName + "_failure.png");
+            string picName = name + picNumber + ".png";
+            string failurePicturePath = Path.Combine(testContext.ResultsDirectory, picName);
             ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
             testContext.AddResultFile(failurePicturePath);
 #endif

@@ -99,8 +99,13 @@ namespace Microsoft.Identity.Test.Unit.Integration
                 return Task.FromResult(0);
             }).ConfigureAwait(false);
 
+            Log("Running asserts");
+
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
+
+            //TODO: remove
+            Assert.Fail("Fail to see the logs");
         }
 
         private void RunAutomatedDeviceCodeFlow(DeviceCodeResult deviceCodeResult, LabUser user)
@@ -118,17 +123,14 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
                 PerformLogin(user);
 
+                Log("Authentication complete");
+
             }
             catch (Exception ex)
             {
                 Log("Browser automation failed " + ex);
                 _seleniumWrapper.SaveScreenshot(TestContext);
                 throw;
-            }
-            finally
-            {
-                driver?.Close();
-                driver?.Dispose();
             }
         }
 
@@ -142,6 +144,9 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
             Log("Logging in ... Clicking next after username");
             driver.FindElement(By.Id(NextButtonHtmlId)).Click(); //Next
+
+            //TODO: remove this
+            _seleniumWrapper.SaveScreenshot(TestContext);
 
             Log("Logging in ... Entering password");
             _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(PasswordHtmlId)).SendKeys(user.Password); // password
