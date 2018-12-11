@@ -8,6 +8,7 @@
 - **Deprecate `HasStateChanged`**: MSAL was not using this flag, so it has been deprecated [ADAL issue #1186](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/issues/1186)
 - **Obsolete public WebUI net45 types from Internal.UI namespace**: [MSAL](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/pull/1438)
 - **NetStandard Unification**:  MSAL.NET helps you build multi-platform applications more easily by rationalizing the .NET Standard 1.3 platform. For details see blog post about this release available from: https://aka.ms/msal-net-2-6
+- **Public namespace change**: If you implement dual serialization (AdalV3/Unified cache), and therefore are using Microsoft.Identity.Core.Cache to access some of the public cache classes, please note the namespace has changed to Microsoft.Identity.Client.Cache. You will get this error when updating packages: The type or namespace name 'Core' does not exist in the namespace 'Microsoft.Identity' (are you missing an assembly reference?). Just replace Core with Client in the using statement.
 - **Move MSAL code to the MSAL repo**
 
 2.5.0-preview
