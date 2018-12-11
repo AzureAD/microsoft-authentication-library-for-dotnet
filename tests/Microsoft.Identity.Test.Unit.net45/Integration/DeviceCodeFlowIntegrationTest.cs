@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
     [TestCategory(TestCategories.LabAccess)]
     public class DeviceCodeFlow
     {
+        // TODO: consolidate with Xamarin UI tests as the constants are the same
         private const string UsernameHtmlId = "i0116";
         private const string NextButtonHtmlId = "idSIButton9";
         private const string PasswordHtmlId = "i0118";
