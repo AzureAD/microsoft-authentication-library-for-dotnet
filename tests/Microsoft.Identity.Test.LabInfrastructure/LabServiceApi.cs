@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add("AppName", query.AppName);
             }
 
-            UriBuilder uriBuilder = new UriBuilder("http://api.msidlab.com/api/user");
+            UriBuilder uriBuilder = new UriBuilder("http://api.msidlab.com/api/userBeta");
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
             string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
             return result;
