@@ -30,6 +30,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
@@ -41,25 +42,40 @@ namespace Microsoft.Identity.Test.Unit.Integration
     // Important: do not install a NuGet package with the Chrome driver as it is a security risk.
     // Instead, install the Chrome driver on the test machine
 
-    // Note: these tests require permission to a KeyVault Microsoft account; 
+    // Note: these tests require permission to a KeyVault Microsoft account;
     // Please ignore them if you are not a Microsoft FTE, they will run as part of the CI build
     [TestClass]
+    [TestCategory(TestCategories.Selenium)]
+    [TestCategory(TestCategories.LabAccess)]
     public class DeviceCodeFlow
     {
-        private static readonly string[] Scopes = { "User.Read" };
+        private const string UsernameHtmlId = "i0116";
+        private const string NextButtonHtmlId = "idSIButton9";
+        private const string PasswordHtmlId = "i0118";
 
+        private static readonly string[] Scopes = { "User.Read" };
+        private static readonly ChromeOptions DriverOptions = new ChromeOptions();
+
+        /// <summary>
+        /// Initialized by mstest (do not make private or readonly)
+        /// </summary>
         public TestContext TestContext { get; set; }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            // ~2x faster, no visual rendering
+            // remove when debugging to see the UI automation
+            DriverOptions.AddArguments("headless");
         }
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetState();
+
         }
 
 
@@ -90,30 +106,22 @@ namespace Microsoft.Identity.Test.Unit.Integration
             {
                 driver = InitDriver();
 
-                Debug.WriteLine("Navigating and enterign the code");
+                Debug.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
 
                 driver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
                 driver.FindElement(By.Id("code")).SendKeys(deviceCodeResult.UserCode);
 
-                IWebElement continueBtn = WaitForElementToBeEnabled(driver, By.Id("continueBtn"));
+                IWebElement continueBtn = WaitForElementToBeVisibleAndEnabled(driver, By.Id("continueBtn"));
                 continueBtn?.Click();
 
-                Debug.WriteLine("Logging in");
                 PerformLogin(driver, user);
 
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Browser automation failed " + ex);
-#if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
-                Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
-                string failurePicturePath = Path.Combine(TestContext.ResultsDirectory, "failure.png");
-                ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
-                TestContext.AddResultFile(failurePicturePath);
-
-                Debug.WriteLine("Failing because of " + ex);
-#endif
-                 throw;
+                SaveScreenshot(driver);
+                throw;
             }
             finally
             {
@@ -122,28 +130,43 @@ namespace Microsoft.Identity.Test.Unit.Integration
             }
         }
 
+        private void SaveScreenshot(IWebDriver driver)
+        {
+#if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
+            Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
+            string failurePicturePath = Path.Combine(TestContext.ResultsDirectory, TestContext.TestName + "_failure.png");
+            ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
+            TestContext.AddResultFile(failurePicturePath);
+#endif
+        }
+
         private static void PerformLogin(IWebDriver driver, LabUser user)
         {
-            driver.FindElement(By.Id("i0116")).SendKeys(user.Upn); // username
-            driver.FindElement(By.Id("idSIButton9")).Click(); //Next
-            WaitForElementToBeEnabled(driver, By.Id("i0118")).SendKeys(user.Password); // password
-            WaitForElementToBeEnabled(driver, By.Id("idSIButton9")).Click(); // Finish
+            Debug.WriteLine("Logging in ... Entering username");
+
+            driver.FindElement(By.Id(UsernameHtmlId)).SendKeys(user.Upn); // username
+
+            Debug.WriteLine("Logging in ... Clicking next after username");
+            driver.FindElement(By.Id(NextButtonHtmlId)).Click(); //Next
+
+            Debug.WriteLine("Logging in ... Entering password");
+            WaitForElementToBeVisibleAndEnabled(driver, By.Id(PasswordHtmlId)).SendKeys(user.Password); // password
+
+            Debug.WriteLine("Logging in ... Clicking next after password");
+            WaitForElementToBeVisibleAndEnabled(driver, By.Id(NextButtonHtmlId)).Click(); // Finish
         }
 
         private static ChromeDriver InitDriver()
         {
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArguments("headless"); // ~2x faster, no visual rendering
-
-            var driver = new ChromeDriver(chromeOptions);
+            var driver = new ChromeDriver(DriverOptions);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
             return driver;
         }
 
-        private static IWebElement WaitForElementToBeEnabled(IWebDriver driver, By by)
+        private static IWebElement WaitForElementToBeVisibleAndEnabled(IWebDriver driver, By by)
         {
             WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            IWebElement continueBtn = webDriverWait.Until<IWebElement>(dr =>
+            IWebElement continueBtn = webDriverWait.Until(dr =>
             {
                 try
                 {
