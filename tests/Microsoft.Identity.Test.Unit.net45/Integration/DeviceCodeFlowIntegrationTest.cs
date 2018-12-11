@@ -54,10 +54,11 @@ namespace Microsoft.Identity.Test.Unit.Integration
         private const string PasswordHtmlId = "i0118";
 
         private static readonly string[] Scopes = { "User.Read" };
-        private static readonly ChromeOptions DriverOptions = new ChromeOptions();
+        private SeleniumWrapper _seleniumWrapper;
 
+        #region MSTest Hooks
         /// <summary>
-        /// Initialized by mstest (do not make private or readonly)
+        /// Initialized by MSTest (do not make private or readonly)
         /// </summary>
         public TestContext TestContext { get; set; }
 
@@ -65,19 +66,21 @@ namespace Microsoft.Identity.Test.Unit.Integration
         public static void ClassInitialize(TestContext context)
         {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            // ~2x faster, no visual rendering
-            // remove when debugging to see the UI automation
-            DriverOptions.AddArguments("headless");
         }
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetState();
-
+            _seleniumWrapper = new SeleniumWrapper();
         }
 
+        [TestCleanup]
+        public void Cleanup()
+        {
+            _seleniumWrapper?.Dispose();
+        }
+        #endregion
 
         [TestMethod]
         [Timeout(60 * 1000)] // 1 min timeout
@@ -101,26 +104,24 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
         private void RunAutomatedDeviceCodeFlow(DeviceCodeResult deviceCodeResult, LabUser user)
         {
-            IWebDriver driver = null;
+            IWebDriver driver = _seleniumWrapper.Driver;
             try
             {
-                driver = InitDriver();
-
                 Debug.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
 
                 driver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
                 driver.FindElement(By.Id("code")).SendKeys(deviceCodeResult.UserCode);
 
-                IWebElement continueBtn = WaitForElementToBeVisibleAndEnabled(driver, By.Id("continueBtn"));
+                IWebElement continueBtn = _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id("continueBtn"));
                 continueBtn?.Click();
 
-                PerformLogin(driver, user);
+                PerformLogin(user);
 
             }
             catch (Exception ex)
             {
                 Debug.WriteLine("Browser automation failed " + ex);
-                SaveScreenshot(driver);
+                _seleniumWrapper.SaveScreenshot(TestContext);
                 throw;
             }
             finally
@@ -130,18 +131,10 @@ namespace Microsoft.Identity.Test.Unit.Integration
             }
         }
 
-        private void SaveScreenshot(IWebDriver driver)
+        private void PerformLogin(LabUser user)
         {
-#if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
-            Screenshot ss = ((ITakesScreenshot)driver).GetScreenshot();
-            string failurePicturePath = Path.Combine(TestContext.ResultsDirectory, TestContext.TestName + "_failure.png");
-            ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
-            TestContext.AddResultFile(failurePicturePath);
-#endif
-        }
+            IWebDriver driver = _seleniumWrapper.Driver;
 
-        private static void PerformLogin(IWebDriver driver, LabUser user)
-        {
             Debug.WriteLine("Logging in ... Entering username");
 
             driver.FindElement(By.Id(UsernameHtmlId)).SendKeys(user.Upn); // username
@@ -150,43 +143,10 @@ namespace Microsoft.Identity.Test.Unit.Integration
             driver.FindElement(By.Id(NextButtonHtmlId)).Click(); //Next
 
             Debug.WriteLine("Logging in ... Entering password");
-            WaitForElementToBeVisibleAndEnabled(driver, By.Id(PasswordHtmlId)).SendKeys(user.Password); // password
+            _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(PasswordHtmlId)).SendKeys(user.Password); // password
 
             Debug.WriteLine("Logging in ... Clicking next after password");
-            WaitForElementToBeVisibleAndEnabled(driver, By.Id(NextButtonHtmlId)).Click(); // Finish
-        }
-
-        private static ChromeDriver InitDriver()
-        {
-            var driver = new ChromeDriver(DriverOptions);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
-            return driver;
-        }
-
-        private static IWebElement WaitForElementToBeVisibleAndEnabled(IWebDriver driver, By by)
-        {
-            WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-            IWebElement continueBtn = webDriverWait.Until(dr =>
-            {
-                try
-                {
-                    var elementToBeDisplayed = driver.FindElement(by);
-                    if (elementToBeDisplayed.Displayed && elementToBeDisplayed.Enabled)
-                    {
-                        return elementToBeDisplayed;
-                    }
-                    return null;
-                }
-                catch (StaleElementReferenceException)
-                {
-                    return null;
-                }
-                catch (NoSuchElementException)
-                {
-                    return null;
-                }
-            });
-            return continueBtn;
+            _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(NextButtonHtmlId)).Click(); // Finish
         }
     }
 }
