@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
@@ -35,7 +34,6 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.UI;
 
 namespace Microsoft.Identity.Test.Unit.Integration
 {
@@ -83,13 +81,16 @@ namespace Microsoft.Identity.Test.Unit.Integration
         #endregion
 
         [TestMethod]
-        [Timeout(60 * 1000)] // 1 min timeout
+        [Timeout(1 * 60 * 1000)] // 1 min timeout
         public async Task DeviceCodeFlowTestAsync()
         {
-            Debug.WriteLine("Fetching user from lab");
+            Log("Hello World");
+            Debug.WriteLine("Hello World from debug");
+
+            Log("Fetching user from lab");
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
 
-            Debug.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
+            Log("Calling AcquireTokenWithDeviceCodeAsync");
             PublicClientApplication pca = new PublicClientApplication(labResponse.AppId);
             var result = await pca.AcquireTokenWithDeviceCodeAsync(Scopes, deviceCodeResult =>
             {
@@ -107,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             IWebDriver driver = _seleniumWrapper.Driver;
             try
             {
-                Debug.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
+                Log("Browser is open. Navigating to the Device Code url and entering the code");
 
                 driver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
                 driver.FindElement(By.Id("code")).SendKeys(deviceCodeResult.UserCode);
@@ -120,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Browser automation failed " + ex);
+                Log("Browser automation failed " + ex);
                 _seleniumWrapper.SaveScreenshot(TestContext);
                 throw;
             }
@@ -135,18 +136,25 @@ namespace Microsoft.Identity.Test.Unit.Integration
         {
             IWebDriver driver = _seleniumWrapper.Driver;
 
-            Debug.WriteLine("Logging in ... Entering username");
+            Log("Logging in ... Entering username");
 
             driver.FindElement(By.Id(UsernameHtmlId)).SendKeys(user.Upn); // username
 
-            Debug.WriteLine("Logging in ... Clicking next after username");
+            Log("Logging in ... Clicking next after username");
             driver.FindElement(By.Id(NextButtonHtmlId)).Click(); //Next
 
-            Debug.WriteLine("Logging in ... Entering password");
+            Log("Logging in ... Entering password");
             _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(PasswordHtmlId)).SendKeys(user.Password); // password
 
-            Debug.WriteLine("Logging in ... Clicking next after password");
+            Log("Logging in ... Clicking next after password");
             _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(NextButtonHtmlId)).Click(); // Finish
+        }
+
+        private void Log(string message)
+        {
+            Trace.WriteLine("[Trace] " + message);
+            Debug.WriteLine("[Debug] " + message);
+            TestContext.WriteLine("[TC] " + message);
         }
     }
 }

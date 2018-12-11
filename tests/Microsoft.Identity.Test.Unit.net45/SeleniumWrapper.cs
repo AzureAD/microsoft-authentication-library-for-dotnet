@@ -14,10 +14,10 @@ namespace Microsoft.Identity.Test.Unit
             ChromeOptions chromeOptions = new ChromeOptions();
 
             if (headlessMode)
-            { // ~2x faster, no visual rendering
+            {
+                // ~2x faster, no visual rendering
                 // remove when debugging to see the UI automation
                 chromeOptions.AddArguments("headless");
-
             }
 
             Driver = new ChromeDriver(chromeOptions);
@@ -73,19 +73,11 @@ namespace Microsoft.Identity.Test.Unit
                 if (disposing)
                 {
                     // dispose managed state (managed objects).
+                    Driver?.Dispose();
                 }
-
-                Driver?.Close();
-                Driver?.Dispose();
 
                 _disposedValue = true;
             }
-        }
-
-        ~SeleniumWrapper()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
         }
 
         // This code added to correctly implement the disposable pattern.
@@ -93,7 +85,6 @@ namespace Microsoft.Identity.Test.Unit
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            GC.SuppressFinalize(this);
         }
         #endregion
     }
