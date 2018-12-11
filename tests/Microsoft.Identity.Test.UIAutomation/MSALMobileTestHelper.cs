@@ -82,11 +82,19 @@ namespace Microsoft.Identity.Test.UIAutomation
             // on consent, also hit the accept button
             if (promptBehavior == CoreUiTestConstants.UIBehaviorConsent)
             {
-                AppWebResult consentHeader = controller.WaitForWebElementByCssId("consentHeader").FirstOrDefault();
+                AppWebResult consentHeader = controller.WaitForWebElementByCssId(CoreUiTestConstants.ConsentHeader).FirstOrDefault();
                 Assert.IsNotNull(consentHeader);
-                Assert.IsTrue(consentHeader.TextContent.Contains("Permissions requested"));
+                Assert.IsTrue(consentHeader.TextContent.Contains(CoreUiTestConstants.PermissionsRequested));
 
                 controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+            }
+            else if(labResponse.User.HomeUPN == CoreUiTestConstants.MsaUserHomeUpn)
+            {
+                AppWebResult thirdPartyConsentHeader = controller.WaitForWebElementByCssId(CoreUiTestConstants.AppHeader).FirstOrDefault();
+                Assert.IsNotNull(thirdPartyConsentHeader);
+                Assert.IsTrue(thirdPartyConsentHeader.TextContent.Contains(CoreUiTestConstants.AppAccessTitle));
+
+                controller.Tap(CoreUiTestConstants.WebConsentSubmitId, XamarinSelector.ByHtmlIdAttribute);
             }
         }
 
@@ -150,7 +158,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// <summary>
         /// Runs through the B2C acquire token flow with Facebook Provider
         /// </summary>
-        public void B2CFacebookProviderAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CFacebookAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Facebook, isB2CLoginAuthority);
         }
@@ -159,7 +167,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Runs through the B2C acquire token flow with Facebook Provider
         /// and Edit Policy authority
         /// </summary>
-        public void B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
+        public void B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
         {
             PerformB2CSignInEditProfileFlow(controller, B2CIdentityProvider.Facebook);
         }
@@ -167,7 +175,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// <summary>
         /// Runs through the B2C acquire token flow with Google Provider
         /// </summary>
-        public void B2CGoogleProviderAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CGoogleAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Google, isB2CLoginAuthority);
         }
@@ -206,7 +214,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void B2CFacebookAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             //acquire token for 1st resource   
-            B2CFacebookProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
+            B2CFacebookAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
         }
@@ -218,7 +226,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void B2CGoogleAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             //acquire token for 1st resource   
-            B2CGoogleProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
+            B2CGoogleAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
         }

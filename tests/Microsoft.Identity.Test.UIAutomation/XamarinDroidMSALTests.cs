@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(
                 xamarinController,
                 labData,
-                CoreUiTestConstants.UIBehaviorConsent);                        
+                CoreUiTestConstants.UIBehaviorConsent);
 
             // 2. Switch ui behavior to "select account"
             _msalMobileTestHelper.SetUiBehavior(xamarinController, CoreUiTestConstants.UIBehaviorSelectAccount);
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
             _msalMobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
-            _msalMobileTestHelper.B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
+            _msalMobileTestHelper.B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
         }
 
         /// <summary>

@@ -33,16 +33,10 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public const string MSGraph = "https://graph.microsoft.com";
         public const string Exchange = "https://outlook.office365.com/";
 
-        //ADAL & MSAL test app
+        //MSAL test app
         public const string AcquireTokenID = "acquireToken";
-        public const string AcquireTokenWithPromptBehaviorAlwaysID = "acquireTokenPromptBehaviorAlways";
         public const string AcquireTokenSilentID = "acquireTokenSilent";
         public const string ClientIdEntryID = "clientIdEntry";
-        public const string ResourceEntryID = "resourceEntry";
-        public const string PromptBehaviorEntryID = "promptBehaviorEntry";
-        public const string PromptBehaviorAuto = "auto";
-        public const string PromptBehaviorAlways = "always";
-        public const string SecondPageID = "secondPage";
         public const string ClearCacheID = "clearCache";
         public const string SaveID = "saveButton";
         public const string WebUPNInputID = "i0116";
@@ -54,7 +48,6 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public const string TestResultSuccessfulMessage = "Result: Success";
         public const string TestResultFailureMessage = "Result: Failure";
 
-        //MSAL test app
         public const string DefaultScope = "User.Read";
         public const string AcquirePageID = "Acquire";
         public const string CachePageID = "Cache";
@@ -62,13 +55,19 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public const string ScopesEntryID = "scopesList";
         public const string UiBehaviorPickerID = "uiBehavior";
         public const string SelectUser = "userList";
-        public const string UserNotSelected = "not selected";
         public const string UserMissingFromResponse = "Missing from the token response";
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
-        public const string RedirectUriEntryID = "redirectUriEntry";
+
+        //Consent page
+        public const string ConsentHeader = "consentHeader";
+        public const string PermissionsRequested = "Permissions requested";
+        //Third party consent page
+        public const string AppHeader = "idSpan_AppHeaderText";
+        public const string AppAccessTitle = "Let this app access your info?";
+        public const string WebConsentSubmitId = "idBtn_Accept";
+        public const string MsaUserHomeUpn = "MSIDLAB4@outlook.com";
 
         //MSAL B2C
-        public const string B2cScopes = "https://sometenant.onmicrosoft.com/some/scope";
         public const string AuthorityPickerID = "b2cAuthorityPicker";
         public const string WebUPNB2CLocalInputID = "logonIdentifier";
         public const string B2CWebSubmitID = "next";
