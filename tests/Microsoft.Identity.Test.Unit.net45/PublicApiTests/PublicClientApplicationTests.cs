@@ -668,11 +668,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task AcquireTokenSilentScopeAndEmptyCacheTestAsync()
         {
             var serviceBundle = ServiceBundle.CreateDefault(_myReceiver);
-            PublicClientApplication app =
-                new PublicClientApplication(serviceBundle, MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
-                {
-                    ValidateAuthority = false
-                };
+            PublicClientApplication app = new PublicClientApplication(
+                serviceBundle,
+                MsalTestConstants.ClientId,
+                ClientApplicationBase.DefaultAuthority)
+            {
+                ValidateAuthority = false
+            };
 
             var cache = new TokenCache()
             {
@@ -680,82 +682,27 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             };
 
             app.UserTokenCache = cache;
+
             try
             {
-                AuthenticationResult result = await app.AcquireTokenSilentAsync(MsalTestConstants.Scope.ToArray(),
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null)).ConfigureAwait(false);
+                AuthenticationResult result = await app.AcquireTokenSilentAsync(
+                                                  MsalTestConstants.Scope.ToArray(),
+                                                  new Account(
+                                                      MsalTestConstants.UserIdentifier,
+                                                      MsalTestConstants.DisplayableId,
+                                                      null)).ConfigureAwait(false);
             }
             catch (MsalUiRequiredException exc)
             {
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
-            Assert.IsNotNull(_myReceiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
-                anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "30"
-                && anEvent[ApiEvent.WasSuccessfulKey] == "false" && anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"
-                ));
-        }
 
-        [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
-        public async Task AcquireTokenSilentScopeAndUserMultipleTokensFoundTestAsync()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
-
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.AuthorityCommonTenant)
-                {
-                    ValidateAuthority = false
-                };
-
-                PublicClientApplication app2 = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    MsalTestConstants.AuthorityTestTenant)
-                {
-                    ValidateAuthority = false
-                };
-
-                var cache = new TokenCache()
-                {
-                    ClientId = MsalTestConstants.ClientId
-                };
-
-                app2.UserTokenCache = cache;
-
-                app.UserTokenCache = cache;
-                _tokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityTestTenant);
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        Method = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
-                    });
-
-                try
-                {
-                    AuthenticationResult result = await app.AcquireTokenSilentAsync(
-                                                      MsalTestConstants.Scope.ToArray(),
-                                                      new Account(
-                                                          MsalTestConstants.UserIdentifier,
-                                                          MsalTestConstants.DisplayableId,
-                                                          null)).ConfigureAwait(false);
-                }
-                catch (MsalClientException exc)
-                {
-                    Assert.AreEqual(MsalClientException.MultipleTokensMatchedError, exc.ErrorCode);
-                }
-            }
+            Assert.IsNotNull(
+                _myReceiver.EventsReceived.Find(
+                    anEvent => // Expect finding such an event
+                        anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.ApiIdKey] == "30" &&
+                        anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                        anEvent[ApiEvent.ApiErrorCodeKey] == "no_tokens_found"));
         }
 
         [TestMethod]
@@ -770,7 +717,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
                 PublicClientApplication app = new PublicClientApplication(
                     serviceBundle,
@@ -794,16 +740,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         MsalTestConstants.UserIdentifier,
                         MsalTestConstants.ClientId,
                         MsalTestConstants.ScopeForAnotherResourceStr));
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        Method = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.ScopeForAnotherResource.ToArray())
-                    });
 
                 Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -849,17 +785,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         MsalTestConstants.ScopeForAnotherResourceStr));
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityTestTenant);
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        Method = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
-                    });
 
                 Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
                     MsalTestConstants.Scope.ToArray(),
@@ -958,17 +883,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MsalTestConstants.ScopeForAnotherResourceStr));
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityTestTenant);
-
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler()
-                    {
-                        Method = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
-                            MsalTestConstants.UniqueId,
-                            MsalTestConstants.DisplayableId,
-                            MsalTestConstants.Scope.ToArray())
-                    });
 
                 Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
                     MsalTestConstants.Scope.ToArray(),

@@ -471,14 +471,14 @@ namespace Microsoft.Identity.Client
             }
 
             requestParams.RequestContext.Logger.Info(
-                "Filtering by authority specified in the authentication request parameters...");
+                "Filtering by tenant specified in the authentication request parameters...");
 
             ICollection<MsalAccessTokenCacheItem> authorityCacheMatches = tokenCacheItems.Where(
-                item => item.Authority.Equals(
-                    requestParams.Authority.CanonicalAuthority,
+                item => item.TenantId.Equals(
+                    requestParams.Authority.GetTenantId(),
                     StringComparison.OrdinalIgnoreCase)).ToList();
 
-            return authorityCacheMatches.Count > 0 ? tokenCacheItems : authorityCacheMatches;
+            return authorityCacheMatches;
         }
 
         private string GetAccessTokenExpireLogMessageContent(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
