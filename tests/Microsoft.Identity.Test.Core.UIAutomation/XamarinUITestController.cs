@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using Xamarin.UITest;
@@ -50,6 +51,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         const int defaultPostTimeoutSec = 1;
         const string CSSIDSelector = "[id|={0}]";
         const string XpathSelector = "//*[text()=\"{0}\"]";
+        const string XpathSelectorid = "//*[id()=\"{0}\"]";
 
         public IApp Application { get; set; }
 
@@ -175,7 +177,10 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                         Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    Application.Tap(QueryByHtmlElementValue(elementID));
+                    if(IsiOS)
+                        Application.Tap(QueryByHtmlElementValueAndClass(elementID));
+                    else
+                        Application.Tap(QueryByHtmlElementValue(elementID));
                     break;
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
@@ -239,6 +244,14 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         {
             string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelector, text);
             return c => c.XPath(xpath);
+        }
+
+        private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
+        {
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
+            Debug.Print("Usingxpath ID");
+            Debug.Print(xpath);
+            return c => c.Class("WKWebView").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
