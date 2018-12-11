@@ -365,7 +365,21 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            try
+            {
+                controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            }
+            catch (Exception ex)
+            {
+                //i0116 = UPN text field on AAD sign in endpoint
+                controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+                //idSIButton9 = Sign in button
+                controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+                //i0118 = password text field
+                controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
+                controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+                return;
+            }
             //i0116 = UPN text field on AAD sign in endpoint
             controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
             //idSIButton9 = Sign in button
