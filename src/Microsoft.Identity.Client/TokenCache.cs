@@ -378,7 +378,7 @@ namespace Microsoft.Identity.Client
                                 .ToList();
                     }
 
-                    tokenCacheItems = FilterToAuthoritySpecifiedByAuthenticationRequest(requestParams, tokenCacheItems);
+                    tokenCacheItems = FilterToTenantIdSpecifiedByAuthenticationRequest(requestParams, tokenCacheItems);
                 }
 
                 // no match found after initial filtering
@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private ICollection<MsalAccessTokenCacheItem> FilterToAuthoritySpecifiedByAuthenticationRequest(
+        private ICollection<MsalAccessTokenCacheItem> FilterToTenantIdSpecifiedByAuthenticationRequest(
             AuthenticationRequestParameters requestParams, ICollection<MsalAccessTokenCacheItem> tokenCacheItems)
         {
             if (tokenCacheItems.Count <= 1)
