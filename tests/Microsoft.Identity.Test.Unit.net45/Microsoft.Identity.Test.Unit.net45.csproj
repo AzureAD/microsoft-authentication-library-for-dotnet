@@ -36,6 +36,10 @@
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.3" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+    
+    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/UserInformationFieldIds.cs" LinkBase="Integration"></Compile>
+    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/CoreUiTestConstants.cs" LinkBase="Integration"></Compile>
+    
 
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />

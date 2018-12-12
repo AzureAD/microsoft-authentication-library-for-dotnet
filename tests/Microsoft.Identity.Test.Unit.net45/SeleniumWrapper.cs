@@ -9,16 +9,13 @@ namespace Microsoft.Identity.Test.Unit
 {
     public class SeleniumWrapper : IDisposable
     {
-        public SeleniumWrapper(bool headlessMode = true)
+        public SeleniumWrapper()
         {
             ChromeOptions chromeOptions = new ChromeOptions();
 
-            if (headlessMode)
-            {
-                // ~2x faster, no visual rendering
-                // remove when debugging to see the UI automation
-                chromeOptions.AddArguments("headless");
-            }
+            // ~2x faster, no visual rendering
+            // remove when debugging to see the UI automation
+            chromeOptions.AddArguments("headless");
 
             Driver = new ChromeDriver(chromeOptions);
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
@@ -26,13 +23,13 @@ namespace Microsoft.Identity.Test.Unit
 
         public IWebDriver Driver { get; }
 
-        private static readonly int picNumber = 1;
+        private int _picNumber = 1;
 
         public void SaveScreenshot(TestContext testContext, string name = "failure")
         {
 #if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
             Screenshot ss = ((ITakesScreenshot)Driver).GetScreenshot();
-            string picName = name + picNumber + ".png";
+            string picName = name + _picNumber++ + ".png";
             string failurePicturePath = Path.Combine(testContext.ResultsDirectory, picName);
             ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
             testContext.AddResultFile(failurePicturePath);

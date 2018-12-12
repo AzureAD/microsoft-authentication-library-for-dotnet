@@ -7,17 +7,19 @@
     <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  
+
   <ItemGroup>
 
     <Compile Include="..\Microsoft.Identity.Test.Unit.net45\**\*.cs" Exclude="..\Microsoft.Identity.Test.Unit.net45\obj\**\*;..\Microsoft.Identity.Test.Unit.net45\bin\**\*" />
-    
+    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/UserInformationFieldIds.cs" LinkBase="Integration"></Compile>
+    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/CoreUiTestConstants.cs" LinkBase="Integration"></Compile>
+
     <None Include="..\Microsoft.Identity.Test.Unit.net45\Resources\**\*" LinkBase="Resources">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    
+
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    
+
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.4" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
@@ -31,9 +33,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-
     <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
   </ItemGroup>

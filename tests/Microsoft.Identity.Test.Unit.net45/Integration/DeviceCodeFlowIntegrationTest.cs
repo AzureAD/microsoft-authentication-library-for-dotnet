@@ -30,10 +30,10 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Core.UIAutomation;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
-using OpenQA.Selenium.Chrome;
 
 namespace Microsoft.Identity.Test.Unit.Integration
 {
@@ -47,11 +47,6 @@ namespace Microsoft.Identity.Test.Unit.Integration
     [TestCategory(TestCategories.LabAccess)]
     public class DeviceCodeFlow
     {
-        // TODO: consolidate with Xamarin UI tests as the constants are the same
-        private const string UsernameHtmlId = "i0116";
-        private const string NextButtonHtmlId = "idSIButton9";
-        private const string PasswordHtmlId = "i0118";
-
         private static readonly string[] Scopes = { "User.Read" };
         private SeleniumWrapper _seleniumWrapper;
 
@@ -84,11 +79,10 @@ namespace Microsoft.Identity.Test.Unit.Integration
         [TestMethod]
         [Timeout(1 * 60 * 1000)] // 1 min timeout
         public async Task DeviceCodeFlowTestAsync()
-        {
-           Trace.WriteLine("Fetching user from lab");
+        {            
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
 
-           Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
+            Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
             PublicClientApplication pca = new PublicClientApplication(labResponse.AppId);
             var result = await pca.AcquireTokenWithDeviceCodeAsync(Scopes, deviceCodeResult =>
             {
@@ -97,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
                 return Task.FromResult(0);
             }).ConfigureAwait(false);
 
-           Trace.WriteLine("Running asserts");
+            Trace.WriteLine("Running asserts");
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
@@ -108,7 +102,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             IWebDriver driver = _seleniumWrapper.Driver;
             try
             {
-               Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
+                Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
 
                 driver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
                 driver.FindElement(By.Id("code")).SendKeys(deviceCodeResult.UserCode);
@@ -118,12 +112,12 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
                 PerformLogin(user);
 
-               Trace.WriteLine("Authentication complete");
+                Trace.WriteLine("Authentication complete");
 
             }
             catch (Exception ex)
             {
-               Trace.WriteLine("Browser automation failed " + ex);
+                Trace.WriteLine("Browser automation failed " + ex);
                 _seleniumWrapper.SaveScreenshot(TestContext);
                 throw;
             }
@@ -131,19 +125,22 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
         private void PerformLogin(LabUser user)
         {
+            UserInformationFieldIds fields = new UserInformationFieldIds();
+            fields.DetermineFieldIds(user);
+
             IWebDriver driver = _seleniumWrapper.Driver;
 
-           Trace.WriteLine("Logging in ... Entering username");
-            driver.FindElement(By.Id(UsernameHtmlId)).SendKeys(user.Upn); // username
+            Trace.WriteLine("Logging in ... Entering username");
+            driver.FindElement(By.Id(CoreUiTestConstants.WebUPNInputID)).SendKeys(user.Upn); 
 
-           Trace.WriteLine("Logging in ... Clicking next after username");
-            driver.FindElement(By.Id(NextButtonHtmlId)).Click(); //Next
+            Trace.WriteLine("Logging in ... Clicking next after username");
+            driver.FindElement(By.Id(fields.SignInButtonId)).Click(); 
 
-           Trace.WriteLine("Logging in ... Entering password");
-            _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(PasswordHtmlId)).SendKeys(user.Password); // password
+            Trace.WriteLine("Logging in ... Entering password");
+            _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordInputId)).SendKeys(user.Password); 
 
-           Trace.WriteLine("Logging in ... Clicking next after password");
-            _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(NextButtonHtmlId)).Click(); // Finish
+            Trace.WriteLine("Logging in ... Clicking next after password");
+            _seleniumWrapper.WaitForElementToBeVisibleAndEnabled(By.Id(fields.SignInButtonId)).Click(); 
         }
     }
 }
