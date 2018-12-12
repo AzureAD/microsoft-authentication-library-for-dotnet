@@ -31,8 +31,9 @@ using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal
 {
+#if NET_CORE || NETSTANDARD || DESKTOP
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
         internal readonly IDictionary<string, string> AccessTokenCacheDictionary =
@@ -196,4 +197,5 @@ namespace Microsoft.Identity.Client
             AccountCacheDictionary.Clear();
         }
     }
+#endif
 }

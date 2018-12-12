@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //The clientCredential object contains the previously used values in the cached client assertion string
             var clientCredential = clientAssertionParameters.ClientCredential;
             var expired = (clientCredential.ValidTo <=
-                                        Jwt.JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
+                                        JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
                                                                         TimeSpan.FromMinutes(
                                                                         Constants
                                                                         .ExpirationMarginInMinutes)));

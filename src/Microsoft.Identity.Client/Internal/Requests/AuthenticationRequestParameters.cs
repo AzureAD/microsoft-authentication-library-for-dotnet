@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         if (!RequestValidationHelper.ValidateClientAssertion(this))
                         {
                             RequestContext.Logger.Info("Client Assertion does not exist or near expiry.");
-                            var jwtToken = new Jwt.JsonWebToken(ClientId, Endpoints?.SelfSignedJwtAudience);
+                            var jwtToken = new JsonWebToken(ClientId, Endpoints?.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate, SendCertificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
                             ClientCredential.ContainsX5C = SendCertificate;

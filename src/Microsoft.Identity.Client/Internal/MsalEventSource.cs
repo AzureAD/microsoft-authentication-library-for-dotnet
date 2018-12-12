@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,16 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Core
-{
-    internal static class Constants
-    {
-        public const string MsAppScheme = "ms-app";
-        public const int ExpirationMarginInMinutes = 5;
-        public const int CodeVerifierLength = 128;
-        public const int CodeVerifierByteSize = 32;
+using System.Diagnostics.Tracing;
 
-        public const string UapWebRedirectUri = "https://sso"; // only ADAL supports WEB
-        public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+namespace Microsoft.Identity.Client.Internal
+{
+#if NET_CORE || NETSTANDARD || DESKTOP || WINDOWS_APP
+    [EventSource(Name = "Microsoft.Identity.Client")]
+    internal class MsalEventSource : EventSource
+    {
+        [Event(1, Level = EventLevel.Verbose)]
+        internal void Verbose(string message)
+        {
+            WriteEvent(1, message);
+        }
+
+        [Event(2, Level = EventLevel.Informational)]
+        internal void Information(string message)
+        {
+            WriteEvent(2, message);
+        }
+
+        [Event(3, Level = EventLevel.Warning)]
+        internal void Warning(string message)
+        {
+            WriteEvent(3, message);
+        }
+
+        [Event(4, Level = EventLevel.Error)]
+        internal void Error(string message)
+        {
+            WriteEvent(4, message);
+        }
     }
+#endif
 }

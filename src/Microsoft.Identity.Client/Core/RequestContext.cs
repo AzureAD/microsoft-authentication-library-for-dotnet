@@ -37,8 +37,7 @@ namespace Microsoft.Identity.Client.Core
         }
 
         public string TelemetryRequestId { get; set; }
-        public string ClientId { get; set; }
-
-        public ICoreLogger Logger { get; set; }
+        public string ClientId { get; }
+        public ICoreLogger Logger { get; }
     }
 }

@@ -37,6 +37,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Features.DeviceCode;
+using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
 {
@@ -592,6 +594,267 @@ namespace Microsoft.Identity.Client
         // endif for !NET_CORE
 #endif
 
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback)
+        {
+            return AcquireTokenWithDeviceCodeAsync(scopes, string.Empty, deviceCodeResultCallback);
+        }
 
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device, with possiblity of passing extra parameters. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public async Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            string extraQueryParameters,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback)
+        {
+            if (deviceCodeResultCallback == null)
+            {
+                throw new ArgumentNullException("A deviceCodeResultCallback must be provided for Device Code authentication to work properly");
+            }
+
+            return await AcquireTokenWithDeviceCodeAsync(
+                scopes,
+                extraQueryParameters,
+                deviceCodeResultCallback,
+                CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information. This step is cancelable</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback,
+            CancellationToken cancellationToken)
+        {
+            return AcquireTokenWithDeviceCodeAsync(scopes, string.Empty, deviceCodeResultCallback, cancellationToken);
+        }
+
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information. This step is cancelable</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public async Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            string extraQueryParameters,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback,
+            CancellationToken cancellationToken)
+        {
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
+            requestParams.ExtraQueryParameters = extraQueryParameters;
+
+            var handler = new DeviceCodeRequest(
+                ServiceBundle,
+                requestParams,
+                ApiEvent.ApiIds.None,
+                deviceCodeResultCallback);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        #region INTEGRATED WINDOWS AUTH
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
+#if !NET_CORE_BUILDTIME
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <remarks>
+        /// On Windows Universal Platform, the following capabilities need to be provided:
+        /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
+        /// Supported on .net desktop and UWP
+        /// </remarks>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
+        {
+            GuardNonWindowsFrameworks();
+            GuardIWANetCore();
+
+            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput()).ConfigureAwait(false);
+        }
+#endif
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+            IEnumerable<string> scopes,
+            string username)
+        {
+            GuardNonWindowsFrameworks();
+            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput(username)).ConfigureAwait(false);
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IntegratedWindowsAuthInput iwaInput)
+        {
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
+            var handler = new IntegratedWindowsAuthRequest(
+                ServiceBundle,
+                requestParams,
+                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
+                iwaInput);
+
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private static void GuardNonWindowsFrameworks()
+        {
+#if ANDROID || iOS
+            throw new PlatformNotSupportedException("Integrated Windows Authentication is not supported on this platform. " +
+                "For details about this authentication flow, please see https://aka.ms/msal-net-iwa");
+#endif
+        }
+
+        private static void GuardIWANetCore()
+        {
+#if NET_CORE
+            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not suppored on .net core because " +
+                "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
+                "For more details see https://aka.ms/msal-net-iwa");
+#endif
+        }
+#endif
+        #endregion INTEGRATED WINDOWS AUTH
+
+        #region USERNAME PASSWORD
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
+        /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user application requests token on behalf.
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
+        /// <param name="securePassword">User password.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
+            IEnumerable<string> scopes, string username, System.Security.SecureString securePassword)
+        {
+#if DESKTOP || NET_CORE
+            UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, securePassword);
+            return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
+#else
+            // TODO: need to consolidate this properly with the public API.
+            throw new NotImplementedException();
+#endif
+        }
+
+        private async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
+            IEnumerable<string> scopes, UsernamePasswordInput usernamePasswordInput)
+        {
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
+            var handler = new UsernamePasswordRequest(
+                ServiceBundle,
+                requestParams,
+                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
+                usernamePasswordInput);
+
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        #endregion // USERNAME PASSWORD
+
+        #region PCA WITH TOKEN CACHE
+        //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
+        // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
+        // as we plan to expose the whole thing
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+
+        /// <summary>
+        /// Constructor to create application instance. This constructor is only available for Desktop and NetCore apps
+        /// </summary>
+        /// <param name="clientId">Client id of the application</param>
+        /// <param name="authority">Default authority to be used for the application</param>
+        /// <param name="userTokenCache">Instance of TokenCache.</param>
+        public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
+            : this(PublicClientApplicationBuilder.Create(clientId, authority).WithUserTokenCache(userTokenCache).BuildConfiguration())
+        {
+            GuardOnMobilePlatforms();
+        }
+
+        private static void GuardOnMobilePlatforms()
+        {
+#if ANDROID || iOS
+        throw new PlatformNotSupportedException("You should not use this constructor that takes in a TokenCache object on mobile platforms. " +
+            "This constructor is meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
+            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
+#endif
+        }
+#endif
+        #endregion // PCA WITH TOKEN CACHE
     }
 }

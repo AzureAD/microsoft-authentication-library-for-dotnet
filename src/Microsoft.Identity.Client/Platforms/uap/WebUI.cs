@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)
         {
-            bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
+            bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWebRedirectUri, StringComparison.OrdinalIgnoreCase);
 
             WebAuthenticationResult webAuthenticationResult;
             WebAuthenticationOptions options = (useCorporateNetwork &&
