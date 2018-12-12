@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.Query(c => c.Class("WKWebView").Invoke(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID)));
+                    Application.Query(c => c.Class("WKWebView").InvokeJS(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID)));
                     //if (IsiOS)
                     //    Application.Tap(QueryByWebViewAndCssId(elementID));
                     //else
