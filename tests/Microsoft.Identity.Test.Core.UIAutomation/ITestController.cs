@@ -115,6 +115,6 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         ///Specifies whether or not this is running on iOS.
         ///this is temporary and will be refactored soon.
-        bool IsiOS { get; set; }
+        //bool IsiOS { get; set; }
     }
 }

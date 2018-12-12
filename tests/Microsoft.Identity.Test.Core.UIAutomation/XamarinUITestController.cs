@@ -51,11 +51,10 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         const int defaultPostTimeoutSec = 1;
         const string CSSIDSelector = "[id|={0}]";
         const string XpathSelector = "//*[text()=\"{0}\"]";
-        const string XpathSelectorid = "//*[id()=\"{0}\"]";
 
         public IApp Application { get; set; }
 
-        public bool IsiOS { get; set; }
+        public static bool IsiOS { get; set; }
 
         public XamarinUITestController()
         {
@@ -171,23 +170,13 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.Query(c => c.Class("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.ClassFull("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.ClassFull("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    if (IsiOS)
-                        Application.Tap(QueryByWebViewAndCssId(elementID));
-                    else
-                        Application.Tap(QueryByCssId(elementID));
+                    Application.Query(c => c.ClassFull("WKWebView").Invoke(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID)));
+                    //if (IsiOS)
+                    //    Application.Tap(QueryByWebViewAndCssId(elementID));
+                    //else
+                    //    Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    Application.Query(c => c.Class("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.ClassFull("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.ClassFull("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    if (IsiOS)
-                        Application.Tap(QueryByHtmlElementValueAndClass(elementID));
-                    else
                         Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     break;
                 default:
@@ -207,15 +196,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.EnterText(x => x.Marked(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.Query(c => c.Class("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.ClassFull("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.ClassFull("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-
-                    if (IsiOS)
                         Application.EnterText(QueryByWebViewAndCssId(elementID), text);
-                    else
-                        Application.EnterText(QueryByCssId(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlValue:
                     throw new InvalidOperationException("Test error - you can't input text in an html element that has a value");
@@ -255,16 +236,14 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string text)
         {
-            Debug.Print("Usingxpath wrong ID");
-            
-            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelector, text);
             return c => c.Class("WKWebView").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
             Debug.Print("Usingxpath ID");
-            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelector, text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
             return c => c.Class("WKWebView").XPath(xpath);

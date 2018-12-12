@@ -68,7 +68,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         {
             app = AppFactory.StartApp(platform, "XForms.iOS");
             xamarinController.Application = app;
-            xamarinController.IsiOS = true;
+            XamarinUITestController.IsiOS = true;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         [Test]
         public void AcquireTokenTest()
         {
-            xamarinController.IsiOS = true;
+            XamarinUITestController.IsiOS = true;
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         }
 
