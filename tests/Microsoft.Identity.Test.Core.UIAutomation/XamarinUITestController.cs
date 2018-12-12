@@ -181,7 +181,6 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                 case XamarinSelector.ByHtmlValue:
                     Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
                     Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
-
                     if (IsiOS)
                         Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     else
@@ -204,12 +203,16 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.EnterText(x => x.Marked(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
+                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
                     if (IsiOS)
                         Application.EnterText(QueryByWebViewAndCssId(elementID), text);
                     else
                         Application.EnterText(QueryByCssId(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlValue:
+                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
                     throw new InvalidOperationException("Test error - you can't input text in an html element that has a value");
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
@@ -249,18 +252,17 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         {
             Debug.Print("Usingxpath wrong ID");
             
-            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
-
-            return c => c.Class("btn btn-block btn-primary").XPath(xpath);
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
+            return c => c.Class("WKWebView").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
             Debug.Print("Usingxpath ID");
-            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
-            return c => c.Class("btn btn-block btn-primary").XPath(xpath);
+            return c => c.Class("WKWebView").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
