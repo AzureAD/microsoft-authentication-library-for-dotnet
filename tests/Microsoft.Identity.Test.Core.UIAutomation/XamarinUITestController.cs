@@ -170,14 +170,16 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.Query(c => c.ClassFull("WKWebView").Invoke(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID)));
+                    Application.Query(c => c.Class("WKWebView").Invoke(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID)));
                     //if (IsiOS)
                     //    Application.Tap(QueryByWebViewAndCssId(elementID));
                     //else
                     //    Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                        Application.Tap(QueryByHtmlElementValueAndClass(elementID));
+                    
+                    Application.Query(c => c.Class("WKWebView").Invoke(String.Format(CultureInfo.InvariantCulture, "document.evaluate('//*[text()=\"{0}\"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()", elementID)));
+                        //Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     break;
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
