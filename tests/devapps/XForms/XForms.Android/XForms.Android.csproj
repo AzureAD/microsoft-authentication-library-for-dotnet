@@ -113,7 +113,6 @@
     <PackageReference Include="Xamarin.Android.Support.v7.AppCompat" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.MediaRouter" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.v7.Palette" Version="27.0.2" />
-	<PackageReference Include="NETStandard.Library" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer">
