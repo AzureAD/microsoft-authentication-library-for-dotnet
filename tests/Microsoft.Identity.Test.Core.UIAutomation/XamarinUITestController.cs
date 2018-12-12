@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     break;
                 case XamarinSelector.ByHtmlValue:
                     
-                    Application.Query(c => c.Class("WKWebView").Invoke(String.Format(CultureInfo.InvariantCulture, "document.evaluate('//*[text()=\"{0}\"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()", elementID)));
+                    Application.Query(c => c.Class("WKWebView").InvokeJS(String.Format(CultureInfo.InvariantCulture, "document.evaluate('//*[text()=\"{0}\"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()", elementID)));
                         //Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     break;
                 default:
