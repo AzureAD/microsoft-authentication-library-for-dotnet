@@ -242,12 +242,15 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string text)
         {
-            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelector, text);
-            return c => c.XPath(xpath);
+            Debug.Print("Usingxpath wrong ID");
+            
+            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
+            return c => c.Class("WKWebView").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
+            Debug.Print("Usingxpath ID");
             string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
