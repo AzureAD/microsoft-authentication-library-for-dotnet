@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using System.Diagnostics;
 
 namespace Microsoft.Identity.Test.Unit
 {
@@ -27,11 +28,18 @@ namespace Microsoft.Identity.Test.Unit
 
         public void SaveScreenshot(TestContext testContext, string name = "failure")
         {
-#if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
             Screenshot ss = ((ITakesScreenshot)Driver).GetScreenshot();
             string picName = name + _picNumber++ + ".png";
-            string failurePicturePath = Path.Combine(testContext.ResultsDirectory, picName);
+            #if DESKTOP // Can't attach a file on netcore because mstest doesn't support it
+            string failurePicturePath = Path.Combine(testContext.TestResultsDirectory, picName);
+            #else
+            string failurePicturePath = Path.Combine(Directory.GetCurrentDirectory(), picName);
+            #endif
+
+            Trace.WriteLine($"Saving picture to {failurePicturePath}");
             ss.SaveAsFile(failurePicturePath, ScreenshotImageFormat.Png);
+
+#if DESKTOP // Can't attach a file to the logs on netcore because mstest doesn't support it
             testContext.AddResultFile(failurePicturePath);
 #endif
         }
