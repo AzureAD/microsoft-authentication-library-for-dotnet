@@ -26,7 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -172,13 +171,18 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
+                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
                     if (IsiOS)
                         Application.Tap(QueryByWebViewAndCssId(elementID));
                     else
                         Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    if(IsiOS)
+                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
+
+                    if (IsiOS)
                         Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     else
                         Application.Tap(QueryByHtmlElementValueAndClass(elementID));
@@ -245,22 +249,18 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         {
             Debug.Print("Usingxpath wrong ID");
             
-            string xpath = String.Format(CultureInfo.InvariantCulture, "#{0}", text);
-            return c => c.Class("btn btn-block btn-primary").Css(xpath);
-        }
+            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
 
-        private AppResult[] getClasses()
-        {
-            return Application.Query(c => c.Class("WKWebView"));
+            return c => c.Class("btn btn-block btn-primary").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
             Debug.Print("Usingxpath ID");
-            string xpath = String.Format(CultureInfo.InvariantCulture, "#{0}", text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
-            return c => c.Class("btn btn-block btn-primary").Css(xpath);
+            return c => c.Class("btn btn-block btn-primary").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
