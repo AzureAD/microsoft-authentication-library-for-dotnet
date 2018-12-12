@@ -300,6 +300,8 @@ namespace XForms
             {
                 acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
+
+            System.Console.WriteLine(exception.Message);
         }
     }
 }

@@ -49,7 +49,6 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             string promptBehavior = CoreUiTestConstants.UIBehaviorLogin)
         {
             AcquireTokenInteractiveHelper(controller, labResponse, promptBehavior);
-            controller.Tap(CoreUiTestConstants.LogPageId);
             VerifyResult(controller);
         }
 
