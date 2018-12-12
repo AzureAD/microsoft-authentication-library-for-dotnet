@@ -59,6 +59,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string AcquirePageID = "Acquire";
         public const string CachePageID = "Cache";
         public const string SettingsPageID = "Settings";
+        public const string LogPageId = "Log";
         public const string ScopesEntryID = "scopesList";
         public const string UiBehaviorPickerID = "uiBehavior";
         public const string SelectUser = "userList";

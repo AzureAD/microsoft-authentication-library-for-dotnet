@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             string promptBehavior = CoreUiTestConstants.UIBehaviorLogin)
         {
             AcquireTokenInteractiveHelper(controller, labResponse, promptBehavior);
+            controller.Tap(CoreUiTestConstants.LogPageId);
             VerifyResult(controller);
         }
 
@@ -390,6 +391,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
                     controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
                 }
+
                 return;
             }
             //i0116 = UPN text field on AAD sign in endpoint
