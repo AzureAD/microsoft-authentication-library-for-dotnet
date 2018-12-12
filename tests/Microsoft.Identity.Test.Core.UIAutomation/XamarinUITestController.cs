@@ -244,14 +244,14 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         {
             Debug.Print("Usingxpath wrong ID");
             
-            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
             return c => c.Class("WKWebView").XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
             Debug.Print("Usingxpath ID");
-            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
             return c => c.Class("WKWebView").XPath(xpath);
