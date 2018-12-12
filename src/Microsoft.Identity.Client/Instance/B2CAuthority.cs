@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
@@ -36,67 +37,27 @@ namespace Microsoft.Identity.Client.Instance
     {
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
         public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
-        public const string OpenIdConfigurationEndpoint = "v2.0/.well-known/openid-configuration";
         public const string B2CTrustedHost = "b2clogin.com";
 
-        internal B2CAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
-            : base(serviceBundle, authority, validateAuthority)
+        internal B2CAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+            : base(serviceBundle, authorityInfo)
         {
-            AuthorityType = AuthorityType.B2C;
-            // Setting this to false as B2C authorities are customer specific
-            validateAuthority = false;
-
-            Uri authorityUri = new Uri(authority);
-            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-            if (pathSegments.Length < 3)
-            {
-                throw new ArgumentException(CoreErrorMessages.B2cAuthorityUriInvalidPath);
-            }
-
-            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate, authorityUri.Authority,
-                pathSegments[0], pathSegments[1], pathSegments[2]);
         }
 
         internal override async Task UpdateCanonicalAuthorityAsync(
             RequestContext requestContext)
         {
-            Uri b2cHost = new Uri(CanonicalAuthority);
-            if (IsB2CLoginHost(b2cHost.Host))
+            if (IsB2CLoginHost(new Uri(CanonicalAuthority).Host))
             {
                 return;
             }
-            else
-            {
-                var metadata = await ServiceBundle.AadInstanceDiscovery
-                                        .GetMetadataEntryAsync(
-                                     new Uri(CanonicalAuthority),
-                                     ValidateAuthority,
-                                     requestContext)
-                                 .ConfigureAwait(false);
 
-                CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
-            }
+            await base.UpdateCanonicalAuthorityAsync(requestContext).ConfigureAwait(false);
         }
 
         private bool IsB2CLoginHost(string host)
         {
-            if (host.EndsWith(B2CTrustedHost, StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        protected override string GetDefaultOpenIdConfigurationEndpoint()
-        {
-            return string.Format(CultureInfo.InvariantCulture, new Uri(CanonicalAuthority).AbsoluteUri + OpenIdConfigurationEndpoint);
-        }
-
-        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
-            string userPrincipalName,
-            RequestContext requestContext)
-        {
-            return await Task.FromResult(GetDefaultOpenIdConfigurationEndpoint()).ConfigureAwait(false);
+            return host.EndsWith(B2CTrustedHost, StringComparison.OrdinalIgnoreCase);
         }
 
         internal override string GetTenantId()

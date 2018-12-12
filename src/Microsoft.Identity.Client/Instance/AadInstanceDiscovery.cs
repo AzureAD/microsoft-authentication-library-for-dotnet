@@ -149,9 +149,9 @@ namespace Microsoft.Identity.Client.Instance
 
         private void CacheInstanceDiscoveryMetadata(string host, InstanceDiscoveryResponse instanceDiscoveryResponse)
         {
-            foreach (var entry in instanceDiscoveryResponse?.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
+            foreach (var entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (string aliasedAuthority in entry?.Aliases ?? Enumerable.Empty<string>())
+                foreach (string aliasedAuthority in entry.Aliases ?? Enumerable.Empty<string>())
                 {
                     TryAddValue(aliasedAuthority, entry);
                 }
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client.Instance
                 {
                     PreferredNetwork = host,
                     PreferredCache = host,
-                    Aliases = null
+                    Aliases = null,
                 });
         }
     }

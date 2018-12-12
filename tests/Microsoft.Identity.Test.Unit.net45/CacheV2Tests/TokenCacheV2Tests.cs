@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 var cacheManager = new CacheManager(
                     _storageManager,

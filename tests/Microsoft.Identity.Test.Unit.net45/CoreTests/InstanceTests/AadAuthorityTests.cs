@@ -1,20 +1,20 @@
-﻿//----------------------------------------------------------------------
-//
+﻿// ------------------------------------------------------------------------------
+// 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-//
+// 
 // This code is licensed under the MIT License.
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,8 +22,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// 
+// ------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -31,12 +31,12 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -58,16 +58,15 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCleanup]
         public void TestCleanup()
         {
-
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
-        public void SuccessfulValidationTest()
+        public async Task SuccessfulValidationTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for instance validation
                 httpManager.AddMockHandler(
@@ -94,38 +93,38 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
+                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", true);
+                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", true);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            null, 
-                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                var endpoints = await endpointManager.ResolveEndpointsAsync(
+                                                         instance.AuthorityInfo,
+                                                         null,
+                                                         new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                                     .ConfigureAwait(false);
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                    instance.AuthorizationEndpoint);
+                    endpoints.AuthorizationEndpoint);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                    instance.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
-                Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.UserRealmUriPrefix);
+                    endpoints.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
             }
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
-        public void ValidationOffSuccessTest()
+        public async Task ValidationOffSuccessTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
@@ -134,37 +133,37 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         Method = HttpMethod.Get,
                         Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
-                           File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
+                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
+                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            null, 
-                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                var endpoints = await endpointManager.ResolveEndpointsAsync(
+                                                         instance.AuthorityInfo,
+                                                         null,
+                                                         new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                                     .ConfigureAwait(false);
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                    instance.AuthorizationEndpoint);
+                    endpoints.AuthorizationEndpoint);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                    instance.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
+                    endpoints.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
             }
         }
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
-        public void FailedValidationTest()
+        public async Task FailedValidationTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for instance validation
                 httpManager.AddMockHandler(
@@ -190,18 +189,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             "4fa2-4f35-a59b-54b6f91a9c94\"}")
                     });
 
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
+                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                null,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    var endpoints = await endpointManager.ResolveEndpointsAsync(
+                                                             instance.AuthorityInfo,
+                                                             null,
+                                                             new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                                         .ConfigureAwait(false);
                     Assert.Fail("validation should have failed here");
                 }
                 catch (Exception exc)
@@ -214,11 +213,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
-        public void FailedValidationMissingFieldsTest()
+        public async Task FailedValidationMissingFieldsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for instance validation
                 httpManager.AddMockHandler(
@@ -234,19 +233,18 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{}")
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
+                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                null,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    await endpointManager.ResolveEndpointsAsync(
+                                             instance.AuthorityInfo,
+                                             null,
+                                             new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                         .ConfigureAwait(false);
                     Assert.Fail("validation should have failed here");
                 }
                 catch (Exception exc)
@@ -258,11 +256,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
-        public void FailedTenantDiscoveryMissingEndpointsTest()
+        public async Task FailedTenantDiscoveryMissingEndpointsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
@@ -270,24 +268,22 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     {
                         Method = HttpMethod.Get,
                         Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
-                        ResponseMessage =
-                            MockHelpers.CreateSuccessResponseMessage(
-                                File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields.json")))
+                        ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
+                            File.ReadAllText(
+                                ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields.json")))
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
+                var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                null,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    await endpointManager.ResolveEndpointsAsync(
+                                             instance.AuthorityInfo,
+                                             null,
+                                             new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                         .ConfigureAwait(false);
                     Assert.Fail("validation should have failed here");
                 }
                 catch (MsalClientException exc)
@@ -301,7 +297,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             const string UriNoPort = "https://login.microsoftonline.in/mytenant.com";
             const string UriNoPortTailSlash = "https://login.microsoftonline.in/mytenant.com/";
@@ -320,23 +316,5 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             authority = Authority.CreateAuthority(serviceBundle, UriCustomPort, false);
             Assert.AreEqual(UriCustomPortTailSlash, authority.CanonicalAuthority);
         }
-
-        /*
-        [TestMethod]
-        [TestCategory("AadAuthorityTests")]
-        public void DeprecatedAuthorityTest()
-        {
-            const string uriNoPort = "https://login.windows.net/mytenant.com";
-            const string uriCustomPort = "https://login.windows.net:444/mytenant.com/";
-            var authority = Authority.CreateAuthority(uriNoPort, false);
-            Assert.AreEqual("https://login.microsoftonline.com/mytenant.com/", authority.CanonicalAuthority);
-            authority = Authority.CreateAuthority(uriCustomPort, false);
-            Assert.AreEqual("https://login.microsoftonline.com:444/mytenant.com/", authority.CanonicalAuthority);
-            authority = Authority.CreateAuthority("https://login.windows.net/tfp/tenant/policy", false);
-            Assert.AreEqual("https://login.microsoftonline.com/tfp/tenant/policy/", authority.CanonicalAuthority);
-            authority = Authority.CreateAuthority("https://login.windows.net:444/tfp/tenant/policy", false);
-            Assert.AreEqual("https://login.microsoftonline.com:444/tfp/tenant/policy/", authority.CanonicalAuthority);
-        }
-        */
     }
 }

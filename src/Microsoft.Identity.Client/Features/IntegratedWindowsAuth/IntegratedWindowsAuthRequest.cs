@@ -33,6 +33,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -68,7 +69,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken)
+            var msalTokenResponse = await SendTokenRequestAsync(
+                                            GetAdditionalBodyParameters(userAssertion), cancellationToken)
                                         .ConfigureAwait(false);
             return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
@@ -81,7 +83,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
-                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)

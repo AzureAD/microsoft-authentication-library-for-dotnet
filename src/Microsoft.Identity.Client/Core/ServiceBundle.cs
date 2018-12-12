@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -35,19 +36,15 @@ namespace Microsoft.Identity.Client.Core
     internal class ServiceBundle : IServiceBundle
     {
         internal ServiceBundle(
-            IHttpClientFactory httpClientFactory = null,
-            IHttpManager httpManager = null,
-            ITelemetryReceiver telemetryReceiver = null,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache = null,
-            IAadInstanceDiscovery aadInstanceDiscovery = null,
-            IWsTrustWebRequestManager wsTrustWebRequestManager = null,
+            ApplicationConfiguration config,
             bool shouldClearCaches = false)
         {
-            HttpManager = httpManager ?? new HttpManager(httpClientFactory);
-            TelemetryManager = new TelemetryManager(telemetryReceiver);
-            ValidatedAuthoritiesCache = validatedAuthoritiesCache ?? new ValidatedAuthoritiesCache(shouldClearCaches);
-            AadInstanceDiscovery = aadInstanceDiscovery ?? new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
-            WsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager(HttpManager);
+            Config = config;
+            HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
+            TelemetryManager = new TelemetryManager(config.TelemetryReceiver);
+            ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(shouldClearCaches);
+            AadInstanceDiscovery = new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
+            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             PlatformProxy = PlatformProxyFactory.GetPlatformProxy();
         }
 
@@ -69,14 +66,12 @@ namespace Microsoft.Identity.Client.Core
         /// <inheritdoc />
         public IPlatformProxy PlatformProxy { get; }
 
-        public static ServiceBundle CreateDefault(ITelemetryReceiver telemetryReceiver = null)
-        {
-            return new ServiceBundle(telemetryReceiver: telemetryReceiver);
-        }
+        /// <inheritdoc />
+        public IApplicationConfiguration Config { get; }
 
-        public static ServiceBundle CreateWithCustomHttpManager(IHttpManager httpManager, ITelemetryReceiver telemetryReceiver = null)
+        public static ServiceBundle Create(ApplicationConfiguration config)
         {
-            return new ServiceBundle(httpManager: httpManager, telemetryReceiver: telemetryReceiver, shouldClearCaches: true);
+            return new ServiceBundle(config);
         }
     }
 }

@@ -27,32 +27,31 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Config;
 
 namespace Microsoft.Identity.Client.Http
 {
-    internal interface IHttpClientFactory
-    {
-        HttpClient HttpClient { get; }
-    }
-
-    internal class HttpClientFactory : IHttpClientFactory
+    internal class HttpClientFactory : IMsalHttpClientFactory
     {
         // The HttpClient is a singleton per ClientApplication so that we don't have a process wide singleton.
         public const long MaxResponseContentBufferSizeInBytes = 1024*1024;
 
+        private readonly HttpClient _httpClient;
+
         public HttpClientFactory()
         {
-            var httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true })
+            _httpClient = new HttpClient(new HttpClientHandler() { UseDefaultCredentials = true })
             {
                 MaxResponseContentBufferSize = MaxResponseContentBufferSizeInBytes
             };
 
-            httpClient.DefaultRequestHeaders.Accept.Clear();
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-            HttpClient = httpClient;
+            _httpClient.DefaultRequestHeaders.Accept.Clear();
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
-        public HttpClient HttpClient { get; }
+        public HttpClient GetHttpClient()
+        {
+            return _httpClient;
+        }
     }
 }

@@ -30,6 +30,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.TelemetryCore;
 using System;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
@@ -47,27 +48,10 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Default authority to be used for the application</param>
         /// <param name="userTokenCache">Instance of TokenCache.</param>
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
-            : this(null, clientId, authority, userTokenCache)
+            : this(PublicClientApplicationBuilder.Create(clientId, authority).WithUserTokenCache(userTokenCache).BuildConfiguration())
         {
             GuardOnMobilePlatforms();
-            UserTokenCache = userTokenCache;
         }
-
-        internal PublicClientApplication(
-            IServiceBundle serviceBundle,
-            string clientId,
-            string authority,
-            TokenCache userTokenCache)
-            : base(
-                clientId,
-                authority,
-                PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId),
-                true,
-                serviceBundle)
-        {
-            UserTokenCache = userTokenCache;
-        }
-
 
         private static void GuardOnMobilePlatforms()
         {

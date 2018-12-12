@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
 
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
                 var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));

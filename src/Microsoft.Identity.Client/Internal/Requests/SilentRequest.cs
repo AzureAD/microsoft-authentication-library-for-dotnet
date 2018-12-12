@@ -58,21 +58,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Token cache is set to null. Silent requests cannot be executed.");
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenItem = null;
+            // Look for access token.
+            var msalAccessTokenItem =
+                await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
 
-            // Look for access token
-            if (!ForceRefresh)
+            MsalIdTokenCacheItem msalIdTokenItem = null;
+
+            if (msalAccessTokenItem != null)
             {
-                msalAccessTokenItem =
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
+                    msalAccessTokenItem.GetIdTokenItemKey(),
+                    AuthenticationRequestParameters.RequestContext);
+            }
+
+            if (ForceRefresh)
+            {
+                msalAccessTokenItem = null;
             }
 
             if (msalAccessTokenItem != null)
             {
-                var msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
-                    msalAccessTokenItem.GetIdTokenItemKey(),
-                    AuthenticationRequestParameters.RequestContext);
-
                 return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
             }
 

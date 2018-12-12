@@ -1,20 +1,20 @@
-﻿//----------------------------------------------------------------------
-//
+﻿// ------------------------------------------------------------------------------
+// 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-//
+// 
 // This code is licensed under the MIT License.
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,12 +22,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// 
+// ------------------------------------------------------------------------------
 
-
-// Test should run on net core. Please re-enable once bug
-// https://identitydivision.visualstudio.com/DevEx/_workitems/edit/574705 is fixed
 #if !ANDROID && !iOS && !WINDOWS_APP && !NET_CORE
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -35,6 +32,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -46,8 +44,6 @@ namespace Microsoft.Identity.Test.Unit
     [DeploymentItem(@"Resources\valid_cert.pfx")]
     public class JsonWebTokenTests
     {
-        private TokenCache _cache;
-
         private readonly MockHttpMessageHandler X5CMockHandler = new MockHttpMessageHandler()
         {
             Method = HttpMethod.Post,
@@ -74,7 +70,6 @@ namespace Microsoft.Identity.Test.Unit
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            _cache = new TokenCache();
         }
 
         internal void SetupMocks(MockHttpManager httpManager)
@@ -89,8 +84,6 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 SetupMocks(httpManager);
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
@@ -98,19 +91,19 @@ namespace Microsoft.Identity.Test.Unit
 
                 var clientAssertion = new ClientAssertionCertificate(certificate);
                 var clientCredential = new ClientCredential(clientAssertion);
-                var app = new ConfidentialClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority,
-                    MsalTestConstants.RedirectUri,
-                    clientCredential,
-                    _cache,
-                    _cache)
-                {
-                    ValidateAuthority = false
-                };
 
-                //Check for x5c claim
+                var cache = new TokenCache();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant, false)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithClientCredential(clientCredential)
+                    .WithHttpManager(httpManager)
+                    .WithUserTokenCache(cache)
+                    .WithAppTokenCache(cache)
+                    .BuildConcrete();
+
+                // Check for x5c claim
                 httpManager.AddMockHandler(X5CMockHandler);
                 AuthenticationResult result =
                     await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenForClientWithCertificateAsync(
@@ -128,7 +121,6 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 SetupMocks(httpManager);
 
                 var certificate = new X509Certificate2(
@@ -136,20 +128,21 @@ namespace Microsoft.Identity.Test.Unit
                     MsalTestConstants.DefaultPassword);
                 var clientAssertion = new ClientAssertionCertificate(certificate);
                 var clientCredential = new ClientCredential(clientAssertion);
-                var app = new ConfidentialClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority,
-                    MsalTestConstants.RedirectUri,
-                    clientCredential,
-                    _cache,
-                    _cache)
-                {
-                    ValidateAuthority = false
-                };
+
+                var cache = new TokenCache();
+
+                var app = ConfidentialClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant, false)
+                    .WithRedirectUri(MsalTestConstants.RedirectUri)
+                    .WithHttpManager(httpManager)
+                    .WithClientCredential(clientCredential)
+                    .WithUserTokenCache(cache)
+                    .WithAppTokenCache(cache)
+                    .BuildConcrete();
+
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
 
-                //Check for x5c claim
+                // Check for x5c claim
                 httpManager.AddMockHandler(X5CMockHandler);
                 AuthenticationResult result =
                     await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenOnBehalfOfWithCertificateAsync(

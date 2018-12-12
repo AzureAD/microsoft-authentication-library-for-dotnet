@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _serviceBundle = ServiceBundle.CreateDefault();
+            _serviceBundle = TestCommon.CreateDefaultServiceBundle();
         }
 
         [TestMethod]
@@ -73,7 +73,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MsalTestConstants.AuthorityCommonTenant,
                     false)
             };
-            parameters.Authority.SelfSignedJwtAudience = Audience1;
+            // TODO: how is this used on the authority?  in other cases it's in the endpoint response so need to figure out how this is consumed.
+            //parameters.Authority.SelfSignedJwtAudience = Audience1;
 
             //Validate cached client assertion with parameters
             Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
@@ -125,7 +126,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MsalTestConstants.AuthorityCommonTenant,
                     false)
             };
-            parameters.Authority.SelfSignedJwtAudience = "Audience1";
+            // TODO: how is this used on the authority?  in other cases it's in the endpoint response so need to figure out how this is consumed.
+            //parameters.Authority.SelfSignedJwtAudience = "Audience1";
 
             //Validate cached client assertion with expiration time
             //Cached assertion should be valid

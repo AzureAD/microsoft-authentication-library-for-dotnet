@@ -47,14 +47,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     public class SilentRequestTests
     {
         private TokenCache _cache;
-        private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
             _cache = new TokenCache();
-            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestCleanup]
@@ -73,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 var cache = new TokenCache()
@@ -113,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
                 Authority authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 TokenCache cache = new TokenCache()
@@ -121,7 +119,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     ServiceBundle = serviceBundle
                 };
-                _tokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+                TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
@@ -174,7 +172,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 _cache = null;
@@ -219,7 +217,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 _cache = new TokenCache()

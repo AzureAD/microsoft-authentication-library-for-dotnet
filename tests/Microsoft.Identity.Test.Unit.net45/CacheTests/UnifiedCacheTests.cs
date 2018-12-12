@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Config;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -56,25 +57,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                PublicClientApplication app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant)
+                    .WithHttpManager(httpManager)
+                    .WithUserTokenCache(new TokenCache() { LegacyCachePersistence = new TestLegacyCachePersistance() })
+                    .BuildConcrete();
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache =
-                    {
-                        LegacyCachePersistence = new TestLegacyCachePersistance()
-                    }
-                };
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -126,7 +120,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 // login to app
                 var tokenCache = new TokenCache();
                 tokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
@@ -138,21 +131,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         data = args.TokenCache.Serialize();
                     });
 
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache = tokenCache
-                };
-
+                var app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant)
+                    .WithHttpManager(httpManager)
+                    .WithUserTokenCache(tokenCache)
+                    .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -171,18 +161,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     data = args.TokenCache.Serialize();
                 });
 
-                PublicClientApplication app1 = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId_1,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache = tokenCache1
-                };
+                PublicClientApplication app1 = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId_1, ClientApplicationBase.DefaultAuthority)
+                    .WithHttpManager(httpManager)
+                    .WithUserTokenCache(tokenCache1).BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
                 
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -213,17 +200,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                var app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache =
-                    {
-                        LegacyCachePersistence = new TestLegacyCachePersistance()
-                    }
-                };
+                var app = PublicClientApplicationBuilder
+                          .Create(MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                          .WithHttpManager(httpManager)
+                          .WithUserTokenCache(
+                              new TokenCache()
+                              {
+                                  LegacyCachePersistence = new TestLegacyCachePersistance()
+                              }).BuildConcrete();
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, MsalTestConstants.Scope.ToString());
 

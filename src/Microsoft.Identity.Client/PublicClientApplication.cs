@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client
@@ -63,6 +64,11 @@ namespace Microsoft.Identity.Client
             ModuleInitializer.EnsureModuleInitialized();
         }
 
+        internal PublicClientApplication(ApplicationConfiguration configuration) : base(configuration)
+        {
+
+        }
+
         /// <summary>
         /// Consutructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
         /// </summary>
@@ -89,27 +95,30 @@ namespace Microsoft.Identity.Client
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
         public PublicClientApplication(string clientId, string authority)
-            : this(null, clientId, authority)
+            : base(PublicClientApplicationBuilder
+                   .Create(
+                       clientId, 
+                       "WHATTENANTGOESHERE", 
+                       PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
+                   .WithAuthority(authority, true, true)
+                   .WithUserTokenCache(new TokenCache())  // TODO: ensure clientid gets set properly this way during build...
+                   .BuildConfiguration())
         {
-            UserTokenCache = new TokenCache()
-            {
-                ClientId = clientId
-            };
         }
 
-        internal PublicClientApplication(IServiceBundle serviceBundle, string clientId, string authority)
-            : base(
-                clientId,
-                authority,
-                PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId),
-                true,
-                serviceBundle)
-        {
-            UserTokenCache = new TokenCache()
-            {
-                ClientId = clientId
-            };
-        }
+        //internal PublicClientApplication(IServiceBundle serviceBundle, string clientId, string authority)
+        //    : base(
+        //        clientId,
+        //        authority,
+        //        PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId),
+        //        true,
+        //        serviceBundle)
+        //{
+        //    UserTokenCache = new TokenCache()
+        //    {
+        //        ClientId = clientId
+        //    };
+        //}
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
         // however include the signatures at runtime only to prevent MissingMethodExceptions from NetStandard
@@ -162,7 +171,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
@@ -181,7 +190,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -202,7 +211,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account,
@@ -225,7 +234,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -248,7 +257,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
@@ -275,7 +284,7 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
@@ -302,7 +311,12 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(
+                ServiceBundle, 
+                AuthorityInfo.FromAuthorityUri(
+                    authority,
+                    ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
+                    false));
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
@@ -323,7 +337,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
@@ -343,7 +357,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -364,7 +378,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account,
@@ -387,7 +401,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
@@ -410,7 +424,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
             return
                 await
                     AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
@@ -437,7 +451,13 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(
+                ServiceBundle, 
+                AuthorityInfo.FromAuthorityUri(
+                    authority,
+                    ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
+                    false));
+
             return
                 await
                     AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
@@ -464,7 +484,13 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
+            Authority authorityInstance =
+                Instance.Authority.CreateAuthorityWithOverride(
+                    ServiceBundle,
+                    AuthorityInfo.FromAuthorityUri(
+                       authority,
+                       ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
+                       false));
             return
                 await
                     AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,

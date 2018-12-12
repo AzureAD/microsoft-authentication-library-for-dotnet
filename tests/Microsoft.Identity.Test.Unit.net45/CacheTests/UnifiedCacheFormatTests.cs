@@ -42,6 +42,7 @@ using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Microsoft.Identity.Client.Config;
 
 #if !NET_CORE
 
@@ -56,14 +57,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
         private void TestInitialize(MockHttpManager httpManager)
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-
-            new AadInstanceDiscovery(null, null, true);
-            new ValidatedAuthoritiesCache(true);
-
-            httpManager.AddMockHandler(
-                MockHelpers.CreateInstanceDiscoveryMockHandler(
-                    MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
+            TestCommon.ResetStateAndInitMsal();
+            httpManager.AddInstanceDiscoveryMockHandler();
         }
 
         private string ClientId;
@@ -192,10 +187,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 TestInitialize(httpManager);
 
-                PublicClientApplication app = new PublicClientApplication(serviceBundle, ClientId, RequestAuthority);
+                PublicClientApplication app = PublicClientApplicationBuilder
+                                              .Create(ClientId, RequestAuthority)
+                                              .WithHttpManager(httpManager)
+                                              .WithUserTokenCache(new TokenCache())
+                                              .BuildConcrete();
+    
                 MockWebUI ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(AuthorizationStatus.Success,

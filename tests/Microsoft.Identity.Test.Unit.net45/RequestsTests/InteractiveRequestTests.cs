@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
 
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 var cache = new TokenCache()
@@ -137,7 +137,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
 
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 var cache = new TokenCache()
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                 
                 TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
 
                 var parameters = new AuthenticationRequestParameters
                 {
@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 using (var httpManager = new MockHttpManager())
                 {
-                    var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                    var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
 
                     var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
 
@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
 
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
 
@@ -319,7 +319,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
 
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 httpManager.AddMockHandler(
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
 
                 TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
@@ -453,7 +453,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {            
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, _myReceiver);
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
                 var parameters = new AuthenticationRequestParameters
                 {

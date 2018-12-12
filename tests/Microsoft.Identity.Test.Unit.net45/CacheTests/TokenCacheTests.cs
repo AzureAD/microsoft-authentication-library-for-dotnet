@@ -48,14 +48,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public static long ValidExpiresIn = 3600;
         public static long ValidExtendedExpiresIn = 7200;
 
-        private TokenCache _cache;
-        private readonly TokenCacheHelper _tokenCacheHelper = new TokenCacheHelper();
-
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            _cache = new TokenCache();
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
@@ -73,22 +69,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 });
         }
 
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _cache.Clear();
-        }
-
-
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void GetExactScopesMatchedAccessTokenTest()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
 
                 var cache = new TokenCache()
                 {
@@ -133,9 +121,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
 
                 var cache = new TokenCache()
                 {
@@ -183,9 +170,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
                 var cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
@@ -234,10 +220,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                _cache = new TokenCache()
+                var cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
                     ServiceBundle = serviceBundle
@@ -255,10 +240,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MockHelpers.CreateClientInfo());
 
                 atItem.Secret = atItem.GetKey().ToString();
-                _cache.TokenCacheAccessor.SaveAccessToken(atItem);
+                cache.TokenCacheAccessor.SaveAccessToken(atItem);
 
                 Assert.IsNull(
-                    _cache.FindAccessTokenAsync(
+                    cache.FindAccessTokenAsync(
                         new AuthenticationRequestParameters()
                         {
                             RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
@@ -276,10 +261,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                _cache = new TokenCache()
+                var cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
                     ServiceBundle = serviceBundle
@@ -297,12 +281,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MockHelpers.CreateClientInfo());
 
                 atItem.Secret = atItem.GetKey().ToString();
-                _cache.TokenCacheAccessor.SaveAccessToken(atItem);
+                cache.TokenCacheAccessor.SaveAccessToken(atItem);
 
-                var cacheItem = _cache.FindAccessTokenAsync(
+                // TODO: This test was setting extended lifetime on the AuthRequestParameters, needs to be in the config
+                // IsExtendedLifeTimeEnabled = true,
+
+                var cacheItem = cache.FindAccessTokenAsync(
                     new AuthenticationRequestParameters()
                     {
-                        IsExtendedLifeTimeEnabled = true,
                         RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
                         ClientId = MsalTestConstants.ClientId,
                         Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
@@ -322,10 +308,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                _cache = new TokenCache()
+                var cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
                     ServiceBundle = serviceBundle
@@ -343,10 +328,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MockHelpers.CreateClientInfo());
 
                 atItem.Secret = atItem.GetKey().ToString();
-                _cache.TokenCacheAccessor.SaveAccessToken(atItem);
+                cache.TokenCacheAccessor.SaveAccessToken(atItem);
 
                 Assert.IsNull(
-                    _cache.FindAccessTokenAsync(
+                    cache.FindAccessTokenAsync(
                         new AuthenticationRequestParameters()
                         {
                             RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
@@ -373,7 +358,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 "someRT",
                 MockHelpers.CreateClientInfo());
 
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             string rtKey = rtItem.GetKey().ToString();
             cache.TokenCacheAccessor.SaveRefreshToken(rtItem);
@@ -408,9 +393,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
                 var cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
@@ -444,11 +428,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
 
-                _cache = new TokenCache()
+                var cache = new TokenCache()
                 {
                     ClientId = MsalTestConstants.ClientId,
                     ServiceBundle = serviceBundle
@@ -468,9 +451,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
 
-                _cache.TokenCacheAccessor.SaveAccessToken(atItem);
+                cache.TokenCacheAccessor.SaveAccessToken(atItem);
 
-                var cacheItem = _cache.FindAccessTokenAsync(
+                var cacheItem = cache.FindAccessTokenAsync(
                     new AuthenticationRequestParameters()
                     {
                         IsClientCredentialRequest = true,
@@ -491,7 +474,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void DoNotSaveRefreshTokenInAdalCacheForMsalB2CAuthorityTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             var cache = new TokenCache()
             {
                 ClientId = MsalTestConstants.ClientId,
@@ -538,9 +521,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
 
                 var cache = new TokenCache()
                 {
@@ -589,9 +571,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
 
                 var cache = new TokenCache()
                 {
@@ -641,9 +622,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
 
                 var cache = new TokenCache()
                 {
@@ -690,7 +670,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void SaveAccessAndRefreshTokenWithEmptyCacheTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var cache = new TokenCache()
             {
@@ -729,7 +709,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void SaveAccessAndRefreshTokenWithMoreScopesTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var cache = new TokenCache()
             {
@@ -790,7 +770,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void SaveAccessAndRefreshTokenWithLessScopesTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var cache = new TokenCache()
             {
@@ -847,7 +827,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void SaveAccessAndRefreshTokenWithIntersectingScopesTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var cache = new TokenCache()
             {
@@ -925,7 +905,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void SaveAccessAndRefreshTokenWithDifferentAuthoritySameUserTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var cache = new TokenCache()
             {
@@ -1012,7 +992,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void SerializeDeserializeCacheTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var cache = new TokenCache()
             {
@@ -1086,41 +1066,45 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void FindAccessToken_ScopeCaseInsensitive()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
-
-            var tokenCache = new TokenCache()
+            using (var httpManager = new MockHttpManager())
             {
-                ClientId = MsalTestConstants.ClientId,
-                ServiceBundle = serviceBundle
-            };
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
+                httpManager.AddInstanceDiscoveryMockHandler();
 
-            _tokenCacheHelper.PopulateCacheWithOneAccessToken(tokenCache.TokenCacheAccessor);
+                var tokenCache = new TokenCache()
+                {
+                    ClientId = MsalTestConstants.ClientId,
+                    ServiceBundle = serviceBundle
+                };
 
-            var param = new AuthenticationRequestParameters()
-            {
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
-                ClientId = MsalTestConstants.ClientId,
-                Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
-                Scope = new SortedSet<string>(),
-                Account = MsalTestConstants.User
-            };
+                TokenCacheHelper.PopulateCache(tokenCache.TokenCacheAccessor);
 
-            string scopeInCache = MsalTestConstants.Scope.FirstOrDefault();
+                var param = new AuthenticationRequestParameters()
+                {
+                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    ClientId = MsalTestConstants.ClientId,
+                    Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
+                    Scope = new SortedSet<string>(),
+                    Account = MsalTestConstants.User
+                };
 
-            string upperCaseScope = scopeInCache.ToUpperInvariant();
-            param.Scope.Add(upperCaseScope);
+                string scopeInCache = MsalTestConstants.Scope.FirstOrDefault();
 
-            var item = tokenCache.FindAccessTokenAsync(param).Result;
+                string upperCaseScope = scopeInCache.ToUpperInvariant();
+                param.Scope.Add(upperCaseScope);
 
-            Assert.IsNotNull(item);
-            Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
+                var item = tokenCache.FindAccessTokenAsync(param).Result;
+
+                Assert.IsNotNull(item);
+                Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
+            }
         }
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void CacheB2CTokenTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             var B2CCache = new TokenCache()
             {

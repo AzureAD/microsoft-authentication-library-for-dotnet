@@ -27,12 +27,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Instance
 {
@@ -46,45 +44,33 @@ namespace Microsoft.Identity.Client.Instance
                 "consumers"
             });
 
-        private bool _resolved;
-
-        protected Authority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
+        protected Authority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
             ServiceBundle = serviceBundle;
-            ValidateAuthority = validateAuthority;
-            var authorityUri = new UriBuilder(authority);
-            Host = authorityUri.Host;
+            AuthorityInfo = authorityInfo;
 
-            CanonicalAuthority = string.Format(
-                CultureInfo.InvariantCulture,
-                "https://{0}/{1}/",
-                authorityUri.Uri.Authority,
-                GetFirstPathSegment(authority));
+            // TODO: it's odd to have multiple sources of truth here, but some authority objects overwrite the
+            // canonical authority.  So should this be read/write here or should we enable it in AuthorityInfo?
+            CanonicalAuthority = authorityInfo.CanonicalAuthority;
         }
 
-        public AuthorityType AuthorityType { get; protected set; }
-        public string CanonicalAuthority { get; protected set; }
-        public bool ValidateAuthority { get; private set; }
-        public bool IsTenantless { get; protected set; }
-        public string AuthorizationEndpoint { get; private set; }
-        public string TokenEndpoint { get; set; }
-        public string EndSessionEndpoint { get; protected set; }
-        public string SelfSignedJwtAudience { get; set; }
-        public string UserRealmUriPrefix { get; private set; }
-        public string Host { get; }
+        public AuthorityInfo AuthorityInfo { get; }
+
+        public AuthorityType AuthorityType => AuthorityInfo.AuthorityType;
+
+        public string CanonicalAuthority
+        {
+            get => AuthorityInfo.CanonicalAuthority;
+            set => AuthorityInfo.CanonicalAuthority = value;
+        }
+
+        public string Host => AuthorityInfo.Host;
 
         protected IServiceBundle ServiceBundle { get; }
 
-        protected abstract Task<string> GetOpenIdConfigurationEndpointAsync(
-            string userPrincipalName,
-            RequestContext requestContext);
-
-        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
+        public static Authority CreateAuthorityWithOverride(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
-            authority = CanonicalizeUri(authority);
-            ValidateAsUri(authority);
-
-            switch (GetAuthorityType(authority))
+            switch (serviceBundle.Config.DefaultAuthorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
                 throw MsalExceptionFactory.GetClientException(
@@ -92,10 +78,10 @@ namespace Microsoft.Identity.Client.Instance
                     "ADFS is not a supported authority");
 
             case AuthorityType.B2C:
-                return new B2CAuthority(serviceBundle, authority, validateAuthority);
+                return new B2CAuthority(serviceBundle, authorityInfo);
 
             case AuthorityType.Aad:
-                return new AadAuthority(serviceBundle, authority, validateAuthority);
+                return new AadAuthority(serviceBundle, authorityInfo);
 
             default:
                 throw MsalExceptionFactory.GetClientException(
@@ -104,41 +90,22 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
+        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
+        {
+            return CreateAuthorityWithOverride(
+                serviceBundle,
+                AuthorityInfo.FromAuthorityUri(authority, validateAuthority, false));
+        }
+
+        public static Authority CreateAuthority(IServiceBundle serviceBundle)
+        {
+            return CreateAuthorityWithOverride(serviceBundle, serviceBundle.Config.DefaultAuthorityInfo);
+        }
+
         internal virtual async Task UpdateCanonicalAuthorityAsync(
             RequestContext requestContext)
         {
             await Task.FromResult(0).ConfigureAwait(false);
-        }
-
-        public static void ValidateAsUri(string authority)
-        {
-            if (string.IsNullOrWhiteSpace(authority))
-            {
-                throw new ArgumentNullException(nameof(authority));
-            }
-
-            if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
-            {
-                throw new ArgumentException(CoreErrorMessages.AuthorityInvalidUriFormat, nameof(authority));
-            }
-
-            var authorityUri = new Uri(authority);
-            if (authorityUri.Scheme != "https")
-            {
-                throw new ArgumentException(CoreErrorMessages.AuthorityUriInsecure, nameof(authority));
-            }
-
-            string path = authorityUri.AbsolutePath.Substring(1);
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                throw new ArgumentException(CoreErrorMessages.AuthorityUriInvalidPath, nameof(authority));
-            }
-
-            string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
-            if (pathSegments == null || pathSegments.Length == 0)
-            {
-                throw new ArgumentException(CoreErrorMessages.AuthorityUriInvalidPath);
-            }
         }
 
         internal static string GetFirstPathSegment(string authority)
@@ -164,117 +131,10 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        public async Task ResolveEndpointsAsync(
-            string userPrincipalName,
-            RequestContext requestContext)
-        {
-            requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - " + _resolved);
-
-            if (!_resolved)
-            {
-                var authorityUri = new Uri(CanonicalAuthority);
-                string host = authorityUri.Authority;
-                string path = authorityUri.AbsolutePath.Substring(1);
-                string tenant = path.Substring(0, path.IndexOf("/", StringComparison.Ordinal));
-                IsTenantless = TenantlessTenantNames.Contains(tenant.ToLowerInvariant());
-                // create log message
-                requestContext.Logger.Info("Is Authority tenantless? - " + IsTenantless);
-
-                UserRealmUriPrefix = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host);
-
-                if (ExistsInValidatedAuthorityCache(userPrincipalName))
-                {
-                    requestContext.Logger.Info("Authority found in validated authority cache");
-                    ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(CanonicalAuthority, out var authority);
-                    AuthorityType = authority.AuthorityType;
-                    CanonicalAuthority = authority.CanonicalAuthority;
-                    ValidateAuthority = authority.ValidateAuthority;
-                    IsTenantless = authority.IsTenantless;
-                    AuthorizationEndpoint = authority.AuthorizationEndpoint;
-                    TokenEndpoint = authority.TokenEndpoint;
-                    EndSessionEndpoint = authority.EndSessionEndpoint;
-                    SelfSignedJwtAudience = authority.SelfSignedJwtAudience;
-
-                    return;
-                }
-
-                string openIdConfigurationEndpoint = await GetOpenIdConfigurationEndpointAsync(
-                                                             userPrincipalName,
-                                                             requestContext)
-                                                         .ConfigureAwait(false);
-
-                //discover endpoints via openid-configuration
-                var edr = await DiscoverEndpointsAsync(
-                              openIdConfigurationEndpoint,
-                              requestContext).ConfigureAwait(false);
-
-                if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
-                {
-                    throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.TenantDiscoveryFailedError,
-                        "Authorize endpoint was not found in the openid configuration");
-                }
-
-                if (string.IsNullOrEmpty(edr.TokenEndpoint))
-                {
-                    throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.TenantDiscoveryFailedError,
-                        "Token endpoint was not found in the openid configuration");
-                }
-
-                if (string.IsNullOrEmpty(edr.Issuer))
-                {
-                    throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.TenantDiscoveryFailedError,
-                        "Issuer was not found in the openid configuration");
-                }
-
-                AuthorizationEndpoint = edr.AuthorizationEndpoint.Replace("{tenant}", tenant);
-                TokenEndpoint = edr.TokenEndpoint.Replace("{tenant}", tenant);
-                SelfSignedJwtAudience = edr.Issuer.Replace("{tenant}", tenant);
-
-                _resolved = true;
-
-                AddToValidatedAuthorities(userPrincipalName);
-            }
-        }
-
-        protected abstract bool ExistsInValidatedAuthorityCache(string userPrincipalName);
-        protected abstract void AddToValidatedAuthorities(string userPrincipalName);
-        protected abstract string GetDefaultOpenIdConfigurationEndpoint();
         internal abstract string GetTenantId();
         internal abstract void UpdateTenantId(string tenantId);
 
-        private async Task<TenantDiscoveryResponse> DiscoverEndpointsAsync(
-            string openIdConfigurationEndpoint,
-            RequestContext requestContext)
-        {
-            var client = new OAuth2Client(ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
-            return await client.ExecuteRequestAsync<TenantDiscoveryResponse>(
-                       new Uri(openIdConfigurationEndpoint),
-                       HttpMethod.Get,
-                       requestContext).ConfigureAwait(false);
-        }
-
-        public static string UpdateTenantId(string authority, string replacementTenantId)
-        {
-            var authUri = new Uri(authority);
-            string[] pathSegments = authUri.AbsolutePath.Substring(1).Split(
-                new[]
-                {
-                    '/'
-                },
-                StringSplitOptions.RemoveEmptyEntries);
-
-            if (TenantlessTenantNames.Contains(pathSegments[0]) && !string.IsNullOrWhiteSpace(replacementTenantId))
-            {
-                return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authUri.Authority, replacementTenantId);
-            }
-
-            return authority;
-        }
-
-        internal static string UpdateHost(string authority, string host)
+        internal static string CreateAuthorityUriWithHost(string authority, string host)
         {
             var uriBuilder = new UriBuilder(authority)
             {
@@ -282,16 +142,6 @@ namespace Microsoft.Identity.Client.Instance
             };
 
             return uriBuilder.Uri.AbsoluteUri;
-        }
-
-        public static string CanonicalizeUri(string uri)
-        {
-            if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
-            {
-                uri = uri + "/";
-            }
-
-            return uri.ToLowerInvariant();
         }
     }
 }

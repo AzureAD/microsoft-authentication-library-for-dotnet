@@ -30,15 +30,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance
 {
     internal class AadAuthority : Authority
     {
-        public const string DefaultTrustedHost = "login.microsoftonline.com";
-        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
-
         internal static readonly HashSet<string> TrustedHostList = new HashSet<string>()
         {
             "login.windows.net", // Microsoft Azure Worldwide - Used in validation scenarios where host is not this list
@@ -50,13 +48,19 @@ namespace Microsoft.Identity.Client.Instance
             "login.cloudgovapi.us" // Microsoft Azure US Government
         };
 
-        internal AadAuthority(
-            IServiceBundle serviceBundle,
-            string authority,
-            bool validateAuthority)
-            : base(serviceBundle, authority, validateAuthority)
+        internal static bool IsInTrustedHostList(string host)
         {
-            AuthorityType = AuthorityType.Aad;
+            return !string.IsNullOrEmpty(
+                       TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
+        }
+
+        public const string DefaultTrustedHost = "login.microsoftonline.com";
+        public const string AADCanonicalAuthorityTemplate = "https://{0}/{1}/";
+
+        internal AadAuthority(
+            IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
+            : base(serviceBundle, authorityInfo)
+        {
         }
 
         internal override async Task UpdateCanonicalAuthorityAsync(
@@ -65,52 +69,11 @@ namespace Microsoft.Identity.Client.Instance
             var metadata = await ServiceBundle.AadInstanceDiscovery
                                  .GetMetadataEntryAsync(
                                      new Uri(CanonicalAuthority),
-                                     ValidateAuthority,
+                                     AuthorityInfo.ValidateAuthority,
                                      requestContext)
                                  .ConfigureAwait(false);
 
-            CanonicalAuthority = UpdateHost(CanonicalAuthority, metadata.PreferredNetwork);
-        }
-
-        protected override async Task<string> GetOpenIdConfigurationEndpointAsync(
-            string userPrincipalName,
-            RequestContext requestContext)
-        {
-            var authorityUri = new Uri(CanonicalAuthority);
-
-            if (ValidateAuthority && !IsInTrustedHostList(authorityUri.Host))
-            {
-                var discoveryResponse = await ServiceBundle.AadInstanceDiscovery.DoInstanceDiscoveryAndCacheAsync(
-                                            authorityUri,
-                                            true,
-                                            requestContext).ConfigureAwait(false);
-
-                return discoveryResponse.TenantDiscoveryEndpoint;
-            }
-
-            return GetDefaultOpenIdConfigurationEndpoint();
-        }
-
-        protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
-        {
-            return ServiceBundle.ValidatedAuthoritiesCache.ContainsKey(CanonicalAuthority);
-        }
-
-        protected override void AddToValidatedAuthorities(string userPrincipalName)
-        {
-            // add to the list of validated authorities so that we don't do openid configuration call
-            ServiceBundle.ValidatedAuthoritiesCache.TryAddValue(CanonicalAuthority, this);
-        }
-
-        protected override string GetDefaultOpenIdConfigurationEndpoint()
-        {
-            return CanonicalAuthority + "v2.0/.well-known/openid-configuration";
-        }
-
-        internal static bool IsInTrustedHostList(string host)
-        {
-            return !string.IsNullOrEmpty(
-                TrustedHostList.FirstOrDefault(a => string.Compare(host, a, StringComparison.OrdinalIgnoreCase) == 0));
+            CanonicalAuthority = CreateAuthorityUriWithHost(CanonicalAuthority, metadata.PreferredNetwork);
         }
 
         internal override string GetTenantId()
@@ -122,7 +85,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             var authorityUri = new Uri(CanonicalAuthority);
 
-            CanonicalAuthority = string.Format(
+            CanonicalAuthority =string.Format(
                 CultureInfo.InvariantCulture,
                 AADCanonicalAuthorityTemplate,
                 authorityUri.Authority,

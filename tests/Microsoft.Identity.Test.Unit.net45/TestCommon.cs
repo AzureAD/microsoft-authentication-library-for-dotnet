@@ -26,8 +26,12 @@
 // ------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit
@@ -40,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit
             ResetState();
             new AadInstanceDiscovery(null, null, true);
             new ValidatedAuthoritiesCache(true);
-
+            new AuthorityEndpointResolutionManager(null, true);
         }
 
         public static void ResetState()
@@ -50,6 +54,30 @@ namespace Microsoft.Identity.Test.Unit
             Logger.Level = LogLevel.Info;
             Logger.DefaultLoggingEnabled = false;
         }
+
+        public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
+            IHttpManager httpManager, 
+            ITelemetryReceiver telemetryReceiver = null,
+            string authority = ClientApplicationBase.DefaultAuthority,
+            bool validateAuthority = true,
+            string clientId = MsalTestConstants.ClientId)
+        {
+            var appConfig = new ApplicationConfiguration()
+            {
+                ClientId = clientId,
+                HttpManager = httpManager,
+                TelemetryReceiver = telemetryReceiver,
+            };
+            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, validateAuthority, true));
+
+            return ServiceBundle.Create(appConfig);
+        }
+
+        public static IServiceBundle CreateDefaultServiceBundle()
+        {
+            return CreateServiceBundleWithCustomHttpManager(null);
+        }
+
 
         public static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {

@@ -75,7 +75,8 @@ namespace Microsoft.Identity.Client
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
         /// you then need to add the reply URL of the deployed application in the application registration portal.
         /// </remarks>
-        string RedirectUri { get; set; }
+        string RedirectUri { get; } // TODO: note break in public API since this shouldn't be set after construction of object
+
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
@@ -95,7 +96,7 @@ namespace Microsoft.Identity.Client
         /// of the form <c>key=value</c> separated by an ampersand character.
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
-        string SliceParameters { get; set; }
+        string SliceParameters { get; } // TODO: note break in public api since this shouldn't be set after construction
 
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.

@@ -34,6 +34,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.Common.Core.Helpers;
@@ -64,11 +65,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void SuccessfulValidationUsingOnPremiseDrsTest()
+        public async Task SuccessfulValidationUsingOnPremiseDrsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for on-premise DRS request
                 httpManager.AddMockHandler(
@@ -111,46 +112,42 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
+
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            CoreTestConstants.FabrikamDisplayableId,
-                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+                AuthorityEndpoints endpoints = await endpointManager.ResolveEndpointsAsync(
+                    instance.AuthorityInfo,
+                    CoreTestConstants.FabrikamDisplayableId,
+                    new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", instance.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", instance.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", instance.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
                 Assert.AreEqual(1, serviceBundle.ValidatedAuthoritiesCache.Count);
 
                 //attempt to do authority validation again. NO network call should be made
                 instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            CoreTestConstants.FabrikamDisplayableId,
-                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                endpoints = await endpointManager.ResolveEndpointsAsync(
+                                instance.AuthorityInfo,
+                    CoreTestConstants.FabrikamDisplayableId,
+                    new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", instance.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", instance.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", instance.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
             }
         }
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void SuccessfulValidationUsingCloudDrsFallbackTest()
+        public async Task SuccessfulValidationUsingCloudDrsFallbackTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock failure response for on-premise DRS request
                 httpManager.AddMockHandler(
@@ -208,27 +205,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
+
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+                AuthorityEndpoints endpoints = await endpointManager.ResolveEndpointsAsync(
+                                                   instance.AuthorityInfo,
                             CoreTestConstants.FabrikamDisplayableId,
                             new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", instance.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", instance.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", instance.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
             }
         }
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void ValidationOffSuccessTest()
+        public async Task ValidationOffSuccessTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
@@ -244,27 +240,25 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            CoreTestConstants.FabrikamDisplayableId,
-                            new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+                AuthorityEndpoints endpoints = await endpointManager.ResolveEndpointsAsync(
+                                                   instance.AuthorityInfo,
+                    CoreTestConstants.FabrikamDisplayableId,
+                    new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
 
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", instance.AuthorizationEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", instance.TokenEndpoint);
-                Assert.AreEqual("https://fs.contoso.com/adfs", instance.SelfSignedJwtAudience);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
+                Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
             }
         }
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void FailedValidationTest()
+        public async Task FailedValidationTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for on-premise DRS request
                 httpManager.AddMockHandler(
@@ -298,15 +292,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                CoreTestConstants.FabrikamDisplayableId,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    await endpointManager.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        CoreTestConstants.FabrikamDisplayableId,
+                        new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -318,11 +310,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void FailedValidationResourceNotInTrustedRealmTest()
+        public async Task FailedValidationResourceNotInTrustedRealmTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for on-premise DRS request
                 httpManager.AddMockHandler(
@@ -356,15 +348,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
+
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                CoreTestConstants.FabrikamDisplayableId,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    await endpointManager.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        CoreTestConstants.FabrikamDisplayableId,
+                        new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -376,11 +367,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void FailedValidationMissingFieldsInDrsResponseTest()
+        public async Task FailedValidationMissingFieldsInDrsResponseTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock failure response for on-premise DRS request
                 httpManager.AddMockHandler(
@@ -400,15 +391,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                CoreTestConstants.FabrikamDisplayableId,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    await endpointManager.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        CoreTestConstants.FabrikamDisplayableId,
+                        new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -420,11 +409,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
         [TestMethod]
         [TestCategory("AdfsAuthorityTests")]
-        public void FailedTenantDiscoveryMissingEndpointsTest()
+        public async Task FailedTenantDiscoveryMissingEndpointsTestAsync()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
 
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
@@ -439,15 +428,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, false);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                CoreTestConstants.FabrikamDisplayableId,
-                                new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    await endpointManager.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        CoreTestConstants.FabrikamDisplayableId,
+                        new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
                     Assert.Fail("validation should have failed here");
                 }
                 catch (MsalServiceException exc)

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
@@ -32,13 +33,9 @@ using Microsoft.Identity.Client.TelemetryCore;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.WsTrust;
-using System;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
-
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {
         /// <summary>
@@ -50,15 +47,20 @@ namespace Microsoft.Identity.Client
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <param name="securePassword">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, System.Security.SecureString securePassword)
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
+            IEnumerable<string> scopes, string username, System.Security.SecureString securePassword)
         {
-            GuardMobilePlatforms();
-
+#if DESKTOP || NET_CORE
             UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, securePassword);
             return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
+#else
+            // TODO: need to consolidate this properly with the public API.
+            throw new NotImplementedException();
+#endif
         }
 
-        private async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, UsernamePasswordInput usernamePasswordInput)
+        private async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
+            IEnumerable<string> scopes, UsernamePasswordInput usernamePasswordInput)
         {
             Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
             var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
@@ -70,14 +72,5 @@ namespace Microsoft.Identity.Client
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
-
-        private static void GuardMobilePlatforms()
-        {
-#if ANDROID || iOS || WINDOWS_APP
-            throw new PlatformNotSupportedException("The Username / Password flow is not supported on Xamarin.Android, Xamarin.iOS and UWP. " +
-               "For more details see https://aka.ms/msal-net-up");
-#endif
-        }
     }
-#endif
 }

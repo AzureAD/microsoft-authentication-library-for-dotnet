@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -34,6 +35,8 @@ namespace Microsoft.Identity.Client.Core
 {
     internal interface IServiceBundle
     {
+        IApplicationConfiguration Config { get; }
+
         IHttpManager HttpManager { get; }
         ITelemetryManager TelemetryManager { get; }
         IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }

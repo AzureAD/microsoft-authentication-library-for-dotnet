@@ -139,14 +139,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task<Uri> CreateAuthorizationUriAsync()
         {
-            await AuthenticationRequestParameters
-                  .Authority.UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext)
-                  .ConfigureAwait(false);
-
-            //this method is used in confidential clients to create authorization URLs.
-            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(
-                AuthenticationRequestParameters.LoginHint,
-                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             return CreateAuthorizationUri();
         }
 
@@ -207,7 +200,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CheckForDuplicateQueryParameters(AuthenticationRequestParameters.SliceParameters, requestParameters);
 
             string qp = requestParameters.ToQueryParameter();
-            var builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint));
+            var builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Endpoints.AuthorizationEndpoint));
             builder.AppendQueryParameters(qp);
 
             return builder.Uri;
