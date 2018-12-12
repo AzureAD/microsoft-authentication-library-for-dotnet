@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     if(IsiOS)
                         Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     else
-                        Application.Tap(QueryByHtmlElementValue(elementID));
+                        Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     break;
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
-            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelectorid, text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
             return c => c.Class("WKWebView").XPath(xpath);
