@@ -164,6 +164,7 @@
       <Project>{a00ac06a-694f-4fea-999f-81e753fa7c28}</Project>
       <Name>XForms</Name>
     </ProjectReference>
+	<PackageReference Include="NETStandard.Library" Version="2.0.1" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <!-- Import the Xamarin targets workaround -->
