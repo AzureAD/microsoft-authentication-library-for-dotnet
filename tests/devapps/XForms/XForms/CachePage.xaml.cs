@@ -90,7 +90,7 @@ namespace XForms
             RefreshCacheView();
         }
 
-        private async Task OnClearClickedAsync(object sender, EventArgs e)
+        private async void OnClearClickedAsync(object sender, EventArgs e)
         {
             foreach (var user in await App.MsalPublicClient.GetAccountsAsync().ConfigureAwait(false))
             {
