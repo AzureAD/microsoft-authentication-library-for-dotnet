@@ -371,6 +371,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             }
             catch (Exception ex)
             {
+                controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
                 //i0116 = UPN text field on AAD sign in endpoint
                 controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
                 //idSIButton9 = Sign in button

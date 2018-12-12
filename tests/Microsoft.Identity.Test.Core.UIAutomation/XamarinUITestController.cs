@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -246,6 +247,11 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             
             string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
             return c => c.Class("btn btn-block btn-primary").XPath(xpath);
+        }
+
+        private AppResult[] getClasses()
+        {
+            return Application.Query(c => c.Class("WKWebView"));
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
