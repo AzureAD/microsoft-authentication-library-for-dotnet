@@ -245,8 +245,8 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         {
             Debug.Print("Usingxpath wrong ID");
             
-            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
-            return c => c.Class("btn btn-block btn-primary").XPath(xpath);
+            string xpath = String.Format(CultureInfo.InvariantCulture, "#{0}", text);
+            return c => c.Class("btn btn-block btn-primary").Css(xpath);
         }
 
         private AppResult[] getClasses()
@@ -257,10 +257,10 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValueAndClass(string text)
         {
             Debug.Print("Usingxpath ID");
-            string xpath = String.Format(CultureInfo.InvariantCulture, "//{0}", text);
+            string xpath = String.Format(CultureInfo.InvariantCulture, "#{0}", text);
             Debug.Print("Usingxpath ID");
             Debug.Print(xpath);
-            return c => c.Class("btn btn-block btn-primary").XPath(xpath);
+            return c => c.Class("btn btn-block btn-primary").Css(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
