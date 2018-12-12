@@ -171,16 +171,20 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
+                    Application.Query(c => c.Class("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
                     Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.ClassFull("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.ClassFull("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
                     if (IsiOS)
                         Application.Tap(QueryByWebViewAndCssId(elementID));
                     else
                         Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
+                    Application.Query(c => c.Class("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
                     Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.ClassFull("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.ClassFull("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
                     if (IsiOS)
                         Application.Tap(QueryByHtmlElementValueAndClass(elementID));
                     else
@@ -203,16 +207,17 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                     Application.EnterText(x => x.Marked(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
+                    Application.Query(c => c.Class("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
                     Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.ClassFull("WKWebView").Invoke("document.getElementById('idSIButton9').click()"));
+                    Application.Query(c => c.ClassFull("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
+
                     if (IsiOS)
                         Application.EnterText(QueryByWebViewAndCssId(elementID), text);
                     else
                         Application.EnterText(QueryByCssId(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    Application.Query(c => c.Class("WKWebView").InvokeJS("document.getElementById('idSIButton9').click()"));
-                    Application.Query(c => c.WebView().InvokeJS("document.getElementById('idSIButton9').click()"));
                     throw new InvalidOperationException("Test error - you can't input text in an html element that has a value");
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
