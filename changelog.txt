@@ -1,7 +1,7 @@
 2.6.1-preview
 =============
 - **Setting ForceRefresh = true in AcquireTokenSilent skips access token cache lookup** MSAL now handles ForceRefresh=true correctly and circumvents looking up an access token in the cache, instead using the refresh token to acquire a new access token. [MSAL issue #695](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695)
-- **Filter access tokens based on tenantId** This enables MSAL to acquire tokens for resources outside the home tenant. [MSAL issues #694](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/694)
+- **Ensure cache lookup filters on the specified tenantId, otherwise the cache lookup would always find the token for the home tenant** This enables MSAL to acquire tokens for resources outside the home tenant. [MSAL issues #694](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/694)
 
 2.6.0-preview
 =============
