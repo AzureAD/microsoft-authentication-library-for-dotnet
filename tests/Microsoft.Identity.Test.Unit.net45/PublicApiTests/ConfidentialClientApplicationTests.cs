@@ -299,19 +299,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
-                //make sure user token cache is empty
+                // make sure user token cache is empty
                 Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.AccessTokenCount);
                 Assert.AreEqual(0, app.UserTokenCache.TokenCacheAccessor.RefreshTokenCount);
 
-                //check app token cache count to be 1
+                // check app token cache count to be 1
                 Assert.AreEqual(1, app.AppTokenCache.TokenCacheAccessor.AccessTokenCount);
                 Assert.AreEqual(0, app.AppTokenCache.TokenCacheAccessor.RefreshTokenCount); //no refresh tokens are returned
 
-                //assert client credential
+                // assert client credential
                 Assert.IsNotNull(cc.Assertion);
                 Assert.AreNotEqual(0, cc.ValidTo);
 
-                //save client assertion.
+                // save client assertion.
                 string cachedAssertion = cc.Assertion;
                 long cacheValidTo = cc.ValidTo;
 
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(cacheValidTo, cc.ValidTo);
                 Assert.AreEqual(cachedAssertion, cc.Assertion);
 
-                //validate the send x5c forces a refresh of the cached client assertion
+                // validate the send x5c forces a refresh of the cached client assertion
                 await ((IConfidentialClientApplicationWithCertificate)app)
                       .AcquireTokenForClientWithCertificateAsync(MsalTestConstants.Scope.ToArray(), true).ConfigureAwait(false);
                 Assert.AreNotEqual(cachedAssertion, cc.Assertion);

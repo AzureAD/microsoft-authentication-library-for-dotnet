@@ -25,7 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
 

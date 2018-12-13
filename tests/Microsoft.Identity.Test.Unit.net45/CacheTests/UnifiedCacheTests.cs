@@ -87,6 +87,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     app.UserTokenCache.RemoveMsalAccount(account, requestContext);
                 }
 
+                // TODO: BUG BUG BUG -- Why are we calling EndpointDiscovery again?  We _are_ calling it for a different tenant (common vs home) but 
+                // something has changed in the test, need to understand what...
+                // adding this line back in fixes the test.
+                // httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
@@ -169,12 +174,18 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
                 
+                // TODO: BUG BUG BUG -- Why are we calling EndpointDiscovery again?  We _are_ calling it for a different tenant (common vs home) but 
+                // something has changed in the test, need to understand what...
+                // adding this line back in fixes the test past this point...
+                // httpManager.AddMockHandlerForTenantEndpointDiscovery(ClientApplicationBase.DefaultAuthority);
+
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
 
                 // make sure that only one account cache entity was created
+                // TODO: BUG BUG BUG -- This is returning 2 items instead of 1 if we uncomment the other bug line above for endpoint discovery.
                 Assert.AreEqual(1, tokenCache1.TokenCacheAccessor.GetAllAccountsAsString().Count);
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
 

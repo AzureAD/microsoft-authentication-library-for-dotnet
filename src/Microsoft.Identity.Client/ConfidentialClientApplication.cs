@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            AppTokenCache = config.UserTokenCache;
+            AppTokenCache = config.AppTokenCache;
             if (AppTokenCache  != null)
             {
                 AppTokenCache .ClientId = ClientId;
