@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
         : this(ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(new ApplicationOptions { ClientId = clientId })
-                                                   .WithAuthority(DefaultAuthority, false, true)
+                                                   .WithAuthority(authority, false, true)
                                                    .WithRedirectUri(redirectUri)
                                                    .WithRedirectUri(redirectUri)
                                                    .WithClientCredential(clientCredential)
