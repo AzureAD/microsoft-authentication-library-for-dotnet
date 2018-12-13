@@ -99,6 +99,49 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             AddRefreshTokenToCache(accessor, CoreTestConstants.Uid, CoreTestConstants.Utid, CoreTestConstants.Name);
         }
 
+        internal static void PopulateCacheWithOneAccessToken(ITokenCacheAccessor accessor)
+        {
+            MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
+               CoreTestConstants.ProductionPrefCacheEnvironment,
+               CoreTestConstants.ClientId,
+               "Bearer",
+               CoreTestConstants.Scope.AsSingleString(),
+               CoreTestConstants.Utid,
+               "",
+               new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+               new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
+               MockHelpers.CreateClientInfo());
+
+            // add access token
+            accessor.SaveAccessToken(atItem);
+
+            MsalIdTokenCacheItem idTokenCacheItem = new MsalIdTokenCacheItem(
+                CoreTestConstants.ProductionPrefCacheEnvironment, CoreTestConstants.ClientId,
+                MockHelpers.CreateIdToken(CoreTestConstants.UniqueId + "more", CoreTestConstants.DisplayableId),
+                MockHelpers.CreateClientInfo(), CoreTestConstants.Utid);
+
+            accessor.SaveIdToken(idTokenCacheItem);
+
+            MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
+                (CoreTestConstants.ProductionPrefNetworkEnvironment, null, MockHelpers.CreateClientInfo(), null, null, CoreTestConstants.Utid,
+                null, null);
+
+            accessor.SaveAccount(accountCacheItem);
+
+            atItem = new MsalAccessTokenCacheItem(
+                CoreTestConstants.ProductionPrefCacheEnvironment,
+                CoreTestConstants.ClientId,
+                "Bearer",
+                CoreTestConstants.ScopeForAnotherResource.AsSingleString(),
+                CoreTestConstants.Utid,
+                "",
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
+                new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
+                MockHelpers.CreateClientInfo());
+
+            AddRefreshTokenToCache(accessor, CoreTestConstants.Uid, CoreTestConstants.Utid, CoreTestConstants.Name);
+        }
+
         public static void AddRefreshTokenToCache(ITokenCacheAccessor accessor, string uid, string utid, string name)
         {
             var rtItem = new MsalRefreshTokenCacheItem

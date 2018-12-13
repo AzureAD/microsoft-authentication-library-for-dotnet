@@ -665,15 +665,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var cc = new ClientCredential("secret");
 
+                string b2cAuthorityUri = "https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy/";
+
                 var app = ConfidentialClientApplicationBuilder
                           .Create(MsalTestConstants.ClientId)
-                          .WithB2CAuthority("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy", true)
+                          .WithB2CAuthority(b2cAuthorityUri, true)
                           .WithHttpManager(httpManager)
                           .WithRedirectUri(MsalTestConstants.RedirectUri).WithClientCredential(cc)
-                          .WithAppTokenCache(cache).BuildConcrete();
+                          .WithUserTokenCache(cache).BuildConcrete();
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant, "p=policy");
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(b2cAuthorityUri, "p=policy");
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(b2cAuthorityUri);
 
                 var result = await app.AcquireTokenByAuthorizationCodeAsync("some-code", MsalTestConstants.Scope)
                                       .ConfigureAwait(false);
@@ -690,8 +692,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app = ConfidentialClientApplicationBuilder
                       .Create(
                           MsalTestConstants.ClientId,
-                          "https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy",
-                          false).WithRedirectUri(MsalTestConstants.RedirectUri).WithClientCredential(cc).WithAppTokenCache(cache)
+                          b2cAuthorityUri,
+                          false).WithRedirectUri(MsalTestConstants.RedirectUri).WithClientCredential(cc).WithUserTokenCache(cache)
                       .BuildConcrete();
 
                 IEnumerable<IAccount> users = await app.GetAccountsAsync().ConfigureAwait(false);

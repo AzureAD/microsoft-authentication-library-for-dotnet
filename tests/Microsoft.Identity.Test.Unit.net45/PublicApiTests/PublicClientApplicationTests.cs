@@ -842,6 +842,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        [TestCategory("Regression")]
+        [WorkItem(695)] // Fix for https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/695
         [TestCategory("PublicClientApplicationTests")]
         public void AcquireTokenSilentForceRefreshTest()
         {
@@ -849,16 +851,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 var cache = new TokenCache();
                 var app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant, false)
+                    .Create(MsalTestConstants.ClientId)
+                    .WithAadAuthority(ClientApplicationBase.DefaultAuthority, false, true)
                     .WithTelemetryCallback(_myReceiver)
                     .WithHttpManager(httpManager)
                     .WithUserTokenCache(cache)
                     .BuildConcrete();
 
-                TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+                TokenCacheHelper.PopulateCacheWithOneAccessToken(cache.TokenCacheAccessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -881,7 +884,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(MsalTestConstants.Scope.ToArray().AsSingleString(), result.Scopes.AsSingleString());
 
-                Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
                 Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
             }
         }

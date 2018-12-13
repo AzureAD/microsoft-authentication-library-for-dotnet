@@ -68,6 +68,19 @@ namespace Microsoft.Identity.Client.Config
         /// 
         /// </summary>
         /// <param name="clientId"></param>
+        public static PublicClientApplicationBuilder Create(string clientId)
+        {
+            return CreateWithApplicationOptions(
+                new ApplicationOptions
+                {
+                    ClientId = clientId
+                });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
         /// <param name="authority"></param>
         /// <param name="validateAuthority"></param>
         /// <returns></returns>
