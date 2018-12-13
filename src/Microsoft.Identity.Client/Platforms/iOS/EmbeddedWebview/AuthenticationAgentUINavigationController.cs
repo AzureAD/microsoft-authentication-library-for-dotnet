@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using CoreGraphics;
+using Microsoft.Identity.Client.Core;
 using UIKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
@@ -53,19 +54,24 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     [Foundation.Register("AuthenticationAgentUINavigationController")]
     internal class AuthenticationAgentUINavigationController : UINavigationController
     {
-        private readonly string url;
-        private readonly string callback;
+        private readonly RequestContext _requestContext;
+        private readonly string _url;
+        private readonly string _callback;
+        private readonly AuthenticationAgentUIViewController.ReturnCodeCallback _callbackMethod;
+        private readonly UIStatusBarStyle _preferredStatusBarStyle;
 
-        private readonly AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod;
-
-        private readonly UIStatusBarStyle preferredStatusBarStyle;
-
-        public AuthenticationAgentUINavigationController(string url, string callback, AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod, UIStatusBarStyle preferredStatusBarStyle)
+        public AuthenticationAgentUINavigationController(
+            RequestContext requestContext, 
+            string url, 
+            string callback, 
+            AuthenticationAgentUIViewController.ReturnCodeCallback callbackMethod, 
+            UIStatusBarStyle preferredStatusBarStyle)
         {
-            this.url = url;
-            this.callback = callback;
-            this.callbackMethod = callbackMethod;
-            this.preferredStatusBarStyle = preferredStatusBarStyle;
+            _requestContext = requestContext;
+            _url = url;
+            _callback = callback;
+            _callbackMethod = callbackMethod;
+            _preferredStatusBarStyle = preferredStatusBarStyle;
         }
 
         public override void DidReceiveMemoryWarning()
@@ -81,12 +87,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             base.ViewDidLoad();
 
             // Perform any additional setup after loading the view
-            this.PushViewController(new AuthenticationAgentUIViewController(this.url, this.callback, this.callbackMethod), true);
+            PushViewController(new AuthenticationAgentUIViewController(_requestContext, _url, _callback, _callbackMethod), true);
         }
 
         public override UIStatusBarStyle PreferredStatusBarStyle()
         {
-            return this.preferredStatusBarStyle;
+            return _preferredStatusBarStyle;
         }
     }
 }

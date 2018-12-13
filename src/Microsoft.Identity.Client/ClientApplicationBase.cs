@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
                 UserTokenCache .ServiceBundle = ServiceBundle;
             }
 
-            new RequestContext(ClientId, new MsalLogger(Guid.Empty, null)).Logger.Info(string.Format(CultureInfo.InvariantCulture,
+            CreateRequestContext(Guid.Empty).Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
                 PlatformProxyFactory.GetPlatformProxy().GetProductName(), MsalIdHelper.GetMsalVersion(),
                 AssemblyUtils.GetAssemblyFileVersionAttribute(), AssemblyUtils.GetAssemblyInformationalVersion()));
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            RequestContext requestContext = new RequestContext(ClientId, new MsalLogger(Guid.Empty, null));
+            RequestContext requestContext = CreateRequestContext(Guid.Empty);
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
             if (UserTokenCache == null)
             {
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Client
         internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(ClientId, new MsalLogger(correlationId, Component));
+            return new RequestContext(ClientId, MsalLogger.Create(correlationId, Component, ServiceBundle.Config));
         }
     }
 }

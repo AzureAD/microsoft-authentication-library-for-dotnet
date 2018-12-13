@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 await endpointManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))).ConfigureAwait(false);
+                    RequestContext.CreateForTest()).ConfigureAwait(false);
                 Assert.Fail("test should have failed");
             }
             catch (Exception exc)
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = await endpointManager.ResolveEndpointsAsync(
                                                          instance.AuthorityInfo,
                                                          null,
-                                                         new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                                         RequestContext.CreateForTest())
                                                      .ConfigureAwait(false);
 
                 Assert.AreEqual(
@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = await endpointManager.ResolveEndpointsAsync(
                                                          instance.AuthorityInfo,
                                                          null,
-                                                         new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)))
+                                                         RequestContext.CreateForTest())
                                                      .ConfigureAwait(false);
 
                 Assert.AreEqual(

@@ -42,6 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     {
         private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
+        private ICoreLogger _defaultLogger;
 
         /// <summary>
         /// Get the user logged in 
@@ -155,6 +156,12 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         public void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
             _overloadWebUiFactory = webUiFactory;
+        }
+
+        /// <inheritdoc />
+        public void SetDefaultLogger(ICoreLogger defaultLogger)
+        {
+            _defaultLogger = defaultLogger;
         }
     }
 }

@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Internal
             // initialize the telemetry instance so statics get created
             Telemetry.GetInstance();
 
-            MsalLogger.Default = new MsalLogger(Guid.Empty, null);
+            //MsalLogger.Default = new MsalLogger(Guid.Empty, null, LogLevel.Verbose, false, false, null);
             _isInitialized = true;
         }
     }

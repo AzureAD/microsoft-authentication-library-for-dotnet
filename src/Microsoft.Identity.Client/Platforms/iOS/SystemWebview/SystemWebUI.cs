@@ -40,7 +40,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 {
     internal class SystemWebUI : WebviewBase, IDisposable
     {
-        public RequestContext RequestContext { get; set; }
+        private readonly RequestContext _requestContext;
+
+        public SystemWebUI(RequestContext requestContext)
+        {
+            _requestContext = requestContext;
+        }
 
         public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
             RequestContext requestContext)

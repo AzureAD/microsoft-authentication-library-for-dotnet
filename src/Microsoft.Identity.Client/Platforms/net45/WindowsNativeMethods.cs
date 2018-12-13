@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         [DllImport("kernel32.dll")]
         private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
-        public static string GetProcessorArchitecture()
+        public static string GetProcessorArchitecture(ICoreLogger logger)
         {
             try
             {
@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.Warning(ex.Message);
+                logger.Warning(ex.Message);
                 return "Unknown";
             }
         }

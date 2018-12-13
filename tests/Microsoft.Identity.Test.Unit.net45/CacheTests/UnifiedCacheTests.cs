@@ -75,11 +75,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // make sure Msal stored RT in Adal cache
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheDictionary =
-                    AdalCacheOperations.Deserialize(app.UserTokenCache.LegacyCachePersistence.LoadCache());
+                    AdalCacheOperations.Deserialize(app.ServiceBundle.DefaultLogger, app.UserTokenCache.LegacyCachePersistence.LoadCache());
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
+                var requestContext = RequestContext.CreateForTest();
                 var accounts =
                     app.UserTokenCache.GetAccounts(MsalTestConstants.AuthorityCommonTenant, false, requestContext);
                 foreach (IAccount account in accounts)
@@ -213,6 +213,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
+                        RequestContext.CreateForTest().Logger, 
                         app.UserTokenCache.LegacyCachePersistence,
                         MsalTestConstants.ClientId);
 
@@ -220,6 +221,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
+                        RequestContext.CreateForTest().Logger, 
                         app.UserTokenCache.LegacyCachePersistence,
                         MsalTestConstants.ClientId);
 
@@ -256,9 +258,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
-                AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
+                AdalCacheOperations.Deserialize(RequestContext.CreateForTest().Logger, legacyCachePersistence.LoadCache());
             dictionary[key] = wrapper;
-            legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
+            legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(RequestContext.CreateForTest().Logger, dictionary));
         }
     }
 }

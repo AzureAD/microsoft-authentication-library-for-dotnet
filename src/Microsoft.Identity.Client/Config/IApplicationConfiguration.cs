@@ -25,6 +25,9 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
+using Microsoft.Identity.Client.TelemetryCore;
+
 namespace Microsoft.Identity.Client.Config
 {
     internal interface IApplicationConfiguration
@@ -36,6 +39,7 @@ namespace Microsoft.Identity.Client.Config
         bool EnablePiiLogging { get; }
         IMsalHttpClientFactory HttpClientFactory { get; }
         LogLevel LogLevel { get; }
+        bool IsDefaultPlatformLoggingEnabled { get; }
         string RedirectUri { get; }
         string Tenant { get; }
         TokenCache UserTokenCache { get; }
@@ -43,5 +47,7 @@ namespace Microsoft.Identity.Client.Config
         bool IsExtendedTokenLifetimeEnabled { get; set; }
         AuthorityInfo DefaultAuthorityInfo { get; }
         string SliceParameters { get; }
+        LogCallback LoggingCallback { get; }
+        ITelemetryReceiver TelemetryReceiver { get; }
     }
 }

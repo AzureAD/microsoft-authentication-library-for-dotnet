@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -39,5 +41,10 @@ namespace Microsoft.Identity.Client.Core
         public string TelemetryRequestId { get; set; }
         public string ClientId { get; }
         public ICoreLogger Logger { get; }
+
+        public static RequestContext CreateForTest()
+        {
+            return new RequestContext(null, MsalLogger.Create(Guid.NewGuid(), null, null, isDefaultPlatformLoggingEnabled: true));
+        }
     }
 }

@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.Core
     {
         IApplicationConfiguration Config { get; }
 
+        ICoreLogger DefaultLogger { get; }
         IHttpManager HttpManager { get; }
         ITelemetryManager TelemetryManager { get; }
         IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }

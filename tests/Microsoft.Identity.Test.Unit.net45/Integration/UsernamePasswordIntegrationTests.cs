@@ -49,13 +49,6 @@ namespace Microsoft.Identity.Test.Unit.Integration
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
         }
 
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            TestCommon.ResetState();
-        }
-
-
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()

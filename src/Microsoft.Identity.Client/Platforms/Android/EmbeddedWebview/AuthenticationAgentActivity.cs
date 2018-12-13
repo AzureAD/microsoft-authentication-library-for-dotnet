@@ -61,7 +61,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
-            MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
+            // TODO: how do we get the logger into this class?
+            //MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
 
             webSettings.JavaScriptEnabled = true;
 
@@ -70,7 +71,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             webSettings.UseWideViewPort = true;
             webSettings.BuiltInZoomControls = true;
 
-            this._client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
+            _client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(_client);
             webView.LoadUrl(url);
         }
@@ -119,7 +120,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    MsalLogger.Default.Verbose("It is browser launch request");
+                    // TODO: How do we get the logger into this class?
+                    //MsalLogger.Default.Verbose("It is browser launch request");
                     OpenLinkInBrowser(url, Activity);
                     view.StopLoading();
                     Activity.Finish();
@@ -128,7 +130,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                 if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    MsalLogger.Default.Verbose("It is an azure authenticator install request");
+                    // TODO: how do we get the logger into this class?
+                    //MsalLogger.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
                     Finish(Activity, url);
                     return true;
@@ -184,7 +187,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     Scheme = Uri.UriSchemeHttps
                 };
 
-                String link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
+                string link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
                 Intent intent = new Intent(Intent.ActionView, global::Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }

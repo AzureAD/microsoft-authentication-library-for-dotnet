@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.Config
         public string RedirectUri { get; internal set; } = Constants.DefaultRedirectUri;
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; }
+        public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public IHttpManager HttpManager { get; set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
@@ -59,6 +60,7 @@ namespace Microsoft.Identity.Client.Config
         public string SliceParameters { get; internal set; }
 
         public ITelemetryReceiver TelemetryReceiver { get; internal set; }
+        public LogCallback LoggingCallback { get; internal set; }
 
         public IEnumerable<AuthorityInfo> Authorities => _authorityInfos.AsEnumerable();
 

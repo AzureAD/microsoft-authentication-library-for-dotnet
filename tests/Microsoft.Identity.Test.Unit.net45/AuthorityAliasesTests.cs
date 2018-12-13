@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private void ValidateCacheEntitiesEnvironment(TokenCache cache, string expectedEnvironment)
         {
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             ICollection<MsalAccessTokenCacheItem> accessTokens = cache.GetAllAccessTokensForClient(requestContext);
             foreach (var at in accessTokens)
             {
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Test.Unit
             }
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(cache.LegacyCachePersistence.LoadCache());
+                AdalCacheOperations.Deserialize(requestContext.Logger, cache.LegacyCachePersistence.LoadCache());
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {

@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
                 OAuth2Client client = new OAuth2Client(httpManager, new TelemetryManager());
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(CoreTestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),
-                    new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+                    RequestContext.CreateForTest());
                 MsalTokenResponse response = task.Result;
                 Assert.IsNotNull(response);
             }

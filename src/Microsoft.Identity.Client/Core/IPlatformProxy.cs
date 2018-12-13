@@ -76,5 +76,11 @@ namespace Microsoft.Identity.Client.Core
 
         IWebUIFactory GetWebUiFactory();
         void SetWebUiFactory(IWebUIFactory webUiFactory);
+
+        /// <summary>
+        /// This is guaranteed to be called by ServiceBundle to wire up logging.
+        /// </summary>
+        /// <param name="defaultLogger"></param>
+        void SetDefaultLogger(ICoreLogger defaultLogger);
     }
 }

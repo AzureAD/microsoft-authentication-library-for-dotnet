@@ -45,6 +45,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new AndroidPlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
+        private ICoreLogger _defaultLogger;
 
         /// <summary>
         /// Get the user logged in 
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// <inheritdoc />
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new AndroidLegacyCachePersistence();
+            return new AndroidLegacyCachePersistence(_defaultLogger);
         }
 
         /// <inheritdoc />
@@ -170,6 +171,12 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
             _overloadWebUiFactory = webUiFactory;
+        }
+
+        /// <inheritdoc />
+        public void SetDefaultLogger(ICoreLogger defaultLogger)
+        {
+            _defaultLogger = defaultLogger;
         }
     }
 }

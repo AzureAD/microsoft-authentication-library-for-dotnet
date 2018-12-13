@@ -26,10 +26,8 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Config
@@ -66,8 +64,9 @@ namespace Microsoft.Identity.Client.Config
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        public T WithLoggingCallback(Action<LogLevel, string, bool> logAction)
+        public T WithLoggingCallback(LogCallback loggingCallback)
         {
+            Config.LoggingCallback = loggingCallback;
             return (T)this;
         }
 
@@ -148,6 +147,17 @@ namespace Microsoft.Identity.Client.Config
         public T WithLoggingLevel(LogLevel logLevel)
         {
             Config.LogLevel = logLevel;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enabled"></param>
+        /// <returns></returns>
+        public T WithDefaultPlatformLoggingEnabled(bool enabled)
+        {
+            Config.IsDefaultPlatformLoggingEnabled = enabled;
             return (T)this;
         }
 

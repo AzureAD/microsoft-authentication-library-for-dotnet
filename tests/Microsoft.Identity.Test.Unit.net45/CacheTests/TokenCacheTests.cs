@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var item = cache.FindAccessTokenAsync(
                     new AuthenticationRequestParameters()
                     {
-                        RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                        RequestContext = cache.CreateRequestContext(),
                         ClientId = MsalTestConstants.ClientId,
                         Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                         Scope = MsalTestConstants.Scope,
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache.TokenCacheAccessor.SaveAccessToken(atItem);
                 var param = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = cache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                     Scope = new SortedSet<string>(),
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var param = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = cache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false),
                     Scope = new SortedSet<string>(),
@@ -246,7 +246,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cache.FindAccessTokenAsync(
                         new AuthenticationRequestParameters()
                         {
-                            RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                            RequestContext = cache.CreateRequestContext(),
                             ClientId = MsalTestConstants.ClientId,
                             Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                             Scope = MsalTestConstants.Scope,
@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var cacheItem = cache.FindAccessTokenAsync(
                     new AuthenticationRequestParameters()
                     {
-                        RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                        RequestContext = cache.CreateRequestContext(),
                         ClientId = MsalTestConstants.ClientId,
                         Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                         Scope = MsalTestConstants.Scope,
@@ -334,7 +334,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     cache.FindAccessTokenAsync(
                         new AuthenticationRequestParameters()
                         {
-                            RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                            RequestContext = cache.CreateRequestContext(),
                             ClientId = MsalTestConstants.ClientId,
                             Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                             Scope = MsalTestConstants.Scope,
@@ -364,7 +364,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             cache.TokenCacheAccessor.SaveRefreshToken(rtItem);
             var authParams = new AuthenticationRequestParameters()
             {
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                RequestContext = cache.CreateRequestContext(),
                 ClientId = MsalTestConstants.ClientId,
                 Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false),
                 Scope = MsalTestConstants.Scope,
@@ -379,7 +379,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache.FindRefreshTokenAsync(
                     new AuthenticationRequestParameters()
                     {
-                        RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                        RequestContext = cache.CreateRequestContext(),
                         ClientId = MsalTestConstants.ClientId,
                         Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant + "more", false),
                         Scope = MsalTestConstants.Scope,
@@ -410,7 +410,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache.TokenCacheAccessor.SaveRefreshToken(rtItem);
                 var authParams = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = cache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false),
                     Scope = MsalTestConstants.Scope,
@@ -457,7 +457,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     new AuthenticationRequestParameters()
                     {
                         IsClientCredentialRequest = true,
-                        RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                        RequestContext = cache.CreateRequestContext(),
                         Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                         ClientId = MsalTestConstants.ClientId,
                         ClientCredential = MsalTestConstants.CredentialWithSecret,
@@ -494,7 +494,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
             var requestParams = new AuthenticationRequestParameters()
             {
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                RequestContext = cache.CreateRequestContext(),
                 Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.B2CAuthority, false),
                 ClientId = MsalTestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant
@@ -508,8 +508,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
-                AdalCacheOperations.Deserialize(cache.LegacyCachePersistence.LoadCache());
-            cache.LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
+                AdalCacheOperations.Deserialize(cache.Logger, cache.LegacyCachePersistence.LoadCache());
+            cache.LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(cache.Logger, dictionary));
 
             // ADAL cache is empty because B2C scenario is only for MSAL
             Assert.AreEqual(0, dictionary.Count);
@@ -549,7 +549,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache.TokenCacheAccessor.SaveAccessToken(atItem);
                 var param = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = cache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false),
                     Scope = MsalTestConstants.Scope,
@@ -601,7 +601,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache.TokenCacheAccessor.SaveAccessToken(atItem);
                 var param = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = cache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false),
                     Scope = MsalTestConstants.Scope,
@@ -651,7 +651,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 cache.TokenCacheAccessor.SaveAccessToken(atItem);
                 var param = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = cache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                     Scope = MsalTestConstants.Scope,
@@ -691,7 +691,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
             var requestParams = new AuthenticationRequestParameters()
             {
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                RequestContext = cache.CreateRequestContext(),
                 Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false),
                 ClientId = MsalTestConstants.ClientId,
                 TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant
@@ -729,7 +729,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = cache.CreateRequestContext();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -790,7 +790,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = cache.CreateRequestContext();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -847,7 +847,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = cache.CreateRequestContext();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -925,7 +925,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = cache.CreateRequestContext();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -950,7 +950,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            requestContext = cache.CreateRequestContext();
             requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -976,16 +976,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void CanDeserializeTokenCacheInNet462()
         {
-            var previousLogLevel = Logger.Level;
-            // Setting LogLevel.Verbose causes certain static dependencies to load
-            Logger.Level = LogLevel.Verbose;
-            var tokenCache = new TokenCache();
-            tokenCache.AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); };
+            var tokenCache = new TokenCache
+            {
+                AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
+            };
             tokenCache.Deserialize(null);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
 #pragma warning restore CS0618 // Type or member is obsolete
-            Logger.Level = previousLogLevel;
         }
 
         [TestMethod]
@@ -1012,7 +1010,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = cache.CreateRequestContext();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -1081,7 +1079,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var param = new AuthenticationRequestParameters()
                 {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                    RequestContext = tokenCache.CreateRequestContext(),
                     ClientId = MsalTestConstants.ClientId,
                     Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
                     Scope = new SortedSet<string>(),
@@ -1106,7 +1104,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
-            var B2CCache = new TokenCache()
+            var b2cCache = new TokenCache()
             {
                 ServiceBundle = serviceBundle
             };
@@ -1129,7 +1127,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = b2cCache.CreateRequestContext();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -1138,10 +1136,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant
             };
 
-            B2CCache.SaveAccessAndRefreshToken(requestParams, response);
+            b2cCache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, B2CCache.TokenCacheAccessor.RefreshTokenCount);
-            Assert.AreEqual(1, B2CCache.TokenCacheAccessor.AccessTokenCount);
+            Assert.AreEqual(1, b2cCache.TokenCacheAccessor.RefreshTokenCount);
+            Assert.AreEqual(1, b2cCache.TokenCacheAccessor.AccessTokenCount);
         }
 
         /*

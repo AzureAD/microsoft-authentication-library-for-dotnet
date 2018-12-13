@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
         private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new IosPlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
+        private ICoreLogger _defaultLogger;
 
         /// <summary>
         ///     Get the user logged
@@ -130,7 +131,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new iOSLegacyCachePersistence();
+            return new iOSLegacyCachePersistence(_defaultLogger);
         }
 
         public ITokenCacheAccessor CreateTokenCacheAccessor()
@@ -154,6 +155,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
             _overloadWebUiFactory = webUiFactory;
+        }
+
+        /// <inheritdoc />
+        public void SetDefaultLogger(ICoreLogger defaultLogger)
+        {
+            _defaultLogger = defaultLogger;
         }
     }
 }

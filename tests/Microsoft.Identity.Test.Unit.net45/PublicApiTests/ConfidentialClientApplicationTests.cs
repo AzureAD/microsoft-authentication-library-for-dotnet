@@ -578,7 +578,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                           .BuildConcrete();
 
                 ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    cache.GetAllAccessTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+                    cache.GetAllAccessTokensForClient(RequestContext.CreateForTest());
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -631,7 +631,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // make sure token in Cache was updated
                 ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    cache.GetAllAccessTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+                    cache.GetAllAccessTokensForClient(RequestContext.CreateForTest());
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();

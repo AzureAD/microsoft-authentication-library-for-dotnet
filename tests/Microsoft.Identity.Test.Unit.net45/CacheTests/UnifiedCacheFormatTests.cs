@@ -91,8 +91,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private string ExpectedAccountCacheKeyIosGeneric;
         private string ExpectedAccountCacheValue;
 
-        private readonly RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
-
         private void IntitTestData(string fileName)
         {
             using (StreamReader r = new StreamReader(fileName))
@@ -227,7 +225,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void ValidateAt(TokenCache cache)
         {
-            var atList = cache.GetAllAccessTokenCacheItems(requestContext);
+            var atList = cache.GetAllAccessTokenCacheItems(cache.CreateRequestContext());
             Assert.IsTrue(atList.Count == 1);
 
             var actualPayload = JsonConvert.DeserializeObject<JObject>(atList.First());
@@ -252,7 +250,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     Assert.AreEqual(expectedPropValue, actualPropValue);
                 }
             }
-            var atCacheItem = cache.GetAllAccessTokensForClient(requestContext).First();
+            var atCacheItem = cache.GetAllAccessTokensForClient(cache.CreateRequestContext()).First();
             var key = atCacheItem.GetKey();
 
             Assert.AreEqual(ExpectedAtCacheKey, key.ToString());
@@ -265,9 +263,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void ValidateRt(TokenCache cache)
         {
             ValidateCacheEntityValue
-                (ExpectedRtCacheValue, cache.GetAllRefreshTokenCacheItems(requestContext));
+                (ExpectedRtCacheValue, cache.GetAllRefreshTokenCacheItems(cache.CreateRequestContext()));
 
-            var rtCacheItem = cache.GetAllRefreshTokensForClient(requestContext).First();
+            var rtCacheItem = cache.GetAllRefreshTokensForClient(cache.CreateRequestContext()).First();
             var key = rtCacheItem.GetKey();
 
             Assert.AreEqual(ExpectedRtCacheKey, key.ToString());
@@ -280,9 +278,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void ValidateIdToken(TokenCache cache)
         {
             ValidateCacheEntityValue
-                (ExpectedIdTokenCacheValue, cache.GetAllIdTokenCacheItems(requestContext));
+                (ExpectedIdTokenCacheValue, cache.GetAllIdTokenCacheItems(cache.CreateRequestContext()));
 
-            var idTokenCacheItem = cache.GetAllIdTokensForClient(requestContext).First();
+            var idTokenCacheItem = cache.GetAllIdTokensForClient(cache.CreateRequestContext()).First();
             var key = idTokenCacheItem.GetKey();
 
             Assert.AreEqual(ExpectedIdTokenCacheKey, key.ToString());
@@ -295,9 +293,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void ValidateAccount(TokenCache cache)
         {
             ValidateCacheEntityValue
-                (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(requestContext));
+                (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(cache.CreateRequestContext()));
 
-            var accountCacheItem = cache.GetAllAccounts(requestContext).First();
+            var accountCacheItem = cache.GetAllAccounts(cache.CreateRequestContext()).First();
             var key = accountCacheItem.GetKey();
 
             Assert.AreEqual(ExpectedAccountCacheKey, key.ToString());

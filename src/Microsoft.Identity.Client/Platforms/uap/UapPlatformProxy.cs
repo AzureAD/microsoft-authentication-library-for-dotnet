@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
     {
         private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
+        private ICoreLogger _defaultLogger;
 
         /// <summary>
         /// Get the user logged in to Windows or throws
@@ -137,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public string GetProcessorArchitecture()
         {
-            return WindowsNativeMethods.GetProcessorArchitecture();
+            return WindowsNativeMethods.GetProcessorArchitecture(_defaultLogger);
         }
 
         public string GetOperatingSystem()
@@ -199,7 +200,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new UapLegacyCachePersistence(CryptographyManager);
+            return new UapLegacyCachePersistence(_defaultLogger, CryptographyManager);
         }
 
         public ITokenCacheAccessor CreateTokenCacheAccessor()
@@ -223,6 +224,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
             _overloadWebUiFactory = webUiFactory;
+        }
+
+        /// <inheritdoc />
+        public void SetDefaultLogger(ICoreLogger defaultLogger)
+        {
+            _defaultLogger = defaultLogger;
         }
     }
 }

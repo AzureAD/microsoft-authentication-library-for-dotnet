@@ -41,23 +41,15 @@ namespace Microsoft.Identity.Test.Unit
         public static void ResetStateAndInitMsal()
         {
             ModuleInitializer.ForceModuleInitializationTestOnly();
-            ResetState();
             new AadInstanceDiscovery(null, null, true);
             new ValidatedAuthoritiesCache(true);
             new AuthorityEndpointResolutionManager(null, true);
         }
 
-        public static void ResetState()
-        {
-            Logger.LogCallback = null;
-            Logger.PiiLoggingEnabled = false;
-            Logger.Level = LogLevel.Info;
-            Logger.DefaultLoggingEnabled = false;
-        }
-
         public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
             IHttpManager httpManager, 
             ITelemetryReceiver telemetryReceiver = null,
+            LogCallback logCallback = null,
             string authority = ClientApplicationBase.DefaultAuthority,
             bool validateAuthority = true,
             string clientId = MsalTestConstants.ClientId)
@@ -67,6 +59,7 @@ namespace Microsoft.Identity.Test.Unit
                 ClientId = clientId,
                 HttpManager = httpManager,
                 TelemetryReceiver = telemetryReceiver,
+                LoggingCallback = logCallback
             };
             appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, validateAuthority, true));
 

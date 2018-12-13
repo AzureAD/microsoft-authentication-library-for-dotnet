@@ -25,9 +25,11 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.WsTrust;
 
@@ -40,13 +42,18 @@ namespace Microsoft.Identity.Client.Core
             bool shouldClearCaches = false)
         {
             Config = config;
+            DefaultLogger = new MsalLogger(Guid.Empty, null, Config.LogLevel, Config.EnablePiiLogging, Config.IsDefaultPlatformLoggingEnabled, Config.LoggingCallback);
+
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
             TelemetryManager = new TelemetryManager(config.TelemetryReceiver);
             ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(shouldClearCaches);
             AadInstanceDiscovery = new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             PlatformProxy = PlatformProxyFactory.GetPlatformProxy();
+            PlatformProxy.SetDefaultLogger(DefaultLogger);
         }
+
+        public ICoreLogger DefaultLogger { get; }
 
         /// <inheritdoc />
         public IHttpManager HttpManager { get; }

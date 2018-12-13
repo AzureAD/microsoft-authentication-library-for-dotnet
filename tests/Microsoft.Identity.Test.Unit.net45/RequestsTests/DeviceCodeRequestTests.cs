@@ -186,14 +186,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             var logCallbacks = new List<_LogData>();
 
-            Logger.LogCallback = (level, message, pii) =>
+            void LogCallback(LogLevel level, string message, bool pii)
             {
                 if (level == LogLevel.Error)
                 {
-                    Assert.Fail(
-                        "Received an error message {0} and the stack trace is {1}",
-                        message,
-                        new StackTrace(true));
+                    Assert.Fail("Received an error message {0} and the stack trace is {1}", message, new StackTrace(true));
                 }
 
                 logCallbacks.Add(
@@ -203,61 +200,52 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         Message = message,
                         IsPii = pii
                     });
-            };
+            }
 
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
-                try
-                {
-                    const int NumberOfAuthorizationPendingRequestsToInject = 2;
-                    var parameters = CreateAuthenticationParametersAndSetupMocks(
-                        serviceBundle,
-                        httpManager,
-                        NumberOfAuthorizationPendingRequestsToInject,
-                        out HashSet<string> expectedScopes);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, logCallback: LogCallback);
+                const int NumberOfAuthorizationPendingRequestsToInject = 2;
+                var parameters = CreateAuthenticationParametersAndSetupMocks(
+                    serviceBundle,
+                    httpManager,
+                    NumberOfAuthorizationPendingRequestsToInject,
+                    out HashSet<string> expectedScopes);
 
-                    var request = new DeviceCodeRequest(
-                        serviceBundle,
-                        parameters,
-                        ApiEvent.ApiIds.None,
-                        result => Task.FromResult(0));
+                var request = new DeviceCodeRequest(
+                    serviceBundle,
+                    parameters,
+                    ApiEvent.ApiIds.None,
+                    result => Task.FromResult(0));
 
-                    Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                    task.Wait();
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
+                task.Wait();
 
-                    // Ensure we got logs so the log callback is working.
-                    Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
+                // Ensure we got logs so the log callback is working.
+                Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
 
-                    // Ensure we have authorization_pending data in the logs
-                    List<_LogData> authPendingLogs =
-                        logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
-                    Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
+                // Ensure we have authorization_pending data in the logs
+                List<_LogData> authPendingLogs =
+                    logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
+                Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
 
-                    // Ensure the authorization_pending logs are Info level and not Error
-                    Assert.AreEqual(
-                        2,
-                        authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
-                        "authorization_pending logs should be INFO");
+                // Ensure the authorization_pending logs are Info level and not Error
+                Assert.AreEqual(
+                    2,
+                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
+                    "authorization_pending logs should be INFO");
 
-                    // Ensure we don't have Error level logs in this scenario.
-                    string errorLogs = string.Join(
-                        "--",
-                        logCallbacks
-                            .Where(x => x.Level == LogLevel.Error)
-                            .Select(x => x.Message)
-                            .ToArray());
+                // Ensure we don't have Error level logs in this scenario.
+                string errorLogs = string.Join(
+                    "--",
+                    logCallbacks
+                        .Where(x => x.Level == LogLevel.Error)
+                        .Select(x => x.Message)
+                        .ToArray());
 
-
-
-                    Assert.IsFalse(
-                        logCallbacks.Any(x => x.Level == LogLevel.Error),
-                        "Error level logs should not exist but got: " + errorLogs);
-                }
-                finally
-                {
-                    Logger.LogCallback = null;
-                }
+                Assert.IsFalse(
+                    logCallbacks.Any(x => x.Level == LogLevel.Error),
+                    "Error level logs should not exist but got: " + errorLogs);
             }
         }
 
@@ -280,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ClientId = MsalTestConstants.ClientId,
                 Scope = MsalTestConstants.Scope,
                 TokenCache = cache,
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))
+                RequestContext = RequestContext.CreateForTest()
             };
 
             TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);

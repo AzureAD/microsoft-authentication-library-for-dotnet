@@ -77,13 +77,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TestCommon.ResetStateAndInitMsal();
             _myReceiver = new MyReceiver();
             _telemetryManager = new TelemetryManager(_myReceiver);
-            Logger.PiiLoggingEnabled = false;
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            Logger.PiiLoggingEnabled = false;
         }
 
         private const string TenantId = "1234";
@@ -118,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -152,7 +145,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var reqId = telemetryManager.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -175,7 +168,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             reqId = telemetryManager.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 telemetry.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = false;  // mimic an unsuccessful event, so that this batch should be dispatched
@@ -242,7 +235,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
-                var apiEvent = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var apiEvent = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
                 _telemetryManager.StartEvent(reqId, uiEvent);
@@ -269,7 +262,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
-                var apiEvent = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var apiEvent = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
                 // Forgot to start this event
@@ -291,8 +284,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PiiLoggingEnabled set to true, TenantId , UserId, and Login Hint are hashed values")]
         public void PiiLoggingEnabledTrue_ApiEventFieldsHashedTest()
         {
-            var logger = new MsalLogger(Guid.NewGuid(), null);
-            Logger.PiiLoggingEnabled = true;
+            var logger = new MsalLogger(Guid.NewGuid(), null, LogLevel.Verbose, true, false, null);
 
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
@@ -341,8 +333,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PiiLoggingEnabled set to false, TenantId & UserId set to null values")]
         public void PiiLoggingEnabledFalse_TenantIdUserIdSetToNullValueTest()
         {
-            var logger = new MsalLogger(Guid.NewGuid(), null);
-            Logger.PiiLoggingEnabled = false;
+            var logger = MsalLogger.Create(Guid.NewGuid(), null, null);
 
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
@@ -391,7 +382,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {
-                var e1 = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                var e1 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(reqId, e1);
                 // do some stuff...
                 e1.WasSuccessful = true;
@@ -405,7 +396,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _telemetryManager.StopEvent(reqId, e1);
 
                 // Authority host not in trusted host list, should return null
-                var e2 = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
+                var e2 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.contoso.com"), AuthorityType = "Aad" };
                 _telemetryManager.StartEvent(reqId, e2);
                 // do some stuff...
                 e2.WasSuccessful = true;
@@ -438,7 +429,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     reqIdArray[i] = reqId;
                     Task task= (new Task(() =>
                     {
-                        var e1 = new ApiEvent(new MsalLogger(Guid.NewGuid(), null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
+                        var e1 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                         _telemetryManager.StartEvent(reqId, e1);
                         // do some stuff...
                         e1.WasSuccessful = true;

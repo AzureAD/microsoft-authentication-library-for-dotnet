@@ -29,6 +29,7 @@ using System;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -44,16 +45,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TestCommon.ResetStateAndInitMsal();
 
             _callback = Substitute.For<LogCallback>();
-            Logger.LogCallback = _callback;
         }
 
         [TestMethod()]
         [TestCategory("LoggerTests")]
         public void ConstructorComponentTest()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Verbose, false, false, _callback);
             Assert.AreEqual(string.Empty, logger.Component);
-            logger = new MsalLogger(Guid.Empty, "comp1");
+            logger = new MsalLogger(Guid.Empty, "comp1", LogLevel.Verbose, false, false, _callback);
             Assert.AreEqual(" (comp1)", logger.Component);
         }
 
@@ -61,9 +61,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestErrorTest()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Error, false, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Error;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Error("test message");
@@ -74,7 +73,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             logger.Warning("test message");
             Assert.AreEqual(1, counter);
             _callback.Received().Invoke(Arg.Is(LogLevel.Error), Arg.Any<string>(), Arg.Is(false));
-
 
             _callback.When(x => x(LogLevel.Info, Arg.Any<string>(), false)).Do(x => counter++);
             logger.Info("test message");
@@ -89,9 +87,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestWarning()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Warning, false, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Warning;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).
                 Do(x => counter++);
@@ -115,10 +112,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestInfo()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
-
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Info, false, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Info;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.ErrorPii(new ArgumentException("test message"));
@@ -141,10 +136,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestVerbose()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
-
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Verbose, false, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Verbose;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), false)).Do(x => counter++);
             logger.ErrorPii(new ArgumentException("test message"));
@@ -167,11 +160,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestErrorPii()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
-
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Error, true, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Error;
-            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new ArgumentException("test message"));
@@ -194,11 +184,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestWarningPii()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
-
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Warning, true, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Warning;
-            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new ArgumentException("test message"));
@@ -221,11 +208,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestInfoPii()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
-
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Info, true, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Info;
-            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new ArgumentException("test message"));
@@ -248,11 +232,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("LoggerTests")]
         public void CallbackTestVerbosePii()
         {
-            MsalLogger logger = new MsalLogger(Guid.Empty, null);
-
+            MsalLogger logger = new MsalLogger(Guid.Empty, null, LogLevel.Verbose, true, false, _callback);
             var counter = 0;
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
 
             _callback.When(x => x(LogLevel.Error, Arg.Any<string>(), true)).Do(x => counter++);
             logger.ErrorPii(new ArgumentException("test message"));

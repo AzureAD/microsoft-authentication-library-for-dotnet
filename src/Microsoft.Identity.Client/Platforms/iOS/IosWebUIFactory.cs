@@ -38,18 +38,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             if (coreUIParent.UseEmbeddedWebview)
             {
-                return new EmbeddedWebUI()
-                {
-                    RequestContext = requestContext,
-                    CoreUIParent = coreUIParent
-                };
+                return new EmbeddedWebUI(requestContext, coreUIParent);
             }
 
             //there is no need to pass UIParent.
-            return new SystemWebUI()
-            {
-                RequestContext = requestContext
-            };
+            return new SystemWebUI(requestContext);
         }
     }
 }

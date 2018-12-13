@@ -38,27 +38,32 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
     internal class EmbeddedWebUI : WebviewBase, IDisposable
     {
-        public RequestContext RequestContext { get; internal set; }
-        public CoreUIParent CoreUIParent { get; set; }
+        private readonly RequestContext _requestContext;
+        private readonly CoreUIParent _coreUiParent;
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public EmbeddedWebUI(RequestContext requestContext, CoreUIParent coreUiParent)
+        {
+            _requestContext = requestContext;
+            _coreUiParent = coreUiParent;
+        }
+
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
             await returnedUriReady.WaitAsync().ConfigureAwait(false);
-
             return authorizationResult;
         }
 
-        public static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        private static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
             authorizationResult = authorizationResultInput;
             returnedUriReady.Release();
         }
 
-        public void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        private void Authenticate(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            UIViewController viewController = null;
+            viewController = null;
             InvokeOnMainThread(() =>
             {
                 UIWindow window = UIApplication.SharedApplication.KeyWindow;
@@ -68,13 +73,18 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             {
                 viewController.InvokeOnMainThread(() =>
                 {
-                    var navigationController =
-                        new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                            redirectUri.OriginalString, CallbackMethod, CoreUIParent.PreferredStatusBarStyle);
+                    var navigationController = new AuthenticationAgentUINavigationController(
+                        _requestContext,
+                        authorizationUri.AbsoluteUri,
+                        redirectUri.OriginalString,
+                        CallbackMethod,
+                        _coreUiParent.PreferredStatusBarStyle)
+                    {
+                        ModalPresentationStyle = _coreUiParent.ModalPresentationStyle,
+                        ModalTransitionStyle = _coreUiParent.ModalTransitionStyle,
+                        TransitioningDelegate = viewController.TransitioningDelegate
+                    };
 
-                    navigationController.ModalPresentationStyle = CoreUIParent.ModalPresentationStyle;
-                    navigationController.ModalTransitionStyle = CoreUIParent.ModalTransitionStyle;
-                    navigationController.TransitioningDelegate = viewController.TransitioningDelegate;
 
                     viewController.PresentViewController(navigationController, true, null);
                 });
@@ -97,6 +107,5 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         {
             RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
         }
-
     }
 }

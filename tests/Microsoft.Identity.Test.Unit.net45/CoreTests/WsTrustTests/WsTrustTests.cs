@@ -66,9 +66,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
                 var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
-                var wsTrustResponse = await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
+                var wsTrustResponse = await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, RequestContext.CreateForTest())
                                                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(wsTrustResponse.Token);
@@ -87,13 +86,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
                 httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
-                var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
 
                     WsTrustResponse wstResponse =
-                        await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
+                        await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, RequestContext.CreateForTest()).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
                 catch (MsalException ex)

@@ -75,6 +75,13 @@ namespace Microsoft.Identity.Client
             }
         }
 
+        internal RequestContext CreateRequestContext()
+        {
+            return new RequestContext(
+                ServiceBundle.Config.ClientId,
+                MsalLogger.Create(Guid.Empty, string.Empty, ServiceBundle.Config));
+        }
+
         static TokenCache()
         {
             ModuleInitializer.EnsureModuleInitialized();
@@ -243,7 +250,7 @@ namespace Microsoft.Identity.Client
                 if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityType.Equals(Config.AuthorityType.B2C))
                 {
                     CacheFallbackOperations.WriteAdalRefreshToken
-                        (LegacyCachePersistence, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
+                        (Logger, LegacyCachePersistence, msalRefreshTokenCacheItem, msalIdTokenCacheItem,
                         Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
                         msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
                 }
@@ -260,6 +267,8 @@ namespace Microsoft.Identity.Client
                 }
         }
     }
+
+        internal ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
     private void DeleteAccessTokensWithIntersectingScopes(AuthenticationRequestParameters requestParams,
        ISet<string> environmentAliases, string tenantId, SortedSet<string> scopeSet, string homeAccountId)
@@ -554,6 +563,7 @@ namespace Microsoft.Identity.Client
                     return null;
                 }
                 return CacheFallbackOperations.GetAdalEntryForMsal(
+                    ServiceBundle.DefaultLogger,
                     LegacyCachePersistence,
                     preferredEnvironmentHost,
                     environmentAliases,
@@ -786,7 +796,7 @@ namespace Microsoft.Identity.Client
             ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
             ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
 
-            var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, ClientId);
+            var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(Logger, LegacyCachePersistence, ClientId);
             OnAfterAccess(args);
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -1009,6 +1019,7 @@ namespace Microsoft.Identity.Client
     internal void RemoveAdalUser(IAccount account)
     {
         CacheFallbackOperations.RemoveAdalUser(
+            Logger,
             LegacyCachePersistence,
             ClientId,
             account.Username,
@@ -1135,9 +1146,9 @@ namespace Microsoft.Identity.Client
 
     internal void ClearAdalCache()
     {
-        IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(LegacyCachePersistence.LoadCache());
+        IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(Logger, LegacyCachePersistence.LoadCache());
         dictionary.Clear();
-        LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
+        LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(Logger, dictionary));
     }
 
     internal void ClearMsalCache()

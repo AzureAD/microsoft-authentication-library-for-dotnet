@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         [DllImport("kernel32.dll")]
         private static extern void GetNativeSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
-        public static string GetProcessorArchitecture()
+        public static string GetProcessorArchitecture(ICoreLogger logger)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.WarningPii(ex);
+                logger.WarningPii(ex);
                 return "Unknown";
             }
         }

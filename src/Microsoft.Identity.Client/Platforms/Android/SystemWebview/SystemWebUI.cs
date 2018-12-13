@@ -49,9 +49,9 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
 
         public RequestContext RequestContext { get; set; }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
         {
-            returnedUriReady = new SemaphoreSlim(0);
+            ReturnedUriReady = new SemaphoreSlim(0);
 
             try
             {
@@ -70,8 +70,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                     ex);
             }
 
-            await returnedUriReady.WaitAsync().ConfigureAwait(false);
-            return authorizationResult;
+            await ReturnedUriReady.WaitAsync().ConfigureAwait(false);
+            return AuthorizationResult;
         }
 
         public override void ValidateRedirectUri(Uri redirectUri)

@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     {
         private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
+        private ICoreLogger _defaultLogger;
 
         /// <summary>
         /// Get the user logged in to Windows or throws
@@ -124,7 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.WarningPii(ex);
+                _defaultLogger.WarningPii(ex);
                 // ignore the exception as the result is already set to false;
             }
 
@@ -144,7 +145,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public string GetProcessorArchitecture()
         {
-            return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture() : null;
+            return IsWindows ? WindowsNativeMethods.GetProcessorArchitecture(_defaultLogger) : null;
         }
 
         public string GetOperatingSystem()
@@ -252,6 +253,12 @@ namespace Microsoft.Identity.Client.Platforms.net45
         public void SetWebUiFactory(IWebUIFactory webUiFactory)
         {
             _overloadWebUiFactory = webUiFactory;
+        }
+
+        /// <inheritdoc />
+        public void SetDefaultLogger(ICoreLogger defaultLogger)
+        {
+            _defaultLogger = defaultLogger;
         }
     }
 }

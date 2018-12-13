@@ -40,6 +40,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         private string keychainGroup;
+        private readonly ICoreLogger _logger;
+
+        public iOSLegacyCachePersistence(ICoreLogger logger)
+        {
+            _logger = logger;
+        }
 
         private string GetBundleId()
         {
@@ -88,7 +94,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
+                _logger.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
             return null;
@@ -118,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 if (err != SecStatusCode.Success)
                 {
                     string msg = "Failed to remove adal cache record: ";
-                    MsalLogger.Default.WarningPii(msg + err, msg);
+                    _logger.WarningPii(msg + err, msg);
                 }
 
                 if (serializedCache != null && serializedCache.Length > 0)
@@ -128,13 +134,13 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                     if (err != SecStatusCode.Success)
                     {
                         string msg = "Failed to save adal cache record: ";
-                        MsalLogger.Default.WarningPii(msg + err, msg);
+                        _logger.WarningPii(msg + err, msg);
                     }
                 }
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
+                _logger.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
     }

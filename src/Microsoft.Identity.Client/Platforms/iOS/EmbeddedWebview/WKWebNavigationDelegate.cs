@@ -71,11 +71,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 return;
             }
 
-            if (requestUrlString.StartsWith(AuthenticationAgentUIViewController.callback, StringComparison.OrdinalIgnoreCase) ||
+            if (requestUrlString.StartsWith(AuthenticationAgentUIViewController.Callback, StringComparison.OrdinalIgnoreCase) ||
                    requestUrlString.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 AuthenticationAgentUIViewController.DismissViewController(true, () =>
-                    AuthenticationAgentUIViewController.callbackMethod(new AuthorizationResult(AuthorizationStatus.Success, requestUrlString)));
+                    AuthenticationAgentUIViewController.CallbackMethod(new AuthorizationResult(AuthorizationStatus.Success, requestUrlString)));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
                 result.Error = CoreErrorCodes.NonHttpsRedirectNotSupported;
                 result.ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported;
-                AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.callbackMethod(result));
+                AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.CallbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
             }
