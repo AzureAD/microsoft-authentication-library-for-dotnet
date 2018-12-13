@@ -28,7 +28,6 @@
 using System;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Config
 {
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Client.Config
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        internal T WithTelemetryCallback(ITelemetryReceiver telemetryReceiver)
+        public T WithTelemetryCallback(ITelemetryReceiver telemetryReceiver)
         {
             Config.TelemetryReceiver = telemetryReceiver;
             return (T)this;
@@ -108,11 +107,7 @@ namespace Microsoft.Identity.Client.Config
         /// <returns></returns>
         public T WithRedirectUri(string redirectUri)
         {
-            if (!string.IsNullOrWhiteSpace(redirectUri))
-            {
-                Config.RedirectUri = redirectUri;
-            }
-
+            Config.RedirectUri = GetValueIfNotEmpty(Config.RedirectUri, redirectUri);
             return (T)this;
         }
 
@@ -122,11 +117,7 @@ namespace Microsoft.Identity.Client.Config
         /// <returns></returns>
         public T WithTenant(string tenant)
         {
-            if (!string.IsNullOrWhiteSpace(tenant))
-            {
-                Config.Tenant = tenant;
-            }
-
+            Config.Tenant = GetValueIfNotEmpty(Config.Tenant, tenant);
             return (T)this;
         }
 
@@ -170,6 +161,34 @@ namespace Microsoft.Identity.Client.Config
             WithClientId(applicationOptions.ClientId);
             WithRedirectUri(applicationOptions.RedirectUri);
             WithTenant(applicationOptions.Tenant);
+            WithLoggingLevel(applicationOptions.LogLevel);
+            WithComponent(applicationOptions.Component);
+            WithEnablePiiLogging(applicationOptions.EnablePiiLogging);
+            WithDefaultPlatformLoggingEnabled(applicationOptions.IsDefaultPlatformLoggingEnabled);
+            WithSliceParameters(applicationOptions.SliceParameters);
+
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="component"></param>
+        /// <returns></returns>
+        public T WithComponent(string component)
+        {
+            Config.Component = GetValueIfNotEmpty(Config.Component, component);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sliceParameters"></param>
+        /// <returns></returns>
+        public T WithSliceParameters(string sliceParameters)
+        {
+            Config.SliceParameters = GetValueIfNotEmpty(Config.SliceParameters, sliceParameters);
             return (T)this;
         }
 
@@ -269,6 +288,11 @@ namespace Microsoft.Identity.Client.Config
         {
             Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.B2C, authorityUri, false, isDefaultAuthority));
             return (T)this;
+        }
+
+        private static string GetValueIfNotEmpty(string original, string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? original : value;
         }
     }
 }

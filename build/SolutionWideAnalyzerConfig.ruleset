@@ -6,6 +6,63 @@
     <Rule Id="UseAsyncSuffix" Action="Error" />
     <Rule Id="UseConfigureAwait" Action="Error" />
   </Rules>
+  <Rules AnalyzerId="Microsoft.NetCore.CSharp.Analyzers" RuleNamespace="Microsoft.NetCore.CSharp.Analyzers">
+    <Rule Id="CA1309" Action="None" />
+    <Rule Id="CA1414" Action="None" />
+    <Rule Id="CA1601" Action="None" />
+    <Rule Id="CA1810" Action="None" />
+    <Rule Id="CA1824" Action="None" />
+    <Rule Id="CA1825" Action="None" />
+    <Rule Id="CA2010" Action="None" />
+    <Rule Id="CA2201" Action="Error" />
+    <Rule Id="CA2205" Action="None" />
+    <Rule Id="CA2207" Action="None" />
+    <Rule Id="CA2215" Action="None" />
+    <Rule Id="CA5350" Action="None" />
+    <Rule Id="CA5351" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers">
+    <Rule Id="CA1304" Action="Error" />
+    <Rule Id="CA1305" Action="Error" />
+    <Rule Id="CA1307" Action="None" />
+    <Rule Id="CA1308" Action="None" />
+    <Rule Id="CA1401" Action="None" />
+    <Rule Id="CA1813" Action="None" />
+    <Rule Id="CA1816" Action="None" />
+    <Rule Id="CA1820" Action="None" />
+    <Rule Id="CA1826" Action="None" />
+    <Rule Id="CA2002" Action="None" />
+    <Rule Id="CA2008" Action="None" />
+    <Rule Id="CA2009" Action="None" />
+    <Rule Id="CA2101" Action="None" />
+    <Rule Id="CA2208" Action="None" />
+    <Rule Id="CA2216" Action="None" />
+    <Rule Id="CA2241" Action="None" />
+    <Rule Id="CA2242" Action="None" />
+    <Rule Id="CA2243" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeQuality.CSharp.Analyzers" RuleNamespace="Microsoft.CodeQuality.CSharp.Analyzers">
+    <Rule Id="Async001" Action="None" />
+    <Rule Id="Async002" Action="None" />
+    <Rule Id="Async003" Action="None" />
+    <Rule Id="Async004" Action="None" />
+    <Rule Id="Async005" Action="None" />
+    <Rule Id="Async006" Action="None" />
+    <Rule Id="CA1001" Action="None" />
+    <Rule Id="CA1003" Action="None" />
+    <Rule Id="CA1019" Action="None" />
+    <Rule Id="CA1032" Action="None" />
+    <Rule Id="CA1065" Action="None" />
+    <Rule Id="CA1200" Action="None" />
+    <Rule Id="CA1500" Action="None" />
+    <Rule Id="CA1507" Action="None" />
+    <Rule Id="CA1726" Action="None" />
+    <Rule Id="CA1821" Action="None" />
+    <Rule Id="CA2001" Action="None" />
+    <Rule Id="CA2109" Action="None" />
+    <Rule Id="CA2200" Action="None" />
+    <Rule Id="CA2234" Action="None" />
+  </Rules>
   <Rules AnalyzerId="Microsoft.CodeQuality.Analyzers" RuleNamespace="Microsoft.CodeQuality.Analyzers">
     <Rule Id="CA1000" Action="Error" />
     <Rule Id="CA1008" Action="Error" />
@@ -78,62 +135,8 @@
     <Rule Id="CA2244" Action="None" />
     <Rule Id="CA9999" Action="None" />
   </Rules>
-  <Rules AnalyzerId="Microsoft.CodeQuality.CSharp.Analyzers" RuleNamespace="Microsoft.CodeQuality.CSharp.Analyzers">
-    <Rule Id="Async001" Action="None" />
-    <Rule Id="Async002" Action="None" />
-    <Rule Id="Async003" Action="None" />
-    <Rule Id="Async004" Action="None" />
-    <Rule Id="Async005" Action="None" />
-    <Rule Id="Async006" Action="None" />
-    <Rule Id="CA1001" Action="None" />
-    <Rule Id="CA1003" Action="None" />
-    <Rule Id="CA1019" Action="None" />
-    <Rule Id="CA1032" Action="None" />
-    <Rule Id="CA1065" Action="None" />
-    <Rule Id="CA1200" Action="None" />
-    <Rule Id="CA1500" Action="None" />
-    <Rule Id="CA1507" Action="None" />
-    <Rule Id="CA1726" Action="None" />
-    <Rule Id="CA1821" Action="None" />
-    <Rule Id="CA2001" Action="None" />
-    <Rule Id="CA2109" Action="None" />
-    <Rule Id="CA2200" Action="None" />
-    <Rule Id="CA2234" Action="None" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers">
-    <Rule Id="CA1304" Action="Error" />
-    <Rule Id="CA1305" Action="None" />
-    <Rule Id="CA1307" Action="None" />
-    <Rule Id="CA1308" Action="None" />
-    <Rule Id="CA1401" Action="None" />
-    <Rule Id="CA1813" Action="None" />
-    <Rule Id="CA1816" Action="None" />
-    <Rule Id="CA1820" Action="None" />
-    <Rule Id="CA1826" Action="None" />
-    <Rule Id="CA2002" Action="None" />
-    <Rule Id="CA2008" Action="None" />
-    <Rule Id="CA2009" Action="None" />
-    <Rule Id="CA2101" Action="None" />
-    <Rule Id="CA2208" Action="None" />
-    <Rule Id="CA2216" Action="None" />
-    <Rule Id="CA2241" Action="None" />
-    <Rule Id="CA2242" Action="None" />
-    <Rule Id="CA2243" Action="None" />
-  </Rules>
-  <Rules AnalyzerId="Microsoft.NetCore.CSharp.Analyzers" RuleNamespace="Microsoft.NetCore.CSharp.Analyzers">
-    <Rule Id="CA1309" Action="None" />
-    <Rule Id="CA1414" Action="None" />
-    <Rule Id="CA1601" Action="None" />
-    <Rule Id="CA1810" Action="None" />
-    <Rule Id="CA1824" Action="None" />
-    <Rule Id="CA1825" Action="None" />
-    <Rule Id="CA2010" Action="None" />
-    <Rule Id="CA2201" Action="Error" />
-    <Rule Id="CA2205" Action="None" />
-    <Rule Id="CA2207" Action="None" />
-    <Rule Id="CA2215" Action="None" />
-    <Rule Id="CA5350" Action="None" />
-    <Rule Id="CA5351" Action="None" />
+  <Rules AnalyzerId="Text.CSharp.Analyzers" RuleNamespace="Text.CSharp.Analyzers">
+    <Rule Id="CA1704" Action="None" />
   </Rules>
   <Rules AnalyzerId="Microsoft.NetFramework.Analyzers" RuleNamespace="Microsoft.NetFramework.Analyzers">
     <Rule Id="CA1058" Action="None" />
@@ -156,8 +159,5 @@
     <Rule Id="CA2240" Action="None" />
     <Rule Id="CA3076" Action="None" />
     <Rule Id="CA3077" Action="None" />
-  </Rules>
-  <Rules AnalyzerId="Text.CSharp.Analyzers" RuleNamespace="Text.CSharp.Analyzers">
-    <Rule Id="CA1704" Action="None" />
   </Rules>
 </RuleSet>

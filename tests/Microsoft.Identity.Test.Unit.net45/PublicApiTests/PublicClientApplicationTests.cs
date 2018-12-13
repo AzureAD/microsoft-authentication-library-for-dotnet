@@ -1137,8 +1137,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             PublicClientApplication app = new PublicClientApplication(MsalTestConstants.ClientId);
 
-            var authoriy = app.GetAuthority(new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
-            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authoriy.CanonicalAuthority);
+            var authority = app.GetAuthority(new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
+            Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestMethod]
@@ -1153,7 +1153,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MsalTestConstants.Name,
                     MsalTestConstants.ProductionPrefNetworkEnvironment));
 
-            Assert.AreEqual(MsalTestConstants.AuthorityTestTenant, authority.CanonicalAuthority);
+            Assert.AreEqual(MsalTestConstants.AuthorityTestTenant, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         [TestCategory("PublicClientApplicationTests")]

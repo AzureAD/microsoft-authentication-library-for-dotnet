@@ -68,24 +68,24 @@ namespace Microsoft.Identity.Client.Instance
         {
             var metadata = await ServiceBundle.AadInstanceDiscovery
                                  .GetMetadataEntryAsync(
-                                     new Uri(CanonicalAuthority),
+                                     new Uri(AuthorityInfo.CanonicalAuthority),
                                      AuthorityInfo.ValidateAuthority,
                                      requestContext)
                                  .ConfigureAwait(false);
 
-            CanonicalAuthority = CreateAuthorityUriWithHost(CanonicalAuthority, metadata.PreferredNetwork);
+            AuthorityInfo.CanonicalAuthority = CreateAuthorityUriWithHost(AuthorityInfo.CanonicalAuthority, metadata.PreferredNetwork);
         }
 
         internal override string GetTenantId()
         {
-            return GetFirstPathSegment(CanonicalAuthority);
+            return GetFirstPathSegment(AuthorityInfo.CanonicalAuthority);
         }
 
         internal override void UpdateTenantId(string tenantId)
         {
-            var authorityUri = new Uri(CanonicalAuthority);
+            var authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
 
-            CanonicalAuthority =string.Format(
+            AuthorityInfo.CanonicalAuthority =string.Format(
                 CultureInfo.InvariantCulture,
                 AADCanonicalAuthorityTemplate,
                 authorityUri.Authority,

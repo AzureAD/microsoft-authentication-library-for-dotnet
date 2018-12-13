@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string messageWithPii = string.Format(
                 CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
-                authenticationRequestParameters.Authority?.CanonicalAuthority,
+                authenticationRequestParameters.Authority?.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
                 TokenCache != null,
@@ -101,12 +101,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 GetType().Name);
 
             if (authenticationRequestParameters.Authority != null &&
-                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.Host))
+                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.AuthorityInfo.Host))
             {
                 messageWithoutPii += string.Format(
                     CultureInfo.CurrentCulture,
                     "\n\tAuthority Host: {0}",
-                    authenticationRequestParameters.Authority.Host);
+                    authenticationRequestParameters.Authority.AuthorityInfo.Host);
             }
 
             authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
@@ -202,8 +202,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (AuthenticationRequestParameters.Authority != null)
             {
-                apiEvent.Authority = new Uri(AuthenticationRequestParameters.Authority.CanonicalAuthority);
-                apiEvent.AuthorityType = AuthenticationRequestParameters.Authority.AuthorityType.ToString();
+                apiEvent.Authority = new Uri(AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+                apiEvent.AuthorityType = AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType.ToString();
             }
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
 
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = GetTenantUpdatedCanonicalAuthority(
-                AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
+                AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority, idToken?.TenantId);
 
             if (TokenCache != null)
             {
@@ -243,12 +243,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return new AuthenticationResult(
                     new MsalAccessTokenCacheItem(
-                        AuthenticationRequestParameters.Authority.Host,
+                        AuthenticationRequestParameters.Authority.AuthorityInfo.Host,
                         AuthenticationRequestParameters.ClientId, 
                         msalTokenResponse,
                         idToken?.TenantId),
                     new MsalIdTokenCacheItem(
-                        AuthenticationRequestParameters.Authority.Host,
+                        AuthenticationRequestParameters.Authority.AuthorityInfo.Host,
                         AuthenticationRequestParameters.ClientId, 
                         msalTokenResponse, 
                         idToken?.TenantId));
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return;
             }
 
-            if (AuthenticationRequestParameters.Authority.AuthorityType == Config.AuthorityType.B2C &&
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == Config.AuthorityType.B2C &&
                 fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
                     StringComparison.OrdinalIgnoreCase))
             {

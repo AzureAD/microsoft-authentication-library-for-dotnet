@@ -114,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
 
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 AuthorityEndpoints endpoints = await endpointManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 //attempt to do authority validation again. NO network call should be made
                 instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 endpoints = await endpointManager.ResolveEndpointsAsync(
                                 instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 AuthorityEndpoints endpoints = await endpointManager.ResolveEndpointsAsync(
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, false);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 AuthorityEndpoints endpoints = await endpointManager.ResolveEndpointsAsync(
                                                    instance.AuthorityInfo,
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 try
                 {
@@ -347,7 +347,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
 
                 try
@@ -390,7 +390,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 try
                 {
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 
                 Authority instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, false);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 try
                 {

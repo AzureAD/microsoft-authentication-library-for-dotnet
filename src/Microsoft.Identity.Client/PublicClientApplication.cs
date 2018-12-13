@@ -794,17 +794,26 @@ namespace Microsoft.Identity.Client
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <param name="securePassword">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
-            IEnumerable<string> scopes, string username, System.Security.SecureString securePassword)
-        {
 #if DESKTOP || NET_CORE
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
+            IEnumerable<string> scopes,
+            string username,
+            System.Security.SecureString securePassword)
+        {
             UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, securePassword);
             return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
-#else
-            // TODO: need to consolidate this properly with the public API.
-            throw new NotImplementedException();
-#endif
         }
+#else
+        public Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
+            IEnumerable<string> scopes,
+            string username,
+            System.Security.SecureString securePassword)
+        {
+            // TODO: need better wording and proper link to aka.ms
+            throw new PlatformNotSupportedException("Username Password is only supported on NetFramework and .NET Core." +
+                "For more details see https://aka.ms/msal-net-iwa");
+        }
+#endif
 
         private async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
             IEnumerable<string> scopes, UsernamePasswordInput usernamePasswordInput)

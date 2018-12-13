@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
 
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 var endpoints = await endpointManager.ResolveEndpointsAsync(
                                                          instance.AuthorityInfo,
                                                          null,
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
 
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 var endpoints = await endpointManager.ResolveEndpointsAsync(
                                                          instance.AuthorityInfo,
                                                          null,
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
 
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try
                 {
                     var endpoints = await endpointManager.ResolveEndpointsAsync(
@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
 
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try
                 {
                     await endpointManager.ResolveEndpointsAsync(
@@ -276,7 +276,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
                 var endpointManager = new AuthorityEndpointResolutionManager(serviceBundle);
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try
                 {
                     await endpointManager.ResolveEndpointsAsync(
@@ -308,13 +308,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
 
             var authority = Authority.CreateAuthority(serviceBundle, UriNoPort, false);
-            Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
+            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
             authority = Authority.CreateAuthority(serviceBundle, UriDefaultPort, false);
-            Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
+            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
             authority = Authority.CreateAuthority(serviceBundle, UriCustomPort, false);
-            Assert.AreEqual(UriCustomPortTailSlash, authority.CanonicalAuthority);
+            Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
         }
     }
 }

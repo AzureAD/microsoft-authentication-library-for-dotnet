@@ -27,11 +27,22 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client
 {
-    internal interface ITelemetryReceiver
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface ITelemetryReceiver
     {
+        /// <summary>
+        /// TODO:  Better name?
+        /// </summary>
+        /// <param name="events"></param>
         void HandleTelemetryEvents(List<Dictionary<string, string>> events);
+
+        /// <summary>
+        /// TODO:  Better name?
+        /// </summary>
         bool OnlySendFailureTelemetry { get; }
     }
 }

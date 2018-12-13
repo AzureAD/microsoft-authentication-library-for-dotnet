@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
-            if (AuthenticationRequestParameters.Authority.AuthorityType == AuthorityType.Adfs)
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
                 return null;
             }

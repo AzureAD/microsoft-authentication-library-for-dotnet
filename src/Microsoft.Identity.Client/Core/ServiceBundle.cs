@@ -37,12 +37,16 @@ namespace Microsoft.Identity.Client.Core
 {
     internal class ServiceBundle : IServiceBundle
     {
-        internal ServiceBundle(
-            ApplicationConfiguration config,
-            bool shouldClearCaches = false)
+        internal ServiceBundle(ApplicationConfiguration config, bool shouldClearCaches = false)
         {
             Config = config;
-            DefaultLogger = new MsalLogger(Guid.Empty, null, Config.LogLevel, Config.EnablePiiLogging, Config.IsDefaultPlatformLoggingEnabled, Config.LoggingCallback);
+            DefaultLogger = new MsalLogger(
+                Guid.Empty,
+                null,
+                config.LogLevel,
+                config.EnablePiiLogging,
+                config.IsDefaultPlatformLoggingEnabled,
+                config.LoggingCallback);
 
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
             TelemetryManager = new TelemetryManager(config.TelemetryReceiver);

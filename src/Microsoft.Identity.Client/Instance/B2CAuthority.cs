@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Instance
         internal override async Task UpdateCanonicalAuthorityAsync(
             RequestContext requestContext)
         {
-            if (IsB2CLoginHost(new Uri(CanonicalAuthority).Host))
+            if (IsB2CLoginHost(new Uri(AuthorityInfo.CanonicalAuthority).Host))
             {
                 return;
             }
@@ -62,18 +62,18 @@ namespace Microsoft.Identity.Client.Instance
 
         internal override string GetTenantId()
         {
-            return new Uri(CanonicalAuthority).Segments[2].TrimEnd('/');
+            return new Uri(AuthorityInfo.CanonicalAuthority).Segments[2].TrimEnd('/');
         }
 
         internal override void UpdateTenantId(string tenantId)
         {
-            Uri authorityUri = new Uri(CanonicalAuthority);
+            Uri authorityUri = new Uri(AuthorityInfo.CanonicalAuthority);
             var segments = authorityUri.Segments;
 
             var b2cPrefix = segments[1].TrimEnd('/');
             var b2cPolicy = segments[3].TrimEnd('/');
 
-            CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate,
+            AuthorityInfo.CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, B2CCanonicalAuthorityTemplate,
                 authorityUri.Authority, b2cPrefix, tenantId, b2cPolicy);
         }
     }

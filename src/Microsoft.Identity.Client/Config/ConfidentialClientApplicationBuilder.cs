@@ -53,17 +53,11 @@ namespace Microsoft.Identity.Client.Config
         /// 
         /// </summary>
         /// <param name="clientId"></param>
-        /// <param name="tenant"></param>
-        /// <param name="redirectUri"></param>
         /// <returns></returns>
-        public static ConfidentialClientApplicationBuilder Create(string clientId, string tenant, string redirectUri)
+        public static ConfidentialClientApplicationBuilder Create(string clientId)
         {
-            return CreateWithApplicationOptions(new ApplicationOptions
-            {
-                ClientId = clientId,
-                Tenant = tenant,
-                RedirectUri = redirectUri
-            });
+            var config = new ApplicationConfiguration();
+            return new ConfidentialClientApplicationBuilder(config).WithClientId(clientId);
         }
 
         /// <summary>
@@ -80,20 +74,6 @@ namespace Microsoft.Identity.Client.Config
                 {
                     ClientId = clientId
                 }).WithAuthority(authority, validateAuthority, true);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
-        public static ConfidentialClientApplicationBuilder Create(string clientId)
-        {
-            return CreateWithApplicationOptions(
-                new ApplicationOptions
-                {
-                    ClientId = clientId
-                });
         }
 
         /// <summary>

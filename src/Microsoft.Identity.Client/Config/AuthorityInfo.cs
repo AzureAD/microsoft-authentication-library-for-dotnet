@@ -51,8 +51,13 @@ namespace Microsoft.Identity.Client.Config
                     throw new ArgumentException(CoreErrorMessages.B2cAuthorityUriInvalidPath);
                 }
 
-                CanonicalAuthority = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/{2}/{3}/", authorityUri.Authority,
-                                                   pathSegments[0], pathSegments[1], pathSegments[2]);
+                CanonicalAuthority = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "https://{0}/{1}/{2}/{3}/",
+                    authorityUri.Authority,
+                    pathSegments[0],
+                    pathSegments[1],
+                    pathSegments[2]);
             }
             else
             {

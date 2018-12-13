@@ -7,17 +7,15 @@
     <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  
+
   <ItemGroup>
 
     <Compile Include="..\Microsoft.Identity.Test.Unit.net45\**\*.cs" Exclude="..\Microsoft.Identity.Test.Unit.net45\obj\**\*;..\Microsoft.Identity.Test.Unit.net45\bin\**\*" />
-    
+
     <None Include="..\Microsoft.Identity.Test.Unit.net45\Resources\**\*" LinkBase="Resources">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    
-    <Compile Remove="..\Microsoft.Identity.Test.Unit.net45\ModuleInitializerTest.cs" />
-    
+
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.4" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />

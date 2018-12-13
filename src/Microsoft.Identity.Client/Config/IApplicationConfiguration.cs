@@ -26,15 +26,19 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Client.Config
 {
     internal interface IApplicationConfiguration
     {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+        /// <summary>
+        /// 
+        /// </summary>
         ClientCredential ClientCredential { get; }
 #endif
+
         string ClientId { get; }
         bool EnablePiiLogging { get; }
         IMsalHttpClientFactory HttpClientFactory { get; }
@@ -49,5 +53,6 @@ namespace Microsoft.Identity.Client.Config
         string SliceParameters { get; }
         LogCallback LoggingCallback { get; }
         ITelemetryReceiver TelemetryReceiver { get; }
+        string Component { get; }
     }
 }

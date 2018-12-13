@@ -66,6 +66,8 @@ namespace Microsoft.Identity.Client.Config
 
         public AuthorityInfo DefaultAuthorityInfo => Authorities.Single(x => x.IsDefault);
 
+        public string Component { get; internal set; }
+
         internal void AddAuthorityInfo(AuthorityInfo authorityInfo)
         {
             _authorityInfos.Add(authorityInfo);

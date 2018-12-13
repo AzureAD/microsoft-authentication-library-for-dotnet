@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client
         /// enables app developers to specify the authority
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : this(ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(new ApplicationOptions { ClientId = clientId })
+            : this(ConfidentialClientApplicationBuilder.Create(clientId)
                                                        .WithAuthority(DefaultAuthority, false, true)
                                                        .WithRedirectUri(redirectUri)
                                                        .WithClientCredential(clientCredential)

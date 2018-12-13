@@ -48,23 +48,9 @@ namespace Microsoft.Identity.Client.Instance
         {
             ServiceBundle = serviceBundle;
             AuthorityInfo = authorityInfo;
-
-            // TODO: it's odd to have multiple sources of truth here, but some authority objects overwrite the
-            // canonical authority.  So should this be read/write here or should we enable it in AuthorityInfo?
-            CanonicalAuthority = authorityInfo.CanonicalAuthority;
         }
 
         public AuthorityInfo AuthorityInfo { get; }
-
-        public AuthorityType AuthorityType => AuthorityInfo.AuthorityType;
-
-        public string CanonicalAuthority
-        {
-            get => AuthorityInfo.CanonicalAuthority;
-            set => AuthorityInfo.CanonicalAuthority = value;
-        }
-
-        public string Host => AuthorityInfo.Host;
 
         protected IServiceBundle ServiceBundle { get; }
 
