@@ -80,15 +80,6 @@ namespace Microsoft.Identity.Client.Config
 
         /// <summary>
         /// </summary>
-        /// <param name="onlySendFailureTelemetryData"></param>
-        /// <returns></returns>
-        public T WithOnlySendFailureTelemetryData(bool onlySendFailureTelemetryData)
-        {
-            return (T)this;
-        }
-
-        /// <summary>
-        /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
         public T WithClientId(string clientId)

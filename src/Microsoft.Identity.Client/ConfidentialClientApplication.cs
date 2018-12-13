@@ -131,9 +131,8 @@ namespace Microsoft.Identity.Client
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-        : this(ConfidentialClientApplicationBuilder.CreateWithApplicationOptions(new ApplicationOptions { ClientId = clientId })
+        : this(ConfidentialClientApplicationBuilder.Create(clientId)
                                                    .WithAuthority(authority, false, true)
-                                                   .WithRedirectUri(redirectUri)
                                                    .WithRedirectUri(redirectUri)
                                                    .WithClientCredential(clientCredential)
                                                    .WithUserTokenCache(userTokenCache)
@@ -142,17 +141,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
         }
-
-        //internal ConfidentialClientApplication(IServiceBundle serviceBundle, string clientId, string authority, string redirectUri,
-        //                                       ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-        //    : base(clientId, authority, redirectUri, true, serviceBundle)
-        //{
-        //    GuardMobileFrameworks();
-
-        //    ClientCredential = clientCredential;
-        //    UserTokenCache = userTokenCache;
-        //    AppTokenCache = appTokenCache;
-        //}
 
         /// <summary>
         /// Acquires an access token for this application (usually a Web API) from the authority configured in the application, in order to access 
@@ -489,6 +477,5 @@ namespace Microsoft.Identity.Client
 #endif
         }
     }
-
-#endif 
+#endif
 }

@@ -28,45 +28,12 @@
 namespace Microsoft.Identity.Client.Config
 {
     /// <summary>
-    ///     Options object with string values loadable from JSON configuration (as in an asp.net configuration scenario)
     /// </summary>
-    public abstract class ApplicationOptions
+    public class ConfidentialClientApplicationOptions : ApplicationOptions
     {
         /// <summary>
-        /// </summary>
-        public string ClientId { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public string Tenant { get; set; }
-
-        /// <summary>
-        /// </summary>
-        public string RedirectUri { get; set; }
-
-        /// <summary>
         /// 
         /// </summary>
-        public LogLevel LogLevel { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool EnablePiiLogging { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsDefaultPlatformLoggingEnabled { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string SliceParameters { get; set; }
-
-        /// <summary>
-        /// TODO: do we have a better / more descriptive name for this?
-        /// </summary>
-        public string Component { get; set; }
+        public string ClientCredentialSecret { get; set; }
     }
 }

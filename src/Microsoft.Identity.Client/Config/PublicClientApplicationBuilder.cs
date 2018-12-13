@@ -41,7 +41,8 @@ namespace Microsoft.Identity.Client.Config
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static PublicClientApplicationBuilder CreateWithApplicationOptions(ApplicationOptions options)
+        public static PublicClientApplicationBuilder CreateWithApplicationOptions(
+            PublicClientApplicationOptions options)
         {
             var config = new ApplicationConfiguration();
             return new PublicClientApplicationBuilder(config).WithOptions(options);
@@ -51,30 +52,10 @@ namespace Microsoft.Identity.Client.Config
         /// 
         /// </summary>
         /// <param name="clientId"></param>
-        /// <param name="tenant"></param>
-        /// <param name="redirectUri"></param>
-        /// <returns></returns>
-        public static PublicClientApplicationBuilder Create(string clientId, string tenant, string redirectUri)
-        {
-            return CreateWithApplicationOptions(new ApplicationOptions
-            {
-                ClientId = clientId,
-                Tenant = tenant,
-                RedirectUri = redirectUri
-            });
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="clientId"></param>
         public static PublicClientApplicationBuilder Create(string clientId)
         {
-            return CreateWithApplicationOptions(
-                new ApplicationOptions
-                {
-                    ClientId = clientId
-                });
+            var config = new ApplicationConfiguration();
+            return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }
 
         /// <summary>
@@ -86,11 +67,7 @@ namespace Microsoft.Identity.Client.Config
         /// <returns></returns>
         public static PublicClientApplicationBuilder Create(string clientId, string authority, bool validateAuthority = true)
         {
-            return CreateWithApplicationOptions(
-                new ApplicationOptions
-                {
-                    ClientId = clientId
-                }).WithAuthority(authority, validateAuthority, true);
+            return Create(clientId).WithAuthority(authority, validateAuthority, true);
         }
 
         /// <summary>

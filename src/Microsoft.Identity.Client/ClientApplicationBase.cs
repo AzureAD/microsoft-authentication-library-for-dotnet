@@ -148,7 +148,6 @@ namespace Microsoft.Identity.Client
         /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
         /// </summary>
         public string SliceParameters => ServiceBundle.Config.SliceParameters;
-        // TODO: VALIDATE IF WE NEED THIS VARIABLE
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.

@@ -43,10 +43,14 @@ namespace Microsoft.Identity.Client.Config
         /// </summary>
         /// <param name="options"></param>
         /// <returns></returns>
-        public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(ApplicationOptions options)
+        public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
+            ConfidentialClientApplicationOptions options)
         {
             var config = new ApplicationConfiguration();
-            return new ConfidentialClientApplicationBuilder(config).WithOptions(options);
+            return new ConfidentialClientApplicationBuilder(config)
+                .WithOptions(options)
+                .WithClientCredential(new ClientCredential(options.ClientCredentialSecret));
+
         }
 
         /// <summary>
@@ -69,21 +73,7 @@ namespace Microsoft.Identity.Client.Config
         /// <returns></returns>
         public static ConfidentialClientApplicationBuilder Create(string clientId, string authority, bool validateAuthority = true)
         {
-            return CreateWithApplicationOptions(
-                new ApplicationOptions
-                {
-                    ClientId = clientId
-                }).WithAuthority(authority, validateAuthority, true);
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithConfidentialApplicationOptions(ConfidentialApplicationOptions options)
-        {
-            WithClientCredential(new ClientCredential(options.ClientCredentialSecret));
-            return this;
+            return Create(clientId).WithAuthority(authority, validateAuthority, true);
         }
 
         /// <summary>

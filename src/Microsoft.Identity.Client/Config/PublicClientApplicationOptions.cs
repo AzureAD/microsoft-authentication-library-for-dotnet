@@ -29,11 +29,7 @@ namespace Microsoft.Identity.Client.Config
 {
     /// <summary>
     /// </summary>
-    public class ConfidentialApplicationOptions
+    public class PublicClientApplicationOptions : ApplicationOptions
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public string ClientCredentialSecret { get; set; }
     }
 }

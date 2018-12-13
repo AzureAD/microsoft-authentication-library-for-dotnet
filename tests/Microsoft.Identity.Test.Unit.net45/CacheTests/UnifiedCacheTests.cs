@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, MsalTestConstants.Scope.ToString());
 
-                Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple =
+                var adalUsersResult =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
                         RequestContext.CreateForTest().Logger, 
                         app.UserTokenCache.LegacyCachePersistence,
@@ -230,13 +230,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, "user.read");
 
-                Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple2 =
+                var adalUsersResult2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
                         RequestContext.CreateForTest().Logger, 
                         app.UserTokenCache.LegacyCachePersistence,
                         MsalTestConstants.ClientId);
 
-                Assert.AreEqual(tuple.Item1.Keys.First(), tuple2.Item1.Keys.First());
+                Assert.AreEqual(adalUsersResult.ClientInfoUsers.Keys.First(), adalUsersResult2.ClientInfoUsers.Keys.First());
 
                 app.UserTokenCache.TokenCacheAccessor.ClearAccessTokens();
                 app.UserTokenCache.TokenCacheAccessor.ClearRefreshTokens();

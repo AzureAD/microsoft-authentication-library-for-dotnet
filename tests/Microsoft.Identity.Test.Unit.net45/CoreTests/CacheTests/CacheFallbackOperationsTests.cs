@@ -63,14 +63,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             PopulateLegacyCache(_logger, _legacyCachePersistence);
 
             // Act - query users by env and clientId
-            Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> userTuple =
+            var adalUsersResult =
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     _logger,
                     _legacyCachePersistence,
                     CoreTestConstants.ClientId);
 
             AssertByUsername(
-                userTuple,
+                adalUsersResult,
                 new[]
                 {
                     "user1",
@@ -84,14 +84,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 });
 
             // Act - query users for different clientId and env
-            userTuple = CacheFallbackOperations.GetAllAdalUsersForMsal(
+            adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 _logger,
                 _legacyCachePersistence,
                 "other_client_id");
 
             // Assert
             AssertByUsername(
-                userTuple,
+                adalUsersResult,
                 new[]
                 {
                     "user6"
@@ -132,14 +132,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
                 "uid1.tenantId1");
 
             // Assert 
-            Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> userTuple =
+            var adalUsersResult =
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     RequestContext.CreateForTest().Logger, 
                     _legacyCachePersistence,
                     CoreTestConstants.ClientId);
 
             AssertByUsername(
-                userTuple,
+                adalUsersResult,
                 new[]
                 {
                     "user2",
@@ -178,14 +178,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 
             AssertCacheEntryCount(8);
 
-            Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> userTuple =
+            var adalUsersResult =
                 CacheFallbackOperations.GetAllAdalUsersForMsal(
                     RequestContext.CreateForTest().Logger, 
                     _legacyCachePersistence,
                     CoreTestConstants.ClientId);
 
             AssertByUsername(
-                userTuple,
+                adalUsersResult,
                 new[]
                 {
                     "user2",
@@ -210,13 +210,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             AssertCacheEntryCount(6);
 
             // Assert 
-            userTuple = CacheFallbackOperations.GetAllAdalUsersForMsal(
+            adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(
                 _logger,
                 _legacyCachePersistence,
                 CoreTestConstants.ClientId);
 
             AssertByUsername(
-                userTuple,
+                adalUsersResult,
                 new[]
                 {
                     "user2",
@@ -454,13 +454,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         }
 
         private static void AssertByUsername(
-            Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> userTuple,
+            AdalUsersForMsalResult adalUsersResult,
             IEnumerable<string> expectedUsersWithClientInfo,
             IEnumerable<string> expectedUsersWithoutClientInfo)
         {
             // Assert
-            var usersWithClientInfo = userTuple.Item1.Values;
-            List<AdalUserInfo> usersWithoutClientInfo = userTuple.Item2;
+            var usersWithClientInfo = adalUsersResult.ClientInfoUsers.Values;
+            List<AdalUserInfo> usersWithoutClientInfo = adalUsersResult.UsersWithoutClientInfo;
 
             AssertUsersByDisplayName(
                 expectedUsersWithClientInfo,

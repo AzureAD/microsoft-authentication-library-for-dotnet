@@ -25,48 +25,25 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Config
+using System.Collections.Generic;
+
+namespace Microsoft.Identity.Client.Cache
 {
-    /// <summary>
-    ///     Options object with string values loadable from JSON configuration (as in an asp.net configuration scenario)
-    /// </summary>
-    public abstract class ApplicationOptions
+    internal class AdalUsersForMsalResult
     {
-        /// <summary>
-        /// </summary>
-        public string ClientId { get; set; }
+        public AdalUsersForMsalResult()
+        {
+            ClientInfoUsers = new Dictionary<string, AdalUserInfo>();
+            UsersWithoutClientInfo = new List<AdalUserInfo>();
+        }
 
-        /// <summary>
-        /// </summary>
-        public string Tenant { get; set; }
+        public AdalUsersForMsalResult(Dictionary<string, AdalUserInfo> clientInfoUsers, List<AdalUserInfo> usersWithoutClientInfo)
+        {
+            ClientInfoUsers = clientInfoUsers;
+            UsersWithoutClientInfo = usersWithoutClientInfo;
+        }
 
-        /// <summary>
-        /// </summary>
-        public string RedirectUri { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public LogLevel LogLevel { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool EnablePiiLogging { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public bool IsDefaultPlatformLoggingEnabled { get; set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public string SliceParameters { get; set; }
-
-        /// <summary>
-        /// TODO: do we have a better / more descriptive name for this?
-        /// </summary>
-        public string Component { get; set; }
+        public Dictionary<string, AdalUserInfo> ClientInfoUsers { get; }
+        public List<AdalUserInfo> UsersWithoutClientInfo { get; }
     }
 }

@@ -93,12 +93,10 @@ namespace Microsoft.Identity.Client
         /// </param>
         public PublicClientApplication(string clientId, string authority)
             : base(PublicClientApplicationBuilder
-                   .Create(
-                       clientId, 
-                       "WHATTENANTGOESHERE", 
-                       PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
+                   .Create(clientId)
+                   .WithRedirectUri(PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
                    .WithAuthority(authority, true, true)
-                   .WithUserTokenCache(new TokenCache())  // TODO: ensure clientid gets set properly this way during build...
+                   .WithUserTokenCache(new TokenCache())
                    .BuildConfiguration())
         {
         }

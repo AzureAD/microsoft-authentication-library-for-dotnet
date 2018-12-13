@@ -51,17 +51,22 @@ namespace Microsoft.Identity.Client
     /// This class is used in the constructors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
-    /// See also <see cref="TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
     /// </summary>
     public sealed class TokenCache
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
+        private const string AccessTokenKey = "access_tokens";
+        private const string RefreshTokenKey = "refresh_tokens";
+        private const string IdTokenKey = "id_tokens";
+        private const string AccountKey = "accounts";
+
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
         // TODO: look at managing construction of tokencache entirely inside of config object so we can remove this
         // or just leave it null and ensure we don't de-ref it until we're bound inside of a PCA.
         private IServiceBundle _serviceBundle = Core.ServiceBundle.Create(PublicClientApplicationBuilder.Create("invalid_client_id", ClientApplicationBase.DefaultAuthority).BuildConfiguration());
+        private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
         internal IServiceBundle ServiceBundle
         {
@@ -260,8 +265,6 @@ namespace Microsoft.Identity.Client
                 }
         }
     }
-
-        internal ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
     private void DeleteAccessTokensWithIntersectingScopes(AuthenticationRequestParameters requestParams,
        ISet<string> environmentAliases, string tenantId, SortedSet<string> scopeSet, string homeAccountId)
@@ -809,7 +812,7 @@ namespace Microsoft.Identity.Client
             ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
             ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
 
-            var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(Logger, LegacyCachePersistence, ClientId);
+            var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(Logger, LegacyCachePersistence, ClientId);
             OnAfterAccess(args);
 
             IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -826,8 +829,8 @@ namespace Microsoft.Identity.Client
                 }
             }
 
-            Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
-            List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
+            Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = adalUsersResult.ClientInfoUsers;
+            List<AdalUserInfo> adalUsersWithoutClientInfo = adalUsersResult.UsersWithoutClientInfo;
 
             foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)
             {
@@ -1207,47 +1210,244 @@ namespace Microsoft.Identity.Client
         }
     }
 
-    /// <summary>
-    /// Only used by dev test apps
-    /// </summary>
-    /// <param name="msalRefreshTokenCacheItem"></param>
-    /// <param name="msalIdTokenCacheItem"></param>
-    internal void SaveRefreshTokenCacheItem(
-        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
-        MsalIdTokenCacheItem msalIdTokenCacheItem)
-    {
-        lock (LockObject)
+        /// <summary>
+        /// Only used by dev test apps
+        /// </summary>
+        /// <param name="msalRefreshTokenCacheItem"></param>
+        /// <param name="msalIdTokenCacheItem"></param>
+        internal void SaveRefreshTokenCacheItem(
+            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
-            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+            lock (LockObject)
             {
-                TokenCache = this,
-                ClientId = ClientId,
-                Account = msalIdTokenCacheItem != null ?
-                       new Account(
-                           msalIdTokenCacheItem.HomeAccountId,
-                           msalIdTokenCacheItem.IdToken.PreferredUsername,
-                           msalIdTokenCacheItem.IdToken.Name) : null,
-                HasStateChanged = true
-            };
+                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                {
+                    TokenCache = this,
+                    ClientId = ClientId,
+                    Account = msalIdTokenCacheItem != null
+                                  ? new Account(
+                                      msalIdTokenCacheItem.HomeAccountId,
+                                      msalIdTokenCacheItem.IdToken.PreferredUsername,
+                                      msalIdTokenCacheItem.IdToken.Name)
+                                  : null,
+                    HasStateChanged = true
+                };
 
-            try
-            {
+                try
+                {
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = true;
 #pragma warning restore CS0618 // Type or member is obsolete
                     OnBeforeAccess(args);
-                OnBeforeWrite(args);
+                    OnBeforeWrite(args);
 
-                TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
-            }
-            finally
-            {
-                OnAfterAccess(args);
+                    TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                }
+                finally
+                {
+                    OnAfterAccess(args);
 #pragma warning disable CS0618 // Type or member is obsolete
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
+            }
         }
+
+        #region TOKEN CACHE EXTENSIONS
+
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+
+        /// <summary>
+        /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
+        /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
+        /// <remarks>In the case where the delegate is used to deserialize the cache, it might
+        /// want to call <see cref="Deserialize(byte[])"/></remarks>
+        public void SetBeforeAccess(TokenCacheNotification beforeAccess)
+        {
+            GuardOnMobilePlatforms();
+            BeforeAccess = beforeAccess;
+        }
+
+        /// <summary>
+        /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
+        /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
+        /// member of the cache is <c>true</c></param>
+        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
+        /// want to call <see cref="Serialize()"/></remarks>
+        public void SetAfterAccess(TokenCacheNotification afterAccess)
+        {
+            GuardOnMobilePlatforms();
+            AfterAccess = afterAccess;
+        }
+
+        /// <summary>
+        /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
+        /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
+        /// registered with <see cref="SetAfterAccess(TokenCacheNotification)"/>
+        /// </summary>
+        /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
+        public void SetBeforeWrite(TokenCacheNotification beforeWrite)
+        {
+            GuardOnMobilePlatforms();
+            BeforeWrite = beforeWrite;
+        }
+
+        /// <summary>
+        /// Deserializes the token cache from a serialization blob in the unified cache format
+        /// </summary>
+        /// <param name="unifiedState">Array of bytes containing serialized Msal cache data</param>
+        /// <remarks>
+        /// <paramref name="unifiedState"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
+        /// </remarks>
+        public void Deserialize(byte[] unifiedState)
+        {
+            GuardOnMobilePlatforms();
+            lock (LockObject)
+            {
+                var requestContext = CreateRequestContext();
+                TokenCacheAccessor.Clear();
+
+                Dictionary<string, IEnumerable<string>> cacheDict = JsonHelper
+                    .DeserializeFromJson<Dictionary<string, IEnumerable<string>>>(unifiedState);
+
+                if (cacheDict == null || cacheDict.Count == 0)
+                {
+                    Logger.Info("Msal Cache is empty.");
+                    return;
+                }
+
+                if (cacheDict.ContainsKey(AccessTokenKey))
+                {
+                    foreach (var atItem in cacheDict[AccessTokenKey])
+                    {
+                        var msalAccessTokenCacheItem =
+                            JsonHelper.TryToDeserializeFromJson<MsalAccessTokenCacheItem>(atItem, requestContext);
+                        if (msalAccessTokenCacheItem != null)
+                        {
+                            TokenCacheAccessor.SaveAccessToken(msalAccessTokenCacheItem);
+                        }
+                    }
+                }
+
+                if (cacheDict.ContainsKey(RefreshTokenKey))
+                {
+                    foreach (var rtItem in cacheDict[RefreshTokenKey])
+                    {
+                        var msalRefreshTokenCacheItem =
+                            JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(rtItem, requestContext);
+                        if (msalRefreshTokenCacheItem != null)
+                        {
+                            TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                        }
+                    }
+                }
+
+                if (cacheDict.ContainsKey(IdTokenKey))
+                {
+                    foreach (var idItem in cacheDict[IdTokenKey])
+                    {
+                        var msalIdTokenCacheItem =
+                            JsonHelper.TryToDeserializeFromJson<MsalIdTokenCacheItem>(idItem, requestContext);
+                        if (msalIdTokenCacheItem != null)
+                        {
+                            TokenCacheAccessor.SaveIdToken(msalIdTokenCacheItem);
+                        }
+                    }
+                }
+
+                if (cacheDict.ContainsKey(AccountKey))
+                {
+                    foreach (var account in cacheDict[AccountKey])
+                    {
+                        var msalAccountCacheItem =
+                            JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(account, requestContext);
+
+                        if (msalAccountCacheItem != null)
+                        {
+                            TokenCacheAccessor.SaveAccount(msalAccountCacheItem);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the token cache from a serialization blob in both format (ADAL V3 format, and unified cache format)
+        /// </summary>
+        /// <param name="cacheData">Array of bytes containing serialicache data</param>
+        public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
+        {
+            GuardOnMobilePlatforms();
+            lock (LockObject)
+            {
+                Deserialize(cacheData.UnifiedState);
+                LegacyCachePersistence.WriteCache(cacheData.AdalV3State);
+            }
+        }
+
+        /// <summary>
+        /// Serializes the entire token cache, in the unified cache format only
+        /// </summary>
+        /// <returns>array of bytes containing the serialized unified cache</returns>
+        public byte[] Serialize()
+        {
+            GuardOnMobilePlatforms();
+            // reads the underlying in-memory dictionary and dumps out the content as a JSON
+            lock (LockObject)
+            {
+                // reads the underlying in-memory dictionary and dumps out the content as a JSON
+                var cacheDict = new Dictionary<string, IEnumerable<string>>
+                {
+                    [AccessTokenKey] = TokenCacheAccessor.GetAllAccessTokensAsString(),
+                    [RefreshTokenKey] = TokenCacheAccessor.GetAllRefreshTokensAsString(),
+                    [IdTokenKey] = TokenCacheAccessor.GetAllIdTokensAsString(),
+                    [AccountKey] = TokenCacheAccessor.GetAllAccountsAsString()
+                };
+
+                return JsonHelper.SerializeToJson(cacheDict).ToByteArray();
+            }
+        }
+
+        /// <summary>
+        /// Serializes the entire token cache in both the ADAL V3 and unified cache formats.
+        /// </summary>
+        /// <returns>Serialized token cache <see cref="CacheData"/></returns>
+        public CacheData SerializeUnifiedAndAdalCache()
+        {
+            GuardOnMobilePlatforms();
+            // reads the underlying in-memory dictionary and dumps out the content as a JSON
+            lock (LockObject)
+            {
+                var serializedUnifiedCache = Serialize();
+                var serializeAdalCache = LegacyCachePersistence.LoadCache();
+
+                return new CacheData()
+                {
+                    AdalV3State = serializeAdalCache,
+                    UnifiedState = serializedUnifiedCache
+                };
+            }
+        }
+        
+        private static void GuardOnMobilePlatforms()
+        {
+#if ANDROID || iOS || WINDOWS_APP
+        throw new PlatformNotSupportedException("You should not use these TokenCache methods object on mobile platforms. " +
+            "They meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
+            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
+#endif
+        }
+
+#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+
+        #endregion // TOKEN CACHE EXTENSIONS
     }
-}
 }

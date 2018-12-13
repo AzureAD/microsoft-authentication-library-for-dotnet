@@ -27,10 +27,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
@@ -107,7 +105,7 @@ namespace Microsoft.Identity.Client.Cache
         /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo 
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
-        public static Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal(
+        public static AdalUsersForMsalResult GetAllAdalUsersForMsal(
             ICoreLogger logger,
             ILegacyCachePersistence legacyCachePersistence, 
             string clientId)
@@ -141,9 +139,9 @@ namespace Microsoft.Identity.Client.Cache
                 logger.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
-                return Tuple.Create(new Dictionary<string, AdalUserInfo>(), new List<AdalUserInfo>());
+                return new AdalUsersForMsalResult();
             }
-            return Tuple.Create(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
+            return new AdalUsersForMsalResult(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
         }
 
         /// <summary>

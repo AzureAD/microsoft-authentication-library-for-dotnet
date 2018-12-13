@@ -505,8 +505,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
-                AdalCacheOperations.Deserialize(cache.Logger, cache.LegacyCachePersistence.LoadCache());
-            cache.LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(cache.Logger, dictionary));
+                AdalCacheOperations.Deserialize(RequestContext.CreateForTest(serviceBundle).Logger, cache.LegacyCachePersistence.LoadCache());
+            cache.LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(RequestContext.CreateForTest(serviceBundle).Logger, dictionary));
 
             // ADAL cache is empty because B2C scenario is only for MSAL
             Assert.AreEqual(0, dictionary.Count);
