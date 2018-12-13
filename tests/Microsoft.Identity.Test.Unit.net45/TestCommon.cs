@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Test.Unit
             LogCallback logCallback = null,
             string authority = ClientApplicationBase.DefaultAuthority,
             bool validateAuthority = true,
+            bool isExtendedTokenLifetimeEnabled = false,
             string clientId = MsalTestConstants.ClientId)
         {
             var appConfig = new ApplicationConfiguration()
@@ -58,7 +59,9 @@ namespace Microsoft.Identity.Test.Unit
                 ClientId = clientId,
                 HttpManager = httpManager,
                 TelemetryReceiver = telemetryReceiver,
-                LoggingCallback = logCallback
+                LoggingCallback = logCallback,
+                LogLevel = LogLevel.Verbose,
+                IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled
             };
             appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, validateAuthority, true));
 

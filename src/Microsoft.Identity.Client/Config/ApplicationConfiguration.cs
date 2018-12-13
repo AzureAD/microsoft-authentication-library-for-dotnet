@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Config
         public string Tenant { get; internal set; }
         public string RedirectUri { get; internal set; } = Constants.DefaultRedirectUri;
         public bool EnablePiiLogging { get; internal set; }
-        public LogLevel LogLevel { get; internal set; }
+        public LogLevel LogLevel { get; internal set; } = LogLevel.Warning;
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public IHttpManager HttpManager { get; set; }

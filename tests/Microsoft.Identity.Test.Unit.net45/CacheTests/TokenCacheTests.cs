@@ -261,7 +261,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager);
+                var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(httpManager, isExtendedTokenLifetimeEnabled: true);
                 httpManager.AddInstanceDiscoveryMockHandler();
                 var cache = new TokenCache()
                 {
@@ -282,9 +282,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 atItem.Secret = atItem.GetKey().ToString();
                 cache.TokenCacheAccessor.SaveAccessToken(atItem);
-
-                // TODO: This test was setting extended lifetime on the AuthRequestParameters, needs to be in the config
-                // IsExtendedLifeTimeEnabled = true,
 
                 var cacheItem = cache.FindAccessTokenAsync(
                     new AuthenticationRequestParameters()

@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ClientId = MsalTestConstants.ClientId,
                 Scope = MsalTestConstants.Scope,
                 TokenCache = cache,
-                RequestContext = RequestContext.CreateForTest()
+                RequestContext = RequestContext.CreateForTest(serviceBundle)
             };
 
             TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);

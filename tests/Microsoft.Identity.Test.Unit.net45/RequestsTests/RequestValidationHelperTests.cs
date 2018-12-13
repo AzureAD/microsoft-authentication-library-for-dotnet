@@ -68,13 +68,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 ClientCredential = credential,
                 SendCertificate = false,
-                Authority = Authority.CreateAuthority(
-                    _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false)
+                Authority = Authority.CreateAuthority(_serviceBundle, MsalTestConstants.AuthorityCommonTenant, false),
+                Endpoints = new AuthorityEndpoints(null, null, Audience1)
             };
-            // TODO: how is this used on the authority?  in other cases it's in the endpoint response so need to figure out how this is consumed.
-            //parameters.Authority.SelfSignedJwtAudience = Audience1;
 
             //Validate cached client assertion with parameters
             Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
@@ -121,16 +117,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 ClientCredential = credential,
                 SendCertificate = false,
-                Authority = Authority.CreateAuthority(
-                    _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false)
+                Authority = Authority.CreateAuthority(_serviceBundle, MsalTestConstants.AuthorityCommonTenant, false),
+                Endpoints = new AuthorityEndpoints(null, null, "Audience1")
             };
-            // TODO: how is this used on the authority?  in other cases it's in the endpoint response so need to figure out how this is consumed.
-            //parameters.Authority.SelfSignedJwtAudience = "Audience1";
 
-            //Validate cached client assertion with expiration time
-            //Cached assertion should be valid
+            // Validate cached client assertion with expiration time
+            // Cached assertion should be valid
             Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
 
             //Setting expiration time to now

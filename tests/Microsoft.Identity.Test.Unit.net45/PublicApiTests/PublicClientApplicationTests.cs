@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
-            Assert.IsTrue(app.ValidateAuthority);
+            Assert.IsFalse(app.ValidateAuthority);   // TODO: need to validate this with others.  This SHOULD be false (as i've changed it to) since this is a B2C authority being used here.
         }
 
         [TestMethod]
@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId, ClientApplicationBase.DefaultAuthority)
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant)
                     .WithHttpManager(httpManager)
                     .WithTelemetryCallback(_myReceiver)
                     .BuildConcrete();

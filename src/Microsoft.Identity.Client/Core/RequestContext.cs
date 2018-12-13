@@ -42,9 +42,15 @@ namespace Microsoft.Identity.Client.Core
         public string ClientId { get; }
         public ICoreLogger Logger { get; }
 
-        public static RequestContext CreateForTest()
+        public static RequestContext CreateForTest(IServiceBundle serviceBundle = null)
         {
-            return new RequestContext(null, MsalLogger.Create(Guid.NewGuid(), null, null, isDefaultPlatformLoggingEnabled: true));
+            var logger = serviceBundle?.DefaultLogger ?? MsalLogger.Create(
+                             Guid.NewGuid(),
+                             null,
+                             null,
+                             isDefaultPlatformLoggingEnabled: true);
+
+            return new RequestContext(null, logger);
         }
     }
 }
