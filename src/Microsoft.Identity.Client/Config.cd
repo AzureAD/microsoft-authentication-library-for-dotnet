@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="Microsoft.Identity.Client.Config.AbstractConfigurationBuilder&lt;T&gt;">
+    <Position X="6.5" Y="0.5" Width="7" />
+    <Members>
+      <Method Name="AbstractConfigurationBuilder" Hidden="true" />
+      <Method Name="AuthorityUriFromAadAuthorityAudience" Hidden="true" />
+      <Method Name="BuildConfiguration" Hidden="true" />
+      <Method Name="WithHttpManager" Hidden="true" />
+      <Method Name="WithTelemetryCallback" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AYAAAACJEiAYAAAAAAAAQAADAAAIABAAAABABAIAAAA=</HashCode>
+      <FileName>Config\AbstractConfigurationBuilder.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Config" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.Config.ApplicationConfiguration" BaseTypeListCollapsed="true">
+    <Position X="14.5" Y="0.5" Width="3.75" />
+    <Members>
+      <Field Name="_authorityInfos" Hidden="true" />
+      <Method Name="AddAuthorityInfo" Hidden="true" />
+      <Method Name="ApplicationConfiguration" Hidden="true" />
+      <Method Name="InitializeDefaults" Hidden="true" />
+    </Members>
+    <AssociationLine Name="Authorities" Type="Microsoft.Identity.Client.Config.AuthorityInfo">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.172" Y="0.129" Height="0.182" Width="1.416" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAEQAAgCRAQQAAICgAAAAAAAAABCAAKgAAIAAAAEAAA=</HashCode>
+      <FileName>Config\ApplicationConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="_authorityInfos" />
+      <Property Name="HttpClientFactory" />
+      <Property Name="DefaultAuthorityInfo" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Authorities" />
+    </ShowAsCollectionAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="Microsoft.Identity.Client.Config.ApplicationOptions">
+    <Position X="16" Y="8.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAAAAAAABAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>Config\ApplicationOptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.Config.AuthorityInfo">
+    <Position X="20" Y="0.5" Width="3.25" />
+    <Members>
+      <Method Name="CanonicalizeAuthorityUri" Hidden="true" />
+      <Method Name="FromAuthorityUri" Hidden="true" />
+      <Method Name="GetFirstPathSegment" Hidden="true" />
+      <Method Name="ValidateAuthorityUri" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAQQAAAAAAQgAAAAAAAAACAAAICAAIAAACAAAAAEA=</HashCode>
+      <FileName>Config\AuthorityInfo.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AuthorityType" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.Config.ConfidentialApplicationOptions">
+    <Position X="15.5" Y="10.5" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAA=</HashCode>
+      <FileName>Config\ConfidentialApplicationOptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.Config.ConfidentialClientApplicationBuilder">
+    <Position X="7.5" Y="7.75" Width="7" />
+    <Members>
+      <Method Name="BuildConcrete" Hidden="true" />
+      <Method Name="ConfidentialClientApplicationBuilder" Hidden="true" />
+    </Members>
+    <InheritanceLine Type="Microsoft.Identity.Client.Config.AbstractConfigurationBuilder&lt;T&gt;" FixedToPoint="true">
+      <Path>
+        <Point X="10" Y="4.296" />
+        <Point X="10" Y="4.745" />
+        <Point X="13.25" Y="4.745" />
+        <Point X="13.25" Y="7.75" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAEAgBAAAAAAAAAAAAAAAgEAAEEAAAAAAAAA=</HashCode>
+      <FileName>Config\ConfidentialClientApplicationBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.Config.PublicClientApplicationBuilder">
+    <Position X="6" Y="5.25" Width="6.25" />
+    <Members>
+      <Method Name="BuildConcrete" Hidden="true" />
+      <Method Name="PublicClientApplicationBuilder" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAgAAAAAAAAAAAAAAAAgEAAAEAAAAAAAAA=</HashCode>
+      <FileName>Config\PublicClientApplicationBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Microsoft.Identity.Client.Config.IApplicationConfiguration">
+    <Position X="18" Y="3.5" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAgCQAQQAAIAgAAAAAAAAABAAAKAAAIAAAAEAAA=</HashCode>
+      <FileName>Config\IApplicationConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Microsoft.Identity.Client.Config.IMsalHttpClientFactory">
+    <Position X="14.25" Y="5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Config\IMsalHttpClientFactory.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Microsoft.Identity.Client.Config.AuthorityType">
+    <Position X="24.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABEAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Config\AuthorityType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Microsoft.Identity.Client.Config.AadAuthorityAudience">
+    <Position X="11.75" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAIAAAAAAAACAAAAAAEAEAAAA=</HashCode>
+      <FileName>Config\AadAuthorityAudience.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
