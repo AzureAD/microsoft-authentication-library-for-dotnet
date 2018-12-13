@@ -609,9 +609,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                 .CanonicalAuthority;
 
                 var app = ConfidentialClientApplicationBuilder
-                          .Create(MsalTestConstants.ClientId, authority, false).WithRedirectUri(MsalTestConstants.RedirectUri)
+                          .Create(MsalTestConstants.ClientId, authority, false)
+                          .WithRedirectUri(MsalTestConstants.RedirectUri)
                           .WithHttpManager(httpManager)
-                          .WithClientCredential(new ClientCredential(MsalTestConstants.ClientSecret)).WithAppTokenCache(cache)
+                          .WithTelemetryCallback(receiver)
+                          .WithClientCredential(new ClientCredential(MsalTestConstants.ClientSecret))
+                          .WithAppTokenCache(cache)
                           .BuildConcrete();
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);

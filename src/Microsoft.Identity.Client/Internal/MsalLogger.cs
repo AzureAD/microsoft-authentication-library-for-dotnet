@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Client.Internal
         public static ICoreLogger Create(Guid correlationId, string component, IApplicationConfiguration config, bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(
-                Guid.Empty,
-                null,
+                correlationId,
+                component,
                 config?.LogLevel ?? LogLevel.Verbose,
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
