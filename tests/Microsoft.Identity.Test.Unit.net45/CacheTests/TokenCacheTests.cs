@@ -49,6 +49,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public static long ValidExtendedExpiresIn = 7200;
 
         private TokenCache _cache;
+        private readonly TokenCacheHelper _tokenCacheHelper = new TokenCacheHelper();
 
         [TestInitialize]
         public void TestInitialize()
@@ -1085,39 +1086,34 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void FindAccessToken_ScopeCaseInsensitive()
         {
-            using (var httpManager = new MockHttpManager())
+            var serviceBundle = ServiceBundle.CreateDefault();
+
+            var tokenCache = new TokenCache()
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                httpManager.AddInstanceDiscoveryMockHandler();
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
+                ClientId = MsalTestConstants.ClientId,
+                ServiceBundle = serviceBundle
+            };
 
-                var tokenCache = new TokenCache()
-                {
-                    ClientId = MsalTestConstants.ClientId,
-                    ServiceBundle = serviceBundle
-                };
+            _tokenCacheHelper.PopulateCacheWithOneAccessToken(tokenCache.TokenCacheAccessor);
 
-                TokenCacheHelper.PopulateCache(tokenCache.TokenCacheAccessor);
+            var param = new AuthenticationRequestParameters()
+            {
+                RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
+                ClientId = MsalTestConstants.ClientId,
+                Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
+                Scope = new SortedSet<string>(),
+                Account = MsalTestConstants.User
+            };
 
-                var param = new AuthenticationRequestParameters()
-                {
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null)),
-                    ClientId = MsalTestConstants.ClientId,
-                    Authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityTestTenant, false),
-                    Scope = new SortedSet<string>(),
-                    Account = MsalTestConstants.User
-                };
+            string scopeInCache = MsalTestConstants.Scope.FirstOrDefault();
 
-                string scopeInCache = MsalTestConstants.Scope.FirstOrDefault();
+            string upperCaseScope = scopeInCache.ToUpperInvariant();
+            param.Scope.Add(upperCaseScope);
 
-                string upperCaseScope = scopeInCache.ToUpperInvariant();
-                param.Scope.Add(upperCaseScope);
+            var item = tokenCache.FindAccessTokenAsync(param).Result;
 
-                var item = tokenCache.FindAccessTokenAsync(param).Result;
-
-                Assert.IsNotNull(item);
-                Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
-            }
+            Assert.IsNotNull(item);
+            Assert.IsTrue(item.ScopeSet.Contains(scopeInCache));
         }
 
         [TestMethod]

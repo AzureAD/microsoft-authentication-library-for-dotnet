@@ -47,12 +47,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     public class SilentRequestTests
     {
         private TokenCache _cache;
+        private TokenCacheHelper _tokenCacheHelper;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
             _cache = new TokenCache();
+            _tokenCacheHelper = new TokenCacheHelper();
         }
 
         [TestCleanup]
@@ -119,7 +121,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     ServiceBundle = serviceBundle
                 };
-                TokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
+                _tokenCacheHelper.PopulateCache(cache.TokenCacheAccessor);
 
                 AuthenticationRequestParameters parameters = new AuthenticationRequestParameters()
                 {
