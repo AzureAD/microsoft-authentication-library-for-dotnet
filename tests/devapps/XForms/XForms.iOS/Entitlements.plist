@@ -4,7 +4,7 @@
 <dict>
 	<key>keychain-access-groups</key>
 	<array>
-		<string>PLBJX365QU.com.microsoft.adalcache</string>
+		<string>PLBJX365QU.com.xamarin.xtcapp3</string>
 	</array>
 </dict>
 </plist>
