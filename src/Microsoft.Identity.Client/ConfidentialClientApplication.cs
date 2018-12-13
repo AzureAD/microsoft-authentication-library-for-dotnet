@@ -54,11 +54,6 @@ namespace Microsoft.Identity.Client
     /// </remarks>
     public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
     {
-        static ConfidentialClientApplication()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         internal ConfidentialClientApplication(ApplicationConfiguration config)
             : base(config)
         {

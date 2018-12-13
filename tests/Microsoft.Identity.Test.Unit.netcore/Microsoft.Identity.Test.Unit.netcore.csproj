@@ -16,6 +16,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     
+    <Compile Remove="..\Microsoft.Identity.Test.Unit.net45\ModuleInitializerTest.cs" />
+    
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.4" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />

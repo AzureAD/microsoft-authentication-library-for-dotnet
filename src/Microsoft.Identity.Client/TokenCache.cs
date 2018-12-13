@@ -82,11 +82,6 @@ namespace Microsoft.Identity.Client
                 MsalLogger.Create(Guid.Empty, string.Empty, ServiceBundle.Config));
         }
 
-        static TokenCache()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         private const int DefaultExpirationBufferInMinutes = 5;
 
         internal TelemetryTokenCacheAccessor TokenCacheAccessor { get; }

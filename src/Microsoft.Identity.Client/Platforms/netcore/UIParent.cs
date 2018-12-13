@@ -41,11 +41,6 @@ namespace Microsoft.Identity.Client
     {
         internal CoreUIParent CoreUIParent { get; }
 
-        static UIParent()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         /// <summary>
         /// Default constructor. Will throw a PlatformNotSupported exception on .netcore because .netcore does not support Interactive Flows. 
         /// </summary>

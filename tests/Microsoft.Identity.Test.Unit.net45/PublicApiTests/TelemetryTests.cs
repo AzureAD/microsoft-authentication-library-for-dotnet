@@ -31,7 +31,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -81,28 +80,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private const string TenantId = "1234";
         private const string UserId = "5678";
-
-        [TestMethod]
-        [TestCategory("TelemetryTests")]
-        public void TelemetryPublicApiSample()
-        {
-            var telemetry = Telemetry.GetInstance();
-            var receiver = new MyReceiver();
-            telemetry.RegisterReceiver(receiver.HandleTelemetryEvents);
-
-            // Or you can use a one-liner:
-            Telemetry.GetInstance().RegisterReceiver(new MyReceiver().HandleTelemetryEvents);
-        }
-
-        [TestMethod]
-        [TestCategory("TelemetryTests")]
-        public void TelemetryIsSingleton()
-        {
-            var t1 = Telemetry.GetInstance();
-            Assert.IsNotNull(t1);
-            var t2 = Telemetry.GetInstance();
-            Assert.AreEqual(t1, t2);
-        }
 
         [TestMethod]
         [TestCategory("TelemetryInternalAPI")]

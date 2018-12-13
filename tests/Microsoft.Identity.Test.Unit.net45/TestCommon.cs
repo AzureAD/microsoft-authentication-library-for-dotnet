@@ -29,7 +29,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -40,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit
     {
         public static void ResetStateAndInitMsal()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
+            // TODO: these still have static, process-wide state.  They aren't as disruptive as the other statics we removed, but we should look to isolate these as well.
             new AadInstanceDiscovery(null, null, true);
             new ValidatedAuthoritiesCache(true);
             new AuthorityEndpointResolutionManager(null, true);
