@@ -95,7 +95,7 @@ namespace WebApi.Controllers
 
             var confidentialClient = new ConfidentialClientApplication(
                 Startup.Configuration["AzureAd:ClientId"],
-                Startup.Configuration["AzureAd:TenantAuthority"],
+                Startup.Configuration["AzureAd:CommonAuthority"],
                 Startup.Configuration["AzureAd:RedirectUri"],
                 new ClientCredential(Startup.Configuration["AzureAd:Secret"]),
                 userCache, appCache);

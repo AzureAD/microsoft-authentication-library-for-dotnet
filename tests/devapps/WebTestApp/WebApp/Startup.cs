@@ -41,6 +41,7 @@ using System.Globalization;
 using System.Linq;
 using Microsoft.IdentityModel.Tokens;
 using WebApp.Utils;
+using Microsoft.Identity.Client.DevAppsTelemetry;
 
 namespace WebApp
 {
@@ -114,6 +115,9 @@ namespace WebApp
             ClientSecret = Configuration["AzureAd:ClientSecret"];
             GraphResourceId = Configuration["AzureAd:GraphResourceId"];
             TodoListResourceId = Configuration["AzureAd:TodoListResourceId"];
+
+            // Register Telemetry Receiver
+            Telemetry.GetInstance().RegisterReceiver(new ServerTelemetryHandler().OnEvents);
 
             // Configure the OWIN pipeline to use cookie auth.
             app.UseCookieAuthentication(new CookieAuthenticationOptions());

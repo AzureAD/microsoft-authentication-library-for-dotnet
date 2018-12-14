@@ -30,6 +30,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.DevAppsTelemetry;
 using Microsoft.IdentityModel.Tokens;
 
 namespace WebApi
@@ -61,7 +63,10 @@ namespace WebApi
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             // Add the console logger.
-            loggerFactory.AddConsole(LogLevel.Debug);
+            loggerFactory.AddConsole(Microsoft.Extensions.Logging.LogLevel.Debug);
+
+            // Register Telemetry Receiver
+            Telemetry.GetInstance().RegisterReceiver(new ServerTelemetryHandler().OnEvents);
 
             // Configure the app to use Jwt Bearer Authentication
             app.UseJwtBearerAuthentication(new JwtBearerOptions

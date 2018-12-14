@@ -38,7 +38,9 @@ using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.DevAppsTelemetry;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace DesktopTestApp
@@ -66,6 +68,11 @@ namespace DesktopTestApp
 
             LoadSettings();
             Logger.LogCallback = LogDelegate;
+
+            //ITelemetryReceiver serverTelemetryHandler = new ServerTelemetryHandler();
+            //TelemetryManager telemetryManager = new TelemetryManager(serverTelemetryHandler);
+
+            Telemetry.GetInstance().RegisterReceiver(new ServerTelemetryHandler().OnEvents);
         }
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)

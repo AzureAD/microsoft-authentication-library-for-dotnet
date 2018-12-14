@@ -100,6 +100,10 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Telemetry\Telemetry.csproj">
+      <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
+      <Name>Telemetry</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

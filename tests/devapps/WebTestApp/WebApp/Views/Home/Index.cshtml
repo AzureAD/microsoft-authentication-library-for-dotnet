@@ -6,11 +6,11 @@
     if (User.Identity.IsAuthenticated)
     {
         <ul>
-            <li><a asp-controller="Home" asp-action="CallGraphMeQuery">Call Graph Me query by User Credential</a></li>
-            <li><a asp-controller="Home" asp-action="CallGraphUsersQueryBySecretClientCredential">Call Graph Users query by Secret ClientCredential</a></li>
-            <li><a asp-controller="Home" asp-action="CallGraphUsersQueryByCertClientCredential">Call Graph Users query by Certificate ClientCredential</a></li>
-            <li><a asp-controller="Home" asp-action="RequestApplicationPermissions">Request Application Permissions</a></li>
-            <li><a asp-controller="Home" asp-action="CallWebApiUserProfileQuery">Call WebApi UserProfile query by User Credential (WebApi will execute On Behalf Of User call to Graph Me query)</a></li>
+            <li><a asp-controller="Home" asp-action="CallGraphMeQueryAsync">Call Graph Me query by User Credential</a></li>
+            <li><a asp-controller="Home" asp-action="CallGraphUsersQueryBySecretClientCredentialAsync">Call Graph Users query by Secret ClientCredential</a></li>
+            <li><a asp-controller="Home" asp-action="CallGraphUsersQueryByCertClientCredentialAsync">Call Graph Users query by Certificate ClientCredential</a></li>
+            <li><a asp-controller="Home" asp-action="RequestApplicationPermissionsAsync">Request Application Permissions</a></li>
+            <li><a asp-controller="Home" asp-action="CallWebApiUserProfileQueryAsync">Call WebApi UserProfile query by User Credential (WebApi will execute On Behalf Of User call to Graph Me query)</a></li>
         </ul>
     }
     else

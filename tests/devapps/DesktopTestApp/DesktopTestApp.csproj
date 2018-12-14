@@ -127,6 +127,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Telemetry\Telemetry.csproj">
+      <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
+      <Name>Telemetry</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
       <Name>Microsoft.Identity.Test.LabInfrastructure</Name>

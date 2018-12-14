@@ -11,13 +11,13 @@
                 {
                     <ul style="list-style-type: none;">
                         <li>Hello, @User.FindFirst("name") </li>
-                        <li><a asp-controller="Account" asp-action="LogOff">Log Out</a></li>
+                        <li><a asp-controller="Account" asp-action="LogOffAsync">Log Out</a></li>
                     </ul>
                 }
                 else
                 {
                     <ul style="list-style-type: none;">
-                        <li><a asp-controller="Account" asp-action="Login">Log In</a></li>
+                        <li><a asp-controller="Account" asp-action="LoginAsync">Log In</a></li>
                     </ul>
                 }
             </td>
