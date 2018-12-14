@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             IWebDriver driver = _seleniumWrapper.Driver;
 
             Trace.WriteLine("Logging in ... Entering username");
-            driver.FindElement(By.Id(CoreUiTestConstants.WebUPNInputID)).SendKeys(user.Upn); 
+            driver.FindElement(By.Id(CoreUiTestConstants.WebUpnInputId)).SendKeys(user.Upn); 
 
             Trace.WriteLine("Logging in ... Clicking next after username");
             driver.FindElement(By.Id(fields.SignInButtonId)).Click(); 
