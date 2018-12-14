@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             _msalMobileTestHelper.SetUiBehavior(xamarinController, CoreUiTestConstants.UIBehaviorSelectAccount);
 
             // 3. Hit Acquire Token directly since we are not changing any other setting
-            xamarinController.Tap(CoreUiTestConstants.AcquireTokenID);
+            xamarinController.Tap(CoreUiTestConstants.AcquireTokenId);
 
             // 4. The web UI should display all users, so click on the current user
             xamarinController.Tap(labData.User.Upn, XamarinSelector.ByHtmlValue);
