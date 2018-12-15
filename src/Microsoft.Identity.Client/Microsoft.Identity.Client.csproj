@@ -1,8 +1,8 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net462;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>-->
-    <TargetFrameworks>net462;netstandard1.3;netcoreapp1.0</TargetFrameworks>
+    <TargetFrameworks>net462;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
+    <!-- <TargetFrameworks>net462;netstandard1.3;netcoreapp1.0</TargetFrameworks> -->
   </PropertyGroup>
 
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
