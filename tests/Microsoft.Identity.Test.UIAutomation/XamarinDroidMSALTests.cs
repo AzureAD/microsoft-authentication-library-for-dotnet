@@ -31,6 +31,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 using Xamarin.UITest;
 
 //NOTICE! Inorder to run UI automation tests for xamarin locally, you may need to upgrade nunit to 3.0 and above for this project and the core ui Automation project.
@@ -93,25 +94,35 @@ namespace Microsoft.Identity.Test.UIAutomation
                 B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest,
             };
 
+            var hasFailed = false;
+            var stringBuilder = new StringBuilder();
             foreach(Action test in tests)
             {
                 try
                 {
-                    Trace.Write($"Running test: {nameof(test)}");
+                    Console.Write($"C.Running test: {nameof(test)}");
+                    Debug.Write($"Running test: {nameof(test)}");
                     test();
-                    Trace.Write($"Complete test: {nameof(test)}");
                 }
                 catch(Exception ex)
                 {
-                    Trace.Write($"Test: {nameof(test)}, Error: {ex.Message}");
-                    Trace.Write($"ErrorDetails: {ex.StackTrace}");
+                    stringBuilder.AppendLine($"Test: {nameof(test)}, Error: {ex.Message}");
+                    stringBuilder.AppendLine($"StackTrace: {ex.StackTrace}");
+                    stringBuilder.AppendLine();
+                    Debug.Write($"Test: {nameof(test)}, Error: {ex.Message}");
+                    Debug.Write($"ErrorDetails: {ex.StackTrace}");
+                    hasFailed = true;
                 }
-                finally { }
+                finally
+                {
+                    Debug.Write($"Complete test: {nameof(test)}");
+                    Console.Write($"C.Complete test: {nameof(test)}");
+                }
             }
 
             // TODO: Collect all exceptions and throw if one is failing indicating a failed test run.
+            Assert.IsFalse(hasFailed, $"Test Failed. {stringBuilder.ToString()}");
         }
-
 
         /// <summary>
         /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
