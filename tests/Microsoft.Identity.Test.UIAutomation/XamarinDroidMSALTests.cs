@@ -100,23 +100,23 @@ namespace Microsoft.Identity.Test.UIAutomation
             {
                 try
                 {
-                    Console.Write($"C.Running test: {nameof(test)}");
-                    Debug.Write($"Running test: {nameof(test)}");
+                    Console.Write($"C.Running test: {test.Method.Name}");
+                    Debug.Write($"Running test: {test.Method.Name}");
                     test();
                 }
                 catch(Exception ex)
                 {
-                    stringBuilder.AppendLine($"Test: {nameof(test)}, Error: {ex.Message}");
+                    stringBuilder.AppendLine($"Test: {test.Method.Name}, Error: {ex.Message}");
                     stringBuilder.AppendLine($"StackTrace: {ex.StackTrace}");
                     stringBuilder.AppendLine();
-                    Debug.Write($"Test: {nameof(test)}, Error: {ex.Message}");
+                    Debug.Write($"Test: {test.Method.Name}, Error: {ex.Message}");
                     Debug.Write($"ErrorDetails: {ex.StackTrace}");
                     hasFailed = true;
                 }
                 finally
                 {
-                    Debug.Write($"Complete test: {nameof(test)}");
-                    Console.Write($"C.Complete test: {nameof(test)}");
+                    Debug.Write($"Complete test: {test.Method.Name}");
+                    Console.Write($"C.Complete test: {test.Method.Name}");
                 }
             }
 
