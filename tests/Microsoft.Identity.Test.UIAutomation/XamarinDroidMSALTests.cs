@@ -95,33 +95,33 @@ namespace Microsoft.Identity.Test.UIAutomation
             };
 
             var hasFailed = false;
-            var stringBuilder = new StringBuilder();
-            foreach(Action test in tests)
+            var stringBuilderMessage = new StringBuilder();
+
+            foreach (Action test in tests)
             {
                 try
                 {
-                    Console.Write($"C.Running test: {test.Method.Name}");
-                    Debug.Write($"Running test: {test.Method.Name}");
+                    LogMessage($"Running test: {test.Method.Name}", stringBuilderMessage);
                     test();
                 }
                 catch(Exception ex)
                 {
-                    stringBuilder.AppendLine($"Test: {test.Method.Name}, Error: {ex.Message}");
-                    stringBuilder.AppendLine($"StackTrace: {ex.StackTrace}");
-                    stringBuilder.AppendLine();
-                    Debug.Write($"Test: {test.Method.Name}, Error: {ex.Message}");
-                    Debug.Write($"ErrorDetails: {ex.StackTrace}");
+                    LogMessage($"Fail: {test.Method.Name}, Error: {ex.Message}", stringBuilderMessage);
                     hasFailed = true;
                 }
                 finally
                 {
-                    Debug.Write($"Complete test: {test.Method.Name}");
-                    Console.Write($"C.Complete test: {test.Method.Name}");
+                    LogMessage($"Complete test: {test.Method.Name}", stringBuilderMessage);
                 }
             }
 
-            // TODO: Collect all exceptions and throw if one is failing indicating a failed test run.
-            Assert.IsFalse(hasFailed, $"Test Failed. {stringBuilder.ToString()}");
+            Assert.IsFalse(hasFailed, $"Test Failed. {stringBuilderMessage.ToString()}");
+        }
+
+        private static void LogMessage(string message, StringBuilder stringBuilderMessage)
+        {
+            Console.WriteLine(message);
+            stringBuilderMessage.AppendLine(message);
         }
 
         /// <summary>
