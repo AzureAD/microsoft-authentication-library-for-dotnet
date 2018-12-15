@@ -110,6 +110,11 @@ namespace Microsoft.Identity.Test.UIAutomation
                 }
                 finally
                 {
+                    Debug.Write($"Complete test: {test.Method.Name}");
+                    Console.Write($"C.Complete test: {test.Method.Name}");
+                }
+                finally
+                {
                     LogMessage($"Complete test: {test.Method.Name}", stringBuilderMessage);
                 }
             }
