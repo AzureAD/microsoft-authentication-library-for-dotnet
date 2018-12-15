@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
     public class XamarinUITestController : ITestController
     {
-        TimeSpan defaultSearchTimeout;
+        TimeSpan defaultSearchTimeout {get;}
         TimeSpan defaultRetryFrequency;
         TimeSpan defaultPostTimeout;
         const int defaultSearchTimeoutSec = 30;

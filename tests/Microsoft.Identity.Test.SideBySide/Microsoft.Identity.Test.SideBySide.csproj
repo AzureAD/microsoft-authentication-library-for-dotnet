@@ -3,19 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <IsPackable>false</IsPackable>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="4.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.3.1" />
@@ -31,8 +21,4 @@
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
   </ItemGroup>
-
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
 </Project>
