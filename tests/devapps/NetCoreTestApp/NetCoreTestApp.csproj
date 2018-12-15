@@ -6,9 +6,8 @@
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>
 
-    <PropertyGroup>
+  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,8 +17,4 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
-
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
 </Project>

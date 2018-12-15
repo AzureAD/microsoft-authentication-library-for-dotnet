@@ -39,7 +39,4 @@
     <Exec Command="gulp min" />
   </Target>
 
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
 </Project>

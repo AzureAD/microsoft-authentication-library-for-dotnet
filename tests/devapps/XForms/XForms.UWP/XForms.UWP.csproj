@@ -15,6 +15,7 @@
     <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <EnableDotNetNativeCompatibleProfile>true</EnableDotNetNativeCompatibleProfile>
+    <SignAssembly>true</SignAssembly>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>XForms.UWP_TemporaryKey.pfx</PackageCertificateKeyFile>
@@ -183,12 +184,5 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Appveyor|x86'">
     <OutputPath>bin\x86\Appveyor\</OutputPath>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
 </Project>

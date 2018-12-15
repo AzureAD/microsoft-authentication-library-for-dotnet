@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
 
     <LangVersion>7.2</LangVersion>
     <SignAssembly>true</SignAssembly>

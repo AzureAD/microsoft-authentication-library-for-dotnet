@@ -8,7 +8,6 @@
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>
   <ItemGroup>
@@ -28,7 +27,4 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
 </Project>

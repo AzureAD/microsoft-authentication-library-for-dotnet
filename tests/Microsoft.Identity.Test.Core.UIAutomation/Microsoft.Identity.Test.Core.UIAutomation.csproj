@@ -7,7 +7,8 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Identity.Test.Core.UIAutomation</RootNamespace>
     <AssemblyName>Microsoft.Identity.Test.Core.UIAutomation</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
+    <SignAssembly>false</SignAssembly>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -52,7 +53,7 @@
   </Target>
   <ItemGroup Condition="'$(NUNIT_HACK)' != ''">
     <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.11.2" />
   </ItemGroup>
   <!-- This is how it runs in AppCenter -->
   <ItemGroup Condition="'$(NUNIT_HACK)' == ''">
@@ -71,7 +72,4 @@
     <Compile Include="XamarinUITestController.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
 </Project>
