@@ -28,6 +28,9 @@
 using Microsoft.Identity.Test.Core.UIAutomation;
 using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Xamarin.UITest;
 
 //NOTICE! Inorder to run UI automation tests for xamarin locally, you may need to upgrade nunit to 3.0 and above for this project and the core ui Automation project.
@@ -69,23 +72,44 @@ namespace Microsoft.Identity.Test.UIAutomation
         [Test]
         public void RunAllTests()
         {
-            AcquireTokenTest();
-            AcquireTokenSilentTest();
+            var tests = new List<Action>()
+            {
+                AcquireTokenTest,
+                AcquireTokenSilentTest,
 
-            PromptBehavior_Consent_SelectAccount();
+                PromptBehavior_Consent_SelectAccount,
 
-            AcquireTokenADFSV3InteractiveFederatedTest();
-            AcquireTokenADFSV3InteractiveNonFederatedTest();
-            AcquireTokenADFSV4InteractiveFederatedTest();
-            AcquireTokenADFSV4InteractiveNonFederatedTest();
+                AcquireTokenADFSV3InteractiveFederatedTest,
+                AcquireTokenADFSV3InteractiveNonFederatedTest,
+                AcquireTokenADFSV4InteractiveFederatedTest,
+                AcquireTokenADFSV4InteractiveNonFederatedTest,
 
-            B2CFacebookProviderEditPolicyAcquireTokenTest();
-            B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest();
-            B2CFacebookProviderWithMicrosoftAuthorityAcquireTokenTest();
-            //B2CGoogleProviderWithB2CLoginAuthorityAcquireTokenTest();
-            //B2CGoogleProviderWithMicrosoftAuthorityAcquireTokenTest();
-            B2CLocalAccountAcquireTokenTest();
-            B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest();
+                B2CFacebookProviderEditPolicyAcquireTokenTest,
+                B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest,
+                B2CFacebookProviderWithMicrosoftAuthorityAcquireTokenTest,
+                //B2CGoogleProviderWithB2CLoginAuthorityAcquireTokenTest,
+                //B2CGoogleProviderWithMicrosoftAuthorityAcquireTokenTest,
+                B2CLocalAccountAcquireTokenTest,
+                B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest,
+            };
+
+            foreach(Action test in tests)
+            {
+                try
+                {
+                    Trace.Write($"Running test: {nameof(test)}");
+                    test();
+                    Trace.Write($"Complete test: {nameof(test)}");
+                }
+                catch(Exception ex)
+                {
+                    Trace.Write($"Test: {nameof(test)}, Error: {ex.Message}");
+                    Trace.Write($"ErrorDetails: {ex.StackTrace}");
+                }
+                finally { }
+            }
+
+            // TODO: Collect all exceptions and throw if one is failing indicating a failed test run.
         }
 
 
