@@ -259,15 +259,15 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             _storageWorker.ReadModifyWrite(_mockPath, content => JObject.Parse(SampleJsonString2));
 
             //// Corrupt the data - flip a bit
-            //vector<uint8_t>& data = _mockFileIO->_filesystem[_mockPath.u8string()];
-            //data[data.size() / 2] ^= 0x01;
+            // vector<uint8_t>& data = _mockFileIO->_filesystem[_mockPath.u8string()];
+            // data[data.size() / 2] ^= 0x01;
 
-            //bool wasCalled = false;
-            //ASSERT_NO_THROW(_storageWorker.ReadModifyWrite(_mockPath, content =>  {
+            // bool wasCalled = false;
+            // ASSERT_NO_THROW(_storageWorker.ReadModifyWrite(_mockPath, content =>  {
             //    ASSERT_TRUE(content.empty());
             //    wasCalled = true;
-            //}));
-            //Assert.IsTrue(wasCalled);
+            // }));
+            // Assert.IsTrue(wasCalled);
         }
 
         // Tests StorageWorker::ReadModifyWrite on an existing file which content is not true JSON.
@@ -279,9 +279,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 
             _mockFileIO.Write(_mockPath, encryptedContent);
 
-            //JObject expectedJson;
+            // JObject expectedJson;
             bool wasCalled = false;
-            //ASSERT_NO_THROW(
+            // ASSERT_NO_THROW(
             _storageWorker.ReadModifyWrite(
                 _mockPath,
                 content =>
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                     wasCalled = true;
                     return content;
                 });
-            //);
+            // );
             Assert.IsTrue(wasCalled);
         }
 
@@ -322,7 +322,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             {
                 var j = new JObject();
 
-                //ASSERT_MSAL_THROW(
+                // ASSERT_MSAL_THROW(
                 //    _storageWorker.FindAccessTokenWithScopes(j, ""),
                 //    MsalStorageException,
                 //    StorageErrorCodes::NO_ACCESS_TOKEN_SCOPES_REQUESTED);
@@ -908,9 +908,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                     }
                 });
 
-            //ASSERT_MSAL_THROW(
+            // ASSERT_MSAL_THROW(
             //    CreateRemoveVerify({}, {}, {}), MsalStorageException, StorageErrorCodes::NO_ACCESS_TOKEN_SCOPES_REQUESTED);
-            //ASSERT_MSAL_THROW(
+            // ASSERT_MSAL_THROW(
             //    CreateRemoveVerify({{"a"}}, {}, {}), MsalStorageException, StorageErrorCodes::NO_ACCESS_TOKEN_SCOPES_REQUESTED);
         }
 

@@ -56,18 +56,24 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             //Building user query
             if (query.FederationProvider != null)
+            {
                 queryDict.Add("federationProvider", query.FederationProvider.ToString());
+            }
 
             queryDict.Add("mam", query.IsMamUser != null && (bool)(query.IsMamUser) ? "true" : "false");
             queryDict.Add("mfa", query.IsMfaUser != null && (bool)(query.IsMfaUser) ? "true" : "false");
 
             if (query.Licenses != null && query.Licenses.Count > 0)
+            {
                 queryDict.Add("license", query.Licenses.ToArray().ToString());
+            }
 
             queryDict.Add("isFederated", query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? "true" : "false");
 
             if (query.UserType != null)
+            {
                 queryDict.Add("usertype", query.UserType.ToString());
+            }
 
             queryDict.Add("external", query.IsExternalUser != null && (bool)(query.IsExternalUser) ? "true" : "false");
 
@@ -104,7 +110,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
+            {
                 user.InitializeHomeUser();
+            }
 
             return response;
         }

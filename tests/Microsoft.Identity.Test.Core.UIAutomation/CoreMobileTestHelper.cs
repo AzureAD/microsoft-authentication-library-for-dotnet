@@ -38,21 +38,21 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         {
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
-            //Acquire token flow
+            // Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenID);
 
-            //i0116 = UPN text field on AAD sign in endpoint
+            // i0116 = UPN text field on AAD sign in endpoint
             controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
-            //idSIButton9 = Sign in button
+            // idSIButton9 = Sign in button
             controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
-            //i0118 = password text field
+            // i0118 = password text field
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
 
         public static void PerformSignInFlowWithoutUI(ITestController controller)
         {
-            //Acquire token flow
+            // Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenID);
         }
 
@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         {
             RetryVerificationHelper(() =>
             {
-                //Test results are put into a label that is checked for messages
+                // Test results are put into a label that is checked for messages
                 var result = controller.GetText(CoreUiTestConstants.TestResultID);
                 if (result.Contains(CoreUiTestConstants.TestResultSuccessfulMessage))
                 {
@@ -86,8 +86,8 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
         private static void RetryVerificationHelper(Action verification)
         {
-            //There may be a delay in the amount of time it takes for an authentication request to complete.
-            //Thus this method will check the result once a second for 20 seconds.
+            // There may be a delay in the amount of time it takes for an authentication request to complete.
+            // Thus this method will check the result once a second for 20 seconds.
             var attempts = 0;
             do
             {

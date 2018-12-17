@@ -1,0 +1,16 @@
+<Project>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+
+    <LangVersion>7.2</LangVersion>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)/build/MSAL.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

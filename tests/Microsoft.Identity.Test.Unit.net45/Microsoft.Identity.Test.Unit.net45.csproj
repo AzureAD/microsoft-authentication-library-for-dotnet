@@ -4,11 +4,9 @@
     <TargetFramework>net462</TargetFramework>
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
     <IsPackable>false</IsPackable>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../build/MSAL.snk</AssemblyOriginatorKeyFile>
-    <CodeAnalysisRuleSet>../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
     <AssemblyName>Microsoft.Identity.Test.Unit.net45</AssemblyName>
     <RootNamespace>Microsoft.Identity.Test.Unit</RootNamespace>
+    <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,14 +16,6 @@
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="NSubstitute" Version="3.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.3.1" />
@@ -36,10 +26,10 @@
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.3" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
-    
+
     <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/UserInformationFieldIds.cs" LinkBase="Integration"></Compile>
     <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/CoreUiTestConstants.cs" LinkBase="Integration"></Compile>
-    
+
 
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />

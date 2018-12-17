@@ -8,18 +8,9 @@
     <!-- Workaround until Xamarin supports PPDB -->
     <DebugType>full</DebugType>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
     <Configurations>Debug;Release;Appveyor</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="StrongNamer">
         <Version>0.0.6</Version>
     </PackageReference>
@@ -36,7 +27,4 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
-	<PropertyGroup>
-		<CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
-	</PropertyGroup>
 </Project>

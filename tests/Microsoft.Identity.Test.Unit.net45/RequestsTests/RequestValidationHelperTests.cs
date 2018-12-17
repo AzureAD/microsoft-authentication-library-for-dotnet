@@ -75,32 +75,32 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             };
             parameters.Authority.SelfSignedJwtAudience = Audience1;
 
-            //Validate cached client assertion with parameters
+            // Validate cached client assertion with parameters
             Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
 
-            //Different audience
+            // Different audience
             credential.Audience = Audience2;
 
-            //cached assertion should be invalid
+            // cached assertion should be invalid
             Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
 
-            //Different x5c, same audience
+            // Different x5c, same audience
             credential.Audience = Audience1;
             credential.ContainsX5C = true;
 
-            //cached assertion should be invalid
+            // cached assertion should be invalid
             Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
 
-            //Different audience and x5c
+            // Different audience and x5c
             credential.Audience = Audience2;
 
-            //cached assertion should be invalid
+            // cached assertion should be invalid
             Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
 
-            //No cached Assertion
+            // No cached Assertion
             credential.Assertion = "";
 
-            //should return false
+            // should return false
             Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
         }
 
@@ -127,14 +127,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             };
             parameters.Authority.SelfSignedJwtAudience = "Audience1";
 
-            //Validate cached client assertion with expiration time
-            //Cached assertion should be valid
+            // Validate cached client assertion with expiration time
+            // Cached assertion should be valid
             Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
 
-            //Setting expiration time to now
+            // Setting expiration time to now
             credential.ValidTo = ConvertToTimeT(DateTime.UtcNow);
 
-            //cached assertion should have expired
+            // cached assertion should have expired
             Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
         }
 
