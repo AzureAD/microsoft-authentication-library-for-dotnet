@@ -80,7 +80,10 @@ namespace WebApp.Utils
                 // From the collection of unexpired certificates, find the ones with the correct name.
                 var signingCert = currentCerts.Find(X509FindType.FindByThumbprint, thumbprint, false);
 
-                if (signingCert.Count == 0) return null;
+                if (signingCert.Count == 0)
+                {
+                    return null;
+                }
 
                 var cert = signingCert.OfType<X509Certificate2>().OrderByDescending(c => c.NotBefore).First();
                 return new ClientAssertionCertificate(cert);

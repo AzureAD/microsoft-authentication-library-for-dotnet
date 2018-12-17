@@ -163,9 +163,9 @@ namespace WebApp.Controllers
         public ActionResult AdminConsent(string admin_consent, string tenant, string error, string error_description)
         {
             // If the admin successfully granted permissions, continue to showing the list of users
-            if (admin_consent == "True")
-                return View("~/Views/Home/Index.cshtml", "admin successfully granted permissions");
-            return View("~/Views/Home/Index.cshtml",
+            return admin_consent == "True"
+                ? View("~/Views/Home/Index.cshtml", "admin successfully granted permissions")
+                : View("~/Views/Home/Index.cshtml",
                 "failed to grant permissions, error_description - " + error_description);
         }
 
@@ -262,7 +262,9 @@ namespace WebApp.Controllers
             var response = await client.SendAsync(request).ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
+            {
                 throw new InvalidOperationException(response.StatusCode.ToString());
+            }
 
             return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
