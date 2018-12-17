@@ -48,11 +48,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private LabResponse GetLabResponseFromAPI(UserQueryParameters query)
         {
             HttpClient webClient = new HttpClient();
-            IDictionary<string, string> queryDict = new Dictionary<string, string>();
-
-            //Disabled for now until there are tests that use it.
-            queryDict.Add("mamca", "false");
-            queryDict.Add("mdmca", "false");
+            IDictionary<string, string> queryDict = new Dictionary<string, string>
+            {
+                // Disabled for now until there are tests that use it.
+                { "mamca", "false" },
+                { "mdmca", "false" }
+            };
 
             //Building user query
             if (query.FederationProvider != null)
@@ -60,22 +61,22 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add("federationProvider", query.FederationProvider.ToString());
             }
 
-            queryDict.Add("mam", query.IsMamUser != null && (bool)(query.IsMamUser) ? "true" : "false");
-            queryDict.Add("mfa", query.IsMfaUser != null && (bool)(query.IsMfaUser) ? "true" : "false");
+            queryDict.Add("mam", query.IsMamUser.HasValue && query.IsMamUser.Value ? "true" : "false");
+            queryDict.Add("mfa", query.IsMfaUser.HasValue && query.IsMfaUser.Value ? "true" : "false");
 
             if (query.Licenses != null && query.Licenses.Count > 0)
             {
                 queryDict.Add("license", query.Licenses.ToArray().ToString());
             }
 
-            queryDict.Add("isFederated", query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? "true" : "false");
+            queryDict.Add("isFederated", query.IsFederatedUser.HasValue && query.IsFederatedUser.Value ? "true" : "false");
 
             if (query.UserType != null)
             {
                 queryDict.Add("usertype", query.UserType.ToString());
             }
 
-            queryDict.Add("external", query.IsExternalUser != null && (bool)(query.IsExternalUser) ? "true" : "false");
+            queryDict.Add("external", query.IsExternalUser.HasValue && query.IsExternalUser.Value ? "true" : "false");
 
             if (query.B2CIdentityProvider == B2CIdentityProvider.Local)
             {
@@ -92,8 +93,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add("b2cProvider", "google");
             }
 
-            UriBuilder uriBuilder = new UriBuilder("http://api.msidlab.com/api/user");
-            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+            UriBuilder uriBuilder = new UriBuilder("http://api.msidlab.com/api/user")
+            {
+                Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()))
+            };
 
             //Fetch user
             string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
@@ -103,18 +106,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new LabUserNotFoundException(query, "No lab user with specified parameters exists");
             }
 
-            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
-
-            LabUser user = response.User;
-
-            user = JsonConvert.DeserializeObject<LabUser>(result);
+            LabUser user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
             {
                 user.InitializeHomeUser();
             }
 
-            return response;
+            return JsonConvert.DeserializeObject<LabResponse>(result);;
         }
 
         /// <summary>

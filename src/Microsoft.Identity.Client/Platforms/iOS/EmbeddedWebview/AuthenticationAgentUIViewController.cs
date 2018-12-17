@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     {
         private readonly string url;
         public readonly string callback;
-        WKWebView wkWebView;
+        private WKWebView wkWebView;
 
         public readonly ReturnCodeCallback callbackMethod;
 
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             wkWebView.EvaluateJavaScript((NSString)@"navigator.userAgent", handler);
         }
 
-        static void HandleWKJavascriptEvaluationResult(NSObject result, NSError err)
+        private static void HandleWKJavascriptEvaluationResult(NSObject result, NSError err)
         {
             if (err != null)
             {

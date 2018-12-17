@@ -289,7 +289,7 @@ namespace Microsoft.Identity.Json.Schema
         /// <summary>
         /// Load a <see cref="JsonSchema"/> from a string that contains JSON Schema.
         /// </summary>
-        /// <param name="json">A <see cref="String"/> that contains JSON Schema.</param>
+        /// <param name="json">A <see cref="string"/> that contains JSON Schema.</param>
         /// <returns>A <see cref="JsonSchema"/> populated from the string that contains JSON Schema.</returns>
         public static JsonSchema Parse(string json)
         {
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Json.Schema
         /// <summary>
         /// Load a <see cref="JsonSchema"/> from a string that contains JSON Schema using the specified <see cref="JsonSchemaResolver"/>.
         /// </summary>
-        /// <param name="json">A <see cref="String"/> that contains JSON Schema.</param>
+        /// <param name="json">A <see cref="string"/> that contains JSON Schema.</param>
         /// <param name="resolver">The resolver.</param>
         /// <returns>A <see cref="JsonSchema"/> populated from the string that contains JSON Schema.</returns>
         public static JsonSchema Parse(string json, JsonSchemaResolver resolver)
@@ -336,16 +336,18 @@ namespace Microsoft.Identity.Json.Schema
         }
 
         /// <summary>
-        /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
+        /// Returns a <see cref="string"/> that represents the current <see cref="object"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="String"/> that represents the current <see cref="Object"/>.
+        /// A <see cref="string"/> that represents the current <see cref="object"/>.
         /// </returns>
         public override string ToString()
         {
             StringWriter writer = new StringWriter(CultureInfo.InvariantCulture);
-            JsonTextWriter jsonWriter = new JsonTextWriter(writer);
-            jsonWriter.Formatting = Formatting.Indented;
+            JsonTextWriter jsonWriter = new JsonTextWriter(writer)
+            {
+                Formatting = Formatting.Indented
+            };
 
             WriteTo(jsonWriter);
 

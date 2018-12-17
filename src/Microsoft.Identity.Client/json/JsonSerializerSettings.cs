@@ -383,8 +383,8 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets or sets how special floating point numbers, e.g. <see cref="Double.NaN"/>,
-        /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/>,
+        /// Gets or sets how special floating point numbers, e.g. <see cref="double.NaN"/>,
+        /// <see cref="double.PositiveInfinity"/> and <see cref="double.NegativeInfinity"/>,
         /// are written as JSON.
         /// The default value is <see cref="Json.FloatFormatHandling.String" />.
         /// </summary>

@@ -53,11 +53,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //Check if all current client assertion values match incoming parameters and expiration time
             //The clientCredential object contains the previously used values in the cached client assertion string
             var clientCredential = clientAssertionParameters.ClientCredential;
-            var expired = (clientCredential.ValidTo <=
+            var expired = clientCredential.ValidTo <=
                                         Jwt.JsonWebToken.ConvertToTimeT(DateTime.UtcNow +
                                                                         TimeSpan.FromMinutes(
                                                                         Constants
-                                                                        .ExpirationMarginInMinutes)));
+                                                                        .ExpirationMarginInMinutes));
 
             var parametersMatch = clientCredential.Audience == clientAssertionParameters.Authority.SelfSignedJwtAudience
                 && clientCredential.ContainsX5C == clientAssertionParameters.SendCertificate;

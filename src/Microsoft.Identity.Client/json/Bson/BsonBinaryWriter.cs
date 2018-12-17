@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Json.Bson
 
         private int CalculateSizeWithLength(int stringByteCount, bool includeSize)
         {
-            int baseSize = (includeSize)
+            int baseSize = includeSize
                 ? 5 // size bytes + terminator
                 : 1; // terminator
 

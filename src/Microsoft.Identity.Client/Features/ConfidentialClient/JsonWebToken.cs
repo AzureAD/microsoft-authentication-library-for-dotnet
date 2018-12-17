@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Jwt
         {
             var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             TimeSpan diff = time - startTime;
-            return (long)(diff.TotalSeconds);
+            return (long)diff.TotalSeconds;
         }
 
         private string Encode(ClientAssertionCertificate credential, bool sendCertificate)
