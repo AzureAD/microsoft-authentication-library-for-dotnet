@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.Internal.Jwt
                 if (!sendCertificate)
                     return;
 
-#if NET46
+#if NET45
                     X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
 #elif NETSTANDARD1_3
                     X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);

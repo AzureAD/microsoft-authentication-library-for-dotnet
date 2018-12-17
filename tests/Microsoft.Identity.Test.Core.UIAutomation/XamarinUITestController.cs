@@ -42,32 +42,32 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
     public class XamarinUITestController : ITestController
     {
-        TimeSpan defaultSearchTimeout {get;}
-        TimeSpan defaultRetryFrequency;
-        TimeSpan defaultPostTimeout;
-        const int defaultSearchTimeoutSec = 30;
-        const int defaultRetryFrequencySec = 1;
-        const int defaultPostTimeoutSec = 1;
-        const string CSSIDSelector = "[id|={0}]";
-        const string XpathSelector = "//*[text()=\"{0}\"]";
+        private readonly TimeSpan _defaultSearchTimeout;
+        private readonly TimeSpan _defaultRetryFrequency;
+        private readonly TimeSpan _defaultPostTimeout;
+        private const int DefaultSearchTimeoutSec = 30;
+        private const int DefaultRetryFrequencySec = 1;
+        private const int DefaultPostTimeoutSec = 1;
+        private const string CssidSelector = "[id|={0}]";
+        private const string XpathSelector = "//*[text()=\"{0}\"]";
 
         public IApp Application { get; set; }
 
         public XamarinUITestController()
         {
-            this.defaultSearchTimeout = new TimeSpan(0, 0, defaultSearchTimeoutSec);
-            this.defaultRetryFrequency = new TimeSpan(0, 0, defaultRetryFrequencySec);
-            this.defaultPostTimeout = new TimeSpan(0, 0, defaultPostTimeoutSec);
+            _defaultSearchTimeout = new TimeSpan(0, 0, DefaultSearchTimeoutSec);
+            _defaultRetryFrequency = new TimeSpan(0, 0, DefaultRetryFrequencySec);
+            _defaultPostTimeout = new TimeSpan(0, 0, DefaultPostTimeoutSec);
         }
 
         public void Tap(string elementID)
         {
-            Tap(elementID, XamarinSelector.ByAutomationId, defaultSearchTimeout);
+            Tap(elementID, XamarinSelector.ByAutomationId, _defaultSearchTimeout);
         }
 
         public void Tap(string elementID, XamarinSelector xamarinSelector)
         {
-            Tap(elementID, xamarinSelector, defaultSearchTimeout);
+            Tap(elementID, xamarinSelector, _defaultSearchTimeout);
         }
 
         public void Tap(string elementID, int waitTime, XamarinSelector xamarinSelector)
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
         public void EnterText(string elementID, string text, XamarinSelector xamarinSelector)
         {
-            EnterText(elementID, text, xamarinSelector, defaultSearchTimeout);
+            EnterText(elementID, text, xamarinSelector, _defaultSearchTimeout);
         }
 
         public void EnterText(string elementID, int waitTime, string text, XamarinSelector xamarinSelector)
@@ -90,19 +90,19 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
             if (timeout == null)
             {
-                timeout = defaultSearchTimeout;
+                timeout = _defaultSearchTimeout;
             }
 
             return Application.WaitForElement(
                 QueryByCssId(elementID),
                 "Timeout waiting for web element with css id: " + elementID,
-                defaultSearchTimeout,
-                defaultRetryFrequency,
-                defaultPostTimeout);
+                _defaultSearchTimeout,
+                _defaultRetryFrequency,
+                _defaultPostTimeout);
         }
 
         /// <summary>
-        /// Searches for an HTML element having a given text. CSS selectors are uanble to do this, 
+        /// Searches for an HTML element having a given text. CSS selectors are uanble to do this,
         /// so an XPath strategy is needed.
         /// </summary>
         public AppWebResult[] WaitForWebElementByText(string text, TimeSpan? timeout = null)
@@ -110,44 +110,44 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
             if (timeout == null)
             {
-                timeout = defaultSearchTimeout;
+                timeout = _defaultSearchTimeout;
             }
 
             return Application.WaitForElement(
                 QueryByHtmlElementValue(text),
                 "Timeout waiting for web element with css id: " + text,
-                defaultSearchTimeout,
-                defaultRetryFrequency,
-                defaultPostTimeout);
+                _defaultSearchTimeout,
+                _defaultRetryFrequency,
+                _defaultPostTimeout);
         }
 
         public AppResult[] WaitForXamlElement(string elementID, TimeSpan? timeout = null)
         {
             if (timeout == null)
             {
-                timeout = defaultSearchTimeout;
+                timeout = _defaultSearchTimeout;
             }
 
             return Application.WaitForElement(
                 elementID,
                 "Timeout waiting for xaml element with automation id: " + elementID,
                 timeout,
-                defaultRetryFrequency,
-                defaultPostTimeout);
+                _defaultRetryFrequency,
+                _defaultPostTimeout);
         }
-        
+
         public object[] WaitForElement(string selector, XamarinSelector xamarinSelector, TimeSpan? timeout)
         {
             if (timeout == null)
             {
-                timeout = defaultSearchTimeout;
+                timeout = _defaultSearchTimeout;
             }
 
             switch (xamarinSelector)
             {
                 case XamarinSelector.ByAutomationId:
                     return WaitForXamlElement(selector, timeout);
-                    
+
                 case XamarinSelector.ByHtmlIdAttribute:
                     return WaitForWebElementByCssId(selector, timeout);
                 case XamarinSelector.ByHtmlValue:
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
             DismissKeyboard();
         }
-       
+
         public void DismissKeyboard()
         {
             Application.DismissKeyboard();
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
         public string GetText(string elementID)
         {
-            Application.WaitForElement(elementID, "Could not find element", defaultSearchTimeout, defaultRetryFrequency, defaultPostTimeout);
+            Application.WaitForElement(elementID, "Could not find element", _defaultSearchTimeout, _defaultRetryFrequency, _defaultPostTimeout);
             return Application.Query(x => x.Marked(elementID)).FirstOrDefault().Text;
         }
 
@@ -229,13 +229,13 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
         private static Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string text)
         {
-            string xpath = String.Format(CultureInfo.InvariantCulture, XpathSelector, text);
+            string xpath = string.Format(CultureInfo.InvariantCulture, XpathSelector, text);
             return c => c.XPath(xpath);
         }
 
         private static Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
         {
-            return c => c.Css(String.Format(CultureInfo.InvariantCulture, CSSIDSelector, elementID));
+            return c => c.Css(string.Format(CultureInfo.InvariantCulture, CssidSelector, elementID));
         }
 
     }
