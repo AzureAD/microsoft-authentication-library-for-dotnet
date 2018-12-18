@@ -26,8 +26,10 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
+using System.Security;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Common
 {
     public static class StringExtensions
     {
@@ -82,6 +84,13 @@ namespace CommonCache.Test.Validator
         public static string EncloseQuotes(this string val)
         {
             return val.EncloseWithString('\"', false);
+        }
+
+        public static SecureString ToSecureString(this string val)
+        {
+            var secureString = new SecureString();
+            val.ToCharArray().ToList().ForEach(c => secureString.AppendChar(c));
+            return secureString;
         }
     }
 }

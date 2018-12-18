@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
     public interface IProcessUtils
     {
@@ -172,10 +172,10 @@ namespace CommonCache.Test.Validator
             string fileName,
             string arguments,
             Dictionary<string, string> environmentVars,
-            CancellationToken cancellationToken,
             bool shouldIgnoreConsoleOutput,
             IEnumerable<int> successfulExitCodes,
             long maxWorkingSetSizeMb,
+            CancellationToken cancellationToken,
             string processWorkingDirectory = null,
             int maxAllowedRuntimeInMinutes = 0,
             long maxVirtualMemorySizeMb = 0,

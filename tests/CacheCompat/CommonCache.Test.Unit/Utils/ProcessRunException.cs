@@ -25,40 +25,45 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
-    public class CacheProgram
+    public class ProcessRunException : Exception
     {
-        public CacheProgram(string executablePath, string resultsFilePath)
+        public ProcessRunException()
         {
-            ExecutablePath = executablePath;
-            ResultsFilePath = resultsFilePath;
         }
 
-        public string ExecutablePath { get; }
-        public string ResultsFilePath { get; }
-
-        public async Task<CacheProgramResults> ExecuteAsync(CancellationToken cancellationToken)
+        public ProcessRunException(
+            string fileName,
+            string arguments,
+            int processExitCode,
+            string processStandardOutput,
+            string processStandardError)
+            : base($"Process {fileName} has exited with code {processExitCode}")
         {
-            var sb = new StringBuilder();
-            sb.Append($"--resultsFilePath {ResultsFilePath.EncloseQuotes()} ");
-            string arguments = sb.ToString();
-
-            var processUtils = new ProcessUtils();
-
-            try
-            {
-                var processRunResults = await processUtils.RunProcessAsync(ExecutablePath, arguments, cancellationToken);
-                return CacheProgramResults.CreateFromResultsFile(ResultsFilePath, processRunResults);
-            }
-            catch (ProcessRunException prex)
-            {
-                return CacheProgramResults.CreateWithFailedExecution(prex);
-            }
+            FileName = fileName;
+            Arguments = arguments;
+            ProcessExitCode = processExitCode;
+            ProcessStandardOutput = processStandardOutput;
+            ProcessStandardError = processStandardError;
         }
+
+        public ProcessRunException(string message)
+            : base(message)
+        {
+        }
+
+        public ProcessRunException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        public string FileName { get; }
+        public string Arguments { get; }
+        public int ProcessExitCode { get; }
+        public string ProcessStandardOutput { get; }
+        public string ProcessStandardError { get; }
     }
 }

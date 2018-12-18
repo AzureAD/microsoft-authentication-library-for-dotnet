@@ -31,6 +31,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace CommonCache.Test.MsalV2
 {
@@ -59,16 +60,16 @@ namespace CommonCache.Test.MsalV2
                     CommonCacheTestUtils.AdalV3CacheFilePath);
 
                 var app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache);
-                IEnumerable<IAccount> accounts = await app.GetAccountsAsync();
+                IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 try
                 {
-                    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false);
+                    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false).ConfigureAwait(false);
                     Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
                     return new CacheExecutorResults(result.Account.Username, true);
                 }
                 catch (MsalUiRequiredException)
                 {
-                    var result = await app.AcquireTokenAsync(scopes);
+                    var result = await app.AcquireTokenByUsernamePasswordAsync(scopes, options.Username, options.UserPassword.ToSecureString()).ConfigureAwait(false);
                     Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
                     return new CacheExecutorResults(result.Account.Username, false);
                 }

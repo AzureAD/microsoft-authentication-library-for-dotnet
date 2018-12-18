@@ -30,8 +30,10 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
     public class CacheTestExecutor
     {
@@ -67,52 +69,64 @@ namespace CommonCache.Test.Validator
             CommonCacheTestUtils.DeleteAllTestCaches();
             CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
+            var api = new LabServiceApi(new KeyVaultSecretsProvider());
+            var labUser = api.GetLabResponse(
+                new UserQueryParameters
+                {
+                    UserType = UserType.Member,
+                    IsFederatedUser = false
+                }).User;
+
             var cacheProgramFirst = CacheProgramFactory.CreateCacheProgram(_firstProgram);
             var cacheProgramSecond = CacheProgramFactory.CreateCacheProgram(_secondProgram);
 
-            var firstResults = await cacheProgramFirst.ExecuteAsync(cancellationToken);
-            var secondResults = await cacheProgramSecond.ExecuteAsync(cancellationToken);
+            var firstResults = await cacheProgramFirst.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
+            var secondResults = await cacheProgramSecond.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
 
-            ValidateBooleanEquals(false, firstResults.ProcessExecutionFailed, $"{cacheProgramFirst.ExecutablePath} should not fail");
-            ValidateBooleanEquals(false, secondResults.ProcessExecutionFailed, $"{cacheProgramSecond.ExecutablePath} should not fail");
+            Console.WriteLine($"FirstResults: {_firstProgram}");
+            Console.WriteLine(firstResults.StdOut);
+            Console.WriteLine(firstResults.StdErr);
 
-            ValidateBooleanEquals(false, firstResults.ExecutionResults.ReceivedTokenFromCache, "First result should not be from the cache");
+            Console.WriteLine($"SecondResults: {_secondProgram}");
+            Console.WriteLine(secondResults.StdOut);
+            Console.WriteLine(secondResults.StdErr);
+
+            Assert.IsFalse(firstResults.ProcessExecutionFailed, $"{cacheProgramFirst.ExecutablePath} should not fail");
+            Assert.IsFalse(secondResults.ProcessExecutionFailed, $"{cacheProgramSecond.ExecutablePath} should not fail");
+
+            Assert.IsFalse(firstResults.ExecutionResults.ReceivedTokenFromCache, "First result should not be from the cache");
 
             if (_expectedAdalCacheSizeBytes > 0)
             {
-                ValidateIntegerEquals(_expectedAdalCacheSizeBytes, Convert.ToInt32(new FileInfo(CommonCacheTestUtils.AdalV3CacheFilePath).Length), "Expected Adal Cache Size");
+                Assert.AreEqual(_expectedAdalCacheSizeBytes, Convert.ToInt32(new FileInfo(CommonCacheTestUtils.AdalV3CacheFilePath).Length), "Expected Adal Cache Size");
             }
             if (_expectedMsalCacheSizeBytes > 0)
             {
-                ValidateIntegerEquals(_expectedMsalCacheSizeBytes, Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length), "Expected Msal Cache Size");
+                Assert.AreEqual(_expectedMsalCacheSizeBytes, Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length), "Expected Msal Cache Size");
             }
 
             if (_expectSecondTokenFromCache)
             {
-                ValidateBooleanEquals(
-                    true,
+                Assert.IsTrue(
                     secondResults.ExecutionResults.ReceivedTokenFromCache,
                     "Second result should be from the cache");
             }
             else
             {
-                ValidateBooleanEquals(
-                    false,
+                Assert.IsFalse(
                     secondResults.ExecutionResults.ReceivedTokenFromCache,
                     "Second result should NOT be from the cache");
             }
 
             if (_expectSecondTokenException)
             {
-                ValidateBooleanEquals(
-                    true,
+                Assert.IsTrue(
                     secondResults.ExecutionResults.IsError,
                     "Second result should have thrown an exception");
             }
             else
             {
-                ValidateBooleanEquals(
-                    false,
+                Assert.IsFalse(
                     secondResults.ExecutionResults.IsError,
                     "Second result should NOT have thrown an exception");
             }
@@ -121,18 +135,6 @@ namespace CommonCache.Test.Validator
         private void LogExecution()
         {
             Console.WriteLine($"Running {_firstProgram} -> {_secondProgram}...");
-        }
-
-        private void ValidateBooleanEquals(bool expected, bool actual, string message)
-        {
-            string result = expected == actual ? "OK" : "FAIL";
-            Console.WriteLine($"{message}: Expected({expected}) Actual({actual}) --> {result}");
-        }
-
-        private void ValidateIntegerEquals(int expected, int actual, string message)
-        {
-            string result = expected == actual ? "OK" : "FAIL";
-            Console.WriteLine($"{message}: Expected({expected}) Actual({actual}) --> {result}");
         }
     }
 }

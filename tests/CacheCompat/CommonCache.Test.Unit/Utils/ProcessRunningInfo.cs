@@ -26,44 +26,58 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
-    public class ProcessRunException : Exception
+    public sealed class ProcessRunningInfo : IProcessRunningInfo
     {
-        public ProcessRunException()
+        private readonly Process _process;
+        private bool _isDisposed;
+
+        public ProcessRunningInfo(Process process, bool shouldTerminateProcessOnDispose)
         {
+            _process = process;
+            _process.Exited += (_, args) => RaiseHasExited(args);
+            _isDisposed = false;
+            ShouldTerminateProcessOnDispose = shouldTerminateProcessOnDispose;
         }
 
-        public ProcessRunException(
-            string fileName,
-            string arguments,
-            int processExitCode,
-            string processStandardOutput,
-            string processStandardError)
-            : base($"Process {fileName} has exited with code {processExitCode}")
+        public bool ShouldTerminateProcessOnDispose { get; }
+        public int ExitCode => _process.ExitCode;
+        public bool HasExited => _process.HasExited;
+        public int Id => _process.Id;
+        public event EventHandler Exited;
+
+        public void Dispose()
         {
-            FileName = fileName;
-            Arguments = arguments;
-            ProcessExitCode = processExitCode;
-            ProcessStandardOutput = processStandardOutput;
-            ProcessStandardError = processStandardError;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public ProcessRunException(string message)
-            : base(message)
+        ~ProcessRunningInfo()
         {
+            Dispose(false);
         }
 
-        public ProcessRunException(string message, Exception innerException)
-            : base(message, innerException)
+        private void Dispose(bool disposing)
         {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            if (disposing && ShouldTerminateProcessOnDispose)
+            {
+                _process.Dispose();
+            }
+
+            _isDisposed = true;
         }
 
-        public string FileName { get; }
-        public string Arguments { get; }
-        public int ProcessExitCode { get; }
-        public string ProcessStandardOutput { get; }
-        public string ProcessStandardError { get; }
+        private void RaiseHasExited(EventArgs args)
+        {
+            Exited?.Invoke(this, args);
+        }
     }
 }

@@ -25,33 +25,12 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
-    /// <summary>
-    ///     Represents information about a running process.
-    /// </summary>
-    public interface IProcessRunningInfo : IDisposable
+    public enum CacheProgramType
     {
-        /// <summary>
-        ///     Gets a value indicating the process exit code.
-        /// </summary>
-        int ExitCode { get; }
-
-        /// <summary>
-        ///     Gets a value indicating whether the process has exited.
-        /// </summary>
-        bool HasExited { get; }
-
-        /// <summary>
-        ///     Gets the process id.
-        /// </summary>
-        int Id { get; }
-
-        /// <summary>
-        ///     Event that is risen when a process exits.
-        /// </summary>
-        event EventHandler Exited;
+        AdalV3,
+        AdalV4,
+        MsalV2
     }
 }

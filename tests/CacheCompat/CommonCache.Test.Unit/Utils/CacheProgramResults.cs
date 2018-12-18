@@ -25,17 +25,38 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace CommonCache.Test.Validator
+using System.IO;
+using CommonCache.Test.Common;
+using Microsoft.Identity.Json;
+
+namespace CommonCache.Test.Unit.Utils
 {
-    public sealed class ProcessRunResults
+    public class CacheProgramResults
     {
-        public ProcessRunResults(string standardOut, string standardError)
+        private CacheProgramResults(ExecutionContent executionResults, bool processExecutionFailed, int processExitCode, string stdOut, string stdErr)
         {
-            StandardOut = standardOut;
-            StandardError = standardError;
+            ExecutionResults = executionResults;
+            ProcessExecutionFailed = processExecutionFailed;
+            ProcessExitCode = processExitCode;
+            StdOut = stdOut;
+            StdErr = stdErr;
         }
 
-        public string StandardOut { get; }
-        public string StandardError { get; }
+        public ExecutionContent ExecutionResults { get; }
+        public bool ProcessExecutionFailed { get; }
+        public int ProcessExitCode { get; }
+        public string StdOut { get; }
+        public string StdErr { get; }
+
+        public static CacheProgramResults CreateFromResultsFile(string resultsFilePath, ProcessRunResults processRunResults)
+        {
+            var executionResults = JsonConvert.DeserializeObject<ExecutionContent>(File.ReadAllText(resultsFilePath));
+            return new CacheProgramResults(executionResults, false, 0, processRunResults.StandardOut, processRunResults.StandardError);
+        }
+
+        public static CacheProgramResults CreateWithFailedExecution(ProcessRunException prex)
+        {
+            return new CacheProgramResults(null, true, prex.ProcessExitCode, prex.ProcessStandardOutput, prex.ProcessStandardError);
+        }
     }
 }

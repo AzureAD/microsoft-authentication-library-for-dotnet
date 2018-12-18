@@ -25,38 +25,43 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Json;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
-    public class CacheProgramResults
+    public class CacheProgram
     {
-        private CacheProgramResults(ExecutionContent executionResults, bool processExecutionFailed, int processExitCode, string stdOut, string stdErr)
+        public CacheProgram(string executablePath, string resultsFilePath)
         {
-            ExecutionResults = executionResults;
-            ProcessExecutionFailed = processExecutionFailed;
-            ProcessExitCode = processExitCode;
-            StdOut = stdOut;
-            StdErr = stdErr;
+            ExecutablePath = executablePath;
+            ResultsFilePath = resultsFilePath;
         }
 
-        public ExecutionContent ExecutionResults { get; }
-        public bool ProcessExecutionFailed { get; }
-        public int ProcessExitCode { get; }
-        public string StdOut { get; }
-        public string StdErr { get; }
+        public string ExecutablePath { get; }
+        public string ResultsFilePath { get; }
 
-        public static CacheProgramResults CreateFromResultsFile(string resultsFilePath, ProcessRunResults processRunResults)
+        public async Task<CacheProgramResults> ExecuteAsync(string username, string password, CancellationToken cancellationToken)
         {
-            var executionResults = JsonConvert.DeserializeObject<ExecutionContent>(File.ReadAllText(resultsFilePath));
-            return new CacheProgramResults(executionResults, false, 0, processRunResults.StandardOut, processRunResults.StandardError);
-        }
+            var sb = new StringBuilder();
+            sb.Append($"--username {username} ");
+            sb.Append($"--userPassword {password} ");
+            sb.Append($"--resultsFilePath {ResultsFilePath.EncloseQuotes()} ");
+            string arguments = sb.ToString();
 
-        public static CacheProgramResults CreateWithFailedExecution(ProcessRunException prex)
-        {
-            return new CacheProgramResults(null, true, prex.ProcessExitCode, prex.ProcessStandardOutput, prex.ProcessStandardError);
+            var processUtils = new ProcessUtils();
+
+            try
+            {
+                var processRunResults = await processUtils.RunProcessAsync(ExecutablePath, arguments, cancellationToken).ConfigureAwait(false);
+                return CacheProgramResults.CreateFromResultsFile(ResultsFilePath, processRunResults);
+            }
+            catch (ProcessRunException ex)
+            {
+                return CacheProgramResults.CreateWithFailedExecution(ex);
+            }
         }
     }
 }

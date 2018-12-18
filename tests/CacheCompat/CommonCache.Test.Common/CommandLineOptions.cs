@@ -34,5 +34,12 @@ namespace CommonCache.Test.Common
     {
         [Option("resultsFilePath", Required = true, HelpText = "Path to write output results file.")]
         public string ResultsFilePath { get; set; }
+
+        [Option("userName", Required = true, HelpText = "Username to login with.")]
+        public string Username{ get; set; }
+
+        [Option("userPassword", Required = true, HelpText = "Password to login with.")]
+        public string UserPassword { get; set; }
+
     }
 }

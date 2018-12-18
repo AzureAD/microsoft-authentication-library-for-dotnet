@@ -55,7 +55,11 @@ namespace CommonCache.Test.AdalV4
 
                 try
                 {
-                    var result = await authenticationContext.AcquireTokenSilentAsync(resource, app.ClientId);
+                    var result = await authenticationContext.AcquireTokenSilentAsync(
+                        resource, 
+                        app.ClientId, 
+                        new UserIdentifier(options.Username, UserIdentifierType.RequiredDisplayableId)).ConfigureAwait(false);
+
                     Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' from the cache");
                     return new CacheExecutorResults(result.UserInfo.DisplayableId, true);
                 }
@@ -64,8 +68,8 @@ namespace CommonCache.Test.AdalV4
                     var result = await authenticationContext.AcquireTokenAsync(
                                      resource,
                                      app.ClientId,
-                                     app.RedirectUri,
-                                     new PlatformParameters(PromptBehavior.SelectAccount));
+                                     new UserPasswordCredential(options.Username, options.UserPassword)).ConfigureAwait(false);
+
                     Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' without the cache");
                     return new CacheExecutorResults(result.UserInfo.DisplayableId, false);
                 }

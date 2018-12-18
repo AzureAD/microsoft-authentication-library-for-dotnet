@@ -30,7 +30,7 @@ using System.IO;
 using System.Reflection;
 using CommonCache.Test.Common;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
     public static class CacheProgramFactory
     {

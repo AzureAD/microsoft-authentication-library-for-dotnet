@@ -33,8 +33,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CommonCache.Test.Common;
 
-namespace CommonCache.Test.Validator
+namespace CommonCache.Test.Unit.Utils
 {
     /// <summary>
     ///     A collection of Process-based utility functions.
@@ -214,10 +215,10 @@ namespace CommonCache.Test.Validator
             string fileName,
             string arguments,
             Dictionary<string, string> environmentVars,
-            CancellationToken cancellationToken,
             bool shouldIgnoreConsoleOutput,
             IEnumerable<int> successfulExitCodes,
             long maxWorkingSetSizeMb,
+            CancellationToken cancellationToken,
             string processWorkingDirectory = null,
             int maxAllowedRuntimeInMinutes = 0,
             long maxVirtualMemorySizeMb = 0,
