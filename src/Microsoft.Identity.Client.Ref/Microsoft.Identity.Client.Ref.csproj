@@ -5,11 +5,8 @@
   <!-- This project is used to generated a ref assembly for MSAL. Use #if REFERENCE_ASSEMBLY in the code files.
   See https://oren.codes/2018/07/09/create-and-pack-reference-assemblies-made-easy/ for details-->
   <PropertyGroup>
-    <!-- <TargetFrameworks>net461;netstandard2.0;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp2.0</TargetFrameworks> -->
-    <!-- <TargetFrameworks>net461;netstandard2.0;netcoreapp2.0</TargetFrameworks> -->
     <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
   </PropertyGroup>
-
 
   <Import Project="../MSAL.Common.props" />
 
