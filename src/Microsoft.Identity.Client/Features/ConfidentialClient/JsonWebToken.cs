@@ -216,10 +216,10 @@ namespace Microsoft.Identity.Client.Internal.Jwt
                     return;
                 }
 
-#if NET45
+#if NETSTANDARD1_3
+                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
+#elif DESKTOP
                 X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
-#elif NETSTANDARD1_3
-                    X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
 #endif
             }
 
