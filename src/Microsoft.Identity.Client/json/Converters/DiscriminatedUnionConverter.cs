@@ -84,21 +84,24 @@ namespace Microsoft.Identity.Json.Converters
 
         private static Union CreateUnion(Type t)
         {
-            Union u = new Union();
-
-            u.TagReader = (FSharpFunction)FSharpUtils.PreComputeUnionTagReader(null, t, null);
-            u.Cases = new List<UnionCase>();
+            Union u = new Union
+            {
+                TagReader = (FSharpFunction)FSharpUtils.PreComputeUnionTagReader(null, t, null),
+                Cases = new List<UnionCase>()
+            };
 
             object[] cases = (object[])FSharpUtils.GetUnionCases(null, t, null);
 
             foreach (object unionCaseInfo in cases)
             {
-                UnionCase unionCase = new UnionCase();
-                unionCase.Tag = (int)FSharpUtils.GetUnionCaseInfoTag(unionCaseInfo);
-                unionCase.Name = (string)FSharpUtils.GetUnionCaseInfoName(unionCaseInfo);
-                unionCase.Fields = (PropertyInfo[])FSharpUtils.GetUnionCaseInfoFields(unionCaseInfo);
-                unionCase.FieldReader = (FSharpFunction)FSharpUtils.PreComputeUnionReader(null, unionCaseInfo, null);
-                unionCase.Constructor = (FSharpFunction)FSharpUtils.PreComputeUnionConstructor(null, unionCaseInfo, null);
+                UnionCase unionCase = new UnionCase
+                {
+                    Tag = (int)FSharpUtils.GetUnionCaseInfoTag(unionCaseInfo),
+                    Name = (string)FSharpUtils.GetUnionCaseInfoName(unionCaseInfo),
+                    Fields = (PropertyInfo[])FSharpUtils.GetUnionCaseInfoFields(unionCaseInfo),
+                    FieldReader = (FSharpFunction)FSharpUtils.PreComputeUnionReader(null, unionCaseInfo, null),
+                    Constructor = (FSharpFunction)FSharpUtils.PreComputeUnionConstructor(null, unionCaseInfo, null)
+                };
 
                 u.Cases.Add(unionCase);
             }

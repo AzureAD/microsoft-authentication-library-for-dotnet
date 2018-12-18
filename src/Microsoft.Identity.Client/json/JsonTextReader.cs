@@ -81,12 +81,7 @@ namespace Microsoft.Identity.Json
         /// <param name="reader">The <see cref="TextReader"/> containing the JSON data to read.</param>
         public JsonTextReader(TextReader reader)
         {
-            if (reader == null)
-            {
-                throw new ArgumentNullException(nameof(reader));
-            }
-
-            _reader = reader;
+            _reader = reader ?? throw new ArgumentNullException(nameof(reader));
             _lineNumber = 1;
 
 #if HAVE_ASYNC
@@ -117,12 +112,7 @@ namespace Microsoft.Identity.Json
             get => _arrayPool;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _arrayPool = value;
+                _arrayPool = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
@@ -454,9 +444,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Int32"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="int"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Int32"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="int"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override int? ReadAsInt32()
         {
             return (int?)ReadNumberValue(ReadType.ReadAsInt32);
@@ -472,18 +462,18 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="String"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="string"/>.
         /// </summary>
-        /// <returns>A <see cref="String"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="string"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override string ReadAsString()
         {
             return (string)ReadStringValue(ReadType.ReadAsString);
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Byte"/>[].
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="byte"/>[].
         /// </summary>
-        /// <returns>A <see cref="Byte"/>[] or <c>null</c> if the next JSON token is null. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="byte"/>[] or <c>null</c> if the next JSON token is null. This method will return <c>null</c> at the end of an array.</returns>
         public override byte[] ReadAsBytes()
         {
             EnsureBuffer();
@@ -751,9 +741,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="bool"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Boolean"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="bool"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override bool? ReadAsBoolean()
         {
             EnsureBuffer();
@@ -1028,18 +1018,18 @@ namespace Microsoft.Identity.Json
 #endif
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Decimal"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="decimal"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Decimal"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="decimal"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override decimal? ReadAsDecimal()
         {
             return (decimal?)ReadNumberValue(ReadType.ReadAsDecimal);
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="Double"/>.
+        /// Reads the next JSON token from the underlying <see cref="TextReader"/> as a <see cref="Nullable{T}"/> of <see cref="double"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Double"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="double"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override double? ReadAsDouble()
         {
             return (double?)ReadNumberValue(ReadType.ReadAsDouble);
@@ -1600,7 +1590,7 @@ namespace Microsoft.Identity.Json
 
         private bool ValidIdentifierChar(char value)
         {
-            return (char.IsLetterOrDigit(value) || value == '_' || value == '$');
+            return char.IsLetterOrDigit(value) || value == '_' || value == '$';
         }
 
         private void ParseUnquotedProperty()
@@ -1937,8 +1927,8 @@ namespace Microsoft.Identity.Json
             object numberValue;
             JsonToken numberType;
 
-            bool singleDigit = (char.IsDigit(firstChar) && _stringReference.Length == 1);
-            bool nonBase10 = (firstChar == '0' && _stringReference.Length > 1 && _stringReference.Chars[_stringReference.StartIndex + 1] != '.' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'e' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'E');
+            bool singleDigit = char.IsDigit(firstChar) && _stringReference.Length == 1;
+            bool nonBase10 = firstChar == '0' && _stringReference.Length > 1 && _stringReference.Chars[_stringReference.StartIndex + 1] != '.' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'e' && _stringReference.Chars[_stringReference.StartIndex + 1] != 'E';
 
             switch (readType)
             {
@@ -2369,7 +2359,7 @@ namespace Microsoft.Identity.Json
 
                     char nextChart = _chars[_charPos + 1];
 
-                    return (nextChart == '*' || nextChart == '/');
+                    return nextChart == '*' || nextChart == '/';
                 case ')':
                     if (CurrentState == State.Constructor || CurrentState == State.ConstructorStart)
                     {

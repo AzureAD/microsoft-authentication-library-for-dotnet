@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             Initialize();
         }
 
-        void Initialize()
+        private void Initialize()
         {
             BackgroundColor = UIColor.Red;
         }

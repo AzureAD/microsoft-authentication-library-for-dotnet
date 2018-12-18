@@ -293,14 +293,16 @@ namespace Microsoft.Identity.Json.Schema
                         CurrentSchema.Id = GetTypeId(type, false);
 
                         JsonArrayAttribute arrayAttribute = JsonTypeReflector.GetCachedAttribute<JsonArrayAttribute>(type);
-                        bool allowNullItem = (arrayAttribute == null || arrayAttribute.AllowNullItems);
+                        bool allowNullItem = arrayAttribute == null || arrayAttribute.AllowNullItems;
 
                         Type collectionItemType = ReflectionUtils.GetCollectionItemType(type);
                         if (collectionItemType != null)
                         {
-                            CurrentSchema.Items = new List<JsonSchema>();
-                            CurrentSchema.Items.Add(GenerateInternal(collectionItemType, (!allowNullItem) ? Required.Always : Required.Default, false));
-                        }
+                        CurrentSchema.Items = new List<JsonSchema>
+                        {
+                            GenerateInternal(collectionItemType, (!allowNullItem) ? Required.Always : Required.Default, false)
+                        };
+                    }
                         break;
                     case JsonContractType.Primitive:
                         CurrentSchema.Type = GetJsonSchemaType(type, valueRequired);
@@ -377,7 +379,7 @@ namespace Microsoft.Identity.Json.Schema
 
         private bool HasFlag(DefaultValueHandling value, DefaultValueHandling flag)
         {
-            return ((value & flag) == flag);
+            return (value & flag) == flag;
         }
 
         private void GenerateObjectSchema(Type type, JsonObjectContract contract)
@@ -424,7 +426,7 @@ namespace Microsoft.Identity.Json.Schema
                 return true;
             }
 
-            bool match = ((value & flag) == flag);
+            bool match = (value & flag) == flag;
             if (match)
             {
                 return true;
