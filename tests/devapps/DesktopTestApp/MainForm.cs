@@ -266,7 +266,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(SplitScopeString(scopes.Text)).ConfigureAwait(true);
+                        await _publicClientHandler.AcquireTokenSilentAsync(SplitScopeString(scopes.Text), GetForceRefresh()).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                 }
@@ -360,6 +360,13 @@ namespace DesktopTestApp
             }
 
             return behavior;
+        }
+
+        private bool GetForceRefresh()
+        {
+            bool forceRefresh = forceRefreshCheckBox.Checked;
+
+            return forceRefresh;
         }
 
         #region App logic
@@ -579,7 +586,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes).ConfigureAwait(true);
+                        await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes, GetForceRefresh()).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                 }
