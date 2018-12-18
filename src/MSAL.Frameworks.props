@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
+        <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
+        <TargetFrameworkNetCore>netcoreapp1.0</TargetFrameworkNetCore>
+        <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
+        <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+        <TargetFrameworkAndroid>MonoAndroid8.1</TargetFrameworkAndroid>
+
+        <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid)</TargetFrameworks>
+    </PropertyGroup>
+</Project>

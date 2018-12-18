@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal override bool DeepEquals(JToken node)
         {
-            return (node is JArray t && ContentsEqual(t));
+            return node is JArray t && ContentsEqual(t);
         }
 
         internal override JToken CloneToken()
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JArray"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
         /// <returns>A <see cref="JArray"/> populated from the string that contains JSON.</returns>
         /// <example>
         ///   <code lang="cs" source="..\Src\Microsoft.Identity.Json.Tests\Documentation\LinqToJsonTests.cs" region="LinqToJsonCreateParseArray" title="Parsing a JSON Array from Text" />
@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JArray"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JArray"/> populated from the string that contains JSON.</returns>

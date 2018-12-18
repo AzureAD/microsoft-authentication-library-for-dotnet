@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Internal.Jwt
         {
             var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             TimeSpan diff = time - startTime;
-            return (long)(diff.TotalSeconds);
+            return (long)diff.TotalSeconds;
         }
 
         private string Encode(ClientAssertionCertificate credential, bool sendCertificate)
@@ -212,12 +212,14 @@ namespace Microsoft.Identity.Client.Internal.Jwt
                 X509CertificatePublicCertValue = null;
 
                 if (!sendCertificate)
+                {
                     return;
+                }
 
-#if NET45
-                    X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
-#elif NETSTANDARD1_3
-                    X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
+#if NETSTANDARD1_3
+                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.RawData);
+#elif DESKTOP
+                X509CertificatePublicCertValue = Convert.ToBase64String(credential.Certificate.GetRawCertData());
 #endif
             }
 

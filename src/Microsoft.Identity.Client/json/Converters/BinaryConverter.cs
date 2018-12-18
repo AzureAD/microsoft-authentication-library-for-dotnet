@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Json.Converters
                 throw JsonSerializationException.Create(reader, "Unexpected token parsing binary. Expected String or StartArray, got {0}.".FormatWith(CultureInfo.InvariantCulture, reader.TokenType));
             }
 
-            Type t = (ReflectionUtils.IsNullableType(objectType))
+            Type t = ReflectionUtils.IsNullableType(objectType)
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
 

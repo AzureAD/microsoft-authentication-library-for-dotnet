@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Json.Schema
             source.Validate(schema, (sender, args) => errors.Add(args.Message));
 
             errorMessages = errors;
-            return (errorMessages.Count == 0);
+            return errorMessages.Count == 0;
         }
 
         /// <summary>

@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         private bool ParseDate(int start)
         {
-            return (Parse4Digit(start, out Year)
+            return Parse4Digit(start, out Year)
                     && 1 <= Year
                     && ParseChar(start + Lzyyyy, '-')
                     && Parse2Digit(start + Lzyyyy_, out Month)
@@ -112,12 +112,12 @@ namespace Microsoft.Identity.Json.Utilities
                     && ParseChar(start + Lzyyyy_MM, '-')
                     && Parse2Digit(start + Lzyyyy_MM_, out Day)
                     && 1 <= Day
-                    && Day <= DateTime.DaysInMonth(Year, Month));
+                    && Day <= DateTime.DaysInMonth(Year, Month);
         }
 
         private bool ParseTimeAndZoneAndWhitespace(int start)
         {
-            return (ParseTime(ref start) && ParseZone(start));
+            return ParseTime(ref start) && ParseZone(start);
         }
 
         private bool ParseTime(ref int start)
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Json.Utilities
                 }
             }
 
-            return (start == _end);
+            return start == _end;
         }
 
         private bool Parse4Digit(int start, out int num)
@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         private bool ParseChar(int start, char ch)
         {
-            return (start < _end && _text[start] == ch);
+            return start < _end && _text[start] == ch;
         }
     }
 }
