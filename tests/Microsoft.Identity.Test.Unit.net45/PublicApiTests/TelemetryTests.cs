@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     string reqId = _telemetryManager.GenerateNewRequestId();
                     reqIdArray[i] = reqId;
-                    Task task= (new Task(() =>
+                    Task task = new Task(() =>
                     {
                         var e1 = new ApiEvent(MsalLogger.Create(Guid.NewGuid(), null, null)) { Authority = new Uri("https://login.microsoftonline.com"), AuthorityType = "Aad" };
                         _telemetryManager.StartEvent(reqId, e1);
@@ -433,7 +433,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         _telemetryManager.StartEvent(reqId, e5);
                         // do some stuff...
                         _telemetryManager.StopEvent(reqId, e5);
-                    }));
+                    });
                     taskArray[i] = task;
                     task.Start();
                 }

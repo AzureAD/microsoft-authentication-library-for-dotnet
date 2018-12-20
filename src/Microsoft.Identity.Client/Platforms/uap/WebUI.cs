@@ -106,9 +106,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private void ThrowOnNetworkDown()
         {
             var profile = NetworkInformation.GetInternetConnectionProfile();
-            var isConnected = (profile != null
+            var isConnected = profile != null
                                && profile.GetNetworkConnectivityLevel() ==
-                               NetworkConnectivityLevel.InternetAccess);
+                               NetworkConnectivityLevel.InternetAccess;
             if (!isConnected)
             {
                 throw new MsalClientException(MsalClientException.NetworkNotAvailableError, MsalErrorMessage.NetworkNotAvailable);

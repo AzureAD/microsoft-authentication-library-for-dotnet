@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             var startTime = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             TimeSpan diff = time - startTime;
-            return (long)(diff.TotalSeconds);
+            return (long)diff.TotalSeconds;
         }
     }
 #endif

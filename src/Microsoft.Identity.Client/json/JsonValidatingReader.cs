@@ -922,7 +922,7 @@ namespace Microsoft.Identity.Json
 
         private static double FloatingPointRemainder(double dividend, double divisor)
         {
-            return dividend - Math.Floor(dividend / divisor) * divisor;
+            return dividend - (Math.Floor(dividend / divisor) * divisor);
         }
 
         private static bool IsZero(double value)

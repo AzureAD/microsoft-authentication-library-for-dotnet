@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageFinished(view, url);
-                    this.Finish(Activity, url);
+                    Finish(Activity, url);
                 }
 
                 base.OnPageFinished(view, url);

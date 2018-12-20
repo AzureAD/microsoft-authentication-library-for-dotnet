@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Internal
             public JWTHeaderWithCertificate(ClientAssertionCertificate credential, bool sendCertificate)
                 : base(credential)
             {
-                X509CertificateThumbprint = this.Credential.Thumbprint;
+                X509CertificateThumbprint = Credential.Thumbprint;
                 X509CertificatePublicCertValue = null;
 
                 if (!sendCertificate)
