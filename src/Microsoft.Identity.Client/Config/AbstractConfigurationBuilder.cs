@@ -26,6 +26,8 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 
@@ -65,7 +67,25 @@ namespace Microsoft.Identity.Client.Config
         /// <returns></returns>
         public T WithLoggingCallback(LogCallback loggingCallback)
         {
+            if (Config.LoggingCallback != null)
+            {
+                throw new InvalidOperationException("LoggingCallback has already been set");
+            }
             Config.LoggingCallback = loggingCallback;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public T WithDebugLoggingCallback()
+        {
+            if (Config.LoggingCallback != null)
+            {
+                throw new InvalidOperationException("LoggingCallback has already been set");
+            }
+            Config.LoggingCallback = (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); };
             return (T)this;
         }
 
@@ -74,15 +94,15 @@ namespace Microsoft.Identity.Client.Config
         /// <returns></returns>
         public T WithTelemetryCallback(ITelemetryReceiver telemetryReceiver)
         {
+            if (Config.TelemetryReceiver != null)
+            {
+                throw new InvalidOperationException("TelemetryReceiver has already been set");
+            }
             Config.TelemetryReceiver = telemetryReceiver;
             return (T)this;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
-        public T WithClientId(string clientId)
+        protected T WithClientId(string clientId)
         {
             if (!string.IsNullOrWhiteSpace(clientId))
             {

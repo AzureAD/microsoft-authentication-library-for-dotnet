@@ -243,6 +243,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
             string authority, bool forceRefresh)
         {
+            ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
             Authority authorityInstance = null;
             if (!string.IsNullOrEmpty(authority))
             {
