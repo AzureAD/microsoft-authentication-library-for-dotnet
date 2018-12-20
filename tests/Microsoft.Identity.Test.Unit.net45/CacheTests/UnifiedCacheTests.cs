@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant)
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityCommonTenant)
                     .WithHttpManager(httpManager)
                     .WithUserTokenCache(new TokenCache() { LegacyCachePersistence = new TestLegacyCachePersistance() })
                     .BuildConcrete();
@@ -67,8 +67,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -86,11 +86,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 {
                     app.UserTokenCache.RemoveMsalAccount(account, requestContext);
                 }
-
-                // TODO: BUG BUG BUG -- Why are we calling EndpointDiscovery again?  We _are_ calling it for a different tenant (common vs home) but 
-                // something has changed in the test, need to understand what...
-                // adding this line back in fixes the test.
-                // httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
@@ -137,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     });
 
                 var app = PublicClientApplicationBuilder
-                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityHomeTenant)
+                    .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityCommonTenant)
                     .WithHttpManager(httpManager)
                     .WithUserTokenCache(tokenCache)
                     .BuildConcrete();
@@ -146,8 +141,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -174,11 +169,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
                 
-                // TODO: BUG BUG BUG -- Why are we calling EndpointDiscovery again?  We _are_ calling it for a different tenant (common vs home) but 
-                // something has changed in the test, need to understand what...
-                // adding this line back in fixes the test past this point...
-                // httpManager.AddMockHandlerForTenantEndpointDiscovery(ClientApplicationBase.DefaultAuthority);
-
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
