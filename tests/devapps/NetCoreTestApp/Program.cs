@@ -167,7 +167,9 @@ namespace NetCoreTestApp
         private static void RunClientCredentialWithCertificate()
         {
             ClientCredential cc = new ClientCredential(new ClientAssertionCertificate(GetCertificateByThumbprint("<THUMBPRINT>")));
-            ConfidentialClientApplication app = new ConfidentialClientApplication(ClientIdForConfidentialApp, "http://localhost", cc, new TokenCache(), new TokenCache());
+            ConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientIdForConfidentialApp).WithRedirectUri("http://localhost")
+                                                                                    .WithClientCredential(cc).WithUserTokenCache(new TokenCache())
+                                                                                    .WithAppTokenCache(new TokenCache()).BuildConcrete();
             try
             {
                 AuthenticationResult result = app.AcquireTokenForClientAsync(new string[] { "User.Read.All" }, true).Result;

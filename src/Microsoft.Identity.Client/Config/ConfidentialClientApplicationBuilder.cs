@@ -117,7 +117,11 @@ namespace Microsoft.Identity.Client.Config
             return BuildConcrete();
         }
 
-        internal ConfidentialClientApplication BuildConcrete()
+        /// <summary>
+        /// TODO: this should be internal, but tests are still using this publicly, some of which are not internalsvisible.
+        /// </summary>
+        /// <returns></returns>
+        public ConfidentialClientApplication BuildConcrete()
         {
             return new ConfidentialClientApplication(BuildConfiguration());
         }

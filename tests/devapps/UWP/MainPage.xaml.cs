@@ -14,6 +14,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.Identity.Client.Config;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -25,15 +26,15 @@ namespace UWP
     public sealed partial class MainPage : Page
     {
         private IPublicClientApplication _pca;
-        private readonly static string ClientID = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations/";
-        private readonly static IEnumerable<string> Scopes = new[] { "user.read" };
+        private static readonly string ClientID = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private static readonly string Authority = "https://login.microsoftonline.com/organizations/";
+        private static readonly IEnumerable<string> Scopes = new[] { "user.read" };
 
         public MainPage()
         {
             this.InitializeComponent();
 
-            _pca = new PublicClientApplication(ClientID, Authority);
+            _pca = PublicClientApplicationBuilder.Create(ClientID).WithAuthority(Authority, true, true).BuildConcrete();
         }
 
 

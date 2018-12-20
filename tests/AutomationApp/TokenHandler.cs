@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 
 namespace AutomationApp
 {
@@ -52,8 +53,8 @@ namespace AutomationApp
             }
 
             _publicClientApplication = input.ContainsKey("authority")
-                ? new PublicClientApplication(input["client_id"], input["authority"])
-                : new PublicClientApplication(input["client_id"]);
+                ? PublicClientApplicationBuilder.Create(input["client_id"]).WithAuthority(input["authority"], true, true).BuildConcrete()
+                : PublicClientApplicationBuilder.Create(input["client_id"]).BuildConcrete();
         }
 
         public async Task<AuthenticationResult> AcquireTokenAsync(Dictionary<string, string> input)

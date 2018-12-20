@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -221,7 +222,10 @@ namespace DesktopTestApp
         {
             try
             {
-                _publicClientHandler.PublicClientApplication = new PublicClientApplication(PublicClientId, "https://login.microsoftonline.com/organizations");
+                _publicClientHandler.PublicClientApplication = PublicClientApplicationBuilder
+                    .Create(PublicClientId)
+                    .WithAuthority("https://login.microsoftonline.com/organizations", true, true)
+                    .BuildConcrete();
 
                 AuthenticationResult authResult = await _publicClientHandler.PublicClientApplication.AcquireTokenByUsernamePasswordAsync(
                     SplitScopeString(scopes.Text),

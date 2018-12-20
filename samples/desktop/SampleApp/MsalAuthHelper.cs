@@ -31,6 +31,7 @@ using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 
 namespace SampleApp
 {
@@ -44,8 +45,10 @@ namespace SampleApp
         public MsalAuthHelper(string clientId)
         {
             _clientId = clientId;
-            Application = new PublicClientApplication(_clientId, "https://login.microsoftonline.com/organizations/",
-                CachePersistence.GetUserCache());
+            Application = PublicClientApplicationBuilder
+                          .Create(_clientId).WithAuthority("https://login.microsoftonline.com/organizations/", true, true)
+                          .WithUserTokenCache(CachePersistence.GetUserCache())
+                          .BuildConcrete();
         }
 
         public async Task<string> GetTokenForCurrentAccountAsync(IEnumerable<string> scopes, IAccount account)

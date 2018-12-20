@@ -29,6 +29,7 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -57,7 +58,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
             SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
 
             AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -81,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
             SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
             AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
@@ -106,7 +107,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
                  await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
@@ -122,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
                  await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));

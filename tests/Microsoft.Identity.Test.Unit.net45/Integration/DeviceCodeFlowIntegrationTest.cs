@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Core.UIAutomation;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -82,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
-            PublicClientApplication pca = new PublicClientApplication(labResponse.AppId);
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId).BuildConcrete();
             var result = await pca.AcquireTokenWithDeviceCodeAsync(Scopes, deviceCodeResult =>
             {
                 RunAutomatedDeviceCodeFlow(deviceCodeResult, labResponse.User);

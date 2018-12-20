@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void ConstructorsTest()
         {
-            PublicClientApplication app = new PublicClientApplication(MsalTestConstants.ClientId);
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
             Assert.IsNotNull(app);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
@@ -1004,7 +1004,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PublicClientApplicationTests")]
         public void GetUserTest()
         {
-            var app = new PublicClientApplication(MsalTestConstants.ClientId);
+            var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
             var users = app.GetAccountsAsync().Result;
             Assert.IsNotNull(users);
             // no users in the cache
@@ -1135,7 +1135,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("ClientApplicationBase.GetAuthoriy tests")]
         public void GetAuthority_AccountWithNullIdPassed_CommonAuthorityReturned()
         {
-            PublicClientApplication app = new PublicClientApplication(MsalTestConstants.ClientId);
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
             var authority = app.GetAuthority(new Account(null, MsalTestConstants.Name, MsalTestConstants.ProductionPrefNetworkEnvironment));
             Assert.AreEqual(ClientApplicationBase.DefaultAuthority, authority.AuthorityInfo.CanonicalAuthority);
@@ -1145,7 +1145,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [Description("ClientApplicationBase.GetAuthoriy tests")]
         public void GetAuthority_AccountWithIdPassed_TenantedAuthorityUsed()
         {
-            PublicClientApplication app = new PublicClientApplication(MsalTestConstants.ClientId);
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
             var authority = app.GetAuthority(
                 new Account(
@@ -1312,7 +1312,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void NetCore_AcquireToken_ThrowsPlatformNotSupported()
         {
             // Arrange
-            PublicClientApplication pca = new PublicClientApplication("cid");
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create("cid").BuildConcrete();
             var account = new Account("a.b", null, null);
 
             // All interactive auth overloads
