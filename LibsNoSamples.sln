@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C-5E2E-4C4A-BDD2-8F2A06AAE3F6}"
 	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
 		src\MSAL.Common.props = src\MSAL.Common.props
 		src\MSAL.Frameworks.props = src\MSAL.Frameworks.props
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
@@ -40,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.Common", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalV2", "tests\CacheCompat\CommonCache.Test.MsalV2\CommonCache.Test.MsalV2.csproj", "{8672FC71-00DE-491D-BCEB-101A2A7887E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.Unit", "tests\CacheCompat\CommonCache.Test.Unit\CommonCache.Test.Unit.csproj", "{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.Unit", "tests\CacheCompat\CommonCache.Test.Unit\CommonCache.Test.Unit.csproj", "{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

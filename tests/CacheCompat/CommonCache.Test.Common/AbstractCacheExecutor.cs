@@ -44,8 +44,6 @@ namespace CommonCache.Test.Common
 
         private async Task ExecuteAsync(CommandLineOptions options)
         {
-            Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
-
             try
             {
                 var results = await InternalExecuteAsync(options).ConfigureAwait(false);

@@ -41,7 +41,7 @@ namespace CommonCache.Test.Common
         {
             void SyncRunAction(CommandLineOptions options)
             {
-                Console.WriteLine(Path.GetFileNameWithoutExtension(Assembly.GetEntryAssembly().Location));
+                Console.WriteLine(Assembly.GetEntryAssembly().Location);
                 try
                 {
                     runFunc.Invoke(options).ConfigureAwait(false).GetAwaiter().GetResult();

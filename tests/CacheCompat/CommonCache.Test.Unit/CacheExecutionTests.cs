@@ -43,7 +43,7 @@ namespace CommonCache.Test.Unit
             var executor = new CacheTestExecutor(
                 CacheProgramType.AdalV3,
                 CacheProgramType.AdalV4,
-                5014,
+                4434,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -57,8 +57,8 @@ namespace CommonCache.Test.Unit
             var executor = new CacheTestExecutor(
                 CacheProgramType.AdalV3,
                 CacheProgramType.MsalV2,
-                5014,
-                expectSecondTokenException: true);
+                6250,
+                expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -86,7 +86,7 @@ namespace CommonCache.Test.Unit
                 CacheProgramType.AdalV4,
                 CacheProgramType.MsalV2,
                 5156,
-                expectSecondTokenException: true);
+                expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -100,7 +100,7 @@ namespace CommonCache.Test.Unit
                 CacheProgramType.MsalV2,
                 CacheProgramType.AdalV3,
                 expectedMsalCacheSizeBytes: 6997,
-                expectSecondTokenException: true);
+                expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -114,7 +114,7 @@ namespace CommonCache.Test.Unit
                 CacheProgramType.MsalV2,
                 CacheProgramType.AdalV4,
                 expectedMsalCacheSizeBytes: 6997,
-                expectSecondTokenException: true);
+                expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }

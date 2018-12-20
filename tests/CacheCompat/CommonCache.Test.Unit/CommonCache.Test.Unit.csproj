@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
@@ -18,4 +18,21 @@
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj" />
   </ItemGroup>
 
+  <Target Name="CopyFiles" AfterTargets="Build">
+    <ItemGroup>
+      <AdalV3Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.AdalV3\bin\$(Configuration)\**\*.*">
+        <InProject>false</InProject>
+      </AdalV3Files>
+      <AdalV4Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.AdalV4\bin\$(Configuration)\**\*.*">
+        <InProject>false</InProject>
+      </AdalV4Files>
+      <MsalV2Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalV2\bin\$(Configuration)\**\*.*">
+        <InProject>false</InProject>
+      </MsalV2Files>
+    </ItemGroup>
+
+    <Copy SourceFiles="@(AdalV3Files)" DestinationFolder="$(OutputPath)\AdalV3" />
+    <Copy SourceFiles="@(AdalV4Files)" DestinationFolder="$(OutputPath)\AdalV4" />
+    <Copy SourceFiles="@(MsalV2Files)" DestinationFolder="$(OutputPath)\MsalV2" />
+  </Target>  
 </Project>

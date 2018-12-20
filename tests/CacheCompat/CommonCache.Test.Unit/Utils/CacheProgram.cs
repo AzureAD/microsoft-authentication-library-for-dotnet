@@ -46,7 +46,7 @@ namespace CommonCache.Test.Unit.Utils
         public async Task<CacheProgramResults> ExecuteAsync(string username, string password, CancellationToken cancellationToken)
         {
             var sb = new StringBuilder();
-            sb.Append($"--username {username} ");
+            sb.Append($"--userName {username} ");
             sb.Append($"--userPassword {password} ");
             sb.Append($"--resultsFilePath {ResultsFilePath.EncloseQuotes()} ");
             string arguments = sb.ToString();
