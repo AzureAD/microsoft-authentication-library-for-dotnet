@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 AccessGroup = keychainGroup
             };
 
-            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, Int32.MaxValue, out SecStatusCode resultCode);
+            SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, int.MaxValue, out SecStatusCode resultCode);
 
             ICollection<string> res = new List<string>();
 

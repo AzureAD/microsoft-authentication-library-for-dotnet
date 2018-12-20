@@ -28,21 +28,20 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 
 namespace DesktopTestApp
 {
-    class PublicClientHandler
+    internal class PublicClientHandler
     {
-        private string _component = "DesktopTestApp";
+        private readonly string _component = "DesktopTestApp";
 
         public PublicClientHandler(string clientId)
         {
             ApplicationId = clientId;
-            PublicClientApplication = new PublicClientApplication(ApplicationId)
-            {
-                UserTokenCache = TokenCacheHelper.GetUserCache(),
-                Component = _component
-            };
+            PublicClientApplication = PublicClientApplicationBuilder
+                                      .Create(ApplicationId).WithUserTokenCache(TokenCacheHelper.GetUserCache())
+                                      .WithComponent(_component).BuildConcrete();
         }
 
         public string ApplicationId { get; set; }
@@ -135,20 +134,16 @@ namespace DesktopTestApp
             if (string.IsNullOrWhiteSpace(interactiveAuthority))
             {
                 // Use default authority
-                PublicClientApplication = new PublicClientApplication(applicationId)
-                {
-                    UserTokenCache = TokenCacheHelper.GetUserCache(),
-                    Component = _component
-                };
+                PublicClientApplication = PublicClientApplicationBuilder
+                                          .Create(ApplicationId).WithUserTokenCache(TokenCacheHelper.GetUserCache())
+                                          .WithComponent(_component).BuildConcrete();
             }
             else
             {
                 // Use the override authority provided
-                PublicClientApplication = new PublicClientApplication(applicationId, interactiveAuthority)
-                {
-                    UserTokenCache = TokenCacheHelper.GetUserCache(),
-                    Component = _component
-                };
+                PublicClientApplication = PublicClientApplicationBuilder
+                                          .Create(ApplicationId).WithUserTokenCache(TokenCacheHelper.GetUserCache())
+                                          .WithComponent(_component).WithAuthority(interactiveAuthority, true, true).BuildConcrete();
             }
         }
     }

@@ -33,6 +33,7 @@ using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 
 namespace NetCoreTestApp
 {
@@ -49,15 +50,11 @@ namespace NetCoreTestApp
 
         public static void Main(string[] args)
         {
-
-            PublicClientApplication pca = new PublicClientApplication(
-                ClientIdForPublicApp,
-                Authority,
-                TokenCacheHelper.GetUserCache()); // token cache serialization https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization
-
-            Logger.LogCallback = Log;
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
+            PublicClientApplication pca = PublicClientApplicationBuilder
+                                          .Create(ClientIdForPublicApp).WithAuthority(Authority, true, true)
+                                          .WithUserTokenCache(TokenCacheHelper.GetUserCache()).WithLoggingCallback(Log)
+                                          .WithLoggingLevel(LogLevel.Verbose).WithEnablePiiLogging(true).BuildConcrete();
+            // token cache serialization https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization
 
             RunConsoleAppLogicAsync(pca).Wait();
         }

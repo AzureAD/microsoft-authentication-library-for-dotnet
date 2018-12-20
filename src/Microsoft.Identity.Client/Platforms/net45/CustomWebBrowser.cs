@@ -82,10 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 #pragma warning disable 618 // WebBrowserNavigateErrorEventArgs is marked obsolete
         protected virtual void OnNavigateError(WebBrowserNavigateErrorEventArgs e)
         {
-            if (NavigateError != null)
-            {
-                NavigateError(this, e);
-            }
+            NavigateError?.Invoke(this, e);
         }
 #pragma warning restore 618
 

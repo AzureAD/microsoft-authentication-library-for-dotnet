@@ -102,9 +102,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             if (!navigationAction.Request.Url.AbsoluteString.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
                 && !navigationAction.Request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             {
-                AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                result.Error = CoreErrorCodes.NonHttpsRedirectNotSupported;
-                result.ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported;
+                AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
+                {
+                    Error = CoreErrorCodes.NonHttpsRedirectNotSupported,
+                    ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported
+                };
                 AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.CallbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;

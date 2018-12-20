@@ -90,7 +90,7 @@ namespace XForms
 
         private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
         {
-            App.MsalPublicClient.ValidateAuthority = args.Value;
+            // TODO: need to wire ValidateAuthority in at construction time.  App.MsalPublicClient.ValidateAuthority = args.Value;
             App.ValidateAuthority = args.Value;
         }
 

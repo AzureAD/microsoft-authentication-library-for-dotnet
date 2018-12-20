@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Config;
 using Xamarin.Forms;
 
 namespace XForms
@@ -67,31 +68,32 @@ namespace XForms
             MainPage = new NavigationPage(new XForms.MainPage());
 
             InitPublicClient();
-
-            Logger.LogCallback = delegate (LogLevel level, string message, bool containsPii)
-            {
-                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, containsPii); });
-            };
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
         }
 
         public static void InitPublicClient()
         {
-            MsalPublicClient = new PublicClientApplication(ClientId, Authority);
-
+            string redirectUri = string.Empty;
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)
             {
-                case "iOS":
-                    MsalPublicClient.RedirectUri = RedirectUriOnIos;
-                    break;
-                case "Android":
-                    MsalPublicClient.RedirectUri = RedirectUriOnAndroid;
-                    break;
+            case "iOS":
+                redirectUri = RedirectUriOnIos;
+                break;
+            case "Android":
+                redirectUri = RedirectUriOnAndroid;
+                break;
             }
 
-            MsalPublicClient.ValidateAuthority = ValidateAuthority;
+            MsalPublicClient = PublicClientApplicationBuilder
+                               .Create(ClientId, Authority, ValidateAuthority)
+                               .WithRedirectUri(redirectUri)
+                               .WithLoggingCallback((level, message, pii) => Device.BeginInvokeOnMainThread(
+                                                        () =>
+                                                        {
+                                                            LogPage.AddToLog("[" + level + "]" + " - " + message, pii);
+                                                        }))
+                               .WithLoggingLevel(LogLevel.Verbose)
+                               .WithEnablePiiLogging(true).BuildConcrete();
         }
 
         protected override void OnStart()

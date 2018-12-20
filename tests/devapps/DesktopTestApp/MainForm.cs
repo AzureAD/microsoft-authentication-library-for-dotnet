@@ -67,7 +67,7 @@ namespace DesktopTestApp
             userPasswordTextBox.PasswordChar = '*';
 
             LoadSettings();
-            Logger.LogCallback = LogDelegate;
+            // TODO: need to wire this in at PCA construction time.  Logger.LogCallback = LogDelegate;
         }
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)
@@ -89,7 +89,7 @@ namespace DesktopTestApp
                 };
             }
 
-            this.BeginInvoke(new MethodInvoker(action));
+            BeginInvoke(new MethodInvoker(action));
         }
 
         public void RefreshUserList()
@@ -311,9 +311,8 @@ namespace DesktopTestApp
         private void CreateException(Exception ex)
         {
             string output = string.Empty;
-            MsalException exception = ex as MsalException;
 
-            if (exception != null)
+            if (ex is MsalException exception)
             {
                 output += string.Format(
                     CultureInfo.InvariantCulture,
@@ -396,9 +395,9 @@ namespace DesktopTestApp
 
             cachePageTableLayout.RowCount = 0;
             var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
-                .GetAllRefreshTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+                .GetAllRefreshTokensForClient(RequestContext.CreateForTest());
             var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
-                    .GetAllAccessTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+                    .GetAllAccessTokensForClient(RequestContext.CreateForTest());
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {
@@ -452,8 +451,10 @@ namespace DesktopTestApp
             _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
             Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
 
-            Logger.Level = (LogLevel)Enum.Parse(typeof(LogLevel), (string)logLevel.SelectedItem);
-            Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
+            // TODO: need to wire this in at PCA construction time.  Perhaps move these to PublicClientHandler so it can pass these in
+            // at construction?
+            // Logger.Level = (LogLevel)Enum.Parse(typeof(LogLevel), (string)logLevel.SelectedItem);
+            // Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
         }
 
         #endregion

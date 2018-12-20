@@ -45,7 +45,7 @@ namespace AutomationApp
         public AutomationUI()
         {
             InitializeComponent();
-            Logger.LogCallback = _appLogger.Log;
+            // TODO:  need to wire this into ClientApplication construction --> Logger.LogCallback = _appLogger.Log;
         }
 
         public Dictionary<string, string> CreateDictionaryFromJson(string json)
@@ -109,14 +109,7 @@ namespace AutomationApp
 
         private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
-            if (!String.IsNullOrWhiteSpace(authenticationResult.AccessToken))
-            {
-                testResultBox.Text = "Result: Success";
-            }
-            else
-            {
-                testResultBox.Text = "Result: Failure";
-            }
+            testResultBox.Text = string.IsNullOrWhiteSpace(authenticationResult.AccessToken) ? "Result: Failure" : "Result: Success";
 
             accessTokenResult.Text = authenticationResult.AccessToken;
             expiresOnResult.Text = authenticationResult.ExpiresOn.ToString(CultureInfo.InvariantCulture);

@@ -125,8 +125,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         private void SetBrowserControlZoom(int zoomPercent)
         {
             NativeWrapper.IWebBrowser2 browser2 = (NativeWrapper.IWebBrowser2)WebBrowser.ActiveXInstance;
-            NativeWrapper.IOleCommandTarget cmdTarget = browser2.Document as NativeWrapper.IOleCommandTarget;
-            if (cmdTarget != null)
+            if (browser2.Document is NativeWrapper.IOleCommandTarget cmdTarget)
             {
                 const int OLECMDID_OPTICAL_ZOOM = 63;
                 const int OLECMDEXECOPT_DONTPROMPTUSER = 2;

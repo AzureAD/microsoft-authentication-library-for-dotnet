@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -50,7 +51,7 @@ namespace XForms
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null, LogLevel.Verbose, true, true, null));
 
             IDictionary<string, MsalAccessTokenCacheItem> accessTokens = new Dictionary<string, MsalAccessTokenCacheItem>();
             foreach (var accessItemStr in tokenCache.GetAllAccessTokenCacheItems(requestContext))
@@ -108,7 +109,7 @@ namespace XForms
 
         public void OnExpire(object sender, EventArgs e)
         {
-            var mi = ((MenuItem)sender);
+            var mi = (MenuItem)sender;
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
             var tokenCache = App.MsalPublicClient.UserTokenCache;
 
@@ -123,21 +124,20 @@ namespace XForms
 
         public void OnAtDelete(object sender, EventArgs e)
         {
-            var mi = ((MenuItem)sender);
+            var mi = (MenuItem)sender;
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
             var tokenCache = App.MsalPublicClient.UserTokenCache;
             // todo pass idToken instead of null
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
 
-            tokenCache.DeleteAccessToken(accessTokenCacheItem, null, requestContext);
+            tokenCache.DeleteAccessToken(accessTokenCacheItem, null, RequestContext.CreateForTest());
 
             RefreshCacheView();
         }
 
         public void OnInvalidate(object sender, EventArgs e)
         {
-            var mi = ((MenuItem)sender);
+            var mi = (MenuItem)sender;
             var refreshTokenCacheItem = (MsalRefreshTokenCacheItem)mi.CommandParameter;
             var tokenCache = App.MsalPublicClient.UserTokenCache;
 

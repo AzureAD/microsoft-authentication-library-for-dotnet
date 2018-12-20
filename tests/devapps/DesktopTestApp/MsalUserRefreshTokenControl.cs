@@ -28,7 +28,7 @@ namespace DesktopTestApp
             cache = publicClient.UserTokenCache;
             rtItem = rtIitem;
 
-            accountItem = cache.GetAccount(rtIitem, new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+            accountItem = cache.GetAccount(rtIitem, RequestContext.CreateForTest());
             upnLabel.Text = accountItem.PreferredUsername;
 
             invalidateRefreshTokenBtn.Enabled = !rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);

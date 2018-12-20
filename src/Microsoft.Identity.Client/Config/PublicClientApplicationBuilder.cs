@@ -89,7 +89,12 @@ namespace Microsoft.Identity.Client.Config
             return BuildConcrete();
         }
 
-        internal PublicClientApplication BuildConcrete()
+        /// <summary>
+        /// TODO: do we want this public?  I'd prefer to keep it internal and have the interface be our customer boundary.
+        /// But some of our apps without InternalsVisibleTo talk to PCA for now.  Need to resolve this.
+        /// </summary>
+        /// <returns></returns>
+        public PublicClientApplication BuildConcrete()
         {
             return new PublicClientApplication(BuildConfiguration());
         }
