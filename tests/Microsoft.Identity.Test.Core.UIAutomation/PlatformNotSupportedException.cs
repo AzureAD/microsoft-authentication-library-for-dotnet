@@ -36,9 +36,9 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
     [Serializable]
     public class PlatformNotSupportedException : Exception
     {
-        private const string message = "Platform not supported.";
+        private const string NotSupportedMessage = "Platform not supported.";
 
-        public PlatformNotSupportedException() : base(message)
+        public PlatformNotSupportedException() : base(NotSupportedMessage)
         {
         }
     }

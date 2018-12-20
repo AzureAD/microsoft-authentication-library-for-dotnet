@@ -1435,7 +1435,7 @@ namespace Microsoft.Identity.Client
                 };
             }
         }
-        
+
         private static void GuardOnMobilePlatforms()
         {
 #if ANDROID || iOS || WINDOWS_APP

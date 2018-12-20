@@ -112,8 +112,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 
                 else
                 {
-                    safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false);
-                    safariViewController.Delegate = this;
+                    safariViewController = new SFSafariViewController(new NSUrl(authorizationUri.AbsoluteUri), false)
+                    {
+                        Delegate = this
+                    };
                     viewController.InvokeOnMainThread(() =>
                     {
                         viewController.PresentViewController(safariViewController, false, null);

@@ -40,8 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     internal class WKWebNavigationDelegate : WKNavigationDelegate
     {
         private const string AboutBlankUri = "about:blank";
-
-        AuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
+        private AuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
 
         public WKWebNavigationDelegate(AuthenticationAgentUIViewController AuthUIViewController)
         {
@@ -116,11 +115,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
         internal class WKWebViewUIDelegate : WKUIDelegate
         {
-            AuthenticationAgentUIViewController controller = null;
+            private readonly AuthenticationAgentUIViewController _controller = null;
 
             public WKWebViewUIDelegate(AuthenticationAgentUIViewController c)
             {
-                controller = c;
+                _controller = c;
                 return;
             }
         }

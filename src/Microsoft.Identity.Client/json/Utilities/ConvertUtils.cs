@@ -664,7 +664,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return ParseResult.Invalid;
             }
 
-            bool isNegative = (chars[start] == '-');
+            bool isNegative = chars[start] == '-';
 
             if (isNegative)
             {
@@ -758,7 +758,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return ParseResult.Invalid;
             }
 
-            bool isNegative = (chars[start] == '-');
+            bool isNegative = chars[start] == '-';
 
             if (isNegative)
             {
@@ -1283,7 +1283,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return ParseResult.Invalid;
             }
 
-            bool isNegative = (chars[start] == '-');
+            bool isNegative = chars[start] == '-';
             if (isNegative)
             {
                 // text just a negative sign
@@ -1412,7 +1412,7 @@ namespace Microsoft.Identity.Json.Utilities
                             }
                         }
 
-                        if (mantissaDigits < 29 && (mantissaDigits != 28 || !(storeOnly28Digits ?? (storeOnly28Digits = (hi19 > decimalMaxValueHi19 || (hi19 == decimalMaxValueHi19 && (lo10 > decimalMaxValueLo9 || (lo10 == decimalMaxValueLo9 && c > decimalMaxValueLo1))))).GetValueOrDefault())))
+                        if (mantissaDigits < 29 && (mantissaDigits != 28 || !(storeOnly28Digits ?? (storeOnly28Digits = hi19 > decimalMaxValueHi19 || (hi19 == decimalMaxValueHi19 && (lo10 > decimalMaxValueLo9 || (lo10 == decimalMaxValueLo9 && c > decimalMaxValueLo1)))).GetValueOrDefault())))
                         {
                             if (mantissaDigits < 19)
                             {
@@ -1439,7 +1439,7 @@ namespace Microsoft.Identity.Json.Utilities
             exponent += exponentFromMantissa;
 
             // correct the decimal point
-            exponent -= (numDecimalEnd - numDecimalStart);
+            exponent -= numDecimalEnd - numDecimalStart;
 
             if (mantissaDigits <= 19)
             {
@@ -1493,7 +1493,7 @@ namespace Microsoft.Identity.Json.Utilities
                     }
                     if (exponent >= -28)
                     {
-                        value *= new decimal(1, 0, 0, false, (byte)(-exponent));
+                        value *= new decimal(1, 0, 0, false, (byte)-exponent);
                     }
                     else
                     {

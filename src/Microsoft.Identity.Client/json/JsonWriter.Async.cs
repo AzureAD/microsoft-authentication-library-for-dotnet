@@ -666,7 +666,7 @@ namespace Microsoft.Identity.Json
         /// <param name="token">The <see cref="JsonToken"/> to write.</param>
         /// <param name="value">
         /// The value to write.
-        /// A value is only required for tokens that have an associated value, e.g. the <see cref="String"/> property name for <see cref="JsonToken.PropertyName"/>.
+        /// A value is only required for tokens that have an associated value, e.g. the <see cref="string"/> property name for <see cref="JsonToken.PropertyName"/>.
         /// <c>null</c> can be passed to the method for tokens that don't have a value, e.g. <see cref="JsonToken.StartObject"/>.
         /// </param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests. The default value is <see cref="CancellationToken.None"/>.</param>

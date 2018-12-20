@@ -25,28 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-
-namespace WebApp
+namespace Microsoft.Identity.Test.Common
 {
-    public class Program
+    public static class TestCategories
     {
-        // Entry point for the application.
-        public static void Main(string[] args)
-        {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
-                .UseStartup<Startup>()
-                .Build();
+        /// <summary>
+        /// Tests under this category use a Selenium driven browser (Chrome) to automate the web ui.
+        /// When run in the lab, the browser is configured to run headless.
+        /// For debugging, consider running with the actual browser. 
+        /// </summary>
+        public const string Selenium = "Selenium";
+        public const string LabAccess = "LabAccess";
 
-            host.Run();
-        }
     }
 }

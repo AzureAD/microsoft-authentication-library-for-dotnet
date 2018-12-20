@@ -191,7 +191,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         internal static long ConvertDateTimeToJavaScriptTicks(DateTime dateTime, bool convertToUtc)
         {
-            long ticks = (convertToUtc) ? ToUniversalTicks(dateTime) : dateTime.Ticks;
+            long ticks = convertToUtc ? ToUniversalTicks(dateTime) : dateTime.Ticks;
 
             return UniversialTicksToJavaScriptTicks(ticks);
         }
@@ -516,7 +516,7 @@ namespace Microsoft.Identity.Json.Utilities
                 index = text.Length - 2;
             }
 
-            return (ConvertUtils.Int64TryParse(text.Chars, 6 + text.StartIndex, index - 6, out ticks) == ParseResult.Success);
+            return ConvertUtils.Int64TryParse(text.Chars, 6 + text.StartIndex, index - 6, out ticks) == ParseResult.Success;
         }
 
         private static bool TryParseDateTimeMicrosoft(StringReference text, DateTimeZoneHandling dateTimeZoneHandling, out DateTime dt)
@@ -589,7 +589,7 @@ namespace Microsoft.Identity.Json.Utilities
 
         private static bool TryReadOffset(StringReference offsetText, int startIndex, out TimeSpan offset)
         {
-            bool negative = (offsetText[startIndex] == '-');
+            bool negative = offsetText[startIndex] == '-';
 
             if (ConvertUtils.Int32TryParse(offsetText.Chars, startIndex + 1, 2, out int hours) != ParseResult.Success)
             {

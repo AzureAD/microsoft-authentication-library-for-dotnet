@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Json.Serialization
 
         private static Func<object[], object> GetCreator(Type type)
         {
-            Func<object> defaultConstructor = (ReflectionUtils.HasDefaultConstructor(type, false))
+            Func<object> defaultConstructor = ReflectionUtils.HasDefaultConstructor(type, false)
                 ? ReflectionDelegateFactory.CreateDefaultConstructor<object>(type)
                 : null;
 
@@ -394,7 +394,7 @@ namespace Microsoft.Identity.Json.Serialization
         {
 #if HAVE_FULL_REFLECTION
             // no inheritance
-            return (ReflectionUtils.GetAttribute<NonSerializedAttribute>(provider, false) != null);
+            return ReflectionUtils.GetAttribute<NonSerializedAttribute>(provider, false) != null;
 #else
             if (provider is FieldInfo fieldInfo && (fieldInfo.Attributes & FieldAttributes.NotSerialized) == FieldAttributes.NotSerialized)
             {
@@ -411,7 +411,7 @@ namespace Microsoft.Identity.Json.Serialization
         {
 #if HAVE_FULL_REFLECTION
             // no inheritance
-            return (ReflectionUtils.GetAttribute<SerializableAttribute>(provider, false) != null);
+            return ReflectionUtils.GetAttribute<SerializableAttribute>(provider, false) != null;
 #else
             if (provider is Type type && (type.GetTypeInfo().Attributes & TypeAttributes.Serializable) == TypeAttributes.Serializable)
             {
@@ -488,7 +488,7 @@ namespace Microsoft.Identity.Json.Serialization
             {
                 if (_fullyTrusted == null)
                 {
-#if (DOTNET || PORTABLE || PORTABLE40)
+#if DOTNET || PORTABLE || PORTABLE40
                     _fullyTrusted = true;
 #elif !(NET20 || NET35 || PORTABLE40)
                     AppDomain appDomain = AppDomain.CurrentDomain;

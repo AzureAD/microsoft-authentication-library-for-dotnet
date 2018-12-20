@@ -9,7 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C-5E2E-4C4A-BDD2-8F2A06AAE3F6}"
 	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		global.json = global.json
 		src\MSAL.Common.props = src\MSAL.Common.props
+		src\MSAL.Frameworks.props = src\MSAL.Frameworks.props
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
 EndProject
@@ -24,6 +27,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.SideBySide", "tests\Microsoft.Identity.Test.SideBySide\Microsoft.Identity.Test.SideBySide.csproj", "{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{528C5488-C0D8-45C3-BEAC-3E52C22631C9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{528F34D9-FF6B-4AAE-8367-182EC19DAB5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Core.UIAutomation", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,6 +66,10 @@ Global
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -69,6 +80,8 @@ Global
 		{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{E22918A8-8FE6-47D2-B65E-34436918C5D7} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{D3033A40-F2C2-4495-BC9F-C3C6D497D1CC} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
+		{528C5488-C0D8-45C3-BEAC-3E52C22631C9} = {528F34D9-FF6B-4AAE-8367-182EC19DAB5F}
+		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C88EF77-AF03-4F82-B666-1831DABAA119}

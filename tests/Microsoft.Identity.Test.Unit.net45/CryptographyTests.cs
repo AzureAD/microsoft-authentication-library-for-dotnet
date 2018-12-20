@@ -41,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit
         [TestCategory("CryptographyTests")]
         public void SignWithCertificate()
         {
-            //Tests the cryptography libraries used by MSAL to sign with certificates
+            // Tests the cryptography libraries used by MSAL to sign with certificates
             var cert = new X509Certificate2(
                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
             var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
