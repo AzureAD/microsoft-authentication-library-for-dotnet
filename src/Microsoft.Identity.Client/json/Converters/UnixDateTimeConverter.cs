@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Json.Converters
                 DateTime d = UnixEpoch.AddSeconds(seconds);
 
 #if HAVE_DATE_TIME_OFFSET
-                Type t = (nullable)
+                Type t = nullable
                     ? Nullable.GetUnderlyingType(objectType)
                     : objectType;
                 if (t == typeof(DateTimeOffset))

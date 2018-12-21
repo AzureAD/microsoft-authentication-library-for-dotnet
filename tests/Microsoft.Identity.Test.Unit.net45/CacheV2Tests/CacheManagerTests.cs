@@ -288,25 +288,25 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public void GetAuthorityType()
         {
             // TODO: need to reconcile our authority uri validation with msal c++
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com"));
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/"));
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/stuff"));
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/stuff/adfs"));
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/stuff/adfs#row=4"));
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://adfs.com"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/stuff"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/stuff/adfs"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://login.microsoftonline.com/stuff/adfs#row=4"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("https://adfs.com"));
 
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs/"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs/stuff"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs?life=42"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs?life=42#row=4"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/ADFS"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/AdFs"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs/"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs/stuff"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs?life=42"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/adfs?life=42#row=4"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/ADFS"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("https://login.microsoftonline.com/AdFs"));
 
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("http://login.microsoftonline.com"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("http://login.microsoftonline.com/adfs"));
-            //Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("ftp://login.microsoftonline.com"));
-            //Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("ftp://login.microsoftonline.com/adfs"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("http://login.microsoftonline.com"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("http://login.microsoftonline.com/adfs"));
+            // Assert.AreEqual(AuthorityType.MsSts, TestGetAuthorityType("ftp://login.microsoftonline.com"));
+            // Assert.AreEqual(AuthorityType.Adfs, TestGetAuthorityType("ftp://login.microsoftonline.com/adfs"));
         }
     }
 }

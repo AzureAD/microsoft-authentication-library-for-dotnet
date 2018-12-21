@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                 }
             }
 
-            bool atPathEnd = (_currentIndex == _expression.Length);
+            bool atPathEnd = _currentIndex == _expression.Length;
 
             if (_currentIndex > currentPartStartIndex)
             {
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
 
         private static PathFilter CreatePathFilter(string member, bool scan)
         {
-            PathFilter filter = (scan) ? (PathFilter)new ScanFilter {Name = member} : new FieldFilter {Name = member};
+            PathFilter filter = scan ? (PathFilter)new ScanFilter {Name = member} : new FieldFilter {Name = member};
             return filter;
         }
 
@@ -439,8 +439,10 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         {
             if (_expression[_currentIndex] == '$')
             {
-                expressionPath = new List<PathFilter>();
-                expressionPath.Add(RootFilter.Instance);
+                expressionPath = new List<PathFilter>
+                {
+                    RootFilter.Instance
+                };
             }
             else if (_expression[_currentIndex] == '@')
             {
@@ -846,7 +848,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     if (fields != null)
                     {
                         fields.Add(field);
-                        return (scan)
+                        return scan
                             ? (PathFilter)new ScanMultipleFilter { Names = fields }
                             : (PathFilter)new FieldMultipleFilter { Names = fields };
                     }

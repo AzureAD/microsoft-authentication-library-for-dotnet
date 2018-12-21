@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
@@ -111,12 +112,16 @@ namespace AutomationApp
         private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
             if (!String.IsNullOrWhiteSpace(authenticationResult.AccessToken))
+            {
                 testResultBox.Text = "Result: Success";
+            }
             else
+            {
                 testResultBox.Text = "Result: Failure";
+            }
 
             accessTokenResult.Text = authenticationResult.AccessToken;
-            expiresOnResult.Text = authenticationResult.ExpiresOn.ToString();
+            expiresOnResult.Text = authenticationResult.ExpiresOn.ToString(CultureInfo.InvariantCulture);
             tenantIdResult.Text = authenticationResult.TenantId;
             userResult.Text = authenticationResult.Account.Username;
             idTokenResult.Text = authenticationResult.IdToken;

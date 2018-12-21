@@ -273,7 +273,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _telemetryManager.StartEvent(reqId, apiEvent);
                 var uiEvent = new UiEvent();
                 // Forgot to start this event
-                //telemetry.StartEvent(reqId, uiEvent);
+                // telemetry.StartEvent(reqId, uiEvent);
                 // Now attempting to stop a never-started event
                 _telemetryManager.StopEvent(reqId, uiEvent); // This line will not cause any exception. The implementation simply ignores it.
                 _telemetryManager.StopEvent(reqId, apiEvent);

@@ -70,11 +70,12 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 {
                     var navigationController =
                         new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
-                            redirectUri.OriginalString, CallbackMethod, CoreUIParent.PreferredStatusBarStyle);
-
-                    navigationController.ModalPresentationStyle = CoreUIParent.ModalPresentationStyle;
-                    navigationController.ModalTransitionStyle = CoreUIParent.ModalTransitionStyle;
-                    navigationController.TransitioningDelegate = viewController.TransitioningDelegate;
+                            redirectUri.OriginalString, CallbackMethod, CoreUIParent.PreferredStatusBarStyle)
+                        {
+                            ModalPresentationStyle = CoreUIParent.ModalPresentationStyle,
+                            ModalTransitionStyle = CoreUIParent.ModalTransitionStyle,
+                            TransitioningDelegate = viewController.TransitioningDelegate
+                        };
 
                     viewController.PresentViewController(navigationController, true, null);
                 });

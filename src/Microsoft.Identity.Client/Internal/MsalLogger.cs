@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client.Internal
             }
 
             //format log message;
-            string correlationId = (CorrelationId.Equals(Guid.Empty))
+            string correlationId = CorrelationId.Equals(Guid.Empty)
                 ? string.Empty
                 : " - " + CorrelationId;
 
