@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
             else
             {
-                keychainGroup = keychainSecurityGroup;
+                keychainGroup = GetTeamId() + '.' + keychainSecurityGroup;
             }
         }
 
