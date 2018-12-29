@@ -39,6 +39,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit
 {

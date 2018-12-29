@@ -1,38 +1,26 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <DefineConstants>$(DefineConstants);DESKTOP</DefineConstants>
     <IsPackable>false</IsPackable>
-    <AssemblyName>Microsoft.Identity.Test.Unit.net45</AssemblyName>
-    <RootNamespace>Microsoft.Identity.Test.Unit</RootNamespace>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
-      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
-      <Name>Microsoft.Identity.Client</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    <ProjectReference Include="..\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj" />
     <ProjectReference Include="..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
-    <PackageReference Include="NSubstitute" Version="3.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="1.4.0" />
     <PackageReference Include="MSTest.TestFramework" Version="1.4.0" />
+    <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="StrongNamer" Version="0.0.8" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.3.0" />
     <!-- This reference is a workaround for a bug in .net46
     https://stackoverflow.com/questions/45563560/could-not-load-file-or-assembly-system-net-http-version-4-1-1-1-net-standard-->
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
 
-
-    <Compile Remove="Resources\**" />
-    <EmbeddedResource Remove="Resources\**" />
-    <None Include="Resources\**" />
-    <None Update="Resources\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

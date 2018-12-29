@@ -46,6 +46,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.Identity.Test.Unit.PublicApiTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -87,7 +88,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     }
                 };         
                 
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -168,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
                                 
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
 
@@ -376,7 +377,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
                 var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
 
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 var webUi = new MockWebUI()
                 {
@@ -466,7 +467,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraQueryParameters = "extra=qp&prompt=login"
                 };
 
-                TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
 
                 var request = new InteractiveRequest(
                     serviceBundle,
@@ -490,6 +491,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ((MsalException)exc.InnerException).ErrorCode);
                 }
             }
+        }
+
+        
+        private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
+        {
+            mockHttpManager.AddInstanceDiscoveryMockHandler();
+            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
     }
 }
