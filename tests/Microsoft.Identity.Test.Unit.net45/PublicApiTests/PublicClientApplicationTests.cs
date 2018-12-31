@@ -1374,6 +1374,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
 
                 // with UIParent
+#pragma warning disable CS0618 // UIParent is obsolete
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, (UIParent)null).ConfigureAwait(false),
@@ -1398,6 +1399,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     (UIParent)null).ConfigureAwait(false),
 
                 async () => await pca.AcquireTokenByIntegratedWindowsAuthAsync(CoreTestConstants.Scope).ConfigureAwait(false)
+#pragma warning restore CS0618 // UIParent is obsolete
 
             };
 

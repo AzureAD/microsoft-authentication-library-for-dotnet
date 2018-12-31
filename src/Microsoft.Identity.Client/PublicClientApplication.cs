@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.CallConfig;
 using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Features.DeviceCode;
@@ -76,7 +77,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Consutructor of the application.
+        /// Constructor of the application.
         /// </summary>
         /// <param name="clientId">Client ID (also named Application ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
@@ -100,20 +101,6 @@ namespace Microsoft.Identity.Client
                    .BuildConfiguration())
         {
         }
-
-        //internal PublicClientApplication(IServiceBundle serviceBundle, string clientId, string authority)
-        //    : base(
-        //        clientId,
-        //        authority,
-        //        PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId),
-        //        true,
-        //        serviceBundle)
-        //{
-        //    UserTokenCache = new TokenCache()
-        //    {
-        //        ClientId = clientId
-        //    };
-        //}
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
         // however include the signatures at runtime only to prevent MissingMethodExceptions from NetStandard
@@ -154,6 +141,7 @@ namespace Microsoft.Identity.Client
         // Android does not support AcquireToken* without UIParent params, but include it at runtime
         // only to avoid MissingMethodExceptions from NetStandard
 #if !ANDROID_BUILDTIME // include for other other platform and for runtime
+
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The user is required to select an account
         /// </summary>
@@ -166,11 +154,14 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
-                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes);
+            // ApiEvent.ApiIds.AcquireTokenWithScope
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -185,11 +176,14 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithLoginHint(loginHint);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -206,11 +200,14 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account,
-                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithAccount(account);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -229,11 +226,14 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithLoginHint(loginHint).WithUiBehavior(behavior).WithExtraQueryParameters(extraQueryParameters);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -252,11 +252,14 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
-                        extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithAccount(account).WithUiBehavior(behavior).WithExtraQueryParameters(extraQueryParameters);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -279,11 +282,17 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
-                        loginHint, behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithLoginHint(loginHint).WithUiBehavior(behavior).WithExtraQueryParameters(extraQueryParameters)
+                                                                 .WithExtraScopesToConsent(extraScopesToConsent).WithAuthorityOverride(authority);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
+
+            // TODO: note the diff here and that this method actually DIDN'T forward the authority properly...
         }
 
         /// <summary>
@@ -306,16 +315,15 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(
-                ServiceBundle, 
-                AuthorityInfo.FromAuthorityUri(
-                    authority,
-                    ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
-                    false));
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
-                        behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithAccount(account).WithUiBehavior(behavior).WithExtraQueryParameters(extraQueryParameters)
+                                                                 .WithExtraScopesToConsent(extraScopesToConsent).WithAuthorityOverride(authority);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 #endif
 
@@ -328,15 +336,20 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
-                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes);
+            // ApiEvent.ApiIds.AcquireTokenWithScope
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -348,15 +361,20 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and login</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithLoginHint(loginHint);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHint
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -367,17 +385,22 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account,
-                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder.Create(scopes).WithAccount(account);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeUser
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -391,16 +414,23 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder
+                          .Create(scopes).WithLoginHint(loginHint).WithUiBehavior(behavior)
+                          .WithExtraQueryParameters(extraQueryParameters);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -414,16 +444,23 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
             UIBehavior behavior, string extraQueryParameters, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
-                        extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder
+                          .Create(scopes).WithAccount(account).WithUiBehavior(behavior)
+                          .WithExtraQueryParameters(extraQueryParameters);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -441,22 +478,24 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
             UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(
-                ServiceBundle, 
-                AuthorityInfo.FromAuthorityUri(
-                    authority,
-                    ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
-                    false));
+            var builder = AcquireTokenInteractiveParameterBuilder
+                          .Create(scopes).WithLoginHint(loginHint).WithUiBehavior(behavior)
+                          .WithExtraQueryParameters(extraQueryParameters).WithExtraScopesToConsent(extraScopesToConsent)
+                          .WithAuthorityOverride(authority);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority
 
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
-                        loginHint, behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -474,27 +513,29 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-        UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             GuardNetCore();
 
-            Authority authorityInstance =
-                Instance.Authority.CreateAuthorityWithOverride(
-                    ServiceBundle,
-                    AuthorityInfo.FromAuthorityUri(
-                       authority,
-                       ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
-                       false));
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
-                        behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
+            var builder = AcquireTokenInteractiveParameterBuilder
+                             .Create(scopes).WithAccount(account).WithUiBehavior(behavior)
+                             .WithExtraQueryParameters(extraQueryParameters).WithExtraScopesToConsent(extraScopesToConsent)
+                             .WithAuthorityOverride(authority);
+            // ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority
+
+            // TODO: handle UIParent here...
+            // builder.WithUseEmbeddedWebView(parent.)
+
+            var parameters = builder.Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
-
-
+#pragma warning disable CS0618 // UIParent is obsolete
         internal IWebUI CreateWebAuthenticationDialog(UIParent parent, UIBehavior behavior, RequestContext requestContext)
+#pragma warning restore CS0618 // UIParent is obsolete
         {
             //create instance of UIParent and assign useCorporateNetwork to UIParent
             if (parent == null)
@@ -530,58 +571,6 @@ namespace Microsoft.Identity.Client
                 "takes in an UIParent object, which you should initialize to an Activity. " +
                 "See https://aka.ms/msal-interactive-android for details.");
 #endif
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(
-            Authority authority,
-            IEnumerable<string> scopes,
-            IEnumerable<string> extraScopesToConsent,
-            string loginHint,
-            UIBehavior behavior,
-            string extraQueryParameters,
-            UIParent parent,
-            ApiEvent.ApiIds apiId)
-        {
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParams,
-                apiId,
-                extraScopesToConsent,
-                loginHint,
-                behavior,
-                CreateWebAuthenticationDialog(
-                    parent,
-                    behavior,
-                    requestParams.RequestContext));
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenForUserCommonAsync(Authority authority, IEnumerable<string> scopes,
-            IEnumerable<string> extraScopesToConsent, IAccount user, UIBehavior behavior, string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
-        {
-            var requestParams = CreateRequestParameters(authority, scopes, user, UserTokenCache);
-            requestParams.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParams,
-                apiId,
-                extraScopesToConsent,
-                behavior,
-                CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext));
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority,
-            IEnumerable<string> scopes, IAccount user, TokenCache cache)
-        {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
-            return parameters;
         }
 
         // endif for !NET_CORE
@@ -632,10 +621,11 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            if (deviceCodeResultCallback == null)
-            {
-                throw new ArgumentNullException("A deviceCodeResultCallback must be provided for Device Code authentication to work properly");
-            }
+            // todo: move this check into the builder, which is called in the other method...
+            //if (deviceCodeResultCallback == null)
+            //{
+            //    throw new ArgumentNullException("A deviceCodeResultCallback must be provided for Device Code authentication to work properly");
+            //}
 
             return await AcquireTokenWithDeviceCodeAsync(
                 scopes,
@@ -693,18 +683,10 @@ namespace Microsoft.Identity.Client
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            var parameters = AcquireTokenWithDeviceCodeParameterBuilder
+                             .Create(scopes, deviceCodeResultCallback).WithExtraQueryParameters(extraQueryParameters).Build();
 
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new DeviceCodeRequest(
-                ServiceBundle,
-                requestParams,
-                ApiEvent.ApiIds.None,
-                deviceCodeResultCallback);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            return await AcquireTokenAsync(parameters, cancellationToken).ConfigureAwait(false);
         }
 
         #region INTEGRATED WINDOWS AUTH
@@ -728,7 +710,8 @@ namespace Microsoft.Identity.Client
             GuardNonWindowsFrameworks();
             GuardIWANetCore();
 
-            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput()).ConfigureAwait(false);
+            var parameters = AcquireTokenWithIntegratedWindowsAuthParameterBuilder.Create(scopes).Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 #endif
 
@@ -746,20 +729,9 @@ namespace Microsoft.Identity.Client
             string username)
         {
             GuardNonWindowsFrameworks();
-            return await AcquireTokenByIWAAsync(scopes, new IntegratedWindowsAuthInput(username)).ConfigureAwait(false);
-        }
 
-        private async Task<AuthenticationResult> AcquireTokenByIWAAsync(IEnumerable<string> scopes, IntegratedWindowsAuthInput iwaInput)
-        {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new IntegratedWindowsAuthRequest(
-                ServiceBundle,
-                requestParams,
-                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
-                iwaInput);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+            var parameters = AcquireTokenWithIntegratedWindowsAuthParameterBuilder.Create(scopes).WithUsername(username).Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         private static void GuardNonWindowsFrameworks()
@@ -792,39 +764,13 @@ namespace Microsoft.Identity.Client
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <param name="securePassword">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-#if DESKTOP || NET_CORE
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
             IEnumerable<string> scopes,
             string username,
             System.Security.SecureString securePassword)
         {
-            UsernamePasswordInput usernamePasswordInput = new UsernamePasswordInput(username, securePassword);
-            return await AcquireTokenByUsernamePasswordAsync(scopes, usernamePasswordInput).ConfigureAwait(false);
-        }
-#else
-        public Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
-            IEnumerable<string> scopes,
-            string username,
-            System.Security.SecureString securePassword)
-        {
-            // TODO: need better wording and proper link to aka.ms
-            throw new PlatformNotSupportedException("Username Password is only supported on NetFramework and .NET Core." +
-                "For more details see https://aka.ms/msal-net-iwa");
-        }
-#endif
-
-        private async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
-            IEnumerable<string> scopes, UsernamePasswordInput usernamePasswordInput)
-        {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            var handler = new UsernamePasswordRequest(
-                ServiceBundle,
-                requestParams,
-                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
-                usernamePasswordInput);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+            var parameters = AcquireTokenWithUsernamePasswordParameterBuilder.Create(scopes, username, securePassword).Build();
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         #endregion // USERNAME PASSWORD

@@ -27,32 +27,85 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.CallConfig;
 
 namespace Microsoft.Identity.Client.Config
 {
-    internal interface IApplicationConfiguration
+    /// <summary>
+    /// TODO: resolve interface naming for public API...
+    /// Have this in the public api for developer debugging...
+    /// </summary>
+    public interface IAppConfig
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        string ClientId { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        bool EnablePiiLogging { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        IMsalHttpClientFactory HttpClientFactory { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LogLevel LogLevel { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        bool IsDefaultPlatformLoggingEnabled { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        string RedirectUri { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        string Tenant { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        string SliceParameters { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LogCallback LoggingCallback { get; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        ITelemetryReceiver TelemetryReceiver { get; }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        string Component { get; }
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// 
         /// </summary>
         ClientCredential ClientCredential { get; }
 #endif
+    }
 
-        string ClientId { get; }
-        bool EnablePiiLogging { get; }
-        IMsalHttpClientFactory HttpClientFactory { get; }
-        LogLevel LogLevel { get; }
-        bool IsDefaultPlatformLoggingEnabled { get; }
-        string RedirectUri { get; }
-        string Tenant { get; }
+    internal interface IApplicationConfiguration : IAppConfig
+    {
+        // todo: before moving these to public api, have an ITokenCache publicly that we expose with limited visibility (e.g. no tokencacheaccessor)
         TokenCache UserTokenCache { get; }
         TokenCache AppTokenCache { get; }
         bool IsExtendedTokenLifetimeEnabled { get; set; }
         AuthorityInfo DefaultAuthorityInfo { get; }
-        string SliceParameters { get; }
-        LogCallback LoggingCallback { get; }
-        ITelemetryReceiver TelemetryReceiver { get; }
-        string Component { get; }
     }
 }

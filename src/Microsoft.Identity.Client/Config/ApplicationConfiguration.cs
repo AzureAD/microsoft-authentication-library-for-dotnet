@@ -28,9 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.CallConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Config
 {

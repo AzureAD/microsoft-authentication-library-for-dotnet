@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.CallConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -59,6 +60,38 @@ namespace Microsoft.Identity.Client
         /// </summary>
         bool UseCorporateNetwork { get; set; }
 #endif
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="interactiveParameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(IAcquireTokenInteractiveParameters interactiveParameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="usernamePasswordParameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="integratedWindowsAuthParameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="deviceCodeParameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(IAcquireTokenWithDeviceCodeParameters deviceCodeParameters, CancellationToken cancellationToken);
 
         // expose the interactive API without UIParent only for platforms that 
         // do not need it to operate like desktop, UWP, iOS.
@@ -181,7 +214,9 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
 
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
@@ -192,9 +227,11 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and login</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
 
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The user will need to sign-in but an account will be proposed
@@ -204,9 +241,11 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
 
         /// <summary>
         /// Interactive request to acquire token for a login with control of the UI behavior and possiblity of passing extra query parameters like additional claims
@@ -219,11 +258,13 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
 
         /// <summary>
         /// Interactive request to acquire token for an account with control of the UI behavior and possiblity of passing extra query parameters like additional claims
@@ -236,11 +277,13 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
             UIBehavior behavior,
             string extraQueryParameters, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
 
         /// <summary>
         /// Interactive request to acquire token for a given login, with the possibility of controlling the user experience, passing extra query
@@ -257,12 +300,14 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
             UIBehavior behavior,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent, string authority, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
 
         /// <summary>
         /// Interactive request to acquire token for a given account, with the possibility of controlling the user experience, passing extra query
@@ -279,6 +324,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+#pragma warning disable CS0618 // UIParent is obsolete
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
@@ -286,6 +332,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
             string authority, UIParent parent);
+#pragma warning restore CS0618 // UIParent is obsolete
         // endif !NOT_CORE
 #endif
 
@@ -313,7 +360,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
-        /// another device, with possiblity of passing extra parameters. This is done in two steps:
+        /// another device, with possibility of passing extra parameters. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -337,7 +384,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
-        /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
+        /// another device, with possibility of cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
@@ -358,7 +405,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
-        /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
+        /// another device, with possibility of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
         /// <list type="bullet">
         /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user

@@ -28,17 +28,17 @@
 namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// Stucture containing static members that you can use to specify how the interactive overrides 
+    /// Structure containing static members that you can use to specify how the interactive overrides 
     /// of AcquireTokenAsync in <see cref="PublicClientApplication"/> should prompt the user.
     /// </summary>
     /// <remarks>Only the .NET Framework platforms allows <c>UIBehavior.Never</c></remarks>
 
-    // Hide this for .net core at build time, but it needs to be public at runtime to support NetStndard
+    // Hide this for .net core at build time, but it needs to be public at runtime to support NetStandard
 #if NET_CORE_BUILDTIME
     internal 
 #else
     public
-#endif    
+#endif
         struct UIBehavior
     {
         /// <summary>

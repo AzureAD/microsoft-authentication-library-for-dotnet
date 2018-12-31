@@ -35,6 +35,7 @@ using System.Linq;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.CallConfig;
 using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
@@ -196,6 +197,35 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(
+            IAcquireTokenSilentParameters parameters,
+            CancellationToken cancellationToken)
+        {
+            // todo: move this validation into the AcquireTokenSilentParameterBuilder so we catch it early
+            if (parameters.Account == null)
+            {
+                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
+            }
+
+            var authorityInstance = string.IsNullOrWhiteSpace(parameters.AuthorityOverride) 
+                                        ? GetAuthority(parameters.Account) 
+                                        : Instance.Authority.CreateAuthority(ServiceBundle, parameters.AuthorityOverride, ValidateAuthority);
+
+            var handler = new SilentRequest(
+                ServiceBundle,
+                CreateRequestParameters(parameters, UserTokenCache, account: parameters.Account, customAuthority: authorityInstance),
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo: consolidate this properly
+                parameters.ForceRefresh);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -212,10 +242,9 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
         {
-            return
-                await
-                    AcquireTokenSilentCommonAsync(null, scopes, account, false, ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority)
-                        .ConfigureAwait(false);
+            var parameters = AcquireTokenSilentParameterBuilder.Create(scopes, account).Build();
+            // AcquireTokenSilentWithoutAuthority
+            return await AcquireTokenSilentAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -244,16 +273,14 @@ namespace Microsoft.Identity.Client
             string authority, bool forceRefresh)
         {
             ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
-            Authority authorityInstance = null;
-            if (!string.IsNullOrEmpty(authority))
-            {
-                authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            }
 
-            return
-                await
-                    AcquireTokenSilentCommonAsync(authorityInstance, scopes, account,
-                        forceRefresh, ApiEvent.ApiIds.AcquireTokenSilentWithAuthority).ConfigureAwait(false);
+            var parameters = AcquireTokenSilentParameterBuilder
+                             .Create(scopes, account).WithAuthorityOverride(authority).WithForceRefresh(forceRefresh)
+                             .Build();
+
+            // AcquireTokenSilentWithAuthority
+
+            return await AcquireTokenSilentAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -285,42 +312,32 @@ namespace Microsoft.Identity.Client
             return authority;
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId)
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(
+            IAcquireTokenCommonParameters commonParameters,
+            TokenCache cache,
+            IAccount account = null,  // todo: can we just use commonParameters.Account?
+            Authority customAuthority = null)
         {
-            if (account == null)
-            {
-                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
-            }
+            Authority authorityInstance = customAuthority ?? (string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
+                                                                  ? Instance.Authority.CreateAuthority(ServiceBundle)
+                                                                  : Instance.Authority.CreateAuthorityWithOverride(
+                                                                      ServiceBundle,
+                                                                      AuthorityInfo.FromAuthorityUri(
+                                                                          commonParameters.AuthorityOverride,
+                                                                          ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
+                                                                          false)));
 
-            if (authority == null)
-            {
-                authority = GetAuthority(account);
-            }
-
-            var handler = new SilentRequest(
-                ServiceBundle,
-                CreateRequestParameters(authority, scopes, account, UserTokenCache),
-                apiId,
-                forceRefresh);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority,
-            IEnumerable<string> scopes,
-            IAccount account, TokenCache cache)
-        {
             return new AuthenticationRequestParameters
             {
                 SliceParameters = ServiceBundle.Config.SliceParameters,  // TODO: can users reference this instead of being in authparams?
-                Authority = authority,
+                Authority = authorityInstance,
                 ClientId = ServiceBundle.Config.ClientId,
                 TokenCache = cache,
                 Account = account,
-                Scope = ScopeHelper.CreateSortedSetFromEnumerable(scopes),
-                RedirectUri = new Uri(RedirectUri),
+                Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
+                RedirectUri = new Uri(RedirectUri),  // todo: can we consistently check for redirecturi override here from commonParameters?
                 RequestContext = CreateRequestContext(Guid.Empty),
+                ExtraQueryParameters = commonParameters.ExtraQueryParameters,
             };
         }
 

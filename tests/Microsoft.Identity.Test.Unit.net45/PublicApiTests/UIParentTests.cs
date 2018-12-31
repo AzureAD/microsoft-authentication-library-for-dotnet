@@ -40,15 +40,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void UIParent_ThrowsOnNetCore()
         {
+#pragma warning disable CS0618 // UIParent is obsolete
             AssertException.Throws<PlatformNotSupportedException>(() => new UIParent());
             AssertException.Throws<PlatformNotSupportedException>(() => new UIParent("parent", true));
+#pragma warning restore CS0618 // UIParent is obsolete
 
         }
 
         [TestMethod]
         public void UIParent_IsSystemAvailable()
         {
+#pragma warning disable CS0618 // UIParent is obsolete
              Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
+#pragma warning restore CS0618 // UIParent is obsolete
         }
 #endif
 
@@ -56,7 +60,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void UIParent_EmptyCtor()
         {
+            #pragma warning disable CS0618 // UIParent is obsolete
             UIParent uiParent = new UIParent();
+            #pragma warning restore CS0618 // UIParent is obsolete
 
             Assert.IsFalse(uiParent.UseHiddenBrowser);
             Assert.IsNotNull(uiParent.CoreUIParent);
@@ -69,7 +75,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void UIParent_NetstndardCtor()
         {
             object parent = "parent";
+            #pragma warning disable CS0618 // UIParent is obsolete
             UIParent uiParent = new UIParent(parent, true);
+            #pragma warning restore CS0618 // UIParent is obsolete
 
             Assert.IsFalse(uiParent.UseHiddenBrowser);
             Assert.IsFalse(uiParent.CoreUIParent.UseHiddenBrowser);
@@ -84,7 +92,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void IsSystemWebview()
         {
+#pragma warning disable CS0618 // UIParent is obsolete
             Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
+#pragma warning restore CS0618 // UIParent is obsolete
         }
 #endif
     }

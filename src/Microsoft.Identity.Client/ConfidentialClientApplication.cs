@@ -28,12 +28,14 @@
 using Microsoft.Identity.Client.Internal.Requests;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.CallConfig;
 using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -52,7 +54,7 @@ namespace Microsoft.Identity.Client
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel 
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
-    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
+    public sealed partial class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
     {
         internal ConfidentialClientApplication(ApplicationConfiguration config)
             : base(config)
@@ -157,11 +159,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, false)
-                        .ConfigureAwait(false);
+            var parameters = AcquireTokenOnBehalfOfParameterBuilder.Create(scopes, userAssertion).Build();
+            // AcquireTokenOnBehalfOfWithScopeUser
+
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -181,11 +182,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, AuthorityInfo.FromAuthorityUri(authority, ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority, false));
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, false)
-                        .ConfigureAwait(false);
+            var parameters = AcquireTokenOnBehalfOfParameterBuilder.Create(scopes, userAssertion).WithAuthorityOverride(authority).Build();
+            // AcquireTokenOnBehalfOfWithScopeUserAuthority
+
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -203,11 +203,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, true)
-                        .ConfigureAwait(false);
+            var parameters = AcquireTokenOnBehalfOfParameterBuilder.Create(scopes, userAssertion).WithCertificate(true).Build();
+            // AcquireTokenOnBehalfOfWithScopeUser
+
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -227,11 +226,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, AuthorityInfo.FromAuthorityUri(authority, ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority, false));
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, true)
-                        .ConfigureAwait(false);
+            var parameters = AcquireTokenOnBehalfOfParameterBuilder.Create(scopes, userAssertion).WithAuthorityOverride(authority).WithCertificate(true).Build();
+            // AcquireTokenOnBehalfOfWithScopeUserAuthority
+
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -248,11 +246,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenByAuthorizationCodeCommonAsync(
-                        authorizationCode, scopes, new Uri(RedirectUri),
-                        ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope, false).ConfigureAwait(false);
+            var parameters = AcquireTokenByAuthorizationCodeParameterBuilder.Create(scopes, authorizationCode).Build();
+            // AcquireTokenByAuthorizationCodeWithCodeScope
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -268,9 +264,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, false).ConfigureAwait(false);
+            var parameters = AcquireTokenForClientParameterBuilder.Create(scopes).Build();
+            // AcquireTokenForClientWithScope
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
         /// <summary>
         /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
@@ -287,9 +283,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh, false).ConfigureAwait(false);
+            var parameters = AcquireTokenForClientParameterBuilder.Create(scopes).WithForceRefresh(forceRefresh).Build();
+            // AcquireTokenForClientWithScopeRefresh
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -306,9 +302,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, true).ConfigureAwait(false);
+            var parameters = AcquireTokenForClientParameterBuilder.Create(scopes).WithCertificate(true).Build();
+            // AcquireTokenForClientWithScope
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -327,9 +323,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh, true).ConfigureAwait(false);
+            var parameters = AcquireTokenForClientParameterBuilder.Create(scopes).WithCertificate(true).WithForceRefresh(forceRefresh).Build();
+            // AcquireTokenForClientWithScopeRefresh
+            return await AcquireTokenAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -348,15 +344,8 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            var requestParameters =
-                CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParameters.ClientId = ClientId;
-            requestParameters.ExtraQueryParameters = extraQueryParameters;
-
-            var handler =
-                new InteractiveRequest(ServiceBundle, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+            var parameters = GetAuthorizationRequestUrlParameterBuilder.Create(scopes).WithLoginHint(loginHint).WithExtraQueryParameters(extraQueryParameters).Build();
+            return await GetAuthorizationRequestUrlAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -380,92 +369,30 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, AuthorityInfo.FromAuthorityUri(authority, ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority, false));
-            var requestParameters = CreateRequestParameters(authorityInstance, scopes, null,
-                UserTokenCache);
-            requestParameters.RedirectUri = new Uri(redirectUri);
-            requestParameters.ClientId = ClientId;
-            requestParameters.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParameters,
-                ApiEvent.ApiIds.None,
-                extraScopesToConsent,
-                loginHint,
-                UIBehavior.SelectAccount,
-                null);
-
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+            var parameters = GetAuthorizationRequestUrlParameterBuilder
+                             .Create(scopes)
+                             .WithLoginHint(loginHint)
+                             .WithExtraQueryParameters(extraQueryParameters)
+                             .WithExtraScopesToConsent(extraScopesToConsent)
+                             .WithAuthorityOverride(authority)
+                             .WithRedirectUri(redirectUri).Build();
+            return await GetAuthorizationRequestUrlAsync(parameters, CancellationToken.None).ConfigureAwait(false);
         }
 
+        // TODO: should this be here at all? we may also have it in the acquiretoken parameters...
         internal ClientCredential ClientCredential => ServiceBundle.Config.ClientCredential;
 
         internal TokenCache AppTokenCache { get; }
-        //{
-        //    get => _appTokenCache;
-        //    //private set
-        //    //{
-        //    //    _appTokenCache = value;
-        //    //    if (_appTokenCache != null)
-        //    //    {
-        //    //        _appTokenCache.ClientId = ClientId;
-        //    //        _appTokenCache.ServiceBundle = ServiceBundle;
-        //    //    }
-        //    //}
-        //}
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scopes, bool forceRefresh, ApiEvent.ApiIds apiId, bool sendCertificate)
+        internal override AuthenticationRequestParameters CreateRequestParameters(
+            IAcquireTokenCommonParameters commonParameters,
+            TokenCache cache,
+            IAccount account = null,  // todo: can we just use commonParameters.Account?
+            Authority customAuthority = null)
         {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scopes, null,
-                AppTokenCache);
-            parameters.IsClientCredentialRequest = true;
-            parameters.SendCertificate = sendCertificate;
-            var handler = new ClientCredentialRequest(
-                ServiceBundle,
-                parameters,
-                apiId,
-                forceRefresh);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
-            IEnumerable<string> scopes, UserAssertion userAssertion, ApiEvent.ApiIds apiId, bool sendCertificate)
-        {
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.UserAssertion = userAssertion;
-            requestParams.SendCertificate = sendCertificate;
-            var handler = new OnBehalfOfRequest(
-                ServiceBundle,
-                requestParams,
-                apiId);
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
-            IEnumerable<string> scopes, Uri redirectUri, ApiEvent.ApiIds apiId, bool sendCertificate)
-        {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle);
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.AuthorizationCode = authorizationCode;
-            requestParams.RedirectUri = redirectUri;
-            requestParams.SendCertificate = sendCertificate;
-            var handler = new AuthorizationCodeRequest(
-                ServiceBundle,
-                requestParams,
-                apiId);
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scopes, IAccount user, TokenCache cache)
-        {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
-            parameters.ClientId = ClientId;
-            parameters.ClientCredential = ServiceBundle.Config.ClientCredential;
-
-            return parameters;
+            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, cache, account, customAuthority);
+            requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
+            return requestParams;
         }
 
         internal static void GuardMobileFrameworks()

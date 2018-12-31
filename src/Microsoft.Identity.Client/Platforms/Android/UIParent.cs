@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client
     /// Android specific UI properties for interactive flows, such as the parent activity and
     /// which browser to use
     /// </summary>
+    [Obsolete("Usage of this class should now be replaced with the PublicClientApplicationBuilder WithUseEmbeddedWebView options.")]  // todo: better documentation
     public sealed class UIParent
     {
         private const string ChromePackage = "com.android.chrome";

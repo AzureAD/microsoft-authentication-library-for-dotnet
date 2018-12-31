@@ -55,24 +55,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
-            UIBehavior uiBehavior,
-            IWebUI webUi)
-            : this(
-                serviceBundle,
-                authenticationRequestParameters,
-                apiId,
-                extraScopesToConsent,
-                authenticationRequestParameters.Account?.Username,
-                uiBehavior,
-                webUi)
-        {
-        }
-
-        public InteractiveRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            IEnumerable<string> extraScopesToConsent,
             string loginHint,
             UIBehavior uiBehavior,
             IWebUI webUi)
@@ -89,6 +71,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(_extraScopesToConsent);
 
+            // TODO: why is LoginHint set here instead of just using the one sent in?
             authenticationRequestParameters.LoginHint = loginHint;
             if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
                 authenticationRequestParameters.ExtraQueryParameters[0] == '&')

@@ -102,6 +102,11 @@ namespace Microsoft.Identity.Client.Config
             return (T)this;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
         protected T WithClientId(string clientId)
         {
             if (!string.IsNullOrWhiteSpace(clientId))

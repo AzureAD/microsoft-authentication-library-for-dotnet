@@ -108,8 +108,8 @@ namespace Microsoft.Identity.Client.UI
         public CoreUIParent(Activity activity)
         {
            if(activity == null)
-           {		
-                throw new ArgumentException("passed in activity is null", nameof(activity));		
+           {
+                throw new ArgumentException("passed in activity is null", nameof(activity));
            }
             Activity = activity;
             CallerActivity = activity;

@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -33,7 +34,8 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Contains UI properties for interactive flows, such as the parent window (on Windows), or the parent activity (on Xamarin.Android), and 
     /// which browser to use (on Xamarin.Android and Xamarin.iOS)
-    /// </summary> 
+    /// </summary>
+    [Obsolete("Usage of this class should now be replaced with the PublicClientApplicationBuilder WithUseEmbeddedWebView options.")]  // todo: better documentation
     public sealed class UIParent
     {
         internal CoreUIParent CoreUIParent { get; }

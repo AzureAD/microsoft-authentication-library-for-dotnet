@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.CallConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -38,6 +40,36 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface IConfidentialClientApplication : IClientApplicationBase
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(
+            IAcquireTokenOnBehalfOfParameters parameters,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(
+            IAcquireTokenByAuthorizationCodeParameters parameters,
+            CancellationToken cancellationToken);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenAsync(
+            IAcquireTokenForClientParameters parameters,
+            CancellationToken cancellationToken);
+
         /// <summary>
         /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>

@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// Allows for configuration of the web UI experience. Not supported on .net core
     /// </summary>     
+    [Obsolete("Usage of this class should now be replaced with the PublicClientApplicationBuilder WithUseEmbeddedWebView options.")]  // todo: better documentation
     public sealed class UIParent
     {
         internal CoreUIParent CoreUIParent { get; }
