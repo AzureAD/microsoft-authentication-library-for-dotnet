@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.CallConfig;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -44,17 +43,12 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
             };
         }
 
-        internal static void ValidateAcquireTokenParameters(
-            AcquireTokenParameters expected,
-            AcquireTokenParameters actual)
+        internal static void ValidateAcquireTokenParameters(AcquireTokenParameters expected, AcquireTokenParameters actual)
         {
             ValidateDefaults(expected, actual);
         }
 
-        private static void ValidateDefaults(
-            AcquireTokenParameters expected,
-            AcquireTokenParameters actual
-            )
+        private static void ValidateDefaults(AcquireTokenParameters expected, AcquireTokenParameters actual)
         {
             Assert.AreEqual(expected.Account, actual.Account);
 
@@ -68,7 +62,9 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
             }
             else
             {
-                CoreAssert.AreScopesEqual(string.Join(" ", expected.ExtraScopesToConsent), string.Join(" ", actual.ExtraScopesToConsent));
+                CoreAssert.AreScopesEqual(
+                    string.Join(" ", expected.ExtraScopesToConsent),
+                    string.Join(" ", actual.ExtraScopesToConsent));
             }
 
             CoreAssert.AreScopesEqual(string.Join(" ", expected.Scopes), string.Join(" ", actual.Scopes));

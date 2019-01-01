@@ -44,7 +44,8 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         [TestMethod]
         public void WithUiBehaviorConsent()
         {
-            var actual = AcquireTokenInteractiveParameterBuilder.Create(ObjectFactory.CreateScopes()).WithUiBehavior(UIBehavior.Consent).Build();
+            var actual = AcquireTokenInteractiveParameterBuilder
+                         .Create(ObjectFactory.CreateScopes()).WithUiBehavior(UIBehavior.Consent).Build();
             Expected.UiBehavior = UIBehavior.Consent;
             Validate(actual);
         }
@@ -52,7 +53,8 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         [TestMethod]
         public void WithUiBehaviorForceLogin()
         {
-            var actual = AcquireTokenInteractiveParameterBuilder.Create(ObjectFactory.CreateScopes()).WithUiBehavior(UIBehavior.ForceLogin).Build();
+            var actual = AcquireTokenInteractiveParameterBuilder
+                         .Create(ObjectFactory.CreateScopes()).WithUiBehavior(UIBehavior.ForceLogin).Build();
             Expected.UiBehavior = UIBehavior.ForceLogin;
             Validate(actual);
         }
@@ -60,7 +62,8 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         [TestMethod]
         public void WithUseEmbeddedWebViewTrue()
         {
-            var actual = AcquireTokenInteractiveParameterBuilder.Create(ObjectFactory.CreateScopes()).WithUseEmbeddedWebView(true).Build();
+            var actual = AcquireTokenInteractiveParameterBuilder
+                         .Create(ObjectFactory.CreateScopes()).WithUseEmbeddedWebView(true).Build();
             Expected.UseEmbeddedWebView = true;
             Validate(actual);
         }
@@ -68,7 +71,8 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         [TestMethod]
         public void WithUseEmbeddedWebViewFalse()
         {
-            var actual = AcquireTokenInteractiveParameterBuilder.Create(ObjectFactory.CreateScopes()).WithUseEmbeddedWebView(false).Build();
+            var actual = AcquireTokenInteractiveParameterBuilder
+                         .Create(ObjectFactory.CreateScopes()).WithUseEmbeddedWebView(false).Build();
             Expected.UseEmbeddedWebView = false;
             Validate(actual);
         }
