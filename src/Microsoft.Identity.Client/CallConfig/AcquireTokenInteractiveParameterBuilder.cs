@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenInteractiveParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder, IAcquireTokenInteractiveParameters>
     {
         /// <summary>
         /// </summary>
@@ -71,15 +71,5 @@ namespace Microsoft.Identity.Client.CallConfig
             Parameters.CoreUiParent.SetAndroidActivity(activity);
         }
 #endif
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenInteractiveParameters Build()
-        {
-            // validate
-
-            return Parameters;
-        }
     }
 }

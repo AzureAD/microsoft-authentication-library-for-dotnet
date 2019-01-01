@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenSilentParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder, IAcquireTokenSilentParameters>
     {
         /// <summary>
         /// </summary>
@@ -53,16 +53,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.ForceRefresh = forceRefresh;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenSilentParameters Build()
-        {
-            // validate
-
-            return Parameters;
         }
     }
 }

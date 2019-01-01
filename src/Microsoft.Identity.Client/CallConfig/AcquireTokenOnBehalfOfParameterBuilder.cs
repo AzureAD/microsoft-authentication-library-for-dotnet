@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder, IAcquireTokenOnBehalfOfParameters>
     {
         /// <summary>
         /// </summary>
@@ -58,16 +58,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.WithOnBehalfOfCertificate = withCertificate;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenOnBehalfOfParameters Build()
-        {
-            // validate
-
-            return Parameters;
         }
     }
 }

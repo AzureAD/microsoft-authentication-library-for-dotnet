@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.CallConfig
@@ -32,7 +33,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenByAuthorizationCodeParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder, IAcquireTokenByAuthorizationCodeParameters>
     {
         /// <summary>
         /// </summary>
@@ -51,14 +52,15 @@ namespace Microsoft.Identity.Client.CallConfig
             return this;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenByAuthorizationCodeParameters Build()
+        /// <inheritdoc />
+        protected override void Validate()
         {
-            // validate
+            base.Validate();
 
-            return Parameters;
+            if (string.IsNullOrWhiteSpace(Parameters.AuthorizationCode))
+            {
+                throw new ArgumentException("AuthorizationCode can not be null or whitespace", nameof(Parameters.AuthorizationCode));
+            }
         }
     }
 }

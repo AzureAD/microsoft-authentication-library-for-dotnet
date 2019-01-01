@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.CallConfig
     ///     that are only used for AcquireToken?
     /// </summary>
     public sealed class GetAuthorizationRequestUrlParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder, IGetAuthorizationRequestUrlParameters>
     {
         /// <summary>
         /// </summary>
@@ -55,16 +55,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.RedirectUri = redirectUri;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IGetAuthorizationRequestUrlParameters Build()
-        {
-            // validate
-
-            return Parameters;
         }
     }
 }

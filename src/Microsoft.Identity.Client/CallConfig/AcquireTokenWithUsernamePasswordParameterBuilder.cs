@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithUsernamePasswordParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder, IAcquireTokenWithUsernamePasswordParameters>
     {
         /// <summary>
         /// </summary>
@@ -60,16 +60,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.Password = password;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenWithUsernamePasswordParameters Build()
-        {
-            // validate
-
-            return Parameters;
         }
     }
 }

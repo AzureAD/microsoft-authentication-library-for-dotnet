@@ -27,7 +27,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.CallConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -105,6 +107,16 @@ namespace Microsoft.Identity.Client
         /// value of the <see cref="AccountId.Identifier"/> property of <see cref="AccountId"/>. 
         /// You typically get the account id from an <see cref="IAccount"/> by using the <see cref="IAccount.HomeAccountId"/> property></param>
         Task<IAccount> GetAccountAsync(string identifier);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> AcquireTokenSilentAsync(
+            IAcquireTokenSilentParameters parameters,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache. 

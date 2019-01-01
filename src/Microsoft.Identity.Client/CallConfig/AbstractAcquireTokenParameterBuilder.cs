@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Identity.Client.CallConfig
@@ -32,8 +33,10 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractAcquireTokenParameterBuilder<T>
-        where T : AbstractAcquireTokenParameterBuilder<T>
+    /// <typeparam name="TParams"></typeparam>
+    public abstract class AbstractAcquireTokenParameterBuilder<T, TParams>
+        where T : AbstractAcquireTokenParameterBuilder<T, TParams>
+        where TParams : IAcquireTokenCommonParameters
     {
         internal AcquireTokenParameters Parameters { get; } = new AcquireTokenParameters();
 
@@ -41,7 +44,7 @@ namespace Microsoft.Identity.Client.CallConfig
         /// </summary>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        public T WithScopes(IEnumerable<string> scopes)
+        protected T WithScopes(IEnumerable<string> scopes)
         {
             Parameters.Scopes = scopes;
             return (T)this;
@@ -97,6 +100,27 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.AuthorityOverride = authorityUri;
             return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected virtual void Validate()
+        {
+            if (Parameters.Scopes == null)
+            {
+                throw new ArgumentException("Scopes cannot be null", nameof(Parameters.Scopes));
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public TParams Build()
+        {
+            Validate();
+            return (TParams)(Parameters as IAcquireTokenCommonParameters);
         }
     }
 }

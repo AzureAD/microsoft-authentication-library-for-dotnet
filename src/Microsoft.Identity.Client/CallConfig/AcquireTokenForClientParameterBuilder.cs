@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenForClientParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenForClientParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenForClientParameterBuilder, IAcquireTokenForClientParameters>
     {
         /// <summary>
         /// </summary>
@@ -61,16 +61,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.WithForClientCertificate = withCertificate;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenForClientParameters Build()
-        {
-            // validate
-
-            return Parameters;
         }
     }
 }

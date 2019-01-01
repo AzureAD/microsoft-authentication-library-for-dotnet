@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithIntegratedWindowsAuthParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder, IAcquireTokenWithIntegratedWindowsAuthParameters>
     {
         /// <summary>
         /// </summary>
@@ -50,16 +50,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.Username = username;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenWithIntegratedWindowsAuthParameters Build()
-        {
-            // validate
-
-            return Parameters;
         }
     }
 }

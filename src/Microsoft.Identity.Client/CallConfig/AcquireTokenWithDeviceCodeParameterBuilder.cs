@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithDeviceCodeParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder>
+        AbstractAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder, IAcquireTokenWithDeviceCodeParameters>
     {
         /// <summary>
         /// </summary>
@@ -58,16 +58,6 @@ namespace Microsoft.Identity.Client.CallConfig
         {
             Parameters.DeviceCodeResultCallback = deviceCodeResultCallback;
             return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        public IAcquireTokenWithDeviceCodeParameters Build()
-        {
-            // todo: validate all parameters...
-
-            return Parameters;
         }
     }
 }
