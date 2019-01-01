@@ -474,12 +474,12 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="username">Identifier of the user application requests token on behalf.
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <param name="securePassword">User password.</param>
+        /// <param name="password">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
             IEnumerable<string> scopes,
             string username,
-            System.Security.SecureString securePassword);
+            string password);
 
         #endregion // USERNAME PASSWORD
 

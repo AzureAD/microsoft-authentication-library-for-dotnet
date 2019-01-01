@@ -77,7 +77,8 @@ namespace Microsoft.Identity.Client
                 ServiceBundle,
                 requestParams,
                 ApiEvent.ApiIds.AcquireTokenWithScopeUser,
-                new UsernamePasswordInput(usernamePasswordParameters.Username, usernamePasswordParameters.Password));
+                usernamePasswordParameters.Username, 
+                usernamePasswordParameters.Password);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
 #else
@@ -99,9 +100,7 @@ namespace Microsoft.Identity.Client
                 ServiceBundle,
                 requestParams,
                 ApiEvent.ApiIds.AcquireTokenWithScopeUser,
-                new IntegratedWindowsAuthInput(
-                    integratedWindowsAuthParameters
-                        .Username)); // todo: can we just pass in Parameters here?  maybe down cast to the actual parameters object so we can use the internal setters?
+                integratedWindowsAuthParameters.Username);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }

@@ -24,26 +24,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     {
         private readonly MyReceiver _myReceiver = new MyReceiver();
         private TokenCache _cache;
-        private SecureString _secureString;
-        private ITelemetryManager _telemetryManager;
+        private string _password;
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
             _cache = new TokenCache();
-            _telemetryManager = new TelemetryManager(_myReceiver);
-
-            CreateSecureString();
-        }
-
-        internal void CreateSecureString()
-        {
-            _secureString = null;
-            var str = new SecureString();
-            str.AppendChar('x');
-            str.MakeReadOnly();
-            _secureString = str;
+            _password = "x";
         }
 
         private void AddMockHandlerDefaultUserRealmDiscovery(MockHttpManager httpManager)
@@ -317,7 +305,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var result = await app.AcquireTokenByUsernamePasswordAsync(
                     MsalTestConstants.Scope,
                     MsalTestConstants.User.Username,
-                    _secureString).ConfigureAwait(false);
+                    _password).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
@@ -369,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _password).ConfigureAwait(false));
 
                 // Check exception message
                 Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
@@ -413,7 +401,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _password).ConfigureAwait(false));
 
                 // Check exception message
                 Assert.AreEqual(CoreErrorCodes.ParsingWsTrustResponseFailed, result.ErrorCode);
@@ -455,7 +443,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _password).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
@@ -495,7 +483,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                           .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityOrganizationsTenant).WithHttpManager(httpManager).WithUserTokenCache(_cache)
                           .BuildConcrete();
 
-                SecureString str = null;
+                string str = null;
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
@@ -553,7 +541,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _password).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
@@ -605,7 +593,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     async () => await app.AcquireTokenByUsernamePasswordAsync(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _password).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
@@ -633,7 +621,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {
                             {"grant_type", "password"},
                             {"username", MsalTestConstants.User.Username},
-                            {"password", _secureString}
+                            {"password", _password}
                         }
                     });
 
@@ -644,7 +632,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var result = await app.AcquireTokenByUsernamePasswordAsync(
                     MsalTestConstants.Scope,
                     MsalTestConstants.User.Username,
-                    _secureString).ConfigureAwait(false);
+                    _password).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
@@ -668,7 +656,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                           .Create(MsalTestConstants.ClientId, MsalTestConstants.AuthorityOrganizationsTenant).WithHttpManager(httpManager).WithUserTokenCache(_cache)
                           .BuildConcrete();
 
-                SecureString str = null;
+                string str = null;
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
@@ -695,9 +683,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 AddMockResponseforManagedAccounts(httpManager);
 
-                var str = new SecureString();
-                str.AppendChar('y');
-                str.MakeReadOnly();
+                var str = "y";
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -708,7 +694,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {
                             {"grant_type", "password"},
                             {"username", MsalTestConstants.User.Username},
-                            {"password", _secureString}
+                            {"password", _password}
                         }
                     });
 

@@ -46,19 +46,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class IntegratedWindowsAuthRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private readonly IntegratedWindowsAuthInput _iwaInput;
+        private string _username;
 
         public IntegratedWindowsAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
-            IntegratedWindowsAuthInput iwaInput)
+            string username)
             : base(serviceBundle, authenticationRequestParameters, apiId)
         {
-            _iwaInput = iwaInput ?? throw new ArgumentNullException(nameof(iwaInput));
+            _username = username;
+
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
-                _iwaInput,
                 serviceBundle);
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
-                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix)
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix, _username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
@@ -89,7 +89,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                     userRealmResponse.FederationMetadataUrl,
                     userRealmResponse.CloudAudienceUrn,
-                    UserAuthType.IntegratedAuth).ConfigureAwait(false);
+                    UserAuthType.IntegratedAuth,
+                    _username,
+                    null).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(
@@ -116,10 +118,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (string.IsNullOrWhiteSpace(_iwaInput.UserName))
+            if (string.IsNullOrWhiteSpace(_username))
             {
                 string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                _iwaInput.UserName = platformUsername;
+                _username = platformUsername;
             }
         }
 

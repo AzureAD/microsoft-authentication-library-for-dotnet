@@ -36,6 +36,6 @@ namespace Microsoft.Identity.Client.CallConfig
     {
         /// <summary>
         /// </summary>
-        SecureString Password { get; }
+        string Password { get; }
     }
 }

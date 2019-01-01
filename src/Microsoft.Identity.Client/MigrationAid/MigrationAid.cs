@@ -147,32 +147,33 @@ namespace Microsoft.Identity.Client
         public IUser User { get { throw new NotImplementedException(); } }
     }
 
-    /// <Summary>
-    /// Abstract class containing common API methods and properties. 
-    /// For details see https://aka.ms/msal-net-client-applications
-    /// </Summary>
-    public partial class PublicClientApplication
-    {
-#if DESKTOP || NET_CORE
-#pragma warning disable 1998
-        /// <summary>
-        /// In ADAL.NET, acquires security token from the authority, using the username/password authentication, 
-        /// with the password sent in clear. 
-        /// In MSAL 2.x, only the method that accepts a SecureString parameter is supported.
-        /// 
-        /// See https://aka.ms/msal-net-up for more details.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.</param>
-        /// <param name="password">User password.</param>
-        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-up)", true)]
-        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
-        {
-            { throw new NotImplementedException(); }
-        }
-#pragma warning restore 1998
-#endif
-    }
+    // TODO: reconcile this...
+//    /// <Summary>
+//    /// Abstract class containing common API methods and properties. 
+//    /// For details see https://aka.ms/msal-net-client-applications
+//    /// </Summary>
+//    public partial class PublicClientApplication
+//    {
+//#if DESKTOP || NET_CORE
+//#pragma warning disable 1998
+//        /// <summary>
+//        /// In ADAL.NET, acquires security token from the authority, using the username/password authentication, 
+//        /// with the password sent in clear. 
+//        /// In MSAL 2.x, only the method that accepts a SecureString parameter is supported.
+//        /// 
+//        /// See https://aka.ms/msal-net-up for more details.
+//        /// </summary>
+//        /// <param name="scopes">Scopes requested to access a protected API</param>
+//        /// <param name="username">Identifier of the user application requests token on behalf.</param>
+//        /// <param name="password">User password.</param>
+//        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+//        [EditorBrowsable(EditorBrowsableState.Never)]
+//        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-up)", true)]
+//        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
+//        {
+//            { throw new NotImplementedException(); }
+//        }
+//#pragma warning restore 1998
+//#endif
+//    }
 }

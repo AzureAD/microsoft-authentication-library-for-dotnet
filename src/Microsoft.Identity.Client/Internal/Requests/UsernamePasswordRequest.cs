@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,19 +48,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class UsernamePasswordRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private readonly UsernamePasswordInput _usernamePasswordInput;
+        private string _username;
+        private readonly string _password;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
-            UsernamePasswordInput usernamePasswordInput)
+            string username,
+            string password)
             : base(serviceBundle, authenticationRequestParameters, apiId)
         {
-            _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
+            _username = username;
+            _password = password;
+
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
-                usernamePasswordInput,
                 serviceBundle);
         }
 
@@ -81,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
-                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix)
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix, _username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
@@ -89,7 +93,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                                           userRealmResponse.FederationMetadataUrl,
                                           userRealmResponse.CloudAudienceUrn,
-                                          UserAuthType.UsernamePassword).ConfigureAwait(false);
+                                          UserAuthType.UsernamePassword,
+                                          _username,
+                                          _password).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(
@@ -102,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (userRealmResponse.IsManaged)
             {
                 // handle grant flow
-                if (!_usernamePasswordInput.HasPassword())
+                if (_password == null)
                 {
                     throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
                 }
@@ -120,13 +126,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (_usernamePasswordInput != null)
+            if (string.IsNullOrWhiteSpace(_username))
             {
-                if (string.IsNullOrWhiteSpace(_usernamePasswordInput.UserName))
-                {
-                    string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                    _usernamePasswordInput.UserName = platformUsername;
-                }
+                string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
+                _username = platformUsername;
             }
         }
 
@@ -144,8 +147,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             else
             {
                 dict[OAuth2Parameter.GrantType] = OAuth2GrantType.Password;
-                dict[OAuth2Parameter.Username] = _usernamePasswordInput.UserName;
-                dict[OAuth2Parameter.Password] = new string(_usernamePasswordInput.PasswordToCharArray());
+                dict[OAuth2Parameter.Username] = _username;
+                dict[OAuth2Parameter.Password] = _password;
             }
 
             ISet<string> unionScope = new HashSet<string>()

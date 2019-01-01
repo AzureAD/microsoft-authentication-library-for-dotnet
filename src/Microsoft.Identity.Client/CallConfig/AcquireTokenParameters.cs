@@ -73,7 +73,8 @@ namespace Microsoft.Identity.Client.CallConfig
         public string Username { get; internal set; }
 
         /// <inheritdoc />
-        public SecureString Password { get; internal set; }
+        /// DO NOT USE SECURESTRING -- https://github.com/dotnet/platform-compat/blob/master/docs/DE0001.md
+        public string Password { get; internal set; }
 
         public string RedirectUri { get; internal set; }
     }

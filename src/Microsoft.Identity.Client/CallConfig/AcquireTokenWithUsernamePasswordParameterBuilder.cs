@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.CallConfig
         public static AcquireTokenWithUsernamePasswordParameterBuilder Create(
             IEnumerable<string> scopes,
             string username,
-            SecureString password)
+            string password)
         {
             return new AcquireTokenWithUsernamePasswordParameterBuilder()
                    .WithScopes(scopes).WithUsername(username).WithPassword(password);
@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.CallConfig
             return this;
         }
 
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(SecureString password)
+        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(string password)
         {
             Parameters.Password = password;
             return this;

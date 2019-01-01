@@ -56,11 +56,11 @@ namespace Microsoft.Identity.Test.Unit.Integration
         {
             var user = LabUserHelper.GetDefaultUser().User;
 
-            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
+            string password = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).Password;
 
             PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
 
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, password).ConfigureAwait(false);
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
@@ -80,10 +80,10 @@ namespace Microsoft.Identity.Test.Unit.Integration
         {
             var user = LabUserHelper.GetDefaultUser().User;
 
-            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
+            string password = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).Password;
 
             PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, password).ConfigureAwait(false);
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
@@ -103,14 +103,12 @@ namespace Microsoft.Identity.Test.Unit.Integration
         {
             var user = LabUserHelper.GetDefaultUser().User;
 
-            SecureString incorrectSecurePassword = new SecureString();
-            incorrectSecurePassword.AppendChar('x');
-            incorrectSecurePassword.MakeReadOnly();
+            string incorrectPassword = "x";
 
             PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
-                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
+                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectPassword).ConfigureAwait(false));
         }
 
         [TestMethod]
@@ -119,14 +117,12 @@ namespace Microsoft.Identity.Test.Unit.Integration
         {
             var user = LabUserHelper.GetDefaultUser().User;
 
-            SecureString incorrectSecurePassword = new SecureString();
-            incorrectSecurePassword.AppendChar('x');
-            incorrectSecurePassword.MakeReadOnly();
+            string incorrectPassword = "x";
 
             PublicClientApplication msalPublicClient = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(Authority, true, true).BuildConcrete();
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
-                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
+                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectPassword).ConfigureAwait(false));
         }
     }
 }
