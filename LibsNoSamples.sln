@@ -9,8 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C-5E2E-4C4A-BDD2-8F2A06AAE3F6}"
 	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
 		src\MSAL.Common.props = src\MSAL.Common.props
+		src\MSAL.Frameworks.props = src\MSAL.Frameworks.props
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
+		src\version.json = src\version.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.netcore", "tests\Microsoft.Identity.Test.Unit.netcore\Microsoft.Identity.Test.Unit.netcore.csproj", "{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}"
