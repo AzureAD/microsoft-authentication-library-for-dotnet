@@ -16,6 +16,9 @@
          would also be forced to install these dependencies.  PrivateAssets avoids this problem. -->
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="StrongNamer" Version="0.0.8" PrivateAssets="All" />
+    <PackageReference Include="StrongNamer" Version="0.0.8" PrivateAssets="All" Condition="$([MSBuild]::IsOsPlatform('Windows_NT')) " /> 
   </ItemGroup>
+
+
+
 </Project>
