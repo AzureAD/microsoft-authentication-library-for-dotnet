@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.CallConfig
     /// </summary>
     public class OwnerUiParent
     {
-        internal CoreUIParent CoreUiParent { get; set; }
+        internal CoreUIParent CoreUiParent { get; } = new CoreUIParent();
 
         // TODO: do the same for IWin32Window/IntPtr on windows, etc...
 #if ANDROID

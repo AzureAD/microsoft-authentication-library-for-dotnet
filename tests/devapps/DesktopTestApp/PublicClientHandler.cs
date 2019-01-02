@@ -43,6 +43,7 @@ namespace DesktopTestApp
             ApplicationId = clientId;
             PublicClientApplication = PublicClientApplicationBuilder
                                       .Create(ApplicationId).WithUserTokenCache(TokenCacheHelper.GetUserCache())
+                                      .WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true, true)
                                       .WithComponent(_component).BuildConcrete();
         }
 
