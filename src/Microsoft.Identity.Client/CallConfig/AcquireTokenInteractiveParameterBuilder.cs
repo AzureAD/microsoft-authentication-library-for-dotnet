@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.CallConfig
             return this;
         }
 
-        // UIBehavior struct is INTERNAL on .net core...  (can we change that?)
+        // TODO: UIBehavior struct is INTERNAL on .net core...  (can we change that?)
 #if !NET_CORE_BUILDTIME
         /// <summary>
         /// </summary>

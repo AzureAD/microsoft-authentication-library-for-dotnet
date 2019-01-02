@@ -30,7 +30,6 @@ using Microsoft.Identity.Client.Config;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 
 namespace Microsoft.Identity.Test.Unit
@@ -72,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit
         {
             return CreateServiceBundleWithCustomHttpManager(null);
         }
-
 
         public static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
