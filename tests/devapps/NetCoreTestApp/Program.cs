@@ -29,22 +29,25 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Config;
+using Microsoft.Identity.Test.Common;
 
 namespace NetCoreTestApp
 {
-    public class Program
+    public static class Program
     {
-        private readonly static string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private readonly static string ClientIdForConfidentialApp = "<enter id>";
+        private static readonly string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private static readonly string ClientIdForConfidentialApp = "<enter id>";
 
-        private readonly static string Username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
-        private readonly static IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
+        private static readonly string Username = ""; // used for WIA and U/P, cannot be empty on .net core
+        private static readonly string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
+        private static readonly IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
@@ -77,24 +80,23 @@ namespace NetCoreTestApp
                         6. Clear PCA cache
                         0. Exit App
                     Enter your Selection: ");
-                int.TryParse(Console.ReadLine(), out var selection);
-
-                Task<AuthenticationResult> authTask = null;
+                int.TryParse(Console.ReadLine(), out int selection);
 
                 try
                 {
+                    Task<AuthenticationResult> authTask = null;
                     switch (selection)
                     {
                         case 1: // acquire token
                             authTask = pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, Username);
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
                             break;
                         case 2: // acquire token u/p
-                            SecureString password = GetPasswordFromConsole();
+                            var maskedConsoleReader = new MaskedConsoleReader();
+                            Console.Write("Enter Password: ");
+                            string password = maskedConsoleReader.ReadLine();                            
                             authTask = pca.AcquireTokenByUsernamePasswordAsync(Scopes, Username, password);
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
                             break;
                         case 3:
                             authTask = pca.AcquireTokenWithDeviceCodeAsync(
@@ -105,7 +107,6 @@ namespace NetCoreTestApp
                                     return Task.FromResult(0);
                                 });
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
                             break;
                         case 4: // acquire token silent
                             IAccount account = pca.GetAccountsAsync().Result.FirstOrDefault();
@@ -113,10 +114,8 @@ namespace NetCoreTestApp
                             {
                                 Log(LogLevel.Error, "Test App Message - no accounts found, AcquireTokenSilentAsync will fail... ", false);
                             }
-
                             authTask = pca.AcquireTokenSilentAsync(Scopes, account);
                             await FetchTokenAndCallGraphAsync(pca, authTask).ConfigureAwait(false);
-
                             break;
                         case 5:
                             RunClientCredentialWithCertificate();
@@ -134,7 +133,6 @@ namespace NetCoreTestApp
                         default:
                             break;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -195,7 +193,6 @@ namespace NetCoreTestApp
             }
         }
 
-
         private static async Task DisplayAccountsAsync(PublicClientApplication pca)
         {
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
@@ -234,44 +231,15 @@ namespace NetCoreTestApp
             Console.ResetColor();
         }
 
-        private static SecureString GetPasswordFromConsole()
-        {
-            Console.Write("Password: ");
-            var pwd = new SecureString();
-            while (true)
-            {
-                ConsoleKeyInfo i = Console.ReadKey(true);
-                if (i.Key == ConsoleKey.Enter)
-                {
-                    break;
-                }
-                else if (i.Key == ConsoleKey.Backspace)
-                {
-                    if (pwd.Length > 0)
-                    {
-                        pwd.RemoveAt(pwd.Length - 1);
-                        Console.Write("\b \b");
-                    }
-                }
-                else if (i.KeyChar != '\u0000') // KeyChar == '\u0000' if the key pressed does not correspond to a printable character, e.g. F1, Pause-Break, etc
-                {
-                    pwd.AppendChar(i.KeyChar);
-                    Console.Write("*");
-                }
-            }
-            return pwd;
-        }
-
         private static async Task<string> CallGraphAsync(string token)
         {
-            var httpClient = new System.Net.Http.HttpClient();
-            System.Net.Http.HttpResponseMessage response;
             try
             {
-                var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, GraphAPIEndpoint);
-                //Add the token in Authorization header
-                request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-                response = await httpClient.SendAsync(request).ConfigureAwait(false);
+                var request = new HttpRequestMessage(HttpMethod.Get, GraphAPIEndpoint);
+                
+                // Add the token in Authorization header
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await new HttpClient().SendAsync(request).ConfigureAwait(false);
                 var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 return content;
             }
@@ -280,7 +248,5 @@ namespace NetCoreTestApp
                 return ex.ToString();
             }
         }
-
-
     }
 }

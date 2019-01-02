@@ -167,8 +167,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         SplitScopeString(scopes.Text),
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -211,14 +210,12 @@ namespace DesktopTestApp
                 ClearResultPageInfo();
                 userPasswordTextBox.PasswordChar = '*';
 
-                string username = loginHintTextBox.Text; //Can be blank for U/P 
-                SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
-
-                await AcquireTokenByUsernamePasswordAsync(username, securePassword).ConfigureAwait(true);
+                string username = loginHintTextBox.Text; // Can be blank for U/P 
+                await AcquireTokenByUsernamePasswordAsync(username, userPasswordTextBox.Text).ConfigureAwait(true);
             }
         }
 
-        private async Task AcquireTokenByUsernamePasswordAsync(string username, SecureString password)
+        private async Task AcquireTokenByUsernamePasswordAsync(string username, string password)
         {
             try
             {
@@ -301,7 +298,7 @@ namespace DesktopTestApp
 
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(SplitScopeString(scopes.Text), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent()).ConfigureAwait(true);
+                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(SplitScopeString(scopes.Text), GetUIBehavior(), _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -532,8 +529,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         _b2CScopes,
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -561,8 +557,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         _b2CScopes,
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();

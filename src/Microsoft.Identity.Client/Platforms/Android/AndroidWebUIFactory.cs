@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
         {
-            if (coreUIParent.UseEmbeddedWebview)
+            if (coreUIParent.UseEmbeddedWebView)
             {
                 return new EmbeddedWebUI(coreUIParent)
                 {

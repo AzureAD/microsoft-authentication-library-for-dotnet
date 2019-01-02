@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>This method is likely to be removed (replaced) before final release</remarks>
         public UIParent(bool useEmbeddedWebview) : this()
         {
-            CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;
+            CoreUIParent.UseEmbeddedWebView = useEmbeddedWebview;
         }
 
 #if iOS_RUNTIME

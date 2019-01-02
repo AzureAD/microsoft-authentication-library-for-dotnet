@@ -39,6 +39,7 @@ namespace XForms
     {
         public static PublicClientApplication MsalPublicClient;
         public static UIParent UIParent { get; set; }
+
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 

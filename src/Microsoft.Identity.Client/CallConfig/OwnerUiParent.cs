@@ -27,6 +27,11 @@
 
 using Microsoft.Identity.Client.UI;
 
+#if ANDROID
+using System;
+using Android.App;
+#endif
+
 namespace Microsoft.Identity.Client.CallConfig
 {
     /// <summary>
@@ -39,8 +44,8 @@ namespace Microsoft.Identity.Client.CallConfig
 #if ANDROID
         internal void SetAndroidActivity(Activity activity)
         {
-            UiParent.Activity = activity;
-            UiParent.CallerActivity = activity;
+            CoreUiParent.Activity = activity;
+            CoreUiParent.CallerActivity = activity;
         }
         #endif
     }

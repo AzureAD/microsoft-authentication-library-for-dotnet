@@ -25,12 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+
+#if ANDROID
+using Android.App;
+#endif
 
 namespace Microsoft.Identity.Client.CallConfig
 {
     /// <summary>
     /// </summary>
+    [CLSCompliant(false)]
     public sealed class AcquireTokenInteractiveParameterBuilder :
         AbstractAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder, IAcquireTokenInteractiveParameters>
     {
@@ -66,9 +72,14 @@ namespace Microsoft.Identity.Client.CallConfig
         }
 #endif
 #if ANDROID
-        public PublicClientApplicationBuilder WithParentActivity(Activity activity)
+        /// <summary>
+        /// </summary>
+        /// <param name="activity"></param>
+        /// <returns></returns>
+        public AcquireTokenInteractiveParameterBuilder WithParentActivity(Activity activity)
         {
-            Parameters.CoreUiParent.SetAndroidActivity(activity);
+            Parameters.UiParent.SetAndroidActivity(activity);
+            return this;
         }
 #endif
     }

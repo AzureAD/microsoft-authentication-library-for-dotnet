@@ -7,7 +7,7 @@
         <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
         <TargetFrameworkAndroid>MonoAndroid8.1</TargetFrameworkAndroid>
 
-        <!--<TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid)</TargetFrameworks>-->
-        <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>
+        <TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid)</TargetFrameworks>
+        <!--<TargetFrameworks>$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore)</TargetFrameworks>-->
     </PropertyGroup>
 </Project>

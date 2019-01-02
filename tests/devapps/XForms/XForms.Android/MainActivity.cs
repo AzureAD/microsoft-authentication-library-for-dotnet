@@ -55,6 +55,7 @@ namespace XForms.Droid
             // To activate embedded webview, remove '//' from line 57 below, 
             // and comment out line 51 above -> App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
 
+            // TODO: need to fix this to remove UIParent usage and bundle in the Activity with PCA creation...
             App.UIParent = new UIParent(this, true);
 
             // Use helper method to determine first if Chrome or Chrome Custom Tabs

@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
         {
-            CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;
+            CoreUIParent.UseEmbeddedWebView = useEmbeddedWebview;
         }
 
         #if ANDROID_RUNTIME

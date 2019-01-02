@@ -72,7 +72,7 @@ namespace SampleApp
             return null;
         }
 
-        public async Task<string> GetTokenWithUsernamePasswordAsync(IEnumerable<string> scopes, SecureString password)
+        public async Task<string> GetTokenWithUsernamePasswordAsync(IEnumerable<string> scopes, string password)
         {
             AuthenticationResult result = null;
 

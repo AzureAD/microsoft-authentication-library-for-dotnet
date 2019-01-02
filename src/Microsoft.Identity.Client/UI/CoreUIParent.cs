@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.UI
         }
 
 #if ANDROID || iOS
-        internal bool UseEmbeddedWebview { get; set; }
+        internal bool UseEmbeddedWebView { get; set; }
 #endif
 
 #if iOS

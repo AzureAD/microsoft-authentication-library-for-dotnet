@@ -54,7 +54,7 @@ namespace XForms.iOS
             LoadApplication(new App());
 
             // Default system browser
-            App.UIParent = new UIParent();
+            //App.UIParent = new UIParent();
 
             // To activate embedded webview, remove '//' below
             //App.UIParent = new UIParent(true);
