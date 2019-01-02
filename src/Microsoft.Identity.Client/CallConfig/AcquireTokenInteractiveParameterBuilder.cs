@@ -32,6 +32,10 @@ using System.Collections.Generic;
 using Android.App;
 #endif
 
+#if DESKTOP
+using System.Windows.Forms;
+#endif
+
 namespace Microsoft.Identity.Client.CallConfig
 {
     /// <summary>
@@ -79,6 +83,27 @@ namespace Microsoft.Identity.Client.CallConfig
         public AcquireTokenInteractiveParameterBuilder WithParentActivity(Activity activity)
         {
             Parameters.UiParent.SetAndroidActivity(activity);
+            return this;
+        }
+#endif
+#if DESKTOP
+        /// <summary>
+        /// </summary>
+        /// <param name="ownerWindow"></param>
+        /// <returns></returns>
+        public AcquireTokenInteractiveParameterBuilder WithOwnerWindow(IWin32Window ownerWindow)
+        {
+            Parameters.UiParent.SetOwnerWindow(ownerWindow);
+            return this;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="ownerWindow"></param>
+        /// <returns></returns>
+        public AcquireTokenInteractiveParameterBuilder WithOwnerWindow(IntPtr ownerWindow)
+        {
+            Parameters.UiParent.SetOwnerWindow(ownerWindow);
             return this;
         }
 #endif

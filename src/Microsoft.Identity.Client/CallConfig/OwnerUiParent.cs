@@ -25,11 +25,15 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.UI;
 
 #if ANDROID
-using System;
 using Android.App;
+#endif
+
+#if DESKTOP
+using System.Windows.Forms;
 #endif
 
 namespace Microsoft.Identity.Client.CallConfig
@@ -40,13 +44,24 @@ namespace Microsoft.Identity.Client.CallConfig
     {
         internal CoreUIParent CoreUiParent { get; } = new CoreUIParent();
 
-        // TODO: do the same for IWin32Window/IntPtr on windows, etc...
 #if ANDROID
         internal void SetAndroidActivity(Activity activity)
         {
             CoreUiParent.Activity = activity;
             CoreUiParent.CallerActivity = activity;
         }
-        #endif
+#endif
+
+#if DESKTOP
+        internal void SetOwnerWindow(IWin32Window ownerWindow)
+        {
+            CoreUiParent.OwnerWindow = ownerWindow;
+        }
+
+        internal void SetOwnerWindow(IntPtr ownerWindow)
+        {
+            CoreUiParent.OwnerWindow = ownerWindow;
+        }
+#endif
     }
 }
