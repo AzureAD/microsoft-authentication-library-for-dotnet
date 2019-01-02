@@ -9,5 +9,10 @@
   ],
   "nugetPackageVersion": {
     "semVer": 2
+  },
+   "cloudBuild": {
+    "buildNumber": {   // use version as build number
+      "enabled": true
+    }
   }
 }
