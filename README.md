@@ -1,4 +1,4 @@
-# Microsoft Authentication Library (MSAL) Preview for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
+# Microsoft Authentication Library (MSAL) for .NET, Windows Store, UWP, NetCore, Xamarin Android and iOS
 
 The MSAL library for .NET gives your app the ability to begin using the [Microsoft Cloud](https://cloud.microsoft.com) by supporting [Microsoft Azure Active Directory](https://azure.microsoft.com/en-us/services/active-directory/) and [Microsoft Accounts](https://account.microsoft.com) in a converged experience using industry standard OAuth2 and OpenID Connect. The library also supports [Azure AD B2C](https://azure.microsoft.com/services/active-directory-b2c/).
 
@@ -32,23 +32,16 @@ Released     | Nightly
 This is the correct repo to file [issues](issues)
 
 
-
-## Important Note about the MSAL Preview
+## Support
 
 This library is suitable for use in a production environment.
-We provide the same production level support for this library as we do our current production libraries.
-During the preview we may make changes to the API, internal cache format, and other mechanisms of this library,
-which you will be required to take along with bug fixes or feature improvements.
-This may impact your application. For instance, a change to the cache format may impact your users,
-such as requiring them to sign in again. An API change may require you to update your code.
-When we provide the General Availability release we will require you to update to the General Availability version within six months,
-as applications written using a preview version of library may no longer work.
+
 
 ## Requirements
 
 * Windows 7 or greater
 * .NET 4.5 or greater
-* .NET Core 2.0 or greater
+* .NET Core 1.0 or greater
  
 ## Community Help and Support
 
