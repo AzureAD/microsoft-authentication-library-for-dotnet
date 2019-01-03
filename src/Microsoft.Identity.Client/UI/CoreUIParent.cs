@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.UI
         /// <param name="activity">parent activity for the call. REQUIRED.</param>
         public CoreUIParent(Activity activity)
         {
-           if(activity == null)
+           if (activity == null)
            {
                 throw new ArgumentException("passed in activity is null", nameof(activity));
            }

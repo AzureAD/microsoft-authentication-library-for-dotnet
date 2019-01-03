@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         [TestMethod]
         public void ValidateDefaults()
         {
-            var actual = AcquireTokenForClientParameterBuilder.Create(ObjectFactory.CreateScopes()).Build();
+            var actual = AcquireTokenBuilder.CreateForClient(ObjectFactory.CreateScopes()).Build();
             Validate(actual);
         }
 
@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         public void WithForceRefresh()
         {
             var actual =
-                AcquireTokenForClientParameterBuilder.Create(ObjectFactory.CreateScopes()).WithForceRefresh(true).Build();
+                AcquireTokenBuilder.CreateForClient(ObjectFactory.CreateScopes()).WithForceRefresh(true).Build();
             Expected.ForceRefresh = true;
             Validate(actual);
         }
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         [TestMethod]
         public void WithCertificate()
         {
-            var actual = AcquireTokenForClientParameterBuilder.Create(ObjectFactory.CreateScopes()).WithCertificate(true).Build();
+            var actual = AcquireTokenBuilder.CreateForClient(ObjectFactory.CreateScopes()).WithCertificate(true).Build();
             Expected.WithForClientCertificate = true;
             Validate(actual);
         }

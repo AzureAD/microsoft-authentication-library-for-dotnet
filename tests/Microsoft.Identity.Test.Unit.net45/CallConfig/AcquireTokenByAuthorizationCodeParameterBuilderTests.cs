@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.CallConfig
         public void ValidateDefaults()
         {
             const string AuthCode = "the-auth-code";
-            var actual = AcquireTokenByAuthorizationCodeParameterBuilder.Create(ObjectFactory.CreateScopes(), AuthCode).Build();
+            var actual = AcquireTokenBuilder.CreateForAuthorizationCode(ObjectFactory.CreateScopes(), AuthCode).Build();
             Expected.AuthorizationCode = AuthCode;
             Validate(actual);
         }
