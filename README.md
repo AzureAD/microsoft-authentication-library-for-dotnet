@@ -27,11 +27,6 @@ Released     | Nightly
   - [Universal Windows Platform (UWP)](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-uwp)
   - [.NET Core daemon console](https://docs.microsoft.com/en-us/azure/active-directory/develop/quickstart-v2-netcore-daemon)
 
-## Where do I file issues
-
-This is the correct repo to file [issues](issues)
-
-
 ## Support
 
 This library is suitable for use in a production environment.
@@ -39,9 +34,9 @@ This library is suitable for use in a production environment.
 
 ## Requirements
 
-* Windows 7 or greater
-* .NET 4.5 or greater
-* .NET Core 1.0 or greater
+This library is build against multiple frameworks because some of its logic is platform specific - popping up a web ui, storing tokens etc. 
+
+To see a list of the minimum supported frameworks please have a loop at the "Depedencies" section of the [NuGet.org page](https://www.nuget.org/packages/Microsoft.Identity.Client) 
  
 ## Community Help and Support
 
