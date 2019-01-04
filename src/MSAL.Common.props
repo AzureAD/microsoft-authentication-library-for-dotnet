@@ -70,6 +70,11 @@
     <!-- These are for MSAL json/* build infra -->
     <DefineConstants>$(DefineConstants);HAVE_ASYNC;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_REFLECTION_BINDER;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
   </PropertyGroup>
+   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkMac)'">
+    <DefineConstants>$(DefineConstants);MAC</DefineConstants>
+    <!-- These are for MSAL json/* build infra (copied from iOS minus HAVE_REFLECTION_BINDER)-->
+    <DefineConstants>$(DefineConstants);HAVE_ASYNC;HAVE_BINARY_SERIALIZATION;HAVE_COVARIANT_GENERICS;HAVE_DATA_CONTRACTS;HAVE_DATE_TIME_OFFSET;HAVE_DYNAMIC;HAVE_EXPRESSIONS;HAVE_FSHARP_TYPES;HAVE_GUID_TRY_PARSE;HAVE_HASH_SET;HAVE_IGNORE_DATA_MEMBER_ATTRIBUTE;HAVE_INOTIFY_COLLECTION_CHANGED;HAVE_INOTIFY_PROPERTY_CHANGING;HAVE_ISET;HAVE_LINQ;HAVE_METHOD_IMPL_ATTRIBUTE;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_READ_ONLY_COLLECTIONS;HAVE_SERIALIZATION_BINDER_BIND_TO_NAME;HAVE_STRING_JOIN_WITH_ENUMERABLE;HAVE_TIME_SPAN_PARSE_WITH_CULTURE;HAVE_TIME_SPAN_TO_STRING_WITH_CULTURE;HAVE_TIME_ZONE_INFO;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_VARIANT_TYPE_PARAMETERS;HAVE_VERSION_TRY_PARSE;HAVE_XLINQ;HAVE_XML_DOCUMENT;HAVE_CONCURRENT_DICTIONARY;HAVE_ICONVERTIBLE;$(AdditionalConstants)</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
     <!-- These are for MSAL json/* build infra -->
@@ -98,8 +103,6 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <Compile Include="$(PathToMsalSources)\Platforms\netstandard13\**\*.cs" LinkBase="Platforms\netstandard13" />
-    <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
-    <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventSource" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Json" Version="4.3.0" />
     <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
@@ -113,12 +116,7 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
-
-    <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache" />
-
     <Compile Include="$(PathToMsalSources)\Platforms\netcore\**\*.cs" LinkBase="Platforms\netcore" />
-    <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
-
     <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
@@ -129,11 +127,7 @@
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkNetDesktop)' ">
-    <Compile Include="$(PathToMsalSources)\Features\Cache\**\*.cs" LinkBase="Core\Features\Cache"/>
-
     <Compile Include="$(PathToMsalSources)\Platforms\net45\**\*.cs" LinkBase="Platforms\net45" />
-
-    <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" LinkBase="Features\EventsSource" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.CustomWebBrowserEvent.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\CustomWebBrowser.cs" SubType="Component" />
     <Compile Update="$(PathToMsalSources)\Platforms\net45\WinFormWebAuthenticationDialog.cs" SubType="Form" />
@@ -153,7 +147,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\uap\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Features\EventSource\**\*.cs" />
     <!-- Bug on UWP where we accidentally included this feature. Not worth removing and breaking backwards compat now -->
     <Compile Remove="$(PathToMsalSources)\Features\PublicClientWithTokenCache\TokenCacheExtensions.cs" />
     <PackageReference Include="Microsoft.CSharp" Version="4.3.0" />
@@ -166,6 +159,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\iOSMacShared\**\*.cs" />    
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -179,6 +173,18 @@
     <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Security.SecureString" Version="4.3.0" />
+  </ItemGroup>
+   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkMac)' ">
+    <Compile Include="$(PathToMsalSources)\Platforms\Mac\**\*.cs" />
+    <Compile Include="$(PathToMsalSources)\Platforms\iOSMacShared\**\*.cs" />         
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Xamarin.Mac" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkAndroid)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Android\**\*.cs" />
