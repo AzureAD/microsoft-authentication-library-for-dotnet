@@ -25,21 +25,30 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Platforms.iOS
+namespace Microsoft.Identity.Client.Platforms.Mac
 {
-    internal class iOSCryptographyManager : ICryptographyManager
+    internal class MacCryptographyManager : ICryptographyManager
     {
         public string CreateBase64UrlEncodedSha256Hash(string input)
         {
-            return string.IsNullOrEmpty(input) ? null : Base64UrlHelpers.Encode(CreateSha256HashBytes(input));
+            if (string.IsNullOrEmpty(input))
+            {
+                return null;
+            }
+
+            using (SHA256Managed sha = new SHA256Managed())
+            {
+                UTF8Encoding encoding = new UTF8Encoding();
+                return Base64UrlHelpers.Encode(sha.ComputeHash(encoding.GetBytes(input)));
+            }
         }
 
         public string GenerateCodeVerifier()
@@ -66,6 +75,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
         }
 
+        #region Not Implemented     
         public string Encrypt(string message)
         {
             throw new NotImplementedException();
@@ -86,11 +96,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            // Used by Confidential Client, which is hidden on iOS
             throw new NotImplementedException();
         }
+
+        #endregion
     }
 }

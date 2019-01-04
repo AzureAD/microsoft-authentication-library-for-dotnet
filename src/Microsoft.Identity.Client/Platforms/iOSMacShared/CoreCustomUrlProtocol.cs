@@ -28,11 +28,12 @@
 using System;
 using Foundation;
 
+// TODO: bogavril - test if this can be removed and resolve the obsolete calls
 #if MAC
 using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
 #endif
 
-namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOSMacShared
 {
     internal class CoreCustomUrlProtocol : NSUrlProtocol
     {
@@ -56,7 +57,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         }
 
         [Export("initWithRequest:cachedResponse:client:")]
-        public CoreCustomUrlProtocol(NSUrlRequest request, NSCachedUrlResponse cachedResponse,
+        public CoreCustomUrlProtocol(
+            NSUrlRequest request, 
+            NSCachedUrlResponse cachedResponse,
             INSUrlProtocolClient client)
             : base(request, cachedResponse, client)
         {

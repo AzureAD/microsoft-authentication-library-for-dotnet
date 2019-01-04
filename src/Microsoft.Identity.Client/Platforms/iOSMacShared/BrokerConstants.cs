@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,19 +25,27 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.iOSMacShared
 {
-    internal class DeviceAuthHelper
+    internal static class BrokerConstants
     {
-        public static bool CanHandleDeviceAuthChallenge { get { return false; } }
+        public const string ChallengeResponseHeader = "Authorization";
 
-        public static Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
-        {
-            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
-        }
+        public const string ChallengeResponseType = "PKeyAuth";
+
+        public const string ChallengeResponseToken = "AuthToken";
+
+        public const string ChallengeResponseContext = "Context";
+
+        public const string ChallengeResponseVersion = "Version";
+
+        public const string BrowserExtPrefix = "browser://";
+
+        public const string BrowserExtInstallPrefix = "msauth://";
+
+        public const string DeviceAuthChallengeRedirect = "urn:http-auth:PKeyAuth";
+        public const string ChallengeHeaderKey = "x-ms-PKeyAuth";
+        public const string ChallengeHeaderValue = "1.0";
     }
 }
