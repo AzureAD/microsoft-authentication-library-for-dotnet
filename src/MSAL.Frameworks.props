@@ -5,6 +5,7 @@
         <TargetFrameworkNetCore>netcoreapp1.0</TargetFrameworkNetCore>
         <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
         <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
+        <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>     
         <TargetFrameworkAndroid>MonoAndroid8.1</TargetFrameworkAndroid>
 
         <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid)</TargetFrameworks>
