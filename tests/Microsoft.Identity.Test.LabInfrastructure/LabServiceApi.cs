@@ -45,52 +45,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             _keyVault = keyVault;
         }
 
-        private LabResponse GetLabResponseFromAPI(UserQueryParameters query)
+        private LabResponse GetLabResponseFromApi(UserQueryParameters query)
         {
-            HttpClient webClient = new HttpClient();
-            IDictionary<string, string> queryDict = new Dictionary<string, string>();
-
-            //Disabled for now until there are tests that use it.
-            queryDict.Add("mamca", "false");
-            queryDict.Add("mdmca", "false");
-
-            //Building user query
-            if (query.FederationProvider != null)
-                queryDict.Add("federationProvider", query.FederationProvider.ToString());
-
-            queryDict.Add("mam", query.IsMamUser != null && (bool)(query.IsMamUser) ? "true" : "false");
-            queryDict.Add("mfa", query.IsMfaUser != null && (bool)(query.IsMfaUser) ? "true" : "false");
-
-            if (query.Licenses != null && query.Licenses.Count > 0)
-                queryDict.Add("license", query.Licenses.ToArray().ToString());
-
-            queryDict.Add("isFederated", query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? "true" : "false");
-
-            if (query.UserType != null)
-                queryDict.Add("usertype", query.UserType.ToString());
-
-            queryDict.Add("external", query.IsExternalUser != null && (bool)(query.IsExternalUser) ? "true" : "false");
-
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Local)
-            {
-                queryDict.Add("b2cProvider", "local");
-            }
-
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Facebook)
-            {
-                queryDict.Add("b2cProvider", "facebook");
-            }
-
-            if (query.B2CIdentityProvider == B2CIdentityProvider.Google)
-            {
-                queryDict.Add("b2cProvider", "google");
-            }
-
-            UriBuilder uriBuilder = new UriBuilder("http://api.msidlab.com/api/user");
-            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-
             //Fetch user
-            string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            string result = CreateLabQuery(query);
 
             if (string.IsNullOrWhiteSpace(result))
             {
@@ -109,6 +67,53 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
+        private string CreateLabQuery(UserQueryParameters query)
+        {
+            HttpClient webClient = new HttpClient();
+            IDictionary<string, string> queryDict = new Dictionary<string, string>();
+            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
+
+            //Disabled for now until there are tests that use it.
+            queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
+            queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
+
+            //Building user query
+            if (query.FederationProvider != null)
+                queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
+
+            queryDict.Add(LabApiConstants.MobileAppManagement, query.IsMamUser != null && (bool)(query.IsMamUser) ? LabApiConstants.True : LabApiConstants.False);
+            queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.IsMfaUser != null && (bool)(query.IsMfaUser) ? LabApiConstants.True : LabApiConstants.False);
+
+            if (query.Licenses != null && query.Licenses.Count > 0)
+                queryDict.Add(LabApiConstants.License, query.Licenses.ToArray().ToString());
+
+            queryDict.Add(LabApiConstants.FederatedUser, query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? LabApiConstants.True : LabApiConstants.False);
+
+            if (query.UserType != null)
+                queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
+
+            queryDict.Add(LabApiConstants.External, query.IsExternalUser != null && (bool)(query.IsExternalUser) ? LabApiConstants.True : LabApiConstants.False);
+
+            if (query.B2CIdentityProvider == B2CIdentityProvider.Local)
+            {
+                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CLocal);
+            }
+
+            if (query.B2CIdentityProvider == B2CIdentityProvider.Facebook)
+            {
+                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CFacebook);
+            }
+
+            if (query.B2CIdentityProvider == B2CIdentityProvider.Google)
+            {
+                queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
+            }
+
+            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+            string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
+            return result;
+        }
+
         /// <summary>
         /// Returns a test user account for use in testing.
         /// </summary>
@@ -116,7 +121,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// <returns>Users that match the given query parameters.</returns>
         public LabResponse GetLabResponse(UserQueryParameters query)
         {
-            var response = GetLabResponseFromAPI(query);
+            var response = GetLabResponseFromApi(query);
             var user = response.User;
 
             if (!Uri.IsWellFormedUriString(user.CredentialUrl, UriKind.Absolute))

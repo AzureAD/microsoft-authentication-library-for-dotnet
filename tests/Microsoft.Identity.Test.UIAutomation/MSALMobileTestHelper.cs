@@ -54,6 +54,33 @@ namespace Microsoft.Identity.Test.UIAutomation
             CoreMobileTestHelper.VerifyResult(controller);
         }
 
+        public void AcquireTokenInteractiveWithConsentTest(
+            ITestController controller,
+            LabResponse labResponse,
+            string promptBehavior = CoreUiTestConstants.UiBehaviorLogin)
+        {
+            PrepareForAuthentication(controller);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, promptBehavior);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenId);
+
+            //i0116 = UPN text field on AAD sign in endpoint
+            controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
+
+            // on consent, also hit the accept button
+            if (promptBehavior == CoreUiTestConstants.UiBehaviorConsent)
+            {
+                AppWebResult consentHeader = controller.WaitForWebElementByCssId("consentHeader").FirstOrDefault();
+                Assert.IsNotNull(consentHeader);
+                Assert.IsTrue(consentHeader.TextContent.Contains("Permissions requested"));
+
+                controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
+            }
+
+            CoreMobileTestHelper.VerifyResult(controller);
+        }
+
         /// <summary>
         /// Runs through the standard acquire token silent flow
         /// </summary>
@@ -225,7 +252,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             B2CSilentFlowHelper(controller);
         }
 
-        private void B2CSilentFlowHelper(ITestController controller)
+        public void B2CSilentFlowHelper(ITestController controller)
         {
             //verify results of AT call
             CoreMobileTestHelper.VerifyResult(controller);
@@ -320,6 +347,26 @@ namespace Microsoft.Identity.Test.UIAutomation
 
                 case B2CIdentityProvider.Facebook:
                     PerformB2CFacebookProviderSignInFlow(controller, user, userInformationFieldIds);
+                    break;
+                default:
+                    throw new InvalidOperationException("B2CIdentityProvider unknown");
+            }
+            CoreMobileTestHelper.VerifyResult(controller);
+        }
+
+        public void PerformB2CSelectProviderOnlyFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool isB2CLoginAuthority)
+        {
+            SetB2CAuthority(controller, isB2CLoginAuthority);
+            
+            controller.Tap(CoreUiTestConstants.AcquirePageId);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenId);
+
+            switch (b2CIdentityProvider)
+            {
+                case B2CIdentityProvider.Facebook:
+                    controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
                     break;
                 default:
                     throw new InvalidOperationException("B2CIdentityProvider unknown");

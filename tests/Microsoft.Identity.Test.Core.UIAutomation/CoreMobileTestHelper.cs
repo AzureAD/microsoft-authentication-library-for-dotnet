@@ -49,13 +49,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
-
-        public static void PerformSignInFlowWithoutUI(ITestController controller)
-        {
-            //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenId);
-        }
-
+        
         public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
         {
             UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds();

@@ -85,13 +85,13 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV4InteractiveFederatedTest,
                 AcquireTokenADFSV4InteractiveNonFederatedTest,
 
-                B2CFacebookEditPolicyAcquireTokenTest,
                 B2CFacebookB2CLoginAuthorityAcquireTokenTest,
                 B2CFacebookMicrosoftAuthorityAcquireTokenTest,
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
                 B2CLocalAccountAcquireTokenTest,
-                B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest,
+                //B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest,
+                B2CFacebookEditPolicyAcquireTokenTest
             };
 
             var hasFailed = false;
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.UIAutomation
             var labData = LabUserHelper.GetDefaultUser();
 
             // 1. Acquire token with uiBehavior set to consent 
-            _msalMobileTestHelper.AcquireTokenInteractiveTestHelper(
+            _msalMobileTestHelper.AcquireTokenInteractiveWithConsentTest(
                 xamarinController,
                 labData,
                 CoreUiTestConstants.UiBehaviorConsent);
@@ -184,7 +184,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// </summary>
         public void B2CFacebookMicrosoftAuthorityAcquireTokenTest()
         {
-            _msalMobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), false);
+            _msalMobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, false);
+            _msalMobileTestHelper.B2CSilentFlowHelper(xamarinController);
         }
 
         /// <summary>
@@ -195,7 +196,8 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// </summary>
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
-            _msalMobileTestHelper.B2CFacebookAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+            _msalMobileTestHelper.PerformB2CSelectProviderOnlyFlow(xamarinController, LabUserHelper.GetB2CFacebookAccount().User, B2CIdentityProvider.Facebook, true);
+            _msalMobileTestHelper.B2CSilentFlowHelper(xamarinController);
             _msalMobileTestHelper.B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
         }
 
