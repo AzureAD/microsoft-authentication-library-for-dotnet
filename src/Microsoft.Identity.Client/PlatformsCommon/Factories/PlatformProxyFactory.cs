@@ -25,9 +25,10 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
 
-namespace Microsoft.Identity.Client.Core
+namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 {
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.
@@ -43,6 +44,8 @@ namespace Microsoft.Identity.Client.Core
             new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy()
 #elif iOS
             new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy()
+#elif MAC
+            new Platforms.Mac.MacPlatformProxy()
 #elif WINDOWS_APP
             new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy()
 #elif FACADE

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,22 +25,37 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
-namespace Microsoft.Identity.Client.Platforms.net45
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    internal class NetDesktopLegacyCachePersistence : ILegacyCachePersistence
+    internal class EventSourcePlatformLogger : IPlatformLogger
     {
-        private byte[] data;
-
-        byte[] ILegacyCachePersistence.LoadCache()
+        static EventSourcePlatformLogger()
         {
-            return data;
+            MsalEventSource = new MsalEventSource();
         }
 
-        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
+        internal static MsalEventSource MsalEventSource { get; }
+
+        public void Error(string message)
         {
-            data = serializedCache;  
+            MsalEventSource.Error(message);
+        }
+
+        public void Warning(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Verbose(string message)
+        {
+            MsalEventSource.Error(message);
+        }
+
+        public void Information(string message)
+        {
+            MsalEventSource.Error(message);
         }
     }
 }

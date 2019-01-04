@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-#if DESKTOP || ANDROID || iOS
+#if DESKTOP || ANDROID || iOS || MAC
 using System.Security;
 using static System.Runtime.InteropServices.Marshal;
 #else

@@ -36,6 +36,10 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+#if iOS
+using Microsoft.Identity.Client.Platforms.iOS;
+#endif
 
 namespace Microsoft.Identity.Client
 {
@@ -134,7 +138,8 @@ namespace Microsoft.Identity.Client
             {
                 keychainSecurityGroup = value;
                 UserTokenCache.TokenCacheAccessor.SetKeychainSecurityGroup(value);
-                UserTokenCache.LegacyCachePersistence.SetKeychainSecurityGroup(value);
+                (UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
+                    .SetKeychainSecurityGroup(value);
             }
         }
 #endif

@@ -31,7 +31,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
 
     /// <summary>
     /// Interface to be used with desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android).

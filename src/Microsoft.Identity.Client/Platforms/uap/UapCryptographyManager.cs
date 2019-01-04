@@ -35,6 +35,7 @@ using Windows.Security.Cryptography.DataProtection;
 using Windows.Storage.Streams;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
