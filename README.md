@@ -34,9 +34,9 @@ This library is suitable for use in a production environment.
 
 ## Requirements
 
-This library is build against multiple frameworks because some of its logic is platform specific - popping up a web ui, storing tokens etc. 
+This library is built against multiple frameworks because some of its logic is platform specific - displaying a web ui, storing tokens etc. 
 
-To see a list of the minimum supported frameworks please have a loop at the "Depedencies" section of the [NuGet.org page](https://www.nuget.org/packages/Microsoft.Identity.Client) 
+To see a list of minimum supported frameworks please have a look at the "Depedencies" section of the [NuGet.org page](https://www.nuget.org/packages/Microsoft.Identity.Client) 
  
 ## Community Help and Support
 
