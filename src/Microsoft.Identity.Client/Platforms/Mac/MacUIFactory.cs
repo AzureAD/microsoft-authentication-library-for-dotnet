@@ -25,27 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.UI;
+using System;
 
-namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
+namespace Microsoft.Identity.Client.Platforms.Mac
 {
-    internal static class BrokerConstants
+    internal class MacUIFactory : IWebUIFactory
     {
-        public const string ChallengeResponseHeader = "Authorization";
-
-        public const string ChallengeResponseType = "PKeyAuth";
-
-        public const string ChallengeResponseToken = "AuthToken";
-
-        public const string ChallengeResponseContext = "Context";
-
-        public const string ChallengeResponseVersion = "Version";
-
-        public const string BrowserExtPrefix = "browser://";
-
-        public const string BrowserExtInstallPrefix = "msauth://";
-
-        public const string DeviceAuthChallengeRedirect = "urn:http-auth:PKeyAuth";
-        public const string ChallengeHeaderKey = "x-ms-PKeyAuth";
-        public const string ChallengeHeaderValue = "1.0";
+        public IWebUI CreateAuthenticationDialog(CoreUIParent coreUIParent, RequestContext requestContext)
+        {
+            return new MacEmbeddedWebUI()
+            {
+                CoreUIParent = coreUIParent,
+                RequestContext = requestContext
+            };
+        }
     }
 }

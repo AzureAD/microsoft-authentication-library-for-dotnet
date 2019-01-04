@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,33 +25,19 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.Identity.Client.Core;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.iOS
+namespace Microsoft.Identity.Client.Platforms.iOSMacShared
 {
-    internal class IosPlatformLogger : IPlatformLogger
+    internal class DeviceAuthHelper
     {
-        // NOTE: Console.WriteLine writes to NSLog by default
+        public static bool CanHandleDeviceAuthChallenge { get { return false; } }
 
-        public void Error(string message)
+        public static Task<string> CreateDeviceAuthChallengeResponseAsync(IDictionary<string, string> challengeData)
         {
-            Console.WriteLine(message);
-        }
-
-        public void Warning(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Verbose(string message)
-        {
-            Console.WriteLine(message);
-        }
-
-        public void Information(string message)
-        {
-            Console.WriteLine(message);
+            return Task.FromResult(string.Format(CultureInfo.InvariantCulture, @"PKeyAuth Context=""{0}"",Version=""{1}""", challengeData[BrokerConstants.ChallengeResponseContext], challengeData[BrokerConstants.ChallengeResponseVersion]));
         }
     }
 }
