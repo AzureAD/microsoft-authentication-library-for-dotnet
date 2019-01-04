@@ -18,8 +18,8 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
@@ -27,20 +27,20 @@
 
 using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.Platforms.netstandard13
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    internal class NetStandard13LegacyCachePersistence : ILegacyCachePersistence
+    internal class InMemoryLegacyCachePersistance : ILegacyCachePersistence
     {
         private byte[] data;
 
-        byte[] ILegacyCachePersistence.LoadCache()
+        public byte[] LoadCache()
         {
             return data;
         }
 
-        void ILegacyCachePersistence.WriteCache(byte[] serializedCache)
+        public void WriteCache(byte[] serializedCache)
         {
-            data = serializedCache;
+            data = serializedCache;  
         }
     }
 }

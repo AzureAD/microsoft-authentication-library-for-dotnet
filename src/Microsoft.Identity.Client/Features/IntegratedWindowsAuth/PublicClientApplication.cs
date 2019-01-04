@@ -37,7 +37,7 @@ using Microsoft.Identity.Client.WsTrust;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
 
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {

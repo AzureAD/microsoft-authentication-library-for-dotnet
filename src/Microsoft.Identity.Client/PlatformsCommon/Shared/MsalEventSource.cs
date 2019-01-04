@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,39 +25,35 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.EventsSource;
+using System.Diagnostics.Tracing;
 
-namespace Microsoft.Identity.Client.Internal
+namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 {
-    internal class EventSourcePlatformLogger : IPlatformLogger
+    [EventSource(Name = "Microsoft.Identity.Client")]
+    internal class MsalEventSource : EventSource
     {
-        static EventSourcePlatformLogger()
+        [Event(1, Level = EventLevel.Verbose)]
+        internal void Verbose(string message)
         {
-            MsalEventSource = new MsalEventSource();
+            WriteEvent(1, message);
         }
 
-        internal static MsalEventSource MsalEventSource { get; }
-
-        public void Error(string message)
+        [Event(2, Level = EventLevel.Informational)]
+        internal void Information(string message)
         {
-            MsalEventSource.Error(message);
+            WriteEvent(2, message);
         }
 
-        public void Warning(string message)
+        [Event(3, Level = EventLevel.Warning)]
+        internal void Warning(string message)
         {
-            MsalEventSource.Error(message);
+            WriteEvent(3, message);
         }
 
-        public void Verbose(string message)
+        [Event(4, Level = EventLevel.Error)]
+        internal void Error(string message)
         {
-            MsalEventSource.Error(message);
-        }
-
-        public void Information(string message)
-        {
-            MsalEventSource.Error(message);
+            WriteEvent(4, message);
         }
     }
 }

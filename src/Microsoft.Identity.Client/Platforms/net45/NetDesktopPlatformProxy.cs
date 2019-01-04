@@ -38,6 +38,8 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -47,7 +49,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     internal class NetDesktopPlatformProxy : IPlatformProxy
     {
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(
+            () => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
@@ -227,7 +230,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new NetDesktopLegacyCachePersistence();
+            return new InMemoryLegacyCachePersistance();
         }
 
         /// <inheritdoc />
