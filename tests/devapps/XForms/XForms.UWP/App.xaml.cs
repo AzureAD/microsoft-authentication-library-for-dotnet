@@ -58,7 +58,6 @@ namespace XForms.UWP
         {
             InitializeComponent();
             Suspending += OnSuspending;
-
 #if TELEMETRY
             Telemetry.GetInstance().RegisterReceiver(
                 new Microsoft.Identity.Client.DevAppsTelemetry.ServerTelemetryHandler().OnEvents);

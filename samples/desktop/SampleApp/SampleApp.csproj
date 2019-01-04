@@ -37,7 +37,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Telemetry|AnyCPU' ">
-    <OutputPath>bin\DebugWithTelemetry\</OutputPath>
+    <OutputPath>bin\Telemetry\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

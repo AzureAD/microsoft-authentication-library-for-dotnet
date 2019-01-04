@@ -125,7 +125,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Condition="'$(Configuration)' == 'Telemetry'" Include="..\..\..\Telemetry\Telemetry.csproj">
+    <ProjectReference Condition="'$(Configuration)' == 'Telemetry'" Include="..\Telemetry\Telemetry.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>Telemetry</Name>
     </ProjectReference>
