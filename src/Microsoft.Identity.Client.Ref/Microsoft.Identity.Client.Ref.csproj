@@ -6,6 +6,7 @@
   See https://oren.codes/2018/07/09/create-and-pack-reference-assemblies-made-easy/ for details-->
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
 
   <Import Project="../MSAL.Common.props" />

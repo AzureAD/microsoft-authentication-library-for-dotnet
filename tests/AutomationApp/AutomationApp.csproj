@@ -39,6 +39,16 @@
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Telemetry|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Telemetry\</OutputPath>
+    <DefineConstants>TELEMETRY;DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -97,7 +107,7 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Telemetry\Telemetry.csproj">
+    <ProjectReference Condition="'$(Configuration)' == 'Telemetry'" Include="..\..\Telemetry\Telemetry.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>Telemetry</Name>
     </ProjectReference>
@@ -127,6 +137,9 @@
       <Version>2.6.2</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http">
+      <Version>4.3.4</Version>
     </PackageReference>
     <PackageReference Include="Text.Analyzers">
       <Version>2.6.2</Version>

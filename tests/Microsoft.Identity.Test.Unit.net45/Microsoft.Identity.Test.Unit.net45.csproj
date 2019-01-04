@@ -7,6 +7,7 @@
     <AssemblyName>Microsoft.Identity.Test.Unit.net45</AssemblyName>
     <RootNamespace>Microsoft.Identity.Test.Unit</RootNamespace>
     <SignAssembly>true</SignAssembly>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

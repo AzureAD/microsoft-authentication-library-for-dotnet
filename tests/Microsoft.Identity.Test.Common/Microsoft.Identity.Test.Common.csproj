@@ -3,6 +3,7 @@
     <TargetFramework>netstandard1.3</TargetFramework>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Identity.Test.Common</AssemblyName>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />

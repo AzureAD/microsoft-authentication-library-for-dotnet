@@ -7,6 +7,7 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP_RUNTIME</DefineConstants>

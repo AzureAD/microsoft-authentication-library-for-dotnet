@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net462</TargetFramework>
     <IsPackable>false</IsPackable>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

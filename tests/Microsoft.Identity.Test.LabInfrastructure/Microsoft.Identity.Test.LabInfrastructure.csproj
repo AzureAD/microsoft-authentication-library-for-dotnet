@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.5</TargetFramework>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

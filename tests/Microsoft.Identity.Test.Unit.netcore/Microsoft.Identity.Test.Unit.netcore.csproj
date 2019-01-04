@@ -4,6 +4,7 @@
     <DefineConstants>$(DefineConstants);NET_CORE</DefineConstants>
     <IsPackable>false</IsPackable>
     <SignAssembly>true</SignAssembly>
+    <Configurations>Debug;Release;Telemetry</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

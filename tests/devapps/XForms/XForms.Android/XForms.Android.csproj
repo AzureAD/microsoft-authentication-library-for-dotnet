@@ -56,6 +56,27 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Appveyor|AnyCPU'">
     <OutputPath>bin\Appveyor\</OutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Telemetry|AnyCPU' ">
+    <OutputPath>bin\Telemetry\</OutputPath>
+    <DefineConstants>TELEMETRY;TRACE</DefineConstants>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>TELEMETRY;TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidUseSharedRuntime>True</AndroidUseSharedRuntime>
+    <AndroidLinkMode>None</AndroidLinkMode>
+    <AndroidSupportedAbis>armeabi;armeabi-v7a;x86</AndroidSupportedAbis>
+    <EmbedAssembliesIntoApk>False</EmbedAssembliesIntoApk>
+    <BundleAssemblies>False</BundleAssemblies>
+    <AndroidCreatePackagePerAbi>False</AndroidCreatePackagePerAbi>
+    <Debugger>.Net (Xamarin)</Debugger>
+    <AotAssemblies>False</AotAssemblies>
+    <EnableLLVM>False</EnableLLVM>
+    <AndroidEnableMultiDex>False</AndroidEnableMultiDex>
+    <EnableProguard>False</EnableProguard>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
@@ -109,7 +130,7 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\Telemetry\Telemetry.csproj">
+    <ProjectReference Condition="'$(Configuration)' == 'Telemetry'" Include="..\..\..\..\Telemetry\Telemetry.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>Telemetry</Name>
     </ProjectReference>
