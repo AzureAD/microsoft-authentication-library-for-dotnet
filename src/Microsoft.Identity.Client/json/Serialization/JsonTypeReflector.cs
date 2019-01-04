@@ -515,7 +515,7 @@ namespace Microsoft.Identity.Json.Serialization
         {
             get
             {
-#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS)
+#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC)
                 if (DynamicCodeGeneration)
                 {
                     return DynamicReflectionDelegateFactory.Instance;
