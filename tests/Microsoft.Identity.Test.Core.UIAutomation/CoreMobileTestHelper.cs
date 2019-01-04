@@ -39,12 +39,12 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenId);
 
             //i0116 = UPN text field on AAD sign in endpoint
-            controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(CoreUiTestConstants.WebUpnInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
             //idSIButton9 = Sign in button
-            controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
             //i0118 = password text field
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public static void PerformSignInFlowWithoutUI(ITestController controller)
         {
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenId);
         }
 
         public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             RetryVerificationHelper(() =>
             {
                 //Test results are put into a label that is checked for messages
-                var result = controller.GetText(CoreUiTestConstants.TestResultID);
+                var result = controller.GetText(CoreUiTestConstants.TestResultId);
                 if (result.Contains(CoreUiTestConstants.TestResultSuccessfulMessage))
                 {
                     return;
