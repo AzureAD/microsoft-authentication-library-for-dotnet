@@ -25,67 +25,44 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Cache;
-
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Notification for certain token cache interactions during token acquisition. This delegate is
-    /// used in particular to provide a custom token cache serialization
+    ///     Options object with string values loadable from JSON configuration (as in an asp.net configuration scenario)
     /// </summary>
-    /// <param name="args">Arguments related to the cache item impacted</param>
-    public delegate void TokenCacheCallback(TokenCacheNotificationArgs args);
-
-    /// <summary>
-    /// This is the interface that implements the public access to cache operations.
-    /// With CacheV2, this should only be necessary if the caller is persisting
-    /// the cache in their own store, since this will provide the serialize/deserialize
-    /// and before/after notifications used in that scenario.
-    /// </summary>
-    public interface ITokenCache
+    public abstract class ApplicationOptions
     {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="beforeAccess"></param>
-        void SetBeforeAccess(TokenCacheCallback beforeAccess);
+        public string ClientId { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="afterAccess"></param>
-        void SetAfterAccess(TokenCacheCallback afterAccess);
+        public string Tenant { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="beforeWrite"></param>
-        void SetBeforeWrite(TokenCacheCallback beforeWrite);
+        public string RedirectUri { get; set; }
 
         /// <summary>
-        /// Unified Only
         /// </summary>
-        /// <returns></returns>
-        byte[] Serialize();
+        public LogLevel LogLevel { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="unifiedState"></param>
-        void Deserialize(byte[] unifiedState);
+        public bool EnablePiiLogging { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <returns></returns>
-        CacheData SerializeUnifiedAndAdalCache();
+        public bool IsDefaultPlatformLoggingEnabled { get; set; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="cacheData"></param>
-        void DeserializeUnifiedAndAdalCache(CacheData cacheData);
-#endif
+        public string SliceParameters { get; set; }
+
+        /// <summary>
+        ///     TODO: do we have a better / more descriptive name for this?
+        /// </summary>
+        public string Component { get; set; }
     }
 }
