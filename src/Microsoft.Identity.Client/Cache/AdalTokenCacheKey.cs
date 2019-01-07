@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Cache
     internal sealed class AdalTokenCacheKey
     {
         internal AdalTokenCacheKey(string authority, string resource, string clientId, TokenSubjectType tokenSubjectType, AdalUserInfo adalUserInfo)
-            : this(authority, resource, clientId, tokenSubjectType, (adalUserInfo != null) ? adalUserInfo.UniqueId : null, (adalUserInfo != null) ? adalUserInfo.DisplayableId : null)
+            : this(authority, resource, clientId, tokenSubjectType, adalUserInfo?.UniqueId, adalUserInfo?.DisplayableId)
         {
         }
 
@@ -138,17 +138,17 @@ namespace Microsoft.Identity.Client.Cache
 
         internal bool ResourceEquals(string otherResource)
         {
-            return (string.Compare(otherResource, this.Resource, StringComparison.OrdinalIgnoreCase) == 0);
+            return string.Compare(otherResource, Resource, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         internal bool ClientIdEquals(string otherClientId)
         {
-            return (string.Compare(otherClientId, this.ClientId, StringComparison.OrdinalIgnoreCase) == 0);
+            return string.Compare(otherClientId, ClientId, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         internal bool DisplayableIdEquals(string otherDisplayableId)
         {
-            return (string.Compare(otherDisplayableId, this.DisplayableId, StringComparison.OrdinalIgnoreCase) == 0);
+            return string.Compare(otherDisplayableId, DisplayableId, StringComparison.OrdinalIgnoreCase) == 0;
         }
 
         private string DebuggerDisplay =>

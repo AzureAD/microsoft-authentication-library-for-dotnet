@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Json.Utilities
     }
 #endif
 
-#if (PORTABLE && !ANDROID && !NET_CORE && !WINDOWS_APP)
+#if PORTABLE && !ANDROID && !NET_CORE && !WINDOWS_APP
     [Flags]
     internal enum BindingFlags
     {
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Json.Utilities
             if (binder != null)
             {
                 binder.BindToName(t, out string assemblyName, out string typeName);
-#if (NET20 || NET35)
+#if NET20 || NET35
                 // for older SerializationBinder implementations that didn't have BindToName
                 if (assemblyName == null & typeName == null)
                 {
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return true;
             }
 
-            return (GetDefaultConstructor(t, nonPublic) != null);
+            return GetDefaultConstructor(t, nonPublic) != null;
         }
 
         public static ConstructorInfo GetDefaultConstructor(Type t)
@@ -265,12 +265,12 @@ namespace Microsoft.Identity.Json.Utilities
         {
             ValidationUtils.ArgumentNotNull(t, nameof(t));
 
-            return (t.IsGenericType() && t.GetGenericTypeDefinition() == typeof(Nullable<>));
+            return t.IsGenericType() && t.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
         public static Type EnsureNotNullableType(Type t)
         {
-            return (IsNullableType(t))
+            return IsNullableType(t)
                 ? Nullable.GetUnderlyingType(t)
                 : t;
         }
@@ -290,7 +290,7 @@ namespace Microsoft.Identity.Json.Utilities
             }
 
             Type t = type.GetGenericTypeDefinition();
-            return (t == genericInterfaceDefinition);
+            return t == genericInterfaceDefinition;
         }
 
         public static bool ImplementsGenericDefinition(Type type, Type genericInterfaceDefinition)
@@ -497,7 +497,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             ValidationUtils.ArgumentNotNull(property, nameof(property));
 
-            return (property.GetIndexParameters().Length > 0);
+            return property.GetIndexParameters().Length > 0;
         }
 
         /// <summary>
@@ -588,7 +588,7 @@ namespace Microsoft.Identity.Json.Utilities
                     {
                         return true;
                     }
-                    return (propertyInfo.GetGetMethod(nonPublic) != null);
+                    return propertyInfo.GetGetMethod(nonPublic) != null;
                 default:
                     return false;
             }
@@ -638,7 +638,7 @@ namespace Microsoft.Identity.Json.Utilities
                     {
                         return true;
                     }
-                    return (propertyInfo.GetSetMethod(nonPublic) != null);
+                    return propertyInfo.GetSetMethod(nonPublic) != null;
                 default:
                     return false;
             }
@@ -774,7 +774,7 @@ namespace Microsoft.Identity.Json.Utilities
                     object[] array = attributeType != null ? t.GetCustomAttributes(attributeType, inherit) : t.GetCustomAttributes(inherit);
                     Attribute[] attributes = array.Cast<Attribute>().ToArray();
 
-#if (NET20 || NET35)
+#if NET20 || NET35
                     // ye olde .NET GetCustomAttributes doesn't respect the inherit argument
                     if (inherit && t.BaseType != null)
                     {

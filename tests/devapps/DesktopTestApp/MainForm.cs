@@ -55,7 +55,9 @@ namespace DesktopTestApp
         private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
-        
+
+        private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
+
         public MainForm()
         {
             InitializeComponent();
@@ -273,7 +275,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(SplitScopeString(scopes.Text)).ConfigureAwait(true);
+                        await _publicClientHandler.AcquireTokenSilentAsync(SplitScopeString(scopes.Text), IsForceRefreshEnabled).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                 }
@@ -586,7 +588,7 @@ namespace DesktopTestApp
                 try
                 {
                     AuthenticationResult authenticationResult =
-                        await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes).ConfigureAwait(true);
+                        await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes, IsForceRefreshEnabled).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                 }

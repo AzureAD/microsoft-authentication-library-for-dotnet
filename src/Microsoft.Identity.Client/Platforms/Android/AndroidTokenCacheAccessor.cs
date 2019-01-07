@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             DeleteAll(_accessTokenSharedPreference);
             DeleteAll(_refreshTokenSharedPreference);
             DeleteAll(_idTokenSharedPreference);
-            DeleteAll(_accessTokenSharedPreference);
+            DeleteAll(_accountSharedPreference);
         }
 
         public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
