@@ -43,8 +43,8 @@ namespace Microsoft.Identity.Client.Platforms.Mac
     internal class AuthenticationAgentNSWindowController
         : NSWindowController, IWebPolicyDelegate, IWebFrameLoadDelegate, INSWindowDelegate
     {
-        const int DEFAULT_WINDOW_WIDTH = 420;
-        const int DEFAULT_WINDOW_HEIGHT = 650;
+        private const int DEFAULT_WINDOW_WIDTH = 420;
+        private const int DEFAULT_WINDOW_HEIGHT = 650;
 
         private WebView _webView;
         private NSProgressIndicator _progressIndicator;
@@ -136,11 +136,11 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             // Calculate the center of the current main window so we can position our window in the center of it
             CGRect centerRect = CenterRect(windowRect, new CGRect(0, 0, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT));
 
-            var window = new NSWindow(centerRect, NSWindowStyle.Titled | NSWindowStyle.Closable | NSWindowStyle.Resizable, NSBackingStore.Buffered, true)
+            var window = new NSWindow(centerRect, NSWindowStyle.Titled | NSWindowStyle.Closable, NSBackingStore.Buffered, true)
             {
-                BackgroundColor = NSColor.Red,
+                BackgroundColor = NSColor.WindowBackground,
                 WeakDelegate = this,
-                AccessibilityIdentifier = "MSAL_SIGN_IN_WINDOW"
+                AccessibilityIdentifier = "SIGN_IN_WINDOW"
             };
 
             var contentView = window.ContentView;
@@ -151,11 +151,13 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 FrameLoadDelegate = this,
                 PolicyDelegate = this,
                 AutoresizingMask = NSViewResizingMask.HeightSizable | NSViewResizingMask.WidthSizable,
-                AccessibilityIdentifier = "MSAL_SIGN_IN_WEBVIEW"
+                AccessibilityIdentifier = "SIGN_IN_WEBVIEW"
             };
 
             contentView.AddSubview(_webView);
 
+            // On macOS there's a noticeable lag between the window showing and the page loading, so starting with the spinner
+            // at least make it looks like something is happening.
             _progressIndicator = new NSProgressIndicator(new CGRect(DEFAULT_WINDOW_WIDTH / 2 - 16, DEFAULT_WINDOW_HEIGHT / 2 - 16, 32, 32))
             {
                 Style = NSProgressIndicatorStyle.Spinning,
@@ -163,8 +165,6 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 AutoresizingMask = NSViewResizingMask.MinXMargin | NSViewResizingMask.MaxXMargin | NSViewResizingMask.MinYMargin | NSViewResizingMask.MaxYMargin
             };
 
-            // On OS X there's a noticable lag between the window showing and the page loading, so starting with the spinner
-            // at least make it looks like something is happening.
             _progressIndicator.Hidden = false;
             _progressIndicator.StartAnimation(null);
 

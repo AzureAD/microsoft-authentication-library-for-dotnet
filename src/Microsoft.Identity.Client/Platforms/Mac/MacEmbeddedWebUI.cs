@@ -32,14 +32,15 @@ using Microsoft.Identity.Client.UI;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AppKit;
+using Foundation;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
     internal class MacEmbeddedWebUI : IWebUI
-    {
-        // only one request at a time
-        private static SemaphoreSlim _returnedUriReady;
-        private static AuthorizationResult _authorizationResult;
+    {        
+        private SemaphoreSlim _returnedUriReady;
+        private AuthorizationResult _authorizationResult;
 
         public CoreUIParent CoreUIParent { get; set; }
         public RequestContext RequestContext { get; set; }
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return _authorizationResult;
         }
 
-        private static void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
+        private void SetAuthorizationResult(AuthorizationResult authorizationResultInput)
         {
             _authorizationResult = authorizationResultInput;
             _returnedUriReady.Release();
@@ -66,12 +67,19 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         {
             try
             {
-                var windowController = new AuthenticationAgentNSWindowController(
-                    authorizationUri.AbsoluteUri, 
-                    redirectUri.OriginalString, 
-                    CallbackMethod);
-
-                windowController.Run(CoreUIParent.CallerWindow);
+                // Ensure we create the NSViewController on the main thread.
+                // Consumers of our library must ensure they do not block the main thread
+                // or else they will cause a deadlock.
+                // For example calling `AcquireTokenAsync(...).Result` from the main thread
+                // would result in this delegate never executing.
+                NSRunLoop.Main.BeginInvokeOnMainThread(() =>
+                {
+                    var windowController = new AuthenticationAgentNSWindowController(
+                        authorizationUri.AbsoluteUri, 
+                        redirectUri.OriginalString, 
+                        SetAuthorizationResult);
+                    windowController.Run(CoreUIParent.CallerWindow);
+                });
             }
             catch (Exception ex)
             {
@@ -80,12 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                     "See inner exception for details",
                     ex);
             }
-        }
-
-        private void CallbackMethod(AuthorizationResult result)
-        {
-            SetAuthorizationResult(result);
-        }
+        }       
 
         public void ValidateRedirectUri(Uri redirectUri)
         {
