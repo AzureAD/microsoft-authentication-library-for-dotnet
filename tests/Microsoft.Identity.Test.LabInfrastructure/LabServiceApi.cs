@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
     /// </summary>
     public class LabServiceApi : ILabService
     {
-        readonly KeyVaultSecretsProvider _keyVault;
+        private readonly KeyVaultSecretsProvider _keyVault;
 
         public LabServiceApi(KeyVaultSecretsProvider keyVault)
         {
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private LabResponse GetLabResponseFromAPI(UserQueryParameters query)
         {
-            HttpClient webClient = new HttpClient();
+            var webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>
             {
                 // Disabled for now until there are tests that use it.

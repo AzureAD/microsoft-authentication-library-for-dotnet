@@ -221,8 +221,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateTooManyRequestsNonJsonResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429);
-            httpResponse.Content = new StringContent(TooManyRequestsContent);
+            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429)
+            {
+                Content = new StringContent(TooManyRequestsContent)
+            };
             httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(TestRetryAfterDuration);
 
             return httpResponse;
@@ -230,12 +232,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateTooManyRequestsJsonResponse()
         {
-            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429);
-            httpResponse.Content = new StringContent("{\"error\":\"Server overload\",\"error_description\":\"429: " +
+            HttpResponseMessage httpResponse = new HttpResponseMessage((HttpStatusCode)429)
+            {
+                Content = new StringContent("{\"error\":\"Server overload\",\"error_description\":\"429: " +
                 TooManyRequestsContent + "\", " +
                 "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
                 "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
-                "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+                "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}")
+            };
             httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(TestRetryAfterDuration);
 
             return httpResponse;
