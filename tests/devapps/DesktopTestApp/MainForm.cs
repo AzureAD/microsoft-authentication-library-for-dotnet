@@ -32,6 +32,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -246,6 +247,20 @@ namespace DesktopTestApp
                 return securePassword;
             }
             return null;
+        }
+
+        private static X509Certificate2 GetCertificateByThumbprint(string thumbprint)
+        {
+            using (var store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                var certs = store.Certificates.Find(X509FindType.FindByThumbprint, thumbprint, false);
+                if (certs.Count > 0)
+                {
+                    return certs[0];
+                }
+                throw new InvalidOperationException($"Cannot find certificate with thumbprint '{thumbprint}'");
+            }
         }
 
         private async void acquireTokenSilent_Click(object sender, EventArgs e)

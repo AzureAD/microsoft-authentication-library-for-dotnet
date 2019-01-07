@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,13 +42,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
-            bool forceRefresh)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            bool forceRefresh,
+            string userProvidedRefreshToken = "")
+            : base(serviceBundle, authenticationRequestParameters, apiId, userProvidedRefreshToken)
         {
             ForceRefresh = forceRefresh;
+            UserProvidedRefreshToken = userProvidedRefreshToken;
         }
 
         public bool ForceRefresh { get; }
+
+        public string UserProvidedRefreshToken { get; }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -58,49 +63,68 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Token cache is set to null. Silent requests cannot be executed.");
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenItem = null;
-
-            // Look for access token
-            if (!ForceRefresh)
+            if (!String.IsNullOrWhiteSpace(UserProvidedRefreshToken))
             {
-                msalAccessTokenItem =
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
-            }
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose("Exchanging access token...");
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+                var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(UserProvidedRefreshToken), cancellationToken)
+                                            .ConfigureAwait(false);
 
-            if (msalAccessTokenItem != null)
+                if (msalTokenResponse.RefreshToken == null)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.Info(
+                        "Refresh token was missing from the token refresh response");
+                }
+
+                return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            }
+            else
             {
-                var msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
-                    msalAccessTokenItem.GetIdTokenItemKey(),
-                    AuthenticationRequestParameters.RequestContext);
 
-                return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
+                MsalAccessTokenCacheItem msalAccessTokenItem = null;
+
+                // Look for access token
+                if (!ForceRefresh)
+                {
+                    msalAccessTokenItem =
+                        await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                }
+
+                if (msalAccessTokenItem != null)
+                {
+                    var msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
+                        msalAccessTokenItem.GetIdTokenItemKey(),
+                        AuthenticationRequestParameters.RequestContext);
+
+                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
+                }
+
+                var msalRefreshTokenItem =
+                    await TokenCache.FindRefreshTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+
+                if (msalRefreshTokenItem == null)
+                {
+                    AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
+
+                    throw new MsalUiRequiredException(
+                        MsalUiRequiredException.NoTokensFoundError,
+                        "No Refresh Token found in the cache");
+                }
+
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
+                await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+                var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
+                                            .ConfigureAwait(false);
+
+                if (msalTokenResponse.RefreshToken == null)
+                {
+                    msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
+                    AuthenticationRequestParameters.RequestContext.Logger.Info(
+                        "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                }
+
+                return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
             }
-
-            var msalRefreshTokenItem =
-                await TokenCache.FindRefreshTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
-
-            if (msalRefreshTokenItem == null)
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
-
-                throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoTokensFoundError,
-                    "No Refresh Token found in the cache");
-            }
-
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
-            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
-                                        .ConfigureAwait(false);
-
-            if (msalTokenResponse.RefreshToken == null)
-            {
-                msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
-            }
-
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
         private Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)

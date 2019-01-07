@@ -66,14 +66,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected RequestBase(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId)
+            ApiEvent.ApiIds apiId,
+            string userProvidedRefreshToken = "")
         {
             ServiceBundle = serviceBundle;
             TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
             
             AuthenticationRequestParameters = authenticationRequestParameters;
-            if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
+            if ((authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0) && String.IsNullOrWhiteSpace(userProvidedRefreshToken))
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
             }
@@ -219,7 +220,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ClientInfo fromServer = null;
 
-            if (!AuthenticationRequestParameters.IsClientCredentialRequest)
+            if (!AuthenticationRequestParameters.IsClientCredentialRequest && !AuthenticationRequestParameters.ExchangingRefreshToken)
             {
                 //client_info is not returned from client credential flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);

@@ -783,6 +783,26 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public async Task AcquireTokenByRefreshTokenTestAsync()
+        {
+         await RunWithMockHttpAsync(
+                async (httpManager, serviceBundle, receiver) =>
+                {
+                    httpManager.AddInstanceDiscoveryMockHandler();
+                    httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                    httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                    TokenCache userCahce = new TokenCache();
+                    ClientCredential cc = new ClientCredential(MsalTestConstants.ClientSecret);
+                    ConfidentialClientApplication app = new ConfidentialClientApplication(serviceBundle, MsalTestConstants.ClientId, MsalTestConstants.AuthorityCommonTenant, MsalTestConstants.RedirectUri, cc, userCahce, new TokenCache());
+                    await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync("SomeRefreshToken").ConfigureAwait(false);
+
+                    Assert.AreEqual(userCahce.TokenCacheAccessor.RefreshTokenCount, 1);
+                }).ConfigureAwait(false);
+        }
+
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)
         {
             args.TokenCache.Deserialize(_serializedCache);

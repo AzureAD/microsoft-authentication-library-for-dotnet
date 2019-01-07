@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel 
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
-    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
+    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate, IByRefreshToken
     {
         static ConfidentialClientApplication()
         {
@@ -387,6 +387,19 @@ namespace Microsoft.Identity.Client
                 null);
 
             return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// This method should be used when you have a solution using ADAL 2.x and 
+        /// caching a refresh token, and you want to migrate to MSAL.NET.
+        /// During the migration process, it enables you to store in MSAL.NET token
+        ///  cache an access token and refresh token corresponding to <paramref="refreshToken"/>.
+        /// From there you will be able to use MSAL.NET new API, in particular
+        /// AcquireTokenSilentAsync() which will renew the user token.  
+        /// </summary>
+        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(string refreshToken)
+        {
+            return await ExchangeRefreshTokenAsync(refreshToken).ConfigureAwait(false);
         }
 
         internal ClientCredential ClientCredential { get; }

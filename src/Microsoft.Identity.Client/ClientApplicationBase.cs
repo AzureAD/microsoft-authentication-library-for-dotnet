@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId)
+            IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId, string userProvidedRefreshToken = "")
         {
             if (account == null)
             {
@@ -331,7 +331,35 @@ namespace Microsoft.Identity.Client
                 ServiceBundle,
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 apiId,
-                forceRefresh);
+                forceRefresh,
+                userProvidedRefreshToken);
+
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        internal async Task<AuthenticationResult> ExchangeRefreshTokenAsync(string userProvidedRefreshToken)
+        {
+            var reqParams = new AuthenticationRequestParameters
+            {
+                SliceParameters = SliceParameters,
+                Authority = Instance.Authority.CreateAuthority(ServiceBundle, this.Authority, false),
+                ClientId = ClientId,
+                TokenCache = UserTokenCache,
+                //Account = account,
+                Scope = new SortedSet<string>(),
+                RedirectUri = new Uri(RedirectUri),
+                RequestContext = CreateRequestContext(Guid.Empty),
+                ValidateAuthority = ValidateAuthority,
+                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
+                ExchangingRefreshToken = true
+            };
+
+            var handler = new SilentRequest(
+                ServiceBundle,
+                reqParams,
+                ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority,
+                false,
+                userProvidedRefreshToken);
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
