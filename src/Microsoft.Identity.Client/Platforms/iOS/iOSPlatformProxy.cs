@@ -49,16 +49,16 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
-        ///     Get the user logged
+        /// Get the user logged
         /// </summary>
-        public async Task<string> GetUserPrincipalNameAsync()
+        public Task<string> GetUserPrincipalNameAsync()
         {
-            return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
+            return Task.FromResult(string.Empty);
         }
 
-        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
+            return Task.FromResult(false);
         }
 
         public bool IsDomainJoined()

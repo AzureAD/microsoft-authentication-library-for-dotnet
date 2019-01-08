@@ -26,7 +26,7 @@
 //------------------------------------------------------------------------------
 
 
-namespace Microsoft.Identity.Client.Platforms.iOSMacShared
+namespace Microsoft.Identity.Client.Platforms.AppleShared
 {
     internal static class BrokerConstants
     {

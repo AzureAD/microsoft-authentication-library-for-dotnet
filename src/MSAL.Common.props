@@ -159,7 +159,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkIos)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\iOS\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\iOSMacShared\**\*.cs" />    
+    <Compile Include="$(PathToMsalSources)\Platforms\AppleShared\**\*.cs" />    
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />
@@ -176,7 +176,7 @@
   </ItemGroup>
    <ItemGroup Condition=" '$(TargetFramework)' == '$(TargetFrameworkMac)' ">
     <Compile Include="$(PathToMsalSources)\Platforms\Mac\**\*.cs" />
-    <Compile Include="$(PathToMsalSources)\Platforms\iOSMacShared\**\*.cs" />         
+    <Compile Include="$(PathToMsalSources)\Platforms\AppleShared\**\*.cs" />         
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IdentityModel" />

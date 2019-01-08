@@ -29,7 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Platforms.iOSMacShared
+namespace Microsoft.Identity.Client.Platforms.AppleShared
 {
     internal class DeviceAuthHelper
     {
