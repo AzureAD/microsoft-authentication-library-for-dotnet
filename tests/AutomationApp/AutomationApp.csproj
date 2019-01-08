@@ -39,6 +39,10 @@
   <PropertyGroup>
     <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+  <!-- Set this env variable locally to enable Telemetry on developer applications-->
+  <PropertyGroup Condition="'$(TELEMETRY)' != ''">
+    <DefineConstants>TELEMETRY</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -97,7 +101,7 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Telemetry\Telemetry.csproj">
+    <ProjectReference Condition="'$(TELEMETRY)' != ''" Include="..\devapps\Telemetry\Telemetry.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>Telemetry</Name>
     </ProjectReference>

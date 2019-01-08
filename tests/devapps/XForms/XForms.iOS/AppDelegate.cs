@@ -32,7 +32,6 @@ using Foundation;
 using UIKit;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Platforms.iOS;
-using Microsoft.Identity.Client.DevAppsTelemetry;
 
 namespace XForms.iOS
 {
@@ -54,7 +53,10 @@ namespace XForms.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
-            Telemetry.GetInstance().RegisterReceiver(new ClientTelemetryHandler().OnEvents);
+#if TELEMETRY
+            Telemetry.GetInstance().RegisterReceiver(
+                new Microsoft.Identity.Client.DevAppsTelemetry.ClientTelemetryHandler().OnEvents);
+#endif
 
             // Default system browser
             App.UIParent = new UIParent();

@@ -1,5 +1,4 @@
 ﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.DevAppsTelemetry;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +35,10 @@ namespace UWP
 
             _pca = new PublicClientApplication(ClientID, Authority);
 
-            Telemetry.GetInstance().RegisterReceiver(new ServerTelemetryHandler().OnEvents);
+#if TELEMETRY
+            Telemetry.GetInstance().RegisterReceiver(
+                new Microsoft.Identity.Client.DevAppsTelemetry.ServerTelemetryHandler().OnEvents);
+#endif
         }
 
 

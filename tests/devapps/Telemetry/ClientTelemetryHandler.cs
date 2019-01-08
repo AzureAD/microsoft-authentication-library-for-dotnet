@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#if TELEMETRY
 extern alias Client;
 
 using System;
@@ -36,9 +37,9 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
     public class ClientTelemetryHandler
     {
         private ILogger logger;
-        private string msalEventNameKey;
-        private string ariaTenantId;
-        private Guid sessionId;
+        private readonly string msalEventNameKey;
+        private readonly string ariaTenantId;
+        private readonly Guid sessionId;
 
         public ClientTelemetryHandler()
         {
@@ -72,8 +73,11 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             foreach (var e in events)
             {
                 Console.WriteLine("Event: {0}", e[msalEventNameKey]);
-                EventProperties eventData = new EventProperties();
-                eventData.Name = e[msalEventNameKey];
+                EventProperties eventData = new EventProperties
+                {
+                    Name = e[msalEventNameKey]
+                };
+
                 eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, sessionId);
                 eventData.SetProperty(TelemetryHandlerConstants.MsalScenarioIdKey, scenarioId);
                 foreach (var entry in e)
@@ -108,4 +112,4 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
         };
     }
 }
-
+#endif

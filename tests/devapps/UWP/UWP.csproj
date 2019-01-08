@@ -116,6 +116,10 @@
   <PropertyGroup>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
+  <!-- Set this env variable locally to enable Telemetry on developer applications-->
+  <PropertyGroup Condition="'$(TELEMETRY)' != ''">
+    <DefineConstants>TELEMETRY</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -159,7 +163,7 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.1.9</Version>
     </PackageReference>
-    <ProjectReference Include="..\..\..\Telemetry\Telemetry.csproj">
+    <ProjectReference Condition="'$(TELEMETRY)' != ''" Include="..\Telemetry\Telemetry.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>Telemetry</Name>
     </ProjectReference>

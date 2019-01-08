@@ -31,7 +31,6 @@ using Android.OS;
 using Android.Content;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Platforms.Android;
-using Microsoft.Identity.Client.DevAppsTelemetry;
 
 namespace XForms.Droid
 {
@@ -49,7 +48,10 @@ namespace XForms.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
 
-            Telemetry.GetInstance().RegisterReceiver(new ClientTelemetryHandler().OnEvents);
+#if TELEMETRY
+            Telemetry.GetInstance().RegisterReceiver(
+                new Microsoft.Identity.Client.DevAppsTelemetry.ClientTelemetryHandler().OnEvents);
+#endif
 
             // To activate system webview, remove '//' from line 51 below, and comment out line 57 ;
             //App.UIParent = new UIParent(this);

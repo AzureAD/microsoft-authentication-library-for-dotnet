@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+#if TELEMETRY
 extern alias Server;
 
 using System;
@@ -36,9 +37,9 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
     public class ServerTelemetryHandler 
     {
         private ILogger logger;
-        private string msalEventNameKey;
-        private string ariaTenantId;
-        private Guid sessionId;
+        private readonly string msalEventNameKey;
+        private readonly string ariaTenantId;
+        private readonly Guid sessionId;
 
         public ServerTelemetryHandler()
         {
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             UploadEventsToAria();
         }
 
-        public void SetEventProperties(List<Dictionary<string, string>> events)
+        private void SetEventProperties(List<Dictionary<string, string>> events)
         {
             Guid scenarioId = Guid.NewGuid();
             Console.WriteLine("{0} event(s) received for scenarioId {1}",
@@ -67,8 +68,11 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             foreach (var e in events)
             {
                 Console.WriteLine("Event: {0}", e[msalEventNameKey]);
-                EventProperties eventData = new EventProperties();
-                eventData.Name = e[msalEventNameKey];
+                EventProperties eventData = new EventProperties
+                {
+                    Name = e[msalEventNameKey]
+                };
+
                 eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, sessionId);
                 eventData.SetProperty(TelemetryHandlerConstants.MsalScenarioIdKey, scenarioId);
                 foreach (var entry in e)
@@ -80,10 +84,11 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             }
         }
 
-        public void UploadEventsToAria()
+        private void UploadEventsToAria()
         {
             LogManager.UploadNow();
             LogManagerProvider.DestroyLogManager(ariaTenantId);
         }
     }
 }
+#endif

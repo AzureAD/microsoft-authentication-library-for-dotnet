@@ -10,12 +10,17 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
+  <!-- Set this env variable locally to enable Telemetry on developer applications-->
+  <PropertyGroup Condition="'$(TELEMETRY)' != ''">
+    <DefineConstants>TELEMETRY</DefineConstants>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
-    <ProjectReference Include="..\..\..\Telemetry\Telemetry.csproj" />
+    <ProjectReference Condition="'$(TELEMETRY)' != ''" Include="..\..\..\Telemetry\Telemetry.csproj" />
   </ItemGroup>
 </Project>
