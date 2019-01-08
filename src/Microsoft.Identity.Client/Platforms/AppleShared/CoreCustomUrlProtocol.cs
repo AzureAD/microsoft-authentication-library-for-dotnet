@@ -33,7 +33,7 @@ using Foundation;
 using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
 #endif
 
-namespace Microsoft.Identity.Client.Platforms.iOSMacShared
+namespace Microsoft.Identity.Client.Platforms.AppleShared
 {
     internal class CoreCustomUrlProtocol : NSUrlProtocol
     {

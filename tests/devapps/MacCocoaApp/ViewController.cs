@@ -20,18 +20,22 @@ namespace MacCocoaApp
 
         public ViewController(IntPtr handle) : base(handle)
         {
+            ConfigureMsalLogging();
+
             // use a simple file cache (alternatively, use no cache and the app will lose all tokens if restarted)
-            _pca = new PublicClientApplication(ClientId, Authority, UserTokenCache.GetUserTokenCache()); 
+            _pca = new PublicClientApplication(ClientId, Authority, UserTokenCache.GetUserTokenCache());
+        }
 
-
-            Logger.LogCallback = (lvl, msg, pii)=>
+        private static void ConfigureMsalLogging()
+        {
+            Logger.LogCallback = (lvl, msg, pii) =>
             {
                 Console.WriteLine($"MSAL {lvl} {pii} {msg}");
                 Console.ResetColor();
             };
             Logger.Level = LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
-        }             
+        }
 
         public override void ViewDidLoad()
         {
@@ -91,9 +95,9 @@ namespace MacCocoaApp
             }
         }
 
-
-
+#pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void ShowCacheStatusAsync(NSObject sender)
+#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             var existingAccounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
             if (!existingAccounts.Any())
@@ -107,7 +111,9 @@ namespace MacCocoaApp
             }
         }
 
+#pragma warning disable AvoidAsyncVoid // Avoid async void
         async partial void ClearCacheClickAsync(Foundation.NSObject sender)
+#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             var accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
             foreach (var acc in accounts)
@@ -118,7 +124,9 @@ namespace MacCocoaApp
             ShowCacheStatusAsync(sender);
         }
 
-        async partial void GetTokenDeviceCodeAsync(Foundation.NSObject sender)
+#pragma warning disable AvoidAsyncVoid // Avoid async void
+        async partial void GetTokenDeviceCodeAsync(NSObject sender)
+#pragma warning restore AvoidAsyncVoid // Avoid async void
         {
             try
             {
@@ -138,15 +146,12 @@ namespace MacCocoaApp
                 UpdateStatus("Unexpected error: " +
                     e.Message + Environment.NewLine + e.StackTrace);
             }
-
-
         }
 
         private void UpdateStatus(string message)
         {
             NSRunLoop.Main.BeginInvokeOnMainThread(() =>
                     this.OutputLabel.StringValue = message);
-
         }
     }
 }

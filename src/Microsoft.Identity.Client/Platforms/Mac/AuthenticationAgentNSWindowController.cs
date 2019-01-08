@@ -33,7 +33,7 @@ using Foundation;
 using AppKit;
 using WebKit;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Platforms.iOSMacShared;
+using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.Exceptions;
 
@@ -158,7 +158,12 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 
             // On macOS there's a noticeable lag between the window showing and the page loading, so starting with the spinner
             // at least make it looks like something is happening.
-            _progressIndicator = new NSProgressIndicator(new CGRect(DEFAULT_WINDOW_WIDTH / 2 - 16, DEFAULT_WINDOW_HEIGHT / 2 - 16, 32, 32))
+            _progressIndicator = new NSProgressIndicator(
+                new CGRect(
+                    (DEFAULT_WINDOW_WIDTH / 2) - 16, 
+                    (DEFAULT_WINDOW_HEIGHT / 2) - 16, 
+                    32, 
+                    32))
             {
                 Style = NSProgressIndicatorStyle.Spinning,
                 // Keep the item centered in the window even if it's resized.

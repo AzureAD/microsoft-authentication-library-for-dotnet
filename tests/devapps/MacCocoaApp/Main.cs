@@ -2,11 +2,11 @@
 
 namespace MacCocoaApp
 {
-    static class MainClass
+    public static class MainClass
     {
         // Tutorial for Xamarin.Mac, including XCode interface builder: 
         // https://docs.microsoft.com/en-gb/xamarin/mac/get-started/hello-mac
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             NSApplication.Init();
             NSApplication.Main(args);
