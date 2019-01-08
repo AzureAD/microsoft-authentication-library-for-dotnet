@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public iOSTokenCacheAccessor()
         {
             //keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
-            keychainGroup = GetBundleId();
+            keychainGroup = GetTeamId() + '.' + GetBundleId();
             Console.WriteLine(LogFinder + keychainGroup);
 
         }
