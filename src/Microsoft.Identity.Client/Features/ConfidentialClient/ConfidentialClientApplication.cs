@@ -397,9 +397,9 @@ namespace Microsoft.Identity.Client
         /// From there you will be able to use MSAL.NET new API, in particular
         /// AcquireTokenSilentAsync() which will renew the user token.  
         /// </summary>
-        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(string refreshToken)
+        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
-            return await ExchangeRefreshTokenAsync(refreshToken).ConfigureAwait(false);
+            return await ExchangeRefreshTokenAsync(scopes, refreshToken).ConfigureAwait(false);
         }
 
         internal ClientCredential ClientCredential { get; }

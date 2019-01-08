@@ -336,10 +336,18 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> ExchangeRefreshTokenAsync(string userProvidedRefreshToken)
+        internal async Task<AuthenticationResult> ExchangeRefreshTokenAsync(IEnumerable<string> scopes, string userProvidedRefreshToken)
         {
-            var scopes = new SortedSet<string>();
-            scopes.Add(ClientId + "/.default");
+            SortedSet<string> _scopes;
+            if (scopes == null)
+            {
+                _scopes = new SortedSet<string>();
+                _scopes.Add(ClientId + "/.default");
+            }
+            else
+            {
+                _scopes = ScopeHelper.CreateSortedSetFromEnumerable(scopes);
+            }
 
             var reqParams = new AuthenticationRequestParameters
             {
@@ -347,7 +355,7 @@ namespace Microsoft.Identity.Client
                 Authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, false),
                 ClientId = ClientId,
                 TokenCache = UserTokenCache,
-                Scope = scopes,
+                Scope = _scopes,
                 RedirectUri = new Uri(RedirectUri),
                 RequestContext = CreateRequestContext(Guid.Empty),
                 ValidateAuthority = ValidateAuthority,
