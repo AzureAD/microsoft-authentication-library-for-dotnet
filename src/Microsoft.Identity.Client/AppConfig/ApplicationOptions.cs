@@ -37,8 +37,24 @@ namespace Microsoft.Identity.Client.AppConfig
         public string ClientId { get; set; }
 
         /// <summary>
+        /// Can be domain, can be guid tenant, can be meta-tenant (e.g. consumers).
         /// </summary>
-        public string Tenant { get; set; }
+        public string TenantId { get; set; }
+
+        /// <summary>
+        /// Mutually exclusive with TenantId...
+        /// </summary>
+        public AadAuthorityAudience AadAuthorityAudience { get; set; } = AadAuthorityAudience.None;
+
+        /// <summary>
+        /// For compat with AzureAdOptions...
+        /// </summary>
+        public string Instance { get; set; }
+
+        /// <summary>
+        /// Mutually exclusive with Instance, allows users to use the enum instead of the explicit url.
+        /// </summary>
+        public AzureCloudInstance AzureCloudInstance { get; set; } = AzureCloudInstance.None;
 
         /// <summary>
         /// </summary>

@@ -18,7 +18,7 @@
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// AUTHORS OR COPYRIGHT HOLDERS BE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
@@ -60,22 +60,23 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="authority"></param>
-        /// <param name="validateAuthority"></param>
+        /// <param name="tokenCache"></param>
         /// <returns></returns>
-        public static PublicClientApplicationBuilder Create(string clientId, string authority, bool validateAuthority = true)
+        internal PublicClientApplicationBuilder WithUserTokenCache(ITokenCache tokenCache)
         {
-            return Create(clientId).WithAuthority(authority, validateAuthority, true);
+            Config.UserTokenCache = tokenCache;
+            return this;
         }
 
         /// <summary>
+        /// 
         /// </summary>
-        /// <param name="tokenCache"></param>
+        /// <param name="enableBroker"></param>
         /// <returns></returns>
-        public PublicClientApplicationBuilder WithUserTokenCache(ITokenCache tokenCache)
+        public PublicClientApplicationBuilder WithEnableBroker(bool enableBroker)
         {
-            Config.UserTokenCache = tokenCache;
+            // TODO: * This should become public only on mobile platforms that support using a broker
+            Config.IsBrokerEnabled = enableBroker;
             return this;
         }
 
@@ -88,14 +89,11 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        ///     TODO: do we want this public?  I'd prefer to keep it internal and have the interface be our customer boundary.
-        ///     But some of our apps without InternalsVisibleTo talk to PCA for now.  Need to resolve this.
         /// </summary>
         /// <returns></returns>
-        public PublicClientApplication BuildConcrete()
+        internal PublicClientApplication BuildConcrete()
         {
-            throw new NotImplementedException();
-            // return new PublicClientApplication(BuildConfiguration());
+            return new PublicClientApplication(BuildConfiguration());
         }
     }
 }

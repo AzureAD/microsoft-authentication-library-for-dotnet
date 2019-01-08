@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             var config = new ApplicationConfiguration();
             return new ConfidentialClientApplicationBuilder(config)
-                   .WithOptions(options).WithClientCredential(new ClientCredential(options.ClientCredentialSecret));
+                   .WithOptions(options).WithClientSecret(options.ClientCredentialSecret);
         }
 
         /// <summary>
@@ -61,20 +62,6 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             var config = new ApplicationConfiguration();
             return new ConfidentialClientApplicationBuilder(config).WithClientId(clientId);
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="authority"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
-        public static ConfidentialClientApplicationBuilder Create(
-            string clientId,
-            string authority,
-            bool validateAuthority = true)
-        {
-            return Create(clientId).WithAuthority(authority, validateAuthority, true);
         }
 
         /// <summary>
@@ -98,13 +85,49 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// 
         /// </summary>
-        /// <param name="clientCredential"></param>
+        /// <param name="certificate"></param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithClientCredential(ClientCredential clientCredential)
+        public ConfidentialClientApplicationBuilder WithX509Certificate2(X509Certificate2 certificate)
         {
-            Config.ClientCredential = clientCredential;
+            Config.Certificate = certificate;
             return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientSecret"></param>
+        /// <returns></returns>
+        public ConfidentialClientApplicationBuilder WithClientSecret(string clientSecret)
+        {
+            Config.ClientSecret = clientSecret;
+            return this;
+        }
+
+        /// <inheritdoc />
+        internal override ApplicationConfiguration BuildConfiguration()
+        {
+            base.BuildConfiguration();
+
+            if (!string.IsNullOrWhiteSpace(Config.ClientSecret) && Config.Certificate != null)
+            {
+                throw new InvalidOperationException(
+                    "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
+            {
+                Config.ClientCredential = new ClientCredential(Config.ClientSecret);
+            }
+
+            if (Config.Certificate != null)
+            {
+                Config.ClientCredential = new ClientCredential(new ClientAssertionCertificate(Config.Certificate));
+            }
+
+            return Config;
         }
 
         /// <summary>
@@ -116,13 +139,11 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        ///     TODO: this should be internal, but tests are still using this publicly, some of which are not internalsvisible.
         /// </summary>
         /// <returns></returns>
-        public ConfidentialClientApplication BuildConcrete()
+        internal ConfidentialClientApplication BuildConcrete()
         {
-            throw new NotImplementedException();
-            // return new ConfidentialClientApplication(BuildConfiguration());
+            return new ConfidentialClientApplication(BuildConfiguration());
         }
     }
 #endif
