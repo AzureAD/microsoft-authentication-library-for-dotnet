@@ -338,18 +338,20 @@ namespace Microsoft.Identity.Client
 
         internal async Task<AuthenticationResult> ExchangeRefreshTokenAsync(string userProvidedRefreshToken)
         {
+            var scopes = new SortedSet<string>();
+            scopes.Add(ClientId + "/.default");
+
             var reqParams = new AuthenticationRequestParameters
             {
                 SliceParameters = SliceParameters,
                 Authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, false),
                 ClientId = ClientId,
                 TokenCache = UserTokenCache,
-                Scope = new SortedSet<string>(),
+                Scope = scopes,
                 RedirectUri = new Uri(RedirectUri),
                 RequestContext = CreateRequestContext(Guid.Empty),
                 ValidateAuthority = ValidateAuthority,
-                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
-                ExchangingRefreshToken = true
+                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
 
             var handler = new ByRefreshTokenRequest(
