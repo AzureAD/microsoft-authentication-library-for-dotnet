@@ -237,41 +237,146 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// 
         /// </summary>
-        /// <param name="authorityUri"></param>
-        /// <param name="validateAuthority"></param>
+        /// <param name="cloudUrl"></param>
+        /// <param name="tenantId"></param>
         /// <param name="isDefaultAuthority"></param>
         /// <returns></returns>
-        public T WithAadAuthority(string authorityUri, bool validateAuthority, bool isDefaultAuthority)
+        public T WithAadAuthority(
+            string cloudUrl,
+            Guid tenantId,
+            bool isDefaultAuthority)
         {
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority, isDefaultAuthority));
+            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudUrl}/{tenantId:N}/", true, isDefaultAuthority));
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cloudUrl"></param>
+        /// <param name="tenantDomainName"></param>
+        /// <param name="isDefaultAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            string cloudUrl,
+            string tenantDomainName,
+            bool isDefaultAuthority)
+        {
+            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudUrl}/{tenantDomainName}/", true, isDefaultAuthority));
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="azureCloud"></param>
+        /// <param name="tenantId"></param>
+        /// <param name="isDefaultAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            AzureCloud azureCloud,
+            Guid tenantId,
+            bool isDefaultAuthority)
+        {
+            string authorityUri = GetAuthorityUri(azureCloud, AadAuthorityAudience.AzureAdSpecificDirectoryOnly, $"{tenantId:N}");
+            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, true, isDefaultAuthority));
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="azureCloud"></param>
+        /// <param name="tenantDomainName"></param>
+        /// <param name="isDefaultAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            AzureCloud azureCloud,
+            string tenantDomainName,
+            bool isDefaultAuthority)
+        {
+            string authorityUri = GetAuthorityUri(azureCloud, AadAuthorityAudience.AzureAdSpecificDirectoryOnly, tenantDomainName);
+            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, true, isDefaultAuthority));
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="azureCloud"></param>
+        /// <param name="authorityAudience"></param>
+        /// <param name="isDefaultAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(AzureCloud azureCloud, AadAuthorityAudience authorityAudience, bool isDefaultAuthority)
+        {
+            string authorityUri = GetAuthorityUri(azureCloud, authorityAudience);
+            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, true, isDefaultAuthority));
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorityAudience"></param>
+        /// <param name="isDefaultAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool isDefaultAuthority)
+        {
+            string authorityUri = GetAuthorityUri(AzureCloud.AzurePublic, authorityAudience);
+            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, true, isDefaultAuthority));
             return (T)this;
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="authorityAudience"></param>
-        /// <param name="validateAuthority"></param>
+        /// <param name="authorityUri"></param>
         /// <param name="isDefaultAuthority"></param>
         /// <returns></returns>
-        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority, bool isDefaultAuthority)
+        public T WithAadAuthority(string authorityUri, bool isDefaultAuthority)
         {
-            string authorityUri = AuthorityUriFromAadAuthorityAudience(authorityAudience);
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority, isDefaultAuthority));
+            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, true, isDefaultAuthority));
             return (T)this;
         }
 
-        internal static string AuthorityUriFromAadAuthorityAudience(AadAuthorityAudience authorityAudience)
+        internal static string GetCloudUrl(AzureCloud azureCloud)
         {
+            switch (azureCloud)
+            {
+            case AzureCloud.AzurePublic:
+                return "https://login.microsoftonline.com";
+            case AzureCloud.AzureChina:
+                return "https://login.chinacloudapi.cn";
+            case AzureCloud.AzureGermany:
+                return "https://login.microsoftonline.de";
+            default:
+                throw new ArgumentException(nameof(azureCloud));
+            }
+        }
+
+        internal static string GetAuthorityUri(
+            AzureCloud azureCloud,
+            AadAuthorityAudience authorityAudience,
+            string tenantId = null)
+        {
+            string cloudUrl = GetCloudUrl(azureCloud);
+
             switch (authorityAudience)
             {
             case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
-                return "https://login.microsoftonline.com/common/";
+                return $"{cloudUrl}/common/";
             case AadAuthorityAudience.AzureAdOnly:
-                return "https://login.microsoftonline.com/organizations/";
+                return $"{cloudUrl}/organizations/";
             case AadAuthorityAudience.MicrosoftAccountOnly:
-                return "https://login.microsoftonline.com/consumers/";
-            case AadAuthorityAudience.None:
+                return $"{cloudUrl}/consumers/";
+            case AadAuthorityAudience.AzureAdSpecificDirectoryOnly:
+                if (string.IsNullOrWhiteSpace(tenantId))
+                {
+                    throw new ArgumentNullException(nameof(tenantId));
+                }
+
+                return $"{cloudUrl}/{tenantId}";
             default:
                 throw new ArgumentException(nameof(authorityAudience));
             }
@@ -280,12 +385,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// </summary>
         /// <param name="authorityUri"></param>
-        /// <param name="validateAuthority"></param>
         /// <param name="isDefaultAuthority"></param>
         /// <returns></returns>
-        public T WithAdfsAuthority(string authorityUri, bool validateAuthority, bool isDefaultAuthority)
+        public T WithAdfsAuthority(string authorityUri, bool isDefaultAuthority)
         {
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority, isDefaultAuthority));
+            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Adfs, authorityUri, true, isDefaultAuthority));
             return (T)this;
         }
 
