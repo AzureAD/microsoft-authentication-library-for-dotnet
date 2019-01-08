@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         private string keychainGroup;
         private readonly RequestContext _requestContext;
+        string LogFinder = "ADAL DEBUG MESSAGE: ";
 
         private string GetBundleId()
         {
@@ -112,7 +113,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public iOSTokenCacheAccessor()
         {
-            keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
+            //keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
+            keychainGroup = "group.com.xamarin.xtcapp3.group1";
+            Console.WriteLine(LogFinder + keychainGroup);
+
         }
 
         public iOSTokenCacheAccessor(RequestContext requestContext) : this()
@@ -244,7 +248,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 CreatorType = type,
                 AccessGroup = keychainGroup
             };
-
+            Console.WriteLine(LogFinder + keychainGroup + " getValue()");
             var match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
 
             return (resultCode == SecStatusCode.Success)
@@ -259,6 +263,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 CreatorType = type,
                 AccessGroup = keychainGroup
             };
+
+            Console.WriteLine(LogFinder + keychainGroup + " getValues()");
 
             SecRecord[] records = SecKeyChain.QueryAsRecord(queryRecord, Int32.MaxValue, out SecStatusCode resultCode);
 
