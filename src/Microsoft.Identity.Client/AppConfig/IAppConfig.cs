@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// </summary>
-        string Tenant { get; }
+        string TenantId { get; }
 
         /// <summary>
         /// </summary>
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// </summary>
-        ITelemetryHandler TelemetryHandler { get; }
+        TelemetryCallback TelemetryCallback { get; }
 
         /// <summary>
         /// </summary>

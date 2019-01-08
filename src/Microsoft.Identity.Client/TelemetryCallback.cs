@@ -32,12 +32,6 @@ namespace Microsoft.Identity.Client
     /// <summary>
     /// 
     /// </summary>
-    public interface ITelemetryHandler
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="events"></param>
-        void HandleTelemetryEvents(List<Dictionary<string, string>> events);
-    }
+    /// <param name="events"></param>
+    public delegate void TelemetryCallback(List<Dictionary<string, string>> events);
 }

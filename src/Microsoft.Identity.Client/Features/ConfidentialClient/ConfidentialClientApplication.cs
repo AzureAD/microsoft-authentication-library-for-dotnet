@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel 
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
-    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
+    public sealed partial class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
     {
         static ConfidentialClientApplication()
         {

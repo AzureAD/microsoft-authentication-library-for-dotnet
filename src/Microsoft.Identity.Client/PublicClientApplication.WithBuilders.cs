@@ -25,35 +25,15 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+using Microsoft.Identity.Client.AppConfig;
+
+namespace Microsoft.Identity.Client
 {
-    /// <summary>
-    /// </summary>
-    public enum AzureCloudInstance
+    public partial class PublicClientApplication
     {
-        /// <summary>
-        ///     Communicates that the AzureCloudInstance is not specified.
-        /// </summary>
-        None,
-   
-        /// <summary>
-        ///     Maps to https://login.microsoftonline.com
-        /// </summary>
-        AzurePublic,
-
-        /// <summary>
-        ///     Maps to https://login.chinacloudapi.cn
-        /// </summary>
-        AzureChina,
-
-        /// <summary>
-        ///     Maps to https://login.microsoftonline.de
-        /// </summary>
-        AzureGermany,
-
-        /// <summary>
-        ///     Maps to https://login.microsoftonline.us
-        /// </summary>
-        AzureUsGovernment,
-    };
+        internal PublicClientApplication(ApplicationConfiguration configuration)
+            : base(configuration)
+        {
+        }
+    }
 }

@@ -35,14 +35,15 @@ namespace Microsoft.Identity.Client.AppConfig
         public AuthorityInfo(
             AuthorityType authorityType,
             string authority,
-            bool validateAuthority,
             bool isDefault)
         {
             AuthorityType = authorityType;
-            ValidateAuthority = authorityType != AuthorityType.B2C && validateAuthority;
             IsDefault = isDefault;
 
             Host = new UriBuilder(authority).Host;
+
+            // TODO: can we simplify this and/or move validation/configuration logic to AbstractApplicationBuilder
+            // so that all authority mangling/management is in one place?
 
             UserRealmUriPrefix = string.Format(CultureInfo.InvariantCulture, "https://{0}/common/userrealm/", Host);
 
@@ -82,17 +83,16 @@ namespace Microsoft.Identity.Client.AppConfig
         public string Host { get; }
         public string CanonicalAuthority { get; set; }
         public AuthorityType AuthorityType { get; }
-        public bool ValidateAuthority { get; }
         public bool IsDefault { get; }
         public string UserRealmUriPrefix { get; }
 
-        internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority, bool isDefaultAuthority)
+        internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool isDefaultAuthority)
         {
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
             ValidateAuthorityUri(canonicalUri);
 
             var authorityType = Instance.Authority.GetAuthorityType(canonicalUri);
-            return new AuthorityInfo(authorityType, canonicalUri, validateAuthority, isDefaultAuthority);
+            return new AuthorityInfo(authorityType, canonicalUri, isDefaultAuthority);
         }
 
         // TODO: consolidate this with the same method in Authority.cs

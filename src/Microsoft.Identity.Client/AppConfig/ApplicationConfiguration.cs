@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 
@@ -40,26 +41,46 @@ namespace Microsoft.Identity.Client.AppConfig
         {
         }
 
-        public IHttpManager HttpManager { get; set; }
+        public bool IsBrokerEnabled { get; internal set; }
+
+        public IHttpManager HttpManager { get; internal set; }
         public IEnumerable<AuthorityInfo> Authorities => _authorityInfos.AsEnumerable();
         public string ClientId { get; internal set; }
-        public string Tenant { get; internal set; }
+        public string TenantId { get; internal set; }
         public string RedirectUri { get; internal set; } = Constants.DefaultRedirectUri;
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Warning;
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
-        public ClientCredential ClientCredential { get; internal set; }
-#endif
         public ITokenCache AppTokenCache { get; internal set; }
         public ITokenCache UserTokenCache { get; internal set; }
         public string SliceParameters { get; internal set; }
-        public ITelemetryHandler TelemetryHandler { get; internal set; }
+        public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
         public AuthorityInfo DefaultAuthorityInfo => Authorities.Single(x => x.IsDefault);
         public string Component { get; internal set; }
+
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+        public ClientCredential ClientCredential { get; internal set; }
+        public string ClientSecret { get; internal set; }
+        public X509Certificate2 Certificate { get; internal set; }
+#endif
+
+        /// <summary>
+        /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
+        /// </summary>
+        internal AadAuthorityAudience AadAuthorityAudience { get; set; }
+
+        /// <summary>
+        /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
+        /// </summary>
+        internal AzureCloudInstance AzureCloudInstance { get; set; }
+
+        /// <summary>
+        /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
+        /// </summary>
+        internal string Instance { get; set; }
 
         internal void AddAuthorityInfo(AuthorityInfo authorityInfo)
         {
