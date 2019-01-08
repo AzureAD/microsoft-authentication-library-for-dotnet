@@ -1585,13 +1585,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                PublicClientApplication app = new PublicClientApplication(
+                var app = new PublicClientApplication(
                     serviceBundle,
                    CoreTestConstants.ClientId,
-                   CoreTestConstants.B2CLoginAuthority);
-                app.ValidateAuthority = true;
+                   CoreTestConstants.B2CLoginAuthority)
+                {
+                    ValidateAuthority = true
+                };
 
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,
@@ -1619,13 +1621,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                PublicClientApplication app = new PublicClientApplication(
+                var app = new PublicClientApplication(
                   serviceBundle,
                   CoreTestConstants.ClientId,
-                  CoreTestConstants.B2CRandomHost);
-                app.ValidateAuthority = true;
+                  CoreTestConstants.B2CRandomHost)
+                {
+                    ValidateAuthority = true
+                };
 
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,

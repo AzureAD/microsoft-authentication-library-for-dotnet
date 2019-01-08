@@ -39,9 +39,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             AuthorizationResult result;
 
-            using (dialog = new WindowsFormsWebAuthenticationDialog(this.OwnerWindow) {RequestContext = this.RequestContext})
+            using (dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) {RequestContext = RequestContext})
             {
-                result = dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
+                result = dialog.AuthenticateAAD(RequestUri, CallbackUri);
             }
 
             return result;
