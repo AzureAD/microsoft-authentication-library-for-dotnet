@@ -3,18 +3,13 @@
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>C:\DA\azure-activedirectory-library-for-dotnet\build\MSAL.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TELEMETRY)' != ''">
     <DefineConstants>TELEMETRY</DefineConstants>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\build\MSAL.snk" Link="MSAL.snk" />
-  </ItemGroup>
-
-  
+ 
   <ItemGroup>
     <PackageReference Condition="'$(TELEMETRY)' != ''" Include="Microsoft.Applications.Events.Client" Version="0.13.1" />
     <PackageReference Condition="'$(TELEMETRY)' != ''" Include="Microsoft.Applications.Events.Server" Version="0.13.1" />
