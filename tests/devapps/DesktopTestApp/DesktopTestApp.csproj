@@ -37,7 +37,7 @@
   </PropertyGroup>
   <!-- Set this env variable locally to enable Telemetry on developer applications-->
   <PropertyGroup Condition="'$(TELEMETRY)' != ''">
-    <DefineConstants>TELEMETRY</DefineConstants>
+    <DefineConstants>$(DefineConstants);TELEMETRY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
