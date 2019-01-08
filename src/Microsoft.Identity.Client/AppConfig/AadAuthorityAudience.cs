@@ -58,17 +58,22 @@ namespace Microsoft.Identity.Client.AppConfig
         Default,
 
         /// <summary>
-        ///     Maps to https://login.microsoftonline.com/common/
+        /// Maps to https://[instance]/[tenantId]
+        /// </summary>
+        AzureAdSpecificDirectoryOnly,
+
+        /// <summary>
+        ///     Maps to https://[instance]/common/
         /// </summary>
         AzureAdAndPersonalMicrosoftAccount,
 
         /// <summary>
-        ///     Maps to https://login.microsoftonline.com/organizations/
+        ///     Maps to https://[instance]/organizations/
         /// </summary>
         AzureAdOnly,
 
         /// <summary>
-        ///     Maps to https://login.microsoftonline.com/consumers/
+        ///     Maps to https://[instance]/consumers/
         /// </summary>
         MicrosoftAccountOnly
     }
