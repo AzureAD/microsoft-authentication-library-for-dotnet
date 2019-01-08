@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Json.Utilities
                 return (char)(n + 48);
             }
 
-            return (char)(n - 10 + 97);
+            return (char)((n - 10) + 97);
         }
 
         public static int? Min(int? val1, int? val2)
@@ -178,10 +178,10 @@ namespace Microsoft.Identity.Json.Utilities
                 return true;
             }
 
-            double tolerance = (Math.Abs(d1) + Math.Abs(d2) + 10.0) * epsilon;
+            double tolerance = ((Math.Abs(d1) + Math.Abs(d2)) + 10.0) * epsilon;
             double difference = d1 - d2;
 
-            return -tolerance < difference && tolerance > difference;
+            return (-tolerance < difference && tolerance > difference);
         }
     }
 }

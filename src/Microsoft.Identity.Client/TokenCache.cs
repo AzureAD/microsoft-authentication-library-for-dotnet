@@ -822,7 +822,7 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
+                Dictionary<String, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
                 List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
 
                 foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)

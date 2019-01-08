@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
                 // If we don't have an owner we need to make sure that the pop up browser 
                 // window is in the task bar so that it can be selected with the mouse.
-                ShowInTaskbar = null == ownerWindow;
+                ShowInTaskbar = (null == ownerWindow);
 
                 _webBrowserPanel.ResumeLayout(false);
                 ResumeLayout(false);

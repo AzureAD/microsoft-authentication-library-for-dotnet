@@ -16,10 +16,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestMethod]
         public void CanDeserializeTokenCache()
         {
-            TokenCache tokenCache = new TokenCache
-            {
-                AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
-            };
+            TokenCache tokenCache = new TokenCache();
+            tokenCache.AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); };
 
             tokenCache.Deserialize(null);
 #pragma warning disable CS0618 // Type or member is obsolete

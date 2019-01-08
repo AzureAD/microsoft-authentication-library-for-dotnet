@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Json.Converters
 
         private bool HasFlag(RegexOptions options, RegexOptions flag)
         {
-            return (options & flag) == flag;
+            return ((options & flag) == flag);
         }
 
 #pragma warning disable 618
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Json.Converters
         [MethodImpl(MethodImplOptions.NoInlining)]
         private bool IsRegex(Type objectType)
         {
-            return objectType == typeof(Regex);
+            return (objectType == typeof(Regex));
         }
     }
 }

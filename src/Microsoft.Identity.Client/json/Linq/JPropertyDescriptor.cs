@@ -112,8 +112,8 @@ namespace Microsoft.Identity.Json.Linq
         /// </summary>
         /// <returns>
         /// A <see cref="Type"/> that represents the type of component this property is bound to.
-        /// When the <see cref="PropertyDescriptor.GetValue(object)"/> or
-        /// <see cref="PropertyDescriptor.SetValue(object, object)"/>
+        /// When the <see cref="PropertyDescriptor.GetValue(Object)"/> or
+        /// <see cref="PropertyDescriptor.SetValue(Object, Object)"/>
         /// methods are invoked, the object specified might be an instance of this type.
         /// </returns>
         public override Type ComponentType => typeof(JObject);

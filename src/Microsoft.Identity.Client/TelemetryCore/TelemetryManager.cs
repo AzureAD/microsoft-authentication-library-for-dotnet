@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             {
                 lock (_lockObj)
                 {
-                    return _telemetryReceiver ?? Telemetry.GetInstance();
+                    return _telemetryReceiver;
                 }
             }
             set
@@ -113,8 +113,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             lock (_lockObj)
             {
-                return _telemetryReceiver != null ||
-                    Telemetry.GetInstance().HasRegisteredReceiver();
+                return _telemetryReceiver != null;
             }
         }
 

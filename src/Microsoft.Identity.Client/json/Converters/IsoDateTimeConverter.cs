@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Json.Converters
         public string DateTimeFormat
         {
             get => _dateTimeFormat ?? string.Empty;
-            set => _dateTimeFormat = string.IsNullOrEmpty(value) ? null : value;
+            set => _dateTimeFormat = (string.IsNullOrEmpty(value)) ? null : value;
         }
 
         /// <summary>
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Json.Converters
             }
 
 #if HAVE_DATE_TIME_OFFSET
-            Type t = nullable
+            Type t = (nullable)
                 ? Nullable.GetUnderlyingType(objectType)
                 : objectType;
 #endif

@@ -121,13 +121,13 @@ namespace DesktopTestApp
             return result;
         }
 
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, bool forceRefresh)
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes)
         {
             return await PublicClientApplication.AcquireTokenSilentAsync(
                 scopes,
                 CurrentUser,
                 AuthorityOverride,
-                forceRefresh).ConfigureAwait(false);
+                false).ConfigureAwait(false);
         }
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)

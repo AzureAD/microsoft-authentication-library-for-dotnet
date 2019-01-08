@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Json.Utilities
 #endif
         }
 
-#if PORTABLE40 || DOTNET || PORTABLE
+#if (PORTABLE40 || DOTNET || PORTABLE)
         public static PropertyInfo GetProperty(this Type type, string name, BindingFlags bindingFlags, object placeholder1, Type propertyType, IList<Type> indexParameters, object placeholder2)
         {
             IEnumerable<PropertyInfo> propertyInfos = type.GetProperties(bindingFlags);
@@ -259,14 +259,14 @@ namespace Microsoft.Identity.Json.Utilities
         }
 #endif
 
-#if DOTNET || PORTABLE
+#if (DOTNET || PORTABLE)
         public static MethodInfo GetBaseDefinition(this MethodInfo method)
         {
             return method.GetRuntimeBaseDefinition();
         }
 #endif
 
-#if DOTNET || PORTABLE
+#if (DOTNET || PORTABLE)
         public static bool IsDefined(this Type type, Type attributeType, bool inherit)
         {
             return type.GetTypeInfo().CustomAttributes.Any(a => a.AttributeType == attributeType);

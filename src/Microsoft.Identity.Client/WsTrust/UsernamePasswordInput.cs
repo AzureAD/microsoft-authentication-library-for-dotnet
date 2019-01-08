@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client
     {
         public string UserName { get; set; }
         private SecureString _securePassword;
-        private readonly string _password;
+        private string _password;
 
         public UsernamePasswordInput(string userName, string password)
         {

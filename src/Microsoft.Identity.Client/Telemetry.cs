@@ -79,14 +79,6 @@ namespace Microsoft.Identity.Client
             _receiver = r;
         }
 
-        /// <summary>
-        ///     Checks if a delegate has been registered as a receiver
-        /// </summary>
-        public bool HasRegisteredReceiver()
-        {
-            return _receiver != null;
-        }
-
         void ITelemetryReceiver.HandleTelemetryEvents(List<Dictionary<string, string>> events)
         {
             _receiver?.Invoke(events);

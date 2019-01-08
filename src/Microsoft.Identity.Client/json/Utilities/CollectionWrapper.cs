@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Json.Utilities
             VerifyValueType(value);
             Add((T)value);
 
-            return Count - 1;
+            return (Count - 1);
         }
 
         bool IList.Contains(object value)

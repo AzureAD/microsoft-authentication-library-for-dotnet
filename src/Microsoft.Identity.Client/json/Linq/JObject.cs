@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JObject"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <returns>A <see cref="JObject"/> populated from the string that contains JSON.</returns>
         /// <exception cref="JsonReaderException">
         ///     <paramref name="json"/> is not valid JSON.
@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JObject"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JObject"/> populated from the string that contains JSON.</returns>
@@ -556,7 +556,7 @@ namespace Microsoft.Identity.Json.Linq
         public bool TryGetValue(string propertyName, StringComparison comparison, out JToken value)
         {
             value = GetValue(propertyName, comparison);
-            return value != null;
+            return (value != null);
         }
 
         #region IDictionary<string,JToken> Members
@@ -643,7 +643,7 @@ namespace Microsoft.Identity.Json.Linq
                 return false;
             }
 
-            return property.Value == item.Value;
+            return (property.Value == item.Value);
         }
 
         void ICollection<KeyValuePair<string, JToken>>.CopyTo(KeyValuePair<string, JToken>[] array, int arrayIndex)

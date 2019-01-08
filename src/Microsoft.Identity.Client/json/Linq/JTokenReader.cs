@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Json.Linq
             }
 
             JToken next = t.Next;
-            if (next == null || next == t || t == t.Parent.Last)
+            if ((next == null || next == t) || t == t.Parent.Last)
             {
                 if (t.Parent == null)
                 {
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Json.Linq
             }
 
             IJsonLineInfo info = _current;
-            return info != null && info.HasLineInfo();
+            return (info != null && info.HasLineInfo());
         }
 
         int IJsonLineInfo.LineNumber

@@ -55,10 +55,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
             }
 
             string headerVersion = headerSegments[0];
-            XmsCliTelemInfo xMsTelemetryInfo = new XmsCliTelemInfo
-            {
-                Version = headerVersion
-            };
+            XmsCliTelemInfo xMsTelemetryInfo = new XmsCliTelemInfo();
+            xMsTelemetryInfo.Version = headerVersion;
 
             if (!string.Equals(headerVersion, ExpectedCliTelemHeaderVersion))
             {

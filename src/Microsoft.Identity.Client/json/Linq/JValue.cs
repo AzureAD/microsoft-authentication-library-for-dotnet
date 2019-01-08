@@ -229,12 +229,12 @@ namespace Microsoft.Identity.Json.Linq
             // check for fraction if result is two numbers are equal
             if (i2 is decimal d1)
             {
-                return 0m.CompareTo(Math.Abs(d1 - Math.Truncate(d1)));
+                return (0m).CompareTo(Math.Abs(d1 - Math.Truncate(d1)));
             }
             else if (i2 is double || i2 is float)
             {
                 double d = Convert.ToDouble(i2, CultureInfo.InvariantCulture);
-                return 0d.CompareTo(Math.Abs(d - Math.Truncate(d)));
+                return (0d).CompareTo(Math.Abs(d - Math.Truncate(d)));
             }
 
             return result;
@@ -829,7 +829,7 @@ namespace Microsoft.Identity.Json.Linq
 
         private static bool ValuesEquals(JValue v1, JValue v2)
         {
-            return v1 == v2 || (v1._valueType == v2._valueType && Compare(v1._valueType, v1._value, v2._value) == 0);
+            return (v1 == v2 || (v1._valueType == v2._valueType && Compare(v1._valueType, v1._value, v2._value) == 0));
         }
 
         /// <summary>
@@ -850,11 +850,11 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="object"/> is equal to the current <see cref="object"/>.
+        /// Determines whether the specified <see cref="Object"/> is equal to the current <see cref="Object"/>.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to compare with the current <see cref="object"/>.</param>
+        /// <param name="obj">The <see cref="Object"/> to compare with the current <see cref="Object"/>.</param>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="object"/> is equal to the current <see cref="object"/>; otherwise, <c>false</c>.
+        /// <c>true</c> if the specified <see cref="Object"/> is equal to the current <see cref="Object"/>; otherwise, <c>false</c>.
         /// </returns>
         public override bool Equals(object obj)
         {
@@ -865,7 +865,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Serves as a hash function for a particular type.
         /// </summary>
         /// <returns>
-        /// A hash code for the current <see cref="object"/>.
+        /// A hash code for the current <see cref="Object"/>.
         /// </returns>
         public override int GetHashCode()
         {
@@ -878,10 +878,10 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
+        /// Returns a <see cref="String"/> that represents this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="string"/> that represents this instance.
+        /// A <see cref="String"/> that represents this instance.
         /// </returns>
         public override string ToString()
         {
@@ -894,11 +894,11 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
+        /// Returns a <see cref="String"/> that represents this instance.
         /// </summary>
         /// <param name="format">The format.</param>
         /// <returns>
-        /// A <see cref="string"/> that represents this instance.
+        /// A <see cref="String"/> that represents this instance.
         /// </returns>
         public string ToString(string format)
         {
@@ -906,11 +906,11 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
+        /// Returns a <see cref="String"/> that represents this instance.
         /// </summary>
         /// <param name="formatProvider">The format provider.</param>
         /// <returns>
-        /// A <see cref="string"/> that represents this instance.
+        /// A <see cref="String"/> that represents this instance.
         /// </returns>
         public string ToString(IFormatProvider formatProvider)
         {
@@ -918,12 +918,12 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> that represents this instance.
+        /// Returns a <see cref="String"/> that represents this instance.
         /// </summary>
         /// <param name="format">The format.</param>
         /// <param name="formatProvider">The format provider.</param>
         /// <returns>
-        /// A <see cref="string"/> that represents this instance.
+        /// A <see cref="String"/> that represents this instance.
         /// </returns>
         public string ToString(string format, IFormatProvider formatProvider)
         {
@@ -984,22 +984,22 @@ namespace Microsoft.Identity.Json.Linq
                 switch (binder.Operation)
                 {
                     case ExpressionType.Equal:
-                        result = Compare(instance.Type, instance.Value, compareValue) == 0;
+                        result = (Compare(instance.Type, instance.Value, compareValue) == 0);
                         return true;
                     case ExpressionType.NotEqual:
-                        result = Compare(instance.Type, instance.Value, compareValue) != 0;
+                        result = (Compare(instance.Type, instance.Value, compareValue) != 0);
                         return true;
                     case ExpressionType.GreaterThan:
-                        result = Compare(instance.Type, instance.Value, compareValue) > 0;
+                        result = (Compare(instance.Type, instance.Value, compareValue) > 0);
                         return true;
                     case ExpressionType.GreaterThanOrEqual:
-                        result = Compare(instance.Type, instance.Value, compareValue) >= 0;
+                        result = (Compare(instance.Type, instance.Value, compareValue) >= 0);
                         return true;
                     case ExpressionType.LessThan:
-                        result = Compare(instance.Type, instance.Value, compareValue) < 0;
+                        result = (Compare(instance.Type, instance.Value, compareValue) < 0);
                         return true;
                     case ExpressionType.LessThanOrEqual:
-                        result = Compare(instance.Type, instance.Value, compareValue) <= 0;
+                        result = (Compare(instance.Type, instance.Value, compareValue) <= 0);
                         return true;
                     case ExpressionType.Add:
                     case ExpressionType.AddAssign:

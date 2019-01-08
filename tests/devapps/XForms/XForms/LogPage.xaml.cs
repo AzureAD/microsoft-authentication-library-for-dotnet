@@ -82,19 +82,15 @@ namespace XForms
         public static void AddToLog(string str, bool containsPii)
         {
             if (containsPii)
-            {
                 lock (BufferLockPii)
                 {
                     SbPii.AppendLine(str);
                 }
-            }
             else
-            {
                 lock (BufferLock)
                 {
                     Sb.AppendLine(str);
                 }
-            }
         }
     }
 }

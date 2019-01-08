@@ -73,10 +73,10 @@ namespace Microsoft.Identity.Json.Serialization
         }
 
         /// <summary>
-        /// Returns a <see cref="string"/> of the most recent trace messages.
+        /// Returns a <see cref="String"/> of the most recent trace messages.
         /// </summary>
         /// <returns>
-        /// A <see cref="string"/> of the most recent trace messages.
+        /// A <see cref="String"/> of the most recent trace messages.
         /// </returns>
         public override string ToString()
         {

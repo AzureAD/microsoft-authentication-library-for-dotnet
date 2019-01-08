@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             webSettings.UseWideViewPort = true;
             webSettings.BuiltInZoomControls = true;
 
-            _client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
+            this._client = new CoreWebViewClient(Intent.GetStringExtra("Callback"), this);
             webView.SetWebViewClient(_client);
             webView.LoadUrl(url);
         }
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     Scheme = Uri.UriSchemeHttps
                 };
 
-                string link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
+                String link = externalBrowserUrlBuilder.Uri.AbsoluteUri;
                 Intent intent = new Intent(Intent.ActionView, global::Android.Net.Uri.Parse(link));
                 activity.StartActivity(intent);
             }
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 if (url.StartsWith(_callback, StringComparison.OrdinalIgnoreCase))
                 {
                     base.OnPageFinished(view, url);
-                    Finish(Activity, url);
+                    this.Finish(Activity, url);
                 }
 
                 base.OnPageFinished(view, url);

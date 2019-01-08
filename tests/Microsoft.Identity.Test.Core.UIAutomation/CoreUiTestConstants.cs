@@ -29,11 +29,11 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 {
     public static class CoreUiTestConstants
     {
-        // Resources
+        //Resources
         public const string MSGraph = "https://graph.microsoft.com";
         public const string Exchange = "https://outlook.office365.com/";
 
-        // ADAL & MSAL test app
+        //ADAL & MSAL test app
         public const string AcquireTokenID = "acquireToken";
         public const string AcquireTokenWithPromptBehaviorAlwaysID = "acquireTokenPromptBehaviorAlways";
         public const string AcquireTokenSilentID = "acquireTokenSilent";
@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string TestResultSuccessfulMessage = "Result: Success";
         public const string TestResultFailureMessage = "Result: Failure";
 
-        // MSAL test app
+        //MSAL test app
         public const string DefaultScope = "User.Read";
         public const string AcquirePageID = "Acquire";
         public const string CachePageID = "Cache";
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriEntryID = "redirectUriEntry";
 
-        // MSAL B2C
+        //MSAL B2C
         public const string B2cScopes = "https://sometenant.onmicrosoft.com/some/scope";
         public const string AuthorityPickerID = "b2cAuthorityPicker";
         public const string WebUPNB2CLocalInputID = "logonIdentifier";
@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string UIBehaviorLogin = "login";
         public const string UIBehaviorNoPrompt = "no_prompt";
 
-        // Test Constants
+        //Test Constants
         public const int ResultCheckPolliInterval = 1000;
         public const int MaximumResultCheckRetryAttempts = 20;
 

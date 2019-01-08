@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                         formsSyncContext = new WindowsFormsSynchronizationContext();
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
-                        dialog = new SilentWindowsFormsAuthenticationDialog(OwnerWindow)
+                        dialog = new SilentWindowsFormsAuthenticationDialog(this.OwnerWindow)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs,
                             RequestContext = RequestContext
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
                         threadInitializedEvent.Set();
 
-                        dialog.AuthenticateAAD(RequestUri, CallbackUri);
+                        dialog.AuthenticateAAD(this.RequestUri, this.CallbackUri);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns></returns>
         protected override AuthorizationResult OnAuthenticate()
         {
-            if (null == CallbackUri)
+            if (null == this.CallbackUri)
             {
                 throw new InvalidOperationException("CallbackUri cannot be null");
             }

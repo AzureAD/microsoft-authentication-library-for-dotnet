@@ -40,7 +40,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     internal class WKWebNavigationDelegate : WKNavigationDelegate
     {
         private const string AboutBlankUri = "about:blank";
-        private AuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
+
+        AuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
 
         public WKWebNavigationDelegate(AuthenticationAgentUIViewController AuthUIViewController)
         {
@@ -102,11 +103,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             if (!navigationAction.Request.Url.AbsoluteString.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase)
                 && !navigationAction.Request.Url.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
             {
-                AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
-                {
-                    Error = CoreErrorCodes.NonHttpsRedirectNotSupported,
-                    ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported
-                };
+                AuthorizationResult result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
+                result.Error = CoreErrorCodes.NonHttpsRedirectNotSupported;
+                result.ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported;
                 AuthenticationAgentUIViewController.DismissViewController(true, () => AuthenticationAgentUIViewController.callbackMethod(result));
                 decisionHandler(WKNavigationActionPolicy.Cancel);
                 return;
@@ -117,11 +116,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
         internal class WKWebViewUIDelegate : WKUIDelegate
         {
-            private readonly AuthenticationAgentUIViewController _controller = null;
+            AuthenticationAgentUIViewController controller = null;
 
             public WKWebViewUIDelegate(AuthenticationAgentUIViewController c)
             {
-                _controller = c;
+                controller = c;
                 return;
             }
         }

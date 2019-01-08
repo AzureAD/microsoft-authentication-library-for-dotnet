@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 {
     internal class iOSLegacyCachePersistence : ILegacyCachePersistence
     {
-        private const string NAME = "ADAL.PCL.iOS";
+        const string NAME = "ADAL.PCL.iOS";
         private const string LocalSettingsContainerName = "ActiveDirectoryAuthenticationLibrary";
 
         private string keychainGroup;

@@ -31,11 +31,10 @@ using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Platforms.Android;
 using Microsoft.Identity.Client.Platforms.Android.SystemWebview;
 using Microsoft.Identity.Client.UI;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Platforms.Android
 {
     /// <summary>
     /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in OnActivityResult() of the activity doing authentication.

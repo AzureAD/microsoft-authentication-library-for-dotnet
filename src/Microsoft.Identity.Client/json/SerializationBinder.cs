@@ -1,5 +1,5 @@
 ﻿
-#if DOTNET || PORTABLE40 || PORTABLE || NET_CORE
+#if (DOTNET || PORTABLE40 || PORTABLE || NET_CORE)
 using System;
 using System.Reflection;
 

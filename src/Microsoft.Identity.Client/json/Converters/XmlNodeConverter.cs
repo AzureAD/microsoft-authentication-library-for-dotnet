@@ -23,7 +23,7 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-#if HAVE_XML_DOCUMENT || HAVE_XLINQ
+#if (HAVE_XML_DOCUMENT || HAVE_XLINQ)
 
 #if HAVE_BIG_INTEGER
 using System.Numerics;
@@ -107,20 +107,16 @@ namespace Microsoft.Identity.Json.Converters
 
         public IXmlNode CreateAttribute(string name, string value)
         {
-            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(name))
-            {
-                Value = value
-            };
+            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(name));
+            attribute.Value = value;
 
             return attribute;
         }
 
         public IXmlNode CreateAttribute(string qualifiedName, string namespaceUri, string value)
         {
-            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(qualifiedName, namespaceUri))
-            {
-                Value = value
-            };
+            XmlNodeWrapper attribute = new XmlNodeWrapper(_document.CreateAttribute(qualifiedName, namespaceUri));
+            attribute.Value = value;
 
             return attribute;
         }

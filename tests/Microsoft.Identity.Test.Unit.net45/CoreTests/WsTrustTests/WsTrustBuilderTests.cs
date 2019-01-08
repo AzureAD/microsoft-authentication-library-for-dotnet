@@ -25,26 +25,26 @@
 ////
 ////------------------------------------------------------------------------------
 
-// using System;
-// using System.Collections.Generic;
-// using System.Diagnostics;
-// using System.IO;
-// using System.Linq;
-// using System.Net;
-// using System.Net.Http;
-// using System.Text;
-// using System.Threading.Tasks;
-// using System.Xml;
-// using System.Xml.Schema;
-// using Microsoft.Identity.Client;
-// using Microsoft.Identity.Client.Http;
-// using Microsoft.Identity.Client.WsTrust;
-// using Microsoft.VisualStudio.TestTools.UnitTesting;
-// using Test.Microsoft.Identity.Client.Unit;
-// using Test.Microsoft.Identity.Client.Unit.Mocks;
+//using System;
+//using System.Collections.Generic;
+//using System.Diagnostics;
+//using System.IO;
+//using System.Linq;
+//using System.Net;
+//using System.Net.Http;
+//using System.Text;
+//using System.Threading.Tasks;
+//using System.Xml;
+//using System.Xml.Schema;
+//using Microsoft.Identity.Client;
+//using Microsoft.Identity.Client.Http;
+//using Microsoft.Identity.Client.WsTrust;
+//using Microsoft.VisualStudio.TestTools.UnitTesting;
+//using Test.Microsoft.Identity.Client.Unit;
+//using Test.Microsoft.Identity.Client.Unit.Mocks;
 
-// namespace Test.Microsoft.Identity.Unit.WsTrustTests
-// {
+//namespace Test.Microsoft.Identity.Unit.WsTrustTests
+//{
 //    [TestClass]
 //    [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
 //    public class WsTrustBuilderTests
@@ -54,56 +54,56 @@
 //        {
 //        }
 
-// [TestMethod]
+//        [TestMethod]
 //        public void WsTrustRequestXmlFormatTest()
 //        {
 //            // Arrange
 //            var cred = new IntegratedWindowsAuthInput("user");
 
-// // Act
+//            // Act
 //            StringBuilder sb = WsTrustRequestBuilder.BuildMessage("https://appliesto",
 //                new WsTrustAddress { Uri = new Uri("some://resource") }, cred);
 
-// // Assert
+//            // Assert
 //            XmlReaderSettings readerSettings = new XmlReaderSettings();
 //            readerSettings.XmlResolver = null;
 //            readerSettings.IgnoreWhitespace = true;
 //            readerSettings.ConformanceLevel = ConformanceLevel.Fragment;
 //            readerSettings.DtdProcessing = DtdProcessing.Ignore;
 
-// // Load the fragment, validating it against the XSDs
+//            // Load the fragment, validating it against the XSDs
 //            List<string> validationIssues = new List<string>();
 
-// readerSettings.ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings;
+//            readerSettings.ValidationFlags = XmlSchemaValidationFlags.ReportValidationWarnings;
 //            readerSettings.ValidationType = ValidationType.Schema;
 //            readerSettings.Schemas = CreateWsTrustEnvelopeSchemaSet();
 
-// readerSettings.ValidationEventHandler += (s, e) =>
+//            readerSettings.ValidationEventHandler += (s, e) =>
 //            {
 //                validationIssues.Add(e.Severity + " " + e.Message);
 //            };
 
 
-// XmlDocument document = new XmlDocument();
+//            XmlDocument document = new XmlDocument();
 //            using (var xmlReader = XmlTextReader.Create(new StringReader(sb.ToString()), readerSettings))
 //            {
 //                document.Load(xmlReader);
 //            }
 
 
-// Debug.WriteLine("All validation issues:");
+//            Debug.WriteLine("All validation issues:");
 //            Debug.WriteLine(string.Join("\r\n", validationIssues.ToArray()));
 
-// // Filter out "expected" schema-validation messages.
+//            // Filter out "expected" schema-validation messages.
 //            // The real ws-trust XML namespace is http://docs.oasis-open.org/ws-sx/ws-trust/200512/ i.e. with a trailing slash. However, we use
 //            // the namespace without a trailing slash as this is what the server expects, so we expect validation messages about missing elements
 //            const string invalidTrustNamespaceMessageContent = "Could not find schema information for the element 'http://docs.oasis-open.org/ws-sx/ws-trust/200512:";
 //            List<string> unexpectedValidationIssues = validationIssues.Where(i => !i.Contains(invalidTrustNamespaceMessageContent)).ToList();
 
-// Assert.AreEqual(0, unexpectedValidationIssues.Count, "Not expecting any XML schema validation errors. See the test output for the validation errors.");
+//            Assert.AreEqual(0, unexpectedValidationIssues.Count, "Not expecting any XML schema validation errors. See the test output for the validation errors.");
 //        }
 
-// private static XmlSchemaSet CreateWsTrustEnvelopeSchemaSet()
+//        private static XmlSchemaSet CreateWsTrustEnvelopeSchemaSet()
 //        {
 //            // Creates and returns a schema set that contains all of the schema required to
 //            // validate the XML Envelope.
@@ -127,7 +127,7 @@
 //                Assert.Inconclusive("Test error - failed to load the XML soap schema. Error: " + ex.ToString());
 //            }
 
-// return schemas;
+//            return schemas;
 //        }
 //    }
-// }
+//}

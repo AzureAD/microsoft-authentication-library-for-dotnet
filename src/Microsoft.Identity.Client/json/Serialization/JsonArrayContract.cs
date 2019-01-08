@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <value><c>true</c> if the creator has a parameter with the collection values; otherwise, <c>false</c>.</value>
         public bool HasParameterizedCreator { get; set; }
 
-        internal bool HasParameterizedCreatorInternal => HasParameterizedCreator || _parameterizedCreator != null || _parameterizedConstructor != null;
+        internal bool HasParameterizedCreatorInternal => (HasParameterizedCreator || _parameterizedCreator != null || _parameterizedConstructor != null);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonArrayContract"/> class.
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Json.Serialization
                 _genericCollectionDefinitionType = typeof(List<>).MakeGenericType(CollectionItemType);
 
                 canDeserialize = true;
-                IsMultidimensionalArray = IsArray && UnderlyingType.GetArrayRank() > 1;
+                IsMultidimensionalArray = (IsArray && UnderlyingType.GetArrayRank() > 1);
             }
             else if (typeof(IList).IsAssignableFrom(underlyingType))
             {
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Json.Serialization
 
             CanDeserialize = canDeserialize;
 
-#if NET20 || NET35
+#if (NET20 || NET35)
             if (CollectionItemType != null && ReflectionUtils.IsNullableType(CollectionItemType))
             {
                 // bug in .NET 2.0 & 3.5 that List<Nullable<T>> throws an error when adding null via IList.Add(object)

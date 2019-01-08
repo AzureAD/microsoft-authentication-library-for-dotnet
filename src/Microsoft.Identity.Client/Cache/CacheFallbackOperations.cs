@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Cache
                     MsalLogger.Default.Error(DifferentEnvError);
                 }
 
-                if (!string.Equals(rtItem?.Environment, new Uri(authority).Host, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(rtItem?.Environment, (new Uri(authority)).Host, StringComparison.OrdinalIgnoreCase))
                 {
                     MsalLogger.Default.Error(DifferentAuthorityError);
                 }

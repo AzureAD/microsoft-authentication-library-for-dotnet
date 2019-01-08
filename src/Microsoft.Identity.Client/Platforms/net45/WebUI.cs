@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     {
         protected Uri RequestUri { get; private set; }
         protected Uri CallbackUri { get; private set; }
-        public object OwnerWindow { get; set; }
+        public Object OwnerWindow { get; set; }
 
         public RequestContext RequestContext { get; set; }
 

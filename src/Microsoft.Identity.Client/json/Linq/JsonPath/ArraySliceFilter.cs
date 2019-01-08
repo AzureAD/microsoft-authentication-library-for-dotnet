@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
                     stopIndex = Math.Max(stopIndex, -1);
                     stopIndex = Math.Min(stopIndex, a.Count);
 
-                    bool positiveStep = stepCount > 0;
+                    bool positiveStep = (stepCount > 0);
 
                     if (IsValid(startIndex, stopIndex, positiveStep))
                     {
@@ -78,10 +78,10 @@ namespace Microsoft.Identity.Json.Linq.JsonPath
         {
             if (positiveStep)
             {
-                return index < stopIndex;
+                return (index < stopIndex);
             }
 
-            return index > stopIndex;
+            return (index > stopIndex);
         }
     }
 }

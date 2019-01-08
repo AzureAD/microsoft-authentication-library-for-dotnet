@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Json.Converters
             while (reader.TokenType == JsonToken.PropertyName)
             {
                 DataTable dt = ds.Tables[(string)reader.Value];
-                bool exists = dt != null;
+                bool exists = (dt != null);
 
                 dt = (DataTable)converter.ReadJson(reader, typeof(DataTable), dt, serializer);
 

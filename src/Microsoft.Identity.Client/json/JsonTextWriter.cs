@@ -74,7 +74,12 @@ namespace Microsoft.Identity.Json
             get => _arrayPool;
             set
             {
-                _arrayPool = value ?? throw new ArgumentNullException(nameof(value));
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                _arrayPool = value;
             }
         }
 
@@ -144,7 +149,12 @@ namespace Microsoft.Identity.Json
         /// <param name="textWriter">The <see cref="TextWriter"/> to write to.</param>
         public JsonTextWriter(TextWriter textWriter)
         {
-            _writer = textWriter ?? throw new ArgumentNullException(nameof(textWriter));
+            if (textWriter == null)
+            {
+                throw new ArgumentNullException(nameof(textWriter));
+            }
+
+            _writer = textWriter;
             _quoteChar = '"';
             _quoteName = true;
             _indentChar = ' ';
@@ -373,10 +383,10 @@ namespace Microsoft.Identity.Json
 
         #region WriteValue methods
         /// <summary>
-        /// Writes a <see cref="object"/> value.
+        /// Writes a <see cref="Object"/> value.
         /// An error will raised if the value cannot be written as a single JSON token.
         /// </summary>
-        /// <param name="value">The <see cref="object"/> value to write.</param>
+        /// <param name="value">The <see cref="Object"/> value to write.</param>
         public override void WriteValue(object value)
         {
 #if HAVE_BIG_INTEGER
@@ -422,9 +432,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="string"/> value.
+        /// Writes a <see cref="String"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="string"/> value to write.</param>
+        /// <param name="value">The <see cref="String"/> value to write.</param>
         public override void WriteValue(string value)
         {
             InternalWriteValue(JsonToken.String);
@@ -446,9 +456,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="int"/> value.
+        /// Writes a <see cref="Int32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="int"/> value to write.</param>
+        /// <param name="value">The <see cref="Int32"/> value to write.</param>
         public override void WriteValue(int value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -456,9 +466,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="uint"/> value.
+        /// Writes a <see cref="UInt32"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="uint"/> value to write.</param>
+        /// <param name="value">The <see cref="UInt32"/> value to write.</param>
         // [ClsCompliant(false)]
         public override void WriteValue(uint value)
         {
@@ -467,9 +477,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="long"/> value.
+        /// Writes a <see cref="Int64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="long"/> value to write.</param>
+        /// <param name="value">The <see cref="Int64"/> value to write.</param>
         public override void WriteValue(long value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -477,9 +487,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="ulong"/> value.
+        /// Writes a <see cref="UInt64"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ulong"/> value to write.</param>
+        /// <param name="value">The <see cref="UInt64"/> value to write.</param>
         // [ClsCompliant(false)]
         public override void WriteValue(ulong value)
         {
@@ -488,9 +498,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="float"/> value.
+        /// Writes a <see cref="Single"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="float"/> value to write.</param>
+        /// <param name="value">The <see cref="Single"/> value to write.</param>
         public override void WriteValue(float value)
         {
             InternalWriteValue(JsonToken.Float);
@@ -498,9 +508,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="float"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Single"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="float"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Single"/> value to write.</param>
         public override void WriteValue(float? value)
         {
             if (value == null)
@@ -515,9 +525,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="double"/> value.
+        /// Writes a <see cref="Double"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="double"/> value to write.</param>
+        /// <param name="value">The <see cref="Double"/> value to write.</param>
         public override void WriteValue(double value)
         {
             InternalWriteValue(JsonToken.Float);
@@ -525,9 +535,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="Nullable{T}"/> of <see cref="double"/> value.
+        /// Writes a <see cref="Nullable{T}"/> of <see cref="Double"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="double"/> value to write.</param>
+        /// <param name="value">The <see cref="Nullable{T}"/> of <see cref="Double"/> value to write.</param>
         public override void WriteValue(double? value)
         {
             if (value == null)
@@ -542,9 +552,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="bool"/> value.
+        /// Writes a <see cref="Boolean"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="bool"/> value to write.</param>
+        /// <param name="value">The <see cref="Boolean"/> value to write.</param>
         public override void WriteValue(bool value)
         {
             InternalWriteValue(JsonToken.Boolean);
@@ -552,9 +562,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="short"/> value.
+        /// Writes a <see cref="Int16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="short"/> value to write.</param>
+        /// <param name="value">The <see cref="Int16"/> value to write.</param>
         public override void WriteValue(short value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -562,9 +572,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="ushort"/> value.
+        /// Writes a <see cref="UInt16"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="ushort"/> value to write.</param>
+        /// <param name="value">The <see cref="UInt16"/> value to write.</param>
         // [ClsCompliant(false)]
         public override void WriteValue(ushort value)
         {
@@ -573,9 +583,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="char"/> value.
+        /// Writes a <see cref="Char"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="char"/> value to write.</param>
+        /// <param name="value">The <see cref="Char"/> value to write.</param>
         public override void WriteValue(char value)
         {
             InternalWriteValue(JsonToken.String);
@@ -583,9 +593,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/> value.
+        /// Writes a <see cref="Byte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/> value to write.</param>
+        /// <param name="value">The <see cref="Byte"/> value to write.</param>
         public override void WriteValue(byte value)
         {
             InternalWriteValue(JsonToken.Integer);
@@ -593,9 +603,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="sbyte"/> value.
+        /// Writes a <see cref="SByte"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="sbyte"/> value to write.</param>
+        /// <param name="value">The <see cref="SByte"/> value to write.</param>
         // [ClsCompliant(false)]
         public override void WriteValue(sbyte value)
         {
@@ -604,9 +614,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="decimal"/> value.
+        /// Writes a <see cref="Decimal"/> value.
         /// </summary>
-        /// <param name="value">The <see cref="decimal"/> value to write.</param>
+        /// <param name="value">The <see cref="Decimal"/> value to write.</param>
         public override void WriteValue(decimal value)
         {
             InternalWriteValue(JsonToken.Float);
@@ -648,9 +658,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Writes a <see cref="byte"/>[] value.
+        /// Writes a <see cref="Byte"/>[] value.
         /// </summary>
-        /// <param name="value">The <see cref="byte"/>[] value to write.</param>
+        /// <param name="value">The <see cref="Byte"/>[] value to write.</param>
         public override void WriteValue(byte[] value)
         {
             if (value == null)

@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.Cache
         /// <summary>
         /// Gets a value indicating whether the refresh token can be used for requesting access token for other resources.
         /// </summary>
-        internal bool IsMultipleResourceRefreshToken => !string.IsNullOrWhiteSpace(RefreshToken) && !string.IsNullOrWhiteSpace(ResourceInResponse);
+        internal bool IsMultipleResourceRefreshToken => (!string.IsNullOrWhiteSpace(RefreshToken) && !string.IsNullOrWhiteSpace(ResourceInResponse));
 
         // This is only needed for AcquireTokenByAuthorizationCode in which parameter resource is optional and we need
         // to get it from the STS response.

@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Json.Linq
         protected abstract IList<JToken> ChildrenTokens { get; }
 
         private object _syncRoot;
-#if HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED
+#if (HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED)
         private bool _busy;
 #endif
 
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal void CheckReentrancy()
         {
-#if HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED
+#if (HAVE_COMPONENT_MODEL || HAVE_INOTIFY_COLLECTION_CHANGED)
             if (_busy)
             {
                 throw new InvalidOperationException("Cannot change {0} during a collection change event.".FormatWith(CultureInfo.InvariantCulture, GetType()));
@@ -316,7 +316,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal bool IsMultiContent(object content)
         {
-            return content is IEnumerable && !(content is string) && !(content is JToken) && !(content is byte[]);
+            return (content is IEnumerable && !(content is string) && !(content is JToken) && !(content is byte[]));
         }
 
         internal JToken EnsureParentToken(JToken item, bool skipParentCheck)
@@ -564,7 +564,7 @@ namespace Microsoft.Identity.Json.Linq
 
         internal virtual bool ContainsItem(JToken item)
         {
-            return IndexOfItem(item) != -1;
+            return (IndexOfItem(item) != -1);
         }
 
         internal virtual void CopyItemsTo(Array array, int arrayIndex)

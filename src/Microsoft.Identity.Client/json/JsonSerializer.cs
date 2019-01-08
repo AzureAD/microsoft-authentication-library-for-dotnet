@@ -89,7 +89,12 @@ namespace Microsoft.Identity.Json
             get => GetReferenceResolver();
             set
             {
-                _referenceResolver = value ?? throw new ArgumentNullException(nameof(value), "Reference resolver cannot be null.");
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Reference resolver cannot be null.");
+                }
+
+                _referenceResolver = value;
             }
         }
 
@@ -137,7 +142,12 @@ namespace Microsoft.Identity.Json
             get => _serializationBinder;
             set
             {
-                _serializationBinder = value ?? throw new ArgumentNullException(nameof(value), "Serialization binder cannot be null.");
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value), "Serialization binder cannot be null.");
+                }
+
+                _serializationBinder = value;
             }
         }
 
@@ -458,8 +468,8 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Gets or sets how special floating point numbers, e.g. <see cref="double.NaN"/>,
-        /// <see cref="double.PositiveInfinity"/> and <see cref="double.NegativeInfinity"/>,
+        /// Gets or sets how special floating point numbers, e.g. <see cref="Double.NaN"/>,
+        /// <see cref="Double.PositiveInfinity"/> and <see cref="Double.NegativeInfinity"/>,
         /// are written as JSON text.
         /// The default value is <see cref="Json.FloatFormatHandling.String" />.
         /// </summary>
@@ -539,7 +549,7 @@ namespace Microsoft.Identity.Json
 
         internal bool IsCheckAdditionalContentSet()
         {
-            return _checkAdditionalContent != null;
+            return (_checkAdditionalContent != null);
         }
 
         /// <summary>
@@ -830,7 +840,7 @@ namespace Microsoft.Identity.Json
         /// Deserializes the JSON structure contained by the specified <see cref="JsonReader"/>.
         /// </summary>
         /// <param name="reader">The <see cref="JsonReader"/> that contains the JSON structure to deserialize.</param>
-        /// <returns>The <see cref="object"/> being deserialized.</returns>
+        /// <returns>The <see cref="Object"/> being deserialized.</returns>
         [DebuggerStepThrough]
         public object Deserialize(JsonReader reader)
         {
@@ -1013,22 +1023,22 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="TextWriter"/>.
         /// </summary>
         /// <param name="textWriter">The <see cref="TextWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
         public void Serialize(TextWriter textWriter, object value)
         {
             Serialize(new JsonTextWriter(textWriter), value);
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="JsonWriter"/>.
         /// </summary>
         /// <param name="jsonWriter">The <see cref="JsonWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
         /// <param name="objectType">
         /// The type of the value being serialized.
         /// This parameter is used when <see cref="JsonSerializer.TypeNameHandling"/> is <see cref="Json.TypeNameHandling.Auto"/> to write out the type name if the type of the value does not match.
@@ -1040,11 +1050,11 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="TextWriter"/>.
         /// </summary>
         /// <param name="textWriter">The <see cref="TextWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
         /// <param name="objectType">
         /// The type of the value being serialized.
         /// This parameter is used when <see cref="TypeNameHandling"/> is Auto to write out the type name if the type of the value does not match.
@@ -1056,11 +1066,11 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Serializes the specified <see cref="object"/> and writes the JSON structure
+        /// Serializes the specified <see cref="Object"/> and writes the JSON structure
         /// using the specified <see cref="JsonWriter"/>.
         /// </summary>
         /// <param name="jsonWriter">The <see cref="JsonWriter"/> used to write the JSON structure.</param>
-        /// <param name="value">The <see cref="object"/> to serialize.</param>
+        /// <param name="value">The <see cref="Object"/> to serialize.</param>
         public void Serialize(JsonWriter jsonWriter, object value)
         {
             SerializeInternal(jsonWriter, value, null);

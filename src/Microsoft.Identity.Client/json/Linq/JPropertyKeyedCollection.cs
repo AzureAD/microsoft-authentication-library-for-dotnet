@@ -242,12 +242,12 @@ namespace Microsoft.Identity.Json.Linq
 
             if (d1 == null)
             {
-                return d2.Count == 0;
+                return (d2.Count == 0);
             }
 
             if (d2 == null)
             {
-                return d1.Count == 0;
+                return (d1.Count == 0);
             }
 
             if (d1.Count != d2.Count)
@@ -267,7 +267,7 @@ namespace Microsoft.Identity.Json.Linq
 
                 if (p1.Value == null)
                 {
-                    return p2.Value == null;
+                    return (p2.Value == null);
                 }
 
                 if (!p1.Value.DeepEquals(p2.Value))

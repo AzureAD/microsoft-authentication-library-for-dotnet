@@ -162,7 +162,7 @@ namespace Microsoft.Identity.Json.Utilities
                     break;
                 }
 
-                bool hasNext = i + 1 < chars.Length;
+                bool hasNext = (i + 1 < chars.Length);
                 if (i > 0 && hasNext && !char.IsUpper(chars[i + 1]))
                 {
                     // if the next character is a space, which is not considered uppercase 
@@ -229,7 +229,7 @@ namespace Microsoft.Identity.Json.Utilities
                     switch (state)
                     {
                         case SnakeCaseState.Upper:
-                            bool hasNext = i + 1 < s.Length;
+                            bool hasNext = (i + 1 < s.Length);
                             if (i > 0 && hasNext)
                             {
                                 char nextChar = s[i + 1];
@@ -295,12 +295,12 @@ namespace Microsoft.Identity.Json.Utilities
 
         public static bool StartsWith(this string source, char value)
         {
-            return source.Length > 0 && source[0] == value;
+            return (source.Length > 0 && source[0] == value);
         }
 
         public static bool EndsWith(this string source, char value)
         {
-            return source.Length > 0 && source[source.Length - 1] == value;
+            return (source.Length > 0 && source[source.Length - 1] == value);
         }
 
         public static string Trim(this string s, int start, int length)

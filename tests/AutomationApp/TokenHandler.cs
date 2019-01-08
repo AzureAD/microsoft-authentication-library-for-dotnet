@@ -41,16 +41,8 @@ namespace AutomationApp
 
         private void EnsurePublicClientApplication(Dictionary<string, string> input)
         {
-            if (_publicClientApplication != null)
-            {
-                return;
-            }
-
-            if (!input.ContainsKey("client_id"))
-            {
-                return;
-            }
-
+            if (_publicClientApplication != null) return;
+            if (!input.ContainsKey("client_id")) return;
             _publicClientApplication = input.ContainsKey("authority")
                 ? new PublicClientApplication(input["client_id"], input["authority"])
                 : new PublicClientApplication(input["client_id"]);

@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Json
         {
             IJsonLineInfo lineInfo = this;
 
-            string exceptionMessage = lineInfo.HasLineInfo()
+            string exceptionMessage = (lineInfo.HasLineInfo())
                 ? message + " Line {0}, position {1}.".FormatWith(CultureInfo.InvariantCulture, lineInfo.LineNumber, lineInfo.LinePosition)
                 : message;
 
@@ -374,9 +374,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="int"/>.
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="Int32"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="int"/>.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Int32"/>.</returns>
         public override int? ReadAsInt32()
         {
             int? i = _reader.ReadAsInt32();
@@ -386,10 +386,10 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="byte"/>[].
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Byte"/>[].
         /// </summary>
         /// <returns>
-        /// A <see cref="byte"/>[] or <c>null</c> if the next JSON token is null.
+        /// A <see cref="Byte"/>[] or <c>null</c> if the next JSON token is null.
         /// </returns>
         public override byte[] ReadAsBytes()
         {
@@ -400,9 +400,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="decimal"/>.
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="Decimal"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="decimal"/>.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Decimal"/>.</returns>
         public override decimal? ReadAsDecimal()
         {
             decimal? d = _reader.ReadAsDecimal();
@@ -412,9 +412,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="double"/>.
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="Double"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="double"/>.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Double"/>.</returns>
         public override double? ReadAsDouble()
         {
             double? d = _reader.ReadAsDouble();
@@ -424,9 +424,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="bool"/>.
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
         /// </summary>
-        /// <returns>A <see cref="Nullable{T}"/> of <see cref="bool"/>.</returns>
+        /// <returns>A <see cref="Nullable{T}"/> of <see cref="Boolean"/>.</returns>
         public override bool? ReadAsBoolean()
         {
             bool? b = _reader.ReadAsBoolean();
@@ -436,9 +436,9 @@ namespace Microsoft.Identity.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="string"/>.
+        /// Reads the next JSON token from the underlying <see cref="JsonReader"/> as a <see cref="String"/>.
         /// </summary>
-        /// <returns>A <see cref="string"/>. This method will return <c>null</c> at the end of an array.</returns>
+        /// <returns>A <see cref="String"/>. This method will return <c>null</c> at the end of an array.</returns>
         public override string ReadAsString()
         {
             string s = _reader.ReadAsString();
@@ -616,7 +616,7 @@ namespace Microsoft.Identity.Json
         {
             foreach (SchemaScope schemaScope in _stack)
             {
-                bool isInUniqueArray = schemaScope.TokenType == JTokenType.Array && schemaScope.IsUniqueArray && schemaScope.ArrayItemCount > 0;
+                bool isInUniqueArray = (schemaScope.TokenType == JTokenType.Array && schemaScope.IsUniqueArray && schemaScope.ArrayItemCount > 0);
 
                 if (isInUniqueArray || schemas.Any(s => s.Enum != null))
                 {
@@ -922,7 +922,7 @@ namespace Microsoft.Identity.Json
 
         private static double FloatingPointRemainder(double dividend, double divisor)
         {
-            return dividend - (Math.Floor(dividend / divisor) * divisor);
+            return dividend - Math.Floor(dividend / divisor) * divisor;
         }
 
         private static bool IsZero(double value)
@@ -987,7 +987,7 @@ namespace Microsoft.Identity.Json
                 return true;
             }
 
-            return TestType(schema, JsonSchemaType.Array);
+            return (TestType(schema, JsonSchemaType.Array));
         }
 
         private bool ValidateObject(JsonSchemaModel schema)
@@ -997,7 +997,7 @@ namespace Microsoft.Identity.Json
                 return true;
             }
 
-            return TestType(schema, JsonSchemaType.Object);
+            return (TestType(schema, JsonSchemaType.Object));
         }
 
         private bool TestType(JsonSchemaModel currentSchema, JsonSchemaType currentType)

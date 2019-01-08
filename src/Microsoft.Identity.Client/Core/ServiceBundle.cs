@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Core
             bool shouldClearCaches = false)
         {
             HttpManager = httpManager ?? new HttpManager(httpClientFactory);
-            TelemetryManager = new TelemetryManager(telemetryReceiver ?? Telemetry.GetInstance());
+            TelemetryManager = new TelemetryManager(telemetryReceiver);
             ValidatedAuthoritiesCache = validatedAuthoritiesCache ?? new ValidatedAuthoritiesCache(shouldClearCaches);
             AadInstanceDiscovery = aadInstanceDiscovery ?? new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager(HttpManager);

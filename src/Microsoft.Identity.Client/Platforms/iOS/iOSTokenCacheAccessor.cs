@@ -40,7 +40,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     internal class iOSTokenCacheAccessor : ITokenCacheAccessor
     {
         public const string CacheKeyDelimiter = "-";
-        private static readonly Dictionary<string, int> AuthorityTypeToAttrType = new Dictionary<string, int>()
+
+        static Dictionary<string, int> AuthorityTypeToAttrType = new Dictionary<string, int>()
         {
             {AuthorityType.AAD.ToString(), 1001},
             {AuthorityType.MSA.ToString(), 1002},
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             {AuthorityType.OTHER.ToString(), 1004},
         };
 
-        private enum CredentialAttrType
+        enum CredentialAttrType
         {
             AccessToken = 2001,
             RefreshToken = 2002,

@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test authority migration")]
         public void AuthorityMigration_IntegrationTest()
         {
-            // make sure that for all network calls "preferred_cache" environment is used
+            // make sure that for all network calls "preferred_cache" enironment is used
             // (it is taken from metadata in instance discovery response),
             // except very first network call - instance discovery
 

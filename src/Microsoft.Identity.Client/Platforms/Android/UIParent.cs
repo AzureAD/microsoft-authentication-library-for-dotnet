@@ -105,7 +105,8 @@ namespace Microsoft.Identity.Client
                     " cannot be null on Android platforms. Please pass in an Activity to which to attach a web UI.");
             }
 
-            if (!(parent is Activity parentActivity))
+            Activity parentActivity = parent as Activity;
+            if (parentActivity == null)
             {
                 throw new ArgumentException(nameof(parent) +
                                             " is expected to be of type Android.App.Activity but is of type " +

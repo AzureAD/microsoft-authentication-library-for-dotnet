@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Json.Serialization
                 {
                     JsonArrayContract arrayContract = (JsonArrayContract)contract;
 
-                    PopulateList(arrayContract.ShouldCreateWrapper ? arrayContract.CreateWrapper(target) : (IList)target, reader, arrayContract, null, null);
+                    PopulateList((arrayContract.ShouldCreateWrapper) ? arrayContract.CreateWrapper(target) : (IList)target, reader, arrayContract, null, null);
                 }
                 else
                 {
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Json.Serialization
                 if (contract.ContractType == JsonContractType.Dictionary)
                 {
                     JsonDictionaryContract dictionaryContract = (JsonDictionaryContract)contract;
-                    PopulateDictionary(dictionaryContract.ShouldCreateWrapper ? dictionaryContract.CreateWrapper(target) : (IDictionary)target, reader, dictionaryContract, null, id);
+                    PopulateDictionary((dictionaryContract.ShouldCreateWrapper) ? dictionaryContract.CreateWrapper(target) : (IDictionary)target, reader, dictionaryContract, null, id);
                 }
                 else if (contract.ContractType == JsonContractType.Object)
                 {
@@ -920,11 +920,11 @@ namespace Microsoft.Identity.Json.Serialization
 
         private bool HasNoDefinedType(JsonContract contract)
         {
-            return contract == null || contract.UnderlyingType == typeof(object) || contract.ContractType == JsonContractType.Linq
+            return (contract == null || contract.UnderlyingType == typeof(object) || contract.ContractType == JsonContractType.Linq
 #if HAVE_DYNAMIC
                     || contract.UnderlyingType == typeof(IDynamicMetaObjectProvider)
 #endif
-                ;
+                );
         }
 
         private object EnsureType(JsonReader reader, object value, CultureInfo culture, JsonContract contract, Type targetType)
@@ -1033,7 +1033,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
             else
             {
-                value = CreateValueInternal(reader, property.PropertyType, propertyContract, property, containerContract, containerProperty, useExistingValue ? currentValue : null);
+                value = CreateValueInternal(reader, property.PropertyType, propertyContract, property, containerContract, containerProperty, (useExistingValue) ? currentValue : null);
             }
 
             // always set the value if useExistingValue is false,
@@ -1106,7 +1106,7 @@ namespace Microsoft.Identity.Json.Serialization
                 {
                     propertyContract = GetContractSafe(currentValue.GetType());
 
-                    useExistingValue = !propertyContract.IsReadOnlyOrFixedSize && !propertyContract.UnderlyingType.IsValueType();
+                    useExistingValue = (!propertyContract.IsReadOnlyOrFixedSize && !propertyContract.UnderlyingType.IsValueType());
                 }
             }
 
@@ -1173,7 +1173,7 @@ namespace Microsoft.Identity.Json.Serialization
 
         private bool HasFlag(DefaultValueHandling value, DefaultValueHandling flag)
         {
-            return (value & flag) == flag;
+            return ((value & flag) == flag);
         }
 
         private bool ShouldSetPropertyValue(JsonProperty property, JsonObjectContract contract, object value)
@@ -1862,7 +1862,7 @@ namespace Microsoft.Identity.Json.Serialization
                             }
                             else
                             {
-                                Type t = JsonTokenUtils.IsPrimitiveToken(reader.TokenType) ? reader.ValueType : typeof(IDynamicMetaObjectProvider);
+                                Type t = (JsonTokenUtils.IsPrimitiveToken(reader.TokenType)) ? reader.ValueType : typeof(IDynamicMetaObjectProvider);
 
                                 JsonContract dynamicMemberContract = GetContractSafe(t);
                                 JsonConverter dynamicMemberConverter = GetConverter(dynamicMemberContract, null, null, member);
@@ -1926,7 +1926,7 @@ namespace Microsoft.Identity.Json.Serialization
             ValidationUtils.ArgumentNotNull(creator, nameof(creator));
 
             // only need to keep a track of properties' presence if they are required or a value should be defaulted if missing
-            bool trackPresence = contract.HasRequiredOrDefaultValueProperties || HasFlag(Serializer._defaultValueHandling, DefaultValueHandling.Populate);
+            bool trackPresence = (contract.HasRequiredOrDefaultValueProperties || HasFlag(Serializer._defaultValueHandling, DefaultValueHandling.Populate));
 
             Type objectType = contract.UnderlyingType;
 
@@ -2070,8 +2070,8 @@ namespace Microsoft.Identity.Json.Serialization
                             object createdObjectCollection = property.ValueProvider.GetValue(createdObject);
                             if (createdObjectCollection != null)
                             {
-                                IList createdObjectCollectionWrapper = propertyArrayContract.ShouldCreateWrapper ? propertyArrayContract.CreateWrapper(createdObjectCollection) : (IList)createdObjectCollection;
-                                IList newValues = propertyArrayContract.ShouldCreateWrapper ? propertyArrayContract.CreateWrapper(value) : (IList)value;
+                                IList createdObjectCollectionWrapper = (propertyArrayContract.ShouldCreateWrapper) ? propertyArrayContract.CreateWrapper(createdObjectCollection) : (IList)createdObjectCollection;
+                                IList newValues = (propertyArrayContract.ShouldCreateWrapper) ? propertyArrayContract.CreateWrapper(value) : (IList)value;
 
                                 foreach (object newValue in newValues)
                                 {
@@ -2089,8 +2089,8 @@ namespace Microsoft.Identity.Json.Serialization
                             object createdObjectDictionary = property.ValueProvider.GetValue(createdObject);
                             if (createdObjectDictionary != null)
                             {
-                                IDictionary targetDictionary = dictionaryContract.ShouldCreateWrapper ? dictionaryContract.CreateWrapper(createdObjectDictionary) : (IDictionary)createdObjectDictionary;
-                                IDictionary newValues = dictionaryContract.ShouldCreateWrapper ? dictionaryContract.CreateWrapper(value) : (IDictionary)value;
+                                IDictionary targetDictionary = (dictionaryContract.ShouldCreateWrapper) ? dictionaryContract.CreateWrapper(createdObjectDictionary) : (IDictionary)createdObjectDictionary;
+                                IDictionary newValues = (dictionaryContract.ShouldCreateWrapper) ? dictionaryContract.CreateWrapper(value) : (IDictionary)value;
 
                                 // Manual use of IDictionaryEnumerator instead of foreach to avoid DictionaryEntry box allocations.
                                 IDictionaryEnumerator e = newValues.GetEnumerator();
@@ -2565,7 +2565,7 @@ namespace Microsoft.Identity.Json.Serialization
                 switch (reader.TokenType)
                 {
                     case JsonToken.String:
-                        propertyPresence = CoerceEmptyStringToNull(property.PropertyType, property.PropertyContract, (string)reader.Value)
+                        propertyPresence = (CoerceEmptyStringToNull(property.PropertyType, property.PropertyContract, (string)reader.Value))
                             ? PropertyPresence.Null
                             : PropertyPresence.Value;
                         break;

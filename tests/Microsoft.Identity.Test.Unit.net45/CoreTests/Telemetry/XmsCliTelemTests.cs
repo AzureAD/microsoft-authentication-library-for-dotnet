@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryInternalAPI")]
         public void XmsClientTelemInfoParseTest_XmsCliTelemInfoCorrectFormat()
         {
-            // Act - Parse correctly formatted header
+            //Act - Parse correctly formatted header
             var responseHeaders = new Dictionary<string, string>
             {
                 {"x-ms-clitelem", "1,0,0,,"}
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryInternalAPI")]
         public void XmsClientTelemInfoParseTest_IncorrectFormat()
         {
-            // Act - Parse malformed header - 6 values
+            //Act - Parse malformed header - 6 values
             var responseHeaders = new Dictionary<string, string>
             {
                 {"x-ms-clitelem", "1,2,3,4,5,6"}
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         [TestCategory("TelemetryInternalAPI")]
         public void XmsClientTelemInfoParseTest_IncorrectHeaderVersion()
         {
-            // Act - Parse wrong version of header - should be "1"
+            //Act - Parse wrong version of header - should be "1"
             var responseHeaders = new Dictionary<string, string>
             {
                 {"x-ms-clitelem", "3,0,0,,"}

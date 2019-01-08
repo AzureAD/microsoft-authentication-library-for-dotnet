@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             using (var httpManager = new MockHttpManager())
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                // add mock response for tenant endpoint discovery
+                //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock response for tenant endpoint discovery
+                //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {

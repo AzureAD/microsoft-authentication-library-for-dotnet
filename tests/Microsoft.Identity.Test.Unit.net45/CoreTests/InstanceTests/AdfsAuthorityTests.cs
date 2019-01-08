@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\drs-response.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-OnPremise.json")]
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields-OnPremise.json")]
-    [Ignore] // disable until we support ADFS
+    [Ignore] //disable until we support ADFS
     public class AdfsAuthorityTests
     {
         [TestInitialize]
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock response for on-premise DRS request
+                //add mock response for on-premise DRS request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
 
-                // add mock response for on-premise webfinger request
+                //add mock response for on-premise webfinger request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage()
                     });
 
-                // add mock response for tenant endpoint discovery
+                //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual("https://fs.contoso.com/adfs", instance.SelfSignedJwtAudience);
                 Assert.AreEqual(1, serviceBundle.ValidatedAuthoritiesCache.Count);
 
-                // attempt to do authority validation again. NO network call should be made
+                //attempt to do authority validation again. NO network call should be made
                 instance = Authority.CreateAuthority(serviceBundle, CoreTestConstants.OnPremiseAuthority, true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityType, AuthorityType.Adfs);
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock failure response for on-premise DRS request
+                //add mock failure response for on-premise DRS request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateFailureMessage(HttpStatusCode.NotFound, "not found")
                     });
 
-                // add mock response for cloud DRS request
+                //add mock response for cloud DRS request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -180,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
 
-                // add mock response for on-premise webfinger request
+                //add mock response for on-premise webfinger request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage()
                     });
 
-                // add mock response for tenant endpoint discovery
+                //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -230,7 +230,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock response for tenant endpoint discovery
+                //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -266,7 +266,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock response for on-premise DRS request
+                //add mock response for on-premise DRS request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
 
-                // add mock response for on-premise webfinger request
+                //add mock response for on-premise webfinger request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock response for on-premise DRS request
+                //add mock response for on-premise DRS request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -339,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
 
-                // add mock response for on-premise webfinger request
+                //add mock response for on-premise webfinger request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -382,7 +382,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock failure response for on-premise DRS request
+                //add mock failure response for on-premise DRS request
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
 
-                // add mock response for tenant endpoint discovery
+                //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {

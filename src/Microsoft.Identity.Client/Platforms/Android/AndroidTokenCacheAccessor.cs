@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         private readonly ISharedPreferences _idTokenSharedPreference;
         private readonly ISharedPreferences _accountSharedPreference;
 
-        private readonly RequestContext _requestContext;
+        private RequestContext _requestContext;
 
         public AndroidTokenCacheAccessor()
         {
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             DeleteAll(_accessTokenSharedPreference);
             DeleteAll(_refreshTokenSharedPreference);
             DeleteAll(_idTokenSharedPreference);
-            DeleteAll(_accountSharedPreference);
+            DeleteAll(_accessTokenSharedPreference);
         }
 
         public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)

@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Json.Serialization
             set
             {
                 _extensionDataValueType = value;
-                ExtensionDataIsJToken = value != null && typeof(JToken).IsAssignableFrom(value);
+                ExtensionDataIsJToken = (value != null && typeof(JToken).IsAssignableFrom(value));
             }
         }
 

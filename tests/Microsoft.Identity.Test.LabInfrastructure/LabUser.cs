@@ -79,22 +79,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         [JsonProperty("b2cProvider")]
         public B2CIdentityProvider B2CIdentityProvider { get; set; }
 
-
-        private string _password = null;
-
-        public string Password
-        {
-            get
-            {
-                if (_password == null)
-                {
-                    _password = LabUserHelper.GetUserPassword(this);
-                }
-
-                return _password;
-            }
-        }
-
         public void InitializeHomeUser()
         {
             HomeUser = new LabUser();

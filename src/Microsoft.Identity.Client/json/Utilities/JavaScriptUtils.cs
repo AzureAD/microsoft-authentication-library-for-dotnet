@@ -252,8 +252,8 @@ namespace Microsoft.Identity.Json.Utilities
 
                         if (i > lastWritePosition)
                         {
-                            length = i - lastWritePosition + (isEscapedUnicodeText ? UnicodeTextLength : 0);
-                            int start = isEscapedUnicodeText ? UnicodeTextLength : 0;
+                            length = i - lastWritePosition + ((isEscapedUnicodeText) ? UnicodeTextLength : 0);
+                            int start = (isEscapedUnicodeText) ? UnicodeTextLength : 0;
 
                             if (writeBuffer == null || writeBuffer.Length < length)
                             {

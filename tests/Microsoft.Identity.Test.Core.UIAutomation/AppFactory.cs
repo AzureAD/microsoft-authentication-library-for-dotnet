@@ -32,8 +32,8 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
     /// <summary>
     /// Initializes the app object that represents the main gateway to interact with the app on the device
     /// </summary>
-    public static class AppFactory
-    {
+	public static class AppFactory
+	{
         public static IApp StartApp(Platform platform, string targetApp)
         {
             switch (platform)

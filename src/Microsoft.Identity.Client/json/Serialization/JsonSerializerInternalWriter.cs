@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Json.Serialization
             }
 #endif
 
-#if DOTNET || PORTABLE
+#if (DOTNET || PORTABLE)
             if (value is Guid || value is Uri || value is TimeSpan)
             {
                 s = value.ToString();
@@ -521,7 +521,7 @@ namespace Microsoft.Identity.Json.Serialization
                 }
 
                 memberValue = property.ValueProvider.GetValue(value);
-                memberContract = property.PropertyContract.IsSealed ? property.PropertyContract : GetContractSafe(memberValue);
+                memberContract = (property.PropertyContract.IsSealed) ? property.PropertyContract : GetContractSafe(memberValue);
 
                 if (ShouldWriteProperty(memberValue, contract as JsonObjectContract, property))
                 {
@@ -614,17 +614,17 @@ namespace Microsoft.Identity.Json.Serialization
 
         private bool HasFlag(DefaultValueHandling value, DefaultValueHandling flag)
         {
-            return (value & flag) == flag;
+            return ((value & flag) == flag);
         }
 
         private bool HasFlag(PreserveReferencesHandling value, PreserveReferencesHandling flag)
         {
-            return (value & flag) == flag;
+            return ((value & flag) == flag);
         }
 
         private bool HasFlag(TypeNameHandling value, TypeNameHandling flag)
         {
-            return (value & flag) == flag;
+            return ((value & flag) == flag);
         }
 
         private void SerializeConvertable(JsonWriter writer, JsonConverter converter, object value, JsonContract contract, JsonContainerContract collectionContract, JsonProperty containerProperty)
@@ -755,7 +755,7 @@ namespace Microsoft.Identity.Json.Serialization
             for (int i = values.GetLowerBound(dimension); i <= values.GetUpperBound(dimension); i++)
             {
                 newIndices[dimension] = i;
-                bool isTopLevel = newIndices.Length == values.Rank;
+                bool isTopLevel = (newIndices.Length == values.Rank);
 
                 if (isTopLevel)
                 {
@@ -802,7 +802,7 @@ namespace Microsoft.Identity.Json.Serialization
         {
             bool isReference = ResolveIsReference(contract, member, containerContract, containerProperty) ?? HasFlag(Serializer._preserveReferencesHandling, PreserveReferencesHandling.Arrays);
             // don't make readonly fields that aren't creator parameters the referenced value because they can't be deserialized to
-            isReference = isReference && (member == null || member.Writable || HasCreatorParameter(containerContract, member));
+            isReference = (isReference && (member == null || member.Writable || HasCreatorParameter(containerContract, member)));
 
             bool includeTypeDetails = ShouldWriteType(TypeNameHandling.Arrays, contract, member, containerContract, containerProperty);
             bool writeMetadataObject = isReference || includeTypeDetails;

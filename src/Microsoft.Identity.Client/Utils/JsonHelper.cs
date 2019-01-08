@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (string.IsNullOrEmpty(json))
             {
-                return default;
+                return default(T);
             }
 
             return DeserializeFromJson<T>(json.ToByteArray());
@@ -58,10 +58,10 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (string.IsNullOrEmpty(json))
             {
-                return default;
+                return default(T);
             }
 
-            T result = default;
+            T result = default(T);
             try
             {
                 result = DeserializeFromJson<T>(json.ToByteArray());
@@ -78,14 +78,14 @@ namespace Microsoft.Identity.Client.Utils
         {
             if (jsonByteArray == null || jsonByteArray.Length == 0)
             {
-                return default;
+                return default(T);
             }
 
             T response;
             DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof (T));
             using (MemoryStream stream = new MemoryStream(jsonByteArray))
             {
-                response = (T) serializer.ReadObject(stream);
+                response = ((T) serializer.ReadObject(stream));
             }
 
             return response;

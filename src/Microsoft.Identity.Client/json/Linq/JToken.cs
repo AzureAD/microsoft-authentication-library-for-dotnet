@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <returns><c>true</c> if the tokens are equal; otherwise <c>false</c>.</returns>
         public static bool DeepEquals(JToken t1, JToken t2)
         {
-            return t1 == t2 || (t1 != null && t2 != null && t1.DeepEquals(t2));
+            return (t1 == t2 || (t1 != null && t2 != null && t1.DeepEquals(t2)));
         }
 
         /// <summary>
@@ -432,10 +432,8 @@ namespace Microsoft.Identity.Json.Linq
         {
             using (StringWriter sw = new StringWriter(CultureInfo.InvariantCulture))
             {
-                JsonTextWriter jw = new JsonTextWriter(sw)
-                {
-                    Formatting = formatting
-                };
+                JsonTextWriter jw = new JsonTextWriter(sw);
+                jw.Formatting = formatting;
 
                 WriteTo(jw, converters);
 
@@ -530,7 +528,7 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="bool"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Boolean"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -558,7 +556,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="long"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -646,7 +644,7 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="decimal"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Decimal"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -674,7 +672,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="double"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Double"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -702,7 +700,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="char"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Char"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -730,7 +728,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="int"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Int32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -753,7 +751,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="short"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Int16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -776,7 +774,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="ushort"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="UInt16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -800,7 +798,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="char"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Char"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -824,7 +822,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="byte"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Byte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -871,7 +869,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="int"/> .
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int32"/> .
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -899,7 +897,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="short"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -927,7 +925,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="ushort"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="UInt16"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -956,7 +954,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="byte"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Byte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -984,7 +982,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="sbyte"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="SByte"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1036,7 +1034,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="long"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Int64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1064,7 +1062,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="float"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="Single"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1092,7 +1090,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="decimal"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Decimal"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1115,7 +1113,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="uint"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="UInt32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1144,7 +1142,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="ulong"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Nullable{T}"/> of <see cref="UInt64"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1173,7 +1171,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="double"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Double"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1196,7 +1194,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="float"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Single"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1219,7 +1217,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="string"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="String"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1257,7 +1255,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="uint"/>.
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="UInt32"/>.
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1305,7 +1303,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="byte"/>[].
+        /// Performs an explicit conversion from <see cref="JToken"/> to <see cref="Byte"/>[].
         /// </summary>
         /// <param name="value">The value.</param>
         /// <returns>The result of the conversion.</returns>
@@ -1489,11 +1487,11 @@ namespace Microsoft.Identity.Json.Linq
             return ConvertUtils.ToBigInteger(v.Value);
         }
 #endif
-        #endregion
+#endregion
 
-        #region Cast to operators
+#region Cast to operators
         /// <summary>
-        /// Performs an implicit conversion from <see cref="bool"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Boolean"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1515,7 +1513,7 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="byte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Byte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1525,7 +1523,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="byte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Byte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1535,7 +1533,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="sbyte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="SByte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1546,7 +1544,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="sbyte"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="SByte"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1557,7 +1555,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="bool"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Boolean"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1567,7 +1565,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="long"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1599,7 +1597,7 @@ namespace Microsoft.Identity.Json.Linq
 #endif
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="decimal"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Decimal"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1609,7 +1607,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="double"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Double"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1619,7 +1617,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="short"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Int16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1630,7 +1628,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ushort"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="UInt16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1641,7 +1639,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="int"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Int32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1651,7 +1649,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="int"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1671,7 +1669,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="long"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1681,7 +1679,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="float"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Single"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1691,7 +1689,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="decimal"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Decimal"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1701,7 +1699,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="short"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="Int16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1712,7 +1710,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="ushort"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="UInt16"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1723,7 +1721,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="uint"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="UInt32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1734,7 +1732,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="ulong"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Nullable{T}"/> of <see cref="UInt64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1745,7 +1743,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="double"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Double"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1755,7 +1753,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="float"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Single"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1765,7 +1763,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="string"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="String"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1775,7 +1773,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="uint"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="UInt32"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1786,7 +1784,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ulong"/> to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="UInt64"/> to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -1797,7 +1795,7 @@ namespace Microsoft.Identity.Json.Linq
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="byte"/>[] to <see cref="JToken"/>.
+        /// Performs an implicit conversion from <see cref="Byte"/>[] to <see cref="JToken"/>.
         /// </summary>
         /// <param name="value">The value to create a <see cref="JValue"/> from.</param>
         /// <returns>The <see cref="JValue"/> initialized with the specified value.</returns>
@@ -2166,7 +2164,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JToken"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <returns>A <see cref="JToken"/> populated from the string that contains JSON.</returns>
         public static JToken Parse(string json)
         {
@@ -2176,7 +2174,7 @@ namespace Microsoft.Identity.Json.Linq
         /// <summary>
         /// Load a <see cref="JToken"/> from a string that contains JSON.
         /// </summary>
-        /// <param name="json">A <see cref="string"/> that contains JSON.</param>
+        /// <param name="json">A <see cref="String"/> that contains JSON.</param>
         /// <param name="settings">The <see cref="JsonLoadSettings"/> used to load the JSON.
         /// If this is <c>null</c>, default load settings will be used.</param>
         /// <returns>A <see cref="JToken"/> populated from the string that contains JSON.</returns>
@@ -2260,7 +2258,7 @@ namespace Microsoft.Identity.Json.Linq
 
         bool IJsonLineInfo.HasLineInfo()
         {
-            return Annotation<LineInfoAnnotation>() != null;
+            return (Annotation<LineInfoAnnotation>() != null);
         }
 
         int IJsonLineInfo.LineNumber
@@ -2295,7 +2293,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Selects a <see cref="JToken"/> using a JPath expression. Selects the token that matches the object path.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JPath expression.
         /// </param>
         /// <returns>A <see cref="JToken"/>, or <c>null</c>.</returns>
         public JToken SelectToken(string path)
@@ -2307,7 +2305,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Selects a <see cref="JToken"/> using a JPath expression. Selects the token that matches the object path.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JPath expression.
         /// </param>
         /// <param name="errorWhenNoMatch">A flag to indicate whether an error should be thrown if no tokens are found when evaluating part of the expression.</param>
         /// <returns>A <see cref="JToken"/>.</returns>
@@ -2333,7 +2331,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Selects a collection of elements using a JPath expression.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JPath expression.
         /// </param>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="JToken"/> that contains the selected elements.</returns>
         public IEnumerable<JToken> SelectTokens(string path)
@@ -2345,7 +2343,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Selects a collection of elements using a JPath expression.
         /// </summary>
         /// <param name="path">
-        /// A <see cref="string"/> that contains a JPath expression.
+        /// A <see cref="String"/> that contains a JPath expression.
         /// </param>
         /// <param name="errorWhenNoMatch">A flag to indicate whether an error should be thrown if no tokens are found when evaluating part of the expression.</param>
         /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="JToken"/> that contains the selected elements.</returns>
@@ -2446,7 +2444,7 @@ namespace Microsoft.Identity.Json.Linq
             {
                 if (!(_annotations is object[] annotations))
                 {
-                    return _annotations as T;
+                    return (_annotations as T);
                 }
                 for (int i = 0; i < annotations.Length; i++)
                 {
@@ -2550,7 +2548,7 @@ namespace Microsoft.Identity.Json.Linq
         /// Gets a collection of annotations of the specified type for this <see cref="JToken"/>.
         /// </summary>
         /// <param name="type">The <see cref="Type"/> of the annotations to retrieve.</param>
-        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="object"/> that contains the annotations that match the specified type for this <see cref="JToken"/>.</returns>
+        /// <returns>An <see cref="IEnumerable{T}"/> of <see cref="Object"/> that contains the annotations that match the specified type for this <see cref="JToken"/>.</returns>
         public IEnumerable<object> Annotations(Type type)
         {
             if (type == null)
