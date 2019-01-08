@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Json.Serialization
         /// <value><c>true</c> if the creator has a parameter with the dictionary values; otherwise, <c>false</c>.</value>
         public bool HasParameterizedCreator { get; set; }
 
-        internal bool HasParameterizedCreatorInternal => (HasParameterizedCreator || _parameterizedCreator != null || _parameterizedConstructor != null);
+        internal bool HasParameterizedCreatorInternal => HasParameterizedCreator || _parameterizedCreator != null || _parameterizedConstructor != null;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonDictionaryContract"/> class.
@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Json.Serialization
             DictionaryKeyType = keyType;
             DictionaryValueType = valueType;
 
-#if (NET20 || NET35)
+#if NET20 || NET35
             if (DictionaryValueType != null && ReflectionUtils.IsNullableType(DictionaryValueType))
             {
                 // bug in .NET 2.0 & 3.5 that Dictionary<TKey, Nullable<TValue>> throws an error when adding null via IDictionary[key] = object

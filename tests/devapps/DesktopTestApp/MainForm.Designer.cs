@@ -93,6 +93,7 @@ namespace DesktopTestApp
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.forceRefreshCheckBox = new System.Windows.Forms.CheckBox();
             this.logsTabPage.SuspendLayout();
             this.cacheTabPage.SuspendLayout();
             this.settingsTabPage.SuspendLayout();
@@ -398,6 +399,7 @@ namespace DesktopTestApp
             // publicClientTabPage
             // 
             this.publicClientTabPage.BackColor = System.Drawing.SystemColors.Control;
+            this.publicClientTabPage.Controls.Add(this.forceRefreshCheckBox);
             this.publicClientTabPage.Controls.Add(this.b2cEditProfile);
             this.publicClientTabPage.Controls.Add(this.b2cSilentFlow);
             this.publicClientTabPage.Controls.Add(this.b2cLogin);
@@ -778,6 +780,16 @@ namespace DesktopTestApp
             this.tabControl1.Size = new System.Drawing.Size(676, 814);
             this.tabControl1.TabIndex = 0;
             // 
+            // forceRefreshCheckBox
+            // 
+            this.forceRefreshCheckBox.AutoSize = true;
+            this.forceRefreshCheckBox.Location = new System.Drawing.Point(262, 85);
+            this.forceRefreshCheckBox.Name = "forceRefreshCheckBox";
+            this.forceRefreshCheckBox.Size = new System.Drawing.Size(93, 17);
+            this.forceRefreshCheckBox.TabIndex = 43;
+            this.forceRefreshCheckBox.Text = "Force Refresh";
+            this.forceRefreshCheckBox.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -875,6 +887,7 @@ namespace DesktopTestApp
         private Button b2cSilentFlow;
         private Button b2cEditProfile;
         private RadioButton noPrompt;
+        private CheckBox forceRefreshCheckBox;
     }
 }
 

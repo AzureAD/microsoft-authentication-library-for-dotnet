@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Json.Utilities
         {
             if (collection != null)
             {
-                return (collection.Count == 0);
+                return collection.Count == 0;
             }
             return true;
         }

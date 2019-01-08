@@ -45,8 +45,10 @@ namespace Microsoft.Identity.Json.Serialization
             // prefix the message in the stringwriter to avoid concat with a potentially large JSON string
             _sw.Write("Deserialized JSON: " + Environment.NewLine);
 
-            _textWriter = new JsonTextWriter(_sw);
-            _textWriter.Formatting = Formatting.Indented;
+            _textWriter = new JsonTextWriter(_sw)
+            {
+                Formatting = Formatting.Indented
+            };
         }
 
         public string GetDeserializedJsonMessage()

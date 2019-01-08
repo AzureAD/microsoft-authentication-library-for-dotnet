@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
         public const string ClientId = "";
         public const string RedirectUri = "http://localhost";
         public string[] MsalScopes = { "https://graph.microsoft.com/.default" };
-        private string _password = "";
+        private readonly string _password = "";
 
         static ApplicationGrantIntegrationTest()
         {
