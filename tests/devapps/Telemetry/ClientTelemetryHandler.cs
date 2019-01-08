@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             UploadEventsToAria();
         }
 
-        public void SetEventProperties(List<Dictionary<string, string>> events)
+        private void SetEventProperties(List<Dictionary<string, string>> events)
         {
             Guid scenarioId = Guid.NewGuid();
             Console.WriteLine("{0} event(s) received for scenarioId {1}",
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             }
         }
 
-        public void UploadEventsToAria()
+        private void UploadEventsToAria()
         {
             LogManager.UploadNow();
             LogManagerProvider.DestroyLogManager(ariaTenantId);
