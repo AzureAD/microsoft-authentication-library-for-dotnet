@@ -331,8 +331,7 @@ namespace Microsoft.Identity.Client
                 ServiceBundle,
                 CreateRequestParameters(authority, scopes, account, UserTokenCache),
                 apiId,
-                forceRefresh,
-                userProvidedRefreshToken);
+                forceRefresh);
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -342,10 +341,9 @@ namespace Microsoft.Identity.Client
             var reqParams = new AuthenticationRequestParameters
             {
                 SliceParameters = SliceParameters,
-                Authority = Instance.Authority.CreateAuthority(ServiceBundle, this.Authority, false),
+                Authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, false),
                 ClientId = ClientId,
                 TokenCache = UserTokenCache,
-                //Account = account,
                 Scope = new SortedSet<string>(),
                 RedirectUri = new Uri(RedirectUri),
                 RequestContext = CreateRequestContext(Guid.Empty),
@@ -354,11 +352,10 @@ namespace Microsoft.Identity.Client
                 ExchangingRefreshToken = true
             };
 
-            var handler = new SilentRequest(
+            var handler = new ByRefreshTokenRequest(
                 ServiceBundle,
                 reqParams,
                 ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority,
-                false,
                 userProvidedRefreshToken);
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);

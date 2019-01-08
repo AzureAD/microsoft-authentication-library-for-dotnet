@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,19 +36,19 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
-    internal class SilentRequest : RequestBase
+    internal class ByRefreshTokenRequest : RequestBase
     {
-        public SilentRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            bool forceRefresh)
-            : base(serviceBundle, authenticationRequestParameters, apiId, true)
-        {
-            ForceRefresh = forceRefresh;
-        }
+        private string _userProvidedRefreshToken;
 
-        public bool ForceRefresh { get; }
+        public ByRefreshTokenRequest(
+        IServiceBundle serviceBundle,
+        AuthenticationRequestParameters authenticationRequestParameters,
+        ApiEvent.ApiIds apiId,
+        string userProvidedRefreshToken)
+        : base(serviceBundle, authenticationRequestParameters, apiId, false)
+        {
+            _userProvidedRefreshToken = userProvidedRefreshToken;
+        }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -58,46 +59,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Token cache is set to null. Silent requests cannot be executed.");
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenItem = null;
-
-            // Look for access token
-            if (!ForceRefresh)
-            {
-                msalAccessTokenItem =
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
-            }
-
-            if (msalAccessTokenItem != null)
-            {
-                var msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
-                    msalAccessTokenItem.GetIdTokenItemKey(),
-                    AuthenticationRequestParameters.RequestContext);
-
-                return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
-            }
-
-            var msalRefreshTokenItem =
-                await TokenCache.FindRefreshTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
-
-            if (msalRefreshTokenItem == null)
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
-
-                throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoTokensFoundError,
-                    "No Refresh Token found in the cache");
-            }
-
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Acquireing access token...");
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
+            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(_userProvidedRefreshToken), cancellationToken)
                                         .ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
             {
-                msalTokenResponse.RefreshToken = msalRefreshTokenItem.Secret;
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
+                    "Refresh token was missing from the token refresh response");
+                throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 
             return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);

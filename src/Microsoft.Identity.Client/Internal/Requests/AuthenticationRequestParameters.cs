@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool IsClientCredentialRequest { get; set; } = false;
         public string SliceParameters { get; set; }
         public bool SendCertificate { get; set; }
-        public bool ExchangingRefreshToken { get; set; }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
         public ClientCredential ClientCredential { get; set; }

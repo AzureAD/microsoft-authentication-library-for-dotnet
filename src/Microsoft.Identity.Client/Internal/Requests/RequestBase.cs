@@ -67,14 +67,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
-            string userProvidedRefreshToken = "")
+            bool validateScopes)
         {
             ServiceBundle = serviceBundle;
             TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
             
             AuthenticationRequestParameters = authenticationRequestParameters;
-            if ((authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0) && String.IsNullOrWhiteSpace(userProvidedRefreshToken))
+            if (validateScopes && (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0))
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
             }
