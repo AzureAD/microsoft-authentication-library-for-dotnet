@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         public iOSTokenCacheAccessor()
         {
             //keychainGroup = GetTeamId() + '.' + DefaultKeychainGroup;
-            keychainGroup = "group.com.xamarin.xtcapp3.group1";
+            keychainGroup = GetBundleId();
             Console.WriteLine(LogFinder + keychainGroup);
 
         }
