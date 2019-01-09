@@ -29,10 +29,11 @@ using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.Integration
+namespace Microsoft.Identity.Test.Integration.HeadlessTests
 {
     // Note: these tests require permission to a KeyVault Microsoft account; 
     // Please ignore them if you are not a Microsoft FTE, they will run as part of the CI build

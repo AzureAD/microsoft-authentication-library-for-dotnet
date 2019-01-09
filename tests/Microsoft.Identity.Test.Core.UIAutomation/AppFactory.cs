@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using Xamarin.UITest;
 
 namespace Microsoft.Identity.Test.Core.UIAutomation
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
                 case Platform.iOS:
                     return ConfigureApp.iOS.StartApp();
                 default:
-                    throw new PlatformNotSupportedException();
+                    throw new PlatformNotSupportedException("Unkown platform: " + platform);
             }
         }
     }

@@ -29,10 +29,11 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Unit;
 
-namespace Microsoft.Identity.Test.Unit
+namespace Microsoft.Identity.Test.Common
 {
-    internal static class TestCommon
+    public static class TestCommon
     {
         public static void ResetStateAndInitMsal()
         {
@@ -51,10 +52,11 @@ namespace Microsoft.Identity.Test.Unit
             Logger.DefaultLoggingEnabled = false;
         }
 
-        public static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
+        internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
             mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
+
     }
 }
