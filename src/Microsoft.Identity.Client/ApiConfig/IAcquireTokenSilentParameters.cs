@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    public interface IAcquireTokenSilentParameters : IAcquireTokenCommonParameters
+    internal interface IAcquireTokenSilentParameters : IAcquireTokenCommonParameters
     {
         /// <summary>
         /// </summary>

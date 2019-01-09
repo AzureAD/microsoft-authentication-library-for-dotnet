@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    public interface IAcquireTokenWithIntegratedWindowsAuthParameters : IAcquireTokenCommonParameters,
+    internal interface IAcquireTokenWithIntegratedWindowsAuthParameters : IAcquireTokenCommonParameters,
                                                                         IAcquireTokenWithUsernameParameters
     {
     }

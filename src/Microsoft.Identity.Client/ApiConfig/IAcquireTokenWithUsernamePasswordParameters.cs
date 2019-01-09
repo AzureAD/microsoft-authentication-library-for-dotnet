@@ -29,8 +29,8 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    public interface IAcquireTokenWithUsernamePasswordParameters : IAcquireTokenCommonParameters,
-                                                                   IAcquireTokenWithUsernameParameters
+    internal interface IAcquireTokenWithUsernamePasswordParameters : IAcquireTokenCommonParameters,
+                                                                     IAcquireTokenWithUsernameParameters
     {
         /// <summary>
         /// </summary>

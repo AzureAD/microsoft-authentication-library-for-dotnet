@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
@@ -34,18 +35,26 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithDeviceCodeParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder, IAcquireTokenWithDeviceCodeParameters>
+        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder>
     {
+        /// <inheritdoc />
+        public AcquireTokenWithDeviceCodeParameterBuilder(IPublicClientApplication publicClientApplication)
+            : base(publicClientApplication)
+        {
+        }
+
         /// <summary>
         /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
         /// <param name="deviceCodeResultCallback"></param>
         /// <returns></returns>
         internal static AcquireTokenWithDeviceCodeParameterBuilder Create(
+            IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            return new AcquireTokenWithDeviceCodeParameterBuilder()
+            return new AcquireTokenWithDeviceCodeParameterBuilder(publicClientApplication)
                    .WithScopes(scopes).WithDeviceCodeResultCallback(deviceCodeResultCallback);
         }
 
@@ -58,6 +67,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             Parameters.DeviceCodeResultCallback = deviceCodeResultCallback;
             return this;
+        }
+
+        /// <inheritdoc />
+        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        {
+            return executor.ExecuteAsync((IAcquireTokenWithDeviceCodeParameters)Parameters, cancellationToken);
         }
     }
 }

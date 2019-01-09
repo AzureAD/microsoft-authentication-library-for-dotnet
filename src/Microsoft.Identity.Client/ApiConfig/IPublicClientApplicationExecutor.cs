@@ -25,36 +25,31 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenCommonParameters
+    internal interface IPublicClientApplicationExecutor
     {
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> Scopes { get; }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenInteractiveParameters interactiveParameters,
+            CancellationToken cancellationToken);
 
-        /// <summary>
-        /// </summary>
-        IAccount Account { get; }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenSilentParameters silentParameters,
+            CancellationToken cancellationToken);
 
-        /// <summary>
-        /// </summary>
-        string LoginHint { get; }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
+            CancellationToken cancellationToken);
 
-        /// <summary>
-        /// </summary>
-        IReadOnlyDictionary<string, string> ExtraQueryParameters { get; }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
+            CancellationToken cancellationToken);
 
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> ExtraScopesToConsent { get; }
-
-        /// <summary>
-        /// </summary>
-        string AuthorityOverride { get; }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
+            CancellationToken cancellationToken);
     }
 }

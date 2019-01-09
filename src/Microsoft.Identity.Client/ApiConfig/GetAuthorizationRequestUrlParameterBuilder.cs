@@ -26,9 +26,13 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     ///     NOTE:  a few of the methods in AbstractAcquireTokenParameterBuilder (e.g. account) don't make sense here.
     ///     Do we want to create a further base that contains ALL of the common methods, and then have another one including
@@ -36,15 +40,24 @@ namespace Microsoft.Identity.Client.ApiConfig
     ///     that are only used for AcquireToken?
     /// </summary>
     public sealed class GetAuthorizationRequestUrlParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder, IGetAuthorizationRequestUrlParameters>
+        AbstractCcaAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>
     {
+        /// <inheritdoc />
+        public GetAuthorizationRequestUrlParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+            : base(confidentialClientApplication)
+        {
+        }
+
         /// <summary>
         /// </summary>
+        /// <param name="confidentialClientApplication"></param>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        internal static GetAuthorizationRequestUrlParameterBuilder Create(IEnumerable<string> scopes)
+        internal static GetAuthorizationRequestUrlParameterBuilder Create(
+            IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes)
         {
-            return new GetAuthorizationRequestUrlParameterBuilder().WithScopes(scopes);
+            return new GetAuthorizationRequestUrlParameterBuilder(confidentialClientApplication).WithScopes(scopes);
         }
 
         /// <summary>
@@ -56,5 +69,12 @@ namespace Microsoft.Identity.Client.ApiConfig
             Parameters.RedirectUri = redirectUri;
             return this;
         }
+
+        /// <inheritdoc />
+        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        {
+            return executor.ExecuteAsync((IGetAuthorizationRequestUrlParameters)Parameters, cancellationToken);
+        }
     }
+#endif
 }

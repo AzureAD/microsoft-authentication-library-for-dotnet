@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public interface IAcquireTokenForClientParameters : IAcquireTokenCommonParameters
+    internal interface IAcquireTokenForClientParameters : IAcquireTokenCommonParameters
     {
         /// <summary>
         /// </summary>
@@ -38,6 +38,6 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        bool WithForClientCertificate { get; }
+        bool WithSendX5C { get; }
     }
 }

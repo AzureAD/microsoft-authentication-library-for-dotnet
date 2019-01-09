@@ -26,8 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -35,13 +33,23 @@ namespace Microsoft.Identity.Client.ApiConfig
 
     /// <summary>
     /// </summary>
-    public sealed class AcquireTokenForClientParameterBuilder :
-        AbstractCcaAcquireTokenParameterBuilder<AcquireTokenForClientParameterBuilder>
+    public static class ConfidentialClientApplicationExtensions
     {
-        /// <inheritdoc />
-        public AcquireTokenForClientParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
-            : base(confidentialClientApplication)
+        /// <summary>
+        /// </summary>
+        /// <param name="confidentialClientApplication"></param>
+        /// <param name="scopes"></param>
+        /// <param name="authorizationCode"></param>
+        /// <returns></returns>
+        public static AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenForAuthorizationCode(
+            this IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes,
+            string authorizationCode)
         {
+            return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
+                confidentialClientApplication,
+                scopes,
+                authorizationCode);
         }
 
         /// <summary>
@@ -49,37 +57,39 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="confidentialClientApplication"></param>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        internal static AcquireTokenForClientParameterBuilder Create(
-            IConfidentialClientApplication confidentialClientApplication,
+        public static AcquireTokenForClientParameterBuilder AcquireTokenForClient(
+            this IConfidentialClientApplication confidentialClientApplication,
             IEnumerable<string> scopes)
         {
-            return new AcquireTokenForClientParameterBuilder(confidentialClientApplication).WithScopes(scopes);
+            return AcquireTokenForClientParameterBuilder.Create(confidentialClientApplication, scopes);
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="forceRefresh"></param>
+        /// <param name="confidentialClientApplication"></param>
+        /// <param name="scopes"></param>
+        /// <param name="userAssertion"></param>
         /// <returns></returns>
-        public AcquireTokenForClientParameterBuilder WithForceRefresh(bool forceRefresh)
+        public static AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(
+            this IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes,
+            UserAssertion userAssertion)
         {
-            Parameters.ForceRefresh = forceRefresh;
-            return this;
+            return AcquireTokenOnBehalfOfParameterBuilder.Create(confidentialClientApplication, scopes, userAssertion);
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="withSendX5C"></param>
+        /// <param name="confidentialClientApplication"></param>
+        /// <param name="scopes"></param>
+        /// <param name="account"></param>
         /// <returns></returns>
-        public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
+        public static AcquireTokenSilentCcaParameterBuilder AcquireTokenSilent(
+            this IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes,
+            IAccount account)
         {
-            Parameters.WithSendX5C = withSendX5C;
-            return this;
-        }
-
-        /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
-        {
-            return executor.ExecuteAsync((IAcquireTokenForClientParameters)Parameters, cancellationToken);
+            return AcquireTokenSilentCcaParameterBuilder.Create(confidentialClientApplication, scopes, account);
         }
     }
 #endif

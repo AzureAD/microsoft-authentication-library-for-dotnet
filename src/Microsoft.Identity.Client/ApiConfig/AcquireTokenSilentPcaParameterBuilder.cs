@@ -31,13 +31,14 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+    /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public sealed class AcquireTokenWithUsernamePasswordParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
+    public sealed class AcquireTokenSilentPcaParameterBuilder :
+        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenSilentPcaParameterBuilder>
     {
         /// <inheritdoc />
-        public AcquireTokenWithUsernamePasswordParameterBuilder(IPublicClientApplication publicClientApplication)
+        public AcquireTokenSilentPcaParameterBuilder(IPublicClientApplication publicClientApplication)
             : base(publicClientApplication)
         {
         }
@@ -46,35 +47,29 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </summary>
         /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="account"></param>
         /// <returns></returns>
-        internal static AcquireTokenWithUsernamePasswordParameterBuilder Create(
+        internal static AcquireTokenSilentPcaParameterBuilder Create(
             IPublicClientApplication publicClientApplication,
-            IEnumerable<string> scopes,
-            string username,
-            string password)
+            IEnumerable<string> scopes, IAccount account)
         {
-            return new AcquireTokenWithUsernamePasswordParameterBuilder(publicClientApplication)
-                   .WithScopes(scopes).WithUsername(username).WithPassword(password);
+            return new AcquireTokenSilentPcaParameterBuilder(publicClientApplication).WithScopes(scopes).WithAccount(account);
         }
 
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithUsername(string username)
+        /// <summary>
+        /// </summary>
+        /// <param name="forceRefresh"></param>
+        /// <returns></returns>
+        public AcquireTokenSilentPcaParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            Parameters.Username = username;
-            return this;
-        }
-
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(string password)
-        {
-            Parameters.Password = password;
+            Parameters.ForceRefresh = forceRefresh;
             return this;
         }
 
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenWithUsernamePasswordParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync((IAcquireTokenSilentParameters)Parameters, cancellationToken);
         }
     }
 }

@@ -25,34 +25,31 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// </summary>
-    public sealed class AcquireTokenSilentParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder, IAcquireTokenSilentParameters>
+    internal interface IConfidentialClientApplicationExecutor
     {
-        /// <summary>
-        /// </summary>
-        /// <param name="scopes"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        internal static AcquireTokenSilentParameterBuilder Create(IEnumerable<string> scopes, IAccount account)
-        {
-            return new AcquireTokenSilentParameterBuilder().WithScopes(scopes).WithAccount(account);
-        }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
+            CancellationToken cancellationToken);
 
-        /// <summary>
-        /// </summary>
-        /// <param name="forceRefresh"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
-        {
-            Parameters.ForceRefresh = forceRefresh;
-            return this;
-        }
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenForClientParameters clientParameters,
+            CancellationToken cancellationToken);
+
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenOnBehalfOfParameters onBehalfOfParameters,
+            CancellationToken cancellationToken);
+
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenSilentParameters silentParameters,
+            CancellationToken cancellationToken);
+
+        Task<AuthenticationResult> ExecuteAsync(
+            IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
+            CancellationToken cancellationToken);
     }
 }

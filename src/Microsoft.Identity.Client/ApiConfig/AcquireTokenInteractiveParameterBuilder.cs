@@ -27,6 +27,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 #if ANDROID
 using Android.App;
@@ -42,15 +44,30 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// </summary>
     [CLSCompliant(false)]
     public sealed class AcquireTokenInteractiveParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder, IAcquireTokenInteractiveParameters>
+        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
     {
+        private object _ownerWindow;
+
+        /// <inheritdoc />
+        internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplication publicClientApplication)
+            : base(publicClientApplication)
+        {
+        }
+
         /// <summary>
         /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
+        /// <param name="parent"></param>
         /// <returns></returns>
-        internal static AcquireTokenInteractiveParameterBuilder Create(IEnumerable<string> scopes)
+        internal static AcquireTokenInteractiveParameterBuilder Create(
+            IPublicClientApplication publicClientApplication, 
+            IEnumerable<string> scopes,
+            object parent)
         {
-            return new AcquireTokenInteractiveParameterBuilder().WithScopes(scopes);
+            return new AcquireTokenInteractiveParameterBuilder(publicClientApplication)
+                .WithScopes(scopes)
+                .WithParent(parent);
         }
 
         /// <summary>
@@ -75,37 +92,50 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 #endif
-#if ANDROID
-        /// <summary>
-        /// </summary>
-        /// <param name="activity"></param>
-        /// <returns></returns>
-        public AcquireTokenInteractiveParameterBuilder WithParentActivity(Activity activity)
+
+        private AcquireTokenInteractiveParameterBuilder WithParent(object parent)
         {
-            Parameters.UiParent.SetAndroidActivity(activity);
-            return this;
-        }
-#endif
-#if DESKTOP
-        /// <summary>
-        /// </summary>
-        /// <param name="ownerWindow"></param>
-        /// <returns></returns>
-        public AcquireTokenInteractiveParameterBuilder WithOwnerWindow(IWin32Window ownerWindow)
-        {
-            Parameters.UiParent.SetOwnerWindow(ownerWindow);
+            _ownerWindow = parent;
             return this;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="ownerWindow"></param>
-        /// <returns></returns>
-        public AcquireTokenInteractiveParameterBuilder WithOwnerWindow(IntPtr ownerWindow)
+        /// <inheritdoc />
+        protected override void Validate()
         {
-            Parameters.UiParent.SetOwnerWindow(ownerWindow);
-            return this;
-        }
+            base.Validate();
+#if ANDROID
+            if (_ownerWindow is Activity activity)
+            {
+                Parameters.UiParent.SetAndroidActivity(activity);
+            }
+            else
+            {
+                throw new InvalidOperationException("Activity is required for parent object on Android.");
+            }
+
+#elif DESKTOP
+            if (_ownerWindow is IWin32Window win32Window)
+            {
+                Parameters.UiParent.SetOwnerWindow(win32Window);
+            }
+            else if (_ownerWindow is IntPtr intPtrWindow)
+            {
+                Parameters.UiParent.SetOwnerWindow(intPtrWindow);
+            }
+            // It's ok on Windows Desktop to not have an owner window, the system will just center on the display
+            // instead of a parent.
+#else
+            if (_ownerWindow != null)
+            {
+                // TODO: Someone set an owner window and we're going to ignore it.  Should we throw?
+            }
 #endif
+        }
+
+        /// <inheritdoc />
+        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        {
+            return executor.ExecuteAsync((IAcquireTokenInteractiveParameters)Parameters, cancellationToken);
+        }
     }
 }

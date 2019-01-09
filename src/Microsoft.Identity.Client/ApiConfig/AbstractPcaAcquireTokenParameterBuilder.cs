@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -33,48 +33,39 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    public sealed class AcquireTokenWithUsernamePasswordParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
+    /// <typeparam name="T"></typeparam>
+    public abstract class AbstractPcaAcquireTokenParameterBuilder<T>
+        : AbstractAcquireTokenParameterBuilder<T>
+        where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        /// <inheritdoc />
-        public AcquireTokenWithUsernamePasswordParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="publicClientApplication"></param>
+        protected AbstractPcaAcquireTokenParameterBuilder(IPublicClientApplication publicClientApplication)
         {
+            PublicClientApplication = publicClientApplication;
+        }
+
+        internal abstract Task<AuthenticationResult> ExecuteAsync(
+            IPublicClientApplicationExecutor executor,
+            CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            if (PublicClientApplication is IPublicClientApplicationExecutor executor)
+            {
+                Validate();
+                return ExecuteAsync(executor, cancellationToken);
+            }
+
+            throw new InvalidOperationException(
+                "PublicClientApplication implementation does not implement IPublicClientApplicationExecutor.");
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="publicClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
-        internal static AcquireTokenWithUsernamePasswordParameterBuilder Create(
-            IPublicClientApplication publicClientApplication,
-            IEnumerable<string> scopes,
-            string username,
-            string password)
-        {
-            return new AcquireTokenWithUsernamePasswordParameterBuilder(publicClientApplication)
-                   .WithScopes(scopes).WithUsername(username).WithPassword(password);
-        }
-
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithUsername(string username)
-        {
-            Parameters.Username = username;
-            return this;
-        }
-
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(string password)
-        {
-            Parameters.Password = password;
-            return this;
-        }
-
-        /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
-        {
-            return executor.ExecuteAsync((IAcquireTokenWithUsernamePasswordParameters)Parameters, cancellationToken);
-        }
+        protected IPublicClientApplication PublicClientApplication { get; }
     }
 }

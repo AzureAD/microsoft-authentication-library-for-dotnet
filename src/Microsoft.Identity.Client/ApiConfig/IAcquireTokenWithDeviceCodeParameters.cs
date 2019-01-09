@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    public interface IAcquireTokenWithDeviceCodeParameters : IAcquireTokenCommonParameters
+    internal interface IAcquireTokenWithDeviceCodeParameters : IAcquireTokenCommonParameters
     {
         /// <summary>
         /// </summary>

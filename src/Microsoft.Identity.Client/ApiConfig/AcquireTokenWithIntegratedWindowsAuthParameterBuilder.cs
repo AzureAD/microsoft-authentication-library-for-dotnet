@@ -26,20 +26,32 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithIntegratedWindowsAuthParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder, IAcquireTokenWithIntegratedWindowsAuthParameters>
+        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
     {
-        /// <summary>
-        /// </summary>
-        /// <returns></returns>
-        internal static AcquireTokenWithIntegratedWindowsAuthParameterBuilder Create(IEnumerable<string> scopes)
+        /// <inheritdoc />
+        public AcquireTokenWithIntegratedWindowsAuthParameterBuilder(IPublicClientApplication publicClientApplication)
+            : base(publicClientApplication)
         {
-            return new AcquireTokenWithIntegratedWindowsAuthParameterBuilder().WithScopes(scopes);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="publicClientApplication"></param>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        internal static AcquireTokenWithIntegratedWindowsAuthParameterBuilder Create(
+            IPublicClientApplication publicClientApplication, IEnumerable<string> scopes)
+        {
+            return new AcquireTokenWithIntegratedWindowsAuthParameterBuilder(publicClientApplication).WithScopes(scopes);
         }
 
         /// <summary>
@@ -50,6 +62,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             Parameters.Username = username;
             return this;
+        }
+
+        /// <inheritdoc />
+        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        {
+            return executor.ExecuteAsync((IAcquireTokenWithIntegratedWindowsAuthParameters)Parameters, cancellationToken);
         }
     }
 }

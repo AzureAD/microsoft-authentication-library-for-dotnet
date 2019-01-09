@@ -31,50 +31,48 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
+    /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public sealed class AcquireTokenWithUsernamePasswordParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
+    public sealed class AcquireTokenSilentCcaParameterBuilder :
+        AbstractCcaAcquireTokenParameterBuilder<AcquireTokenSilentCcaParameterBuilder>
     {
         /// <inheritdoc />
-        public AcquireTokenWithUsernamePasswordParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        public AcquireTokenSilentCcaParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+            : base(confidentialClientApplication)
         {
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="publicClientApplication"></param>
+        /// <param name="confidentialClientApplication"></param>
         /// <param name="scopes"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="account"></param>
         /// <returns></returns>
-        internal static AcquireTokenWithUsernamePasswordParameterBuilder Create(
-            IPublicClientApplication publicClientApplication,
-            IEnumerable<string> scopes,
-            string username,
-            string password)
+        internal static AcquireTokenSilentCcaParameterBuilder Create(
+            IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes, IAccount account)
         {
-            return new AcquireTokenWithUsernamePasswordParameterBuilder(publicClientApplication)
-                   .WithScopes(scopes).WithUsername(username).WithPassword(password);
+            return new AcquireTokenSilentCcaParameterBuilder(confidentialClientApplication).WithScopes(scopes).WithAccount(account);
         }
 
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithUsername(string username)
+        /// <summary>
+        /// </summary>
+        /// <param name="forceRefresh"></param>
+        /// <returns></returns>
+        public AcquireTokenSilentCcaParameterBuilder WithForceRefresh(bool forceRefresh)
         {
-            Parameters.Username = username;
-            return this;
-        }
-
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(string password)
-        {
-            Parameters.Password = password;
+            Parameters.ForceRefresh = forceRefresh;
             return this;
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenWithUsernamePasswordParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync((IAcquireTokenSilentParameters)Parameters, cancellationToken);
         }
     }
+#endif
 }

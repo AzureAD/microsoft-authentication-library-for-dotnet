@@ -27,22 +27,36 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenByAuthorizationCodeParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder, IAcquireTokenByAuthorizationCodeParameters>
+        AbstractCcaAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
     {
+        /// <inheritdoc />
+        public AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+            : base(confidentialClientApplication)
+        {
+        }
+
         /// <summary>
         /// </summary>
+        /// <param name="confidentialClientApplication"></param>
         /// <param name="scopes"></param>
         /// <param name="authorizationCode"></param>
         /// <returns></returns>
-        internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(IEnumerable<string> scopes, string authorizationCode)
+        internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
+            IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes, 
+            string authorizationCode)
         {
-            return new AcquireTokenByAuthorizationCodeParameterBuilder()
+            return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplication)
                    .WithScopes(scopes).WithAuthorizationCode(authorizationCode);
         }
 
@@ -62,5 +76,12 @@ namespace Microsoft.Identity.Client.ApiConfig
                 throw new ArgumentException("AuthorizationCode can not be null or whitespace", nameof(Parameters.AuthorizationCode));
             }
         }
+
+        /// <inheritdoc />
+        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        {
+            return executor.ExecuteAsync((IAcquireTokenByAuthorizationCodeParameters)Parameters, cancellationToken);
+        }
     }
+#endif
 }

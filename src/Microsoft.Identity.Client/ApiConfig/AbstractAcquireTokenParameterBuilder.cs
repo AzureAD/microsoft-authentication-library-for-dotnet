@@ -28,21 +28,25 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
-    // TODO: we should only have values in here publicly that are useful for ALL acquire token usages
-    // (e.g. WithExtraQueryParameters).  Which ones don't make the cut and need to be moved up the 
-    // inheritance hierarchy?
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    /// <typeparam name="TParams"></typeparam>
-    public abstract class AbstractAcquireTokenParameterBuilder<T, TParams>
-        where T : AbstractAcquireTokenParameterBuilder<T, TParams>
-        where TParams : IAcquireTokenCommonParameters
+    public abstract class AbstractAcquireTokenParameterBuilder<T>
+        where T : AbstractAcquireTokenParameterBuilder<T>
     {
         internal AcquireTokenParameters Parameters { get; } = new AcquireTokenParameters();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// </summary>
@@ -114,16 +118,6 @@ namespace Microsoft.Identity.Client.ApiConfig
             {
                 throw new ArgumentException("Scopes cannot be null", nameof(Parameters.Scopes));
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public TParams Build()
-        {
-            Validate();
-            return (TParams)(Parameters as IAcquireTokenCommonParameters);
         }
     }
 }
