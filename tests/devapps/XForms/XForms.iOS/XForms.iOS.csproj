@@ -144,7 +144,7 @@
       <Version>0.0.8</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
-      <Version>3.4.0.1008975</Version>
+      <Version>2.5.0.122203</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.TestCloud.Agent">
       <Version>0.21.7</Version>

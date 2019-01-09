@@ -30,8 +30,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Core.UIAutomation;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.UIAutomation.infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
