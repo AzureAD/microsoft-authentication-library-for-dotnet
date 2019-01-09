@@ -90,7 +90,6 @@ namespace Microsoft.Identity.Test.UIAutomation
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
                 B2CLocalAccountAcquireTokenTest,
-                //B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest,
                 B2CFacebookEditPolicyAcquireTokenTest
             };
 
@@ -233,16 +232,6 @@ namespace Microsoft.Identity.Test.UIAutomation
         public void B2CLocalAccountAcquireTokenTest()
         {
             _msalMobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
-        }
-
-        /// <summary>
-        /// B2C acquire token with local account 
-        /// login.microsoftonline.com authority
-        /// with subsequent silent call
-        /// </summary>
-        public void B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest()
-        {
-            _msalMobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), false);
         }
 
         /// <summary>
