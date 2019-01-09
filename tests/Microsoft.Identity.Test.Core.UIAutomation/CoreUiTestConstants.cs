@@ -56,10 +56,10 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
         //MSAL test app
         public const string DefaultScope = "User.Read";
-        public const string AcquirePageID = "Acquire";
-        public const string CachePageID = "Cache";
-        public const string SettingsPageID = "Settings";
-        public const string LogPageId = "Log";
+        public const string AcquirePageID = "AcquirePage";
+        public const string CachePageID = "CachePage";
+        public const string SettingsPageID = "SettingsPage";
+        public const string LogPageId = "LogPage";
         public const string ScopesEntryID = "scopesList";
         public const string UiBehaviorPickerID = "uiBehavior";
         public const string SelectUser = "userList";
