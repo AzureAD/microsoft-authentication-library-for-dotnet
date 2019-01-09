@@ -83,6 +83,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
         }
 
+        // Will remove in v3.
+        public void SetIOSKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            if (keychainSecurityGroup == null)
+            {
+                keychainGroup = GetBundleId();
+            }
+            else
+            {
+                keychainGroup = keychainSecurityGroup;
+            }
+        }
+
         private string GetTeamId()
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)

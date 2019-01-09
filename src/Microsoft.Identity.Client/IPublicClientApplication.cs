@@ -49,6 +49,14 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>This API may change in future release.</remarks>
         string iOSKeychainSecurityGroup { get; set; }
+
+        /// <summary>
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
+        /// If you use this property, you MUST add the capability to your Application Entitlement.
+        /// When using this property, the value must contain the TeamId prefix, which is why this will be obsolete in future releases.
+        /// </summary>
+        /// <remarks>This API will be removed in MSAL v3.x. See https://aka.ms/msal-net-ios-keychain-security-group for details</remarks>
+        string KeychainSecurityGroup { get; set; }
 #endif
 
 #if WINDOWS_APP

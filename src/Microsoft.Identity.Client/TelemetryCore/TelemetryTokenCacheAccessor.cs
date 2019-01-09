@@ -49,6 +49,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             _tokenCacheAccessor.SetKeychainSecurityGroup(keychainSecurityGroup);
         }
+
+        // Will remove in v3.
+        public void SetIOSKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            _tokenCacheAccessor.SetIOSKeychainSecurityGroup(keychainSecurityGroup);
+        }
 #endif
 
         // The content of this class has to be placed outside of its base class TokenCacheAccessor,
