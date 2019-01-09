@@ -71,24 +71,24 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
             XamarinUITestController.IsiOS = true;
         }
 
-        /// <summary>
-        /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
-        /// </summary>
-        [Test]
-        public void AcquireTokenTest()
-        {
-            XamarinUITestController.IsiOS = true;
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenTest()
+        //{
+        //    XamarinUITestController.IsiOS = true;
+        //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+        //}
 
-        /// <summary>
-        /// Runs through the standard acquire token silent flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenSilentTest()
-        {
-            _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token silent flow
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenSilentTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+        //}
 
         ///// <summary>
         ///// Runs through the standard acquire token flow
@@ -101,16 +101,16 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         //    _mobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
         //}
 
-        ///// <summary>
-        ///// B2C acquire token with Facebook provider
-        ///// b2clogin.com authority
-        ///// with subsequent silent call
-        ///// </summary>
-        //[Test]
-        //public void B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest()
-        //{
-        //    _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
-        //}
+        /// <summary>
+        /// B2C acquire token with Facebook provider
+        /// b2clogin.com authority
+        /// with subsequent silent call
+        /// </summary>
+        [Test]
+        public void B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest()
+        {
+            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+        }
 
         ///// <summary>
         ///// B2C acquire token with Facebook provider 
