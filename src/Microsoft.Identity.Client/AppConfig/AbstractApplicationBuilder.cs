@@ -221,6 +221,11 @@ namespace Microsoft.Identity.Client.AppConfig
                 throw new InvalidOperationException("More than one default authority was configured.");
             }
 
+            if (Config.Authorities.Any(x => x.AuthorityType == AuthorityType.Adfs))
+            {
+                throw new InvalidOperationException("ADFS is not currently a supported authority type.");
+            }
+
             return Config;
         }
 
