@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
                 return driver;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 driver?.Dispose();
                 throw;

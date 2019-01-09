@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             {
                 // We use the same IDs for ADFSv3 and ADFSv4
                 _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
-                _singInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
+                _signInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
                 return;
             }
 
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             }
 
             _passwordInputId = CoreUiTestConstants.WebPasswordID;
-            _singInButtonId = CoreUiTestConstants.WebSubmitID;
+            _signInButtonId = CoreUiTestConstants.WebSubmitID;
         }
 
         private void DetermineB2CFieldIds()
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             if (_user.B2CIdentityProvider == B2CIdentityProvider.Local)
             {
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordID;
-                _singInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+                _signInButtonId = CoreUiTestConstants.B2CWebSubmitID;
             }
 
             if (_user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
             if (_user.B2CIdentityProvider == B2CIdentityProvider.Google)
             {
                 _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
-                _singInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
+                _signInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
             }
         }
     }
