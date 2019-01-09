@@ -223,7 +223,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 param.Scope.Add("non-existent-scopes");
                 var item = cache.FindAccessTokenAsync(param).Result;
 
-                //intersected scopes are not returned.
+                // intersected scopes are not returned.
                 Assert.IsNull(item);
             }
         }
@@ -576,8 +576,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var item = cache.FindAccessTokenAsync(param).Result;
 
-                //cache lookup should fail because there was no userassertion hash in the matched
-                //token cache item.
+                // cache lookup should fail because there was no userassertion hash in the matched
+                // token cache item.
 
                 Assert.IsNull(item);
             }
@@ -999,8 +999,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var previousLogLevel = Logger.Level;
             // Setting LogLevel.Verbose causes certain static dependencies to load
             Logger.Level = LogLevel.Verbose;
-            var tokenCache = new TokenCache();
-            tokenCache.AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); };
+            var tokenCache = new TokenCache
+            {
+                AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
+            };
             tokenCache.Deserialize(null);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
@@ -1058,8 +1060,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             serializedCache = cache.Serialize();
             cache.Deserialize(serializedCache);
-            //item count should not change because old cache entries should have
-            //been overriden
+            // item count should not change because old cache entries should have
+            // been overriden
 
             Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
             Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
@@ -1072,7 +1074,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(response.Scope, atItem.ScopeSet.AsSingleString());
 
             // todo add test for idToken serialization
-            //Assert.AreEqual(response.IdToken, atItem.RawIdToken);
+            // Assert.AreEqual(response.IdToken, atItem.RawIdToken);
 
             var rtItem = cache.GetAllRefreshTokensForClient(requestContext).First();
             Assert.AreEqual(response.RefreshToken, rtItem.Secret);

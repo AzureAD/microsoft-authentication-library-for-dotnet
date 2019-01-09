@@ -61,11 +61,13 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                 PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
                 SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
             }
+
             if (user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
             {
                 PasswordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
                 SignInButtonId = CoreUiTestConstants.B2CFacebookSubmitID;
             }
+
             if (user.B2CIdentityProvider == B2CIdentityProvider.Google)
             {
                 PasswordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;

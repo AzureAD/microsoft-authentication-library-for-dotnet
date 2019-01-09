@@ -43,22 +43,22 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
     public class XamarinUITestController : ITestController
     {
-        TimeSpan _defaultSearchTimeout;
-        TimeSpan _defaultRetryFrequency;
-        TimeSpan _defaultPostTimeout;
-        const int defaultSearchTimeoutSec = 30;
-        const int defaultRetryFrequencySec = 1;
-        const int defaultPostTimeoutSec = 1;
-        const string CssidSelector = "[id|={0}]";
-        const string XpathSelector = "//*[text()=\"{0}\"]";
+        private readonly TimeSpan _defaultSearchTimeout;
+        private readonly TimeSpan _defaultRetryFrequency;
+        private readonly TimeSpan _defaultPostTimeout;
+        private const int DefaultSearchTimeoutSec = 30;
+        private const int DefaultRetryFrequencySec = 1;
+        private const int DefaultPostTimeoutSec = 1;
+        private const string CssidSelector = "[id|={0}]";
+        private const string XpathSelector = "//*[text()=\"{0}\"]";
 
         public IApp Application { get; set; }
 
         public XamarinUITestController()
         {
-            this._defaultSearchTimeout = new TimeSpan(0, 0, defaultSearchTimeoutSec);
-            this._defaultRetryFrequency = new TimeSpan(0, 0, defaultRetryFrequencySec);
-            this._defaultPostTimeout = new TimeSpan(0, 0, defaultPostTimeoutSec);
+            _defaultSearchTimeout = new TimeSpan(0, 0, DefaultSearchTimeoutSec);
+            _defaultRetryFrequency = new TimeSpan(0, 0, DefaultRetryFrequencySec);
+            _defaultPostTimeout = new TimeSpan(0, 0, DefaultPostTimeoutSec);
         }
 
         public void Tap(string elementID)
@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         }
 
         /// <summary>
-        /// Searches for an HTML element having a given text. CSS selectors are uanble to do this, 
+        /// Searches for an HTML element having a given text. CSS selectors are uanble to do this,
         /// so an XPath strategy is needed.
         /// </summary>
         public AppWebResult[] WaitForWebElementByText(string text, TimeSpan? timeout = null)
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
                 _defaultRetryFrequency,
                 _defaultPostTimeout);
         }
-        
+
         public object[] WaitForElement(string selector, XamarinSelector xamarinSelector, TimeSpan? timeout)
         {
             if (timeout == null)
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             {
                 case XamarinSelector.ByAutomationId:
                     return WaitForXamlElement(selector, timeout);
-                    
+
                 case XamarinSelector.ByHtmlIdAttribute:
                     return WaitForWebElementByCssId(selector, timeout);
                 case XamarinSelector.ByHtmlValue:
@@ -200,7 +200,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
             DismissKeyboard();
         }
-       
+
         public void DismissKeyboard()
         {
             Application.DismissKeyboard();

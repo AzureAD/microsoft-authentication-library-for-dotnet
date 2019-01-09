@@ -27,8 +27,9 @@
 
 using System;
 using Foundation;
+using Microsoft.Identity.Client.Platforms.iOS;
 
-namespace Microsoft.Identity.Client.Platforms.iOS
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Static class that consumes the response from the Authentication flow and continues token acquisition. This class should be called in ApplicationDelegate whenever app loads/reloads.

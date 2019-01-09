@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit
 
         public static string CreateUserIdentifier()
         {
-            //return CreateUserIdentifier(Uid, Utid);
+            // return CreateUserIdentifier(Uid, Utid);
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", Uid, Utid);
         }
 

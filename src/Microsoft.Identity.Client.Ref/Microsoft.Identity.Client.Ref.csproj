@@ -1,38 +1,35 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
 
-  <!-- This project is used to generate a ref assembly for MSAL. Use #if REFERENCE_ASSEMBLY in the code files. 
+  <Import Project="../MSAL.Frameworks.props" />
+
+  <!-- This project is used to generated a ref assembly for MSAL. Use #if REFERENCE_ASSEMBLY in the code files.
   See https://oren.codes/2018/07/09/create-and-pack-reference-assemblies-made-easy/ for details-->
-  <Target Name="OS" BeforeTargets="Build">
-    <Message Text="OS = $(OS)" Importance="High" />
-  </Target>
-  <PropertyGroup  Condition="'$(OS)' != 'Unix'">
-    <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
-    <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(OS)' == 'Unix'">
-    <TargetFrameworks>netstandard1.3;Xamarin.iOS10</TargetFrameworks>
+  <PropertyGroup>
     <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
   </PropertyGroup>
 
   <Import Project="../MSAL.Common.props" />
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);NET_CORE_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid)'">
     <DefineConstants>$(DefineConstants);ANDROID_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <DefineConstants>$(DefineConstants);DESKTOP_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
     <DefineConstants>$(DefineConstants);iOS_BUILDTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_BUILDTIME</DefineConstants>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+  </ItemGroup>
 
 </Project>

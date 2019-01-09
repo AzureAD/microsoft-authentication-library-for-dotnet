@@ -42,9 +42,9 @@ namespace Microsoft.Identity.Client.Http
             {
                 var headers = new Dictionary<string, string>();
 
-                if (this.Headers != null)
+                if (Headers != null)
                 {
-                    foreach (var kvp in this.Headers)
+                    foreach (var kvp in Headers)
                     {
                         headers[kvp.Key] = kvp.Value.First();
                     }

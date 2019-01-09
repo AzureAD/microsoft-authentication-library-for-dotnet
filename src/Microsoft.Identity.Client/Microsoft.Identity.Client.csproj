@@ -9,25 +9,27 @@
     <TargetFrameworks>netstandard1.3;Xamarin.iOS10</TargetFrameworks>
   </PropertyGroup>
 
+  <Import Project="../MSAL.Frameworks.props" />
+
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
   <Import Project="../MSAL.Common.props" />
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp1.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
     <DefineConstants>$(DefineConstants);NET_CORE_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'uap10.0' ">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkUap)' ">
     <DefineConstants>$(DefineConstants);WINDOWS_APP_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'MonoAndroid8.1'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkAndroid)'">
     <DefineConstants>$(DefineConstants);ANDROID_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'net45'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetDesktop)'">
     <DefineConstants>$(DefineConstants);DESKTOP_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'Xamarin.iOS10'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
     <DefineConstants>$(DefineConstants);iOS_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard1.3'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
 

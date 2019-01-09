@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Json.Converters
         /// </returns>
         public override bool CanConvert(Type objectType)
         {
-            return (objectType == typeof(ExpandoObject));
+            return objectType == typeof(ExpandoObject);
         }
 
         /// <summary>
