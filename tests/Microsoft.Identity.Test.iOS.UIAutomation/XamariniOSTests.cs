@@ -48,7 +48,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
     {
         IApp app;
         Platform platform;
-        ITestController xamarinController = new XamarinUITestController();
+        ITestController xamarinController = new IOSXamarinUITestController();
         MobileTestHelper _mobileTestHelper = new MobileTestHelper();
 
         /// <summary>
@@ -81,25 +81,25 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
         //}
 
-        ///// <summary>
-        ///// Runs through the standard acquire token silent flow
-        ///// </summary>
-        //[Test]
-        //public void AcquireTokenSilentTest()
-        //{
-        //    _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
-        //}
+        /// <summary>
+        /// Runs through the standard acquire token silent flow
+        /// </summary>
+        [Test]
+        public void AcquireTokenSilentTest()
+        {
+            _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+        }
 
-        ///// <summary>
-        ///// Runs through the standard acquire token flow
-        ///// </summary>
-        //[Test]
-        //public void PromptBehaviorConsentSelectAccount()
-        //{
-        //    var labResponse = LabUserHelper.GetDefaultUser();
+        /// <summary>
+        /// Runs through the standard acquire token flow
+        /// </summary>
+        [Test]
+        public void PromptBehaviorConsentSelectAccount()
+        {
+            var labResponse = LabUserHelper.GetDefaultUser();
 
-        //    _mobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
-        //}
+            _mobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
+        }
 
         /// <summary>
         /// B2C acquire token with Facebook provider
