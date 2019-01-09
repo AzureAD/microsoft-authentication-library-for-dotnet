@@ -33,6 +33,6 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         /// <summary>
         /// </summary>
-        public string ClientCredentialSecret { get; set; }
+        public string ClientSecret { get; set; }
     }
 }

@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             var config = new ApplicationConfiguration();
             return new ConfidentialClientApplicationBuilder(config)
-                   .WithOptions(options).WithClientSecret(options.ClientCredentialSecret);
+                   .WithOptions(options).WithClientSecret(options.ClientSecret);
         }
 
         /// <summary>
