@@ -36,21 +36,21 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
 {
     public class ServerTelemetryHandler 
     {
-        private ILogger logger;
-        private readonly string msalEventNameKey;
-        private readonly string ariaTenantId;
-        private readonly Guid sessionId;
+        private ILogger _logger;
+        private readonly string _msalEventNameKey;
+        private readonly string _ariaTenantId;
+        private readonly Guid _sessionId;
 
         public ServerTelemetryHandler()
         {
             EVTStatus status;
             LogManager.Start(new LogConfiguration());
 
-            ariaTenantId = TelemetryHandlerConstants.AriaTenantId;
-            logger = LogManager.GetLogger(ariaTenantId, out status);
+            _ariaTenantId = TelemetryHandlerConstants.AriaTenantId;
+            _logger = LogManager.GetLogger(_ariaTenantId, out status);
 
-            sessionId = Guid.NewGuid();
-            msalEventNameKey = TelemetryHandlerConstants.MsalEventNameKey;
+            _sessionId = Guid.NewGuid();
+            _msalEventNameKey = TelemetryHandlerConstants.MsalEventNameKey;
         }
 
         public void OnEvents(List<Dictionary<string, string>> events)
@@ -67,20 +67,20 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
                 scenarioId);
             foreach (var e in events)
             {
-                Console.WriteLine("Event: {0}", e[msalEventNameKey]);
+                Console.WriteLine("Event: {0}", e[_msalEventNameKey]);
                 EventProperties eventData = new EventProperties
                 {
-                    Name = e[msalEventNameKey]
+                    Name = e[_msalEventNameKey]
                 };
 
-                eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, sessionId);
+                eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, _sessionId);
                 eventData.SetProperty(TelemetryHandlerConstants.MsalScenarioIdKey, scenarioId);
                 foreach (var entry in e)
                 {
                     eventData.SetProperty(entry.Key, entry.Value);
                     Console.WriteLine("  {0}: {1}", entry.Key, entry.Value);
                 }
-                logger.LogEvent(eventData);
+                _logger.LogEvent(eventData);
             }
         }
 

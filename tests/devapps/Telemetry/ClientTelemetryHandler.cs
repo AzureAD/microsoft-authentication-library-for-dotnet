@@ -36,27 +36,43 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
 {
     public class ClientTelemetryHandler
     {
-        private ILogger logger;
-        private readonly string msalEventNameKey;
-        private readonly string ariaTenantId;
-        private readonly Guid sessionId;
+        private ILogger _logger;
+        private readonly string _msalEventNameKey;
+        private readonly string _ariaTenantId;
+        private readonly Guid _sessionId;
 
         public ClientTelemetryHandler()
         {
             // Aria configuration
             EVTStatus status;
             LogManager.Start(new LogConfiguration());
-            LogManager.SetNetCost(REAL_TIME_FOR_ALL[0].Rules[0].NetCost);
-            LogManager.LoadTransmitProfiles(REAL_TIME_FOR_ALL);
-            LogManager.SetTransmitProfile(REAL_TIME_FOR_ALL[0].ProfileName);
+            LogManager.SetNetCost(_realTimeForAll[0].Rules[0].NetCost);
+            LogManager.LoadTransmitProfiles(_realTimeForAll);
+            LogManager.SetTransmitProfile(_realTimeForAll[0].ProfileName);
             LogManager.SetPowerState(PowerState.Charging);
 
-            ariaTenantId = TelemetryHandlerConstants.AriaTenantId;
-            logger = LogManager.GetLogger(ariaTenantId, out status);
+            _ariaTenantId = TelemetryHandlerConstants.AriaTenantId;
+            _logger = LogManager.GetLogger(_ariaTenantId, out status);
 
-            sessionId = Guid.NewGuid();
-            msalEventNameKey = TelemetryHandlerConstants.MsalEventNameKey;
+            _sessionId = Guid.NewGuid();
+            _msalEventNameKey = TelemetryHandlerConstants.MsalEventNameKey;
         }
+
+        private List<TransmitPolicy> _realTimeForAll = new List<TransmitPolicy>
+        {
+             new TransmitPolicy
+             {
+                 ProfileName = "RealTimeForALL",
+                 Rules = new List<Rules>
+                 {
+                     new Rules
+                     {
+                         NetCost = NetCost.Low, PowerState = PowerState.Charging,
+                         Timers = new Timers { Normal = 10, RealTime = 1 }
+                     }
+                 }
+             }
+        };
 
         public void OnEvents(List<Dictionary<string, string>> events)
         {
@@ -72,44 +88,28 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
                 scenarioId);
             foreach (var e in events)
             {
-                Console.WriteLine("Event: {0}", e[msalEventNameKey]);
+                Console.WriteLine("Event: {0}", e[_msalEventNameKey]);
                 EventProperties eventData = new EventProperties
                 {
-                    Name = e[msalEventNameKey]
+                    Name = e[_msalEventNameKey]
                 };
 
-                eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, sessionId);
+                eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, _sessionId);
                 eventData.SetProperty(TelemetryHandlerConstants.MsalScenarioIdKey, scenarioId);
                 foreach (var entry in e)
                 {
                     eventData.SetProperty(entry.Key, entry.Value);
                     Console.WriteLine("  {0}: {1}", entry.Key, entry.Value);
                 }
-                logger.LogEvent(eventData);
+                _logger.LogEvent(eventData);
             }
         }
 
         private void UploadEventsToAria()
         {
             LogManager.UploadNow();
-            LogManagerProvider.DestroyLogManager(ariaTenantId);
+            LogManagerProvider.DestroyLogManager(_ariaTenantId);
         }
-
-        private List<TransmitPolicy> REAL_TIME_FOR_ALL = new List<TransmitPolicy>
-        {
-             new TransmitPolicy
-             {
-                 ProfileName = "RealTimeForALL",
-                 Rules = new List<Rules>
-                 {
-                     new Rules
-                     {
-                         NetCost = NetCost.Low, PowerState = PowerState.Charging,
-                         Timers = new Timers { Normal = 10, RealTime = 1 }
-                     }
-                 }
-             }
-        };
     }
 }
 #endif
