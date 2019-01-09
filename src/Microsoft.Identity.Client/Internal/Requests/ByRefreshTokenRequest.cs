@@ -40,11 +40,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private string _userProvidedRefreshToken;
 
+        private const string _nullTokenCacheErrorMassage = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
+        private const string _noRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
+
         public ByRefreshTokenRequest(
-        IServiceBundle serviceBundle,
-        AuthenticationRequestParameters authenticationRequestParameters,
-        ApiEvent.ApiIds apiId,
-        string userProvidedRefreshToken)
+            IServiceBundle serviceBundle,
+            AuthenticationRequestParameters authenticationRequestParameters,
+            ApiEvent.ApiIds apiId,
+            string userProvidedRefreshToken)
         : base(serviceBundle, authenticationRequestParameters, apiId, false)
         {
             _userProvidedRefreshToken = userProvidedRefreshToken;
@@ -56,10 +59,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalUiRequiredException(
                     MsalUiRequiredException.TokenCacheNullError,
-                    "Token cache is set to null. Silent requests cannot be executed.");
+                    _nullTokenCacheErrorMassage);
             }
 
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Acquireing access token...");
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Begin acquire token by refresh token...");
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(_userProvidedRefreshToken), cancellationToken)
                                         .ConfigureAwait(false);
@@ -67,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (msalTokenResponse.RefreshToken == null)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    "Refresh token was missing from the token refresh response");
+                    _noRefreshTokenInResponse);
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 

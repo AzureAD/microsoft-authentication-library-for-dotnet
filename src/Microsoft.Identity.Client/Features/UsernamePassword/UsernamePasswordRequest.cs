@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             UsernamePasswordInput usernamePasswordInput)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, apiId, true)
         {
             _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(

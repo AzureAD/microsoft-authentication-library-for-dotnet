@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public Task RemoveAsync(IAccount account)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.Empty);
+            RequestContext requestContext = CreateRequestContext();
             if (account != null)
             {
                 UserTokenCache?.RemoveAccount(account, requestContext);
@@ -315,7 +315,7 @@ namespace Microsoft.Identity.Client
         }
 
         internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId, string userProvidedRefreshToken = "")
+            IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId)
         {
             if (account == null)
             {
@@ -357,9 +357,10 @@ namespace Microsoft.Identity.Client
                 TokenCache = UserTokenCache,
                 Scope = _scopes,
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(Guid.Empty),
+                RequestContext = CreateRequestContext(),
                 ValidateAuthority = ValidateAuthority,
-                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
+                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
+                IsRefreshTokenRequest = true
             };
 
             var handler = new ByRefreshTokenRequest(
@@ -384,16 +385,15 @@ namespace Microsoft.Identity.Client
                 Account = account,
                 Scope = ScopeHelper.CreateSortedSetFromEnumerable(scopes),
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(Guid.Empty),
+                RequestContext = CreateRequestContext(),
                 ValidateAuthority = ValidateAuthority,
                 IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
         }
 
-        internal RequestContext CreateRequestContext(Guid correlationId)
+        private RequestContext CreateRequestContext()
         {
-            correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(ClientId, new MsalLogger(correlationId, Component));
+            return new RequestContext(ClientId, new MsalLogger(Guid.Empty, Component));
         }
     }
 }

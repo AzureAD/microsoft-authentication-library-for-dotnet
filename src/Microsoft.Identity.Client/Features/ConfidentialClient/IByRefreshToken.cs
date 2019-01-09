@@ -46,6 +46,6 @@ namespace Microsoft.Identity.Client
         /// From there you will be able to use MSAL.NET new API, in particular
         /// AcquireTokenSilentAsync() which will renew the user token.  
         /// </summary>
-        Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(string refreshToken);
+        Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken);
     }
 }

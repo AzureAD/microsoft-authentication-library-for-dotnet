@@ -797,9 +797,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     TokenCache userCahce = new TokenCache();
                     ClientCredential cc = new ClientCredential(MsalTestConstants.ClientSecret);
                     ConfidentialClientApplication app = new ConfidentialClientApplication(serviceBundle, MsalTestConstants.ClientId, MsalTestConstants.AuthorityCommonTenant, MsalTestConstants.RedirectUri, cc, userCahce, new TokenCache());
-                    await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync("SomeRefreshToken").ConfigureAwait(false);
+                    var result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(null, "SomeRefreshToken").ConfigureAwait(false);
 
                     Assert.AreEqual(userCahce.TokenCacheAccessor.RefreshTokenCount, 1);
+                    Assert.AreEqual(userCahce.TokenCacheAccessor.AccessTokenCount, 1);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(result.AccessToken, "some-access-token");
                 }).ConfigureAwait(false);
         }
 

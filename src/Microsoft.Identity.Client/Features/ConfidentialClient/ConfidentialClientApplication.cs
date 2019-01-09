@@ -399,6 +399,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
+            GuardMobileFrameworks();
+
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new ArgumentNullException(nameof(refreshToken), "A refresh token must be provided.");
+            }
+
             return await ExchangeRefreshTokenAsync(scopes, refreshToken).ConfigureAwait(false);
         }
 
