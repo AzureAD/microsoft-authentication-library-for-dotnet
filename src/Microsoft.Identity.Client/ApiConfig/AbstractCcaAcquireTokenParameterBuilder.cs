@@ -25,36 +25,50 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// </summary>
-    internal interface IAcquireTokenCommonParameters
+    /// <typeparam name="T"></typeparam>
+    public abstract class AbstractCcaAcquireTokenParameterBuilder<T>
+        : AbstractAcquireTokenParameterBuilder<T>
+        where T : AbstractAcquireTokenParameterBuilder<T>
     {
         /// <summary>
+        /// 
         /// </summary>
-        IEnumerable<string> Scopes { get; }
+        /// <param name="confidentialClientApplication"></param>
+        protected AbstractCcaAcquireTokenParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+        {
+            ConfidentialClientApplication = confidentialClientApplication;
+        }
+
+        internal abstract Task<AuthenticationResult> ExecuteAsync(
+            IConfidentialClientApplicationExecutor executor,
+            CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
+            {
+                Validate();
+                return ExecuteAsync(executor, cancellationToken);
+            }
+
+            throw new InvalidOperationException(
+                "PublicClientApplication implementation does not implement IPublicClientApplicationExecutor.");
+        }
 
         /// <summary>
         /// </summary>
-        IAccount Account { get; }
-
-        /// <summary>
-        /// </summary>
-        string LoginHint { get; }
-
-        /// <summary>
-        /// </summary>
-        IReadOnlyDictionary<string, string> ExtraQueryParameters { get; }
-
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> ExtraScopesToConsent { get; }
-
-        /// <summary>
-        /// </summary>
-        string AuthorityOverride { get; }
+        protected IConfidentialClientApplication ConfidentialClientApplication { get; }
     }
+#endif
 }

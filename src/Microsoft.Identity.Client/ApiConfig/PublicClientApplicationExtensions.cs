@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
@@ -34,103 +35,82 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// 
     /// </summary>
-    public static class AcquireTokenBuilder
+    public static class PublicClientApplicationExtensions
     {
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
-        /// <param name="authorizationCode"></param>
-        /// <returns></returns>
-        public static AcquireTokenByAuthorizationCodeParameterBuilder CreateForAuthorizationCode(
-            IEnumerable<string> scopes,
-            string authorizationCode)
-        {
-            return AcquireTokenByAuthorizationCodeParameterBuilder.Create(scopes, authorizationCode);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="scopes"></param>
-        /// <returns></returns>
-        public static AcquireTokenForClientParameterBuilder CreateForClient(IEnumerable<string> scopes)
-        {
-            return AcquireTokenForClientParameterBuilder.Create(scopes);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="scopes"></param>
+        /// <param name="parent"></param>
         /// <returns></returns>
         [CLSCompliant(false)]
-        public static AcquireTokenInteractiveParameterBuilder CreateInteractive(IEnumerable<string> scopes)
+        public static AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
+            this IPublicClientApplication publicClientApplication,
+            IEnumerable<string> scopes, 
+            object parent)
         {
-            return AcquireTokenInteractiveParameterBuilder.Create(scopes);
+            return AcquireTokenInteractiveParameterBuilder.Create(publicClientApplication, scopes, parent);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="scopes"></param>
-        /// <param name="userAssertion"></param>
-        /// <returns></returns>
-        public static AcquireTokenOnBehalfOfParameterBuilder CreateOnBehalfOf(
-            IEnumerable<string> scopes,
-            UserAssertion userAssertion)
-        {
-            return AcquireTokenOnBehalfOfParameterBuilder.Create(scopes, userAssertion);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
         /// <param name="account"></param>
         /// <returns></returns>
-        public static AcquireTokenSilentParameterBuilder CreateSilent(IEnumerable<string> scopes, IAccount account)
+        public static AcquireTokenSilentPcaParameterBuilder AcquireTokenSilent(
+            this IPublicClientApplication publicClientApplication,
+            IEnumerable<string> scopes, 
+            IAccount account)
         {
-            return AcquireTokenSilentParameterBuilder.Create(scopes, account);
+            return AcquireTokenSilentPcaParameterBuilder.Create(publicClientApplication, scopes, account);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
         /// <param name="deviceCodeResultCallback"></param>
         /// <returns></returns>
-        public static AcquireTokenWithDeviceCodeParameterBuilder CreateWithDeviceCode(
+        public static AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
+            this IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            return AcquireTokenWithDeviceCodeParameterBuilder.Create(scopes, deviceCodeResultCallback);
+            return AcquireTokenWithDeviceCodeParameterBuilder.Create(publicClientApplication, scopes, deviceCodeResultCallback);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        public static AcquireTokenWithIntegratedWindowsAuthParameterBuilder CreateWithIntegratedWindowsAuth(
+        public static AcquireTokenWithIntegratedWindowsAuthParameterBuilder AcquireTokenWithIntegratedWindowsAuth(
+            this IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes)
         {
-            return AcquireTokenWithIntegratedWindowsAuthParameterBuilder.Create(scopes);
+            return AcquireTokenWithIntegratedWindowsAuthParameterBuilder.Create(publicClientApplication, scopes);
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        public static AcquireTokenWithUsernamePasswordParameterBuilder CreateWithUsernamePassword(
+        public static AcquireTokenWithUsernamePasswordParameterBuilder AcquireTokenWithUsernamePassword(
+            this IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes,
             string username,
             string password)
         {
-            return AcquireTokenWithUsernamePasswordParameterBuilder.Create(scopes, username, password);
+            return AcquireTokenWithUsernamePasswordParameterBuilder.Create(publicClientApplication, scopes, username, password);
         }
     }
 }

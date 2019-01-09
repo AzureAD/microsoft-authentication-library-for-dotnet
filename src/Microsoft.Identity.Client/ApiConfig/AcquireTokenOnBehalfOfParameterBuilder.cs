@@ -26,22 +26,38 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
-        AbstractAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder, IAcquireTokenOnBehalfOfParameters>
+        AbstractCcaAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
     {
+        /// <inheritdoc />
+        public AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+            : base(confidentialClientApplication)
+        {
+        }
+
         /// <summary>
         /// </summary>
+        /// <param name="confidentialClientApplication"></param>
         /// <param name="scopes"></param>
         /// <param name="userAssertion"></param>
         /// <returns></returns>
-        internal static AcquireTokenOnBehalfOfParameterBuilder Create(IEnumerable<string> scopes, UserAssertion userAssertion)
+        internal static AcquireTokenOnBehalfOfParameterBuilder Create(
+            IConfidentialClientApplication confidentialClientApplication,
+            IEnumerable<string> scopes, 
+            UserAssertion userAssertion)
         {
-            return new AcquireTokenOnBehalfOfParameterBuilder().WithScopes(scopes).WithUserAssertion(userAssertion);
+            return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplication)
+                   .WithScopes(scopes)
+                   .WithUserAssertion(userAssertion);
         }
 
         private AcquireTokenOnBehalfOfParameterBuilder WithUserAssertion(UserAssertion userAssertion)
@@ -59,5 +75,12 @@ namespace Microsoft.Identity.Client.ApiConfig
             Parameters.WithOnBehalfOfCertificate = withCertificate;
             return this;
         }
+
+        /// <inheritdoc />
+        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        {
+            return executor.ExecuteAsync((IAcquireTokenOnBehalfOfParameters)Parameters, cancellationToken);
+        }
     }
+#endif
 }

@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     ///     This one isn't used directly, but is an inheritance chain for IntegratedWindowsAuth and UsernamePassword since they
     ///     both have the Username property
     /// </summary>
-    public interface IAcquireTokenWithUsernameParameters
+    internal interface IAcquireTokenWithUsernameParameters
     {
         /// <summary>
         /// </summary>

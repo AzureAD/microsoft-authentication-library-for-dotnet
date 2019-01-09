@@ -28,7 +28,7 @@
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <inheritdoc />
-    public interface IAcquireTokenByAuthorizationCodeParameters : IAcquireTokenCommonParameters
+    internal interface IAcquireTokenByAuthorizationCodeParameters : IAcquireTokenCommonParameters
     {
         /// <summary>
         /// </summary>

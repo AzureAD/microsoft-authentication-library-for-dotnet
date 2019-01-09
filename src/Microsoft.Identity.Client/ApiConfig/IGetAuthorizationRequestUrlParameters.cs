@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public interface IGetAuthorizationRequestUrlParameters : IAcquireTokenCommonParameters
+    internal interface IGetAuthorizationRequestUrlParameters : IAcquireTokenCommonParameters
     {
         /// <summary>
         /// </summary>

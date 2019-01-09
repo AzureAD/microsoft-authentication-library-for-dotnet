@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     {
         public string AuthorizationCode { get; internal set; }
         public bool ForceRefresh { get; internal set; }
-        public bool WithForClientCertificate { get; internal set; }
+        public bool WithSendX5C { get; internal set; }
 
         // Interactive Parameters
         public bool UseEmbeddedWebView { get; internal set; }
