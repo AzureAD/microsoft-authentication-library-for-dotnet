@@ -161,7 +161,8 @@ namespace Microsoft.Identity.Client
             {
                 keychainSecurityGroup = value;
                 UserTokenCache.TokenCacheAccessor.SetIOSKeychainSecurityGroup(value);
-                UserTokenCache.LegacyCachePersistence.SetKeychainSecurityGroup(value);
+                (UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
+                    .SetKeychainSecurityGroup(value);
             }
         }
 #endif

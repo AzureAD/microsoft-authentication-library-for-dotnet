@@ -84,6 +84,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         }
 
         // Will remove in v3.
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
         public void SetIOSKeychainSecurityGroup(string keychainSecurityGroup)
         {
             if (keychainSecurityGroup == null)

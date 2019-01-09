@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -56,6 +57,7 @@ namespace Microsoft.Identity.Client
         /// When using this property, the value must contain the TeamId prefix, which is why this will be obsolete in future releases.
         /// </summary>
         /// <remarks>This API will be removed in MSAL v3.x. See https://aka.ms/msal-net-ios-keychain-security-group for details</remarks>
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
         string KeychainSecurityGroup { get; set; }
 #endif
 
