@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
 
             //acquire token for 2nd resource with refresh token
             SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UIBehaviorLogin);
-            controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonID);
             VerifyResult(controller);
         }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             //b2c does not return userinfo in token response
             controller.Tap(CoreUiTestConstants.UserMissingFromResponse);
             //acquire token silent with selected user
-            controller.Tap(CoreUiTestConstants.AcquireTokenSilentID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonID);
             VerifyResult(controller);
         }
 
@@ -303,7 +303,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             controller.Tap(CoreUiTestConstants.AcquirePageID);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
 
             switch (b2CIdentityProvider)
             {
@@ -332,7 +332,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorNoPrompt);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
 
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueID, XamarinSelector.ByHtmlIdAttribute);
 
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorSelectAccount);
 
             // 3. Hit Acquire Token directly since we are not changing any other setting
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
 
             // 4. The web UI should display all users, so click on the current user
             controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
@@ -367,7 +367,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             //Acquire token flow
             try
             {
-                controller.Tap(CoreUiTestConstants.AcquireTokenID);
+                controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
             }
             catch (Exception ex)
             {
@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public static void PerformSignInFlowWithoutUI(ITestController controller)
         {
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
         }
 
         public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)

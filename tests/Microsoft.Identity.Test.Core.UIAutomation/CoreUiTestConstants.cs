@@ -34,9 +34,9 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string Exchange = "https://outlook.office365.com/";
 
         //ADAL & MSAL test app
-        public const string AcquireTokenID = "acquireToken";
+        public const string AcquireTokenButtonID = "acquireToken_button";
         public const string AcquireTokenWithPromptBehaviorAlwaysID = "acquireTokenPromptBehaviorAlways";
-        public const string AcquireTokenSilentID = "acquireTokenSilent";
+        public const string AcquireTokenSilentButtonID = "acquireTokenSilent_button";
         public const string ClientIdEntryID = "clientIdEntry";
         public const string ResourceEntryID = "resourceEntry";
         public const string PromptBehaviorEntryID = "promptBehaviorEntry";
