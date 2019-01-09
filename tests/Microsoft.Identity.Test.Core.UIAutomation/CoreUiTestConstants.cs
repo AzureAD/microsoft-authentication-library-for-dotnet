@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string MSGraph = "https://graph.microsoft.com";
         public const string Exchange = "https://outlook.office365.com/";
 
-        //ADAL & MSAL test app
+        //MSAL test app
         public const string AcquireTokenButtonID = "acquireToken_button";
         public const string AcquireTokenWithPromptBehaviorAlwaysID = "acquireTokenPromptBehaviorAlways";
         public const string AcquireTokenSilentButtonID = "acquireTokenSilent_button";
@@ -53,8 +53,6 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
         public const string TestResultID = "testResult";
         public const string TestResultSuccessfulMessage = "Result: Success";
         public const string TestResultFailureMessage = "Result: Failure";
-
-        //MSAL test app
         public const string DefaultScope = "User.Read";
         public const string AcquirePageID = "AcquirePage";
         public const string CachePageID = "CachePage";
