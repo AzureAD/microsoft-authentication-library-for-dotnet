@@ -365,34 +365,7 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
             //Acquire token flow
-            try
-            {
-                controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
-            }
-            catch (Exception ex)
-            {
-
-                //i0116 = UPN text field on AAD sign in endpoint
-                controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
-                //idSIButton9 = Sign in button
-                controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
-                try
-                {
-                    //i0118 = password text field
-                    controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
-                    controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
-                }
-                catch(Exception ex2)
-                {
-                    //idBtn_Back
-                    //i0118 = password text field
-                    controller.Tap("idBtn_Back", XamarinSelector.ByHtmlIdAttribute);
-                    controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
-                    controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
-                }
-
-                return;
-            }
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
             //i0116 = UPN text field on AAD sign in endpoint
             controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
             //idSIButton9 = Sign in button

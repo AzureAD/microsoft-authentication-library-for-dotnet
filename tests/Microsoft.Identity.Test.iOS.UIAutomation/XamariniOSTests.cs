@@ -68,7 +68,6 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         {
             app = AppFactory.StartApp(platform, "XForms.iOS");
             xamarinController.Application = app;
-            XamarinUITestController.IsiOS = true;
         }
 
         ///// <summary>

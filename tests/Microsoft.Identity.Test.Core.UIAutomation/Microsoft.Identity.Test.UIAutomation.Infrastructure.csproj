@@ -72,6 +72,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppFactory.cs" />
+    <Compile Include="IOSXamarinUITestController.cs" />
     <Compile Include="ITestController.cs" />
     <Compile Include="MobileTestHelper.cs" />
     <Compile Include="PlatformNotSupportedException.cs" />
