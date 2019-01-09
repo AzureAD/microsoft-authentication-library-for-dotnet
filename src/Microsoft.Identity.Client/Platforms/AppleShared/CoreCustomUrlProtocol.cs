@@ -28,11 +28,6 @@
 using System;
 using Foundation;
 
-// TODO: bogavril - test if this can be removed and resolve the obsolete calls
-#if MAC
-using INSUrlProtocolClient = Foundation.NSUrlProtocolClient;
-#endif
-
 namespace Microsoft.Identity.Client.Platforms.AppleShared
 {
     internal class CoreCustomUrlProtocol : NSUrlProtocol
@@ -89,12 +84,8 @@ namespace Microsoft.Identity.Client.Platforms.AppleShared
 
             public CoreCustomConnectionDelegate(CoreCustomUrlProtocol handler)
             {
-                this.handler = handler;
-#if MAC
-                client = (INSUrlProtocolClient)handler.WeakClient;
-#else
+                this.handler = handler;                
                 client = handler.Client;
-#endif
             }
 
             public override void ReceivedData(NSUrlConnection connection, NSData data)

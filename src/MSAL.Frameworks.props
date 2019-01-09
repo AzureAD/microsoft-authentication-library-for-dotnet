@@ -8,8 +8,8 @@
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>
     <TargetFrameworkAndroid>MonoAndroid8.1</TargetFrameworkAndroid>
 
-        <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid)</TargetFrameworks>
-        <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid)</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Windows'))">$(TargetFrameworkNetDesktop);$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkUap);$(TargetFrameworkIos);$(TargetFrameworkAndroid);$(TargetFrameworkMac)</TargetFrameworks>
+        <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('OSX'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);$(TargetFrameworkIos);$(TargetFrameworkAndroid);$(TargetFrameworkMac)</TargetFrameworks>
         <TargetFrameworks Condition="$([MSBuild]::IsOsPlatform('Linux'))">$(TargetFrameworkNetStandard);$(TargetFrameworkNetCore);</TargetFrameworks>
 
     </PropertyGroup>

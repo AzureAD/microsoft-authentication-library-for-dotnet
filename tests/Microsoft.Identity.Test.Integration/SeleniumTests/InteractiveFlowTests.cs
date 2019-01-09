@@ -1,5 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
