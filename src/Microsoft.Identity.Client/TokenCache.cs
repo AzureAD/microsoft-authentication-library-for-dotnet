@@ -1367,7 +1367,7 @@ namespace Microsoft.Identity.Client
         {
 #if ANDROID || iOS || WINDOWS_APP
         throw new PlatformNotSupportedException("You should not use these TokenCache methods object on mobile platforms. " +
-            "They meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "They meant to allow applications to define their own storage strategy on .net desktop and non-mobile platforms such as .net core. " +
             "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
