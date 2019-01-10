@@ -117,8 +117,8 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <!-- Set this env variable locally to enable Telemetry on developer applications-->
-  <PropertyGroup Condition="'$(TELEMETRY)' != ''">
-    <DefineConstants>$(DefineConstants);TELEMETRY</DefineConstants>
+  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
+    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
@@ -163,7 +163,7 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.1.9</Version>
     </PackageReference>
-    <ProjectReference Condition="'$(TELEMETRY)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
+    <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>AriaTelemetryProvider</Name>
     </ProjectReference>

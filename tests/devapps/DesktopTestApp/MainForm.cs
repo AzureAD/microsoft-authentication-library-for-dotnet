@@ -69,7 +69,7 @@ namespace DesktopTestApp
             LoadSettings();
             Logger.LogCallback = LogDelegate;
 
-#if TELEMETRY
+#if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
 #endif

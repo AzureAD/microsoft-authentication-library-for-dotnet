@@ -33,8 +33,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 <!-- Set this env variable locally to enable Telemetry on developer applications-->
-  <PropertyGroup Condition="'$(TELEMETRY)' != ''">
-    <DefineConstants>$(DefineConstants);TELEMETRY</DefineConstants>
+  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
+    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -120,7 +120,7 @@
       <Project>{a181778d-5917-41ce-aa5f-7daaa7b7f5bb}</Project>
       <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
     </ProjectReference>
-    <ProjectReference Condition="'$(TELEMETRY)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
+    <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>AriaTelemetryProvider</Name>
     </ProjectReference>

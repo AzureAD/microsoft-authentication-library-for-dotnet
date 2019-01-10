@@ -48,7 +48,7 @@ namespace XForms.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
 
-#if TELEMETRY
+#if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
 #endif

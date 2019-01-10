@@ -59,7 +59,7 @@ namespace XForms.UWP
             InitializeComponent();
             Suspending += OnSuspending;
 
-#if TELEMETRY
+#if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
 #endif

@@ -93,8 +93,8 @@
     <UseDotNetNativeToolchain>true</UseDotNetNativeToolchain>
   </PropertyGroup>
   <!-- Set this env variable locally to enable Telemetry on developer applications-->
-  <PropertyGroup Condition="'$(TELEMETRY)' != ''">
-    <DefineConstants>$(DefineConstants);TELEMETRY</DefineConstants>
+  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
+    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
@@ -171,7 +171,7 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Condition="'$(TELEMETRY)' != ''" Include="..\..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
+    <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>AriaTelemetryProvider</Name>
     </ProjectReference>

@@ -25,7 +25,7 @@
 //
 //------------
 
-#if TELEMETRY
+#if ARIA_TELEMETRY_ENABLED
 // Referencing alias set in project file since Aria server and
 // client assemblies have the same fully-qualified type names. 
 extern alias Client;
