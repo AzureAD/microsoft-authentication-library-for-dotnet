@@ -39,7 +39,7 @@ using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
     /// Class to be used for confidential client applications (Web Apps, Web APIs, and daemon applications).
@@ -461,9 +461,9 @@ namespace Microsoft.Identity.Client
 
         internal static void GuardMobileFrameworks()
         {
-#if ANDROID || iOS || WINDOWS_APP
+#if ANDROID || iOS || WINDOWS_APP || MAC
             throw new PlatformNotSupportedException(
-                "Confidential Client flows are not available on mobile platforms. " +
+                "Confidential Client flows are not available on mobile platforms or on Mac." +
                 "See https://aka.ms/msal-net-confidential-availability for details.");
 #endif
         }

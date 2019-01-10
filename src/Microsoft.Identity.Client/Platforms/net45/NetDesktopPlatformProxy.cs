@@ -38,6 +38,8 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
@@ -47,58 +49,55 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     internal class NetDesktopPlatformProxy : IPlatformProxy
     {
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(
+            () => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         /// Get the user logged in to Windows or throws
         /// </summary>
         /// <returns>Upn or throws</returns>
-        public async Task<string> GetUserPrincipalNameAsync()
+        public Task<string> GetUserPrincipalNameAsync()
         {
             // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and 
             // the rest of the platforms - returns "" 
 
-            return await Task.Factory.StartNew(() =>
+            const int NameUserPrincipal = 8;
+            uint userNameSize = 0;
+            WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
+            if (userNameSize == 0)
             {
-                const int NameUserPrincipal = 8;
-                uint userNameSize = 0;
-                WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, null, ref userNameSize);
-                if (userNameSize == 0)
-                {
-                    throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.GetUserNameFailed,
-                        CoreErrorMessages.GetUserNameFailed,
-                        new Win32Exception(Marshal.GetLastWin32Error()));
-                }
+                throw MsalExceptionFactory.GetClientException(
+                    CoreErrorCodes.GetUserNameFailed,
+                    CoreErrorMessages.GetUserNameFailed,
+                    new Win32Exception(Marshal.GetLastWin32Error()));
+            }
 
-                StringBuilder sb = new StringBuilder((int)userNameSize);
-                if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
-                {
-                    throw MsalExceptionFactory.GetClientException(
-                       CoreErrorCodes.GetUserNameFailed,
-                       CoreErrorMessages.GetUserNameFailed,
-                       new Win32Exception(Marshal.GetLastWin32Error()));
-                }
+            StringBuilder sb = new StringBuilder((int)userNameSize);
+            if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
+            {
+                throw MsalExceptionFactory.GetClientException(
+                   CoreErrorCodes.GetUserNameFailed,
+                   CoreErrorMessages.GetUserNameFailed,
+                   new Win32Exception(Marshal.GetLastWin32Error()));
+            }
 
-                return sb.ToString();
-            }).ConfigureAwait(false);
+            return Task.FromResult(sb.ToString());
         }
 
-
-        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
-            return await Task.Factory.StartNew(() =>
-            {
-                WindowsIdentity current = WindowsIdentity.GetCurrent();
-                if (current != null)
-                {
-                    string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
-                    return prefix.Equals(Environment.MachineName.ToUpperInvariant(), StringComparison.OrdinalIgnoreCase);
-                }
 
-                return false;
-            }).ConfigureAwait(false);
+            WindowsIdentity current = WindowsIdentity.GetCurrent();
+            if (current != null)
+            {
+                string prefix = WindowsIdentity.GetCurrent().Name.Split('\\')[0].ToUpperInvariant();
+                return Task.FromResult(
+                    prefix.Equals(Environment.MachineName.ToUpperInvariant(), StringComparison.OrdinalIgnoreCase));
+            }
+
+            return Task.FromResult(false);
+
         }
 
         public bool IsDomainJoined()
@@ -227,7 +226,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new NetDesktopLegacyCachePersistence();
+            return new InMemoryLegacyCachePersistance();
         }
 
         /// <inheritdoc />
