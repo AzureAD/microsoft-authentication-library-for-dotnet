@@ -262,7 +262,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return;
             }
 
-            if (AuthenticationRequestParameters.Authority.AuthorityType == Instance.AuthorityType.B2C &&
+            if (AuthenticationRequestParameters.Authority.AuthorityType == AppConfig.AuthorityType.B2C &&
                 fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
                     StringComparison.OrdinalIgnoreCase))
             {

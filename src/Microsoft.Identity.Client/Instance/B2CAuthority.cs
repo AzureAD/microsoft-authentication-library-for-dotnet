@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Instance
         internal B2CAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
             : base(serviceBundle, authority, validateAuthority)
         {
-            AuthorityType = AuthorityType.B2C;
+            AuthorityType = AppConfig.AuthorityType.B2C;
             // Setting this to false as B2C authorities are customer specific
             validateAuthority = false;
 

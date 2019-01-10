@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Instance
             bool validateAuthority)
             : base(serviceBundle, authority, validateAuthority)
         {
-            AuthorityType = AuthorityType.Aad;
+            AuthorityType = AppConfig.AuthorityType.Aad;
         }
 
         internal override async Task UpdateCanonicalAuthorityAsync(

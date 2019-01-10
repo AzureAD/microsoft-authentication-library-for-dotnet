@@ -25,67 +25,62 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Cache;
-
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Notification for certain token cache interactions during token acquisition. This delegate is
-    /// used in particular to provide a custom token cache serialization
+    ///     TODO: resolve interface naming for public API...
+    ///     Have this in the public api for developer debugging...
     /// </summary>
-    /// <param name="args">Arguments related to the cache item impacted</param>
-    public delegate void TokenCacheCallback(TokenCacheNotificationArgs args);
-
-    /// <summary>
-    /// This is the interface that implements the public access to cache operations.
-    /// With CacheV2, this should only be necessary if the caller is persisting
-    /// the cache in their own store, since this will provide the serialize/deserialize
-    /// and before/after notifications used in that scenario.
-    /// </summary>
-    public interface ITokenCache
+    public interface IAppConfig
     {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="beforeAccess"></param>
-        void SetBeforeAccess(TokenCacheCallback beforeAccess);
+        string ClientId { get; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="afterAccess"></param>
-        void SetAfterAccess(TokenCacheCallback afterAccess);
+        bool EnablePiiLogging { get; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="beforeWrite"></param>
-        void SetBeforeWrite(TokenCacheCallback beforeWrite);
+        IMsalHttpClientFactory HttpClientFactory { get; }
 
         /// <summary>
-        /// Unified Only
         /// </summary>
-        /// <returns></returns>
-        byte[] Serialize();
+        LogLevel LogLevel { get; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="unifiedState"></param>
-        void Deserialize(byte[] unifiedState);
+        bool IsDefaultPlatformLoggingEnabled { get; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <returns></returns>
-        CacheData SerializeUnifiedAndAdalCache();
+        string RedirectUri { get; }
 
         /// <summary>
-        /// 
         /// </summary>
-        /// <param name="cacheData"></param>
-        void DeserializeUnifiedAndAdalCache(CacheData cacheData);
+        string TenantId { get; }
+
+        /// <summary>
+        /// </summary>
+        string SliceParameters { get; }
+
+        /// <summary>
+        /// </summary>
+        LogCallback LoggingCallback { get; }
+
+        /// <summary>
+        /// </summary>
+        TelemetryCallback TelemetryCallback { get; }
+
+        /// <summary>
+        /// </summary>
+        string Component { get; }
+
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+        /// <summary>
+        /// </summary>
+        ClientCredential ClientCredential { get; }
 #endif
     }
 }

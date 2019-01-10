@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Instance
         public AdfsAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority)
             : base(serviceBundle, authority, validateAuthority)
         {
-            AuthorityType = AuthorityType.Adfs;
+            AuthorityType = AppConfig.AuthorityType.Adfs;
         }
 
         protected override bool ExistsInValidatedAuthorityCache(string userPrincipalName)
