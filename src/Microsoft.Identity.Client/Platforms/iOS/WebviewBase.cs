@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         protected static UIViewController viewController;
         protected SFSafariViewController safariViewController;
         protected SFAuthenticationSession sfAuthenticationSession;
+        /* For app center builds, this will need to build on a hosted mac agent. The mac agent does not have the latest SDK's required to build 'ASWebAuthenticationSession'
+        * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
 #if BUILDENV != APPCENTER
         protected ASWebAuthenticationSession asWebAuthenticationSession;
 #endif

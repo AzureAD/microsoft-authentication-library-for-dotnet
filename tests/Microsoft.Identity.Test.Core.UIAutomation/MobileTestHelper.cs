@@ -32,7 +32,7 @@ using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
 using Xamarin.UITest.Queries;
 
-namespace Microsoft.Identity.Test.UIAutomation.infrastructure
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     /// <summary>
     /// Contains the core test functionality that will be used by Android and iOS tests

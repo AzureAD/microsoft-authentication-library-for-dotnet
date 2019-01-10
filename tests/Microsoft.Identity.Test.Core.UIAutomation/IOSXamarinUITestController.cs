@@ -1,5 +1,4 @@
-﻿using Microsoft.Identity.Test.UIAutomation.infrastructure;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -7,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xamarin.UITest.Queries;
 
-namespace Microsoft.Identity.Test.UIAutomation.infrastructure
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public class IOSXamarinUITestController : XamarinUITestController
     {

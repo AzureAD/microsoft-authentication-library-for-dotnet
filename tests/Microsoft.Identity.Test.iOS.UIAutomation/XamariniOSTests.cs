@@ -27,7 +27,7 @@
 
 using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
-using Microsoft.Identity.Test.UIAutomation.infrastructure;
+using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Xamarin.UITest;
 using Xamarin.UITest.Queries;
 using System;

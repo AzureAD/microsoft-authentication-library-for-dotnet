@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Test.UIAutomation.infrastructure
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     /// <summary>
     /// Exception thrown when AppFactory tries to initialize an unsupported platform

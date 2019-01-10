@@ -32,7 +32,7 @@ using System.Linq;
 using Xamarin.UITest;
 using Xamarin.UITest.Queries;
 
-namespace Microsoft.Identity.Test.UIAutomation.infrastructure
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public enum XamarinSelector
     {
