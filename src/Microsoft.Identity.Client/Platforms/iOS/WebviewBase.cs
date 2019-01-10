@@ -26,9 +26,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-#if OS != UNIX
 using AuthenticationServices;
-#endif
 using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
@@ -44,9 +42,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         protected static UIViewController viewController;
         protected SFSafariViewController safariViewController;
         protected SFAuthenticationSession sfAuthenticationSession;
-#if OS != UNIX
         protected ASWebAuthenticationSession asWebAuthenticationSession;
-#endif
         protected nint taskId = UIApplication.BackgroundTaskInvalid;
         protected NSObject didEnterBackgroundNotification;
         protected NSObject willEnterForegroundNotification;
