@@ -1,14 +1,5 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-  <Target Name="OS" BeforeTargets="Build">
-    <Message Text="OS = $(OS)" Importance="High" />
-  </Target>
-  <PropertyGroup Condition="'$(OS)' != 'Unix'">
-    <TargetFrameworks>net45;netstandard1.3;uap10.0;MonoAndroid8.1;Xamarin.iOS10;netcoreapp1.0</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(OS)' == 'Unix'">
-    <TargetFrameworks>netstandard1.3;Xamarin.iOS10</TargetFrameworks>
-  </PropertyGroup>
-
+  
   <Import Project="../MSAL.Frameworks.props" />
 
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
