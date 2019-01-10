@@ -97,6 +97,7 @@ namespace Microsoft.Identity.Client
         /// used in particular to provide a custom token cache serialization
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
+        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead.")]
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
         internal readonly object LockObject = new object();
@@ -107,19 +108,19 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Notification method called before any library method accesses the cache.
         /// </summary>
-        internal TokenCacheNotification BeforeAccess { get; set; }
+        internal TokenCacheCallback BeforeAccess { get; set; }
 
         /// <summary>
         /// Notification method called before any library method writes to the cache. This notification can be used to reload
         /// the cache state from a row in database and lock that row. That database row can then be unlocked in the
         /// <see cref="AfterAccess"/>notification.
         /// </summary>
-        internal TokenCacheNotification BeforeWrite { get; set; }
+        internal TokenCacheCallback BeforeWrite { get; set; }
 
         /// <summary>
         /// Notification method called after any library method accesses the cache.
         /// </summary>
-        internal TokenCacheNotification AfterAccess { get; set; }
+        internal TokenCacheCallback AfterAccess { get; set; }
 
         /// <summary>
         /// Gets or sets the flag indicating whether the state of the cache has changed.
@@ -1261,7 +1262,7 @@ namespace Microsoft.Identity.Client
         /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
         /// <remarks>In the case where the delegate is used to deserialize the cache, it might
         /// want to call <see cref="Deserialize(byte[])"/></remarks>
-        public void SetBeforeAccess(TokenCacheNotification beforeAccess)
+        public void SetBeforeAccess(TokenCacheCallback beforeAccess)
         {
             GuardOnMobilePlatforms();
             BeforeAccess = beforeAccess;
@@ -1276,7 +1277,7 @@ namespace Microsoft.Identity.Client
         /// member of the cache is <c>true</c></param>
         /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
         /// want to call <see cref="Serialize()"/></remarks>
-        public void SetAfterAccess(TokenCacheNotification afterAccess)
+        public void SetAfterAccess(TokenCacheCallback afterAccess)
         {
             GuardOnMobilePlatforms();
             AfterAccess = afterAccess;
@@ -1285,10 +1286,10 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
         /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
-        /// registered with <see cref="SetAfterAccess(TokenCacheNotification)"/>
+        /// registered with <see cref="SetAfterAccess(TokenCacheCallback)"/>
         /// </summary>
         /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
-        public void SetBeforeWrite(TokenCacheNotification beforeWrite)
+        public void SetBeforeWrite(TokenCacheCallback beforeWrite)
         {
             GuardOnMobilePlatforms();
             BeforeWrite = beforeWrite;
