@@ -65,9 +65,9 @@ namespace Microsoft.Identity.Client.AriaTelemetryProvider
                 }
             };
 
-            LogManager.SetNetCost(_ariaTransmitPolicy[0].Rules[0].NetCost);
-            LogManager.LoadTransmitProfiles(new[] { _ariaTransmitPolicy });
-            LogManager.SetTransmitProfile(_ariaTransmitPolicy[0].ProfileName);
+            LogManager.SetNetCost(_ariaTransmitPolicy.Rules[0].NetCost);
+            LogManager.LoadTransmitProfiles(new List <TransmitPolicy> {_ariaTransmitPolicy});
+            LogManager.SetTransmitProfile(_ariaTransmitPolicy.ProfileName);
             LogManager.SetPowerState(PowerState.Charging);
 
             _ariaTenantId = TelemetryHandlerConstants.AriaTenantId;

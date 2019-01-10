@@ -41,7 +41,6 @@ namespace UWP
 #endif
         }
 
-
         private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
         {
             AuthenticationResult result = null;

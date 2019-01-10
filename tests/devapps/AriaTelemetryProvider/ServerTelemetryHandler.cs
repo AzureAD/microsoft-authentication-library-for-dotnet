@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Client.AriaTelemetryProvider
         private void UploadEventsToAria()
         {
             LogManager.UploadNow();
-            LogManagerProvider.DestroyLogManager(ariaTenantId);
+            LogManagerProvider.DestroyLogManager(_ariaTenantId);
         }
     }
 }
