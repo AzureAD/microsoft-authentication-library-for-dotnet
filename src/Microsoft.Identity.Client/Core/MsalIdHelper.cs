@@ -31,6 +31,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.Core
 {

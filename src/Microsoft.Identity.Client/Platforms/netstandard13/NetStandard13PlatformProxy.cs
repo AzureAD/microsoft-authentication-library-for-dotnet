@@ -30,6 +30,8 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.netstandard13
@@ -39,20 +41,21 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
     /// </summary>
     internal class Netstandard13PlatformProxy : IPlatformProxy
     {
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private readonly Lazy<IPlatformLogger> _platformLogger =
+            new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
         /// Get the user logged in
         /// </summary>
-        public async Task<string> GetUserPrincipalNameAsync()
+        public Task<string> GetUserPrincipalNameAsync()
         {
-            return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
+            return Task.FromResult(string.Empty);
         }
 
-        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
+            return Task.FromResult(false);
         }
 
         /// <inheritdoc />
@@ -132,7 +135,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
 
         public ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new NetStandard13LegacyCachePersistence();
+            return new InMemoryLegacyCachePersistance();
         }
 
         public ITokenCacheAccessor CreateTokenCacheAccessor()
@@ -141,7 +144,8 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <inheritdoc />
-        public ICryptographyManager CryptographyManager { get; } = new NetStandard13CryptographyManager();
+        public ICryptographyManager CryptographyManager { get; } =
+            new NetStandard13CryptographyManager();
 
         /// <inheritdoc />
         public IPlatformLogger PlatformLogger => _platformLogger.Value;

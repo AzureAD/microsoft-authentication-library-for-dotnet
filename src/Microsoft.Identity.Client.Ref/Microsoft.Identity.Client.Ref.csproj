@@ -25,6 +25,9 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkIos)'">
     <DefineConstants>$(DefineConstants);iOS_BUILDTIME</DefineConstants>
   </PropertyGroup>
+   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkMac)'">
+    <DefineConstants>$(DefineConstants);MAC_BUILDTIME</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_BUILDTIME</DefineConstants>
   </PropertyGroup>

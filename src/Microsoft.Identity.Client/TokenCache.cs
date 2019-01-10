@@ -41,6 +41,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {
@@ -805,7 +806,7 @@ namespace Microsoft.Identity.Client
                 ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
                 ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
 
-                var tuple = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, ClientId);
+                var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(LegacyCachePersistence, ClientId);
                 OnAfterAccess(args);
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -822,8 +823,8 @@ namespace Microsoft.Identity.Client
                     }
                 }
 
-                Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = tuple.Item1;
-                List<AdalUserInfo> adalUsersWithoutClientInfo = tuple.Item2;
+                Dictionary<string, AdalUserInfo> clientInfoToAdalUserMap = adalUsersResult.ClientInfoUsers;
+                List<AdalUserInfo> adalUsersWithoutClientInfo = adalUsersResult.UsersWithoutClientInfo;
 
                 foreach (KeyValuePair<string, AdalUserInfo> pair in clientInfoToAdalUserMap)
                 {

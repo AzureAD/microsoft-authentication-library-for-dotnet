@@ -65,7 +65,6 @@
     <Compile Include="AppFactory.cs" />
     <Compile Include="CoreMobileTestHelper.cs" />
     <Compile Include="ITestController.cs" />
-    <Compile Include="PlatformNotSupportedException.cs" />
     <Compile Include="ResultVerificationFailureException.cs" />
     <Compile Include="CoreUiTestConstants.cs" />
     <Compile Include="UserInformationFieldIds.cs" />

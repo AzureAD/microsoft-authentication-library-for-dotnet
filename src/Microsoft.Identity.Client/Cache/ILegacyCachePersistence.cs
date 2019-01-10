@@ -32,9 +32,5 @@ namespace Microsoft.Identity.Client.Cache
         byte[] LoadCache();
 
         void WriteCache(byte[] serializedCache);
-
-#if iOS
-        void SetKeychainSecurityGroup(string keychainSecurityGroup);
-#endif
     }
 }

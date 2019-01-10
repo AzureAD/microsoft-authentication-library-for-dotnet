@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -227,19 +228,19 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, MsalTestConstants.Scope.ToString());
 
-                Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple =
+                var adalUsers =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
                         app.UserTokenCache.LegacyCachePersistence,
                         MsalTestConstants.ClientId);
 
                 CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, "user.read");
 
-                Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> tuple2 =
+                var adalUsers2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
                         app.UserTokenCache.LegacyCachePersistence,
                         MsalTestConstants.ClientId);
 
-                Assert.AreEqual(tuple.Item1.Keys.First(), tuple2.Item1.Keys.First());
+                Assert.AreEqual(adalUsers.ClientInfoUsers.Keys.First(), adalUsers2.ClientInfoUsers.Keys.First());
 
                 app.UserTokenCache.TokenCacheAccessor.ClearAccessTokens();
                 app.UserTokenCache.TokenCacheAccessor.ClearRefreshTokens();
