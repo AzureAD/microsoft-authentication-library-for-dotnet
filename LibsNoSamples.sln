@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979-0A13-456D-B9F9-CED41F935FD9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C-5E2E-4C4A-BDD2-8F2A06AAE3F6}"
@@ -15,6 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{48CF4D7C
 		src\MSAL.Frameworks.props = src\MSAL.Frameworks.props
 		build\SolutionWideAnalyzerConfig.ruleset = build\SolutionWideAnalyzerConfig.ruleset
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{528F34D9-FF6B-4AAE-8367-182EC19DAB5F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CacheCompat", "CacheCompat", "{7930A443-1981-49CD-8AF5-02E25F3A7FF3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Unit.netcore", "tests\Microsoft.Identity.Test.Unit.netcore\Microsoft.Identity.Test.Unit.netcore.csproj", "{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}"
 EndProject
@@ -28,13 +32,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Sid
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client.Ref", "src\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj", "{528C5488-C0D8-45C3-BEAC-3E52C22631C9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{528F34D9-FF6B-4AAE-8367-182EC19DAB5F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Identity.Test.Core.UIAutomation", "tests\Microsoft.Identity.Test.Core.UIAutomation\Microsoft.Identity.Test.Core.UIAutomation.csproj", "{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.AdalV3", "tests\CacheCompat\CommonCache.Test.AdalV3\CommonCache.Test.AdalV3.csproj", "{A8C2D397-BA21-4BD2-93AA-801B0E0804BC}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CacheCompat", "CacheCompat", "{7930A443-1981-49CD-8AF5-02E25F3A7FF3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.AdalV4", "tests\CacheCompat\CommonCache.Test.AdalV4\CommonCache.Test.AdalV4.csproj", "{70DFE67C-D2D1-4BE4-B785-F4445C6F652D}"
 EndProject
@@ -107,6 +107,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{7930A443-1981-49CD-8AF5-02E25F3A7FF3} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{DA8E7933-0A56-4668-9786-ECECA3D16944} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{30287EC8-BD85-41CC-BDCB-9DBF9EFBCC98} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
@@ -115,7 +116,6 @@ Global
 		{528C5488-C0D8-45C3-BEAC-3E52C22631C9} = {528F34D9-FF6B-4AAE-8367-182EC19DAB5F}
 		{3DC6EC76-D350-4D43-B206-A4CEC8AA36D4} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{A8C2D397-BA21-4BD2-93AA-801B0E0804BC} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
-		{7930A443-1981-49CD-8AF5-02E25F3A7FF3} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 		{70DFE67C-D2D1-4BE4-B785-F4445C6F652D} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
 		{21B0D02E-8E52-4ECD-BFD3-5F14FCB73703} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
 		{8672FC71-00DE-491D-BCEB-101A2A7887E6} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
