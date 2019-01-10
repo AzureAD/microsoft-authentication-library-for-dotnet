@@ -53,9 +53,8 @@ namespace Microsoft.Identity.Client
     /// This class is used in the constructors of <see cref="PublicClientApplication"/> and <see cref="ConfidentialClientApplication"/>.
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
-    /// See also <see cref="TokenCacheExtensions"/> which contains extension methods used to customize the cache serialization
     /// </summary>
-    public sealed class TokenCache
+    public sealed class TokenCache : ITokenCache
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
@@ -1245,5 +1244,134 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
+
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+        // todo: where to put this documentation
+        ///// <summary>
+        ///// Extension methods used to subscribe to cache serialization events, and to effectively serialize and deserialize the cache
+        ///// </summary>
+        ///// <remarks>New in MSAL.NET 2.x: it's now possible to deserialize the token cache in two formats, the ADAL V3 legacy token cache
+        ///// format, and the new unified cache format, common to ADAL.NET, MSAL.NET, and other libraries on the same platform (MSAL.objc, on iOS)</remarks>
+         
+        /// <summary>
+        /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
+        /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="beforeAccess">Delegate set in order to handle the cache deserialiation</param>
+        /// <remarks>In the case where the delegate is used to deserialize the cache, it might
+        /// want to call <see cref="Deserialize(byte[])"/></remarks>
+        public void SetBeforeAccess(TokenCacheNotification beforeAccess)
+        {
+            GuardOnMobilePlatforms();
+            BeforeAccess = beforeAccess;
+        }
+
+        /// <summary>
+        /// Sets a delegate to be notified after any library method accesses the cache. This gives an option to the
+        /// delegate to serialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
+        /// See https://aka.ms/msal-net-token-cache-serialization
+        /// </summary>
+        /// <param name="afterAccess">Delegate set in order to handle the cache serialization in the case where the <see cref="TokenCache.HasStateChanged"/>
+        /// member of the cache is <c>true</c></param>
+        /// <remarks>In the case where the delegate is used to serialize the cache entierely (not just a row), it might
+        /// want to call <see cref="Serialize()"/></remarks>
+        public void SetAfterAccess(TokenCacheNotification afterAccess)
+        {
+            GuardOnMobilePlatforms();
+            AfterAccess = afterAccess;
+        }
+
+        /// <summary>
+        /// Sets a delegate called before any library method writes to the cache. This gives an option to the delegate
+        /// to reload the cache state from a row in database and lock that row. That database row can then be unlocked in the delegate
+        /// registered with <see cref="SetAfterAccess(TokenCacheNotification)"/>
+        /// </summary>
+        /// <param name="beforeWrite">Delegate set in order to prepare the cache serialization</param>
+        public void SetBeforeWrite(TokenCacheNotification beforeWrite)
+        {
+            GuardOnMobilePlatforms();
+            BeforeWrite = beforeWrite;
+        }
+
+        /// <summary>
+        /// Deserializes the token cache from a serialization blob in the unified cache format
+        /// </summary>
+        /// <param name="unifiedState">Array of bytes containing serialized Msal cache data</param>
+        /// <remarks>
+        /// <paramref name="unifiedState"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
+        /// </remarks>
+        public void Deserialize(byte[] unifiedState)
+        {
+            GuardOnMobilePlatforms();
+            lock (LockObject)
+            {
+                RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
+                TokenCacheSerializeHelper.DeserializeUnifiedCache(TokenCacheAccessor, unifiedState, requestContext);
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the token cache from a serialization blob in both format (ADAL V3 format, and unified cache format)
+        /// </summary>
+        /// <param name="cacheData">Array of bytes containing serialicache data</param>
+        public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
+        {
+            GuardOnMobilePlatforms();
+            lock (LockObject)
+            {
+                RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
+                Deserialize(cacheData.UnifiedState);
+
+                LegacyCachePersistence.WriteCache(cacheData.AdalV3State);
+            }
+        }
+
+        /// <summary>
+        /// Serializes the entire token cache, in the unified cache format only
+        /// </summary>
+        /// <returns>array of bytes containing the serialized unified cache</returns>
+        public byte[] Serialize()
+        {
+            GuardOnMobilePlatforms();
+            // reads the underlying in-memory dictionary and dumps out the content as a JSON
+            lock (LockObject)
+            {
+                return TokenCacheSerializeHelper.SerializeUnifiedCache(TokenCacheAccessor);
+            }
+        }
+
+        /// <summary>
+        /// Serializes the entire token cache in both the ADAL V3 and unified cache formats.
+        /// </summary>
+        /// <returns>Serialized token cache <see cref="CacheData"/></returns>
+        public CacheData SerializeUnifiedAndAdalCache()
+        {
+            GuardOnMobilePlatforms();
+            // reads the underlying in-memory dictionary and dumps out the content as a JSON
+            lock (LockObject)
+            {
+                var serializedUnifiedCache = Serialize();
+                var serializeAdalCache = LegacyCachePersistence.LoadCache();
+
+                return new CacheData()
+                {
+                    AdalV3State = serializeAdalCache,
+                    UnifiedState = serializedUnifiedCache
+                };
+            }
+        }
+        
+        private static void GuardOnMobilePlatforms()
+        {
+#if ANDROID || iOS || WINDOWS_APP
+        throw new PlatformNotSupportedException("You should not use these TokenCache methods object on mobile platforms. " +
+            "They meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
+            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
+#endif
+        }
+#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+
     }
 }

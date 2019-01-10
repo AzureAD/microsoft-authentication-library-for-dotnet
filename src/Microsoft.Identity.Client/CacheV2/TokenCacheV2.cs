@@ -93,6 +93,21 @@ namespace Microsoft.Identity.Client.CacheV2
         //    }
         //}
 
+        public void SetBeforeAccess(TokenCache.TokenCacheNotification beforeAccess)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetAfterAccess(TokenCache.TokenCacheNotification afterAccess)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetBeforeWrite(TokenCache.TokenCacheNotification beforeWrite)
+        {
+            throw new NotImplementedException();
+        }
+
         public byte[] Serialize()
         {
             lock (_lock)
