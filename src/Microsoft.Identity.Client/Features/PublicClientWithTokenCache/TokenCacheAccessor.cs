@@ -23,6 +23,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
@@ -183,6 +184,12 @@ namespace Microsoft.Identity.Client
                    AccountCacheDictionary.Values.ToList());
         }
 
+        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
         public void SetKeychainSecurityGroup(string keychainSecurityGroup)
         {
             throw new System.NotImplementedException();
