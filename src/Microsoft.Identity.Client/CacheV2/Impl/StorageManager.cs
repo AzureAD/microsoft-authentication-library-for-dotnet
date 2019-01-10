@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.CacheV2.Impl
 {

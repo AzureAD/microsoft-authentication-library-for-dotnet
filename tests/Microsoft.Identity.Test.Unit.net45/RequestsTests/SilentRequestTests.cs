@@ -40,6 +40,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -139,7 +141,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MsalAccessTokenCacheItem accessItem =
                         JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
                     accessItem.ExpiresOnUnixTimestamp =
-                        ((long)((DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)).ToString(CultureInfo.InvariantCulture);
+                        ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds).ToString(CultureInfo.InvariantCulture);
 
                     cache.AddAccessTokenCacheItem(accessItem);
                 }

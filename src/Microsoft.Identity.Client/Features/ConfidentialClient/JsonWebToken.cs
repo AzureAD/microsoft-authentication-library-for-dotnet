@@ -33,7 +33,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Jwt
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     internal class JsonWebTokenConstants
     {
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Client.Internal.Jwt
             public JWTHeaderWithCertificate(ClientAssertionCertificate credential, bool sendCertificate)
                 : base(credential)
             {
-                X509CertificateThumbprint = this.Credential.Thumbprint;
+                X509CertificateThumbprint = Credential.Thumbprint;
                 X509CertificatePublicCertValue = null;
 
                 if (!sendCertificate)

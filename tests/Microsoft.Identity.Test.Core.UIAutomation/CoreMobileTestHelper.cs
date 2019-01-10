@@ -58,8 +58,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
 
         public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
         {
-            UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds();
-            userInformationFieldIds.DetermineFieldIds(user);
+            UserInformationFieldIds userInformationFieldIds = new UserInformationFieldIds(user);
             return userInformationFieldIds;
         }
 

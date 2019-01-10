@@ -39,6 +39,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -999,8 +1001,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var previousLogLevel = Logger.Level;
             // Setting LogLevel.Verbose causes certain static dependencies to load
             Logger.Level = LogLevel.Verbose;
-            var tokenCache = new TokenCache();
-            tokenCache.AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); };
+            var tokenCache = new TokenCache
+            {
+                AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
+            };
             tokenCache.Deserialize(null);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
