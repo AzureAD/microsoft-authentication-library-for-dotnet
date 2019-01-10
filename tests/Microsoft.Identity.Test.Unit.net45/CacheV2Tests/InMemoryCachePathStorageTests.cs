@@ -133,6 +133,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 
         // Tests FileIO::Read(), FileIO::Write(), and FileIO::DeleteFile() concurrently
         [TestMethod]
+        [Ignore]
         public void ReadWriteDeleteConcurrently()
         {
             int successfulReadsCount = 0;
