@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public AuthorityInfo DefaultAuthorityInfo => Authorities.Single(x => x.IsDefault);
         public string Component { get; internal set; }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         public ClientCredential ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
         public X509Certificate2 Certificate { get; internal set; }

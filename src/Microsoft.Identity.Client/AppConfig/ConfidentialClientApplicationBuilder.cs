@@ -30,7 +30,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
     /// </summary>

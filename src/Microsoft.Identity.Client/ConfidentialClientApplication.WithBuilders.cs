@@ -29,7 +29,7 @@ using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME // Hide confidential client on mobile platforms
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
     public partial class ConfidentialClientApplication
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)
