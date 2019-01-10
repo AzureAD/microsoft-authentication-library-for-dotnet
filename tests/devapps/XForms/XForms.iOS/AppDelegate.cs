@@ -55,7 +55,7 @@ namespace XForms.iOS
 
 #if TELEMETRY
             Telemetry.GetInstance().RegisterReceiver(
-                new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler().OnEvents);
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
 #endif
 
             // Default system browser

@@ -24,6 +24,7 @@
 // THE SOFTWARE.
 //
 //------------
+
 #if TELEMETRY
 // Referencing alias set in project file since Aria server and
 // client assemblies have the same fully-qualified type names. 
