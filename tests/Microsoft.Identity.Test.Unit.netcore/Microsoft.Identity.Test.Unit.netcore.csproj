@@ -9,8 +9,6 @@
   <ItemGroup>
 
     <Compile Include="..\Microsoft.Identity.Test.Unit.net45\**\*.cs" Exclude="..\Microsoft.Identity.Test.Unit.net45\obj\**\*;..\Microsoft.Identity.Test.Unit.net45\bin\**\*" />
-    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/UserInformationFieldIds.cs" LinkBase="Integration"></Compile>
-    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/CoreUiTestConstants.cs" LinkBase="Integration"></Compile>
 
     <None Include="..\Microsoft.Identity.Test.Unit.net45\Resources\**\*" LinkBase="Resources">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -30,7 +30,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client
 {
-   #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+   #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
         /// <summary>
