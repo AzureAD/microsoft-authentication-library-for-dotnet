@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
                 viewController.InvokeOnMainThread(() =>
                 {
                     var navigationController =
-                        new AuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
+                        new MsalAuthenticationAgentUINavigationController(authorizationUri.AbsoluteUri,
                             redirectUri.OriginalString, CallbackMethod, CoreUIParent.PreferredStatusBarStyle)
                         {
                             ModalPresentationStyle = CoreUIParent.ModalPresentationStyle,
