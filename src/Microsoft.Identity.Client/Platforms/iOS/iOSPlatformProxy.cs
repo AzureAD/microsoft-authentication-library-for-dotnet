@@ -31,6 +31,8 @@ using System.Threading.Tasks;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 using UIKit;
 
@@ -42,20 +44,21 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     internal class iOSPlatformProxy : IPlatformProxy
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new IosPlatformLogger());
+        private readonly Lazy<IPlatformLogger> _platformLogger = 
+            new Lazy<IPlatformLogger>(() => new ConsolePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
-        ///     Get the user logged
+        /// Get the user logged
         /// </summary>
-        public async Task<string> GetUserPrincipalNameAsync()
+        public Task<string> GetUserPrincipalNameAsync()
         {
-            return await Task.Factory.StartNew(() => string.Empty).ConfigureAwait(false);
+            return Task.FromResult(string.Empty);
         }
 
-        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
-            return await Task.Factory.StartNew(() => false).ConfigureAwait(false);
+            return Task.FromResult(false);
         }
 
         public bool IsDomainJoined()

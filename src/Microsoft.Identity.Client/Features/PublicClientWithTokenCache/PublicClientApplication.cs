@@ -31,6 +31,7 @@ using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.TelemetryCore;
 using System;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client
 {

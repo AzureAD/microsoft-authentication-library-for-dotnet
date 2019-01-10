@@ -27,9 +27,6 @@
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
 
-    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/UserInformationFieldIds.cs" LinkBase="Integration"></Compile>
-    <Compile Include="../Microsoft.Identity.Test.Core.UIAutomation/CoreUiTestConstants.cs" LinkBase="Integration"></Compile>
-
 
     <Compile Remove="Resources\**" />
     <EmbeddedResource Remove="Resources\**" />

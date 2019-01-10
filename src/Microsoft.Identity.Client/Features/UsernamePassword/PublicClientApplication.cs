@@ -37,7 +37,7 @@ using System;
 
 namespace Microsoft.Identity.Client
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
 
     public sealed partial class PublicClientApplication : ClientApplicationBase
     {
@@ -73,8 +73,8 @@ namespace Microsoft.Identity.Client
 
         private static void GuardMobilePlatforms()
         {
-#if ANDROID || iOS || WINDOWS_APP
-            throw new PlatformNotSupportedException("The Username / Password flow is not supported on Xamarin.Android, Xamarin.iOS and UWP. " +
+#if ANDROID || iOS || WINDOWS_APP || MAC
+            throw new PlatformNotSupportedException("The Username / Password flow is not supported on Xamarin.Android, Xamarin.iOS, Xamarin.Mac or UWP. " +
                "For more details see https://aka.ms/msal-net-up");
 #endif
         }
