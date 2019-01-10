@@ -92,6 +92,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         /// Runs through the standard acquire token flow
         /// </summary>
         [Test]
+        [Ignore("Current web element search implementation is unable to properly wait for select account elements on login page. Will be addressed in future updates.")]
         public void PromptBehaviorConsentSelectAccount()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
@@ -105,6 +106,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         /// with subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
         public void B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest()
         {
             _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
@@ -116,6 +118,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         /// with subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
         public void B2CFacebookProviderWithMicrosoftAuthorityAcquireTokenTest()
         {
             _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), false);
@@ -128,6 +131,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         ///  UIBehavior none
         /// </summary>
         [Test]
+        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
         public void B2CFacebookProviderEditPolicyAcquireTokenTest()
         {
             _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
@@ -166,6 +170,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         /// and subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
         public void B2CLocalAccountAcquireTokenTest()
         {
             _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
@@ -177,6 +182,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         /// with subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
         public void B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest()
         {
             _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), false);
