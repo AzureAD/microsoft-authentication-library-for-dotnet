@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard1.3</TargetFramework>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\build\MSAL.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(TELEMETRY)' != ''">
@@ -16,6 +14,7 @@
     <PackageReference Condition="'$(TELEMETRY)' != ''" Include="Microsoft.Extensions.Logging.Console" Version="1.0.0" />
   </ItemGroup>
 
+  <!-- Setting aliases for Aria packages since they both have the same fully-qualified type names -->
   <Target Name="ChangeAliasesOfStrongNameAssemblies" BeforeTargets="FindReferenceAssembliesForReferences;ResolveReferences">
     <ItemGroup>
       <ReferencePath Condition="'%(FileName)' == 'Microsoft.Applications.Events.Client'">

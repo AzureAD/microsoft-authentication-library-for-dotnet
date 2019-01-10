@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.Identity.Client.DevAppsTelemetry
+namespace Microsoft.Identity.Client.AriaTelemetryProvider
 {
     internal class TelemetryHandlerConstants
     {

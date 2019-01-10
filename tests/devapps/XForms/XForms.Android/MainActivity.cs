@@ -50,7 +50,7 @@ namespace XForms.Droid
 
 #if TELEMETRY
             Telemetry.GetInstance().RegisterReceiver(
-                new Microsoft.Identity.Client.DevAppsTelemetry.ClientTelemetryHandler().OnEvents);
+                new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler().OnEvents);
 #endif
 
             // To activate system webview, remove '//' from line 51 below, and comment out line 57 ;

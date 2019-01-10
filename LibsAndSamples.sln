@@ -67,7 +67,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalV2", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.Unit", "tests\CacheCompat\CommonCache.Test.Unit\CommonCache.Test.Unit.csproj", "{3C21354D-601A-4902-A728-419C70891338}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Telemetry", "tests\devapps\Telemetry\Telemetry.csproj", "{2AE44538-8E72-4D43-9CD1-B26C3A657814}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AriaTelemetryProvider", "tests\devapps\AriaTelemetryProvider\AriaTelemetryProvider.csproj", "{2AE44538-8E72-4D43-9CD1-B26C3A657814}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

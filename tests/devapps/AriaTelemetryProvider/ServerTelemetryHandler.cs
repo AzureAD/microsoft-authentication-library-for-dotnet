@@ -26,20 +26,25 @@
 //------------------------------------------------------------------------------
 
 #if TELEMETRY
+// Referencing alias set in project file since Aria server and
+// client assemblies have the same fully-qualified type names. 
 extern alias Server;
 
+using AriaTelemetryProvider;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Server::Microsoft.Applications.Events;
 
-namespace Microsoft.Identity.Client.DevAppsTelemetry
+namespace Microsoft.Identity.Client.AriaTelemetryProvider
 {
     public class ServerTelemetryHandler 
     {
-        private ILogger _logger;
+        private ILogger _ariaEventLogger;
         private readonly string _msalEventNameKey;
         private readonly string _ariaTenantId;
         private readonly Guid _sessionId;
+        private Logger _logger;
 
         public ServerTelemetryHandler()
         {
@@ -47,10 +52,13 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
             LogManager.Start(new LogConfiguration());
 
             _ariaTenantId = TelemetryHandlerConstants.AriaTenantId;
-            _logger = LogManager.GetLogger(_ariaTenantId, out status);
+            _ariaEventLogger = LogManager.GetLogger(_ariaTenantId, out status);
 
             _sessionId = Guid.NewGuid();
             _msalEventNameKey = TelemetryHandlerConstants.MsalEventNameKey;
+
+            // Set '_logger.WriteToConsole = true' to write out telemetry data to console
+            _logger = new Logger();
         }
 
         public void OnEvents(List<Dictionary<string, string>> events)
@@ -62,25 +70,34 @@ namespace Microsoft.Identity.Client.DevAppsTelemetry
         private void SetEventProperties(List<Dictionary<string, string>> events)
         {
             Guid scenarioId = Guid.NewGuid();
-            Console.WriteLine("{0} event(s) received for scenarioId {1}",
+            _logger.Log(string.Format(CultureInfo.InvariantCulture,
+                "{0} event(s) received for scenarioId {1}",
                 events.Count,
-                scenarioId);
-            foreach (var e in events)
+                scenarioId));
+
+            foreach (var msalEvent in events)
             {
-                Console.WriteLine("Event: {0}", e[_msalEventNameKey]);
+                _logger.Log(string.Format(CultureInfo.InvariantCulture,
+                    "Event: {0}",
+                    msalEvent[_msalEventNameKey]));
+
                 EventProperties eventData = new EventProperties
                 {
-                    Name = e[_msalEventNameKey]
+                    Name = msalEvent[_msalEventNameKey]
                 };
 
                 eventData.SetProperty(TelemetryHandlerConstants.MsalSessionIdKey, _sessionId);
                 eventData.SetProperty(TelemetryHandlerConstants.MsalScenarioIdKey, scenarioId);
-                foreach (var entry in e)
+                foreach (var entry in msalEvent)
                 {
                     eventData.SetProperty(entry.Key, entry.Value);
-                    Console.WriteLine("  {0}: {1}", entry.Key, entry.Value);
+
+                    _logger.Log(string.Format(CultureInfo.InvariantCulture,
+                            "  {0}: {1}",
+                              entry.Key, 
+                              entry.Value));
                 }
-                _logger.LogEvent(eventData);
+                _ariaEventLogger.LogEvent(eventData);
             }
         }
 

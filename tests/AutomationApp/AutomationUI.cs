@@ -48,7 +48,7 @@ namespace AutomationApp
             Logger.LogCallback = _appLogger.Log;
 #if TELEMETRY
             Telemetry.GetInstance().RegisterReceiver(
-                new Microsoft.Identity.Client.DevAppsTelemetry.ServerTelemetryHandler().OnEvents);
+                new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler().OnEvents);
 #endif
         }
 
