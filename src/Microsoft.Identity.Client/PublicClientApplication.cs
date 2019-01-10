@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Consutructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
+        /// Constructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Consutructor of the application.
+        /// Constructor of the application.
         /// </summary>
         /// <param name="clientId">Client ID (also named Application ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
@@ -122,12 +122,24 @@ namespace Microsoft.Identity.Client
 #if iOS
         private string keychainSecurityGroup;
 
-        /// <summary>
-        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
-        /// If you provide this key, you MUST add the capability to your Application Entitlement.
-        /// For more details, please see https://aka.ms/msal-net-sharing-cache-on-ios
-        /// </summary>
-        /// <remarks>This API may change in future release.</remarks>
+        /// <inheritdoc />
+        public string iOSKeychainSecurityGroup
+        {
+            get
+            {
+                return keychainSecurityGroup;
+            }
+            set
+            {
+                keychainSecurityGroup = value;
+                UserTokenCache.TokenCacheAccessor.SetiOSKeychainSecurityGroup(value);
+                (UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
+                    .SetKeychainSecurityGroup(value);
+            }
+        }
+
+        /// <inheritdoc />
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
         public string KeychainSecurityGroup
         {
             get

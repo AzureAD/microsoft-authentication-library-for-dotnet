@@ -46,7 +46,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -60,7 +60,10 @@
   <ItemGroup>
     <Reference Include="Mono.Android" />
     <Reference Include="System" />
+    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ObjectModel" />
+    <Reference Include="System.Runtime" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -90,6 +93,16 @@
     <AndroidResource Include="Resources\values\styles.xml" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AsyncUsageAnalyzers">
+      <Version>1.0.0-alpha003</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
+      <Version>2.6.2</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="2.5.0.122203" />
     <PackageReference Include="Xamarin.Android.Support.V4" Version="27.0.2" />
     <PackageReference Include="Xamarin.Android.Support.Compat" Version="27.0.2" />
@@ -104,7 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="StrongNamer">
-      <Version>0.0.8</Version>
+      <Version>0.0.6</Version>
     </PackageReference>
     <ProjectReference Include="..\..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
@@ -122,4 +135,7 @@
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <!-- Import the Xamarin targets workaround -->
   <Import Project="..\Patch.Xamarin.Common.targets" />
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
 </Project>
