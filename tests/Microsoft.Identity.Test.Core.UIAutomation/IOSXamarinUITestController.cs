@@ -13,15 +13,15 @@ namespace Microsoft.Identity.Test.UIAutomation.infrastructure
     {
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {
+            WaitForElement(elementID, xamarinSelector, timeout);
+
             switch (xamarinSelector)
             {
                 case XamarinSelector.ByAutomationId:
-                    WaitForElement(elementID, xamarinSelector, timeout);
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    WaitForElement(elementID, xamarinSelector, timeout);
-                    Application.Query(InvokeTapByCssId(elementID));
+                        Application.Query(InvokeTapByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
                     Application.Query(InvokeTapByHtmlElementValue(elementID));
