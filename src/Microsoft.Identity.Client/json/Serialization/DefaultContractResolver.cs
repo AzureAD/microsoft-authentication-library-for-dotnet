@@ -1379,7 +1379,7 @@ namespace Microsoft.Identity.Json.Serialization
             // warning - this method use to cause errors with Intellitrace. Retest in VS Ultimate after changes
             IValueProvider valueProvider;
 
-#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS)
+#if !(PORTABLE40 || PORTABLE || DOTNET || ANDROID || iOS || MAC)
             if (DynamicCodeGeneration)
             {
                 valueProvider = new DynamicValueProvider(member);

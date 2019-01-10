@@ -26,52 +26,83 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Test.LabInfrastructure;
+using System;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public class UserInformationFieldIds
     {
-        public string PasswordInputId { get; set; }
-        public string SignInButtonId { get; set; }
+        private readonly LabUser _user;
+        private string _passwordInputId;
+        private string _signInButtonId;
 
-        public void DetermineFieldIds(LabUser user)
+        public UserInformationFieldIds(LabUser user)
         {
-            if (user.IsFederated)
-            {
-                // We use the same IDs for ADFSv3 and ADFSv4
-                PasswordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
-                SignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
-                return;
-            }
-
-            if (user.UserType == UserType.B2C)
-            {
-                DetermineB2CFieldIds(user);
-                return;
-            }
-
-            PasswordInputId = CoreUiTestConstants.WebPasswordID;
-            SignInButtonId = CoreUiTestConstants.WebSubmitID;
+            _user = user;
         }
 
-        private void DetermineB2CFieldIds(LabUser user)
+        public string PasswordInputId
         {
-            if (user.B2CIdentityProvider == B2CIdentityProvider.Local)
+            get
             {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordID;
-                SignInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+                if (String.IsNullOrWhiteSpace(_passwordInputId))
+                {
+                    DetermineFieldIds();
+                }
+                return _passwordInputId;
+            }
+        }
+
+        public string SignInButtonId
+        {
+            get
+            {
+                if (String.IsNullOrWhiteSpace(_signInButtonId))
+                {
+                    DetermineFieldIds();
+                }
+                return _signInButtonId;
+            }
+        }
+
+        private void DetermineFieldIds()
+        {
+            if (_user.IsFederated)
+            {
+                // We use the same IDs for ADFSv3 and ADFSv4
+                _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
+                _signInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
+                return;
             }
 
-            if (user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
+            if (_user.UserType == UserType.B2C)
             {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
-                SignInButtonId = CoreUiTestConstants.B2CFacebookSubmitID;
+                DetermineB2CFieldIds();
+                return;
             }
 
-            if (user.B2CIdentityProvider == B2CIdentityProvider.Google)
+            _passwordInputId = CoreUiTestConstants.WebPasswordID;
+            _signInButtonId = CoreUiTestConstants.WebSubmitID;
+        }
+
+        private void DetermineB2CFieldIds()
+        {
+            if (_user.B2CIdentityProvider == B2CIdentityProvider.Local)
             {
-                PasswordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
-                SignInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
+                _passwordInputId = CoreUiTestConstants.B2CWebPasswordID;
+                _signInButtonId = CoreUiTestConstants.B2CWebSubmitID;
+            }
+
+            if (_user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
+            {
+                _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
+                _passwordInputId = CoreUiTestConstants.B2CFacebookSubmitID;
+            }
+
+            if (_user.B2CIdentityProvider == B2CIdentityProvider.Google)
+            {
+                _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
+                _signInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
             }
         }
     }

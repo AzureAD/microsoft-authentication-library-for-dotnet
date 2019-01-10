@@ -28,6 +28,7 @@
 using System;
 using System.Text;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.Cache
 {
