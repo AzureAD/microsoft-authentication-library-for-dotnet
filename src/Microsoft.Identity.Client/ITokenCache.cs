@@ -30,6 +30,13 @@ using Microsoft.Identity.Client.Cache;
 namespace Microsoft.Identity.Client
 {
     /// <summary>
+    /// Notification for certain token cache interactions during token acquisition. This delegate is
+    /// used in particular to provide a custom token cache serialization
+    /// </summary>
+    /// <param name="args">Arguments related to the cache item impacted</param>
+    public delegate void TokenCacheCallback(TokenCacheNotificationArgs args);
+
+    /// <summary>
     /// This is the interface that implements the public access to cache operations.
     /// </summary>
     public interface ITokenCache
@@ -39,19 +46,19 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="beforeAccess"></param>
-        void SetBeforeAccess(TokenCache.TokenCacheNotification beforeAccess);
+        void SetBeforeAccess(TokenCacheCallback beforeAccess);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="afterAccess"></param>
-        void SetAfterAccess(TokenCache.TokenCacheNotification afterAccess);
+        void SetAfterAccess(TokenCacheCallback afterAccess);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="beforeWrite"></param>
-        void SetBeforeWrite(TokenCache.TokenCacheNotification beforeWrite);
+        void SetBeforeWrite(TokenCacheCallback beforeWrite);
 
         /// <summary>
         /// Unified Only
