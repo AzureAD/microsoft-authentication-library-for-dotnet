@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="tokenCache"></param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithAppTokenCache(ITokenCache tokenCache)
+        public ConfidentialClientApplicationBuilder WithAppTokenCache(TokenCache tokenCache)
         {
             Config.AppTokenCache = tokenCache;
             return this;
@@ -78,7 +78,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="tokenCache"></param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithUserTokenCache(ITokenCache tokenCache)
+        public ConfidentialClientApplicationBuilder WithUserTokenCache(TokenCache tokenCache)
         {
             Config.UserTokenCache = tokenCache;
             return this;

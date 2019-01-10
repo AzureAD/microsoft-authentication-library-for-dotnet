@@ -29,9 +29,8 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     internal interface IApplicationConfiguration : IAppConfig
     {
-        // todo: before moving these to public api, have an ITokenCache publicly that we expose with limited visibility (e.g. no tokencacheaccessor)
-        ITokenCache UserTokenCache { get; }
-        ITokenCache AppTokenCache { get; }
+        TokenCache UserTokenCache { get; }
+        TokenCache AppTokenCache { get; }
         bool IsExtendedTokenLifetimeEnabled { get; }
         AuthorityInfo DefaultAuthorityInfo { get; }
     }

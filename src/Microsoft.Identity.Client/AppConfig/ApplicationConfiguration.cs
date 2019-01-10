@@ -53,8 +53,8 @@ namespace Microsoft.Identity.Client.AppConfig
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
-        public ITokenCache AppTokenCache { get; internal set; }
-        public ITokenCache UserTokenCache { get; internal set; }
+        public TokenCache AppTokenCache { get; internal set; }
+        public TokenCache UserTokenCache { get; internal set; }
         public string SliceParameters { get; internal set; }
         public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
