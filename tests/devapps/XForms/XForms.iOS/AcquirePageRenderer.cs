@@ -33,6 +33,7 @@ using XForms;
 using XForms.iOS;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
+using Security;
 
 [assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
 
@@ -41,11 +42,55 @@ namespace XForms.iOS
     internal class AcquirePageRenderer : PageRenderer
     {
         AcquirePage page;
+        private bool SubscribedToEvent = false;
 
         protected override void OnElementChanged(VisualElementChangedEventArgs e)
         {
             base.OnElementChanged(e);
             page = e.NewElement as AcquirePage;
+
+            if (!SubscribedToEvent)
+            {
+                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
+                SubscribedToEvent = true;
+            }
+            else
+            {
+                App.MsalApplicationUpdated -= OnMsalApplicationUpdated;
+                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
+            }
+
+            OnMsalApplicationUpdated(null, null);
+        }
+
+        private void OnMsalApplicationUpdated(object sender, EventArgs e)
+        {
+            App.MsalPublicClient.KeychainSecurityGroup = GetTeamId() + ".*";
+        }
+
+        private string GetTeamId()
+        {
+            var queryRecord = new SecRecord(SecKind.GenericPassword)
+            {
+                Service = "",
+                Account = "DotNetTeamIDHint",
+                Accessible = SecAccessible.Always
+            };
+
+            SecRecord match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
+
+            if (resultCode == SecStatusCode.ItemNotFound)
+            {
+                SecKeyChain.Add(queryRecord);
+                match = SecKeyChain.QueryAsRecord(queryRecord, out resultCode);
+            }
+
+            if (resultCode == SecStatusCode.Success)
+            {
+                return match.AccessGroup.Split('.')[0];
+            }
+
+            return "";
         }
 
         public override void ViewDidLoad()

@@ -62,6 +62,8 @@ namespace XForms
 
         public static string[] Scopes = DefaultScopes;
 
+        public static event EventHandler MsalApplicationUpdated;
+
         public App()
         {
             MainPage = new NavigationPage(new XForms.MainPage());
@@ -92,6 +94,9 @@ namespace XForms
             }
 
             MsalPublicClient.ValidateAuthority = ValidateAuthority;
+
+            if (MsalApplicationUpdated != null)
+                MsalApplicationUpdated(null, null);
         }
 
         protected override void OnStart()

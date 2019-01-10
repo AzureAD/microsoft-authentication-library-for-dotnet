@@ -36,9 +36,6 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-#if __IOS__
-using Security;
-#endif
 
 namespace XForms
 {
@@ -53,36 +50,7 @@ namespace XForms
         {
             InitializeComponent();
             InitUIBehaviorPicker();
-#if __IOS__
-            App.MsalPublicClient.KeychainSecurityGroup = GetTeamId() + ".*";
-#endif
         }
-
-#if __IOS__
-        private string GetTeamId()
-        {
-            var queryRecord = new SecRecord(SecKind.GenericPassword)
-            {
-                Service = "",
-                Account = TeamIdKey,
-                Accessible = SecAccessible.Always
-            };
-
-            SecRecord match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
-
-            if (resultCode == SecStatusCode.ItemNotFound)
-            {
-                SecKeyChain.Add(queryRecord);
-                match = SecKeyChain.QueryAsRecord(queryRecord, out resultCode);
-            }
-
-            if (resultCode == SecStatusCode.Success)
-            {
-                return match.AccessGroup.Split('.')[0];
-            }
-        }
-
-#endif
 
         protected override void OnAppearing()
         {
