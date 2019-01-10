@@ -27,34 +27,38 @@
 
 using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.CacheV2
+namespace Microsoft.Identity.Client
 {
     /// <summary>
-    /// This is the interface that implements the public access to cache operations.
-    /// With CacheV2, this should only be necessary if the caller is persisting
-    /// the cache in their own store, since this will provide the serialize/deserialize
-    /// and before/after notifications used in that scenario.
-    /// TODO: This interface should eventually be PUBLIC.
+    /// Notification for certain token cache interactions during token acquisition. This delegate is
+    /// used in particular to provide a custom token cache serialization
     /// </summary>
-    internal interface ITokenCache
+    /// <param name="args">Arguments related to the cache item impacted</param>
+    public delegate void TokenCacheCallback(TokenCacheNotificationArgs args);
+
+    /// <summary>
+    /// This is the interface that implements the public access to cache operations.
+    /// </summary>
+    public interface ITokenCache
     {
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="beforeAccess"></param>
-        //void SetBeforeAccess(TokenCacheNotification beforeAccess);
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeAccess"></param>
+        void SetBeforeAccess(TokenCacheCallback beforeAccess);
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="afterAccess"></param>
-        //void SetAfterAccess(TokenCacheNotification afterAccess);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="afterAccess"></param>
+        void SetAfterAccess(TokenCacheCallback afterAccess);
 
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <param name="beforeWrite"></param>
-        //void SetBeforeWrite(TokenCacheNotification beforeWrite);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beforeWrite"></param>
+        void SetBeforeWrite(TokenCacheCallback beforeWrite);
 
         /// <summary>
         /// Unified Only
@@ -79,5 +83,6 @@ namespace Microsoft.Identity.Client.CacheV2
         /// </summary>
         /// <param name="cacheData"></param>
         void DeserializeUnifiedAndAdalCache(CacheData cacheData);
+#endif
     }
 }
