@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId)
-            : base(serviceBundle, authenticationRequestParameters, apiId, true)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             if (authenticationRequestParameters.UserAssertion == null)
             {

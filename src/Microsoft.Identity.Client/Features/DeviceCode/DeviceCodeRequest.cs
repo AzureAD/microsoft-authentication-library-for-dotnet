@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Features.DeviceCode
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
-            : base(serviceBundle, authenticationRequestParameters, apiId, true)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             _deviceCodeResultCallback = deviceCodeResultCallback;
         }

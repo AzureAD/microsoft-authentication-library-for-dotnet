@@ -66,15 +66,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected RequestBase(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            bool validateScopes)
+            ApiEvent.ApiIds apiId)
         {
             ServiceBundle = serviceBundle;
             TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
             
             AuthenticationRequestParameters = authenticationRequestParameters;
-            if (validateScopes && (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0))
+            if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
                 throw new ArgumentNullException(nameof(authenticationRequestParameters.Scope));
             }

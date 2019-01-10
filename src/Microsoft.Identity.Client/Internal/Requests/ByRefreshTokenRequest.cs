@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             string userProvidedRefreshToken)
-        : base(serviceBundle, authenticationRequestParameters, apiId, false)
+        : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             _userProvidedRefreshToken = userProvidedRefreshToken;
         }

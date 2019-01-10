@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string loginHint,
             UIBehavior uiBehavior,
             IWebUI webUi)
-            : base(serviceBundle, authenticationRequestParameters, apiId, true)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
             webUi?.ValidateRedirectUri(authenticationRequestParameters.RedirectUri);

@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             bool forceRefresh)
-            : base(serviceBundle, authenticationRequestParameters, apiId, true)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             ForceRefresh = forceRefresh;
         }

@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IntegratedWindowsAuthInput iwaInput)
-            : base(serviceBundle, authenticationRequestParameters, apiId, true)
+            : base(serviceBundle, authenticationRequestParameters, apiId)
         {
             _iwaInput = iwaInput ?? throw new ArgumentNullException(nameof(iwaInput));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
