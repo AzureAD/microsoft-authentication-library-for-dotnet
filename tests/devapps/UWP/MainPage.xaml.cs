@@ -34,8 +34,12 @@ namespace UWP
             this.InitializeComponent();
 
             _pca = new PublicClientApplication(ClientID, Authority);
-        }
 
+#if ARIA_TELEMETRY_ENABLED
+            Telemetry.GetInstance().RegisterReceiver(
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+#endif
+        }
 
         private async void AcquireTokenIWA_ClickAsync(object sender, RoutedEventArgs e)
         {
