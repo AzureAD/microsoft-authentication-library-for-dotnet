@@ -46,6 +46,10 @@ namespace AutomationApp
         {
             InitializeComponent();
             Logger.LogCallback = _appLogger.Log;
+#if ARIA_TELEMETRY_ENABLED
+            Telemetry.GetInstance().RegisterReceiver(
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+#endif
         }
 
         public Dictionary<string, string> CreateDictionaryFromJson(string json)
