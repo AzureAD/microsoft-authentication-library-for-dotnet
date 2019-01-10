@@ -35,8 +35,8 @@ using WebKit;
 
 namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 {
-    [Foundation.Register("AuthenticationAgentUIViewController")]
-    internal class AuthenticationAgentUIViewController : UIViewController
+    [Foundation.Register("MsalAuthenticationAgentUIViewController")]
+    internal class MsalAuthenticationAgentUIViewController : UIViewController
     {
         private readonly string url;
         public readonly string callback;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
         public delegate void ReturnCodeCallback(AuthorizationResult result);
 
-        public AuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
+        public MsalAuthenticationAgentUIViewController(string url, string callback, ReturnCodeCallback callbackMethod)
         {
             this.url = url;
             this.callback = callback;
