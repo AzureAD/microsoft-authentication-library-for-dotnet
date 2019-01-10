@@ -42,48 +42,6 @@ namespace Microsoft.Identity.Client.Cache
         internal /* internal for testing only */ const string DifferentAuthorityError = 
             "Not expecting authority to have a different env than the RT and IdT";
 
-        public static void WriteMsalRefreshToken(ITokenCacheAccessor tokenCacheAccessor,
-            AdalResultWrapper resultWrapper, string authority, string clientId, string displayableId,
-             string givenName, string familyName, string objectId)
-        {
-            if (string.IsNullOrEmpty(resultWrapper.RawClientInfo))
-            {
-                MsalLogger.Default.Info("Client Info is missing. Skipping MSAL refresh token cache write");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(resultWrapper.RefreshToken))
-            {
-                MsalLogger.Default.Info("Refresh Token is missing. Skipping MSAL refresh token cache write");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(resultWrapper.Result.IdToken))
-            {
-                MsalLogger.Default.Info("Id Token is missing. Skipping MSAL refresh token cache write");
-                return;
-            }
-
-            try
-            {
-                var rtItem = new MsalRefreshTokenCacheItem
-                    (new Uri(authority).Host, clientId, resultWrapper.RefreshToken, resultWrapper.RawClientInfo);
-                tokenCacheAccessor.SaveRefreshToken(rtItem);
-
-                MsalAccountCacheItem accountCacheItem = new MsalAccountCacheItem
-                    (new Uri(authority).Host, objectId, resultWrapper.RawClientInfo, null, displayableId, resultWrapper.Result.TenantId,
-                        givenName, familyName);
-                tokenCacheAccessor.SaveAccount(accountCacheItem);
-            }
-            catch (Exception ex)
-            {
-                MsalLogger.Default.WarningPiiWithPrefix(
-                    ex, 
-                    "An error occurred while writing ADAL refresh token to the cache in MSAL format. " 
-                    + "For details please see https://aka.ms/net-cache-persistence-errors. ");
-            }
-        }
-
         public static void WriteAdalRefreshToken(
             ILegacyCachePersistence legacyCachePersistence,
             MsalRefreshTokenCacheItem rtItem,
@@ -148,8 +106,9 @@ namespace Microsoft.Identity.Client.Cache
         /// Item1 is a map of ClientInfo -> AdalUserInfo for those users that have ClientInfo 
         /// Item2 is a list of AdalUserInfo for those users that do not have ClientInfo
         /// </summary>
-        public static Tuple<Dictionary<string, AdalUserInfo>, List<AdalUserInfo>> GetAllAdalUsersForMsal
-            (ILegacyCachePersistence legacyCachePersistence, string clientId)
+        public static AdalUsersForMsalResult GetAllAdalUsersForMsal(
+            ILegacyCachePersistence legacyCachePersistence, 
+            string clientId)
         {
             var clientInfoToAdalUserMap = new Dictionary<string, AdalUserInfo>();
             var adalUsersWithoutClientInfo = new List<AdalUserInfo>();
@@ -180,9 +139,9 @@ namespace Microsoft.Identity.Client.Cache
                 MsalLogger.Default.WarningPiiWithPrefix(ex, "An error occurred while reading accounts in ADAL format from the cache for MSAL. " +
                              "For details please see https://aka.ms/net-cache-persistence-errors. ");
 
-                return Tuple.Create(new Dictionary<string, AdalUserInfo>(), new List<AdalUserInfo>());
+                return new AdalUsersForMsalResult();
             }
-            return Tuple.Create(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
+            return new AdalUsersForMsalResult(clientInfoToAdalUserMap, adalUsersWithoutClientInfo);
         }
 
         /// <summary>

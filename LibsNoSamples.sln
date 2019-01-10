@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27703.2000
+VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{8B57084E-12B8-4499-B7DD-D8DD882BDA98}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Client", "src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj", "{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{5D231979-0A13-456D-B9F9-CED41F935FD9}"
 EndProject
@@ -44,16 +44,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommonCache.Test.MsalV2", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonCache.Test.Unit", "tests\CacheCompat\CommonCache.Test.Unit\CommonCache.Test.Unit.csproj", "{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Identity.Test.Integration", "tests\Microsoft.Identity.Test.Integration\Microsoft.Identity.Test.Integration.csproj", "{E7F9B699-4941-4053-AB81-7E26C4D24805}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8B57084E-12B8-4499-B7DD-D8DD882BDA98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60117A9B-4BB8-472E-BFFF-52CBF67CA95A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF0E7BEC-90A3-46B4-AEDC-4162D7873AE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -102,6 +104,10 @@ Global
 		{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7F9B699-4941-4053-AB81-7E26C4D24805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7F9B699-4941-4053-AB81-7E26C4D24805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7F9B699-4941-4053-AB81-7E26C4D24805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7F9B699-4941-4053-AB81-7E26C4D24805}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +126,7 @@ Global
 		{21B0D02E-8E52-4ECD-BFD3-5F14FCB73703} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
 		{8672FC71-00DE-491D-BCEB-101A2A7887E6} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
 		{CFC2232F-3276-42A4-B8E3-F03B6F8BAA82} = {7930A443-1981-49CD-8AF5-02E25F3A7FF3}
+		{E7F9B699-4941-4053-AB81-7E26C4D24805} = {5D231979-0A13-456D-B9F9-CED41F935FD9}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6C88EF77-AF03-4F82-B666-1831DABAA119}

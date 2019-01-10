@@ -44,6 +44,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Identity.Test.Common;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {

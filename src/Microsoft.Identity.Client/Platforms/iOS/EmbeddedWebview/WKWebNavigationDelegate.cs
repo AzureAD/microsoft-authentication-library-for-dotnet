@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using CoreFoundation;
 using Foundation;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Platforms.AppleShared;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using UIKit;
@@ -40,9 +41,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
     internal class WKWebNavigationDelegate : WKNavigationDelegate
     {
         private const string AboutBlankUri = "about:blank";
-        private AuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
+        private MsalAuthenticationAgentUIViewController AuthenticationAgentUIViewController = null;
 
-        public WKWebNavigationDelegate(AuthenticationAgentUIViewController AuthUIViewController)
+        public WKWebNavigationDelegate(MsalAuthenticationAgentUIViewController AuthUIViewController)
         {
             AuthenticationAgentUIViewController = AuthUIViewController;
             return;
@@ -117,9 +118,9 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
 
         internal class WKWebViewUIDelegate : WKUIDelegate
         {
-            private readonly AuthenticationAgentUIViewController _controller = null;
+            private readonly MsalAuthenticationAgentUIViewController _controller = null;
 
-            public WKWebViewUIDelegate(AuthenticationAgentUIViewController c)
+            public WKWebViewUIDelegate(MsalAuthenticationAgentUIViewController c)
             {
                 _controller = c;
                 return;

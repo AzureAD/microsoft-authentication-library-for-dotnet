@@ -41,6 +41,8 @@ using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using String = System.String;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -49,7 +51,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
     /// </summary>
     internal class UapPlatformProxy : IPlatformProxy
     {
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
+        private readonly Lazy<IPlatformLogger> _platformLogger = 
+            new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
         private IWebUIFactory _overloadWebUiFactory;
 
         /// <summary>
