@@ -45,6 +45,12 @@ namespace Microsoft.Identity.Client.TelemetryCore
         }
 
 #if iOS
+        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            _tokenCacheAccessor.SetiOSKeychainSecurityGroup(keychainSecurityGroup);
+        }
+
+        // Will remove in v3.
         public void SetKeychainSecurityGroup(string keychainSecurityGroup)
         {
             _tokenCacheAccessor.SetKeychainSecurityGroup(keychainSecurityGroup);

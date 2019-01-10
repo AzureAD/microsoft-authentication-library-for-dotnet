@@ -71,6 +71,19 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             return NSBundle.MainBundle.BundleIdentifier;
         }
 
+        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            if (keychainSecurityGroup == null)
+            {
+                keychainGroup = GetBundleId();
+            }
+            else
+            {
+                keychainGroup = GetTeamId() + '.' + keychainSecurityGroup;
+            }
+        }
+
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
         public void SetKeychainSecurityGroup(string keychainSecurityGroup)
         {
             if (keychainSecurityGroup == null)
