@@ -115,5 +115,7 @@ namespace Microsoft.Identity.Client
 
         public const string NoRedirectUri = "No redirectUri was configured. ADAL does not provide any defaults.";
 
+        public const string NoRefreshTokenProvided = "A refresh token must be provided.";
+
     }
 }

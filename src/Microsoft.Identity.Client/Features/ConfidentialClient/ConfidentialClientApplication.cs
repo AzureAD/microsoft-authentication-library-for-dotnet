@@ -403,10 +403,10 @@ namespace Microsoft.Identity.Client
 
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                throw new ArgumentNullException(nameof(refreshToken), "A refresh token must be provided.");
+                throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
             }
 
-            return await ExchangeRefreshTokenAsync(scopes, refreshToken).ConfigureAwait(false);
+            return await AcquireByRefreshTokenCommonAsync(scopes, refreshToken).ConfigureAwait(false);
         }
 
         internal ClientCredential ClientCredential { get; }

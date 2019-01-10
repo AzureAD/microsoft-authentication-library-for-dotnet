@@ -337,17 +337,21 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> ExchangeRefreshTokenAsync(IEnumerable<string> scopes, string userProvidedRefreshToken)
+        internal async Task<AuthenticationResult> AcquireByRefreshTokenCommonAsync(IEnumerable<string> scopes, string userProvidedRefreshToken)
         {
+            var context = CreateRequestContext();
             SortedSet<string> _scopes;
-            if (scopes == null)
+
+            if (scopes == null || scopes.Count() == 0)
             {
                 _scopes = new SortedSet<string>();
                 _scopes.Add(ClientId + "/.default");
+                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, "No scopes provided for acquire token by refresh token request. Using default scope instead.", scopes.Count()));
             }
             else
             {
                 _scopes = ScopeHelper.CreateSortedSetFromEnumerable(scopes);
+                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", scopes.Count()));
             }
 
             var reqParams = new AuthenticationRequestParameters
@@ -358,7 +362,7 @@ namespace Microsoft.Identity.Client
                 TokenCache = UserTokenCache,
                 Scope = _scopes,
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(),
+                RequestContext = context,
                 ValidateAuthority = ValidateAuthority,
                 IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
                 IsRefreshTokenRequest = true
@@ -367,7 +371,7 @@ namespace Microsoft.Identity.Client
             var handler = new ByRefreshTokenRequest(
                 ServiceBundle,
                 reqParams,
-                ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority,
+                ApiEvent.ApiIds.AcquireTokenByRefreshToken,
                 userProvidedRefreshToken);
 
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
