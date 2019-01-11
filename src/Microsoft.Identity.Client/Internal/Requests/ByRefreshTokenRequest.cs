@@ -40,9 +40,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         private string _userProvidedRefreshToken;
 
-        private const string _nullTokenCacheErrorMassage = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
-        private const string _noRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
-
         public ByRefreshTokenRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -59,10 +56,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalUiRequiredException(
                     MsalUiRequiredException.TokenCacheNullError,
-                    _nullTokenCacheErrorMassage);
+                    CoreErrorMessages.NullTokenCacheError);
             }
 
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose("Begin acquire token by refresh token...");
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose(MSALStatusMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(_userProvidedRefreshToken), cancellationToken)
                                         .ConfigureAwait(false);
@@ -70,7 +67,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (msalTokenResponse.RefreshToken == null)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    _noRefreshTokenInResponse);
+                    CoreErrorMessages.NoRefreshTokenInResponse);
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 
