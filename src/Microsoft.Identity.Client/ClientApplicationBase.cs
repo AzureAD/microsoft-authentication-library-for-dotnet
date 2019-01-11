@@ -346,12 +346,12 @@ namespace Microsoft.Identity.Client
             {
                 _scopes = new SortedSet<string>();
                 _scopes.Add(ClientId + "/.default");
-                context.Logger.Info("No scopes provided for acquire token by refresh token request. Using default scope instead.");
+                context.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }
             else
             {
                 _scopes = ScopeHelper.CreateSortedSetFromEnumerable(scopes);
-                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", scopes.Count()));
+                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, LogMessages.UsingXScopesForRefreshTokenRequest, scopes.Count()));
             }
 
             var reqParams = new AuthenticationRequestParameters

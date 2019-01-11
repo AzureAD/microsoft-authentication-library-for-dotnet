@@ -39,13 +39,15 @@ namespace Microsoft.Identity.Client
     public interface IByRefreshToken
     {
         /// <summary>
-        /// This method should be used when you have a solution using ADAL 2.x and 
-        /// caching a refresh token, and you want to migrate to MSAL.NET.
-        /// During the migration process, it enables you to store in MSAL.NET token
-        ///  cache an access token and refresh token corresponding to <paramref="refreshToken"/>.
-        /// From there you will be able to use MSAL.NET new API, in particular
-        /// AcquireTokenSilentAsync() which will renew the user token.  
+        /// Acquires an access token from an existing refresh token and stores it and the refresh token into 
+        /// the application user token cache, where it will be available for further AcquireTokenSilentAsync calls.
+        /// This method can be used in migration to MSAL from ADAL v2 and in various integration 
+        /// scenarios where you have a RefreshToken available. 
+        /// (see https://aka.ms/msal-net-migration-adal2-msal2)
         /// </summary>
+        /// <param name="scopes">Scope to request from the token endpoint.
+        /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
+        /// <param name="refreshToken">The refresh token from ADAL 2.x</param>
         Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken);
     }
 }

@@ -27,8 +27,10 @@
 
 namespace Microsoft.Identity.Client
 {
-    internal class MSALStatusMessages
+    internal class LogMessages
     {
         public const string BeginningAcquireByRefreshToken = "Begin acquire token by refresh token...";
+        public const string NoScopesProvidedForRefreshTokenRequest = "No scopes provided for acquire token by refresh token request. Using default scope instead.";
+        public const string UsingXScopesForRefreshTokenRequest = "Using {0} scopes for acquire token by refresh token request";
     }
 }
