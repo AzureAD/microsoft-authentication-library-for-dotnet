@@ -390,11 +390,11 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Acquires an access token from an existing refresh token and stores it and the refresh token into 
+        /// the application user token cache, where it will be available for further AcquireTokenSilentAsync calls.
         /// This method can be used in migration to MSAL from ADAL v2 and in various integration 
-        /// scenarios where you have a RefreshToken available. MSAL doesn't expose the RT and thus 
-        /// you have to use the standard MSAL cache to persist SSO state of your application. 
-        /// AcquireTokenByRefreshTokenAsync() which will renew all the RT, the AT and the IDT which will 
-        /// be stored in the cache and will therefore be available for silent calls. (see https://aka.ms/msal-net-migration-adal2-msal2)
+        /// scenarios where you have a RefreshToken available. 
+        /// (see https://aka.ms/msal-net-migration-adal2-msal2)
         /// </summary>
         /// <param name="scopes">Scope to request from the token endpoint.
         /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
