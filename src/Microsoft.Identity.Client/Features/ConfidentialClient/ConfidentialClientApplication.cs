@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scope to request from the token endpoint.
         /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
-        /// <param name="refreshToken">The refresh token from ADAL 2.x</param>
+        /// <param name="refreshToken">The refresh token (for example previously obtained from ADAL 2.x)</param>
         async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
             GuardMobileFrameworks();
