@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Client
             {
                 _scopes = new SortedSet<string>();
                 _scopes.Add(ClientId + "/.default");
-                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, "No scopes provided for acquire token by refresh token request. Using default scope instead.", scopes.Count()));
+                context.Logger.Info("No scopes provided for acquire token by refresh token request. Using default scope instead.");
             }
             else
             {
