@@ -25,27 +25,27 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Threading;
-using System.Threading.Tasks;
+using System;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Instance
 {
-    internal interface IPublicClientApplicationExecutor
+    internal static class OpenIdConfigurationEndpointManagerFactory
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenInteractiveParameters interactiveParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken);
+        public static IOpenIdConfigurationEndpointManager Create(AuthorityInfo authorityInfo, IServiceBundle serviceBundle)
+        {
+            switch (authorityInfo.AuthorityType)
+            {
+            case AuthorityType.Adfs:
+                return new AdfsOpenIdConfigurationEndpointManager(serviceBundle);
+            case AuthorityType.Aad:
+                return new AadOpenIdConfigurationEndpointManager(serviceBundle);
+            case AuthorityType.B2C:
+                return new B2COpenIdConfigurationEndpointManager();
+            default:
+                throw new InvalidOperationException("Invalid AuthorityType");
+            }
+        }
     }
 }

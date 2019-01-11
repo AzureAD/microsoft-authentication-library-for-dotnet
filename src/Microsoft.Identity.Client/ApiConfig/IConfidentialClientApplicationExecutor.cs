@@ -45,10 +45,6 @@ namespace Microsoft.Identity.Client.ApiConfig
             IAcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken);
 
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken);
-
         Task<Uri> ExecuteAsync(
             IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken);

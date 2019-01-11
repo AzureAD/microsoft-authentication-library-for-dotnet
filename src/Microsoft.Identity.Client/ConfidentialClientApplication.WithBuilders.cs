@@ -90,18 +90,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// </summary>
-        /// <param name="scopes"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentCcaParameterBuilder AcquireTokenSilent(
-            IEnumerable<string> scopes,
-            IAccount account)
-        {
-            return AcquireTokenSilentCcaParameterBuilder.Create(this, scopes, account);
-        }
-
-        /// <summary>
         /// Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
@@ -152,23 +140,6 @@ namespace Microsoft.Identity.Client
                 ServiceBundle,
                 requestParams,
                 ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope); // TODO(migration): consolidate this with parameters...
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken)
-        {
-            var authorityInstance = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride) 
-                ? GetAuthority(silentParameters.Account) 
-                : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride, ValidateAuthority);
-
-            var handler = new SilentRequest(
-                ServiceBundle,
-                CreateRequestParameters(silentParameters, UserTokenCache, account: silentParameters.Account, customAuthority: authorityInstance),
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo(migration): consolidate this properly
-                silentParameters.ForceRefresh);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }

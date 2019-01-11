@@ -30,22 +30,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
-    internal interface IPublicClientApplicationExecutor
+    internal interface IClientApplicationBaseExecutor
     {
         Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenInteractiveParameters interactiveParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
+            IAcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken);
     }
 }

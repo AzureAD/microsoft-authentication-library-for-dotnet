@@ -59,7 +59,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             _username = username ?? throw new ArgumentNullException(nameof(username));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
-                _username,
                 serviceBundle);
         }
 
@@ -68,20 +67,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             await UpdateUsernameAsync().ConfigureAwait(false);
             var userAssertion = await FetchAssertionFromWsTrustAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetAdditionalBodyParameters(userAssertion), cancellationToken)
+            var msalTokenResponse = await SendTokenRequestAsync(
+                                            GetAdditionalBodyParameters(userAssertion), cancellationToken)
                                         .ConfigureAwait(false);
             return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
-            if (AuthenticationRequestParameters.Authority.AuthorityType == AppConfig.AuthorityType.Adfs)
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
             {
                 return null;
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
-                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.UserRealmUriPrefix)
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix, _username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
@@ -89,7 +89,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 var wsTrustResponse = await _commonNonInteractiveHandler.PerformWsTrustMexExchangeAsync(
                     userRealmResponse.FederationMetadataUrl,
                     userRealmResponse.CloudAudienceUrn,
-                    UserAuthType.IntegratedAuth).ConfigureAwait(false);
+                    UserAuthType.IntegratedAuth,
+                    _username,
+                    null).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(

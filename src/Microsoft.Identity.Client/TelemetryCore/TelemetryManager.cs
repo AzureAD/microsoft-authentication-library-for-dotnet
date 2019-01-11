@@ -38,8 +38,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         private const string MsalCacheEventValuePrefix = "msal.token"; 
         private const string MsalCacheEventName = "msal.cache_event";
 
-        private readonly object _lockObj = new object();
-
         internal readonly ConcurrentDictionary<string, List<EventBase>> CompletedEvents =
             new ConcurrentDictionary<string, List<EventBase>>();
 
@@ -49,12 +47,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
         internal ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount = 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
-        private readonly TelemetryCallback _telemetryCallback;
         private readonly bool _onlySendFailureTelemetry;
 
         public TelemetryManager(TelemetryCallback telemetryCallback, bool onlySendFailureTelemetry = false)
         {
-            _telemetryCallback = telemetryCallback;
+            Callback = telemetryCallback;
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
         }
 
@@ -73,24 +70,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Flush(requestId, clientId);
         }
 
-        public TelemetryCallback Callback
-        {
-            get
-            {
-                lock (_lockObj)
-                {
-                    return _telemetryCallback; // ?? Telemetry.GetInstance();
-                }
-            }
-            // TODO(migration):
-            //set
-            //{
-            //    lock (_lockObj)
-            //    {
-            //        _telemetryReceiver = value;
-            //    }
-            //}
-        }
+        public TelemetryCallback Callback { get; }
 
         /// <inheritdoc />
         public string GenerateNewRequestId()
@@ -114,11 +94,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
         private bool HasReceiver()
         {
-            lock (_lockObj)
-            {
-                return _telemetryCallback != null ||
-                    Telemetry.GetInstance().HasRegisteredReceiver();
-            }
+            return Callback != null;
         }
 
         internal void StartEvent(string requestId, EventBase eventToStart)
@@ -221,10 +197,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
                 eventsToFlush.Insert(0, new DefaultEvent(clientId, new ConcurrentDictionary<string, int>()));
             }
 
-            lock (_lockObj)
-            {
-                _telemetryCallback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
-            }
+            Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
         }
 
         private IEnumerable<EventBase> CollateOrphanedEvents(string requestId)

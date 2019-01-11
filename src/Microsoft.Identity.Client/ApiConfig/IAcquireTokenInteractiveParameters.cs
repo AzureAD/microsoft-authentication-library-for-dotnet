@@ -31,7 +31,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// </summary>
     internal interface IAcquireTokenInteractiveParameters : IAcquireTokenCommonParameters
     {
-        // UIBehavior struct is INTERNAL on .net core...  (can we change that?)
+        // todo(migration): UIBehavior struct is INTERNAL on .net core...  (can we change that?)
 #if !NET_CORE_BUILDTIME
         /// <summary>
         /// </summary>

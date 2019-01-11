@@ -25,27 +25,20 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Threading;
-using System.Threading.Tasks;
+using System;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Instance
 {
-    internal interface IPublicClientApplicationExecutor
+    internal static class AdfsUpnHelper
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenInteractiveParameters interactiveParameters,
-            CancellationToken cancellationToken);
+        public static string GetDomainFromUpn(string upn)
+        {
+            if (!upn.Contains("@"))
+            {
+                throw new ArgumentException("userPrincipalName does not contain @ character.");
+            }
 
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken);
+            return upn.Split('@')[1];
+        }
     }
 }

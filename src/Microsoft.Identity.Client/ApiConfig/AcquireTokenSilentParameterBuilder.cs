@@ -35,40 +35,40 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <inheritdoc />
     /// <summary>
     /// </summary>
-    public sealed class AcquireTokenSilentPcaParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenSilentPcaParameterBuilder>
+    public sealed class AcquireTokenSilentParameterBuilder :
+        AbstractCabAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>
     {
         /// <inheritdoc />
-        public AcquireTokenSilentPcaParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        public AcquireTokenSilentParameterBuilder(IClientApplicationBase clientApplicationBase)
+            : base(clientApplicationBase)
         {
         }
 
         /// <summary>
         /// </summary>
-        /// <param name="publicClientApplication"></param>
+        /// <param name="clientApplicationBase"></param>
         /// <param name="scopes"></param>
         /// <param name="account"></param>
         /// <returns></returns>
-        internal static AcquireTokenSilentPcaParameterBuilder Create(
-            IPublicClientApplication publicClientApplication,
+        internal static AcquireTokenSilentParameterBuilder Create(
+            IClientApplicationBase clientApplicationBase,
             IEnumerable<string> scopes, IAccount account)
         {
-            return new AcquireTokenSilentPcaParameterBuilder(publicClientApplication).WithScopes(scopes).WithAccount(account);
+            return new AcquireTokenSilentParameterBuilder(clientApplicationBase).WithScopes(scopes).WithAccount(account);
         }
 
         /// <summary>
         /// </summary>
         /// <param name="forceRefresh"></param>
         /// <returns></returns>
-        public AcquireTokenSilentPcaParameterBuilder WithForceRefresh(bool forceRefresh)
+        public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
             Parameters.ForceRefresh = forceRefresh;
             return this;
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteAsync(IClientApplicationBaseExecutor executor, CancellationToken cancellationToken)
         {
             return executor.ExecuteAsync((IAcquireTokenSilentParameters)Parameters, cancellationToken);
         }

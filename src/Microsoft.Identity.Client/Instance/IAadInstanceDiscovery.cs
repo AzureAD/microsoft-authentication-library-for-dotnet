@@ -35,12 +35,10 @@ namespace Microsoft.Identity.Client.Instance
     {
         Task<InstanceDiscoveryResponse> DoInstanceDiscoveryAndCacheAsync(
             Uri authority,
-            bool validateAuthority,
             RequestContext requestContext);
 
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             Uri authority,
-            bool validateAuthority,
             RequestContext requestContext);
 
         bool TryAddValue(string host, InstanceDiscoveryMetadataEntry instanceDiscoveryMetadataEntry);

@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             string messageWithPii = string.Format(
                 CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({4}) started:\n\tAuthority: {0}\n\tScope: {1}\n\tClientId: {2}\n\tCache Provided: {3}",
-                authenticationRequestParameters.Authority?.CanonicalAuthority,
+                authenticationRequestParameters.Authority?.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
                 TokenCache != null,
@@ -101,12 +101,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 GetType().Name);
 
             if (authenticationRequestParameters.Authority != null &&
-                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority.Host))
+                AadAuthority.IsInTrustedHostList(authenticationRequestParameters.Authority?.AuthorityInfo?.Host))
             {
                 messageWithoutPii += string.Format(
                     CultureInfo.CurrentCulture,
                     "\n\tAuthority Host: {0}",
-                    authenticationRequestParameters.Authority.Host);
+                    authenticationRequestParameters.Authority?.AuthorityInfo?.Host);
             }
 
             authenticationRequestParameters.RequestContext.Logger.InfoPii(messageWithPii, messageWithoutPii);
@@ -186,9 +186,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger)
             {
                 ApiId = _apiId,
-#pragma warning disable CA1305 // netcore does not have bool.tostring(culture)
-                ValidationStatus = AuthenticationRequestParameters.ValidateAuthority.ToString(),
-#pragma warning restore CA1305 // Specify IFormatProvider
+// todo(migration): remove this dead code
+//#pragma warning disable CA1305 // netcore does not have bool.tostring(culture)
+//                ValidationStatus = AuthenticationRequestParameters.ValidateAuthority.ToString(),
+//#pragma warning restore CA1305 // Specify IFormatProvider
                 AccountId = accountId ?? "",
                 CorrelationId = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString(),
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
@@ -202,8 +203,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (AuthenticationRequestParameters.Authority != null)
             {
-                apiEvent.Authority = new Uri(AuthenticationRequestParameters.Authority.CanonicalAuthority);
-                apiEvent.AuthorityType = AuthenticationRequestParameters.Authority.AuthorityType.ToString();
+                apiEvent.Authority = new Uri(AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority);
+                apiEvent.AuthorityType = AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType.ToString();
             }
 
             // Give derived classes the ability to add or modify fields in the telemetry as needed.
@@ -229,8 +230,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             IdToken idToken = IdToken.Parse(msalTokenResponse.IdToken);
 
-            AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = Authority.UpdateTenantId(
-                AuthenticationRequestParameters.Authority.CanonicalAuthority, idToken?.TenantId);
+            AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = GetTenantUpdatedCanonicalAuthority(
+                AuthenticationRequestParameters.Authority.AuthorityInfo.CanonicalAuthority, idToken?.TenantId);
 
             if (TokenCache != null)
             {
@@ -243,16 +244,34 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 return new AuthenticationResult(
                     new MsalAccessTokenCacheItem(
-                        AuthenticationRequestParameters.Authority.Host,
+                        AuthenticationRequestParameters.Authority.AuthorityInfo.Host,
                         AuthenticationRequestParameters.ClientId, 
                         msalTokenResponse,
                         idToken?.TenantId),
                     new MsalIdTokenCacheItem(
-                        AuthenticationRequestParameters.Authority.Host,
+                        AuthenticationRequestParameters.Authority.AuthorityInfo.Host,
                         AuthenticationRequestParameters.ClientId, 
                         msalTokenResponse, 
                         idToken?.TenantId));
             }
+        }
+
+        private static string GetTenantUpdatedCanonicalAuthority(string authority, string replacementTenantId)
+        {
+            var authUri = new Uri(authority);
+            string[] pathSegments = authUri.AbsolutePath.Substring(1).Split(
+                new[]
+                {
+                    '/'
+                },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            if (Authority.TenantlessTenantNames.Contains(pathSegments[0]) && !string.IsNullOrWhiteSpace(replacementTenantId))
+            {
+                return string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", authUri.Authority, replacementTenantId);
+            }
+
+            return authority;
         }
 
         private void ValidateAccountIdentifiers(ClientInfo fromServer)
@@ -262,7 +281,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return;
             }
 
-            if (AuthenticationRequestParameters.Authority.AuthorityType == AppConfig.AuthorityType.B2C &&
+            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.B2C &&
                 fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
                     StringComparison.OrdinalIgnoreCase))
             {
@@ -294,15 +313,32 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task ResolveAuthorityEndpointsAsync()
         {
-            await AuthenticationRequestParameters.Authority.UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            await AuthenticationRequestParameters
+                  .Authority
+                  .UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext)
+                  .ConfigureAwait(false);
 
-            await AuthenticationRequestParameters.Authority
-                .ResolveEndpointsAsync(AuthenticationRequestParameters.LoginHint,
-                    AuthenticationRequestParameters.RequestContext)
-                .ConfigureAwait(false);
+            // todo: send IAuthorityEndpointResolutionManager in to RequestBase as a parameter...
+            var resolutionManager = new AuthorityEndpointResolutionManager(ServiceBundle, false);
+
+            AuthenticationRequestParameters.Endpoints = await resolutionManager.ResolveEndpointsAsync(
+                AuthenticationRequestParameters.Authority.AuthorityInfo,
+                AuthenticationRequestParameters.LoginHint,
+                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+        }
+
+        protected Task<MsalTokenResponse> SendTokenRequestAsync(
+            IDictionary<string, string> additionalBodyParameters,
+            CancellationToken cancellationToken)
+        {
+            return SendTokenRequestAsync(
+                AuthenticationRequestParameters.Endpoints.TokenEndpoint,
+                additionalBodyParameters,
+                cancellationToken);
         }
 
         protected async Task<MsalTokenResponse> SendTokenRequestAsync(
+            string tokenEndpoint,
             IDictionary<string, string> additionalBodyParameters, 
             CancellationToken cancellationToken)
         {
@@ -322,12 +358,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 client.AddBodyParameter(kvp.Key, kvp.Value);
             }
 
-            return await SendHttpMessageAsync(client).ConfigureAwait(false);
+            return await SendHttpMessageAsync(client, tokenEndpoint).ConfigureAwait(false);
         }
 
-        private async Task<MsalTokenResponse> SendHttpMessageAsync(OAuth2Client client)
+        private async Task<MsalTokenResponse> SendHttpMessageAsync(OAuth2Client client, string tokenEndpoint)
         {
-            UriBuilder builder = new UriBuilder(AuthenticationRequestParameters.Authority.TokenEndpoint);
+            UriBuilder builder = new UriBuilder(tokenEndpoint);
             builder.AppendQueryParameters(AuthenticationRequestParameters.SliceParameters);
             MsalTokenResponse msalTokenResponse =
                 await client

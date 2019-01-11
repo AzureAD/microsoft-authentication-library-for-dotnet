@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -77,13 +78,43 @@ namespace Microsoft.Identity.Client
 
             var authorityInstance = string.IsNullOrWhiteSpace(parameters.AuthorityOverride) 
                 ? GetAuthority(parameters.Account) 
-                : Instance.Authority.CreateAuthority(ServiceBundle, parameters.AuthorityOverride, ValidateAuthority);
+                : Instance.Authority.CreateAuthority(ServiceBundle, parameters.AuthorityOverride);
 
             var handler = new SilentRequest(
                 ServiceBundle,
                 CreateRequestParameters(parameters, UserTokenCache, account: parameters.Account, customAuthority: authorityInstance),
                 ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // TODO(migration): consolidate this properly
                 parameters.ForceRefresh);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(
+            IEnumerable<string> scopes, 
+            IAccount account)
+        {
+            return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);
+        }
+
+        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
+            IAcquireTokenSilentParameters silentParameters,
+            CancellationToken cancellationToken)
+        {
+            var authorityInstance = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride) 
+                                        ? GetAuthority(silentParameters.Account) 
+                                        : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride);
+
+            var handler = new SilentRequest(
+                ServiceBundle,
+                CreateRequestParameters(silentParameters, UserTokenCache, account: silentParameters.Account, customAuthority: authorityInstance),
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo(migration): consolidate this properly
+                silentParameters.ForceRefresh);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
