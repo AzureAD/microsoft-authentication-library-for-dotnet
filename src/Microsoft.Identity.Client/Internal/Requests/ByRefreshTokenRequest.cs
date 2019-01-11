@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     CoreErrorMessages.NullTokenCacheError);
             }
 
-            AuthenticationRequestParameters.RequestContext.Logger.Verbose(MSALStatusMessages.BeginningAcquireByRefreshToken);
+            AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(_userProvidedRefreshToken), cancellationToken)
                                         .ConfigureAwait(false);
