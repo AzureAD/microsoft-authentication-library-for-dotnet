@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Client
 
         private RequestContext CreateRequestContext()
         {
-            return new RequestContext(ClientId, new MsalLogger(Guid.Empty, Component));
+            return new RequestContext(ClientId, new MsalLogger(Guid.NewGuid(), Component));
         }
     }
 }
