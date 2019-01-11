@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -82,10 +83,16 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </summary>
         /// <param name="extraQueryParameters"></param>
         /// <returns></returns>
-        public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
+        public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
-            Parameters.ExtraQueryParameters = new ReadOnlyDictionary<string, string>(extraQueryParameters ?? new Dictionary<string, string>());
+            Parameters.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
             return (T)this;
+        }
+
+        // This exists for back compat with old-style API.  Once we deprecate it, we can remove this.
+        internal T WithExtraQueryParameters(string extraQueryParameters)
+        {
+            return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
         }
 
         /// <summary>

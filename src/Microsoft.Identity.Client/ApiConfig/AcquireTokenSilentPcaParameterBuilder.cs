@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -70,6 +71,18 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
             return executor.ExecuteAsync((IAcquireTokenSilentParameters)Parameters, cancellationToken);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected override void Validate()
+        {
+            base.Validate();
+            if (Parameters.Account == null)
+            {
+                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
+            }
         }
     }
 }

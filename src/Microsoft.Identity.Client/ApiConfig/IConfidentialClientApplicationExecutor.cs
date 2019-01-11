@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Client.ApiConfig
             IAcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken);
 
-        Task<AuthenticationResult> ExecuteAsync(
+        Task<Uri> ExecuteAsync(
             IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken);
     }

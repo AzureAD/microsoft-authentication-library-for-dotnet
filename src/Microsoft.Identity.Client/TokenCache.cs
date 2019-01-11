@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
@@ -60,7 +61,15 @@ namespace Microsoft.Identity.Client
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
-        private IServiceBundle _serviceBundle = Core.ServiceBundle.CreateDefault();
+        // TODO(migration): look at managing construction of tokencache entirely inside of config object so we can remove this
+        // or just leave it null and ensure we don't de-ref it until we're bound inside of a PCA.
+        private IServiceBundle _serviceBundle = Core.ServiceBundle.Create(
+            PublicClientApplicationBuilder
+                .Create("invalid_client_id")
+                .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                .BuildConfiguration());
+
+        private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
         internal IServiceBundle ServiceBundle
         {
@@ -75,6 +84,12 @@ namespace Microsoft.Identity.Client
         static TokenCache()
         {
             ModuleInitializer.EnsureModuleInitialized();
+        }
+
+        internal RequestContext CreateRequestContext()
+        {
+            return new RequestContext(ServiceBundle.Config.ClientId,
+                MsalLogger.Create(Guid.Empty, string.Empty, ServiceBundle.Config));
         }
 
         private const int DefaultExpirationBufferInMinutes = 5;
@@ -443,7 +458,7 @@ namespace Microsoft.Identity.Client
                         return msalAccessTokenCacheItem;
                     }
 
-                    if (requestParams.IsExtendedLifeTimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
+                    if (_serviceBundle.Config.IsExtendedTokenLifetimeEnabled && msalAccessTokenCacheItem.ExtendedExpiresOn >
                         DateTime.UtcNow + TimeSpan.FromMinutes(DefaultExpirationBufferInMinutes))
                     {
                         requestParams.RequestContext.Logger.Info(
@@ -573,6 +588,7 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
                     return CacheFallbackOperations.GetAdalEntryForMsal(
+                        // TODO(migration): ServiceBundle.DefaultLogger,
                         LegacyCachePersistence,
                         preferredEnvironmentHost,
                         environmentAliases,
@@ -1307,8 +1323,7 @@ namespace Microsoft.Identity.Client
             GuardOnMobilePlatforms();
             lock (LockObject)
             {
-                RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
-                TokenCacheSerializeHelper.DeserializeUnifiedCache(TokenCacheAccessor, unifiedState, requestContext);
+                TokenCacheSerializeHelper.DeserializeUnifiedCache(TokenCacheAccessor, unifiedState, CreateRequestContext());
             }
         }
 
@@ -1321,9 +1336,7 @@ namespace Microsoft.Identity.Client
             GuardOnMobilePlatforms();
             lock (LockObject)
             {
-                RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
                 Deserialize(cacheData.UnifiedState);
-
                 LegacyCachePersistence.WriteCache(cacheData.AdalV3State);
             }
         }

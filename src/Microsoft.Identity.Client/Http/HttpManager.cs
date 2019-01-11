@@ -32,6 +32,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 
@@ -39,16 +40,16 @@ namespace Microsoft.Identity.Client.Http
 {
     internal class HttpManager : IHttpManager
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMsalHttpClientFactory _httpClientFactory;
 
-        public HttpManager(IHttpClientFactory httpClientFactory = null)
+        public HttpManager(IMsalHttpClientFactory httpClientFactory = null)
         {
             _httpClientFactory = httpClientFactory ?? new HttpClientFactory();
         }
 
         protected virtual HttpClient GetHttpClient()
         {
-            return _httpClientFactory.HttpClient;
+            return _httpClientFactory.GetHttpClient();
         }
 
         public async Task<HttpResponse> SendPostAsync(

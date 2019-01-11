@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,7 +74,27 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IGetAuthorizationRequestUrlParameters)Parameters, cancellationToken);
+            throw new InvalidOperationException("This is a developer BUG.  This should never get executed.");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public new Task<Uri> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            // This method is marked "public new" because it only differs in return type from the base class
+            // ExecuteAsync() and we need this one to return Uri and not AuthenticationResult.
+
+            if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
+            {
+                Validate();
+                return executor.ExecuteAsync((IGetAuthorizationRequestUrlParameters)Parameters, cancellationToken);
+            }
+
+            throw new InvalidOperationException(
+                "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.");
         }
     }
 #endif

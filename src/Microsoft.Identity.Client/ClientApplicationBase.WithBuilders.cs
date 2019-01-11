@@ -25,7 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
+using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
@@ -33,6 +44,48 @@ namespace Microsoft.Identity.Client
     {
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
+            ServiceBundle = Core.ServiceBundle.Create(config);
+
+            UserTokenCache = config.UserTokenCache;
+            if (UserTokenCache != null)
+            {
+                UserTokenCache.ClientId = ClientId;
+                UserTokenCache.ServiceBundle = ServiceBundle;
+            }
+
+            CreateRequestContext(Guid.Empty).Logger.Info(string.Format(CultureInfo.InvariantCulture,
+                "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+                PlatformProxyFactory.GetPlatformProxy().GetProductName(), MsalIdHelper.GetMsalVersion(),
+                AssemblyUtils.GetAssemblyFileVersionAttribute(), AssemblyUtils.GetAssemblyInformationalVersion()));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="parameters"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        internal async Task<AuthenticationResult> AcquireTokenSilentAsync(
+            IAcquireTokenSilentParameters parameters,
+            CancellationToken cancellationToken)
+        {
+            // todo: move this validation into the AcquireTokenSilentParameterBuilder so we catch it early
+            if (parameters.Account == null)
+            {
+                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
+            }
+
+            var authorityInstance = string.IsNullOrWhiteSpace(parameters.AuthorityOverride) 
+                ? GetAuthority(parameters.Account) 
+                : Instance.Authority.CreateAuthority(ServiceBundle, parameters.AuthorityOverride, ValidateAuthority);
+
+            var handler = new SilentRequest(
+                ServiceBundle,
+                CreateRequestParameters(parameters, UserTokenCache, account: parameters.Account, customAuthority: authorityInstance),
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // TODO(migration): consolidate this properly
+                parameters.ForceRefresh);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

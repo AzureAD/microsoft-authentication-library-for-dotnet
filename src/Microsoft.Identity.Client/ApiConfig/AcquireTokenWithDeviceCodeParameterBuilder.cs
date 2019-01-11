@@ -74,5 +74,20 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             return executor.ExecuteAsync((IAcquireTokenWithDeviceCodeParameters)Parameters, cancellationToken);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected override void Validate()
+        {
+            base.Validate();
+
+            if (Parameters.DeviceCodeResultCallback == null)
+            {
+                throw new ArgumentNullException(
+                    nameof(Parameters.DeviceCodeResultCallback), 
+                    "A deviceCodeResultCallback must be provided for Device Code authentication to work properly");
+            }
+        }
     }
 }

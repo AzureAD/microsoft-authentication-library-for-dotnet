@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Internal
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal
         /// </summary>
         public static void EnsureModuleInitialized()
         {
-            // double check locking instead locking first to improve performace
+            // double check locking instead locking first to improve performance
             if (!_isInitialized)
             {
                 lock (LockObj)
@@ -82,7 +83,15 @@ namespace Microsoft.Identity.Client.Internal
             // initialize the telemetry instance so statics get created
             Telemetry.GetInstance();
 
-            MsalLogger.Default = new MsalLogger(Guid.Empty, null);
+            // TODO(migration): need to remove this ModuleInitializer class entirely...
+            MsalLogger.Default = MsalLogger.Create(
+                Guid.Empty, 
+                string.Empty, 
+                PublicClientApplicationBuilder
+                    .Create("invalid_client_id")
+                    .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                    .BuildConfiguration());
+
             _isInitialized = true;
         }
     }

@@ -47,19 +47,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class IntegratedWindowsAuthRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private readonly IntegratedWindowsAuthInput _iwaInput;
+        private string _username;
 
         public IntegratedWindowsAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
-            IntegratedWindowsAuthInput iwaInput)
+            string username)
             : base(serviceBundle, authenticationRequestParameters, apiId)
         {
-            _iwaInput = iwaInput ?? throw new ArgumentNullException(nameof(iwaInput));
+            _username = username ?? throw new ArgumentNullException(nameof(username));
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
-                _iwaInput,
+                _username,
                 serviceBundle);
         }
 
@@ -116,10 +116,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (string.IsNullOrWhiteSpace(_iwaInput.UserName))
+            if (string.IsNullOrWhiteSpace(_username))
             {
                 string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                _iwaInput.UserName = platformUsername;
+                _username = platformUsername;
             }
         }
 

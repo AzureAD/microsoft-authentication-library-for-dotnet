@@ -30,13 +30,17 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using System.Collections.Generic;
+using System.Security;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.WsTrust;
+
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
 #endif
@@ -93,26 +97,13 @@ namespace Microsoft.Identity.Client
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
         public PublicClientApplication(string clientId, string authority)
-            : this(null, clientId, authority)
+        : base(PublicClientApplicationBuilder
+                .Create(clientId)
+                .WithRedirectUri(PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
+                .AddKnownAuthority(new Uri(authority), true)
+                .WithUserTokenCache(new TokenCache())
+                .BuildConfiguration())
         {
-            UserTokenCache = new TokenCache()
-            {
-                ClientId = clientId
-            };
-        }
-
-        internal PublicClientApplication(IServiceBundle serviceBundle, string clientId, string authority)
-            : base(
-                clientId,
-                authority,
-                PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId),
-                true,
-                serviceBundle)
-        {
-            UserTokenCache = new TokenCache()
-            {
-                ClientId = clientId
-            };
         }
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
@@ -179,11 +170,9 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
-                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScope
+
+            return await AcquireTokenInteractive(scopes, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -197,12 +186,11 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
+            
+            // TODO(migration): AcquireTokenWithScopeHint
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
+            return await AcquireTokenInteractive(scopes, null).WithLoginHint(loginHint)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -219,11 +207,10 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account,
-                        UIBehavior.SelectAccount, null, null, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeUser
+
+            return await AcquireTokenInteractive(scopes, null).WithAccount(account)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -242,11 +229,13 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeHintBehavior
+
+            return await AcquireTokenInteractive(scopes, null)
+                .WithLoginHint(loginHint)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -265,11 +254,13 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
-                        extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeUserBehavior
+
+            return await AcquireTokenInteractive(scopes, null)
+                .WithAccount(account)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -292,11 +283,15 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
-                        loginHint, behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeHintBehaviorAuthority
+
+            return await AcquireTokenInteractive(scopes, null)
+                .WithLoginHint(loginHint)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .WithExtraScopesToConsent(extraScopesToConsent)
+                .WithAuthorityOverride(authority)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -319,11 +314,15 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
-                        behavior, extraQueryParameters, null, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeUserBehaviorAuthority
+
+            return await AcquireTokenInteractive(scopes, null)
+                .WithAccount(account)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .WithExtraScopesToConsent(extraScopesToConsent)
+                .WithAuthorityOverride(authority)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
 
@@ -340,11 +339,23 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, null,
-                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScope).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScope
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private static object GetParentObjectFromUiParent(UIParent parent)
+        {
+            #if DESKTOP
+                return parent.CoreUIParent.OwnerWindow;
+            #elif ANDROID
+                return parent.CoreUIParent.Activity;
+            #elif MAC
+                return parent.CoreUIParent.CallerWindow;
+            #else
+                return null;
+            #endif
         }
 
         /// <summary>
@@ -360,11 +371,11 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHint).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeHint
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .WithLoginHint(loginHint)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -381,11 +392,11 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account,
-                        UIBehavior.SelectAccount, null, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUser).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeUser
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .WithAccount(account)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -404,11 +415,13 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authority, scopes, null, loginHint,
-                        behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehavior).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeHintBehavior
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .WithLoginHint(loginHint)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -427,11 +440,13 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authority, scopes, null, account, behavior,
-                        extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehavior).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeUserBehavior
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .WithAccount(account)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -454,11 +469,15 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForLoginHintCommonAsync(authorityInstance, scopes, extraScopesToConsent,
-                        loginHint, behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeHintBehaviorAuthority).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeHintBehaviorAuthority
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .WithLoginHint(loginHint)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .WithExtraScopesToConsent(extraScopesToConsent)
+                .WithAuthorityOverride(authority)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -481,14 +500,76 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenForUserCommonAsync(authorityInstance, scopes, extraScopesToConsent, account,
-                        behavior, extraQueryParameters, parent, ApiEvent.ApiIds.AcquireTokenWithScopeUserBehaviorAuthority).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenWithScopeUserBehaviorAuthority
+
+            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
+                .WithAccount(account)
+                .WithUiBehavior(behavior)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .WithExtraScopesToConsent(extraScopesToConsent)
+                .WithAuthorityOverride(authority)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
+        /// narrows down the selection to a specific tenant. This does not change the configured value in the application. This is specific
+        /// to applications managing several accounts (like a mail client with several mailboxes)</param>
+        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the cache and attempt to acquire new access token
+        /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
+        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
+        /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </remarks>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
+            string authority, bool forceRefresh)
+        {
+            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
+            // TODO(migration): AcquireTokenSilentWithAuthority
 
+            return await AcquireTokenSilent(scopes, account)
+                .WithAuthorityOverride(authority)
+                .WithForceRefresh(forceRefresh)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
+        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
+        /// close to expiration (within a 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </remarks>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
+        {
+            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
+            // TODO(migration): AcquireTokenSilentWithoutAuthority
+
+            return await AcquireTokenSilent(scopes, account)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+        }
 
         internal IWebUI CreateWebAuthenticationDialog(UIParent parent, UIBehavior behavior, RequestContext requestContext)
         {
@@ -528,61 +609,231 @@ namespace Microsoft.Identity.Client
 #endif
         }
 
-        private async Task<AuthenticationResult> AcquireTokenForLoginHintCommonAsync(
-            Authority authority,
-            IEnumerable<string> scopes,
-            IEnumerable<string> extraScopesToConsent,
-            string loginHint,
-            UIBehavior behavior,
-            string extraQueryParameters,
-            UIParent parent,
-            ApiEvent.ApiIds apiId)
-        {
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParams,
-                apiId,
-                extraScopesToConsent,
-                loginHint,
-                behavior,
-                CreateWebAuthenticationDialog(
-                    parent,
-                    behavior,
-                    requestParams.RequestContext));
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenForUserCommonAsync(Authority authority, IEnumerable<string> scopes,
-            IEnumerable<string> extraScopesToConsent, IAccount user, UIBehavior behavior, string extraQueryParameters, UIParent parent, ApiEvent.ApiIds apiId)
-        {
-            var requestParams = CreateRequestParameters(authority, scopes, user, UserTokenCache);
-            requestParams.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParams,
-                apiId,
-                extraScopesToConsent,
-                behavior,
-                CreateWebAuthenticationDialog(parent, behavior, requestParams.RequestContext));
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority,
-            IEnumerable<string> scopes, IAccount user, TokenCache cache)
-        {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
-            return parameters;
-        }
-
         // endif for !NET_CORE
 #endif
 
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
+        /// <summary>
+        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
+        /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user application requests token on behalf.
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
+        /// <param name="securePassword">User password.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
+        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, SecureString securePassword)
+        {
+            GuardMobilePlatforms();
 
+            // TODO(migration): AcquireTokenWithScopeUser
+
+            return await AcquireTokenWithUsernamePassword(scopes, username, securePassword)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private static void GuardMobilePlatforms()
+        {
+#if ANDROID || iOS || WINDOWS_APP || MAC
+            throw new PlatformNotSupportedException("The Username / Password flow is not supported on Xamarin.Android, Xamarin.iOS, Xamarin.Mac or UWP. " +
+               "For more details see https://aka.ms/msal-net-up");
+#endif
+        }
+#endif
+
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback)
+        {
+            return AcquireTokenWithDeviceCodeAsync(scopes, string.Empty, deviceCodeResultCallback);
+        }
+
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device, with possiblity of passing extra parameters. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public async Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            string extraQueryParameters,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback)
+        {
+            return await AcquireTokenWithDeviceCodeAsync(
+                scopes,
+                extraQueryParameters,
+                deviceCodeResultCallback,
+                CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device, with possiblity of cancelling the token acquisition before it times out. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information. This step is cancelable</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback,
+            CancellationToken cancellationToken)
+        {
+            return AcquireTokenWithDeviceCodeAsync(scopes, string.Empty, deviceCodeResultCallback, cancellationToken);
+        }
+
+        /// <summary>
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// another device, with possiblity of passing extra query parameters and cancelling the token acquisition before it times out. This is done in two steps:
+        /// <list type="bullet">
+        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
+        /// to direct them to authenticate (to a specific URL, with a code)</description></item>
+        /// <item><description>The method then proceeds to poll for the security
+        /// token which is granted upon successful login by the user based on the device code information. This step is cancelable</description></item>
+        /// </list>
+        /// See https://aka.ms/msal-device-code-flow.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
+        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
+        /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
+        public async Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+            IEnumerable<string> scopes,
+            string extraQueryParameters,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback,
+            CancellationToken cancellationToken)
+        {
+            return await AcquireTokenWithDeviceCode(scopes, deviceCodeResultCallback)
+                .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
+#if !NET_CORE_BUILDTIME
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <remarks>
+        /// On Windows Universal Platform, the following capabilities need to be provided:
+        /// Enterprise Authentication, Private Networks (Client and Server), User Account Information
+        /// Supported on .net desktop and UWP
+        /// </remarks>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
+        {
+            GuardNonWindowsFrameworks();
+            GuardIWANetCore();
+
+            // TODO(migration): AcquireTokenWithScopeUser
+
+            return await AcquireTokenWithIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+#endif
+
+        /// <summary>
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
+        /// See https://aka.ms/msal-net-iwa.
+        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
+        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
+        /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
+        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+            IEnumerable<string> scopes,
+            string username)
+        {
+            GuardNonWindowsFrameworks();
+
+            // TODO(migration): AcquireTokenWithScopeUser
+
+            return await AcquireTokenWithIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private static void GuardNonWindowsFrameworks()
+        {
+#if ANDROID || iOS
+            throw new PlatformNotSupportedException("Integrated Windows Authentication is not supported on this platform. " +
+                "For details about this authentication flow, please see https://aka.ms/msal-net-iwa");
+#endif
+        }
+
+        private static void GuardIWANetCore()
+        {
+#if NET_CORE
+            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not suppored on .net core because " +
+                "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
+                "For more details see https://aka.ms/msal-net-iwa");
+#endif
+        }
+#endif
+
+    //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
+    // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
+    // as we plan to expose the whole thing
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
+        /// <summary>
+        /// Constructor to create application instance. This constructor is only available for Desktop and NetCore apps
+        /// </summary>
+        /// <param name="clientId">Client id of the application</param>
+        /// <param name="authority">Default authority to be used for the application</param>
+        /// <param name="userTokenCache">Instance of TokenCache.</param>
+        public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
+            : this(PublicClientApplicationBuilder.Create(clientId).AddKnownAuthority(new Uri(authority), true).WithUserTokenCache(userTokenCache).BuildConfiguration())
+        {
+            GuardOnMobilePlatforms();
+        }
+
+        private static void GuardOnMobilePlatforms()
+        {
+#if ANDROID || iOS
+        throw new PlatformNotSupportedException("You should not use this constructor that takes in a TokenCache object on mobile platforms. " +
+            "This constructor is meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
+            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
+            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
+#endif
+        }
+#endif
     }
 }

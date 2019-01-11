@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -53,7 +54,7 @@ namespace Microsoft.Identity.Client.ApiConfig
             IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes,
             string username,
-            string password)
+            SecureString password)
         {
             return new AcquireTokenWithUsernamePasswordParameterBuilder(publicClientApplication)
                    .WithScopes(scopes).WithUsername(username).WithPassword(password);
@@ -65,7 +66,7 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(string password)
+        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(SecureString password)
         {
             Parameters.Password = password;
             return this;

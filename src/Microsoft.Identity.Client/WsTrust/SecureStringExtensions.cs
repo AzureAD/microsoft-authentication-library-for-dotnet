@@ -26,44 +26,38 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client.Features.DeviceCode
+#if DESKTOP || ANDROID || iOS || MAC
+using System.Security;
+using static System.Runtime.InteropServices.Marshal;
+#else
+using System.Security;
+using static System.Security.SecureStringMarshal;
+using static System.Runtime.InteropServices.Marshal;
+#endif
+
+
+namespace Microsoft.Identity.Client.WsTrust
 {
-    [DataContract]
-    internal class DeviceCodeResponse : OAuth2ResponseBase
+    internal static class SecureStringExtensions
     {
-        [DataMember(Name = "user_code", IsRequired = false)]
-        public string UserCode { get; internal set; }
-
-        [DataMember(Name = "device_code", IsRequired = false)]
-        public string DeviceCode { get; internal set; }
-
-        [DataMember(Name = "verification_url", IsRequired = false)]
-        public string VerificationUrl { get; internal set; }
-
-        [DataMember(Name = "expires_in", IsRequired = false)]
-        public long ExpiresIn { get; internal set; }
-
-        [DataMember(Name = "interval", IsRequired = false)]
-        public long Interval { get; internal set; }
-
-        [DataMember(Name = "message", IsRequired = false)]
-        public string Message { get; internal set; }
-
-        public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)
+        public static char[] PasswordToCharArray(this SecureString secureString)
         {
-            return new DeviceCodeResult(
-                UserCode,
-                DeviceCode,
-                VerificationUrl,
-                DateTime.UtcNow.AddSeconds(ExpiresIn),
-                Interval,
-                Message,
-                clientId,
-                scopes);
+            if (secureString == null)
+            {
+                return null;
+            }
+
+            var output = new char[secureString.Length];
+
+            IntPtr secureStringPtr = SecureStringToCoTaskMemUnicode(secureString);
+            for (int i = 0; i < secureString.Length; i++)
+            {
+                output[i] = (char)ReadInt16(secureStringPtr, i * 2);
+            }
+
+            ZeroFreeCoTaskMemUnicode(secureStringPtr);
+            return output;
         }
     }
 }

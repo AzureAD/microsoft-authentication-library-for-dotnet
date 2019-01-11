@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -37,10 +38,18 @@ namespace Microsoft.Identity.Client.Internal
     internal class MsalLogger : ICoreLogger
     {
         private readonly IPlatformLogger _platformLogger;
+        private readonly LogCallback _loggingCallback;
+        private readonly LogLevel _logLevel;
+        private readonly bool _isDefaultPlatformLoggingEnabled;
 
-        internal MsalLogger(Guid correlationId, string component)
+        internal MsalLogger(Guid correlationId, string component, LogLevel logLevel, bool enablePiiLogging, bool isDefaultPlatformLoggingEnabled, LogCallback loggingCallback)
         {
             CorrelationId = correlationId;
+            PiiLoggingEnabled = enablePiiLogging;
+            _loggingCallback = loggingCallback;
+            _logLevel = logLevel;
+            _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
+
             _platformLogger = PlatformProxyFactory.GetPlatformProxy().PlatformLogger;
             Component = string.Empty;
             if (!string.IsNullOrEmpty(component))
@@ -52,9 +61,20 @@ namespace Microsoft.Identity.Client.Internal
 
         public static ICoreLogger Default { get; set; }
 
-        public Guid CorrelationId { get; set; }
+        public static ICoreLogger Create(Guid correlationId, string component, IApplicationConfiguration config, bool isDefaultPlatformLoggingEnabled = false)
+        {
+            return new MsalLogger(
+                correlationId,
+                component,
+                config?.LogLevel ?? LogLevel.Verbose,
+                config?.EnablePiiLogging ?? false,
+                config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
+                config?.LoggingCallback ?? null);
+        }
 
-        public bool PiiLoggingEnabled => Logger.PiiLoggingEnabled;
+        public Guid CorrelationId { get; }
+
+        public bool PiiLoggingEnabled { get; }
 
         internal string Component { get; }
 
@@ -128,17 +148,9 @@ namespace Microsoft.Identity.Client.Internal
             Log(LogLevel.Error, messageWithPii, messageScrubbed);
         }
 
-        private static void ExecuteCallback(LogLevel level, string message, bool containsPii)
-        {
-            lock (Logger.LockObj)
-            {
-                Logger.LogCallback?.Invoke(level, message, containsPii);
-            }
-        }
-
         private void Log(LogLevel msalLogLevel, string messageWithPii, string messageScrubbed)
         {
-            if (msalLogLevel > Logger.Level)
+            if (_loggingCallback == null || msalLogLevel > _logLevel)
             {
                 return;
             }
@@ -157,7 +169,7 @@ namespace Microsoft.Identity.Client.Internal
 
             bool messageWithPiiExists = !string.IsNullOrWhiteSpace(messageWithPii);
             // If we have a message with PII, and PII logging is enabled, use the PII message, else use the scrubbed message.
-            bool isLoggingPii = messageWithPiiExists && Logger.PiiLoggingEnabled;
+            bool isLoggingPii = messageWithPiiExists && PiiLoggingEnabled;
             string messageToLog = isLoggingPii ? messageWithPii : messageScrubbed;
 
             string log = string.Format(CultureInfo.InvariantCulture, "{0} MSAL {1} {2} {3} [{4}{5}]{6} {7}",
@@ -166,9 +178,9 @@ namespace Microsoft.Identity.Client.Internal
                 msalIdParameters[MsalIdParameter.Product],
                 os, DateTime.UtcNow, correlationId, Component, messageToLog);
 
-            if (Logger.DefaultLoggingEnabled)
+            if (_isDefaultPlatformLoggingEnabled)
             {
-                switch (Logger.Level)
+                switch (msalLogLevel)
                 {
                     case LogLevel.Error:
                         _platformLogger.Error(log);
@@ -185,7 +197,7 @@ namespace Microsoft.Identity.Client.Internal
                 }
             }
 
-            ExecuteCallback(msalLogLevel, log, isLoggingPii);
+            _loggingCallback.Invoke(msalLogLevel, log, isLoggingPii);
         }
     }
 }

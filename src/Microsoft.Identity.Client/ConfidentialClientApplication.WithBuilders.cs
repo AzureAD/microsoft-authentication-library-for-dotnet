@@ -25,7 +25,14 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client
 {
@@ -35,6 +42,159 @@ namespace Microsoft.Identity.Client
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
         {
+            GuardMobileFrameworks();
+
+            AppTokenCache = configuration.AppTokenCache;
+            if (AppTokenCache != null)
+            {
+                AppTokenCache.ClientId = ClientId;
+                AppTokenCache.ServiceBundle = ServiceBundle;
+            }
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="authorizationCode"></param>
+        /// <returns></returns>
+        public AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenForAuthorizationCode(
+            IEnumerable<string> scopes,
+            string authorizationCode)
+        {
+            return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
+                this,
+                scopes,
+                authorizationCode);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        public AcquireTokenForClientParameterBuilder AcquireTokenForClient(
+            IEnumerable<string> scopes)
+        {
+            return AcquireTokenForClientParameterBuilder.Create(this, scopes);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="userAssertion"></param>
+        /// <returns></returns>
+        public AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(
+            IEnumerable<string> scopes,
+            UserAssertion userAssertion)
+        {
+            return AcquireTokenOnBehalfOfParameterBuilder.Create(this, scopes, userAssertion);
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public AcquireTokenSilentCcaParameterBuilder AcquireTokenSilent(
+            IEnumerable<string> scopes,
+            IAccount account)
+        {
+            return AcquireTokenSilentCcaParameterBuilder.Create(this, scopes, account);
+        }
+
+        /// <summary>
+        /// Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scopes">Array of scopes requested for resource</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
+            IEnumerable<string> scopes)
+        {
+            return GetAuthorizationRequestUrlParameterBuilder.Create(this, scopes);
+        }
+
+        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
+            IAcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestParams = CreateRequestParameters(authorizationCodeParameters, UserTokenCache);
+            requestParams.AuthorizationCode = authorizationCodeParameters.AuthorizationCode;
+            requestParams.SendCertificate = false;
+            var handler = new AuthorizationCodeRequest(
+                ServiceBundle,
+                requestParams,
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope);  // TODO(migration): consolidate this appropriately
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);        }
+
+        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
+            IAcquireTokenForClientParameters clientParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestParams = CreateRequestParameters(clientParameters, AppTokenCache);
+            requestParams.IsClientCredentialRequest = true;
+            requestParams.SendCertificate = clientParameters.SendX5C;
+            var handler = new ClientCredentialRequest(
+                ServiceBundle,
+                requestParams,
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope, // todo(migration): consolidate this appropriately
+                clientParameters.ForceRefresh);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
+            IAcquireTokenOnBehalfOfParameters onBehalfOfParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestParams = CreateRequestParameters(onBehalfOfParameters, UserTokenCache);
+            requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
+            requestParams.SendCertificate = onBehalfOfParameters.WithOnBehalfOfCertificate;
+            var handler = new OnBehalfOfRequest(
+                ServiceBundle,
+                requestParams,
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope); // TODO(migration): consolidate this with parameters...
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
+            IAcquireTokenSilentParameters silentParameters,
+            CancellationToken cancellationToken)
+        {
+            var authorityInstance = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride) 
+                ? GetAuthority(silentParameters.Account) 
+                : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride, ValidateAuthority);
+
+            var handler = new SilentRequest(
+                ServiceBundle,
+                CreateRequestParameters(silentParameters, UserTokenCache, account: silentParameters.Account, customAuthority: authorityInstance),
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo(migration): consolidate this properly
+                silentParameters.ForceRefresh);
+
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<Uri> IConfidentialClientApplicationExecutor.ExecuteAsync(
+            IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestParameters = CreateRequestParameters(authorizationRequestUrlParameters, UserTokenCache);
+            if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
+            {
+                // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?
+                requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
+            }
+
+            var handler = new InteractiveRequest(
+                ServiceBundle,
+                requestParameters,
+                ApiEvent.ApiIds.None,
+                authorizationRequestUrlParameters.ExtraScopesToConsent,
+                authorizationRequestUrlParameters.LoginHint,
+                UIBehavior.SelectAccount,
+                null);
+
+            // todo: need to pass through cancellation token here
+            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
     }
 #endif
