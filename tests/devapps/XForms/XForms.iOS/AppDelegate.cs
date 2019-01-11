@@ -53,6 +53,11 @@ namespace XForms.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
+#if ARIA_TELEMETRY_ENABLED
+            Telemetry.GetInstance().RegisterReceiver(
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
+#endif
+
             // Default system browser
             App.UIParent = new UIParent();
 

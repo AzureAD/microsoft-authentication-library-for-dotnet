@@ -58,7 +58,10 @@ namespace NetCoreTestApp
             Logger.LogCallback = Log;
             Logger.Level = LogLevel.Verbose;
             Logger.PiiLoggingEnabled = true;
-
+#if ARIA_TELEMETRY_ENABLED
+            Telemetry.GetInstance().RegisterReceiver(
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+#endif
             RunConsoleAppLogicAsync(pca).Wait();
         }
 

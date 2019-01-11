@@ -33,6 +33,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+<!-- Set this env variable locally to enable Telemetry on developer applications-->
+  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
+    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -73,7 +77,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -92,6 +95,15 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
+    <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\devapps\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
+      <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
+      <Name>AriaTelemetryProvider</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Net.Http">
+      <Version>4.3.4</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

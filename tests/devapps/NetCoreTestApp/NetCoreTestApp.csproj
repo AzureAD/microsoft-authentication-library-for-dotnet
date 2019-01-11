@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,11 +10,17 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
 
+  <!-- Set this env variable locally to enable Telemetry on developer applications-->
+  <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
+    <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Legacy2CPSWorkaround" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj" />
   </ItemGroup>
 </Project>

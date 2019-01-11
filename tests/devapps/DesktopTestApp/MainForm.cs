@@ -68,6 +68,11 @@ namespace DesktopTestApp
 
             LoadSettings();
             Logger.LogCallback = LogDelegate;
+
+#if ARIA_TELEMETRY_ENABLED
+            Telemetry.GetInstance().RegisterReceiver(
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+#endif
         }
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)
@@ -100,7 +105,7 @@ namespace DesktopTestApp
             userList.Refresh();
         }
 
-        #region PublicClient UI Controls
+#region PublicClient UI Controls
 
         private void loginHint_TextChanged(object sender, EventArgs e)
         {
@@ -139,9 +144,9 @@ namespace DesktopTestApp
             tabControl1.SelectedTab = logsTabPage;
         }
 
-        #endregion
+#endregion
 
-        #region PublicClientApplication Acquire Token
+#region PublicClientApplication Acquire Token
         private async void AcquireTokenInteractive_Click(object sender, EventArgs e)
         {
             using (new UIProgressScope(this))
@@ -306,7 +311,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-        #endregion
+#endregion
 
         private void CreateException(Exception ex)
         {
@@ -364,7 +369,7 @@ namespace DesktopTestApp
             return behavior;
         }
 
-        #region App logic
+#region App logic
 
         public void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
@@ -380,9 +385,9 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-        #endregion
+#endregion
 
-        #region Cache Tab Operations
+#region Cache Tab Operations
         private void LoadCacheTabPage()
         {
             while (cachePageTableLayout.Controls.Count > 0)
@@ -435,9 +440,9 @@ namespace DesktopTestApp
                 rs.Height = ctl.Height;
             }
         }
-        #endregion
+#endregion
 
-        #region Settings Tab Operations
+#region Settings Tab Operations
         private void TabControl1_Selecting(object sender, TabControlCancelEventArgs e)
         {
             //tab page is not settings tab. Apply values from settings page.
@@ -456,7 +461,7 @@ namespace DesktopTestApp
             Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
         }
 
-        #endregion
+#endregion
 
         private void clearLogsButton_Click(object sender, EventArgs e)
         {
