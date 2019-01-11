@@ -38,6 +38,6 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        bool WithSendX5C { get; }
+        bool SendX5C { get; }
     }
 }

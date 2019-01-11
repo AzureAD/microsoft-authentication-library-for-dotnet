@@ -25,8 +25,11 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -37,21 +40,29 @@ namespace Microsoft.Identity.Client.Core
     internal class ServiceBundle : IServiceBundle
     {
         internal ServiceBundle(
-            IHttpClientFactory httpClientFactory = null,
-            IHttpManager httpManager = null,
-            ITelemetryReceiver telemetryReceiver = null,
-            IValidatedAuthoritiesCache validatedAuthoritiesCache = null,
-            IAadInstanceDiscovery aadInstanceDiscovery = null,
-            IWsTrustWebRequestManager wsTrustWebRequestManager = null,
+            ApplicationConfiguration config,
             bool shouldClearCaches = false)
         {
-            HttpManager = httpManager ?? new HttpManager(httpClientFactory);
-            TelemetryManager = new TelemetryManager(telemetryReceiver ?? Telemetry.GetInstance());
-            ValidatedAuthoritiesCache = validatedAuthoritiesCache ?? new ValidatedAuthoritiesCache(shouldClearCaches);
-            AadInstanceDiscovery = aadInstanceDiscovery ?? new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
-            WsTrustWebRequestManager = wsTrustWebRequestManager ?? new WsTrustWebRequestManager(HttpManager);
+            Config = config;
+
+            DefaultLogger = new MsalLogger(
+                Guid.Empty,
+                null,
+                config.LogLevel,
+                config.EnablePiiLogging,
+                config.IsDefaultPlatformLoggingEnabled,
+                config.LoggingCallback);
+
+            HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
+            TelemetryManager = new TelemetryManager(config.TelemetryCallback);
+            ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(shouldClearCaches);
+            AadInstanceDiscovery = new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
+            WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             PlatformProxy = PlatformProxyFactory.GetPlatformProxy();
+            // todo(migration): note this may cause process wide logging callback issues --> PlatformProxy.SetDefaultLogger(DefaultLogger);
         }
+
+        public ICoreLogger DefaultLogger { get; }
 
         /// <inheritdoc />
         public IHttpManager HttpManager { get; }
@@ -71,14 +82,12 @@ namespace Microsoft.Identity.Client.Core
         /// <inheritdoc />
         public IPlatformProxy PlatformProxy { get; }
 
-        public static ServiceBundle CreateDefault(ITelemetryReceiver telemetryReceiver = null)
-        {
-            return new ServiceBundle(telemetryReceiver: telemetryReceiver);
-        }
+        /// <inheritdoc />
+        public IApplicationConfiguration Config { get; }
 
-        public static ServiceBundle CreateWithCustomHttpManager(IHttpManager httpManager, ITelemetryReceiver telemetryReceiver = null)
+        public static ServiceBundle Create(ApplicationConfiguration config)
         {
-            return new ServiceBundle(httpManager: httpManager, telemetryReceiver: telemetryReceiver, shouldClearCaches: true);
+            return new ServiceBundle(config);
         }
     }
 }

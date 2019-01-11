@@ -25,13 +25,12 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
 using System;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client.Internal.Jwt
+namespace Microsoft.Identity.Client.Internal
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 

@@ -76,6 +76,16 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="withSendX5C"></param>
+        /// <returns></returns>
+        public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)
+        {
+            Parameters.SendX5C = withSendX5C;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
         {

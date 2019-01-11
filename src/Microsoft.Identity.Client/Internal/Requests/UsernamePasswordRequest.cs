@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,19 +50,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class UsernamePasswordRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private readonly UsernamePasswordInput _usernamePasswordInput;
+        private string _username;
+        private readonly SecureString _securePassword;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
-            UsernamePasswordInput usernamePasswordInput)
+            string username,
+            SecureString securePassword)
             : base(serviceBundle, authenticationRequestParameters, apiId)
         {
-            _usernamePasswordInput = usernamePasswordInput ?? throw new ArgumentNullException(nameof(usernamePasswordInput));
+            _username = username ?? throw new ArgumentNullException(nameof(username));
+            _securePassword = securePassword;
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
-                usernamePasswordInput,
+                username,
                 serviceBundle);
         }
 
@@ -104,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (userRealmResponse.IsManaged)
             {
                 // handle grant flow
-                if (!_usernamePasswordInput.HasPassword())
+                if (_securePassword == null)
                 {
                     throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
                 }
@@ -122,13 +126,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (_usernamePasswordInput != null)
+            if (string.IsNullOrWhiteSpace(_username))
             {
-                if (string.IsNullOrWhiteSpace(_usernamePasswordInput.UserName))
-                {
-                    string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                    _usernamePasswordInput.UserName = platformUsername;
-                }
+                string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
+                _username = platformUsername;
             }
         }
 
@@ -146,8 +147,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             else
             {
                 dict[OAuth2Parameter.GrantType] = OAuth2GrantType.Password;
-                dict[OAuth2Parameter.Username] = _usernamePasswordInput.UserName;
-                dict[OAuth2Parameter.Password] = new string(_usernamePasswordInput.PasswordToCharArray());
+                dict[OAuth2Parameter.Username] = _username;
+                dict[OAuth2Parameter.Password] = new string(_securePassword.PasswordToCharArray());
             }
 
             ISet<string> unionScope = new HashSet<string>()

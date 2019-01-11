@@ -73,6 +73,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public bool IsDefaultPlatformLoggingEnabled { get; set; }
 
         /// <summary>
+        ///  TODO(migration):  make this a Dictionary[string, string] like we have for ExtraQueryParameters
         /// </summary>
         public string SliceParameters { get; set; }
 

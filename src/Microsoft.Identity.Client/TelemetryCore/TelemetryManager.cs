@@ -49,11 +49,13 @@ namespace Microsoft.Identity.Client.TelemetryCore
         internal ConcurrentDictionary<string, ConcurrentDictionary<string, int>> EventCount = 
             new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
-        private ITelemetryReceiver _telemetryReceiver;
+        private readonly TelemetryCallback _telemetryCallback;
+        private readonly bool _onlySendFailureTelemetry;
 
-        public TelemetryManager(ITelemetryReceiver telemetryReceiver = null)
+        public TelemetryManager(TelemetryCallback telemetryCallback, bool onlySendFailureTelemetry = false)
         {
-            _telemetryReceiver = telemetryReceiver;
+            _telemetryCallback = telemetryCallback;
+            _onlySendFailureTelemetry = onlySendFailureTelemetry;
         }
 
         void ITelemetry.StartEvent(string requestId, EventBase eventToStart)
@@ -71,22 +73,23 @@ namespace Microsoft.Identity.Client.TelemetryCore
             Flush(requestId, clientId);
         }
 
-        public ITelemetryReceiver TelemetryReceiver
+        public TelemetryCallback Callback
         {
             get
             {
                 lock (_lockObj)
                 {
-                    return _telemetryReceiver ?? Telemetry.GetInstance();
+                    return _telemetryCallback; // ?? Telemetry.GetInstance();
                 }
             }
-            set
-            {
-                lock (_lockObj)
-                {
-                    _telemetryReceiver = value;
-                }
-            }
+            // TODO(migration):
+            //set
+            //{
+            //    lock (_lockObj)
+            //    {
+            //        _telemetryReceiver = value;
+            //    }
+            //}
         }
 
         /// <inheritdoc />
@@ -113,7 +116,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             lock (_lockObj)
             {
-                return _telemetryReceiver != null ||
+                return _telemetryCallback != null ||
                     Telemetry.GetInstance().HasRegisteredReceiver();
             }
         }
@@ -198,14 +201,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
             CompletedEvents.TryRemove(requestId, out List<EventBase> eventsToFlush);
             EventCount.TryRemove(requestId, out ConcurrentDictionary<string, int> eventCountToFlush);
 
-            bool onlySendFailureTelemetry;
-            lock (_lockObj)
-            {
-                onlySendFailureTelemetry = _telemetryReceiver?.OnlySendFailureTelemetry ?? false;
-            }
-
             // Check all events, and if the ApiEvent was successful, don't dispatch.
-            if (onlySendFailureTelemetry && eventsToFlush.Any(ev => ev is ApiEvent a && a.WasSuccessful))
+            if (_onlySendFailureTelemetry && eventsToFlush.Any(ev => ev is ApiEvent a && a.WasSuccessful))
             {
                 eventsToFlush.Clear();
             }
@@ -226,7 +223,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             lock (_lockObj)
             {
-                _telemetryReceiver?.HandleTelemetryEvents(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
+                _telemetryCallback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());
             }
         }
 

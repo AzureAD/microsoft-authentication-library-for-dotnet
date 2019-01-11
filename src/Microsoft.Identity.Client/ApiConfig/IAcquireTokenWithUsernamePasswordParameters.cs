@@ -25,6 +25,8 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System.Security;
+
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
@@ -34,6 +36,6 @@ namespace Microsoft.Identity.Client.ApiConfig
     {
         /// <summary>
         /// </summary>
-        string Password { get; }
+        SecureString Password { get; }
     }
 }

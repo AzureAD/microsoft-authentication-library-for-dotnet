@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     {
         public string AuthorizationCode { get; internal set; }
         public bool ForceRefresh { get; internal set; }
-        public bool WithSendX5C { get; internal set; }
+        public bool SendX5C { get; internal set; }
 
         // Interactive Parameters
         public bool UseEmbeddedWebView { get; internal set; }
@@ -55,7 +56,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         public string LoginHint { get; internal set; }
 
         /// <inheritdoc />
-        public IReadOnlyDictionary<string, string> ExtraQueryParameters { get; internal set; }
+        public Dictionary<string, string> ExtraQueryParameters { get; internal set; }
 
         /// <inheritdoc />
         public IEnumerable<string> ExtraScopesToConsent { get; internal set; }
@@ -72,8 +73,8 @@ namespace Microsoft.Identity.Client.ApiConfig
         public string Username { get; internal set; }
 
         /// <inheritdoc />
-        /// DO NOT USE SECURESTRING -- https://github.com/dotnet/platform-compat/blob/master/docs/DE0001.md
-        public string Password { get; internal set; }
+        /// TODO(migration): DO NOT USE SECURESTRING -- https://github.com/dotnet/platform-compat/blob/master/docs/DE0001.md
+        public SecureString Password { get; internal set; }
 
         public string RedirectUri { get; internal set; }
     }

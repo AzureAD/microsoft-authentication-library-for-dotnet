@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.ApiConfig
             }
 
             throw new InvalidOperationException(
-                "PublicClientApplication implementation does not implement IPublicClientApplicationExecutor.");
+                "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.");
         }
 
         /// <summary>

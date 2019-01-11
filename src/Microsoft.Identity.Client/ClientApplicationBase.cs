@@ -35,6 +35,8 @@ using System.Linq;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
@@ -57,20 +59,12 @@ namespace Microsoft.Identity.Client
             ModuleInitializer.EnsureModuleInitialized();
         }
 
-        private TokenCache _userTokenCache;
-
         /// <Summary>
         /// Default Authority used for interactive calls.
         /// </Summary>
         internal const string DefaultAuthority = "https://login.microsoftonline.com/common/";
 
         internal IServiceBundle ServiceBundle { get; }
-
-        internal ITelemetryReceiver TelemetryReceiver
-        {
-            get => ServiceBundle.TelemetryManager.TelemetryReceiver;
-            set => ServiceBundle.TelemetryManager.TelemetryReceiver = value;
-        }
 
         ///  <summary>
         ///  Constructor of the base application
@@ -94,47 +88,37 @@ namespace Microsoft.Identity.Client
         ///  This should be set to <c>false</c> for Azure AD B2C authorities as those are customer specific (a list of known B2C authorities
         ///  cannot be maintained by MSAL.NET</param>
         /// <param name="serviceBundle"></param>
+        [Obsolete("TODO(migration): add comments")]
         internal ClientApplicationBase(string clientId, string authority, string redirectUri,
             bool validateAuthority, IServiceBundle serviceBundle)
         {
-            ServiceBundle = serviceBundle ?? Core.ServiceBundle.CreateDefault();
-
-            ClientId = clientId;
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, validateAuthority);
-            Authority = authorityInstance.CanonicalAuthority;
-            RedirectUri = redirectUri;
-            ValidateAuthority = validateAuthority;
-            if (UserTokenCache != null)
-            {
-                UserTokenCache.ClientId = clientId;
-            }
-
-            RequestContext requestContext = new RequestContext(ClientId, new MsalLogger(Guid.Empty, null));
-
-            requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                PlatformProxyFactory.GetPlatformProxy().GetProductName(), MsalIdHelper.GetMsalVersion(),
-                AssemblyUtils.GetAssemblyFileVersionAttribute(), AssemblyUtils.GetAssemblyInformationalVersion()));
+            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
-        public string Component { get; set; }
+        public string Component
+        {
+            get => ServiceBundle.Config.Component;
+            
+            // TODO(migration): [Obsolete("TODO(migration): comments")]
+            set { }
+        }
 
         /// <Summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
         /// </Summary>
-        public string Authority { get; }
+        public string Authority => ServiceBundle.Config.DefaultAuthorityInfo.CanonicalAuthority;
 
         /// <summary>
         /// Gets the Client ID (also known as <i>Application ID</i>) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
         /// and as passed in the constructor of the application
         /// </summary>
-        public string ClientId { get; }
+        public string ClientId => ServiceBundle.Config.ClientId;
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
         /// <summary>
@@ -152,7 +136,13 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
-        public string RedirectUri { get; set; }
+        public string RedirectUri
+        {
+            get => ServiceBundle.Config.RedirectUri;
+
+            // TODO(migration): [Obsolete("TODO(migration): comments")]
+            set { }
+        }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
         /// <summary>
@@ -161,24 +151,18 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise by Microsoft support, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
         /// </summary>
-        public string SliceParameters { get; set; }
+        public string SliceParameters
+        {
+            get => ServiceBundle.Config.SliceParameters;
+
+            // TODO(migration): [Obsolete("TODO(migration): comments")]
+            set { }
+        }
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.
         /// </Summary>
-        internal TokenCache UserTokenCache
-        {
-            get => _userTokenCache;
-            set
-            {
-                _userTokenCache = value;
-                if (_userTokenCache != null)
-                {
-                    _userTokenCache.ClientId = ClientId;
-                    _userTokenCache.ServiceBundle = ServiceBundle;
-                }
-            }
-        }
+        internal TokenCache UserTokenCache { get; }
 
         /// <summary>
         /// Gets/sets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
@@ -186,12 +170,14 @@ namespace Microsoft.Identity.Client
         /// (a list of known B2C authorities cannot be maintained by MSAL.NET). This property can be set just after the construction of the application
         /// and before an operation acquiring a token or interacting with the STS.
         /// </summary>
+        [Obsolete("This is no longer used...  TODO(migration): comments")]
         public bool ValidateAuthority { get; set; }
 
         /// <summary>
         /// ExtendedLifeTimeEnabled is a Boolean that first party applications (read Office) can set to true in case when the STS has an outage,
         /// to be more resilient.
         /// </summary>
+        // TODO(migration): can/should we put this on the config object?
         private bool ExtendedLifeTimeEnabled { get; set; }
 
         /// <summary>
@@ -199,7 +185,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            RequestContext requestContext = new RequestContext(ClientId, new MsalLogger(Guid.Empty, null));
+            RequestContext requestContext = CreateRequestContext(Guid.Empty);
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
             if (UserTokenCache == null)
             {
@@ -227,66 +213,6 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
-        /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
-        /// <remarks>
-        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
-        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
-        /// close to expiration (within a 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
-        ///
-        /// See https://aka.ms/msal-net-acquiretokensilent for more details
-        /// </remarks>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
-        {
-            return
-                await
-                    AcquireTokenSilentCommonAsync(null, scopes, account, false, ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority)
-                        .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
-        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
-        /// narrows down the selection to a specific tenant. This does not change the configured value in the application. This is specific
-        /// to applications managing several accounts (like a mail client with several mailboxes)</param>
-        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the cache and attempt to acquire new access token
-        /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
-        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
-        /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
-        /// or performs two factor authentication</exception>
-        /// <remarks>
-        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
-        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
-        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
-        ///
-        /// See https://aka.ms/msal-net-acquiretokensilent for more details
-        /// </remarks>
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
-            string authority, bool forceRefresh)
-        {
-            Authority authorityInstance = null;
-            if (!string.IsNullOrEmpty(authority))
-            {
-                authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            }
-
-            return
-                await
-                    AcquireTokenSilentCommonAsync(authorityInstance, scopes, account,
-                        forceRefresh, ApiEvent.ApiIds.AcquireTokenSilentWithAuthority).ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// Removes all tokens in the cache for the specified account.
         /// </summary>
         /// <param name="account">Instance of the account that needs to be removed</param>
@@ -303,7 +229,7 @@ namespace Microsoft.Identity.Client
 
         internal Authority GetAuthority(IAccount account)
         {
-            var authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
+            var authority = Instance.Authority.CreateAuthority(ServiceBundle);
             var tenantId = authority.GetTenantId();
 
             if (Instance.Authority.TenantlessTenantNames.Contains(tenantId)
@@ -315,51 +241,42 @@ namespace Microsoft.Identity.Client
             return authority;
         }
 
-        internal async Task<AuthenticationResult> AcquireTokenSilentCommonAsync(Authority authority,
-            IEnumerable<string> scopes, IAccount account, bool forceRefresh, ApiEvent.ApiIds apiId)
+        internal virtual AuthenticationRequestParameters CreateRequestParameters(
+            IAcquireTokenCommonParameters commonParameters,
+            TokenCache cache,
+            IAccount account = null,  // todo: can we just use commonParameters.Account?
+            Authority customAuthority = null)
         {
-            if (account == null)
-            {
-                throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
-            }
+            Authority authorityInstance = customAuthority ?? (string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
+                                              ? Instance.Authority.CreateAuthority(ServiceBundle)
+                                              : Instance.Authority.CreateAuthorityWithOverride(
+                                                  ServiceBundle,
+                                                  AuthorityInfo.FromAuthorityUri(
+                                                      commonParameters.AuthorityOverride,
+                                                      ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
+                                                      false)));
 
-            if (authority == null)
-            {
-                authority = GetAuthority(account);
-            }
 
-            var handler = new SilentRequest(
-                ServiceBundle,
-                CreateRequestParameters(authority, scopes, account, UserTokenCache),
-                apiId,
-                forceRefresh);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority,
-            IEnumerable<string> scopes,
-            IAccount account, TokenCache cache)
-        {
             return new AuthenticationRequestParameters
             {
-                SliceParameters = SliceParameters,
-                Authority = authority,
-                ClientId = ClientId,
+                SliceParameters = ServiceBundle.Config.SliceParameters,  // TODO(migration): can users reference this instead of being in authparams?
+                Authority = authorityInstance,
+                ClientId = ServiceBundle.Config.ClientId,
                 TokenCache = cache,
                 Account = account,
-                Scope = ScopeHelper.CreateSortedSetFromEnumerable(scopes),
-                RedirectUri = new Uri(RedirectUri),
+                Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
+                RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
                 RequestContext = CreateRequestContext(Guid.Empty),
                 ValidateAuthority = ValidateAuthority,
-                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
+                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
+                ExtraQueryParameters = commonParameters.ExtraQueryParameters,
             };
         }
 
         internal RequestContext CreateRequestContext(Guid correlationId)
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(ClientId, new MsalLogger(correlationId, Component));
+            return new RequestContext(ClientId, MsalLogger.Create(correlationId, Component, ServiceBundle.Config));
         }
     }
 }

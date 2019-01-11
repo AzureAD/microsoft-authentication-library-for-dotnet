@@ -34,6 +34,8 @@ using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 
@@ -51,7 +53,11 @@ namespace Microsoft.Identity.Client
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel 
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
-    public sealed partial class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
+    public sealed partial class ConfidentialClientApplication 
+        : ClientApplicationBase, 
+            IConfidentialClientApplication, 
+            IConfidentialClientApplicationWithCertificate,
+            IConfidentialClientApplicationExecutor
     {
         static ConfidentialClientApplication()
         {
@@ -79,7 +85,15 @@ namespace Microsoft.Identity.Client
         /// enables app developers to specify the authority
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : this(clientId, DefaultAuthority, redirectUri, clientCredential, userTokenCache, appTokenCache)
+            : this(ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .AddKnownAuthority(new Uri(DefaultAuthority), true)
+                .WithRedirectUri(redirectUri)
+                // TODO(migration): need an internal "WithClientCredential" we can use for back compat...
+                .WithClientCredential(clientCredential)
+                .WithUserTokenCache(userTokenCache)
+                .WithAppTokenCache(appTokenCache)
+                .BuildConfiguration())
         {
             GuardMobileFrameworks();
         }
@@ -116,20 +130,16 @@ namespace Microsoft.Identity.Client
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : this(null, clientId, authority, redirectUri, clientCredential, userTokenCache, appTokenCache)
+            : this(ConfidentialClientApplicationBuilder
+                .Create(clientId)
+                .AddKnownAuthority(new Uri(authority), true)
+                .WithRedirectUri(redirectUri)
+                .WithClientCredential(clientCredential)
+                .WithUserTokenCache(userTokenCache)
+                .WithAppTokenCache(appTokenCache)
+                .BuildConfiguration())
         {
             GuardMobileFrameworks();
-        }
-
-        internal ConfidentialClientApplication(IServiceBundle serviceBundle, string clientId, string authority, string redirectUri,
-                                               ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
-            : base(clientId, authority, redirectUri, true, serviceBundle)
-        {
-            GuardMobileFrameworks();
-
-            ClientCredential = clientCredential;
-            UserTokenCache = userTokenCache;
-            AppTokenCache = appTokenCache;
         }
 
         /// <summary>
@@ -147,11 +157,8 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, false)
-                        .ConfigureAwait(false);
+            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUser
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -171,11 +178,8 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, false)
-                        .ConfigureAwait(false);
+            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUserAuthority
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -193,11 +197,8 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authority, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser, true)
-                        .ConfigureAwait(false);
+            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUser
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -217,11 +218,8 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            return
-                await
-                    AcquireTokenOnBehalfCommonAsync(authorityInstance, scopes, userAssertion, ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUserAuthority, true)
-                        .ConfigureAwait(false);
+            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUserAuthority
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -238,11 +236,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenByAuthorizationCodeCommonAsync(
-                        authorizationCode, scopes, new Uri(RedirectUri),
-                        ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope, false).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenByAuthorizationCodeWithCodeScope
+            return await AcquireTokenForAuthorizationCode(scopes, authorizationCode)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -258,9 +254,9 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, false).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenForClientWithScope
+            return await AcquireTokenForClient(scopes)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
         /// <summary>
         /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
@@ -277,9 +273,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh, false).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenForClientWithScopeRefresh
+            return await AcquireTokenForClient(scopes)
+                .WithForceRefresh(forceRefresh)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -296,9 +293,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, false, ApiEvent.ApiIds.AcquireTokenForClientWithScope, true).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenForClientWithScope
+            return await AcquireTokenForClient(scopes)
+                .WithSendX5C(true)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -317,9 +315,71 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return
-                await
-                    AcquireTokenForClientCommonAsync(scopes, forceRefresh, ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh, true).ConfigureAwait(false);
+            // TODO(migration): AcquireTokenForClientWithScopeRefresh
+            return await AcquireTokenForClient(scopes)
+                .WithForceRefresh(forceRefresh)
+                .WithSendX5C(true)
+                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
+        /// narrows down the selection to a specific tenant. This does not change the configured value in the application. This is specific
+        /// to applications managing several accounts (like a mail client with several mailboxes)</param>
+        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the cache and attempt to acquire new access token
+        /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
+        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
+        /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </remarks>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
+            string authority, bool forceRefresh)
+        {
+            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
+            // TODO(migration): AcquireTokenSilentWithAuthority
+
+            return await AcquireTokenSilent(scopes, account)
+                .WithAuthorityOverride(authority)
+                .WithForceRefresh(forceRefresh)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
+        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
+        /// close to expiration (within a 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </remarks>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
+        {
+            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
+            // TODO(migration): AcquireTokenSilentWithoutAuthority
+
+            return await AcquireTokenSilent(scopes, account)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -338,15 +398,10 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            var requestParameters =
-                CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParameters.ClientId = ClientId;
-            requestParameters.ExtraQueryParameters = extraQueryParameters;
-
-            var handler =
-                new InteractiveRequest(ServiceBundle, requestParameters, ApiEvent.ApiIds.None, null, loginHint, UIBehavior.SelectAccount, null);
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+            // TODO(migration): ApiEvent.ApiIds.None
+            return await GetAuthorizationRequestUrl(scopes).WithLoginHint(loginHint)
+                .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -370,23 +425,15 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            Authority authorityInstance = Instance.Authority.CreateAuthority(ServiceBundle, authority, ValidateAuthority);
-            var requestParameters = CreateRequestParameters(authorityInstance, scopes, null,
-                UserTokenCache);
-            requestParameters.RedirectUri = new Uri(redirectUri);
-            requestParameters.ClientId = ClientId;
-            requestParameters.ExtraQueryParameters = extraQueryParameters;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParameters,
-                ApiEvent.ApiIds.None,
-                extraScopesToConsent,
-                loginHint,
-                UIBehavior.SelectAccount,
-                null);
-
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+            // TODO(migration): ApiEvent.ApiIds.None
+            return await GetAuthorizationRequestUrl(scopes)
+                .WithRedirectUri(redirectUri)
+                .WithLoginHint(loginHint)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .WithExtraScopesToConsent(extraScopesToConsent)
+                .WithAuthorityOverride(authority)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
         }
 
         internal ClientCredential ClientCredential { get; }
@@ -406,57 +453,15 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        private async Task<AuthenticationResult> AcquireTokenForClientCommonAsync(IEnumerable<string> scopes, bool forceRefresh, ApiEvent.ApiIds apiId, bool sendCertificate)
+        internal override AuthenticationRequestParameters CreateRequestParameters(
+            IAcquireTokenCommonParameters commonParameters,
+            TokenCache cache,
+            IAccount account = null,  // todo: can we just use commonParameters.Account?
+            Authority customAuthority = null)
         {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            AuthenticationRequestParameters parameters = CreateRequestParameters(authority, scopes, null,
-                AppTokenCache);
-            parameters.IsClientCredentialRequest = true;
-            parameters.SendCertificate = sendCertificate;
-            var handler = new ClientCredentialRequest(
-                ServiceBundle,
-                parameters,
-                apiId,
-                forceRefresh);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenOnBehalfCommonAsync(Authority authority,
-            IEnumerable<string> scopes, UserAssertion userAssertion, ApiEvent.ApiIds apiId, bool sendCertificate)
-        {
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.UserAssertion = userAssertion;
-            requestParams.SendCertificate = sendCertificate;
-            var handler = new OnBehalfOfRequest(
-                ServiceBundle,
-                requestParams,
-                apiId);
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeCommonAsync(string authorizationCode,
-            IEnumerable<string> scopes, Uri redirectUri, ApiEvent.ApiIds apiId, bool sendCertificate)
-        {
-            Authority authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, ValidateAuthority);
-            var requestParams = CreateRequestParameters(authority, scopes, null, UserTokenCache);
-            requestParams.AuthorizationCode = authorizationCode;
-            requestParams.RedirectUri = redirectUri;
-            requestParams.SendCertificate = sendCertificate;
-            var handler = new AuthorizationCodeRequest(
-                ServiceBundle,
-                requestParams,
-                apiId);
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal override AuthenticationRequestParameters CreateRequestParameters(Authority authority, IEnumerable<string> scopes, IAccount user, TokenCache cache)
-        {
-            AuthenticationRequestParameters parameters = base.CreateRequestParameters(authority, scopes, user, cache);
-            parameters.ClientId = ClientId;
-            parameters.ClientCredential = ClientCredential;
-
-            return parameters;
+            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, cache, account, customAuthority);
+            requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
+            return requestParams;
         }
 
         internal static void GuardMobileFrameworks()

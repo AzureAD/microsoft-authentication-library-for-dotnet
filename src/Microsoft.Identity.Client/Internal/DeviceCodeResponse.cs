@@ -25,27 +25,45 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal
 {
-   #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
-    public partial interface IPublicClientApplication : IClientApplicationBase
+    [DataContract]
+    internal class DeviceCodeResponse : OAuth2ResponseBase
     {
-        /// <summary>
-        /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
-        /// See https://aka.ms/msal-net-up.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="username">Identifier of the user application requests token on behalf.
-        /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
-        /// <param name="securePassword">User password.</param>
-        /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
-            IEnumerable<string> scopes,
-            string username,
-            System.Security.SecureString securePassword);
+        [DataMember(Name = "user_code", IsRequired = false)]
+        public string UserCode { get; internal set; }
+
+        [DataMember(Name = "device_code", IsRequired = false)]
+        public string DeviceCode { get; internal set; }
+
+        [DataMember(Name = "verification_url", IsRequired = false)]
+        public string VerificationUrl { get; internal set; }
+
+        [DataMember(Name = "expires_in", IsRequired = false)]
+        public long ExpiresIn { get; internal set; }
+
+        [DataMember(Name = "interval", IsRequired = false)]
+        public long Interval { get; internal set; }
+
+        [DataMember(Name = "message", IsRequired = false)]
+        public string Message { get; internal set; }
+
+        public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)
+        {
+            return new DeviceCodeResult(
+                UserCode,
+                DeviceCode,
+                VerificationUrl,
+                DateTime.UtcNow.AddSeconds(ExpiresIn),
+                Interval,
+                Message,
+                clientId,
+                scopes);
+        }
     }
-    #endif
 }

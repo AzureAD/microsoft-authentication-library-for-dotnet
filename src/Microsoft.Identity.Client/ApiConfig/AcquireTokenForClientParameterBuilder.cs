@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns></returns>
         public AcquireTokenForClientParameterBuilder WithSendX5C(bool withSendX5C)
         {
-            Parameters.WithSendX5C = withSendX5C;
+            Parameters.SendX5C = withSendX5C;
             return this;
         }
 

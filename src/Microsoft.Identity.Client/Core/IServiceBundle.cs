@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
@@ -35,6 +36,8 @@ namespace Microsoft.Identity.Client.Core
 {
     internal interface IServiceBundle
     {
+        IApplicationConfiguration Config { get; }
+        ICoreLogger DefaultLogger { get; }
         IHttpManager HttpManager { get; }
         ITelemetryManager TelemetryManager { get; }
         IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }

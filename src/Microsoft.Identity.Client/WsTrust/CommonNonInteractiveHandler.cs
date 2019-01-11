@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Security;
 using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Identity.Client.Core;
@@ -37,16 +38,16 @@ namespace Microsoft.Identity.Client.WsTrust
     internal class CommonNonInteractiveHandler
     {
         private readonly RequestContext _requestContext;
-        private readonly IUsernameInput _usernameInput;
+        private readonly string _username;
         private readonly IServiceBundle _serviceBundle;
 
         public CommonNonInteractiveHandler(
             RequestContext requestContext,
-            IUsernameInput usernameInput,
+            string username,
             IServiceBundle serviceBundle)
         {
             _requestContext = requestContext;
-            _usernameInput = usernameInput;
+            _username = username;
             _serviceBundle = serviceBundle;
         }
 
@@ -73,7 +74,7 @@ namespace Microsoft.Identity.Client.WsTrust
         {
             var userRealmResponse = await _serviceBundle.WsTrustWebRequestManager.GetUserRealmAsync(
                 userRealmUriPrefix,
-                _usernameInput.UserName,
+                _username,
                 _requestContext).ConfigureAwait(false);
 
             if (userRealmResponse == null)
@@ -84,7 +85,7 @@ namespace Microsoft.Identity.Client.WsTrust
             }
 
             _requestContext.Logger.InfoPii(
-                $"User with user name '{_usernameInput.UserName}' detected as '{userRealmResponse.AccountType}'",
+                $"User with user name '{_username}' detected as '{userRealmResponse.AccountType}'",
                 string.Empty);
 
             return userRealmResponse;
@@ -127,7 +128,8 @@ namespace Microsoft.Identity.Client.WsTrust
                 userAuthType,
                 cloudAudienceUrn,
                 wsTrustEndpoint,
-                _usernameInput).ConfigureAwait(false);
+                _username,
+                null).ConfigureAwait(false);
 
             _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint");
 
@@ -138,16 +140,15 @@ namespace Microsoft.Identity.Client.WsTrust
             UserAuthType userAuthType,
             string cloudAudienceUrn,
             WsTrustEndpoint endpoint,
-            IUsernameInput usernameInput)
+            string username,
+            SecureString securePassword)
         {
-            // TODO: need to clean up the casting to UsernamePasswordInput as well as removing the PasswordToCharArray
-            // since we're putting the strings onto the managed heap anyway.
             string wsTrustRequestMessage = userAuthType == UserAuthType.IntegratedAuth
                 ? endpoint.BuildTokenRequestMessageWindowsIntegratedAuth(cloudAudienceUrn)
                 : endpoint.BuildTokenRequestMessageUsernamePassword(
                     cloudAudienceUrn,
-                    usernameInput.UserName,
-                    new string(((UsernamePasswordInput)usernameInput).PasswordToCharArray()));
+                    username,
+                    new string(securePassword.PasswordToCharArray()));
 
             try
             {

@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        IReadOnlyDictionary<string, string> ExtraQueryParameters { get; }
+        Dictionary<string, string> ExtraQueryParameters { get; }
 
         /// <summary>
         /// </summary>

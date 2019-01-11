@@ -29,7 +29,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal interface ITelemetryManager
     {
-        ITelemetryReceiver TelemetryReceiver { get; set; }
+        TelemetryCallback Callback { get; }
 
         string GenerateNewRequestId();
 

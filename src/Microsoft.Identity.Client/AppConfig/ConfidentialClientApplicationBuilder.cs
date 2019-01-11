@@ -106,12 +106,36 @@ namespace Microsoft.Identity.Client.AppConfig
             return this;
         }
 
+        // This is for back-compat with oldstyle API.  Once we deprecate that, we can remove this.
+        internal ConfidentialClientApplicationBuilder WithClientCredential(ClientCredential clientCredential)
+        {
+            Config.ClientCredential = clientCredential;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override ApplicationConfiguration BuildConfiguration()
         {
             base.BuildConfiguration();
 
-            if (!string.IsNullOrWhiteSpace(Config.ClientSecret) && Config.Certificate != null)
+            int numSpecified = 0;
+
+            if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
+            {
+                numSpecified++;
+            }
+
+            if (Config.Certificate != null)
+            {
+                numSpecified++;
+            }
+
+            if (Config.ClientCredential != null)
+            {
+                numSpecified++;
+            }
+
+            if (numSpecified > 1)
             {
                 throw new InvalidOperationException(
                     "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.");

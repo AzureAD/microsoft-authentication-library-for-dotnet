@@ -90,12 +90,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ValidateScopeInput(_extraScopesToConsent);
 
             authenticationRequestParameters.LoginHint = loginHint;
-            if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
-                authenticationRequestParameters.ExtraQueryParameters[0] == '&')
-            {
-                authenticationRequestParameters.ExtraQueryParameters =
-                    authenticationRequestParameters.ExtraQueryParameters.Substring(1);
-            }
+
+            // TODO(migration): do we need to handle this case in the param builder or will the split method we have ignore the & prefix
+            //if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
+            //    authenticationRequestParameters.ExtraQueryParameters[0] == '&')
+            //{
+            //    authenticationRequestParameters.ExtraQueryParameters =
+            //        authenticationRequestParameters.ExtraQueryParameters.Substring(1);
+            //}
 
             _webUi = webUi;
             _uiBehavior = uiBehavior;
@@ -224,20 +226,27 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     false,
                     AuthenticationRequestParameters.RequestContext);
 
-                foreach (KeyValuePair<string, string> kvp in kvps)
-                {
-                    if (requestParameters.ContainsKey(kvp.Key))
-                    {
-                        throw new MsalClientException(
-                            MsalClientException.DuplicateQueryParameterError,
-                            string.Format(
-                                CultureInfo.InvariantCulture,
-                                MsalErrorMessage.DuplicateQueryParameterTemplate,
-                                kvp.Key));
-                    }
+                CheckForDuplicateQueryParameters(kvps, requestParameters);
+            }
+        }
 
-                    requestParameters[kvp.Key] = kvp.Value;
+        private static void CheckForDuplicateQueryParameters(
+            Dictionary<string, string> queryParamsDictionary, 
+            IDictionary<string, string> requestParameters)
+        {
+            foreach (KeyValuePair<string, string> kvp in queryParamsDictionary)
+            {
+                if (requestParameters.ContainsKey(kvp.Key))
+                {
+                    throw new MsalClientException(
+                        MsalClientException.DuplicateQueryParameterError,
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            MsalErrorMessage.DuplicateQueryParameterTemplate,
+                            kvp.Key));
                 }
+
+                requestParameters[kvp.Key] = kvp.Value;
             }
         }
 
