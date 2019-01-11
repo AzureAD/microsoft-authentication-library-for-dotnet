@@ -41,6 +41,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.Identity.Client;
 
 namespace XForms.UWP
 {
@@ -57,6 +58,11 @@ namespace XForms.UWP
         {
             InitializeComponent();
             Suspending += OnSuspending;
+
+#if ARIA_TELEMETRY_ENABLED
+            Telemetry.GetInstance().RegisterReceiver(
+                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+#endif
         }
 
         /// <summary>
