@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Client
         /// During the migration process, it enables you to store in the MSAL.NET token
         /// cache an access token and refresh token corresponding to <paramref name="refreshToken"/>.
         /// From there you will be able to use the new MSAL.NET API, in particular
-        /// AcquireTokenSilentAsync() which will renew the access token.  
+        /// AcquireTokenSilentAsync() which will renew the access token.
         /// </summary>
         /// <param name="scopes">Scope to request from the token endpoint. Setting this to null or empty will request a refresh token with default scopes</param>
         /// /// <param name="refreshToken">The refresh token from ADAL 2.x</param>
