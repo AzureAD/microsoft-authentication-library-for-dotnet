@@ -805,6 +805,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(userCahce.TokenCacheAccessor.AccessTokenCount, 1);
                     Assert.IsNotNull(result.AccessToken);
                     Assert.AreEqual(result.AccessToken, "some-access-token");
+
+                    userCahce.Clear();
+                    httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                    List<string> scope = new List<string>();
+                    result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(MsalTestConstants.Scope, "SomeRefreshToken").ConfigureAwait(false);
+                    Assert.AreEqual(userCahce.TokenCacheAccessor.RefreshTokenCount, 1);
+                    Assert.AreEqual(userCahce.TokenCacheAccessor.AccessTokenCount, 1);
+                    Assert.IsNotNull(result.AccessToken);
+                    Assert.AreEqual(result.AccessToken, "some-access-token");
+
                 }).ConfigureAwait(false);
         }
 
