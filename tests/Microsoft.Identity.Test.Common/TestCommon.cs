@@ -39,9 +39,8 @@ namespace Microsoft.Identity.Test.Common
         {
             ModuleInitializer.ForceModuleInitializationTestOnly();
             ResetState();
-            new AadInstanceDiscovery(null, null, true);
+            new AadInstanceDiscovery(null, null, null, true);
             new ValidatedAuthoritiesCache(true);
-
         }
 
         public static void ResetState()
