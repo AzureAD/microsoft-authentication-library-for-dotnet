@@ -189,7 +189,7 @@ namespace Microsoft.Identity.Client
             var environmentAliases = GetEnvironmentAliases(requestParams.TenantUpdatedCanonicalAuthority,
                 instanceDiscoveryMetadataEntry);
 
-            var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParams.Authority.AuthorityInfo.Host,
+            var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParams.AuthorityInfo.Host,
                 instanceDiscoveryMetadataEntry);
 
             var msalAccessTokenCacheItem =
@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Client
 
                     // save RT in ADAL cache for public clients
                     // do not save RT in ADAL cache for MSAL B2C scenarios
-                    if (!requestParams.IsClientCredentialRequest && !requestParams.Authority.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
+                    if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
                     {
                         CacheFallbackOperations.WriteAdalRefreshToken(
                             LegacyCachePersistence, 
@@ -326,16 +326,16 @@ namespace Microsoft.Identity.Client
                 ISet<string> environmentAliases = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 string preferredEnvironmentAlias = null;
 
-                if (requestParams.Authority != null)
+                if (requestParams.AuthorityInfo != null)
                 {
                     var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(
-                        requestParams.Authority.AuthorityInfo.CanonicalAuthority,
+                        requestParams.AuthorityInfo.CanonicalAuthority,
                         requestParams.RequestContext).ConfigureAwait(false);
 
                     environmentAliases.UnionWith
-                        (GetEnvironmentAliases(requestParams.Authority.AuthorityInfo.CanonicalAuthority, instanceDiscoveryMetadataEntry));
+                        (GetEnvironmentAliases(requestParams.AuthorityInfo.CanonicalAuthority, instanceDiscoveryMetadataEntry));
 
-                    if (requestParams.Authority.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.B2C)
+                    if (requestParams.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.B2C)
                     {
                         preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                     }
@@ -525,13 +525,13 @@ namespace Microsoft.Identity.Client
                 return null;
             }
 
-            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParam.Authority.AuthorityInfo.CanonicalAuthority,
+            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParam.AuthorityInfo.CanonicalAuthority,
                 requestParam.RequestContext).ConfigureAwait(false);
 
-            var environmentAliases = GetEnvironmentAliases(requestParam.Authority.AuthorityInfo.CanonicalAuthority,
+            var environmentAliases = GetEnvironmentAliases(requestParam.AuthorityInfo.CanonicalAuthority,
                 instanceDiscoveryMetadataEntry);
 
-            var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParam.Authority.AuthorityInfo.Host,
+            var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParam.AuthorityInfo.Host,
                 instanceDiscoveryMetadataEntry);
 
             lock (LockObject)

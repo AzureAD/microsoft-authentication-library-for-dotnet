@@ -133,8 +133,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.DeviceCode,
                 [OAuth2Parameter.DeviceCode] = deviceCodeResult.DeviceCode,
-                // TODO: this is out of spec and the server is changing but for now to keep compatible
+
+                // TODO(migration): this is out of spec and the server is changing but for now to keep compatible
                 // across servers as the changes roll out, we're sending the device code both ways.
+                // WE SHOULD NOW BE ABLE TO REMOVE THIS.  DO IT WHILE TESTING MIGRATION CODE.
                 [OAuth2Parameter.Code] = deviceCodeResult.DeviceCode
             };
             return dict;

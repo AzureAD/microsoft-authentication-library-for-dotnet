@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         public RequestContext RequestContext { get; set; }
         public Authority Authority { get; set; }
+        public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
         public TokenCache TokenCache { get; set; }

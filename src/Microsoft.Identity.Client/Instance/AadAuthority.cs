@@ -69,7 +69,6 @@ namespace Microsoft.Identity.Client.Instance
             var metadata = await ServiceBundle.AadInstanceDiscovery
                                  .GetMetadataEntryAsync(
                                      new Uri(AuthorityInfo.CanonicalAuthority),
-                                     //AuthorityInfo.ValidateAuthority,
                                      requestContext)
                                  .ConfigureAwait(false);
 

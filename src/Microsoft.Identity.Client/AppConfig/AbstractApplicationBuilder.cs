@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.LoggingCallback != null)
             {
-                throw new InvalidOperationException("LoggingCallback has already been set");
+                throw new InvalidOperationException(CoreErrorMessages.LoggingCallbackAlreadySet);
             }
 
             Config.LoggingCallback = loggingCallback;
@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.LoggingCallback != null)
             {
-                throw new InvalidOperationException("LoggingCallback has already been set");
+                throw new InvalidOperationException(CoreErrorMessages.LoggingCallbackAlreadySet);
             }
 
             Config.LoggingCallback = (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); };
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.TelemetryCallback  != null)
             {
-                throw new InvalidOperationException("TelemetryCallback has already been set");
+                throw new InvalidOperationException(CoreErrorMessages.TelemetryCallbackAlreadySet);
             }
 
             Config.TelemetryCallback = telemetryCallback;
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client.AppConfig
             // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
-                throw new InvalidOperationException("No ClientId was specified.");
+                throw new InvalidOperationException(CoreErrorMessages.NoClientIdWasSpecified);
             }
 
             TryAddDefaultAuthority();
@@ -218,12 +218,12 @@ namespace Microsoft.Identity.Client.AppConfig
             // validate that we only have ONE default authority
             if (Config.Authorities.Where(x => x.IsDefault).ToList().Count != 1)
             {
-                throw new InvalidOperationException("More than one default authority was configured.");
+                throw new InvalidOperationException(CoreErrorMessages.MoreThanOneDefaultAuthorityConfigured);
             }
 
             if (Config.Authorities.Any(x => x.AuthorityType == AuthorityType.Adfs))
             {
-                throw new InvalidOperationException("ADFS is not currently a supported authority type.");
+                throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
             }
 
             return Config;
@@ -278,7 +278,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdSpecificDirectoryOnly)
             {
                 // Conflict, user has specified a string tenantId and the enum audience value for AAD, which is also the tenant.
-                throw new InvalidOperationException("TenantId and AadAuthorityAudience are both set, but they're mutually exclusive.");
+                throw new InvalidOperationException(CoreErrorMessages.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
             }
 
             if (Config.AadAuthorityAudience != AadAuthorityAudience.None)
@@ -300,7 +300,7 @@ namespace Microsoft.Identity.Client.AppConfig
             if (!string.IsNullOrWhiteSpace(Config.Instance) && Config.AzureCloudInstance != AzureCloudInstance.None)
             {
                 // Conflict, user has specified a string instance and the enum instance value.
-                throw new InvalidOperationException("Instance and AzureCloudInstance are both set but they're mutually exclusive.");
+                throw new InvalidOperationException(CoreErrorMessages.InstanceAndAzureCloudInstanceAreMutuallyExclusive);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.Instance))

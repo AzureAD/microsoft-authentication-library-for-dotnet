@@ -62,8 +62,7 @@ namespace Microsoft.Identity.Client.ApiConfig
                 return ExecuteAsync(executor, cancellationToken);
             }
 
-            throw new InvalidOperationException(
-                "ClientApplicationBase implementation does not implement IClientApplicationBaseExecutor.");
+            throw new InvalidOperationException(CoreErrorMessages.ClientApplicationBaseExecutorNotImplemented);
         }
     }
 }

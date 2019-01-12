@@ -80,13 +80,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task<UserAssertion> FetchAssertionFromWsTrustAsync()
         {
-            if (AuthenticationRequestParameters.Authority.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
+            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
             {
                 return null;
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
-                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.Authority.AuthorityInfo.UserRealmUriPrefix, _username)
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)

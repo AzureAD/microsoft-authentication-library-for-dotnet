@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.Instance
                 return discoveryResponse.TenantDiscoveryEndpoint;
             }
 
-            return authorityInfo.CanonicalAuthority + "v2.0/.well-known/openid-configuration";
+            return authorityInfo.CanonicalAuthority + Constants.OpenIdConfigurationEndpoint;
         }
     }
 }

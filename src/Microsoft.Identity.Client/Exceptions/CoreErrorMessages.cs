@@ -87,9 +87,9 @@ namespace Microsoft.Identity.Client
         public const string UnknownUserType = "Unknown User Type";
 
         public const string InternalErrorCacheEmptyUsername =
-            "Internal error - trying to remove an ADAL user with an empty username. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
+            "Internal error - trying to remove an MSAL user with an empty username. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
         public const string InternalErrorCacheEmptyIdentifier =
-            "Internal error - trying to remove an ADAL user with an empty identifier. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
+            "Internal error - trying to remove an MSAL user with an empty identifier. Possible cache corruption. See https://aka.ms/adal_token_cache_serialization";
 
         public const string GetUserNameFailed = "Failed to get user name from the operating system.";
 
@@ -113,7 +113,20 @@ namespace Microsoft.Identity.Client
 
         public const string RedirectUriContainsFragment = "'redirectUri' must NOT include a fragment component";
 
-        public const string NoRedirectUri = "No redirectUri was configured. ADAL does not provide any defaults.";
+        public const string NoRedirectUri = "No redirectUri was configured. MSAL does not provide any defaults.";
 
+
+        public const string ClientApplicationBaseExecutorNotImplemented =
+            "ClientApplicationBase implementation does not implement IClientApplicationBaseExecutor.";
+
+        public const string ActivityRequiredForParentObjectAndroid = "Activity is required for parent object on Android.";
+
+        public const string LoggingCallbackAlreadySet = "LoggingCallback has already been set";
+        public const string TelemetryCallbackAlreadySet = "TelemetryCallback has already been set";
+        public const string NoClientIdWasSpecified = "No ClientId was specified.";
+        public const string MoreThanOneDefaultAuthorityConfigured = "More than one default authority was configured.";
+        public const string AdfsNotCurrentlySupportedAuthorityType = "ADFS is not currently a supported authority type.";
+        public const string TenantIdAndAadAuthorityInstanceAreMutuallyExclusive = "TenantId and AadAuthorityAudience are both set, but they're mutually exclusive.";
+        public const string InstanceAndAzureCloudInstanceAreMutuallyExclusive = "Instance and AzureCloudInstance are both set but they're mutually exclusive.";
     }
 }
