@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -39,10 +40,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         public RequestContext RequestContext { get; set; }
         public Authority Authority { get; set; }
+        public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
+        public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
-        public bool ValidateAuthority { get; set; }
         public TokenCache TokenCache { get; set; }
-        public bool IsExtendedLifeTimeEnabled { get; set; }
         public SortedSet<string> Scope { get; set; }
         public string ClientId { get; set; }
         public string AuthorizationCode { get; set; }
@@ -76,11 +77,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         if (!RequestValidationHelper.ValidateClientAssertion(this))
                         {
                             RequestContext.Logger.Info("Client Assertion does not exist or near expiry.");
-                            var jwtToken = new JsonWebToken(ClientId, Authority.SelfSignedJwtAudience);
+                            var jwtToken = new JsonWebToken(ClientId, Endpoints?.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate, SendCertificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
                             ClientCredential.ContainsX5C = SendCertificate;
-                            ClientCredential.Audience = Authority.SelfSignedJwtAudience;
+                            ClientCredential.Audience = Endpoints?.SelfSignedJwtAudience;
                         }
                         else
                         {
@@ -105,7 +106,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Client Id - " + ClientId);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
-            builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (Account != null));
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
@@ -127,7 +127,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
                 (Authority != null) + Environment.NewLine);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
-            builder.AppendLine("Validate Authority? - " + ValidateAuthority);
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (Account != null));
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());

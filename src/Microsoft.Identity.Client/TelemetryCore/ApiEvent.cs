@@ -98,10 +98,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
             set => this[UiBehaviorKey] = value?.ToLowerInvariant();
         }
 
-        public string ValidationStatus
-        {
-            set => this[ValidationStatusKey] = value?.ToLowerInvariant();
-        }
+        // TODO(migration):  this was from ValidateAuthority which is no longer used.  
+        //public string ValidationStatus
+        //{
+        //    set => this[ValidationStatusKey] = value?.ToLowerInvariant();
+        //}
 
         public string TenantId
         {

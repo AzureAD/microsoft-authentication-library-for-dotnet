@@ -31,7 +31,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -68,12 +67,11 @@ namespace Microsoft.Identity.Client.Instance
 
         public async Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             Uri authority,
-            bool validateAuthority,
             RequestContext requestContext)
         {
             if (!TryGetValue(authority.Host, out var entry))
             {
-                await DoInstanceDiscoveryAndCacheAsync(authority, validateAuthority, requestContext).ConfigureAwait(false);
+                await DoInstanceDiscoveryAndCacheAsync(authority, requestContext).ConfigureAwait(false);
                 TryGetValue(authority.Host, out entry);
             }
 
@@ -82,18 +80,10 @@ namespace Microsoft.Identity.Client.Instance
 
         public async Task<InstanceDiscoveryResponse> DoInstanceDiscoveryAndCacheAsync(
             Uri authority,
-            bool validateAuthority,
             RequestContext requestContext)
         {
             var discoveryResponse = await SendInstanceDiscoveryRequestAsync(authority, requestContext).ConfigureAwait(false);
-
-            if (validateAuthority)
-            {
-                Validate(discoveryResponse);
-            }
-
             CacheInstanceDiscoveryMetadata(authority.Host, discoveryResponse);
-
             return discoveryResponse;
         }
 
@@ -137,21 +127,11 @@ namespace Microsoft.Identity.Client.Instance
             return discoveryResponse;
         }
 
-        private static void Validate(InstanceDiscoveryResponse instanceDiscoveryResponse)
-        {
-            if (instanceDiscoveryResponse.TenantDiscoveryEndpoint == null)
-            {
-                throw MsalExceptionFactory.GetClientException(
-                    instanceDiscoveryResponse.Error,
-                    instanceDiscoveryResponse.ErrorDescription);
-            }
-        }
-
         private void CacheInstanceDiscoveryMetadata(string host, InstanceDiscoveryResponse instanceDiscoveryResponse)
         {
-            foreach (var entry in instanceDiscoveryResponse?.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
+            foreach (var entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
-                foreach (string aliasedAuthority in entry?.Aliases ?? Enumerable.Empty<string>())
+                foreach (string aliasedAuthority in entry.Aliases ?? Enumerable.Empty<string>())
                 {
                     TryAddValue(aliasedAuthority, entry);
                 }

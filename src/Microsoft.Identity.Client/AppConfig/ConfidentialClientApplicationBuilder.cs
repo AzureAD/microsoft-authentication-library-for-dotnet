@@ -118,25 +118,26 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             base.BuildConfiguration();
 
-            int numSpecified = 0;
+            int countOfCredentialTypesSpecified = 0;
 
             if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
             {
-                numSpecified++;
+                countOfCredentialTypesSpecified++;
             }
 
             if (Config.Certificate != null)
             {
-                numSpecified++;
+                countOfCredentialTypesSpecified++;
             }
 
             if (Config.ClientCredential != null)
             {
-                numSpecified++;
+                countOfCredentialTypesSpecified++;
             }
 
-            if (numSpecified > 1)
+            if (countOfCredentialTypesSpecified > 1)
             {
+                // TODO(migration): move text into string literals file.
                 throw new InvalidOperationException(
                     "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.");
             }

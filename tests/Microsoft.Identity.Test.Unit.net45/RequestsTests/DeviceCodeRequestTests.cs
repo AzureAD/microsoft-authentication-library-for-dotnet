@@ -35,7 +35,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Features.DeviceCode;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;

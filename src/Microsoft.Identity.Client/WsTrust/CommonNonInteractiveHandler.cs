@@ -38,16 +38,13 @@ namespace Microsoft.Identity.Client.WsTrust
     internal class CommonNonInteractiveHandler
     {
         private readonly RequestContext _requestContext;
-        private readonly string _username;
         private readonly IServiceBundle _serviceBundle;
 
         public CommonNonInteractiveHandler(
             RequestContext requestContext,
-            string username,
             IServiceBundle serviceBundle)
         {
             _requestContext = requestContext;
-            _username = username;
             _serviceBundle = serviceBundle;
         }
 
@@ -70,11 +67,11 @@ namespace Microsoft.Identity.Client.WsTrust
             return platformUsername;
         }
 
-        public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUriPrefix)
+        public async Task<UserRealmDiscoveryResponse> QueryUserRealmDataAsync(string userRealmUriPrefix, string username)
         {
             var userRealmResponse = await _serviceBundle.WsTrustWebRequestManager.GetUserRealmAsync(
                 userRealmUriPrefix,
-                _username,
+                username,
                 _requestContext).ConfigureAwait(false);
 
             if (userRealmResponse == null)
@@ -85,14 +82,14 @@ namespace Microsoft.Identity.Client.WsTrust
             }
 
             _requestContext.Logger.InfoPii(
-                $"User with user name '{_username}' detected as '{userRealmResponse.AccountType}'",
+                $"User with user name '{username}' detected as '{userRealmResponse.AccountType}'",
                 string.Empty);
 
             return userRealmResponse;
         }
 
         public async Task<WsTrustResponse> PerformWsTrustMexExchangeAsync(
-            string federationMetadataUrl, string cloudAudienceUrn, UserAuthType userAuthType)
+            string federationMetadataUrl, string cloudAudienceUrn, UserAuthType userAuthType, string username, SecureString password)
         {
             MexDocument mexDocument;
 
@@ -128,8 +125,8 @@ namespace Microsoft.Identity.Client.WsTrust
                 userAuthType,
                 cloudAudienceUrn,
                 wsTrustEndpoint,
-                _username,
-                null).ConfigureAwait(false);
+                username,
+                password).ConfigureAwait(false);
 
             _requestContext.Logger.Info($"Token of type '{wsTrustResponse.TokenType}' acquired from WS-Trust endpoint");
 

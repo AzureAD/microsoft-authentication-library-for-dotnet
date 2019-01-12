@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
     /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
-    public abstract partial class ClientApplicationBase
+    public abstract partial class ClientApplicationBase : IClientApplicationBase, IClientApplicationBaseExecutor
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         static ClientApplicationBase()
@@ -193,7 +193,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                accounts = UserTokenCache.GetAccounts(Authority, ValidateAuthority, requestContext);
+                accounts = UserTokenCache.GetAccounts(Authority, requestContext);
             }
 
             return Task.FromResult(accounts);
@@ -253,7 +253,6 @@ namespace Microsoft.Identity.Client
                                                   ServiceBundle,
                                                   AuthorityInfo.FromAuthorityUri(
                                                       commonParameters.AuthorityOverride,
-                                                      ServiceBundle.Config.DefaultAuthorityInfo.ValidateAuthority,
                                                       false)));
 
 
@@ -267,8 +266,6 @@ namespace Microsoft.Identity.Client
                 Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
                 RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
                 RequestContext = CreateRequestContext(Guid.Empty),
-                ValidateAuthority = ValidateAuthority,
-                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
                 ExtraQueryParameters = commonParameters.ExtraQueryParameters,
             };
         }
@@ -277,6 +274,66 @@ namespace Microsoft.Identity.Client
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
             return new RequestContext(ClientId, MsalLogger.Create(correlationId, Component, ServiceBundle.Config));
+        }
+
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured in the application constructor
+        /// narrows down the selection to a specific tenant. This does not change the configured value in the application. This is specific
+        /// to applications managing several accounts (like a mail client with several mailboxes)</param>
+        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the cache and attempt to acquire new access token
+        /// using the refresh token for the account if this one is available. This can be useful in the case when the application developer wants to make
+        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
+        /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </remarks>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
+            string authority, bool forceRefresh)
+        {
+            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
+            // TODO(migration): AcquireTokenSilentWithAuthority
+
+            return await AcquireTokenSilent(scopes, account)
+                .WithAuthorityOverride(authority)
+                .WithForceRefresh(forceRefresh)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AuthenticationResult"/> containing the requested token</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance so that the user consents, or re-signs-in (for instance if the password expired), or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes.
+        /// This means that an access token with more scopes than requested could be returned as well. If the access token is expired or
+        /// close to expiration (within a 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </remarks>
+        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
+        {
+            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
+            // TODO(migration): AcquireTokenSilentWithoutAuthority
+
+            return await AcquireTokenSilent(scopes, account)
+                         .ExecuteAsync(CancellationToken.None)
+                         .ConfigureAwait(false);
         }
     }
 }

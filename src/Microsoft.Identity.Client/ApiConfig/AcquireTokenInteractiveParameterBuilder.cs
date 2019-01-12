@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client.ApiConfig
             }
             else
             {
-                throw new InvalidOperationException("Activity is required for parent object on Android.");
+                throw new InvalidOperationException(CoreErrorMessages.ActivityRequiredForParentObjectAndroid);
             }
 
 #elif DESKTOP

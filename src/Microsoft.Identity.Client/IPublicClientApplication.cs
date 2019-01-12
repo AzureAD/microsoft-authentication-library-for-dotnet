@@ -21,7 +21,8 @@
 // AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.//
+// THE SOFTWARE.
+//
 //------------------------------------------------------------------------------
 
 using System;
@@ -59,7 +60,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>This API will be removed in MSAL v3.x. See https://aka.ms/msal-net-ios-keychain-security-group for details</remarks>
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
         string KeychainSecurityGroup { get; set; }
-#endif
+#endif // iOS
 
 #if WINDOWS_APP
        /// <summary>
@@ -67,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         bool UseCorporateNetwork { get; set; }
-#endif
+#endif // WINDOWS_APP
 
         // expose the interactive API without UIParent only for platforms that 
         // do not need it to operate like desktop, UWP, iOS.
@@ -178,8 +179,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> extraScopesToConsent,
             string authority);
 
-        // endif !ANDROID
-#endif
+#endif // !ANDROID_BUILDTIME
 
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
@@ -295,8 +295,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
             string authority, UIParent parent);
-        // endif !NOT_CORE
-#endif
+#endif // !NET_CORE_BUILDTIME
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
         /// <summary>
@@ -312,7 +311,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string username,
             System.Security.SecureString securePassword);
-#endif
+#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTME
 
         /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
@@ -420,7 +419,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
         Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes);
-#endif
+#endif // !NET_CORE_BUILDTIME
 
         /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows, via Integrated Windows Authentication.
@@ -434,7 +433,6 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
             IEnumerable<string> scopes,
             string username);
-
+#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
     }
-#endif
 }

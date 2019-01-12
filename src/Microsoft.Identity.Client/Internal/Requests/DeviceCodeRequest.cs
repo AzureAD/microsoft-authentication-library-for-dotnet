@@ -70,13 +70,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             // Fow now, the string replace is correct.
             // TODO: We should NOT be talking to common, need to work with henrik/bogdan on why /common is being set
             // as default for msal.
-            string deviceCodeEndpoint = AuthenticationRequestParameters.Authority.TokenEndpoint
+            string deviceCodeEndpoint = AuthenticationRequestParameters.Endpoints.TokenEndpoint
                                                                        .Replace("token", "devicecode").Replace(
                                                                            "common",
                                                                            "organizations");
-
-            AuthenticationRequestParameters.Authority.TokenEndpoint =
-                AuthenticationRequestParameters.Authority.TokenEndpoint.Replace("common", "organizations");
 
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
                                new Uri(deviceCodeEndpoint),
@@ -105,7 +102,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
                 try
                 {
-                    return await SendTokenRequestAsync(GetBodyParameters(deviceCodeResult), cancellationToken)
+                    // TODO: once we have a devicecode discovery endpoint, we should remove this modification...
+                    return await SendTokenRequestAsync(
+                                   AuthenticationRequestParameters.Endpoints.TokenEndpoint.Replace("common", "organizations"),
+                                   GetBodyParameters(deviceCodeResult), cancellationToken)
                                .ConfigureAwait(false);
                 }
                 catch (MsalServiceException ex)
@@ -133,8 +133,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.DeviceCode,
                 [OAuth2Parameter.DeviceCode] = deviceCodeResult.DeviceCode,
-                // TODO: this is out of spec and the server is changing but for now to keep compatible
+
+                // TODO(migration): this is out of spec and the server is changing but for now to keep compatible
                 // across servers as the changes roll out, we're sending the device code both ways.
+                // WE SHOULD NOW BE ABLE TO REMOVE THIS.  DO IT WHILE TESTING MIGRATION CODE.
                 [OAuth2Parameter.Code] = deviceCodeResult.DeviceCode
             };
             return dict;

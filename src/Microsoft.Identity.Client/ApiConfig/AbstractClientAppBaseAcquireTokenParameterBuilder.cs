@@ -25,27 +25,44 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
-    internal interface IPublicClientApplicationExecutor
+    /// <summary>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public abstract class AbstractClientAppBaseAcquireTokenParameterBuilder<T> : AbstractAcquireTokenParameterBuilder<T>
+        where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenInteractiveParameters interactiveParameters,
+        /// <summary>
+        /// </summary>
+        /// <param name="clientApplicationBase"></param>
+        protected AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
+        {
+            ClientApplicationBase = clientApplicationBase;
+        }
+
+        /// <summary>
+        /// </summary>
+        protected IClientApplicationBase ClientApplicationBase { get; }
+
+        internal abstract Task<AuthenticationResult> ExecuteAsync(
+            IClientApplicationBaseExecutor executor,
             CancellationToken cancellationToken);
 
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
+        /// <inheritdoc />
+        public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
+        {
+            if (ClientApplicationBase is IClientApplicationBaseExecutor executor)
+            {
+                Validate();
+                return ExecuteAsync(executor, cancellationToken);
+            }
 
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken);
+            throw new InvalidOperationException(CoreErrorMessages.ClientApplicationBaseExecutorNotImplemented);
+        }
     }
 }

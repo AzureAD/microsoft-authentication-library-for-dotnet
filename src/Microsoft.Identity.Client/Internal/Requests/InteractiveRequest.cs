@@ -50,23 +50,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _codeVerifier;
         private string _state;
 
-        public InteractiveRequest(
-            IServiceBundle serviceBundle,
-            AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            IEnumerable<string> extraScopesToConsent,
-            UIBehavior uiBehavior,
-            IWebUI webUi)
-            : this(
-                serviceBundle,
-                authenticationRequestParameters,
-                apiId,
-                extraScopesToConsent,
-                authenticationRequestParameters.Account?.Username,
-                uiBehavior,
-                webUi)
-        {
-        }
+        //public InteractiveRequest(
+        //    IServiceBundle serviceBundle,
+        //    AuthenticationRequestParameters authenticationRequestParameters,
+        //    ApiEvent.ApiIds apiId,
+        //    IEnumerable<string> extraScopesToConsent,
+        //    UIBehavior uiBehavior,
+        //    IWebUI webUi)
+        //    : this(
+        //        serviceBundle,
+        //        authenticationRequestParameters,
+        //        apiId,
+        //        extraScopesToConsent,
+        //        authenticationRequestParameters.Account?.Username,
+        //        uiBehavior,
+        //        webUi)
+        //{
+        //}
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
@@ -89,6 +89,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(_extraScopesToConsent);
 
+            // TODO: why is LoginHint set here instead of just using the one sent in?
             authenticationRequestParameters.LoginHint = loginHint;
 
             // TODO(migration): do we need to handle this case in the param builder or will the split method we have ignore the & prefix
@@ -141,14 +142,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal async Task<Uri> CreateAuthorizationUriAsync()
         {
-            await AuthenticationRequestParameters
-                  .Authority.UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext)
-                  .ConfigureAwait(false);
-
-            //this method is used in confidential clients to create authorization URLs.
-            await AuthenticationRequestParameters.Authority.ResolveEndpointsAsync(
-                AuthenticationRequestParameters.LoginHint,
-                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+            await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             return CreateAuthorizationUri();
         }
 
@@ -209,7 +203,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             CheckForDuplicateQueryParameters(AuthenticationRequestParameters.SliceParameters, requestParameters);
 
             string qp = requestParameters.ToQueryParameter();
-            var builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Authority.AuthorizationEndpoint));
+            var builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Endpoints.AuthorizationEndpoint));
             builder.AppendQueryParameters(qp);
 
             return builder.Uri;

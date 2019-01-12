@@ -51,7 +51,9 @@ namespace Microsoft.Identity.Client
         [CLSCompliant(false)]
         public static void SetAuthenticationContinuationEventArgs(int requestCode, Result resultCode, Intent data)
         {
-            RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
+            // TODO(migration): how can a public static method get access to the proper ClientRequestBase to wire into the logger and appropriate requestcontext?
+            // Can we move this call to be somewhere on the ClientApplicationBase or something else that's wired into that?
+            RequestContext requestContext = new RequestContext(null, MsalLogger.Create(Guid.Empty, null, null));
 
             requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture, "Received Activity Result({0})", (int)resultCode));
             AuthorizationResult authorizationResult = null;

@@ -66,19 +66,6 @@ namespace Microsoft.Identity.Client
         /// 
         /// </summary>
         /// <param name="scopes"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentPcaParameterBuilder AcquireTokenSilent(
-            IEnumerable<string> scopes, 
-            IAccount account)
-        {
-            return AcquireTokenSilentPcaParameterBuilder.Create(this, scopes, account);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="scopes"></param>
         /// <param name="deviceCodeResultCallback"></param>
         /// <returns></returns>
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
@@ -130,7 +117,11 @@ namespace Microsoft.Identity.Client
                 ApiEvent.ApiIds.AcquireTokenForClientWithScope, // TODO(migration): need to reconcile how to get this.  do we add this in at builder time to differentiate the various calling pattern types?
                 interactiveParameters.ExtraScopesToConsent,
                 string.IsNullOrWhiteSpace(interactiveParameters.LoginHint) ? requestParams.Account?.Username : interactiveParameters.LoginHint,
+#if NET_CORE_BUILDTIME
+                UIBehavior.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
+#else
                 interactiveParameters.UiBehavior,
+#endif
                 CreateWebAuthenticationDialogEx(
                     interactiveParameters,
                     requestParams.RequestContext));
@@ -144,7 +135,7 @@ namespace Microsoft.Identity.Client
         {
             var authorityInstance = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride) 
                 ? GetAuthority(silentParameters.Account) 
-                : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride, ValidateAuthority);
+                : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride);
 
             var handler = new SilentRequest(
                 ServiceBundle,

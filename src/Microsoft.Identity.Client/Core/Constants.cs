@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
 using System.Xml.Linq;
 
 namespace Microsoft.Identity.Client.Core
@@ -38,6 +39,37 @@ namespace Microsoft.Identity.Client.Core
 
         public const string UapWEBRedirectUri = "https://sso"; // only ADAL supports WEB
         public const string DefaultRedirectUri = "urn:ietf:wg:oauth:2.0:oob";
+
+        public const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
+
+        public static string FormatEnterpriseRegistrationOnPremiseUri(string domain)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "https://enterpriseregistration.{0}/enrollmentserver/contract",
+                domain);
+        }
+
+        public static string FormatEnterpriseRegistrationInternetUri(string domain)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
+                domain);
+        }
+
+        public const string WellKnownOpenIdConfigurationPath = ".well-known/openid-configuration";
+        public const string OpenIdConfigurationEndpoint = "v2.0/" + WellKnownOpenIdConfigurationPath;
+
+        public static string FormatAdfsWebFingerUrl(string host, string resource)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}",
+                host,
+                Constants.DefaultRealm,
+                resource);
+        }
     }
 
 

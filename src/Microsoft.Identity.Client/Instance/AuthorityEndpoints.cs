@@ -25,27 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Instance
 {
-    internal interface IPublicClientApplicationExecutor
+    internal class AuthorityEndpoints
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenInteractiveParameters interactiveParameters,
-            CancellationToken cancellationToken);
+        public AuthorityEndpoints(string authorizationEndpoint, string tokenEndpoint, string selfSignedJwtAudience)
+        {
+            AuthorizationEndpoint = authorizationEndpoint;
+            TokenEndpoint = tokenEndpoint;
+            SelfSignedJwtAudience = selfSignedJwtAudience;
+        }
 
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken);
+        public string AuthorizationEndpoint { get; }
+        public string TokenEndpoint { get; }
+        public string SelfSignedJwtAudience { get; }
     }
 }

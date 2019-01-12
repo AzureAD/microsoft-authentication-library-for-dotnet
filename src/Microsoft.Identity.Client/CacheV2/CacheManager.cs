@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.CacheV2
             account = null;
 
             string homeAccountId = _authParameters.Account.HomeAccountId.Identifier;
-            var authority = new Uri(_authParameters.Authority.CanonicalAuthority);
+            var authority = new Uri(_authParameters.AuthorityInfo.CanonicalAuthority);
             string environment = authority.GetEnvironment();
             string realm = authority.GetRealm();
             string clientId = _authParameters.ClientId;
@@ -203,7 +203,7 @@ namespace Microsoft.Identity.Client.CacheV2
             var tokenResponse = new TokenResponse(msalTokenResponse);
 
             string homeAccountId = GetHomeAccountId(tokenResponse);
-            var authority = new Uri(_authParameters.Authority.CanonicalAuthority);
+            var authority = new Uri(_authParameters.AuthorityInfo.CanonicalAuthority);
             string environment = authority.GetEnvironment();
             string realm = authority.GetRealm();
             string clientId = _authParameters.ClientId;
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Client.CacheV2
         public void DeleteCachedRefreshToken()
         {
             string homeAccountId = _authParameters.Account.HomeAccountId.ToString();
-            var authority = new Uri(_authParameters.Authority.CanonicalAuthority);
+            var authority = new Uri(_authParameters.AuthorityInfo.CanonicalAuthority);
             string environment = authority.GetEnvironment();
             string clientId = _authParameters.ClientId;
 
@@ -374,7 +374,7 @@ namespace Microsoft.Identity.Client.CacheV2
 
         internal AuthorityType GetAuthorityType()
         {
-            var authority = new Uri(_authParameters.Authority.CanonicalAuthority);
+            var authority = new Uri(_authParameters.AuthorityInfo.CanonicalAuthority);
 
             string[] pathSegments = authority.GetPath().Split('/');
             if (pathSegments.Count() < 2)
