@@ -83,15 +83,6 @@ namespace Microsoft.Identity.Client.Internal
             // initialize the telemetry instance so statics get created
             Telemetry.GetInstance();
 
-            // TODO(migration): need to remove this ModuleInitializer class entirely...
-            MsalLogger.Default = MsalLogger.Create(
-                Guid.Empty, 
-                string.Empty, 
-                PublicClientApplicationBuilder
-                    .Create("invalid_client_id")
-                    .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                    .BuildConfiguration());
-
             _isInitialized = true;
         }
     }

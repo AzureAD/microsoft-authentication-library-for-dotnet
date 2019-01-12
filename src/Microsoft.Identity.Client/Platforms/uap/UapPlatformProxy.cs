@@ -49,11 +49,12 @@ namespace Microsoft.Identity.Client.Platforms.uap
     /// <summary>
     /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    internal class UapPlatformProxy : IPlatformProxy
+    internal class UapPlatformProxy : AbstractPlatformProxy
     {
-        private readonly Lazy<IPlatformLogger> _platformLogger = 
-            new Lazy<IPlatformLogger>(() => new EventSourcePlatformLogger());
-        private IWebUIFactory _overloadWebUiFactory;
+        public UapPlatformProxy(ICoreLogger logger)
+            : base(logger)
+        {
+        }
 
         /// <summary>
         /// Get the user logged in to Windows or throws
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// select the first principal name that can be used
         /// </remarks>
         /// <returns>The username or throws</returns>
-        public async Task<string> GetUserPrincipalNameAsync()
+        public override async Task<string> GetUserPrincipalNameAsync()
         {
             IReadOnlyList<User> users = await User.FindAllAsync();
             if (users == null || !users.Any())
@@ -120,55 +121,54 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         }
 
-        public async Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public override async Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             IReadOnlyList<User> users = await User.FindAllAsync();
             return users.Any(u => u.Type == UserType.LocalUser || u.Type == UserType.LocalGuest);
         }
 
-        public bool IsDomainJoined()
+        public override bool IsDomainJoined()
         {
             return NetworkInformation.GetHostNames().Any(entry => entry.Type == HostNameType.DomainName);
         }
 
-
-        public string GetEnvironmentVariable(string variable)
+        public override string GetEnvironmentVariable(string variable)
         {
             ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
             return localSettings.Values.ContainsKey(variable) ? localSettings.Values[variable].ToString() : null;
         }
 
-        public string GetProcessorArchitecture()
+        protected override string InternalGetProcessorArchitecture()
         {
             return WindowsNativeMethods.GetProcessorArchitecture();
         }
 
-        public string GetOperatingSystem()
+        protected override string InternalGetOperatingSystem()
         {
             // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
             // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
             return null;
         }
 
-        public string GetDeviceModel()
+        protected override string InternalGetDeviceModel()
         {
             var deviceInformation = new Windows.Security.ExchangeActiveSyncProvisioning.EasClientDeviceInformation();
             return deviceInformation.SystemProductName;
         }
 
         /// <inheritdoc />
-        public string GetBrokerOrRedirectUri(Uri redirectUri)
+        public override string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
-        public string GetDefaultRedirectUri(string correlationId)
+        public override string GetDefaultRedirectUri(string correlationId)
         {
             return Constants.DefaultRedirectUri;
         }
 
-        public string GetProductName()
+        protected override string InternalGetProductName()
         {
             return "MSAL.UAP";
         }
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        public string GetCallingApplicationName()
+        protected override string InternalGetCallingApplicationName()
         {
             return Package.Current?.DisplayName?.ToString();
         }
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        public string GetCallingApplicationVersion()
+        protected override string InternalGetCallingApplicationVersion()
         {
             return Package.Current?.Id?.Version.ToString();
         }
@@ -195,37 +195,23 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Considered PII. Please ensure that it is hashed. 
         /// </summary>
         /// <returns>Device identifier</returns>
-        public string GetDeviceId()
+        protected override string InternalGetDeviceId()
         {
             return new EasClientDeviceInformation()?.Id.ToString();
         }
 
-        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new UapLegacyCachePersistence(CryptographyManager);
+            return new UapLegacyCachePersistence(Logger, CryptographyManager);
         }
 
-        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
             return new UapTokenCacheAccessor(CryptographyManager);
         }
 
-        /// <inheritdoc />
-        public ICryptographyManager CryptographyManager { get; } = new UapCryptographyManager();
-
-        /// <inheritdoc />
-        public IPlatformLogger PlatformLogger => _platformLogger.Value;
-
-        /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory()
-        {
-            return _overloadWebUiFactory ?? new WebUIFactory();
-        }
-
-        /// <inheritdoc />
-        public void SetWebUiFactory(IWebUIFactory webUiFactory)
-        {
-            _overloadWebUiFactory = webUiFactory;
-        }
+        protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
+        protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
+        protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
     }
 }

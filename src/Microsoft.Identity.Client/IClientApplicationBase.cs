@@ -38,6 +38,11 @@ namespace Microsoft.Identity.Client
     public partial interface IClientApplicationBase
     {
         /// <summary>
+        /// TODO(migration): this is a new field, needs documentation.
+        /// </summary>
+        ITokenCache UserTokenCache { get; }
+
+        /// <summary>
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
@@ -95,7 +100,13 @@ namespace Microsoft.Identity.Client
         /// of the form <c>key=value</c> separated by an ampersand character.
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
-        string SliceParameters { get; set; }
+        string SliceParameters
+        {
+            get; 
+
+            // [Obsolete]  TODO(migration): need to mark this obsolete
+            set;
+        }
 
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.

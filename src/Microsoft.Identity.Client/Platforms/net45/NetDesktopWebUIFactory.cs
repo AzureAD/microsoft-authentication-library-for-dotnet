@@ -30,7 +30,7 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
-    internal class WebUIFactory : IWebUIFactory
+    internal class NetDesktopWebUIFactory : IWebUIFactory
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {

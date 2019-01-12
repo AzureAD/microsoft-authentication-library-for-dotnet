@@ -45,20 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
 
-        private TokenCache _tokenCache;
-        internal TokenCache TokenCache
-        {
-            get => _tokenCache;
-            set
-            {
-                _tokenCache = value;
-                if (_tokenCache != null)
-                {
-                    _tokenCache.ServiceBundle = ServiceBundle;
-                }
-            }
-        }
-
+        internal ITokenCacheInternal TokenCache => AuthenticationRequestParameters.TokenCache;
 
         private readonly ApiEvent.ApiIds _apiId;
         protected IServiceBundle ServiceBundle { get; }
@@ -69,7 +56,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent.ApiIds apiId)
         {
             ServiceBundle = serviceBundle;
-            TokenCache = authenticationRequestParameters.TokenCache;
             _apiId = apiId;
 
             AuthenticationRequestParameters = authenticationRequestParameters;
@@ -182,7 +168,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private ApiEvent InitializeApiEvent(string accountId)
         {
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
-            var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger)
+            var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
             {
                 ApiId = _apiId,
                 AccountId = accountId ?? "",
@@ -337,10 +323,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             IDictionary<string, string> additionalBodyParameters, 
             CancellationToken cancellationToken)
         {
-            OAuth2Client client = new OAuth2Client(ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
+            OAuth2Client client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
-            foreach (var entry in AuthenticationRequestParameters.ToParameters())
+            foreach (var entry in AuthenticationRequestParameters.ToParameters(ServiceBundle.PlatformProxy.CryptographyManager))
             {
                 client.AddBodyParameter(entry.Key, entry.Value);
             }

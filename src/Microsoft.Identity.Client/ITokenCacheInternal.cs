@@ -25,11 +25,29 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
+
+namespace Microsoft.Identity.Client
 {
-    internal interface IApplicationConfiguration : IAppConfig
+    internal interface ITokenCacheInternal : ITokenCache
     {
-        bool IsExtendedTokenLifetimeEnabled { get; }
-        AuthorityInfo DefaultAuthorityInfo { get; }
+        void RemoveAccount(IAccount account, RequestContext requestContext);
+        IEnumerable<IAccount> GetAccounts(string authority, RequestContext requestContext);
+
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            MsalTokenResponse msalTokenResponse);
+
+        Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey getIdTokenItemKey, RequestContext requestContext);
+        Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
+
+        void SetIosKeychainSecurityGroup(string securityGroup);
     }
 }

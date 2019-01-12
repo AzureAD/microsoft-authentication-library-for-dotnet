@@ -31,6 +31,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -69,14 +70,10 @@ namespace Microsoft.Identity.Client
 
         }
 
-
         /// <summary>
         /// Gets minimum X509 certificate key size in bits
         /// </summary>
-        public static int MinKeySizeInBits
-        {
-            get { return 2048; }
-        }
+        public static int MinKeySizeInBits => 2048;
 
         /// <summary>
         /// Gets the X509 certificate used as credentials to prove the identity of the application to Azure AD.
@@ -84,17 +81,13 @@ namespace Microsoft.Identity.Client
         public X509Certificate2 Certificate { get; }
 
 
-        internal byte[] Sign(string message)
+        internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
         {
-            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
-            return crypto.SignWithCertificate(message, Certificate);
+            return cryptographyManager.SignWithCertificate(message, Certificate);
         }
 
-        internal string Thumbprint
-        {
-            // Thumbprint should be url encoded
-            get { return Base64UrlHelpers.Encode(Certificate.GetCertHash()); }
-        }
+        // Thumbprint should be url encoded
+        internal string Thumbprint => Base64UrlHelpers.Encode(Certificate.GetCertHash());
     }
 #endif
 

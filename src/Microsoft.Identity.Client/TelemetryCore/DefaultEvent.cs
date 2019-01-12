@@ -28,21 +28,21 @@
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
     internal class DefaultEvent : EventBase
     {
-        public DefaultEvent(string clientId, IDictionary<string, int> eventCount) : base((string) (EventNamePrefix + "default_event"))
+        public DefaultEvent(IPlatformProxy platformProxy, string clientId, IDictionary<string, int> eventCount) 
+            : base(EventNamePrefix + "default_event")
         {
-            var platformProxy = PlatformProxyFactory.GetPlatformProxy();
             this[EventNamePrefix + "client_id"] = clientId;
             this[EventNamePrefix + "sdk_platform"] = platformProxy.GetProductName()?.ToLowerInvariant();
             this[EventNamePrefix + "sdk_version"] = MsalIdHelper.GetMsalVersion();
-            this[EventNamePrefix + "application_name"] = HashPersonalIdentifier(platformProxy.GetCallingApplicationName()?.ToLowerInvariant());
-            this[EventNamePrefix + "application_version"] = HashPersonalIdentifier(platformProxy.GetCallingApplicationVersion()?.ToLowerInvariant());
-            this[EventNamePrefix + "device_id"] = HashPersonalIdentifier(platformProxy.GetDeviceId()?.ToLowerInvariant());
+            this[EventNamePrefix + "application_name"] = HashPersonalIdentifier(platformProxy.CryptographyManager, platformProxy.GetCallingApplicationName()?.ToLowerInvariant());
+            this[EventNamePrefix + "application_version"] = HashPersonalIdentifier(platformProxy.CryptographyManager, platformProxy.GetCallingApplicationVersion()?.ToLowerInvariant());
+            this[EventNamePrefix + "device_id"] = HashPersonalIdentifier(platformProxy.CryptographyManager, platformProxy.GetDeviceId()?.ToLowerInvariant());
             this[EventNamePrefix + "ui_event_count"] = GetEventCount(EventNamePrefix + "ui_event", eventCount);
             this[EventNamePrefix + "http_event_count"] = GetEventCount(EventNamePrefix + "http_event", eventCount);
             this[EventNamePrefix + "cache_event_count"] = GetEventCount(EventNamePrefix + "cache_event", eventCount);

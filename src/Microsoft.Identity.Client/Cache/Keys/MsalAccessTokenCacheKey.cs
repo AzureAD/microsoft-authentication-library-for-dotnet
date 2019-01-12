@@ -29,6 +29,7 @@ using System;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -69,7 +70,6 @@ namespace Microsoft.Identity.Client.Cache
            _tenantId = tenantId;
         }
 
-
         public override string ToString()
         {
             return MsalCacheCommon.GetCredentialKey(
@@ -97,16 +97,15 @@ namespace Microsoft.Identity.Client.Cache
         /// delimiters - 4 chars
         /// total: 224 chars
         /// </remarks>
-        public string GetUWPFixedSizeKey()
+        public string GetUWPFixedSizeKey(ICryptographyManager cryptographyManager)
         {
-            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
             return MsalCacheCommon.GetCredentialKey(
               _homeAccountId,
               _environment,
               MsalCacheCommon.AccessToken,
               _clientId,
               _tenantId,
-              crypto.CreateSha256Hash(_normalizedScopes)); // can't use scopes and env because they are of variable length
+              cryptographyManager.CreateSha256Hash(_normalizedScopes)); // can't use scopes and env because they are of variable length
         }
         #endregion
 

@@ -69,44 +69,6 @@ namespace Microsoft.Identity.Client.Core
     /// </summary>
     internal static class MsalIdHelper
     {
-        private static readonly Lazy<IDictionary<string, string>> MsalIdParameters = new Lazy<IDictionary<string, string>>(
-            () =>
-            {
-                var platformProxy = PlatformProxyFactory.GetPlatformProxy();
-                if (platformProxy == null)
-                {
-                    throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.PlatformNotSupported,
-                        CoreErrorMessages.PlatformNotSupported);
-                }
-
-                var parameters = new Dictionary<string, string>
-                {
-                    [MsalIdParameter.Product] = platformProxy.GetProductName(),
-                    [MsalIdParameter.Version] = GetMsalVersion()
-                };
-
-                string processorInformation = platformProxy.GetProcessorArchitecture();
-                if (processorInformation != null)
-                {
-                    parameters[MsalIdParameter.CpuPlatform] = processorInformation;
-                }
-
-                string osInformation = platformProxy.GetOperatingSystem();
-                if (osInformation != null)
-                {
-                    parameters[MsalIdParameter.OS] = osInformation;
-                }
-
-                string deviceInformation = platformProxy.GetDeviceModel();
-                if (deviceInformation != null)
-                {
-                    parameters[MsalIdParameter.DeviceModel] = deviceInformation;
-                }
-
-                return parameters;
-            });
-
         private static readonly Lazy<string> MsalVersion = new Lazy<string>(
             () =>
             {
@@ -127,9 +89,41 @@ namespace Microsoft.Identity.Client.Core
                 return version[1];
             });
 
-        public static IDictionary<string, string> GetMsalIdParameters()
+        public static IDictionary<string, string> GetMsalIdParameters(ICoreLogger logger)
         {
-            return MsalIdParameters.Value;
+            var platformProxy = PlatformProxyFactory.CreatePlatformProxy(logger);
+            if (platformProxy == null)
+            {
+                throw MsalExceptionFactory.GetClientException(
+                    CoreErrorCodes.PlatformNotSupported,
+                    CoreErrorMessages.PlatformNotSupported);
+            }
+
+            var parameters = new Dictionary<string, string>
+            {
+                [MsalIdParameter.Product] = platformProxy.GetProductName(),
+                [MsalIdParameter.Version] = GetMsalVersion()
+            };
+
+            string processorInformation = platformProxy.GetProcessorArchitecture();
+            if (processorInformation != null)
+            {
+                parameters[MsalIdParameter.CpuPlatform] = processorInformation;
+            }
+
+            string osInformation = platformProxy.GetOperatingSystem();
+            if (osInformation != null)
+            {
+                parameters[MsalIdParameter.OS] = osInformation;
+            }
+
+            string deviceInformation = platformProxy.GetDeviceModel();
+            if (deviceInformation != null)
+            {
+                parameters[MsalIdParameter.DeviceModel] = deviceInformation;
+            }
+
+            return parameters;
         }
 
         public static string GetMsalVersion()

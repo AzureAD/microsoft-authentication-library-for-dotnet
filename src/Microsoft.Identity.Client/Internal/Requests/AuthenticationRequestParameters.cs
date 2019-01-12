@@ -32,6 +32,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -43,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
-        public TokenCache TokenCache { get; set; }
+        public ITokenCacheInternal TokenCache { get; set; }
         public SortedSet<string> Scope { get; set; }
         public string ClientId { get; set; }
         public string AuthorizationCode { get; set; }
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public ClientCredential ClientCredential { get; set; }
 #endif
 
-        public IDictionary<string, string> ToParameters()
+        public IDictionary<string, string> ToParameters(ICryptographyManager cryptographyManager)
         {
             IDictionary<string, string> parameters = new Dictionary<string, string>();
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
@@ -77,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                         if (!RequestValidationHelper.ValidateClientAssertion(this))
                         {
                             RequestContext.Logger.Info("Client Assertion does not exist or near expiry.");
-                            var jwtToken = new JsonWebToken(ClientId, Endpoints?.SelfSignedJwtAudience);
+                            var jwtToken = new JsonWebToken(cryptographyManager, ClientId, Endpoints?.SelfSignedJwtAudience);
                             ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate, SendCertificate);
                             ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
                             ClientCredential.ContainsX5C = SendCertificate;

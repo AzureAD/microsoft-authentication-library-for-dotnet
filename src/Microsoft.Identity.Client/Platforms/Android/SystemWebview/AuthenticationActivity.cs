@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 Intent browserIntent = new Intent(Intent.ActionView, Uri.Parse(_requestUrl));
                 browserIntent.AddCategory(Intent.CategoryBrowsable);
 
-                MsalLogger.Default.Warning(
+                RequestContext.Logger.Warning(
                     "Browser with custom tabs package not available. " +
                     "Launching with alternate browser. See https://aka.ms/msal-net-system-browsers for details.");
 
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             }
             else
             {
-                MsalLogger.Default.Info(
+                RequestContext.Logger.Info(
                     string.Format(
                     CultureInfo.CurrentCulture,
                     "Browser with custom tabs package available. Using {0}. ",

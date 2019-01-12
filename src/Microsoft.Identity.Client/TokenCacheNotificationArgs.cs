@@ -29,15 +29,16 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains parameters used by the MSAL call accessing the cache. 
-    /// See also <see cref="T:TokenCacheExtensions"/> which contains extension methods
+    /// See also <see cref="T:ITokenCache"/> which contains methods
     /// to customize the cache serialization
     /// </summary>
     public sealed partial class TokenCacheNotificationArgs
     {
         /// <summary>
-        /// Gets teh <see cref="TokenCache"/> involved in the transaction
+        /// Gets teh <see cref="ITokenCache"/> involved in the transaction
         /// </summary>
-        public TokenCache TokenCache { get; internal set; }
+        // TODO(migration): note that this changed from TokenCache to ITokenCache
+        public ITokenCache TokenCache { get; internal set; }
 
         /// <summary>
         /// Gets the ClientId (application ID) of the application involved in the cache transaction

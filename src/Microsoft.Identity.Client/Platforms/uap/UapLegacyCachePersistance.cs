@@ -45,9 +45,11 @@ namespace Microsoft.Identity.Client.Platforms.uap
         private const int MaxCompositeValueLength = 1024;
 
         private readonly ICryptographyManager _cryptographyManager;
+        private readonly ICoreLogger _logger;
 
-        public UapLegacyCachePersistence(ICryptographyManager cryptographyManager)
+        public UapLegacyCachePersistence(ICoreLogger logger, ICryptographyManager cryptographyManager)
         {
+            _logger = logger;
             _cryptographyManager = cryptographyManager;
         }
 
@@ -62,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
+                _logger.WarningPiiWithPrefix(ex, "Failed to load adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
 
@@ -80,7 +82,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
+                _logger.WarningPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
 

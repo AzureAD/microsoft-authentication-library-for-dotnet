@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString();
             }
 
-            foreach (KeyValuePair<string, string> kvp in MsalIdHelper.GetMsalIdParameters())
+            foreach (KeyValuePair<string, string> kvp in MsalIdHelper.GetMsalIdParameters(AuthenticationRequestParameters.RequestContext.Logger))
             {
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }

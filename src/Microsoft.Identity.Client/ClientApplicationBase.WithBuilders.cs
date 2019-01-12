@@ -46,17 +46,11 @@ namespace Microsoft.Identity.Client
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
             ServiceBundle = Core.ServiceBundle.Create(config);
-
-            UserTokenCache = config.UserTokenCache;
-            if (UserTokenCache != null)
-            {
-                UserTokenCache.ClientId = ClientId;
-                UserTokenCache.ServiceBundle = ServiceBundle;
-            }
+            UserTokenCacheInternal = new TokenCache(ServiceBundle);
 
             CreateRequestContext(Guid.Empty).Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                PlatformProxyFactory.GetPlatformProxy().GetProductName(), MsalIdHelper.GetMsalVersion(),
+                ServiceBundle.PlatformProxy.GetProductName(), MsalIdHelper.GetMsalVersion(),
                 AssemblyUtils.GetAssemblyFileVersionAttribute(), AssemblyUtils.GetAssemblyInformationalVersion()));
         }
 
@@ -82,7 +76,7 @@ namespace Microsoft.Identity.Client
 
             var handler = new SilentRequest(
                 ServiceBundle,
-                CreateRequestParameters(parameters, UserTokenCache, account: parameters.Account, customAuthority: authorityInstance),
+                CreateRequestParameters(parameters, UserTokenCacheInternal, account: parameters.Account, customAuthority: authorityInstance),
                 ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // TODO(migration): consolidate this properly
                 parameters.ForceRefresh);
 
@@ -112,7 +106,7 @@ namespace Microsoft.Identity.Client
 
             var handler = new SilentRequest(
                 ServiceBundle,
-                CreateRequestParameters(silentParameters, UserTokenCache, account: silentParameters.Account, customAuthority: authorityInstance),
+                CreateRequestParameters(silentParameters, UserTokenCacheInternal, account: silentParameters.Account, customAuthority: authorityInstance),
                 ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo(migration): consolidate this properly
                 silentParameters.ForceRefresh);
 

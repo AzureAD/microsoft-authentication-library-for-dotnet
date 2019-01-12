@@ -31,6 +31,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace CommonCache.Test.MsalV2
@@ -55,11 +56,14 @@ namespace CommonCache.Test.MsalV2
                 };
 
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
-                var tokenCache = FileBasedTokenCacheHelper.GetUserCache(
+
+                var app = PublicClientApplicationBuilder.Create(v1App.ClientId).AddKnownAuthority(new Uri(v1App.Authority), true).Build();
+
+                FileBasedTokenCacheHelper.ConfigureUserCache(
+                    app.UserTokenCache,
                     CommonCacheTestUtils.MsalV2CacheFilePath,
                     CommonCacheTestUtils.AdalV3CacheFilePath);
 
-                var app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache);
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 try
                 {
