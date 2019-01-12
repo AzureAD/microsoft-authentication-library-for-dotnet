@@ -34,13 +34,13 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractCabAcquireTokenParameterBuilder<T> : AbstractAcquireTokenParameterBuilder<T>
+    public abstract class AbstractClientAppBaseAcquireTokenParameterBuilder<T> : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
         /// <summary>
         /// </summary>
         /// <param name="clientApplicationBase"></param>
-        protected AbstractCabAcquireTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
+        protected AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
         {
             ClientApplicationBase = clientApplicationBase;
         }

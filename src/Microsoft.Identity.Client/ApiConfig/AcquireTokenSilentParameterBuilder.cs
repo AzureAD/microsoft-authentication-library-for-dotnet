@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenSilentParameterBuilder :
-        AbstractCabAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>
+        AbstractClientAppBaseAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>
     {
         /// <inheritdoc />
         public AcquireTokenSilentParameterBuilder(IClientApplicationBase clientApplicationBase)
