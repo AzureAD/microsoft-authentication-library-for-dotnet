@@ -1,9 +1,34 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// 
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+// 
+// This code is licensed under the MIT License.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// 
+// ------------------------------------------------------------------------------
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
@@ -14,6 +39,7 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AuthorityEndpointResolutionManager : IAuthorityEndpointResolutionManager
     {
+        // TODO(migration): finalize whether we need this to remain static or if we can/should recreate this with each PCA.
         private static readonly ConcurrentDictionary<string, AuthorityEndpointCacheEntry> EndpointCacheEntries =
             new ConcurrentDictionary<string, AuthorityEndpointCacheEntry>();
 
@@ -40,7 +66,7 @@ namespace Microsoft.Identity.Client.Instance
                     CoreErrorMessages.UpnRequiredForAuthroityValidation);
             }
 
-            if (TryGetCacheValue(authorityInfo, userPrincipalName, out AuthorityEndpoints endpoints))
+            if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))
             {
                 requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - TRUE");
                 return endpoints;
@@ -56,8 +82,7 @@ namespace Microsoft.Identity.Client.Instance
             // TODO: where is the value in this log message?  we have a bunch of code supporting printing just this out...
             requestContext.Logger.Info("Is Authority tenantless? - " + isTenantless);
 
-            IOpenIdConfigurationEndpointManager endpointManager =
-                OpenIdConfigurationEndpointManagerFactory.Create(authorityInfo, _serviceBundle);
+            var endpointManager = OpenIdConfigurationEndpointManagerFactory.Create(authorityInfo, _serviceBundle);
 
             string openIdConfigurationEndpoint = await endpointManager.GetOpenIdConfigurationEndpointAsync(
                                                      authorityInfo,
@@ -65,8 +90,7 @@ namespace Microsoft.Identity.Client.Instance
                                                      requestContext).ConfigureAwait(false);
 
             // Discover endpoints via openid-configuration
-            TenantDiscoveryResponse edr =
-                await DiscoverEndpointsAsync(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
+            var edr = await DiscoverEndpointsAsync(openIdConfigurationEndpoint, requestContext).ConfigureAwait(false);
 
             if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
             {
@@ -102,7 +126,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             endpoints = null;
 
-            if (!EndpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out AuthorityEndpointCacheEntry cacheEntry))
+            if (!EndpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out var cacheEntry))
             {
                 return false;
             }
@@ -130,9 +154,7 @@ namespace Microsoft.Identity.Client.Instance
             {
                 // Since we're here, we've made a call to the backend.  We want to ensure we're caching
                 // the latest values from the server.
-                if (EndpointCacheEntries.TryGetValue(
-                    authorityInfo.CanonicalAuthority,
-                    out AuthorityEndpointCacheEntry cacheEntry))
+                if (EndpointCacheEntries.TryGetValue(authorityInfo.CanonicalAuthority, out var cacheEntry))
                 {
                     foreach (string s in cacheEntry.ValidForDomainsList)
                     {
