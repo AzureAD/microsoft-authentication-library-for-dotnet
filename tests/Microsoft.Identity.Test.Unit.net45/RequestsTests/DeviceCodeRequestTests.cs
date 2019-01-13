@@ -294,7 +294,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ClientId = MsalTestConstants.ClientId,
                 Scope = MsalTestConstants.Scope,
                 TokenCache = _cache,
-                RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null))
+                RequestContext = RequestContext.CreateForTest()
             };
 
             TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);

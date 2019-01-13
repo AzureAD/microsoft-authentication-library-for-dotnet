@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 
@@ -60,6 +61,9 @@ namespace Microsoft.Identity.Client.AppConfig
         public LogCallback LoggingCallback { get; internal set; }
         public AuthorityInfo DefaultAuthorityInfo => Authorities.Single(x => x.IsDefault);
         public string Component { get; internal set; }
+
+        internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
+        internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         public ClientCredential ClientCredential { get; internal set; }

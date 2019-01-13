@@ -25,8 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.Integration
@@ -51,13 +53,14 @@ namespace Microsoft.Identity.Test.Unit.Integration
         [Ignore]
         public async Task ApplicationGrantIntegrationTestAsync()
         {
-            var appCache = new TokenCache();
-            var userCache = new TokenCache();
-
-            var confidentialClient = new ConfidentialClientApplication(ClientId, Authority, RedirectUri,
-                new ClientCredential(_password), userCache, appCache);
+            var confidentialClient = ConfidentialClientApplicationBuilder
+                                     .Create(ClientId).AddKnownAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
+                                     .WithClientSecret(_password).BuildConcrete();
 
             var res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
+
+            ITokenCacheInternal userCache = confidentialClient.UserTokenCacheInternal;
+            ITokenCacheInternal appCache = confidentialClient.AppTokenCacheInternal;
 
             Assert.IsNotNull(res);
             Assert.IsNotNull(res.AccessToken);
@@ -82,8 +85,11 @@ namespace Microsoft.Identity.Test.Unit.Integration
             Assert.IsNull(appCache.LegacyCachePersistence.LoadCache());
 
             // passing empty password to make sure that AT returned from cache
-            confidentialClient = new ConfidentialClientApplication(ClientId, Authority, RedirectUri,
-                new ClientCredential("wrong_password"), userCache, appCache);
+            confidentialClient = ConfidentialClientApplicationBuilder
+                                 .Create(ClientId).AddKnownAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
+                                 .WithClientSecret("wrong_password").BuildConcrete();
+            confidentialClient.AppTokenCacheInternal.Deserialize(appCache.Serialize());
+            confidentialClient.UserTokenCacheInternal.Deserialize(userCache.Serialize());
 
             res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
 

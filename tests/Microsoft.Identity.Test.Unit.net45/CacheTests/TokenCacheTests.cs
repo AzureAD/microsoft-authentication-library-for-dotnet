@@ -751,7 +751,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -812,7 +812,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -869,7 +869,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -947,7 +947,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -972,7 +972,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            requestContext = RequestContext.CreateForTest();
             requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -1036,7 +1036,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,
@@ -1149,7 +1149,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TokenType = "Bearer"
             };
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             var requestParams = new AuthenticationRequestParameters()
             {
                 RequestContext = requestContext,

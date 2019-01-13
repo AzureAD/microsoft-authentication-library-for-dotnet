@@ -66,11 +66,6 @@ namespace Microsoft.Identity.Client
     public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        static PublicClientApplication()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         /// <summary>
         /// Constructor of the application. It will use https://login.microsoftonline.com/common as the default authority.
         /// </summary>

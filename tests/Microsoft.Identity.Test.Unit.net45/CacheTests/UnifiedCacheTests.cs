@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
@@ -212,38 +213,32 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test for duplicate key in ADAL cache")]
         public void UnifiedCache_ProcessAdalDictionaryForDuplicateKeyTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                var app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache =
-                    {
-                        LegacyCachePersistence = new TestLegacyCachePersistance()
-                    }
-                };
+                var app = PublicClientApplicationBuilder
+                          .Create(MsalTestConstants.ClientId).AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance()).BuildConcrete();
 
-                CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, MsalTestConstants.Scope.ToString());
+                CreateAdalCache(app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
 
                 var adalUsers =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        app.UserTokenCache.LegacyCachePersistence,
+                        harness.ServiceBundle.DefaultLogger,
+                        app.UserTokenCacheInternal.LegacyPersistence,
                         MsalTestConstants.ClientId);
 
-                CreateAdalCache(app.UserTokenCache.LegacyCachePersistence, "user.read");
+                CreateAdalCache(app.UserTokenCacheInternal.LegacyPersistence, "user.read");
 
                 var adalUsers2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
-                        app.UserTokenCache.LegacyCachePersistence,
+                        harness.ServiceBundle.DefaultLogger,
+                        app.UserTokenCacheInternal.LegacyPersistence,
                         MsalTestConstants.ClientId);
 
                 Assert.AreEqual(adalUsers.ClientInfoUsers.Keys.First(), adalUsers2.ClientInfoUsers.Keys.First());
 
-                app.UserTokenCache.TokenCacheAccessor.ClearAccessTokens();
-                app.UserTokenCache.TokenCacheAccessor.ClearRefreshTokens();
+                app.UserTokenCacheInternal.Accessor.ClearAccessTokens();
+                app.UserTokenCacheInternal.Accessor.ClearRefreshTokens();
             }
         }
 

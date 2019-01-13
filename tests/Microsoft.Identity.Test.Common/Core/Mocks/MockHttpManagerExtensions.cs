@@ -48,12 +48,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static void AddSuccessTokenResponseMockHandlerForPost(
             this MockHttpManager httpManager,
+            string authority,
             IDictionary<string, string> bodyParameters = null,
             IDictionary<string, string> queryParameters = null)
         {
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
+                    Url = authority + "oauth2/v2.0/token",
                     Method = HttpMethod.Post,
                     PostData = bodyParameters,
                     QueryParams = queryParameters,
@@ -105,6 +107,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
+                    Url = authority + "v2.0/.well-known/openid-configuration",
                     Method = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(authority, qp)
                 });

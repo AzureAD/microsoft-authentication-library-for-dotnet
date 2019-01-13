@@ -57,8 +57,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 throw ExceptionToThrow;
             }
 
-            Assert.AreEqual(Method, request.Method);
-
             var uri = request.RequestUri;
             if (!string.IsNullOrEmpty(Url))
             {
@@ -70,6 +68,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                             '?'
                         })[0]);
             }
+
+            Assert.AreEqual(Method, request.Method);
 
             // Match QP passed in for validation. 
             if (QueryParams != null)

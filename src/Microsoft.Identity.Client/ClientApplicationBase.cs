@@ -54,11 +54,6 @@ namespace Microsoft.Identity.Client
     public abstract partial class ClientApplicationBase : IClientApplicationBase, IClientApplicationBaseExecutor
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
-        static ClientApplicationBase()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         /// <Summary>
         /// Default Authority used for interactive calls.
         /// </Summary>

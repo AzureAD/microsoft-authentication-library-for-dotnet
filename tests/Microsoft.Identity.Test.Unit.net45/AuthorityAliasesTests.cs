@@ -30,7 +30,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Cache;
@@ -46,22 +48,16 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class AuthorityAliasesTests
     {
-        internal void TestInitialize(MockHttpManager httpManager)
+        [TestInitialize]
+        public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-
-            new AadInstanceDiscovery(null, null, true);
-            new ValidatedAuthoritiesCache(true);
-
-            httpManager.AddMockHandler(
-                MockHelpers.CreateInstanceDiscoveryMockHandler(
-                    MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
         }
 
 #if !NET_CORE
         [TestMethod]
         [Description("Test authority migration")]
-        public void AuthorityMigration_IntegrationTest()
+        public async Task AuthorityMigration_IntegrationTestAsync()
         {
             // make sure that for all network calls "preferred_cache" environment is used
             // (it is taken from metadata in instance discovery response),
@@ -69,22 +65,20 @@ namespace Microsoft.Identity.Test.Unit
 
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                TestInitialize(httpManager);
+                httpManager.AddInstanceDiscoveryMockHandler();
 
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
+                var authorityUri = new Uri(
                     string.Format(
                         CultureInfo.InvariantCulture,
                         "https://{0}/common",
-                        MsalTestConstants.ProductionNotPrefEnvironmentAlias))
-                {
-                    UserTokenCache =
-                    {
-                        LegacyCachePersistence = new TestLegacyCachePersistance()
-                    }
-                };
+                        MsalTestConstants.ProductionNotPrefEnvironmentAlias));
+
+                var app = PublicClientApplicationBuilder
+                    .Create(MsalTestConstants.ClientId)
+                          .AddKnownAuthority(authorityUri, true)
+                          .WithHttpManager(httpManager)
+                          .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
+                          .BuildConcrete();
 
                 // mock for openId config request
                 httpManager.AddMockHandler(new MockHttpMessageHandler
@@ -112,20 +106,20 @@ namespace Microsoft.Identity.Test.Unit
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)
-                ValidateCacheEntitiesEnvironment(app.UserTokenCache, MsalTestConstants.ProductionPrefCacheEnvironment);
+                ValidateCacheEntitiesEnvironment(app.UserTokenCacheInternal, MsalTestConstants.ProductionPrefCacheEnvironment);
 
                 // silent request targeting at, should return at from cache for any environment alias
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
                 {
-                    result = app.AcquireTokenSilentAsync(MsalTestConstants.Scope,
+                    result = await app.AcquireTokenSilentAsync(MsalTestConstants.Scope,
                         app.GetAccountsAsync().Result.First(),
                         string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid),
-                        false).Result;
+                        false).ConfigureAwait(false);
 
                     Assert.IsNotNull(result);
                 }
 
-                // mock for openId config request for tenant spesific authority
+                // mock for openId config request for tenant specific authority
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     Url = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/v2.0/.well-known/openid-configuration",
@@ -134,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityUtidTenant)
                 });
 
-                // silent request targeting rt should find rt in cahce for authority with any environment alias
+                // silent request targeting rt should find rt in cache for authority with any environment alias
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
                 {
                     httpManager.AddMockHandler(new MockHttpMessageHandler()
@@ -152,11 +146,11 @@ namespace Microsoft.Identity.Test.Unit
 
                     try
                     {
-                        result = null;
-                        result = app.AcquireTokenSilentAsync(MsalTestConstants.ScopeForAnotherResource,
-                            app.GetAccountsAsync().Result.First(),
+                        result = await app.AcquireTokenSilentAsync(
+                            MsalTestConstants.ScopeForAnotherResource,
+                            (await app.GetAccountsAsync().ConfigureAwait(false)).First(),
                             string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid),
-                            false).Result;
+                            false).ConfigureAwait(false);
                     }
                     catch (AggregateException ex)
                     {
@@ -170,9 +164,9 @@ namespace Microsoft.Identity.Test.Unit
         }
 #endif
 
-        private void ValidateCacheEntitiesEnvironment(TokenCache cache, string expectedEnvironment)
+        private void ValidateCacheEntitiesEnvironment(ITokenCacheInternal cache, string expectedEnvironment)
         {
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
             ICollection<MsalAccessTokenCacheItem> accessTokens = cache.GetAllAccessTokensForClient(requestContext);
             foreach (var at in accessTokens)
             {
@@ -198,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit
             }
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(cache.LegacyCachePersistence.LoadCache());
+                AdalCacheOperations.Deserialize(requestContext.Logger, cache.LegacyCachePersistence.LoadCache());
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {

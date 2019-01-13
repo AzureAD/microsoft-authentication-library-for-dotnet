@@ -33,7 +33,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -51,10 +50,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             string wsTrustAddress = "https://some/address/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(wsTrustAddress), WsTrustVersion.WsTrust13);
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         Url = wsTrustAddress,
@@ -66,9 +64,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                         }
                     });
 
-                var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+                var requestContext = RequestContext.CreateForTest();
                 var wsTrustRequest = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
-                var wsTrustResponse = await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
+                var wsTrustResponse = await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, wsTrustRequest, requestContext)
                                                    .ConfigureAwait(false);
 
                 Assert.IsNotNull(wsTrustResponse.Token);
@@ -82,18 +80,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
             string uri = "https://some/address/usernamemixed";
             var endpoint = new WsTrustEndpoint(new Uri(uri), WsTrustVersion.WsTrust13);
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
+                harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Post, url: uri);
 
-                var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+                var requestContext = RequestContext.CreateForTest();
                 try
                 {
                     var message = endpoint.BuildTokenRequestMessageWindowsIntegratedAuth("urn:federation:SomeAudience");
 
                     WsTrustResponse wstResponse =
-                        await serviceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
+                        await harness.ServiceBundle.WsTrustWebRequestManager.GetWsTrustResponseAsync(endpoint, message, requestContext).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
                 catch (MsalException ex)

@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -65,6 +66,12 @@ namespace Microsoft.Identity.Client.AppConfig
         internal PublicClientApplicationBuilder WithUserTokenCache(TokenCache tokenCache)
         {
             Config.UserTokenCache = tokenCache;
+            return this;
+        }
+
+        internal PublicClientApplicationBuilder WithUserTokenLegacyCachePersistenceForTest(ILegacyCachePersistence legacyCachePersistence)
+        {
+            Config.UserTokenLegacyCachePersistenceForTest = legacyCachePersistence;
             return this;
         }
 
