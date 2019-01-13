@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = cache,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = "extra=qp"
                 };
@@ -179,7 +179,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = cache,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = "extra=qp"
                 };
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ClientId = MsalTestConstants.ClientId,
                         Scope = MsalTestConstants.Scope,
                         TokenCache = null,
-                        RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                        RequestContext = RequestContext.CreateForTest(),
                         RedirectUri = new Uri("some://uri#fragment=not-so-good"),
                         ExtraQueryParameters = "extra=qp"
                     };
@@ -281,7 +281,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
                 };
 
@@ -336,7 +336,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
                 };
 
@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = "extra=qp"
                 };
@@ -462,7 +462,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = "extra=qp&prompt=login"
                 };

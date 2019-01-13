@@ -59,11 +59,6 @@ namespace Microsoft.Identity.Client
             IConfidentialClientApplicationWithCertificate,
             IConfidentialClientApplicationExecutor
     {
-        static ConfidentialClientApplication()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         /// <summary>
         /// Constructor for a confidential client application requesting tokens with the default authority (<see cref="ClientApplicationBase.DefaultAuthority"/>)
         /// </summary>

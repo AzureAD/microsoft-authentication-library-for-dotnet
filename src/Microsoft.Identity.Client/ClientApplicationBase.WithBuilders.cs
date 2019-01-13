@@ -46,7 +46,15 @@ namespace Microsoft.Identity.Client
         internal ClientApplicationBase(ApplicationConfiguration config)
         {
             ServiceBundle = Core.ServiceBundle.Create(config);
-            UserTokenCacheInternal = new TokenCache(ServiceBundle);
+
+            if (config.UserTokenLegacyCachePersistenceForTest != null)
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
+            }
+            else
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle);
+            }
 
             CreateRequestContext(Guid.Empty).Logger.Info(string.Format(CultureInfo.InvariantCulture,
                 "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",

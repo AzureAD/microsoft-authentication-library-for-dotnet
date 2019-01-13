@@ -66,11 +66,6 @@ namespace Microsoft.Identity.Client
 
         internal IServiceBundle ServiceBundle { get; }
 
-        static TokenCache()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
         internal RequestContext CreateRequestContext()
         {
             return new RequestContext(ServiceBundle.Config.ClientId,
@@ -80,7 +75,12 @@ namespace Microsoft.Identity.Client
         private const int DefaultExpirationBufferInMinutes = 5;
 
         internal TelemetryTokenCacheAccessor TokenCacheAccessor { get; }
-        internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
+
+        ITokenCacheAccessor ITokenCacheInternal.Accessor => TokenCacheAccessor;
+
+        ILegacyCachePersistence LegacyCachePersistence { get; set; }
+
+        ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
         /// <summary>
         /// Constructor
@@ -96,6 +96,18 @@ namespace Microsoft.Identity.Client
             ServiceBundle = serviceBundle;
             TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());
             LegacyCachePersistence = ServiceBundle.PlatformProxy.CreateLegacyCachePersistence();
+        }
+
+        /// <summary>
+        /// This method is so we can inject test ILegacyCachePersistence...
+        /// </summary>
+        /// <param name="serviceBundle"></param>
+        /// <param name="legacyCachePersistenceForTest"></param>
+        internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
+        {
+            ServiceBundle = serviceBundle;
+            TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());
+            LegacyCachePersistence = legacyCachePersistenceForTest;
         }
 
         /// <summary>
@@ -361,7 +373,7 @@ namespace Microsoft.Identity.Client
 
                 OnBeforeAccess(args);
                 // filtered by client id.
-                ICollection<MsalAccessTokenCacheItem> tokenCacheItems = GetAllAccessTokensForClient(requestParams.RequestContext);
+                ICollection<MsalAccessTokenCacheItem> tokenCacheItems = ((ITokenCacheInternal)this).GetAllAccessTokensForClient(requestParams.RequestContext);
                 OnAfterAccess(args);
 
                 // this is OBO flow. match the cache entry with assertion hash,
@@ -515,7 +527,7 @@ namespace Microsoft.Identity.Client
         {
             #if iOS
             TokenCacheAccessor.SetiOSKeychainSecurityGroup(securityGroup);
-            (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
+            LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
             #endif
         }
 
@@ -819,8 +831,8 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = GetAllRefreshTokensForClient(requestContext);
-                ICollection<MsalAccountCacheItem> accountCacheItems = GetAllAccounts(requestContext);
+                ICollection<MsalRefreshTokenCacheItem> tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokensForClient(requestContext);
+                ICollection<MsalAccountCacheItem> accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts(requestContext);
 
                 var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(Logger, LegacyCachePersistence, ClientId);
                 OnAfterAccess(args);
@@ -869,7 +881,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokensForClient(RequestContext requestContext)
+        ICollection<MsalRefreshTokenCacheItem> ITokenCacheInternal.GetAllRefreshTokensForClient(RequestContext requestContext)
         {
             lock (LockObject)
             {
@@ -888,7 +900,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<MsalAccessTokenCacheItem> GetAllAccessTokensForClient(RequestContext requestContext)
+        ICollection<MsalAccessTokenCacheItem> ITokenCacheInternal.GetAllAccessTokensForClient(RequestContext requestContext)
         {
             lock (LockObject)
             {
@@ -908,7 +920,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<MsalIdTokenCacheItem> GetAllIdTokensForClient(RequestContext requestContext)
+        ICollection<MsalIdTokenCacheItem> ITokenCacheInternal.GetAllIdTokensForClient(RequestContext requestContext)
         {
             lock (LockObject)
             {
@@ -938,7 +950,7 @@ namespace Microsoft.Identity.Client
             };
 
             OnBeforeAccess(args);
-            ICollection<MsalAccountCacheItem> accounts = GetAllAccounts(requestContext);
+            ICollection<MsalAccountCacheItem> accounts = ((ITokenCacheInternal)this).GetAllAccounts(requestContext);
             OnAfterAccess(args);
 
             foreach (MsalAccountCacheItem account in accounts)
@@ -952,7 +964,7 @@ namespace Microsoft.Identity.Client
             return null;
         }
 
-        internal ICollection<MsalAccountCacheItem> GetAllAccounts(RequestContext requestContext)
+        ICollection<MsalAccountCacheItem> ITokenCacheInternal.GetAllAccounts(RequestContext requestContext)
         {
             lock (LockObject)
             {
@@ -1012,7 +1024,7 @@ namespace Microsoft.Identity.Client
                 // adalv3 account
                 return;
             }
-            IList<MsalRefreshTokenCacheItem> allRefreshTokens = GetAllRefreshTokensForClient(requestContext)
+            IList<MsalRefreshTokenCacheItem> allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalRefreshTokenCacheItem refreshTokenCacheItem in allRefreshTokens)
@@ -1021,7 +1033,7 @@ namespace Microsoft.Identity.Client
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-            IList<MsalAccessTokenCacheItem> allAccessTokens = GetAllAccessTokensForClient(requestContext)
+            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
@@ -1031,7 +1043,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
-            IList<MsalIdTokenCacheItem> allIdTokens = GetAllIdTokensForClient(requestContext)
+            IList<MsalIdTokenCacheItem> allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokensForClient(requestContext)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)

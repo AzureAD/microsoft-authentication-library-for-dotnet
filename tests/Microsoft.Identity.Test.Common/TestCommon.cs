@@ -26,29 +26,49 @@
 // ------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common
 {
-    public static class TestCommon
+    internal static class TestCommon
     {
         public static void ResetStateAndInitMsal()
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-            ResetState();
+            // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
             new AadInstanceDiscovery(null, null, null, true);
             new ValidatedAuthoritiesCache(true);
+            new AuthorityEndpointResolutionManager(null, true);
         }
 
-        public static void ResetState()
+        public static IServiceBundle CreateServiceBundleWithCustomHttpManager(
+            IHttpManager httpManager,
+            TelemetryCallback telemetryCallback = null,
+            LogCallback logCallback = null,
+            string authority = ClientApplicationBase.DefaultAuthority,
+            bool isExtendedTokenLifetimeEnabled = false,
+            string clientId = MsalTestConstants.ClientId)
         {
-            Logger.LogCallback = null;
-            Logger.PiiLoggingEnabled = false;
-            Logger.Level = LogLevel.Info;
-            Logger.DefaultLoggingEnabled = false;
+            var appConfig = new ApplicationConfiguration()
+            {
+                ClientId = clientId,
+                HttpManager = httpManager,
+                TelemetryCallback = telemetryCallback,
+                LoggingCallback = logCallback,
+                LogLevel = LogLevel.Verbose,
+                IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled
+            };
+            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true));
+            return ServiceBundle.Create(appConfig);
+        }
+
+        public static IServiceBundle CreateDefaultServiceBundle()
+        {
+            return CreateServiceBundleWithCustomHttpManager(null);
         }
 
         internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
@@ -56,6 +76,5 @@ namespace Microsoft.Identity.Test.Common
             mockHttpManager.AddInstanceDiscoveryMockHandler();
             mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
-
     }
 }

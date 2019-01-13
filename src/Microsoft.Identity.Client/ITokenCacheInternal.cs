@@ -49,5 +49,14 @@ namespace Microsoft.Identity.Client
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
 
         void SetIosKeychainSecurityGroup(string securityGroup);
+
+        // These methods are only for test...  
+        // TODO(migration): separate out into a separate interface?
+        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokensForClient(RequestContext requestContext);
+        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokensForClient(RequestContext requestContext);
+        ICollection<MsalIdTokenCacheItem> GetAllIdTokensForClient(RequestContext requestContext);
+        ICollection<MsalAccountCacheItem> GetAllAccounts(RequestContext requestContext);
+        ILegacyCachePersistence LegacyPersistence { get; }
+        ITokenCacheAccessor Accessor { get; }
     }
 }

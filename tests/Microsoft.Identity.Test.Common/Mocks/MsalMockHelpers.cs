@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Core;
@@ -63,7 +64,8 @@ namespace Microsoft.Identity.Test.Common.Mocks
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
-            PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(mockFactory);
+            // TODO(migration): PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(mockFactory);
+            throw new InvalidOperationException("TODO: MIGRATION WORK NEEDED FOR PLATFORMPROXY");
         }
     }
 }
