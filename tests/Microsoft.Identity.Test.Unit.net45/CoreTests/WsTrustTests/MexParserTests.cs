@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            _requestContext = RequestContext.CreateForTest();
         }
 
         [TestMethod]

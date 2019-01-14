@@ -46,12 +46,6 @@ namespace Microsoft.Identity.Client
         private const string ChromePackage = "com.android.chrome";
         private const string CustomTabService = "android.support.customtabs.action.CustomTabsService";
 
-        static UIParent()
-        {
-            ModuleInitializer.EnsureModuleInitialized();
-        }
-
-
         /// <summary>
         /// Default constructor. Should not be used on Android.
         /// </summary>

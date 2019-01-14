@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.Core
 {
@@ -40,5 +42,16 @@ namespace Microsoft.Identity.Client.Core
         public string ClientId { get; set; }
 
         public ICoreLogger Logger { get; set; }
+
+        public static RequestContext CreateForTest(IServiceBundle serviceBundle = null)
+        {
+            var logger = serviceBundle?.DefaultLogger ?? MsalLogger.Create(
+                             Guid.NewGuid(),
+                             null,
+                             null,
+                             isDefaultPlatformLoggingEnabled: true);
+
+            return new RequestContext(null, logger);
+        }
     }
 }

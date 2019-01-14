@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private string ExpectedAccountCacheKeyIosGeneric;
         private string ExpectedAccountCacheValue;
 
-        private readonly RequestContext requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+        private readonly RequestContext requestContext = RequestContext.CreateForTest();
 
         private void IntitTestData(string fileName)
         {

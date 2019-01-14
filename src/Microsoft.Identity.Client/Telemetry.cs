@@ -25,6 +25,7 @@
 //
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.TelemetryCore;
 
@@ -39,6 +40,7 @@ namespace Microsoft.Identity.Client
     ///     want to receive telemetry
     ///     events only in case of failure or all the time, by setting the <see cref="TelemetryOnFailureOnly" /> boolean.
     /// </summary>
+    [Obsolete("TODO(migration): need documentation/migration info here")]
     public class Telemetry : ITelemetryReceiver
     {
         /// <summary>
@@ -47,7 +49,7 @@ namespace Microsoft.Identity.Client
         /// <param name="events">Dictionary of key/values pair</param>
         public delegate void Receiver(List<Dictionary<string, string>> events);
 
-        private static readonly Telemetry Instance = new Telemetry();
+        //private static readonly Telemetry Instance = new Telemetry();
         private Receiver _receiver;
 
         // This is an internal constructor to build isolated unit test instance
@@ -59,9 +61,10 @@ namespace Microsoft.Identity.Client
         ///     Get the instance of the Telemetry helper for MSAL.NET
         /// </summary>
         /// <returns>a unique instance of <see cref="Telemetry" /></returns>
+        [Obsolete("TODO(migration): need documentation info here.")]
         public static Telemetry GetInstance()
         {
-            return Instance;
+            throw new NotImplementedException();
         }
 
         /// <summary>

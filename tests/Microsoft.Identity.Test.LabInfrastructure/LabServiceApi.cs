@@ -62,7 +62,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             user = JsonConvert.DeserializeObject<LabUser>(result);
 
             if (!string.IsNullOrEmpty(user.HomeTenantId) && !string.IsNullOrEmpty(user.HomeUPN))
+            {
                 user.InitializeHomeUser();
+            }
 
             return response;
         }
@@ -79,18 +81,24 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
             //Building user query
             if (query.FederationProvider != null)
+            {
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
+            }
 
             queryDict.Add(LabApiConstants.MobileAppManagement, query.IsMamUser != null && (bool)(query.IsMamUser) ? LabApiConstants.True : LabApiConstants.False);
             queryDict.Add(LabApiConstants.MultiFactorAuthentication, query.IsMfaUser != null && (bool)(query.IsMfaUser) ? LabApiConstants.True : LabApiConstants.False);
 
             if (query.Licenses != null && query.Licenses.Count > 0)
+            {
                 queryDict.Add(LabApiConstants.License, query.Licenses.ToArray().ToString());
+            }
 
             queryDict.Add(LabApiConstants.FederatedUser, query.IsFederatedUser != null && (bool)(query.IsFederatedUser) ? LabApiConstants.True : LabApiConstants.False);
 
             if (query.UserType != null)
+            {
                 queryDict.Add(LabApiConstants.UserType, query.UserType.ToString());
+            }
 
             queryDict.Add(LabApiConstants.External, query.IsExternalUser != null && (bool)(query.IsExternalUser) ? LabApiConstants.True : LabApiConstants.False);
 

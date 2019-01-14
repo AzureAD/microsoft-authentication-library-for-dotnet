@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -58,14 +59,10 @@ namespace Microsoft.Identity.Client.AppConfig
             return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="tokenCache"></param>
-        /// <returns></returns>
-        [Obsolete("You can access the UserTokenCache using the UserTokenCache property on the created IPublicClientApplication")]
-        internal PublicClientApplicationBuilder WithUserTokenCache(TokenCache tokenCache)
+        internal PublicClientApplicationBuilder WithUserTokenLegacyCachePersistenceForTest(ILegacyCachePersistence legacyCachePersistence)
         {
-            throw new NotImplementedException();
+            Config.UserTokenLegacyCachePersistenceForTest = legacyCachePersistence;
+            return this;
         }
 
         /// <summary>

@@ -25,8 +25,10 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.Integration
@@ -51,13 +53,14 @@ namespace Microsoft.Identity.Test.Unit.Integration
         [Ignore]
         public async Task ApplicationGrantIntegrationTestAsync()
         {
-            var appCache = new TokenCache();
-            var userCache = new TokenCache();
-
-            var confidentialClient = new ConfidentialClientApplication(ClientId, Authority, RedirectUri,
-                new ClientCredential(_password), userCache, appCache);
+            var confidentialClient = ConfidentialClientApplicationBuilder
+                                     .Create(ClientId).AddKnownAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
+                                     .WithClientSecret(_password).BuildConcrete();
 
             var res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
+
+            ITokenCacheInternal userCache = confidentialClient.UserTokenCacheInternal;
+            ITokenCacheInternal appCache = confidentialClient.AppTokenCacheInternal;
 
             Assert.IsNotNull(res);
             Assert.IsNotNull(res.AccessToken);
@@ -65,25 +68,28 @@ namespace Microsoft.Identity.Test.Unit.Integration
             Assert.IsNull(res.Account);
 
             // make sure user cache is empty
-            Assert.IsTrue(userCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count == 0);
-            Assert.IsTrue(userCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count == 0);
-            Assert.IsTrue(userCache.TokenCacheAccessor.GetAllIdTokensAsString().Count == 0);
-            Assert.IsTrue(userCache.TokenCacheAccessor.GetAllAccountsAsString().Count == 0);
+            Assert.IsTrue(userCache.Accessor.GetAllAccessTokensAsString().Count == 0);
+            Assert.IsTrue(userCache.Accessor.GetAllRefreshTokensAsString().Count == 0);
+            Assert.IsTrue(userCache.Accessor.GetAllIdTokensAsString().Count == 0);
+            Assert.IsTrue(userCache.Accessor.GetAllAccountsAsString().Count == 0);
 
             // make sure nothing was written to legacy cache
-            Assert.IsNull(userCache.LegacyCachePersistence.LoadCache());
+            Assert.IsNull(userCache.LegacyPersistence.LoadCache());
 
             // make sure only AT entity was stored in the App msal cache
-            Assert.IsTrue(appCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count == 1);
-            Assert.IsTrue(appCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count == 0);
-            Assert.IsTrue(appCache.TokenCacheAccessor.GetAllIdTokensAsString().Count == 0);
-            Assert.IsTrue(appCache.TokenCacheAccessor.GetAllAccountsAsString().Count == 0);
+            Assert.IsTrue(appCache.Accessor.GetAllAccessTokensAsString().Count == 1);
+            Assert.IsTrue(appCache.Accessor.GetAllRefreshTokensAsString().Count == 0);
+            Assert.IsTrue(appCache.Accessor.GetAllIdTokensAsString().Count == 0);
+            Assert.IsTrue(appCache.Accessor.GetAllAccountsAsString().Count == 0);
 
-            Assert.IsNull(appCache.LegacyCachePersistence.LoadCache());
+            Assert.IsNull(appCache.LegacyPersistence.LoadCache());
 
             // passing empty password to make sure that AT returned from cache
-            confidentialClient = new ConfidentialClientApplication(ClientId, Authority, RedirectUri,
-                new ClientCredential("wrong_password"), userCache, appCache);
+            confidentialClient = ConfidentialClientApplicationBuilder
+                                 .Create(ClientId).AddKnownAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
+                                 .WithClientSecret("wrong_password").BuildConcrete();
+            confidentialClient.AppTokenCacheInternal.Deserialize(appCache.Serialize());
+            confidentialClient.UserTokenCacheInternal.Deserialize(userCache.Serialize());
 
             res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
 
