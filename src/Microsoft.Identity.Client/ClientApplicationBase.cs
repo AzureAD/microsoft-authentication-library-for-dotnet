@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client
         /// </Summary>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
-        internal ITokenCacheInternal UserTokenCacheInternal { get; }
+        internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
 
         /// <summary>
         /// Gets/sets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default

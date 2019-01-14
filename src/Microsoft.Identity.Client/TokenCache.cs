@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client
 
         // TODO(migration): [Obsolete("TokenCache is now created internally during ClientApplication construction.  You can access the TokenCache via a property on your ClientApplication.")]
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public TokenCache()
         {
