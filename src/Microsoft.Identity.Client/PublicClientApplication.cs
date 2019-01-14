@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
-        [Obsolete("Use PublicClientApplicationBuilder instead")]
+        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder instead")]
         public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
         }
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
-        [Obsolete("Use PublicClientApplicationBuilder class")]
+        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder class")]
         public PublicClientApplication(string clientId, string authority)
         : base(PublicClientApplicationBuilder
                 .Create(clientId)
@@ -762,16 +762,17 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         /// <param name="userTokenCache">Instance of TokenCache.</param>
-        [Obsolete("Use PublicClientApplicationBuilder instead")]
+        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder instead")]
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
             : this(PublicClientApplicationBuilder
                    .Create(clientId)
                    .AddKnownAuthority(new Uri(authority), true)
-                   //.WithUserTokenCache(userTokenCache)
                    .BuildConfiguration())
         {
             GuardOnMobilePlatforms();
-            throw new NotImplementedException();
+
+            userTokenCache.SetServiceBundle(ServiceBundle);
+            UserTokenCacheInternal = userTokenCache;
         }
 
         private static void GuardOnMobilePlatforms()

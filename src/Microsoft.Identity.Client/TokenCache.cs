@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
 
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
-        internal IServiceBundle ServiceBundle { get; }
+        internal IServiceBundle ServiceBundle { get; private set; }
 
         static TokenCache()
         {
@@ -79,19 +79,26 @@ namespace Microsoft.Identity.Client
 
         private const int DefaultExpirationBufferInMinutes = 5;
 
-        internal TelemetryTokenCacheAccessor TokenCacheAccessor { get; }
-        internal ILegacyCachePersistence LegacyCachePersistence { get; set; }
+        internal TelemetryTokenCacheAccessor TokenCacheAccessor { get; private set; }
+        internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        [Obsolete("TokenCache is now created internally during ClientApplication construction.  You can access the TokenCache via a property on your ClientApplication.")]
+        // TODO(migration): [Obsolete("TokenCache is now created internally during ClientApplication construction.  You can access the TokenCache via a property on your ClientApplication.")]
         public TokenCache()
         {
-            throw new NotImplementedException();
+            ServiceBundle = null;
+            TokenCacheAccessor = null;
+            LegacyCachePersistence = null;
         }
 
         internal TokenCache(IServiceBundle serviceBundle)
+        {
+            SetServiceBundle(serviceBundle);
+        }
+
+        internal void SetServiceBundle(IServiceBundle serviceBundle)
         {
             ServiceBundle = serviceBundle;
             TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());

@@ -83,21 +83,22 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication"/> which 
         /// enables app developers to specify the authority
-        [Obsolete("Use ConfidentialClientApplicationBuilder  instead.")]  // TODO(migration): proper docs
+        // todo(migration): [Obsolete("Use ConfidentialClientApplicationBuilder  instead.")]  // TODO(migration): proper docs
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
                 .AddKnownAuthority(new Uri(DefaultAuthority), true)
                 .WithRedirectUri(redirectUri)
-                // TODO(migration): need an internal "WithClientCredential" we can use for back compat...
                 .WithClientCredential(clientCredential)
-                //.WithUserTokenCache(userTokenCache)
-                //.WithAppTokenCache(appTokenCache)
                 .BuildConfiguration())
         {
             GuardMobileFrameworks();
-            throw new NotImplementedException();
+
+            userTokenCache.SetServiceBundle(ServiceBundle);
+            UserTokenCacheInternal = userTokenCache;
+            appTokenCache.SetServiceBundle(ServiceBundle);
+            AppTokenCacheInternal = userTokenCache;
         }
 
         /// <summary>
