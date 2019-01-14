@@ -59,22 +59,6 @@ namespace Microsoft.Identity.Client.AppConfig
             return new PublicClientApplicationBuilder(config).WithClientId(clientId);
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="tokenCache"></param>
-        /// <returns></returns>
-        [Obsolete("You can access the UserTokenCache using the UserTokenCache property on the created IPublicClientApplication")]
-        internal PublicClientApplicationBuilder WithUserTokenCache(TokenCache tokenCache)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal PublicClientApplicationBuilder WithUserTokenLegacyCachePersistenceForTest(ILegacyCachePersistence legacyCachePersistence)
-        {
-            Config.UserTokenLegacyCachePersistenceForTest = legacyCachePersistence;
-            return this;
-        }
-
         internal PublicClientApplicationBuilder WithUserTokenLegacyCachePersistenceForTest(ILegacyCachePersistence legacyCachePersistence)
         {
             Config.UserTokenLegacyCachePersistenceForTest = legacyCachePersistence;

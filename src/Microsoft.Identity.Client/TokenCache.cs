@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
 
         private ICoreLogger Logger => ServiceBundle.DefaultLogger;
 
-        internal IServiceBundle ServiceBundle { get; }
+        internal IServiceBundle ServiceBundle { get; private set; }
 
         internal RequestContext CreateRequestContext()
         {
@@ -74,40 +74,32 @@ namespace Microsoft.Identity.Client
 
         private const int DefaultExpirationBufferInMinutes = 5;
 
-        internal TelemetryTokenCacheAccessor TokenCacheAccessor { get; }
-
+        internal TelemetryTokenCacheAccessor TokenCacheAccessor { get; private set; }
         ITokenCacheAccessor ITokenCacheInternal.Accessor => TokenCacheAccessor;
-
-        ILegacyCachePersistence LegacyCachePersistence { get; set; }
-
+        internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
+        // TODO(migration): [Obsolete("TokenCache is now created internally during ClientApplication construction.  You can access the TokenCache via a property on your ClientApplication.")]
         /// <summary>
-        /// Constructor
+        /// 
         /// </summary>
-        [Obsolete("TokenCache is now created internally during ClientApplication construction.  You can access the TokenCache via a property on your ClientApplication.")]
         public TokenCache()
         {
-            throw new NotImplementedException();
+            ServiceBundle = null;
+            TokenCacheAccessor = null;
+            LegacyCachePersistence = null;
         }
 
         internal TokenCache(IServiceBundle serviceBundle)
         {
-            ServiceBundle = serviceBundle;
-            TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());
-            LegacyCachePersistence = ServiceBundle.PlatformProxy.CreateLegacyCachePersistence();
+            SetServiceBundle(serviceBundle);
         }
 
-        /// <summary>
-        /// This method is so we can inject test ILegacyCachePersistence...
-        /// </summary>
-        /// <param name="serviceBundle"></param>
-        /// <param name="legacyCachePersistenceForTest"></param>
-        internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
+        internal void SetServiceBundle(IServiceBundle serviceBundle)
         {
             ServiceBundle = serviceBundle;
             TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());
-            LegacyCachePersistence = legacyCachePersistenceForTest;
+            LegacyCachePersistence = ServiceBundle.PlatformProxy.CreateLegacyCachePersistence();
         }
 
         /// <summary>
@@ -1015,7 +1007,7 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
-                    RemoveMsalAccount(account, requestContext);
+                    ((ITokenCacheInternal)this).RemoveMsalAccount(account, requestContext);
                     RemoveAdalUser(account);
 
                     OnAfterAccess(args);
@@ -1029,7 +1021,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void RemoveMsalAccount(IAccount account, RequestContext requestContext)
+        void ITokenCacheInternal.RemoveMsalAccount(IAccount account, RequestContext requestContext)
         {
             if (account.HomeAccountId == null)
             {
