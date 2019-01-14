@@ -41,34 +41,36 @@ namespace Microsoft.Identity.Client.Platforms.Mac
     /// <summary>
     /// Platform / OS specific logic.
     /// </summary>
-    internal class MacPlatformProxy : IPlatformProxy
+    internal class MacPlatformProxy : AbstractPlatformProxy
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
-        private readonly Lazy<IPlatformLogger> _platformLogger = 
-            new Lazy<IPlatformLogger>(() => new ConsolePlatformLogger());
-        private IWebUIFactory _overloadWebUiFactory;
+
+        public MacPlatformProxy(ICoreLogger logger) 
+            : base(logger)
+        {
+        }
 
         /// <summary>
         ///     Get the user logged
         /// </summary>
-        public Task<string> GetUserPrincipalNameAsync()
+        public override Task<string> GetUserPrincipalNameAsync()
         {
             return Task.FromResult(string.Empty);
         }
 
-        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return Task.FromResult(false);
         }
 
-        public bool IsDomainJoined()
+        public override bool IsDomainJoined()
         {
             return false;
         }
 
-        public string GetEnvironmentVariable(string variable)
+        public override string GetEnvironmentVariable(string variable)
         {
-            if (String.IsNullOrWhiteSpace(variable))
+            if (string.IsNullOrWhiteSpace(variable))
             {
                 throw new ArgumentNullException(nameof(variable));
             }
@@ -76,35 +78,35 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             return Environment.GetEnvironmentVariable(variable);
         }
 
-        public string GetProcessorArchitecture()
+        protected override string InternalGetProcessorArchitecture()
         {
             return null;
         }
 
-        public string GetOperatingSystem()
+        protected override string InternalGetOperatingSystem()
         {
             return Environment.OSVersion.ToString();
         }
 
-        public string GetDeviceModel()
+        protected override string InternalGetDeviceModel()
         {
             return null;
         }
 
 
         /// <inheritdoc />
-        public string GetBrokerOrRedirectUri(Uri redirectUri)
+        public override string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
-        public string GetDefaultRedirectUri(string clientId)
+        public override string GetDefaultRedirectUri(string clientId)
         {
             return Constants.DefaultRedirectUri;
         }
 
-        public string GetProductName()
+        protected override string InternalGetProductName()
         {
             return "MSAL.Xamarin.Mac";
         }
@@ -113,7 +115,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        public string GetCallingApplicationName()
+        protected override string InternalGetCallingApplicationName()
         {
             return Assembly.GetEntryAssembly()?.GetName()?.Name;
         }
@@ -122,7 +124,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        public string GetCallingApplicationVersion()
+        protected override string InternalGetCallingApplicationVersion()
         {
             return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
         }
@@ -136,12 +138,12 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         /// Considered PII. Please ensure that it is hashed. 
         /// </summary>
         /// <returns>Device identifier</returns>
-        public string GetDeviceId()
+        protected override string InternalGetDeviceId()
         {
             return DeviceIdLazy.Value;
         }
 
-        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
             // There is no ADAL for MAC 
             return new NullLegacyCachePersistence();
@@ -151,28 +153,13 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         /// Currently we do not store a token cache in the key chain for Mac. Instead, 
         /// we allow users provide custom token cache serialization.
         /// </remarks>
-        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
             return new TokenCacheAccessor(); 
         }
 
-        /// <inheritdoc />
-        public ICryptographyManager CryptographyManager { get; } 
-            = new MacCryptographyManager();
-
-        /// <inheritdoc />
-        public IPlatformLogger PlatformLogger => _platformLogger.Value;
-
-        /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory()
-        {
-            return _overloadWebUiFactory ?? new MacUIFactory();
-        }
-
-        /// <inheritdoc />
-        public void SetWebUiFactory(IWebUIFactory webUiFactory)
-        {
-            _overloadWebUiFactory = webUiFactory;
-        }
+        protected override IWebUIFactory CreateWebUiFactory() => new MacUIFactory();
+        protected override ICryptographyManager InternalGetCryptographyManager() => new MacCryptographyManager();
+        protected override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();
     }
 }

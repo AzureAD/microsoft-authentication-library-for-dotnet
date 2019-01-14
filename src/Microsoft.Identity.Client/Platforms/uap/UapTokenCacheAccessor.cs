@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         {
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
             SetCacheValue(composite, JsonHelper.SerializeToJson(item));
-            var key = item.GetKey().GetUWPFixedSizeKey();
+            var key = item.GetKey().GetUWPFixedSizeKey(_cryptographyManager);
 
             _accessTokenContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/key] = composite;
         }
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            var keyStr = accessTokenKey.GetUWPFixedSizeKey();
+            var keyStr = accessTokenKey.GetUWPFixedSizeKey(_cryptographyManager);
             if (!_accessTokenContainer.Values.ContainsKey(/*encodedKey*/keyStr))
             {
                 return null;
@@ -178,7 +178,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
         {
-            _accessTokenContainer.Values.Remove(/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/cacheKey.GetUWPFixedSizeKey());
+            _accessTokenContainer.Values.Remove(/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/cacheKey.GetUWPFixedSizeKey(_cryptographyManager));
         }
 
         public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)

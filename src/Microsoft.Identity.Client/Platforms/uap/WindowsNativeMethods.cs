@@ -64,9 +64,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     return "Unknown";
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MsalLogger.Default.WarningPii(ex);
+                // todo(migration): look at way to get logger into servicebundle-specific platformproxy -> MsalLogger.Default.WarningPii(ex);
                 return "Unknown";
             }
         }

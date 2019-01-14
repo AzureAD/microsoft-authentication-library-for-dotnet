@@ -29,6 +29,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
@@ -48,9 +49,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
             new ConcurrentDictionary<string, ConcurrentDictionary<string, int>>();
 
         private readonly bool _onlySendFailureTelemetry;
+        private readonly IPlatformProxy _platformProxy;
 
-        public TelemetryManager(TelemetryCallback telemetryCallback, bool onlySendFailureTelemetry = false)
+        public TelemetryManager(IPlatformProxy platformProxy, TelemetryCallback telemetryCallback, bool onlySendFailureTelemetry = false)
         {
+            _platformProxy = platformProxy;
             Callback = telemetryCallback;
             _onlySendFailureTelemetry = onlySendFailureTelemetry;
         }
@@ -190,11 +193,11 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             if (eventCountToFlush != null)
             {
-                eventsToFlush.Insert(0, new DefaultEvent(clientId, eventCountToFlush));
+                eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, clientId, eventCountToFlush));
             }
             else
             {
-                eventsToFlush.Insert(0, new DefaultEvent(clientId, new ConcurrentDictionary<string, int>()));
+                eventsToFlush.Insert(0, new DefaultEvent(_platformProxy, clientId, new ConcurrentDictionary<string, int>()));
             }
 
             Callback?.Invoke(eventsToFlush.Cast<Dictionary<string, string>>().ToList());

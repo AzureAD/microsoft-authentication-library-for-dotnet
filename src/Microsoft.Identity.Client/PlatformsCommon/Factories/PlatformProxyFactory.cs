@@ -27,46 +27,37 @@
 
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 {
     /// <summary>
     ///     Returns the platform / os specific implementation of a PlatformProxy.
     /// </summary>
-    internal class PlatformProxyFactory
+    internal static class PlatformProxyFactory
     {
-        // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
-        private static readonly Lazy<IPlatformProxy> PlatformProxyLazy = new Lazy<IPlatformProxy>(
-            () =>
-#if NET_CORE
-            new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy()
-#elif ANDROID
-            new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy()
-#elif iOS
-            new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy()
-#elif MAC
-            new Platforms.Mac.MacPlatformProxy()
-#elif WINDOWS_APP
-            new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy()
-#elif FACADE
-            new NetStandard11PlatformProxy(IsMsal())
-#elif NETSTANDARD1_3
-            new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy()
-#elif DESKTOP
-            new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy()
-#endif
-        );
-
-        private PlatformProxyFactory()
-        {
-        }
-
         /// <summary>
         ///     Gets the platform proxy, which can be used to perform platform specific operations
         /// </summary>
-        public static IPlatformProxy GetPlatformProxy()
+        public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
         {
-            return PlatformProxyLazy.Value;
+#if NET_CORE
+            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(logger);
+#elif ANDROID
+            return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(logger);
+#elif iOS
+            return new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy(logger);
+#elif MAC
+            return new Platforms.Mac.MacPlatformProxy(logger);
+#elif WINDOWS_APP
+            return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(logger);
+#elif NETSTANDARD1_3
+            return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(logger);
+#elif DESKTOP
+            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(logger);
+#else
+            throw new PlatformNotSupportedException();
+#endif
         }
     }
 }

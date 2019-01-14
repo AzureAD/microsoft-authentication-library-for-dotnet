@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
+        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder instead")]
         public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
         }
@@ -96,14 +97,16 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
+        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder class")]
         public PublicClientApplication(string clientId, string authority)
         : base(PublicClientApplicationBuilder
                 .Create(clientId)
-                .WithRedirectUri(PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
+                //.WithRedirectUri(PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
                 .AddKnownAuthority(new Uri(authority), true)
-                .WithUserTokenCache(new TokenCache())
+                //.WithUserTokenCache(new TokenCache())
                 .BuildConfiguration())
         {
+            throw new NotImplementedException();
         }
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
@@ -123,9 +126,7 @@ namespace Microsoft.Identity.Client
             set
             {
                 keychainSecurityGroup = value;
-                UserTokenCache.TokenCacheAccessor.SetiOSKeychainSecurityGroup(value);
-                (UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
-                    .SetKeychainSecurityGroup(value);
+                UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
             }
         }
 
@@ -140,9 +141,11 @@ namespace Microsoft.Identity.Client
             set
             {
                 keychainSecurityGroup = value;
-                UserTokenCache.TokenCacheAccessor.SetKeychainSecurityGroup(value);
-                (UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
-                    .SetKeychainSecurityGroup(value);
+                UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
+                // todo(migration): ensure this is correct, esp since this is obsolete.  Or can we just delete it now?
+                //UserTokenCache.TokenCacheAccessor.SetKeychainSecurityGroup(value);
+                //(UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
+                //    .SetKeychainSecurityGroup(value);
             }
         }
 #endif
@@ -759,10 +762,17 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         /// <param name="userTokenCache">Instance of TokenCache.</param>
+        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder instead")]
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
-            : this(PublicClientApplicationBuilder.Create(clientId).AddKnownAuthority(new Uri(authority), true).WithUserTokenCache(userTokenCache).BuildConfiguration())
+            : this(PublicClientApplicationBuilder
+                   .Create(clientId)
+                   .AddKnownAuthority(new Uri(authority), true)
+                   .BuildConfiguration())
         {
             GuardOnMobilePlatforms();
+
+            userTokenCache.SetServiceBundle(ServiceBundle);
+            UserTokenCacheInternal = userTokenCache;
         }
 
         private static void GuardOnMobilePlatforms()

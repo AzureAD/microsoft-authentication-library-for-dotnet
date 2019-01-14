@@ -31,6 +31,7 @@ using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.CacheV2.Impl
 {
@@ -38,10 +39,10 @@ namespace Microsoft.Identity.Client.CacheV2.Impl
     {
         private readonly IStorageWorker _storageWorker;
 
-        public StorageManager(IStorageWorker storageWorker, IAdalLegacyCacheManager adalLegacyCacheManager = null)
+        public StorageManager(IPlatformProxy platformProxy, IStorageWorker storageWorker, IAdalLegacyCacheManager adalLegacyCacheManager = null)
         {
             _storageWorker = storageWorker;
-            AdalLegacyCacheManager = adalLegacyCacheManager ?? new AdalLegacyCacheManager(PlatformProxyFactory.GetPlatformProxy().CreateLegacyCachePersistence());
+            AdalLegacyCacheManager = adalLegacyCacheManager ?? new AdalLegacyCacheManager(platformProxy.CreateLegacyCachePersistence());
         }
 
         public IAdalLegacyCacheManager AdalLegacyCacheManager { get; }

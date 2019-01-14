@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.Android
@@ -40,38 +41,39 @@ namespace Microsoft.Identity.Client.Platforms.Android
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
     [global::Android.Runtime.Preserve(AllMembers = true)]
-    internal class AndroidPlatformProxy : IPlatformProxy
+    internal class AndroidPlatformProxy : AbstractPlatformProxy
     {
         internal const string AndroidDefaultRedirectUriTemplate = "msal{0}://auth";
 
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(() => new AndroidPlatformLogger());
-        private IWebUIFactory _overloadWebUiFactory;
+        public AndroidPlatformProxy(ICoreLogger logger) : base(logger)
+        {
+        }
 
         /// <summary>
         /// Get the user logged in 
         /// </summary>
         /// <returns>The username or throws</returns>
-        public Task<string> GetUserPrincipalNameAsync()
+        public override Task<string> GetUserPrincipalNameAsync()
         {
             return Task.FromResult(string.Empty);
 
         }
-        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return Task.FromResult(false);
         }
 
-        public bool IsDomainJoined()
+        public override bool IsDomainJoined()
         {
             return false;
         }
 
-        public string GetEnvironmentVariable(string variable)
+        public override string GetEnvironmentVariable(string variable)
         {
             return null;
         }
 
-        public string GetProcessorArchitecture()
+        protected override string InternalGetProcessorArchitecture()
         {
             if (global::Android.OS.Build.VERSION.SdkInt < global::Android.OS.BuildVersionCodes.Lollipop)
             {
@@ -87,29 +89,29 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return null;
         }
 
-        public string GetOperatingSystem()
+        protected override string InternalGetOperatingSystem()
         {
             return global::Android.OS.Build.VERSION.Sdk;
         }
 
-        public string GetDeviceModel()
+        protected override string InternalGetDeviceModel()
         {
             return global::Android.OS.Build.Model;
         }
 
         /// <inheritdoc />
-        public string GetBrokerOrRedirectUri(Uri redirectUri)
+        public override string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
-        public string GetDefaultRedirectUri(string clientId)
+        public override string GetDefaultRedirectUri(string clientId)
         {
             return string.Format(CultureInfo.InvariantCulture, AndroidDefaultRedirectUriTemplate, clientId);
         }
 
-        public string GetProductName()
+        protected override string InternalGetProductName()
         {
             return "MSAL.Xamarin.Android";
         }
@@ -118,7 +120,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        public string GetCallingApplicationName()
+        protected override  string InternalGetCallingApplicationName()
         {
             return global::Android.App.Application.Context.ApplicationInfo?.LoadLabel(global::Android.App.Application.Context.PackageManager);
         }
@@ -127,7 +129,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        public string GetCallingApplicationVersion()
+        protected override  string InternalGetCallingApplicationVersion()
         {
             return global::Android.App.Application.Context.PackageManager.GetPackageInfo(global::Android.App.Application.Context.PackageName, 0)?.VersionName;
         }
@@ -136,7 +138,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
         /// Considered PII. Please ensure that it is hashed. 
         /// </summary>
         /// <returns>Device identifier</returns>
-        public string GetDeviceId()
+        protected override  string InternalGetDeviceId()
         {
             return global::Android.Provider.Settings.Secure.GetString(
                 global::Android.App.Application.Context.ContentResolver,
@@ -144,33 +146,24 @@ namespace Microsoft.Identity.Client.Platforms.Android
         }
 
         /// <inheritdoc />
-        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            return new AndroidLegacyCachePersistence();
+            return new AndroidLegacyCachePersistence(Logger);
         }
 
         /// <inheritdoc />
-        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
             return new AndroidTokenCacheAccessor();
         }
 
         /// <inheritdoc />
-        public ICryptographyManager CryptographyManager { get; } = new AndroidCryptographyManager();
-
-        /// <inheritdoc />
-        public IPlatformLogger PlatformLogger => _platformLogger.Value;
-
-        /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory()
+        protected override IWebUIFactory CreateWebUiFactory()
         {
-            return _overloadWebUiFactory ?? new AndroidWebUIFactory();
+            return new AndroidWebUIFactory();
         }
 
-        /// <inheritdoc />
-        public void SetWebUiFactory(IWebUIFactory webUiFactory)
-        {
-            _overloadWebUiFactory = webUiFactory;
-        }
+        protected override ICryptographyManager InternalGetCryptographyManager() => new AndroidCryptographyManager();
+        protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
     }
 }

@@ -28,6 +28,7 @@
 using System;
 using System.Runtime.Serialization;
 using System.Text;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal
@@ -69,9 +70,11 @@ namespace Microsoft.Identity.Client.Internal
         // (64K) This is an arbitrary large value for the token length. We can adjust it as needed.
         private const int MaxTokenLength = 65536;
         public readonly JWTPayload Payload;
+        private readonly ICryptographyManager _cryptographyManager;
 
-        public JsonWebToken(string clientId, string audience)
+        public JsonWebToken(ICryptographyManager cryptographyManager, string clientId, string audience)
         {
+            _cryptographyManager = cryptographyManager;
             DateTime validFrom = DateTime.UtcNow;
 
             DateTime validTo = validFrom + TimeSpan.FromSeconds(JsonWebTokenConstants.JwtToAadLifetimeInSeconds);
@@ -98,7 +101,7 @@ namespace Microsoft.Identity.Client.Internal
                 throw new MsalException(MsalError.EncodedTokenTooLong);
             }
 
-            return string.Concat(token, ".", UrlEncodeSegment(credential.Sign(token)));
+            return string.Concat(token, ".", UrlEncodeSegment(credential.Sign(_cryptographyManager, token)));
         }
 
         private static string EncodeSegment(string segment)

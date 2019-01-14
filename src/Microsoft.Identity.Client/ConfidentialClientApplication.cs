@@ -83,19 +83,22 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication"/> which 
         /// enables app developers to specify the authority
+        // todo(migration): [Obsolete("Use ConfidentialClientApplicationBuilder  instead.")]  // TODO(migration): proper docs
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
                 .AddKnownAuthority(new Uri(DefaultAuthority), true)
                 .WithRedirectUri(redirectUri)
-                // TODO(migration): need an internal "WithClientCredential" we can use for back compat...
                 .WithClientCredential(clientCredential)
-                .WithUserTokenCache(userTokenCache)
-                .WithAppTokenCache(appTokenCache)
                 .BuildConfiguration())
         {
             GuardMobileFrameworks();
+
+            userTokenCache.SetServiceBundle(ServiceBundle);
+            UserTokenCacheInternal = userTokenCache;
+            appTokenCache.SetServiceBundle(ServiceBundle);
+            AppTokenCacheInternal = userTokenCache;
         }
 
         /// <summary>
@@ -128,6 +131,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication"/> which 
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
+        [Obsolete("Use ConfidentialClientApplicationBuilder instead.")]  // TODO(migration): proper docs
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
@@ -135,11 +139,12 @@ namespace Microsoft.Identity.Client
                 .AddKnownAuthority(new Uri(authority), true)
                 .WithRedirectUri(redirectUri)
                 .WithClientCredential(clientCredential)
-                .WithUserTokenCache(userTokenCache)
-                .WithAppTokenCache(appTokenCache)
+                //.WithUserTokenCache(userTokenCache)
+                //.WithAppTokenCache(appTokenCache)
                 .BuildConfiguration())
         {
             GuardMobileFrameworks();
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -378,24 +383,16 @@ namespace Microsoft.Identity.Client
 
         internal ClientCredential ClientCredential { get; }
 
-        private TokenCache _appTokenCache;
-        internal TokenCache AppTokenCache
-        {
-            get => _appTokenCache;
-            private set
-            {
-                _appTokenCache = value;
-                if (_appTokenCache != null)
-                {
-                    _appTokenCache.ClientId = ClientId;
-                    _appTokenCache.ServiceBundle = ServiceBundle;
-                }
-            }
-        }
+        /// <summary>
+        /// TODO(migration):  this is a new public interface
+        /// </summary>
+        public ITokenCache AppTokenCache => AppTokenCacheInternal;
+
+        internal ITokenCacheInternal AppTokenCacheInternal { get; }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(
             IAcquireTokenCommonParameters commonParameters,
-            TokenCache cache,
+            ITokenCacheInternal cache,
             IAccount account = null,  // todo: can we just use commonParameters.Account?
             Authority customAuthority = null)
         {

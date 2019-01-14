@@ -25,37 +25,29 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Unit;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
 
-namespace Microsoft.Identity.Test.Common
+namespace Microsoft.Identity.Client
 {
-    public static class TestCommon
+    internal interface ITokenCacheInternal : ITokenCache
     {
-        public static void ResetStateAndInitMsal()
-        {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-            ResetState();
-            new AadInstanceDiscovery(null, null, null, true);
-            new ValidatedAuthoritiesCache(true);
-        }
+        void RemoveAccount(IAccount account, RequestContext requestContext);
+        IEnumerable<IAccount> GetAccounts(string authority, RequestContext requestContext);
 
-        public static void ResetState()
-        {
-            Logger.LogCallback = null;
-            Logger.PiiLoggingEnabled = false;
-            Logger.Level = LogLevel.Info;
-            Logger.DefaultLoggingEnabled = false;
-        }
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            MsalTokenResponse msalTokenResponse);
 
-        internal static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
-        {
-            mockHttpManager.AddInstanceDiscoveryMockHandler();
-            mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-        }
+        Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey getIdTokenItemKey, RequestContext requestContext);
+        Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
 
+        void SetIosKeychainSecurityGroup(string securityGroup);
     }
 }

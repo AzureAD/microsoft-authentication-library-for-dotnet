@@ -161,8 +161,11 @@ namespace Microsoft.Identity.Client
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.
+        /// TODO(migration): this is a new public property, need to document.
         /// </Summary>
-        internal TokenCache UserTokenCache { get; }
+        public ITokenCache UserTokenCache => UserTokenCacheInternal;
+
+        internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
 
         /// <summary>
         /// Gets/sets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
@@ -193,7 +196,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                accounts = UserTokenCache.GetAccounts(Authority, requestContext);
+                accounts = UserTokenCacheInternal.GetAccounts(Authority, requestContext);
             }
 
             return Task.FromResult(accounts);
@@ -221,7 +224,7 @@ namespace Microsoft.Identity.Client
             RequestContext requestContext = CreateRequestContext(Guid.Empty);
             if (account != null)
             {
-                UserTokenCache?.RemoveAccount(account, requestContext);
+                UserTokenCacheInternal?.RemoveAccount(account, requestContext);
             }
 
             return Task.FromResult(0);
@@ -243,7 +246,7 @@ namespace Microsoft.Identity.Client
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
             IAcquireTokenCommonParameters commonParameters,
-            TokenCache cache,
+            ITokenCacheInternal cache,
             IAccount account = null,  // todo: can we just use commonParameters.Account?
             Authority customAuthority = null)
         {

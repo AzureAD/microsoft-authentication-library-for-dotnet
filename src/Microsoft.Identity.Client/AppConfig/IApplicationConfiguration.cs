@@ -29,8 +29,6 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     internal interface IApplicationConfiguration : IAppConfig
     {
-        TokenCache UserTokenCache { get; }
-        TokenCache AppTokenCache { get; }
         bool IsExtendedTokenLifetimeEnabled { get; }
         AuthorityInfo DefaultAuthorityInfo { get; }
     }

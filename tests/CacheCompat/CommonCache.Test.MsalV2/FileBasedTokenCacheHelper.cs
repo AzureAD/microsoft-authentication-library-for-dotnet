@@ -38,11 +38,6 @@ namespace CommonCache.Test.MsalV2
     /// </summary>
     public static class FileBasedTokenCacheHelper
     {
-        /// <summary>
-        ///     Token cache
-        /// </summary>
-        private static TokenCache _userTokenCache;
-
         private static readonly object FileLock = new object();
 
         /// <summary>
@@ -63,23 +58,21 @@ namespace CommonCache.Test.MsalV2
         ///     be <c>null</c> if you don't want to implement the legacy ADAL V3 token cache serialization in your MSAL 2.x+
         ///     application
         /// </param>
+        /// <param name="tokenCache"></param>
         /// <param name="unifiedCacheFileName">
         ///     File name where the cache is serialized with the Unified cache format, common to
         ///     ADAL V4 and MSAL V2 and above, and also across ADAL/MSAL on the same platform. Should not be <c>null</c>
         /// </param>
         /// <returns></returns>
-        public static TokenCache GetUserCache(string unifiedCacheFileName, string adalV3CacheFileName)
+        public static void ConfigureUserCache(ITokenCache tokenCache, string unifiedCacheFileName, string adalV3CacheFileName)
         {
             UnifiedCacheFileName = unifiedCacheFileName;
             AdalV3CacheFileName = adalV3CacheFileName;
-            if (_userTokenCache == null)
+            if (tokenCache != null)
             {
-                _userTokenCache = new TokenCache();
-                _userTokenCache.SetBeforeAccess(BeforeAccessNotification);
-                _userTokenCache.SetAfterAccess(AfterAccessNotification);
+                tokenCache.SetBeforeAccess(BeforeAccessNotification);
+                tokenCache.SetAfterAccess(AfterAccessNotification);
             }
-
-            return _userTokenCache;
         }
 
         public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
@@ -98,7 +91,7 @@ namespace CommonCache.Test.MsalV2
         public static void AfterAccessNotification(TokenCacheNotificationArgs args)
         {
             // if the access operation resulted in a cache update
-            if (args.TokenCache.HasStateChanged)
+            if (args.HasStateChanged)
             {
                 lock (FileLock)
                 {
@@ -110,9 +103,6 @@ namespace CommonCache.Test.MsalV2
                     {
                         WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
                     }
-
-                    // once the write operation takes place restore the HasStateChanged bit to false
-                    args.TokenCache.HasStateChanged = false;
                 }
             }
         }
