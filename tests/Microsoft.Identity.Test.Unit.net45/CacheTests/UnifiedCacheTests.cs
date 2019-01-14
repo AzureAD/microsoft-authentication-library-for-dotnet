@@ -56,46 +56,38 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache =
-                    {
-                        LegacyCachePersistence = new TestLegacyCachePersistance()
-                    }
-                };
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithUserTokenLegacyCachePersistenceForTest(
+                                                            new TestLegacyCachePersistance())
+                                                        .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheDictionary =
-                    AdalCacheOperations.Deserialize(app.UserTokenCache.LegacyCachePersistence.LoadCache());
+                    AdalCacheOperations.Deserialize(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence.LoadCache());
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = new RequestContext(null, new MsalLogger(Guid.Empty, null));
-                var accounts =
-                    app.UserTokenCache.GetAccounts(MsalTestConstants.AuthorityCommonTenant, false, requestContext);
+                var requestContext = RequestContext.CreateForTest();
+                var accounts = app.UserTokenCacheInternal.GetAccounts(MsalTestConstants.AuthorityCommonTenant, requestContext);
                 foreach (IAccount account in accounts)
                 {
-                    app.UserTokenCache.RemoveMsalAccount(account, requestContext);
+                    app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
                 }
 
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         Method = HttpMethod.Post,
@@ -126,76 +118,67 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             byte[] data = null;
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 // login to app
-                var tokenCache = new TokenCache();
-                tokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
-                   {
-                        args.TokenCache.Deserialize(data);
-                   });
-                tokenCache.SetAfterAccess((TokenCacheNotificationArgs args) =>
-                    {
-                        data = args.TokenCache.Serialize();
-                    });
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .BuildConcrete();
 
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache = tokenCache
-                };
-
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
-                                                                           app.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
-
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
-                Assert.IsNotNull(result);
-
-                Assert.AreEqual(1, tokenCache.TokenCacheAccessor.GetAllAccountsAsString().Count);
-                Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
-
-                // login tp app1 with same credentials
-                var tokenCache1 = new TokenCache();
-                tokenCache1.SetBeforeAccess((TokenCacheNotificationArgs args) =>
+                app.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
                 {
                     args.TokenCache.Deserialize(data);
                 });
-                tokenCache1.SetAfterAccess((TokenCacheNotificationArgs args) =>
+                app.UserTokenCache.SetAfterAccess((TokenCacheNotificationArgs args) =>
                 {
                     data = args.TokenCache.Serialize();
                 });
 
-                PublicClientApplication app1 = new PublicClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId_1,
-                    ClientApplicationBase.DefaultAuthority)
-                {
-                    UserTokenCache = tokenCache1
-                };
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
                                                                            app.RedirectUri + "?code=some-code"));
+
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
+
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                Assert.IsNotNull(result);
+
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccountsAsString().Count);
+                Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
+
+                // login tp app1 with same credentials
+
+                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
+                                                         .AddKnownAuthority(
+                                                             new Uri(ClientApplicationBase.DefaultAuthority),
+                                                             true).BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                                                                           app.RedirectUri + "?code=some-code"));
+
+                app1.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
+                {
+                    args.TokenCache.Deserialize(data);
+                });
+                app1.UserTokenCache.SetAfterAccess((TokenCacheNotificationArgs args) =>
+                {
+                    data = args.TokenCache.Serialize();
+                });
                 
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
 
                 // make sure that only one account cache entity was created
-                Assert.AreEqual(1, tokenCache1.TokenCacheAccessor.GetAllAccountsAsString().Count);
+                Assert.AreEqual(1, app1.UserTokenCacheInternal.Accessor.GetAllAccountsAsString().Count);
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
 
-                Assert.AreEqual(2, tokenCache1.TokenCacheAccessor.GetAllAccessTokensAsString().Count);
-                Assert.AreEqual(2, tokenCache1.TokenCacheAccessor.GetAllRefreshTokensAsString().Count);
-                Assert.AreEqual(2, tokenCache1.TokenCacheAccessor.GetAllIdTokensAsString().Count);
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllAccessTokensAsString().Count);
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllRefreshTokensAsString().Count);
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllIdTokensAsString().Count);
 
                 // remove account from app
                 app.RemoveAsync(app.GetAccountsAsync().Result.First()).Wait();
@@ -219,7 +202,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                           .Create(MsalTestConstants.ClientId).AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance()).BuildConcrete();
 
-                CreateAdalCache(app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
+                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
 
                 var adalUsers =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -227,7 +210,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                         app.UserTokenCacheInternal.LegacyPersistence,
                         MsalTestConstants.ClientId);
 
-                CreateAdalCache(app.UserTokenCacheInternal.LegacyPersistence, "user.read");
+                CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, "user.read");
 
                 var adalUsers2 =
                     CacheFallbackOperations.GetAllAdalUsersForMsal(
@@ -242,7 +225,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             }
         }
 
-        private void CreateAdalCache(ILegacyCachePersistence legacyCachePersistence, string scopes)
+        private void CreateAdalCache(ICoreLogger logger, ILegacyCachePersistence legacyCachePersistence, string scopes)
         {
             var key = new AdalTokenCacheKey(
                 MsalTestConstants.AuthorityHomeTenant,
@@ -268,9 +251,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             };
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
-                AdalCacheOperations.Deserialize(legacyCachePersistence.LoadCache());
+                AdalCacheOperations.Deserialize(logger, legacyCachePersistence.LoadCache());
             dictionary[key] = wrapper;
-            legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(dictionary));
+            legacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(logger, dictionary));
         }
     }
 }

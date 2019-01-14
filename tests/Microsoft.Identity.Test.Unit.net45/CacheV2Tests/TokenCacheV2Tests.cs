@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -57,10 +58,11 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         {
             _tokenCache = new TokenCacheV2();
 
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             _cachePathStorage = new InMemoryCachePathStorage();
-            _credentialPathManager = new FileSystemCredentialPathManager();
+            _credentialPathManager = new FileSystemCredentialPathManager(serviceBundle.PlatformProxy.CryptographyManager);
             _storageWorker = new PathStorageWorker(_cachePathStorage, _credentialPathManager);
-            _storageManager = new StorageManager(_storageWorker);
+            _storageManager = new StorageManager(serviceBundle.PlatformProxy, _storageWorker);
 
             _tokenCache.BindToStorageManager(_storageManager);
         }
@@ -87,10 +89,8 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                     atItem
                 });
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 var cacheManager = new CacheManager(
                     _storageManager,
                     new AuthenticationRequestParameters
@@ -108,9 +108,8 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                         // AccountId = MsalTestConstants.HomeAccountId,
                         // Authority = new Uri(MsalTestConstants.AuthorityTestTenant),
                         Authority = Authority.CreateAuthority(
-                            serviceBundle,
-                            MsalTestConstants.AuthorityTestTenant,
-                            false),
+                            harness.ServiceBundle,
+                            MsalTestConstants.AuthorityTestTenant),
                         ClientId = MsalTestConstants.ClientId,
                         Scope = new SortedSet<string>(MsalCacheV2TestConstants.Scope) // todo(mzuber):  WHY SORTED SET?
                     });

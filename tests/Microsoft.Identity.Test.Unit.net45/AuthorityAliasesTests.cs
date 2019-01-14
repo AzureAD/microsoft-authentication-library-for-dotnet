@@ -192,7 +192,7 @@ namespace Microsoft.Identity.Test.Unit
             }
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCache =
-                AdalCacheOperations.Deserialize(requestContext.Logger, cache.LegacyCachePersistence.LoadCache());
+                AdalCacheOperations.Deserialize(requestContext.Logger, cache.LegacyPersistence.LoadCache());
 
             foreach (KeyValuePair<AdalTokenCacheKey, AdalResultWrapper> kvp in adalCache)
             {

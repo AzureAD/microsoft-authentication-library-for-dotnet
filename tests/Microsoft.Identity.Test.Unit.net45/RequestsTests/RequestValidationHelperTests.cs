@@ -70,8 +70,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 SendCertificate = false,
                 Authority = Authority.CreateAuthority(
                     _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false)
+                    MsalTestConstants.AuthorityCommonTenant)
             };
             parameters.Authority.SelfSignedJwtAudience = Audience1;
 
@@ -122,8 +121,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 SendCertificate = false,
                 Authority = Authority.CreateAuthority(
                     _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false)
+                    MsalTestConstants.AuthorityCommonTenant)
             };
             parameters.Authority.SelfSignedJwtAudience = "Audience1";
 

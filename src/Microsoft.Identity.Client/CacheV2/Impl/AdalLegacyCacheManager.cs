@@ -74,5 +74,6 @@ namespace Microsoft.Identity.Client.CacheV2.Impl
         ICollection<MsalAccountCacheItem> GetAllAccounts(RequestContext requestContext);
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
+        void RemoveMsalAccount(IAccount account, RequestContext requestContext);
     }
 }
