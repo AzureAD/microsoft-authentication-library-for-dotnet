@@ -47,11 +47,13 @@ namespace Microsoft.Identity.Client.Instance
         private static readonly ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry> _cache =
             new ConcurrentDictionary<string, InstanceDiscoveryMetadataEntry>();
 
+        private readonly ICoreLogger _logger;
         private readonly IHttpManager _httpManager;
         private readonly ITelemetryManager _telemetryManager;
 
-        public AadInstanceDiscovery(IHttpManager httpManager, ITelemetryManager telemetryManager, bool shouldClearCache = true)
+        public AadInstanceDiscovery(ICoreLogger logger, IHttpManager httpManager, ITelemetryManager telemetryManager, bool shouldClearCache = true)
         {
+            _logger = logger;
             _httpManager = httpManager;
             _telemetryManager = telemetryManager;
             if (shouldClearCache)
@@ -111,7 +113,7 @@ namespace Microsoft.Identity.Client.Instance
             Uri authority,
             RequestContext requestContext)
         {
-            var client = new OAuth2Client(_httpManager, _telemetryManager);
+            var client = new OAuth2Client(_logger, _httpManager, _telemetryManager);
             client.AddQueryParameter("api-version", "1.1");
             client.AddQueryParameter("authorization_endpoint", BuildAuthorizeEndpoint(authority.Host, GetTenant(authority)));
 

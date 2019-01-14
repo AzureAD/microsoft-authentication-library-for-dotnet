@@ -28,6 +28,7 @@
 using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
@@ -71,11 +72,13 @@ namespace Microsoft.Identity.Client.TelemetryCore
             AcquireTokenByAuthorizationCodeWithCodeScope = 830,
         }
 
+        private readonly ICryptographyManager _cryptographyManager;
         private readonly ICoreLogger _logger;
 
-        public ApiEvent(ICoreLogger logger) : base(EventNamePrefix + "api_event")
+        public ApiEvent(ICoreLogger logger, ICryptographyManager cryptographyManager) : base(EventNamePrefix + "api_event")
         {
             _logger = logger;
+            _cryptographyManager = cryptographyManager;
         }
 
         public ApiIds ApiId
@@ -108,7 +111,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             set =>
                 this[TenantIdKey] = value != null && _logger.PiiLoggingEnabled
-                                        ? HashPersonalIdentifier(value)
+                                        ? HashPersonalIdentifier(_cryptographyManager, value)
                                         : null;
         }
 
@@ -116,7 +119,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             set =>
                 this[UserIdKey] = value != null && _logger.PiiLoggingEnabled
-                                      ? HashPersonalIdentifier(value)
+                                      ? HashPersonalIdentifier(_cryptographyManager, value)
                                       : null;
         }
 
@@ -155,7 +158,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             set =>
                 this[LoginHintKey] = value != null && _logger.PiiLoggingEnabled
-                                         ? HashPersonalIdentifier(value)
+                                         ? HashPersonalIdentifier(_cryptographyManager, value)
                                          : null;
         }
     }

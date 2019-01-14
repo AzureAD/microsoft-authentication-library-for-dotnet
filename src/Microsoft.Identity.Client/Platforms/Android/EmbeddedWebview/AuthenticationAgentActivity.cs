@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             WebSettings webSettings = webView.Settings;
             string userAgent = webSettings.UserAgentString;
             webSettings.UserAgentString = userAgent + BrokerConstants.ClientTlsNotSupported;
-            MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
+            // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("UserAgent:" + webSettings.UserAgentString);
 
             webSettings.JavaScriptEnabled = true;
 
@@ -119,7 +119,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                 Uri uri = new Uri(url);
                 if (url.StartsWith(BrokerConstants.BrowserExtPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    MsalLogger.Default.Verbose("It is browser launch request");
+                    // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("It is browser launch request");
                     OpenLinkInBrowser(url, Activity);
                     view.StopLoading();
                     Activity.Finish();
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
                 if (url.StartsWith(BrokerConstants.BrowserExtInstallPrefix, StringComparison.OrdinalIgnoreCase))
                 {
-                    MsalLogger.Default.Verbose("It is an azure authenticator install request");
+                    // TODO(migration): Figure out how to get logger into this class.  MsalLogger.Default.Verbose("It is an azure authenticator install request");
                     view.StopLoading();
                     Finish(Activity, url);
                     return true;
@@ -157,7 +157,6 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                     Finish(Activity, url);
                     return true;
                 }
-
 
                 if (!url.Equals(AboutBlankUri, StringComparison.OrdinalIgnoreCase) && !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
                 {

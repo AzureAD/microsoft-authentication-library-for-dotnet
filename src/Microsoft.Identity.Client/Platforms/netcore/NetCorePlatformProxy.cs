@@ -39,31 +39,32 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     /// <summary>
     /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
     /// </summary>
-    internal class NetCorePlatformProxy : IPlatformProxy
+    internal class NetCorePlatformProxy : AbstractPlatformProxy
     {
-        private readonly Lazy<IPlatformLogger> _platformLogger = new Lazy<IPlatformLogger>(
-            () => new EventSourcePlatformLogger());
-        private IWebUIFactory _overloadWebUiFactory;
+        public NetCorePlatformProxy(ICoreLogger logger)
+            : base(logger)
+        {
+        }
 
         /// <summary>
         /// Get the user logged in 
         /// </summary>
-        public Task<string> GetUserPrincipalNameAsync()
+        public override Task<string> GetUserPrincipalNameAsync()
         {
             return Task.FromResult(string.Empty);
         }
 
-        public Task<bool> IsUserLocalAsync(RequestContext requestContext)
+        public override Task<bool> IsUserLocalAsync(RequestContext requestContext)
         {
             return Task.FromResult(false);
         }
 
-        public bool IsDomainJoined()
+        public override bool IsDomainJoined()
         {
             return false;
         }
 
-        public string GetEnvironmentVariable(string variable)
+        public override string GetEnvironmentVariable(string variable)
         {
             if (string.IsNullOrWhiteSpace(variable))
             {
@@ -73,34 +74,34 @@ namespace Microsoft.Identity.Client.Platforms.netcore
             return Environment.GetEnvironmentVariable(variable);
         }
 
-        public string GetProcessorArchitecture()
+        protected override string InternalGetProcessorArchitecture()
         {
             return null;
         }
 
-        public string GetOperatingSystem()
+        protected override string InternalGetOperatingSystem()
         {
             return System.Runtime.InteropServices.RuntimeInformation.OSDescription;
         }
 
-        public string GetDeviceModel()
+        protected override string InternalGetDeviceModel()
         {
             return null;
         }
 
         /// <inheritdoc />
-        public string GetBrokerOrRedirectUri(Uri redirectUri)
+        public override string GetBrokerOrRedirectUri(Uri redirectUri)
         {
             return redirectUri.OriginalString;
         }
 
         /// <inheritdoc />
-        public string GetDefaultRedirectUri(string clientId)
+        public override string GetDefaultRedirectUri(string clientId)
         {
             return Constants.DefaultRedirectUri;
         }
 
-        public string GetProductName()
+        protected override string InternalGetProductName()
         {
             return "MSAL.NetCore";
         }
@@ -109,7 +110,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Name of the calling application</returns>
-        public string GetCallingApplicationName()
+        protected override string InternalGetCallingApplicationName()
         {
             return Assembly.GetEntryAssembly()?.GetName()?.Name?.ToString();
         }
@@ -118,7 +119,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// Considered PII, ensure that it is hashed. 
         /// </summary>
         /// <returns>Version of the calling application</returns>
-        public string GetCallingApplicationVersion()
+        protected override string InternalGetCallingApplicationVersion()
         {
             return Assembly.GetEntryAssembly()?.GetName()?.Version?.ToString();
         }
@@ -127,36 +128,23 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// Considered PII. Please ensure that it is hashed. 
         /// </summary>
         /// <returns>Device identifier</returns>
-        public string GetDeviceId()
+        protected override string InternalGetDeviceId()
         {
             return Environment.MachineName;
         }
 
-        public ILegacyCachePersistence CreateLegacyCachePersistence()
+        public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
             return new InMemoryLegacyCachePersistance();
         }
 
-        public ITokenCacheAccessor CreateTokenCacheAccessor()
+        public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
             return new TokenCacheAccessor();
         }
 
-        public ICryptographyManager CryptographyManager { get; } = new NetCoreCryptographyManager();
-
-        /// <inheritdoc />
-        public IPlatformLogger PlatformLogger => _platformLogger.Value;
-
-        /// <inheritdoc />
-        public IWebUIFactory GetWebUiFactory()
-        {
-            return _overloadWebUiFactory ?? new WebUIFactory();
-        }
-
-        /// <inheritdoc />
-        public void SetWebUiFactory(IWebUIFactory webUiFactory)
-        {
-            _overloadWebUiFactory = webUiFactory;
-        }
+        protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
+        protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
+        protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
     }
 }

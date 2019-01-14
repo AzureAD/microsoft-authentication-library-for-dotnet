@@ -32,6 +32,7 @@ using System.Globalization;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
@@ -90,10 +91,9 @@ namespace Microsoft.Identity.Client.TelemetryCore
             return uri.Scheme + "://" + uri.Authority + scrubbedPath;
         }
 
-        public string HashPersonalIdentifier(string valueToHash)
+        public string HashPersonalIdentifier(ICryptographyManager cryptographyManager, string valueToHash)
         {
-            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
-            return crypto.CreateBase64UrlEncodedSha256Hash(valueToHash);
+            return cryptographyManager.CreateBase64UrlEncodedSha256Hash(valueToHash);
         }
     }
 }

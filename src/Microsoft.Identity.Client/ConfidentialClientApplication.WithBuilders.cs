@@ -43,13 +43,7 @@ namespace Microsoft.Identity.Client
             : base(configuration)
         {
             GuardMobileFrameworks();
-
-            AppTokenCache = configuration.AppTokenCache;
-            if (AppTokenCache != null)
-            {
-                AppTokenCache.ClientId = ClientId;
-                AppTokenCache.ServiceBundle = ServiceBundle;
-            }
+            AppTokenCacheInternal = new TokenCache(ServiceBundle);
         }
 
         /// <summary>
@@ -104,7 +98,7 @@ namespace Microsoft.Identity.Client
             IAcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(authorizationCodeParameters, UserTokenCache);
+            var requestParams = CreateRequestParameters(authorizationCodeParameters, UserTokenCacheInternal);
             requestParams.AuthorizationCode = authorizationCodeParameters.AuthorizationCode;
             requestParams.SendCertificate = false;
             var handler = new AuthorizationCodeRequest(
@@ -117,7 +111,7 @@ namespace Microsoft.Identity.Client
             IAcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(clientParameters, AppTokenCache);
+            var requestParams = CreateRequestParameters(clientParameters, AppTokenCacheInternal);
             requestParams.IsClientCredentialRequest = true;
             requestParams.SendCertificate = clientParameters.SendX5C;
             var handler = new ClientCredentialRequest(
@@ -133,7 +127,7 @@ namespace Microsoft.Identity.Client
             IAcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(onBehalfOfParameters, UserTokenCache);
+            var requestParams = CreateRequestParameters(onBehalfOfParameters, UserTokenCacheInternal);
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
             requestParams.SendCertificate = onBehalfOfParameters.WithOnBehalfOfCertificate;
             var handler = new OnBehalfOfRequest(
@@ -148,7 +142,7 @@ namespace Microsoft.Identity.Client
             IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken)
         {
-            var requestParameters = CreateRequestParameters(authorizationRequestUrlParameters, UserTokenCache);
+            var requestParameters = CreateRequestParameters(authorizationRequestUrlParameters, UserTokenCacheInternal);
             if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
             {
                 // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?

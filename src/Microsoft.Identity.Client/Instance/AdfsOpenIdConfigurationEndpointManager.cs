@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client.Instance
 
         private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(string endpoint, RequestContext requestContext)
         {
-            var client = new OAuth2Client(_serviceBundle.HttpManager, _serviceBundle.TelemetryManager);
+            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.TelemetryManager);
             client.AddQueryParameter("api-version", "1.0");
             return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext)
                                .ConfigureAwait(false);

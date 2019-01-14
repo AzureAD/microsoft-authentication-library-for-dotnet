@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal
             _logLevel = logLevel;
             _isDefaultPlatformLoggingEnabled = isDefaultPlatformLoggingEnabled;
 
-            _platformLogger = PlatformProxyFactory.GetPlatformProxy().PlatformLogger;
+            _platformLogger = PlatformProxyFactory.CreatePlatformProxy(null).PlatformLogger;
             Component = string.Empty;
             if (!string.IsNullOrEmpty(component))
             {
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        public static ICoreLogger Default { get; set; }
+        //public static ICoreLogger Default { get; set; }
 
         public static ICoreLogger Create(Guid correlationId, string component, IApplicationConfiguration config, bool isDefaultPlatformLoggingEnabled = false)
         {
@@ -160,7 +160,7 @@ namespace Microsoft.Identity.Client.Internal
                 ? string.Empty
                 : " - " + CorrelationId;
 
-            var msalIdParameters = MsalIdHelper.GetMsalIdParameters();
+            var msalIdParameters = MsalIdHelper.GetMsalIdParameters(this);
             string os = "N/A";
             if (msalIdParameters.TryGetValue(MsalIdParameter.OS, out string osValue))
             {

@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
             IAcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(interactiveParameters, UserTokenCache);
+            var requestParams = CreateRequestParameters(interactiveParameters, UserTokenCacheInternal);
 
             var handler = new InteractiveRequest(
                 ServiceBundle,
@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client
 
             var handler = new SilentRequest(
                 ServiceBundle,
-                CreateRequestParameters(silentParameters, UserTokenCache, account: silentParameters.Account, customAuthority: authorityInstance),
+                CreateRequestParameters(silentParameters, UserTokenCacheInternal, account: silentParameters.Account, customAuthority: authorityInstance),
                 ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo(migration): consolidate this properly
                 silentParameters.ForceRefresh);
 
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client
             IAcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(deviceCodeParameters, UserTokenCache);
+            var requestParams = CreateRequestParameters(deviceCodeParameters, UserTokenCacheInternal);
 
             var handler = new DeviceCodeRequest(
                 ServiceBundle,
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client
             IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(integratedWindowsAuthParameters, UserTokenCache);
+            var requestParams = CreateRequestParameters(integratedWindowsAuthParameters, UserTokenCacheInternal);
             var handler = new IntegratedWindowsAuthRequest(
                 ServiceBundle,
                 requestParams,
@@ -182,7 +182,7 @@ namespace Microsoft.Identity.Client
             // TODO(migration):  proper ApiEvent.ApiIds value here
 
 #if DESKTOP || NET_CORE
-            var requestParams = CreateRequestParameters(usernamePasswordParameters, UserTokenCache);
+            var requestParams = CreateRequestParameters(usernamePasswordParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
                 requestParams,

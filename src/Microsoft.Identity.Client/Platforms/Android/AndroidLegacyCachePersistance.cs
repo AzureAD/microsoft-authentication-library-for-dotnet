@@ -29,7 +29,7 @@ using System;
 using Android.App;
 using Android.Content;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {
@@ -38,7 +38,14 @@ namespace Microsoft.Identity.Client.Platforms.Android
     {
         private const string SharedPreferencesName = "ActiveDirectoryAuthenticationLibrary";
         private const string SharedPreferencesKey = "cache";
-        
+
+        private readonly ICoreLogger _logger;
+
+        public AndroidLegacyCachePersistence(ICoreLogger logger)
+        {
+            _logger = logger;
+        }
+
         byte[] ILegacyCachePersistence.LoadCache()
         {
             try
@@ -52,7 +59,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.ErrorPiiWithPrefix(ex, "An error occurred while reading the adal cache: ");
+                _logger.ErrorPiiWithPrefix(ex, "An error occurred while reading the adal cache: ");
                 // Ignore as the cache seems to be corrupt
             }
 
@@ -72,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
             }
             catch (Exception ex)
             {
-                MsalLogger.Default.ErrorPiiWithPrefix(ex, "Failed to save adal cache: ");
+                _logger.ErrorPiiWithPrefix(ex, "Failed to save adal cache: ");
             }
         }
     }

@@ -97,11 +97,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         {
             if (err != null)
             {
-                MsalLogger.Default.Info(err.LocalizedDescription);
+                // TODO(migration): figure out how to get logger into this class: MsalLogger.Default.Info(err.LocalizedDescription);
             }
             if (result != null)
             {
-                MsalLogger.Default.Info(result.ToString());
+                // TODO(migration): figure out how to get logger into this class: MsalLogger.Default.Info(result.ToString());
             }
             return;
         }

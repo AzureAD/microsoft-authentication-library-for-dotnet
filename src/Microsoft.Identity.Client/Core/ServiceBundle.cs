@@ -53,13 +53,12 @@ namespace Microsoft.Identity.Client.Core
                 config.IsDefaultPlatformLoggingEnabled,
                 config.LoggingCallback);
 
+            PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
-            TelemetryManager = new TelemetryManager(config.TelemetryCallback);
+            TelemetryManager = new TelemetryManager(PlatformProxy, config.TelemetryCallback);
             ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(shouldClearCaches);
-            AadInstanceDiscovery = new AadInstanceDiscovery(HttpManager, TelemetryManager, shouldClearCaches);
+            AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
-            PlatformProxy = PlatformProxyFactory.GetPlatformProxy();
-            // todo(migration): note this may cause process wide logging callback issues --> PlatformProxy.SetDefaultLogger(DefaultLogger);
         }
 
         public ICoreLogger DefaultLogger { get; }

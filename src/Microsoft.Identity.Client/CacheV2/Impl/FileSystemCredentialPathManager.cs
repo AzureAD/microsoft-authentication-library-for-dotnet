@@ -32,6 +32,7 @@ using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.CacheV2.Impl
 {
@@ -51,6 +52,13 @@ namespace Microsoft.Identity.Client.CacheV2.Impl
         private const string AppMetadataFolder = "AppMetadata";
         private const string FileExtension = ".bin";
 
+        private readonly ICryptographyManager _cryptographyManager;
+
+        public FileSystemCredentialPathManager(ICryptographyManager cryptographyManager)
+        {
+            _cryptographyManager = cryptographyManager;
+        }
+
         public string GetCredentialPath(Credential credential)
         {
             return GetCredentialPath(
@@ -65,7 +73,7 @@ namespace Microsoft.Identity.Client.CacheV2.Impl
         public string ToSafeFilename(string data)
         {
             string normalizedData = NormalizeKey(data);
-            byte[] hash = PlatformProxyFactory.GetPlatformProxy().CryptographyManager.CreateSha256HashBytes(normalizedData);
+            byte[] hash = _cryptographyManager.CreateSha256HashBytes(normalizedData);
             var sizedHash = new byte[10];
             Array.Copy(hash, sizedHash, 10);
             return Base32Hex.ToBase32String(sizedHash);
