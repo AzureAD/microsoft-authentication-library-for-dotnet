@@ -527,7 +527,7 @@ namespace Microsoft.Identity.Client
         {
             #if iOS
             TokenCacheAccessor.SetiOSKeychainSecurityGroup(securityGroup);
-            LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
+            (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
             #endif
         }
 

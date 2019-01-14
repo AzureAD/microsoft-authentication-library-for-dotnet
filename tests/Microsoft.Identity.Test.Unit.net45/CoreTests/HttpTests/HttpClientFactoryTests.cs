@@ -39,14 +39,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_MaxRespContentBuffSizeSetTo1Mb()
         {
-            Assert.AreEqual(1024 * 1024, new HttpClientFactory().HttpClient.MaxResponseContentBufferSize);
+            Assert.AreEqual(1024 * 1024, new HttpClientFactory().GetHttpClient().MaxResponseContentBufferSize);
         }
 
         [TestMethod]
         [TestCategory("HttpClientFactoryTests")]
         public void GetHttpClient_DefaultHeadersSetToJson()
         {
-            var client = new HttpClientFactory().HttpClient;
+            var client = new HttpClientFactory().GetHttpClient();
             Assert.IsNotNull(client.DefaultRequestHeaders.Accept);
             Assert.IsTrue(
                 client.DefaultRequestHeaders.Accept.Any<MediaTypeWithQualityHeaderValue>(x => x.MediaType == "application/json"));
