@@ -128,5 +128,10 @@ namespace Microsoft.Identity.Client
         public const string AdfsNotCurrentlySupportedAuthorityType = "ADFS is not currently a supported authority type.";
         public const string TenantIdAndAadAuthorityInstanceAreMutuallyExclusive = "TenantId and AadAuthorityAudience are both set, but they're mutually exclusive.";
         public const string InstanceAndAzureCloudInstanceAreMutuallyExclusive = "Instance and AzureCloudInstance are both set but they're mutually exclusive.";
+        public const string NoRefreshTokenProvided = "A refresh token must be provided.";
+
+        public const string NullTokenCacheError = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
+
+        public const string NoRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
     }
 }

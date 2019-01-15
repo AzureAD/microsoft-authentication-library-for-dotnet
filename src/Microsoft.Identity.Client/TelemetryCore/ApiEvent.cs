@@ -68,6 +68,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
 
             AcquireTokenForClientWithScope = 726,
             AcquireTokenForClientWithScopeRefresh = 727,
+            AcquireTokenByRefreshToken = 728,
 
             AcquireTokenByAuthorizationCodeWithCodeScope = 830,
         }

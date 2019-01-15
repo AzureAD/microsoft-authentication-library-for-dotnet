@@ -67,7 +67,7 @@ namespace Microsoft.Identity.Client
         ///  <param name="clientId">Client ID (also known as <i>Application ID</i>) of the application as registered in the
         ///  application registration portal (https://aka.ms/msal-net-register-app)</param>
         ///  <param name="authority">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
-        /// 
+        ///
         ///  Usual authorities endpoints for the Azure public Cloud are:
         ///  <list type="bullet">
         ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client
         public string Component
         {
             get => ServiceBundle.Config.Component;
-            
+
             // TODO(migration): [Obsolete("TODO(migration): comments")]
             set { }
         }
@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public Task RemoveAsync(IAccount account)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.Empty);
+            RequestContext requestContext = CreateRequestContext();
             if (account != null)
             {
                 UserTokenCacheInternal?.RemoveAccount(account, requestContext);
@@ -253,7 +253,6 @@ namespace Microsoft.Identity.Client
                                                       commonParameters.AuthorityOverride,
                                                       false)));
 
-
             return new AuthenticationRequestParameters
             {
                 SliceParameters = ServiceBundle.Config.SliceParameters,  // TODO(migration): can users reference this instead of being in authparams?
@@ -268,7 +267,47 @@ namespace Microsoft.Identity.Client
             };
         }
 
-        internal RequestContext CreateRequestContext(Guid correlationId)
+        internal async Task<AuthenticationResult> AcquireByRefreshTokenCommonAsync(IEnumerable<string> scopes, string userProvidedRefreshToken)
+        {
+            var context = CreateRequestContext();
+            SortedSet<string> _scopes;
+
+            if (scopes == null || scopes.Count() == 0)
+            {
+                _scopes = new SortedSet<string>();
+                _scopes.Add(ClientId + "/.default");
+                context.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
+            }
+            else
+            {
+                _scopes = ScopeHelper.CreateSortedSetFromEnumerable(scopes);
+                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, LogMessages.UsingXScopesForRefreshTokenRequest, scopes.Count()));
+            }
+
+            var reqParams = new AuthenticationRequestParameters
+            {
+                SliceParameters = SliceParameters,
+                Authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, false),
+                ClientId = ClientId,
+                TokenCache = UserTokenCache,
+                Scope = _scopes,
+                RedirectUri = new Uri(RedirectUri),
+                RequestContext = context,
+                ValidateAuthority = ValidateAuthority,
+                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
+                IsRefreshTokenRequest = true
+            };
+
+            var handler = new ByRefreshTokenRequest(
+                ServiceBundle,
+                reqParams,
+                ApiEvent.ApiIds.AcquireTokenByRefreshToken,
+                userProvidedRefreshToken);
+
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        private RequestContext CreateRequestContext()
         {
             correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
             return new RequestContext(ClientId, MsalLogger.Create(correlationId, Component, ServiceBundle.Config));
