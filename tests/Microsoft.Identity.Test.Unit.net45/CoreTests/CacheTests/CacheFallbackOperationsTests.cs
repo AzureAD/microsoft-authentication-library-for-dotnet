@@ -50,7 +50,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         {
             // Methods in CacheFallbackOperations silently catch all exceptions and log them;
             // By setting this to null, logging will fail, making the test fail.
-            //MsalLogger.Default = Substitute.For<ICoreLogger>();
             _logger = Substitute.For<ICoreLogger>();
 
             // Use the net45 accessor for tests

@@ -22,13 +22,13 @@ namespace DesktopTestApp
 
         public RefreshView RefreshViewDelegate { get; set; }
 
-        internal MsalUserRefreshTokenControl(PublicClientApplication publicClient, MsalRefreshTokenCacheItem rtIitem) : this()
+        internal MsalUserRefreshTokenControl(PublicClientApplication publicClient, MsalRefreshTokenCacheItem rtItem) : this()
         {
             _publicClient = publicClient;
             _cache = publicClient.UserTokenCacheInternal;
-            _rtItem = rtIitem;
+            _rtItem = rtItem;
 
-            accountItem = _cache.GetAccount(rtIitem, RequestContext.CreateForTest());
+            accountItem = _cache.GetAccount(_rtItem, RequestContext.CreateForTest());
             upnLabel.Text = accountItem.PreferredUsername;
 
             invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);

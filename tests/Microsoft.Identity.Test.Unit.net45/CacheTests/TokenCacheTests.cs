@@ -50,14 +50,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public static long ValidExpiresIn = 3600;
         public static long ValidExtendedExpiresIn = 7200;
 
-        //private TokenCache _cache;
         private readonly TokenCacheHelper _tokenCacheHelper = new TokenCacheHelper();
 
         [TestInitialize]
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            //_cache = new TokenCache();
         }
 
         private void AddHostToInstanceCache(IServiceBundle serviceBundle, string host)
@@ -74,13 +72,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     }
                 });
         }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            //_cache.Clear();
-        }
-
 
         [TestMethod]
         [TestCategory("TokenCacheTests")]
