@@ -84,14 +84,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
         public async Task MexEndpointFailsToResolveTestAsync()
         {
             // TODO: should we move this into a separate test class for WsTrustWebRequestManager?
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                httpManager.AddMockHandlerContentNotFound(HttpMethod.Get);
+                harness.HttpManager.AddMockHandlerContentNotFound(HttpMethod.Get);
 
                 try
                 {
-                    await serviceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost", _requestContext).ConfigureAwait(false);
+                    await harness.ServiceBundle.WsTrustWebRequestManager.GetMexDocumentAsync("http://somehost", _requestContext).ConfigureAwait(false);
                     Assert.Fail("We expect an exception to be thrown here");
                 }
                 catch (MsalException ex)

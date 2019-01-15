@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             var authParameters = new AuthenticationRequestParameters
             {
                 // todo(mzuber): this is going to be wonky probably...
-                Authority = Authority.CreateAuthority(null, authority, false)
+                Authority = Authority.CreateAuthority(null, authority)
             };
             var cacheManager = new CacheManager(null, authParameters);
             return cacheManager.GetAuthorityType();

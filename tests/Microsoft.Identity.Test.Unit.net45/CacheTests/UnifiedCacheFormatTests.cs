@@ -32,11 +32,13 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -56,10 +58,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     {
         private void TestInitialize(MockHttpManager httpManager)
         {
-            ModuleInitializer.ForceModuleInitializationTestOnly();
-
-            new AadInstanceDiscovery(null, null, true);
-            new ValidatedAuthoritiesCache(true);
+            TestCommon.ResetStateAndInitMsal();
 
             httpManager.AddMockHandler(
                 MockHelpers.CreateInstanceDiscoveryMockHandler(
@@ -190,12 +189,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         public void RunCacheFormatValidation()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                TestInitialize(httpManager);
+                TestInitialize(harness.HttpManager);
 
-                PublicClientApplication app = new PublicClientApplication(serviceBundle, ClientId, RequestAuthority);
+                PublicClientApplication app = PublicClientApplicationBuilder
+                                              .Create(ClientId).AddKnownAuthority(new Uri(RequestAuthority), true)
+                                              .BuildConcrete();
+
                 MockWebUI ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(AuthorizationStatus.Success,
@@ -205,12 +206,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     app.RedirectUri + "?code=some-code"));
 
                 //add mock response for tenant endpoint discovery
-                httpManager.AddMockHandler(new MockHttpMessageHandler
+                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     Method = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
                 });
-                httpManager.AddMockHandler(new MockHttpMessageHandler
+                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     Method = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TokenResponse)
@@ -219,14 +220,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
 
-                ValidateAt(app.UserTokenCache);
-                ValidateRt(app.UserTokenCache);
-                ValidateIdToken(app.UserTokenCache);
-                ValidateAccount(app.UserTokenCache);
+                ValidateAt(app.UserTokenCacheInternal);
+                ValidateRt(app.UserTokenCacheInternal);
+                ValidateIdToken(app.UserTokenCacheInternal);
+                ValidateAccount(app.UserTokenCacheInternal);
             }
         }
 
-        private void ValidateAt(TokenCache cache)
+        private void ValidateAt(ITokenCacheInternal cache)
         {
             var atList = cache.GetAllAccessTokenCacheItems(requestContext);
             Assert.IsTrue(atList.Count == 1);
@@ -263,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(ExpectedAtCacheKeyIosGeneric, key.GetiOSGenericKey());
         }
 
-        private void ValidateRt(TokenCache cache)
+        private void ValidateRt(ITokenCacheInternal cache)
         {
             ValidateCacheEntityValue
                 (ExpectedRtCacheValue, cache.GetAllRefreshTokenCacheItems(requestContext));
@@ -278,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(ExpectedRtCacheKeyIosGeneric, key.GetiOSGenericKey());
         }
 
-        private void ValidateIdToken(TokenCache cache)
+        private void ValidateIdToken(ITokenCacheInternal cache)
         {
             ValidateCacheEntityValue
                 (ExpectedIdTokenCacheValue, cache.GetAllIdTokenCacheItems(requestContext));
@@ -293,7 +294,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(ExpectedIdTokenCacheKeyIosGeneric, key.GetiOSGenericKey());
         }
 
-        private void ValidateAccount(TokenCache cache)
+        private void ValidateAccount(ITokenCacheInternal cache)
         {
             ValidateCacheEntityValue
                 (ExpectedAccountCacheValue, cache.GetAllAccountCacheItems(requestContext));

@@ -68,11 +68,11 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
         [TestCategory("TokenResponseTests")]
         public void JsonDeserializationTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.AuthorityCommonTenant);
 
-                OAuth2Client client = new OAuth2Client(httpManager, new TelemetryManager());
+                OAuth2Client client = new OAuth2Client(harness.ServiceBundle.DefaultLogger, harness.HttpManager, new TelemetryManager(harness.ServiceBundle.PlatformProxy, null));
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
                     new Uri(CoreTestConstants.AuthorityCommonTenant),
                     RequestContext.CreateForTest());

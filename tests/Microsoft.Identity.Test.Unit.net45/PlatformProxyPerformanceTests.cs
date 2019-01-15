@@ -42,13 +42,13 @@ namespace Microsoft.Identity.Test.Unit
         {
             using (new PerformanceValidator(50, "GetPlatformProxy"))
             {
-                PlatformProxyFactory.CreatePlatformProxy();
+                PlatformProxyFactory.CreatePlatformProxy(null);
             }
         }
 
         private void ValidateMethodPerformance(long maxMilliseconds, string name, Action<IPlatformProxy> action)
         {
-            var platformProxy = PlatformProxyFactory.CreatePlatformProxy();
+            var platformProxy = PlatformProxyFactory.CreatePlatformProxy(null);
 
             // Call it once to pre-load it.  We're not worried about the time it takes to call it
             // the first time, we're worried about subsequent calls.

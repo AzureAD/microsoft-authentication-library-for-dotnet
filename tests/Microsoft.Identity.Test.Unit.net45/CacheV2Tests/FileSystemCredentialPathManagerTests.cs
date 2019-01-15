@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client.CacheV2.Impl;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
@@ -33,7 +34,13 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
     [TestClass]
     public class FileSystemCredentialPathManagerTests
     {
-        private readonly FileSystemCredentialPathManager _credentialPathManager = new FileSystemCredentialPathManager();
+        private FileSystemCredentialPathManager _credentialPathManager;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _credentialPathManager = new FileSystemCredentialPathManager(TestCommon.CreateDefaultServiceBundle().PlatformProxy.CryptographyManager);
+        }
 
         [TestMethod]
         public void ToSafeFilename()

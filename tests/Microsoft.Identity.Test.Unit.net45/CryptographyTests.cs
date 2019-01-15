@@ -29,6 +29,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit
@@ -42,10 +43,11 @@ namespace Microsoft.Identity.Test.Unit
         [TestCategory("CryptographyTests")]
         public void SignWithCertificate()
         {
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             // Tests the cryptography libraries used by MSAL to sign with certificates
             var cert = new X509Certificate2(
                 ResourceHelper.GetTestResourceRelativePath("testCert.crtfile"), "passw0rd!");
-            var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
+            var crypto = serviceBundle.PlatformProxy.CryptographyManager;
             byte[] result = crypto.SignWithCertificate("TEST", cert);
             string value = Base64UrlHelpers.Encode(result);
             Assert.IsNotNull(value);

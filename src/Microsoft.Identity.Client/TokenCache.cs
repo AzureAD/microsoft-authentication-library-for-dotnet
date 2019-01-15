@@ -1068,7 +1068,7 @@ namespace Microsoft.Identity.Client
                 account.HomeAccountId.Identifier);
         }
 
-        internal ICollection<string> GetAllAccessTokenCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllAccessTokenCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1080,7 +1080,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<string> GetAllRefreshTokenCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllRefreshTokenCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<string> GetAllIdTokenCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllIdTokenCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1104,7 +1104,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<string> GetAllAccountCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllAccountCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1116,7 +1116,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void AddAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        void ITokenCacheInternal.AddAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates

@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -52,10 +53,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
              };
 
             SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
-            PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(webUIFactory);
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            serviceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
 
             // TODO: use the lab app once localhost is setup as a redirect uri
-            PublicClientApplication pca = new PublicClientApplication("1d18b3b0-251b-4714-a02a-9956cec86c2d");
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create("1d18b3b0-251b-4714-a02a-9956cec86c2d").BuildConcrete();
 
             // tests need to use http://localhost:port so that we can capture the AT
             pca.RedirectUri = SeleniumWebUIFactory.FindFreeLocalhostRedirectUri();
@@ -63,7 +65,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             // Act
             result = await pca.AcquireTokenAsync(new[] { "user.read" }).ConfigureAwait(false);
-
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));

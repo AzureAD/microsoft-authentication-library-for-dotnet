@@ -80,21 +80,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
             {
-                _tokenCacheHelper.PopulateCache(harness.Cache.TokenCacheAccessor);
+                _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
                 var parameters = harness.CreateRequestParams(harness.Cache);
 
                 // set access tokens as expired
                 foreach (string atCacheItemStr in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest()))
                 {
                     var accessItem = JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
-                    accessItem.ExpiresOnUnixTimestamp = ((long)(DateTime.UtcNow - new DateTime(
-                                                                    1970,
-                                                                    1,
-                                                                    1,
-                                                                    0,
-                                                                    0,
-                                                                    0,
-                                                                    DateTimeKind.Utc)).TotalSeconds)
+                    accessItem.ExpiresOnUnixTimestamp =
+                        ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
                         .ToString(CultureInfo.InvariantCulture);
 
                     harness.Cache.AddAccessTokenCacheItem(accessItem);
@@ -209,7 +203,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             public IServiceBundle ServiceBundle => _mockHttpAndServiceBundle.ServiceBundle;
             public MockHttpManager HttpManager => _mockHttpAndServiceBundle.HttpManager;
             public Authority Authority { get; }
-            public TokenCache Cache { get; }
+            public ITokenCacheInternal Cache { get; }
 
             /// <inheritdoc />
             public void Dispose()
@@ -217,7 +211,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _mockHttpAndServiceBundle.Dispose();
             }
 
-            public AuthenticationRequestParameters CreateRequestParams(TokenCache cache)
+            public AuthenticationRequestParameters CreateRequestParams(ITokenCacheInternal cache)
             {
                 var parameters = new AuthenticationRequestParameters()
                 {

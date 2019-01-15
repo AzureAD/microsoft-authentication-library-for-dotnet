@@ -30,6 +30,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestInitialize]
         public void TestInitialize()
         {
-            _serviceBundle = ServiceBundle.CreateDefault();
+            _serviceBundle = TestCommon.CreateDefaultServiceBundle();
         }
 
         [TestMethod]
@@ -70,9 +71,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 SendCertificate = false,
                 Authority = Authority.CreateAuthority(
                     _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant)
+                    MsalTestConstants.AuthorityCommonTenant),
+                Endpoints = new AuthorityEndpoints(null, null, Audience1)
             };
-            parameters.Authority.SelfSignedJwtAudience = Audience1;
 
             // Validate cached client assertion with parameters
             Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
@@ -121,9 +122,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 SendCertificate = false,
                 Authority = Authority.CreateAuthority(
                     _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant)
+                    MsalTestConstants.AuthorityCommonTenant),
+                Endpoints = new AuthorityEndpoints(null, null, "Audience1")
             };
-            parameters.Authority.SelfSignedJwtAudience = "Audience1";
 
             // Validate cached client assertion with expiration time
             // Cached assertion should be valid
