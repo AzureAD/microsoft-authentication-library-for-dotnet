@@ -37,7 +37,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-    public partial class ConfidentialClientApplication
+    public partial class ConfidentialClientApplication : IConfidentialClientApplicationExecutor
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)
             : base(configuration)

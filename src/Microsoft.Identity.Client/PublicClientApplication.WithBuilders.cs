@@ -40,7 +40,7 @@ using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
-    public partial class PublicClientApplication
+    public partial class PublicClientApplication : IPublicClientApplicationExecutor
     {
         internal PublicClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client
 
         #region ParameterExecutors
 
-        internal async Task<AuthenticationResult> ExecuteAsync(
+        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
             IAcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
@@ -129,24 +129,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken)
-        {
-            var authorityInstance = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride) 
-                ? GetAuthority(silentParameters.Account) 
-                : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride);
-
-            var handler = new SilentRequest(
-                ServiceBundle,
-                CreateRequestParameters(silentParameters, UserTokenCacheInternal, account: silentParameters.Account, customAuthority: authorityInstance),
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope,  // todo(migration): consolidate this properly
-                silentParameters.ForceRefresh);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        internal async Task<AuthenticationResult> ExecuteAsync(
+        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
             IAcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
@@ -161,7 +144,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> ExecuteAsync(
+        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
             IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
@@ -175,7 +158,7 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        internal async Task<AuthenticationResult> ExecuteAsync(
+        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
             IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {

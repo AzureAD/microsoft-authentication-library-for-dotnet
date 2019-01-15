@@ -57,7 +57,6 @@ namespace Microsoft.Identity.Client
         : ClientApplicationBase,
             IConfidentialClientApplication,
             IConfidentialClientApplicationWithCertificate,
-            IConfidentialClientApplicationExecutor,
             IByRefreshToken
     {
         /// <summary>
