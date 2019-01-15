@@ -400,10 +400,10 @@ namespace DesktopTestApp
             Trace.WriteLine("Accounts: " + acc.Count());
 
             cachePageTableLayout.RowCount = 0;
-            var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
-                .GetAllRefreshTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
-            var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCache
-                    .GetAllAccessTokensForClient(new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+            var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
+                .GetAllRefreshTokensForClient(RequestContext.CreateForTest());
+            var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
+                    .GetAllAccessTokensForClient(RequestContext.CreateForTest());
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {
@@ -418,7 +418,7 @@ namespace DesktopTestApp
                     if (atItem.HomeAccountId.Equals(rtItem.HomeAccountId, StringComparison.OrdinalIgnoreCase))
                     {
                         AddControlToCachePageTableLayout(
-                            new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCache,
+                            new MsalUserAccessTokenControl(_publicClientHandler.PublicClientApplication.UserTokenCacheInternal,
                                 atItem)
                             {
                                 RefreshViewDelegate = LoadCacheTabPage

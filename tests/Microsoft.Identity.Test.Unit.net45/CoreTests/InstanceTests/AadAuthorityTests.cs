@@ -38,6 +38,8 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -66,12 +68,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 // add mock response for instance validation
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     });
 
                 // add mock response for tenant endpoint discovery
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -98,25 +98,24 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", true);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoftonline.in/mytenant.com");
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            null, 
-                            RequestContext.CreateForTest()).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                var endpoints = resolver.ResolveEndpointsAsync(
+                    instance.AuthorityInfo,
+                    null,
+                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                    instance.AuthorizationEndpoint);
+                    endpoints.AuthorizationEndpoint);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                    instance.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
-                Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.UserRealmUriPrefix);
+                    endpoints.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
+                Assert.AreEqual("https://login.microsoftonline.in/common/userrealm/", instance.AuthorityInfo.UserRealmUriPrefix);
             }
         }
 
@@ -124,12 +123,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void ValidationOffSuccessTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 // add mock response for tenant endpoint discovery
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -138,24 +135,23 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoftonline.in/mytenant.com");
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
-                Task.Run(
-                    async () =>
-                    {
-                        await instance.ResolveEndpointsAsync(
-                            null, 
-                            RequestContext.CreateForTest()).ConfigureAwait(false);
-                    }).GetAwaiter().GetResult();
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
+
+                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                var endpoints = resolver.ResolveEndpointsAsync(
+                    instance.AuthorityInfo,
+                    null,
+                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/authorize",
-                    instance.AuthorizationEndpoint);
+                    endpoints.AuthorizationEndpoint);
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/oauth2/v2.0/token",
-                    instance.TokenEndpoint);
-                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", instance.SelfSignedJwtAudience);
+                    endpoints.TokenEndpoint);
+                Assert.AreEqual("https://sts.windows.net/6babcaad-604b-40ac-a9d7-9fd97c0b779f/", endpoints.SelfSignedJwtAudience);
             }
         }
 
@@ -163,12 +159,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 // add mock response for instance validation
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -191,18 +185,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             "4fa2-4f35-a59b-54b6f91a9c94\"}")
                     });
 
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoft0nline.com/mytenant.com");
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                null,
-                                RequestContext.CreateForTest()).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                    var endpoints = resolver.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        null,
+                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+
                     Assert.Fail("validation should have failed here");
                 }
                 catch (Exception exc)
@@ -217,12 +210,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedValidationMissingFieldsTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 // add mock response for instance validation
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -235,19 +226,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage("{}")
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoft0nline.com/mytenant.com");
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                null,
-                                RequestContext.CreateForTest()).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                    var endpoints = resolver.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        null,
+                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+
                     Assert.Fail("validation should have failed here");
                 }
                 catch (Exception exc)
@@ -261,12 +250,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void FailedTenantDiscoveryMissingEndpointsTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 // add mock response for tenant endpoint discovery
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -276,19 +263,17 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                                 File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields.json")))
                     });
 
-                var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                Authority instance = Authority.CreateAuthority(serviceBundle, "https://login.microsoftonline.in/mytenant.com", false);
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoftonline.in/mytenant.com");
                 Assert.IsNotNull(instance);
-                Assert.AreEqual(instance.AuthorityType, AuthorityType.Aad);
+                Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try
                 {
-                    Task.Run(
-                        async () =>
-                        {
-                            await instance.ResolveEndpointsAsync(
-                                null,
-                                RequestContext.CreateForTest()).ConfigureAwait(false);
-                        }).GetAwaiter().GetResult();
+                    var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
+                    var endpoints = resolver.ResolveEndpointsAsync(
+                        instance.AuthorityInfo,
+                        null,
+                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+
                     Assert.Fail("validation should have failed here");
                 }
                 catch (MsalClientException exc)
@@ -302,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
         [TestCategory("AadAuthorityTests")]
         public void CanonicalAuthorityInitTest()
         {
-            var serviceBundle = ServiceBundle.CreateDefault();
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
 
             const string UriNoPort = "https://login.microsoftonline.in/mytenant.com";
             const string UriNoPortTailSlash = "https://login.microsoftonline.in/mytenant.com/";
@@ -312,14 +297,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             const string UriCustomPort = "https://login.microsoftonline.in:444/mytenant.com";
             const string UriCustomPortTailSlash = "https://login.microsoftonline.in:444/mytenant.com/";
 
-            var authority = Authority.CreateAuthority(serviceBundle, UriNoPort, false);
-            Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
+            var authority = Authority.CreateAuthority(serviceBundle, UriNoPort);
+            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(serviceBundle, UriDefaultPort, false);
-            Assert.AreEqual(UriNoPortTailSlash, authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority(serviceBundle, UriDefaultPort);
+            Assert.AreEqual(UriNoPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
 
-            authority = Authority.CreateAuthority(serviceBundle, UriCustomPort, false);
-            Assert.AreEqual(UriCustomPortTailSlash, authority.CanonicalAuthority);
+            authority = Authority.CreateAuthority(serviceBundle, UriCustomPort);
+            Assert.AreEqual(UriCustomPortTailSlash, authority.AuthorityInfo.CanonicalAuthority);
         }
 
         /*

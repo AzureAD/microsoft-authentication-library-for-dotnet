@@ -12,26 +12,26 @@ namespace DesktopTestApp
 {
     public partial class MsalUserRefreshTokenControl : UserControl
     {
-        private TokenCache cache;
-        private PublicClientApplication publicClient;
-        private MsalRefreshTokenCacheItem rtItem;
-        private MsalAccountCacheItem accountItem;
+        private readonly ITokenCacheInternal _cache;
+        private readonly PublicClientApplication _publicClient;
+        private readonly MsalRefreshTokenCacheItem _rtItem;
+        private readonly MsalAccountCacheItem accountItem;
         public delegate void RefreshView();
 
         private const string GarbageRtValue = "garbage-refresh-token";
 
         public RefreshView RefreshViewDelegate { get; set; }
 
-        internal MsalUserRefreshTokenControl(PublicClientApplication publicClient, MsalRefreshTokenCacheItem rtIitem) : this()
+        internal MsalUserRefreshTokenControl(PublicClientApplication publicClient, MsalRefreshTokenCacheItem rtItem) : this()
         {
-            this.publicClient = publicClient;
-            cache = publicClient.UserTokenCache;
-            rtItem = rtIitem;
+            _publicClient = publicClient;
+            _cache = publicClient.UserTokenCacheInternal;
+            _rtItem = rtItem;
 
-            accountItem = cache.GetAccount(rtIitem, new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)));
+            accountItem = _cache.GetAccount(_rtItem, RequestContext.CreateForTest());
             upnLabel.Text = accountItem.PreferredUsername;
 
-            invalidateRefreshTokenBtn.Enabled = !rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);
+            invalidateRefreshTokenBtn.Enabled = !_rtItem.Secret.Equals(GarbageRtValue, StringComparison.OrdinalIgnoreCase);
         }
 
         public MsalUserRefreshTokenControl()
@@ -41,19 +41,19 @@ namespace DesktopTestApp
 
         private void InvalidateRefreshTokenBtn_Click(object sender, System.EventArgs e)
         {
-            rtItem.Secret = GarbageRtValue;
-            cache.SaveRefreshTokenCacheItem(rtItem, null);
+            _rtItem.Secret = GarbageRtValue;
+            _cache.SaveRefreshTokenCacheItem(_rtItem, null);
             invalidateRefreshTokenBtn.Enabled = false;
         }
 
         private async void signOutUserOneBtn_Click(object sender, System.EventArgs e)
         {
-            IEnumerable<IAccount> accounts = await publicClient.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> accounts = await _publicClient.GetAccountsAsync().ConfigureAwait(false);
 
             while (accounts.Any())
             {
-                await publicClient.RemoveAsync(accounts.FirstOrDefault()).ConfigureAwait(false);
-                accounts = await publicClient.GetAccountsAsync().ConfigureAwait(false);
+                await _publicClient.RemoveAsync(accounts.FirstOrDefault()).ConfigureAwait(false);
+                accounts = await _publicClient.GetAccountsAsync().ConfigureAwait(false);
             }
 
             RefreshViewDelegate?.Invoke();

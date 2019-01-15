@@ -28,6 +28,7 @@
 using System;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -69,7 +70,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("accesstoken-clientid-contoso.com-user.read user.write", key.GetiOSServiceKey());
             Assert.AreEqual("accesstoken-clientid-contoso.com", key.GetiOSGenericKey());
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientid-contoso.com-n5wvhdusof/wfsjgk1muxrk89nwfynymsl4qefkynbu=", key.GetUWPFixedSizeKey());
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientid-contoso.com-n5wvhdusof/wfsjgk1muxrk89nwfynymsl4qefkynbu=", key.GetUWPFixedSizeKey(serviceBundle.PlatformProxy.CryptographyManager));
         }
 
         [TestMethod]
@@ -91,9 +93,12 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             MsalAccessTokenCacheKey key2 = new MsalAccessTokenCacheKey("env", "tid", "uid", "cid", 
                 string.Join(" ", Enumerable.Range(1, 100).Select(i => "scope" + i)));
 
-            Assert.AreNotEqual(key1.GetUWPFixedSizeKey(), key2.GetUWPFixedSizeKey());
-            Assert.IsTrue(key2.GetUWPFixedSizeKey().Length < 255);
-            Assert.IsTrue(key1.GetUWPFixedSizeKey().Length < 255);
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            var crypto = serviceBundle.PlatformProxy.CryptographyManager;
+
+            Assert.AreNotEqual(key1.GetUWPFixedSizeKey(crypto), key2.GetUWPFixedSizeKey(crypto));
+            Assert.IsTrue(key2.GetUWPFixedSizeKey(crypto).Length < 255);
+            Assert.IsTrue(key1.GetUWPFixedSizeKey(crypto).Length < 255);
 
         }
 

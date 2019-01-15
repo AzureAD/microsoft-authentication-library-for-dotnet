@@ -12,14 +12,14 @@ namespace DesktopTestApp
 {
     public partial class MsalUserAccessTokenControl : UserControl
     {
-        private readonly TokenCache _cache;
+        private readonly ITokenCacheInternal _cache;
         private readonly MsalAccessTokenCacheItem _item;
         public delegate void RefreshView();
 
         public RefreshView RefreshViewDelegate { get; set; }
 
         // todo add id token
-        internal MsalUserAccessTokenControl(TokenCache cache, MsalAccessTokenCacheItem item) : this()
+        internal MsalUserAccessTokenControl(ITokenCacheInternal cache, MsalAccessTokenCacheItem item) : this()
         {
             _cache = cache;
             _item = item;
@@ -37,12 +37,12 @@ namespace DesktopTestApp
         {
             expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString(CultureInfo.CurrentCulture);
             _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
-            _cache.SaveAccesTokenCacheItem(_item, null);
+            _cache.SaveAccessTokenCacheItem(_item, null);
         }
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)
         {
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
 
             _cache.DeleteAccessToken(_item, null, requestContext);
             RefreshViewDelegate?.Invoke();

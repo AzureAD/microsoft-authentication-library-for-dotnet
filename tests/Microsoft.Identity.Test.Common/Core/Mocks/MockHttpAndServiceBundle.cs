@@ -26,16 +26,23 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
     internal class MockHttpAndServiceBundle : IDisposable
     {
-        public MockHttpAndServiceBundle()
+        public MockHttpAndServiceBundle(
+            TelemetryCallback telemetryCallback = null, 
+            LogCallback logCallback = null,
+            bool isExtendedTokenLifetimeEnabled = false)
         {
             HttpManager = new MockHttpManager();
-            ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(HttpManager);
+            ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
+                HttpManager, 
+                telemetryCallback: telemetryCallback,
+                logCallback: logCallback);
         }
 
         public IServiceBundle ServiceBundle { get; }

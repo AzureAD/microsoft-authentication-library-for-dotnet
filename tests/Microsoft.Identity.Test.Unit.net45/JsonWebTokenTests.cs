@@ -35,6 +35,7 @@ using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -88,31 +89,21 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateTestAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
-                SetupMocks(httpManager);
+                SetupMocks(harness.HttpManager);
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
                     MsalTestConstants.DefaultPassword);
 
-                var clientAssertion = new ClientAssertionCertificate(certificate);
-                var clientCredential = new ClientCredential(clientAssertion);
-                var app = new ConfidentialClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority,
-                    MsalTestConstants.RedirectUri,
-                    clientCredential,
-                    _cache,
-                    _cache)
-                {
-                    ValidateAuthority = false
-                };
+                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                              .AddKnownAuthority(
+                                                                  new System.Uri(ClientApplicationBase.DefaultAuthority),
+                                                                  true).WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                              .WithX509Certificate2(certificate).BuildConcrete();
 
                 //Check for x5c claim
-                httpManager.AddMockHandler(X5CMockHandler);
+                harness.HttpManager.AddMockHandler(X5CMockHandler);
                 AuthenticationResult result =
                     await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenForClientWithCertificateAsync(
                         MsalTestConstants.Scope).ConfigureAwait(false);
@@ -127,31 +118,24 @@ namespace Microsoft.Identity.Test.Unit
         [Description("Test for client assertion with X509 public certificate using sendCertificate")]
         public async Task JsonWebTokenWithX509PublicCertSendCertificateOnBehalfOfTestAsync()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                SetupMocks(httpManager);
+                SetupMocks(harness.HttpManager);
 
                 var certificate = new X509Certificate2(
                     ResourceHelper.GetTestResourceRelativePath("valid_cert.pfx"),
                     MsalTestConstants.DefaultPassword);
-                var clientAssertion = new ClientAssertionCertificate(certificate);
-                var clientCredential = new ClientCredential(clientAssertion);
-                var app = new ConfidentialClientApplication(
-                    serviceBundle,
-                    MsalTestConstants.ClientId,
-                    ClientApplicationBase.DefaultAuthority,
-                    MsalTestConstants.RedirectUri,
-                    clientCredential,
-                    _cache,
-                    _cache)
-                {
-                    ValidateAuthority = false
-                };
+
+                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                              .AddKnownAuthority(
+                                                                  new System.Uri(ClientApplicationBase.DefaultAuthority),
+                                                                  true).WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                              .WithX509Certificate2(certificate).BuildConcrete();
+                
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
 
                 //Check for x5c claim
-                httpManager.AddMockHandler(X5CMockHandler);
+                harness.HttpManager.AddMockHandler(X5CMockHandler);
                 AuthenticationResult result =
                     await (app as IConfidentialClientApplicationWithCertificate).AcquireTokenOnBehalfOfWithCertificateAsync(
                         MsalTestConstants.Scope,

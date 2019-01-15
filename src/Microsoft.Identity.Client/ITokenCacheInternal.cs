@@ -59,5 +59,28 @@ namespace Microsoft.Identity.Client
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
         void RemoveMsalAccount(IAccount account, RequestContext requestContext);
+        ICollection<string> GetAllAccessTokenCacheItems(RequestContext requestContext);
+        ICollection<string> GetAllRefreshTokenCacheItems(RequestContext requestContext);
+        ICollection<string> GetAllIdTokenCacheItems(RequestContext requestContext);
+        ICollection<string> GetAllAccountCacheItems(RequestContext requestContext);
+        void AddAccessTokenCacheItem(MsalAccessTokenCacheItem accessItem);
+        void AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem);
+
+        void SaveAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem);
+
+        void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem,
+            RequestContext requestContext);
+
+        void SaveRefreshTokenCacheItem(
+            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
+            MsalIdTokenCacheItem msalIdTokenCacheItem);
+
+        void ClearAdalCache();
+        void ClearMsalCache();
+        void Clear();
+
+        MsalAccountCacheItem GetAccount(MsalRefreshTokenCacheItem refreshTokenCacheItem, RequestContext requestContext);
     }
 }

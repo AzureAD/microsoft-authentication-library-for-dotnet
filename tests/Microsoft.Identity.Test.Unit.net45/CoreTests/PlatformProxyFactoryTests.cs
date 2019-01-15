@@ -39,10 +39,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     {
         [TestMethod]
         public void PlatformProxyFactoryCachesTheProxy()
-        {
+        {            
             // Act 
-            var proxy1 = PlatformProxyFactory.GetPlatformProxy();
-            var proxy2 = PlatformProxyFactory.GetPlatformProxy();
+            var proxy1 = PlatformProxyFactory.CreatePlatformProxy(null);
+            var proxy2 = PlatformProxyFactory.CreatePlatformProxy(null);
 
             // Assert
             Assert.IsTrue(proxy1 == proxy2);
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         public void PlatformProxyFactoryReturnsInstances()
         {
             // Arrange
-            var proxy = PlatformProxyFactory.GetPlatformProxy();
+            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
 
             // Act and Assert
             Assert.AreNotSame(
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
                 // Arrange
                 Environment.SetEnvironmentVariable("proxy_foo", "bar");
 
-                var proxy = PlatformProxyFactory.GetPlatformProxy();
+                var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
 
                 // Act
                 string actualValue = proxy.GetEnvironmentVariable("proxy_foo");
@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
 
             AssertException.Throws<ArgumentNullException>(
                 () =>
-                PlatformProxyFactory.GetPlatformProxy().GetEnvironmentVariable(""));
+                PlatformProxyFactory.CreatePlatformProxy(null).GetEnvironmentVariable(""));
         }
 
       

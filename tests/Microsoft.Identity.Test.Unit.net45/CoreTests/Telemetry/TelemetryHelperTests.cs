@@ -27,6 +27,7 @@
 
 using System.Collections.Generic;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
@@ -44,7 +45,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
         public void Setup()
         {
             _testReceiver = new _TestReceiver();
-            _telemetryManager = new TelemetryManager(_testReceiver);
+            _telemetryManager = new TelemetryManager(TestCommon.CreateDefaultServiceBundle().PlatformProxy, _testReceiver.HandleTelemetryEvents);
             _trackingEvent = new _TestEvent("tracking event");
         }
 

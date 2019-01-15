@@ -53,9 +53,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestInitialize]
         public void TestInitialize()
         {
-            TestCommon.ResetState();
+            TestCommon.ResetStateAndInitMsal();
         }
-
 
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]

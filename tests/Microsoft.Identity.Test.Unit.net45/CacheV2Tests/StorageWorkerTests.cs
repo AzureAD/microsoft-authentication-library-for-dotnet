@@ -31,6 +31,7 @@ using Microsoft.Identity.Client.CacheV2.Impl;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
@@ -41,13 +42,15 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         private const string _mockPath = "mock/relative/path.txt";
         public const string SampleJsonString1 = "{'life': 42, 'cat': '=^^='}";
         public const string SampleJsonString2 = "{'cat': '=^^='}";
-        private readonly FileSystemCredentialPathManager _credentialPathManager = new FileSystemCredentialPathManager();
+        private FileSystemCredentialPathManager _credentialPathManager;
         private MockFileIO _mockFileIO;
         private PathStorageWorker _storageWorker;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            _credentialPathManager =
+                new FileSystemCredentialPathManager(TestCommon.CreateDefaultServiceBundle().PlatformProxy.CryptographyManager);
             _mockFileIO = new MockFileIO();
             _storageWorker = new PathStorageWorker(_mockFileIO, _credentialPathManager);
         }

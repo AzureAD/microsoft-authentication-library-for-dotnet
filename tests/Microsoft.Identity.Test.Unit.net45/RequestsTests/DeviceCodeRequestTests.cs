@@ -35,7 +35,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -58,7 +57,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private const int ExpectedExpiresIn = 900;
         private const int ExpectedInterval = 1;
         private const string ExpectedVerificationUrl = "https://microsoft.com/devicelogin";
-        private TokenCache _cache;
         private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
 
         private string ExpectedMessage =>
@@ -79,14 +77,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             TestCommon.ResetStateAndInitMsal();
             _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
-            _cache = new TokenCache();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-            _cache.TokenCacheAccessor.ClearAccessTokens();
-            _cache.TokenCacheAccessor.ClearRefreshTokens();
         }
 
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()
@@ -100,26 +90,24 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
-                    httpManager,
+                    harness,
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                _cache.ServiceBundle = serviceBundle;
-                
+                var cache = new TokenCache(harness.ServiceBundle);
+
                 // Check that cache is empty
-                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccessTokenCount);
-                Assert.AreEqual(0, _cache.TokenCacheAccessor.AccountCount);
-                Assert.AreEqual(0, _cache.TokenCacheAccessor.IdTokenCount);
-                Assert.AreEqual(0, _cache.TokenCacheAccessor.RefreshTokenCount);
+                Assert.AreEqual(0, cache.TokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(0, cache.TokenCacheAccessor.AccountCount);
+                Assert.AreEqual(0, cache.TokenCacheAccessor.IdTokenCount);
+                Assert.AreEqual(0, cache.TokenCacheAccessor.RefreshTokenCount);
 
                 DeviceCodeResult actualDeviceCodeResult = null;
                 var request = new DeviceCodeRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     result =>
@@ -143,10 +131,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
 
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, _cache.TokenCacheAccessor.AccessTokenCount);
-                Assert.AreEqual(1, _cache.TokenCacheAccessor.AccountCount);
-                Assert.AreEqual(1, _cache.TokenCacheAccessor.IdTokenCount);
-                Assert.AreEqual(1, _cache.TokenCacheAccessor.RefreshTokenCount);
+                Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(1, cache.TokenCacheAccessor.AccountCount);
+                Assert.AreEqual(1, cache.TokenCacheAccessor.IdTokenCount);
+                Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
             }
         }
 
@@ -154,22 +142,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("DeviceCodeRequestTests")]
         public void TestDeviceCodeCancel()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 const int NumberOfAuthorizationPendingRequestsToInject = 0;
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
-                    httpManager,
+                    harness,
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
-
-                _cache.ServiceBundle = serviceBundle;
 
                 var cancellationSource = new CancellationTokenSource();
 
                 DeviceCodeResult actualDeviceCodeResult = null;
                 var request = new DeviceCodeRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     async result =>
@@ -184,7 +169,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AssertException.TaskThrows<OperationCanceledException>(() => request.RunAsync(cancellationSource.Token));
             }
         }
-
 
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
@@ -216,22 +200,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
             };
 
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
                 try
                 {
                     const int NumberOfAuthorizationPendingRequestsToInject = 2;
                     var parameters = CreateAuthenticationParametersAndSetupMocks(
-                        httpManager,
+                        harness,
                         NumberOfAuthorizationPendingRequestsToInject,
                         out HashSet<string> expectedScopes);
 
-                    var aadInstanceDiscovery = new AadInstanceDiscovery(httpManager, new TelemetryManager());
-                    _cache.ServiceBundle = serviceBundle;
-
                     var request = new DeviceCodeRequest(
-                        serviceBundle,
+                        harness.ServiceBundle,
                         parameters,
                         ApiEvent.ApiIds.None,
                         result => Task.FromResult(0));
@@ -261,8 +241,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             .Select(x => x.Message)
                             .ToArray());
 
-
-
                     Assert.IsFalse(
                         logCallbacks.Any(x => x.Level == LogLevel.Error),
                         "Error level logs should not exist but got: " + errorLogs);
@@ -275,29 +253,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         private AuthenticationRequestParameters CreateAuthenticationParametersAndSetupMocks(
-            MockHttpManager httpManager,
+            MockHttpAndServiceBundle harness,
             int numAuthorizationPendingResults,
             out HashSet<string> expectedScopes)
         {
-            var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-
-            var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
-            _cache = new TokenCache()
-            {
-                ClientId = MsalTestConstants.ClientId,
-                ServiceBundle = serviceBundle
-            };
+            var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
+            var cache = new TokenCache(harness.ServiceBundle);
 
             var parameters = new AuthenticationRequestParameters()
             {
                 Authority = authority,
                 ClientId = MsalTestConstants.ClientId,
                 Scope = MsalTestConstants.Scope,
-                TokenCache = _cache,
+                TokenCache = cache,
                 RequestContext = RequestContext.CreateForTest()
             };
 
-            TestCommon.MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+            TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
             expectedScopes = new HashSet<string>();
             expectedScopes.UnionWith(MsalTestConstants.Scope);
@@ -306,7 +278,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             expectedScopes.Add(OAuth2Value.ScopeOpenId);
 
             // Mock Handler for device code request
-            httpManager.AddMockHandler(
+            harness.HttpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
                     Method = HttpMethod.Post,
@@ -320,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             for (int i = 0; i < numAuthorizationPendingResults; i++)
             {
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Post,
@@ -340,7 +312,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             if (numAuthorizationPendingResults > 0)
             {
                 // Mock Handler for devicecode->token exchange request
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Post,

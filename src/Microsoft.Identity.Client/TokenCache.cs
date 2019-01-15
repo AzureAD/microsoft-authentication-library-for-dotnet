@@ -654,7 +654,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
+        void ITokenCacheInternal.DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem,
             RequestContext requestContext)
         {
             lock (LockObject)
@@ -944,7 +944,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal MsalAccountCacheItem GetAccount(MsalRefreshTokenCacheItem refreshTokenCacheItem, RequestContext requestContext)
+        MsalAccountCacheItem ITokenCacheInternal.GetAccount(MsalRefreshTokenCacheItem refreshTokenCacheItem, RequestContext requestContext)
         {
             TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
             {
@@ -1068,7 +1068,7 @@ namespace Microsoft.Identity.Client
                 account.HomeAccountId.Identifier);
         }
 
-        internal ICollection<string> GetAllAccessTokenCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllAccessTokenCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1080,7 +1080,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<string> GetAllRefreshTokenCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllRefreshTokenCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1092,7 +1092,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<string> GetAllIdTokenCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllIdTokenCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1104,7 +1104,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal ICollection<string> GetAllAccountCacheItems(RequestContext requestContext)
+        ICollection<string> ITokenCacheInternal.GetAllAccountCacheItems(RequestContext requestContext)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1116,7 +1116,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void AddAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
+        void ITokenCacheInternal.AddAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1126,7 +1126,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem)
+        void ITokenCacheInternal.AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem)
         {
             // this method is called by serialize and does not require
             // delegates because serialize itself is called from delegates
@@ -1156,7 +1156,7 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void Clear()
+        void ITokenCacheInternal.Clear()
         {
             lock (LockObject)
             {
@@ -1173,8 +1173,8 @@ namespace Microsoft.Identity.Client
                     OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
-                    ClearMsalCache();
-                    ClearAdalCache();
+                    ((ITokenCacheInternal)this).ClearMsalCache();
+                    ((ITokenCacheInternal)this).ClearAdalCache();
                 }
                 finally
                 {
@@ -1186,14 +1186,14 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void ClearAdalCache()
+        void ITokenCacheInternal.ClearAdalCache()
         {
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(Logger, LegacyCachePersistence.LoadCache());
             dictionary.Clear();
             LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(Logger, dictionary));
         }
 
-        internal void ClearMsalCache()
+        void ITokenCacheInternal.ClearMsalCache()
         {
             TokenCacheAccessor.Clear();
         }
@@ -1201,7 +1201,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Only used by dev test apps
         /// </summary>
-        internal void SaveAccesTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem)
+        void ITokenCacheInternal.SaveAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem, MsalIdTokenCacheItem msalIdTokenCacheItem)
         {
             lock (LockObject)
             {
@@ -1241,7 +1241,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="msalRefreshTokenCacheItem"></param>
         /// <param name="msalIdTokenCacheItem"></param>
-        internal void SaveRefreshTokenCacheItem(
+        void ITokenCacheInternal.SaveRefreshTokenCacheItem(
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
             MsalIdTokenCacheItem msalIdTokenCacheItem)
         {

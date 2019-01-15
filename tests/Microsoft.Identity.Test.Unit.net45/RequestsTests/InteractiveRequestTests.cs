@@ -53,8 +53,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
     [TestClass]
     public class InteractiveRequestTests
     {
-        private readonly MyReceiver _myReceiver = new MyReceiver();
-
         [TestInitialize]
         public void TestInitialize()
         {
@@ -65,16 +63,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void SliceParametersTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var authority = Authority.CreateAuthority(
+                    harness.ServiceBundle, 
+                    MsalTestConstants.AuthorityHomeTenant);
 
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
-                var cache = new TokenCache()
-                {
-                    ClientId = MsalTestConstants.ClientId,
-                    ServiceBundle = serviceBundle
-                };
+                var cache = new TokenCache(harness.ServiceBundle);
 
                 var ui = new MockWebUI()
                 {
@@ -86,11 +81,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         {"key1", "value1%20with%20encoded%20space"},
                         {"key2", "value2"}
                     }
-                };         
-                
-                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                };
 
-                httpManager.AddMockHandler(
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
+
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Post,
@@ -111,11 +106,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = cache,
                     RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
-                    ExtraQueryParameters = "extra=qp"
+                    ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                 };
 
                 var request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -136,16 +131,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void NoCacheLookup()
         {
-            using (var httpManager = new MockHttpManager())
-            {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+            MyReceiver myReceiver = new MyReceiver();
 
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
-                var cache = new TokenCache()
-                {
-                    ClientId = MsalTestConstants.ClientId,
-                    ServiceBundle = serviceBundle
-                };
+            using (var harness = new MockHttpAndServiceBundle(telemetryCallback: myReceiver.HandleTelemetryEvents))
+            {
+                var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
+                var cache = new TokenCache(harness.ServiceBundle);
 
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
@@ -169,9 +160,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
                                 
-                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
 
                 var parameters = new AuthenticationRequestParameters
                 {
@@ -181,11 +172,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = cache,
                     RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
-                    ExtraQueryParameters = "extra=qp"
+                    ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                 };
 
                 var request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -201,17 +192,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(result.AccessToken, "some-access-token");
 
                 Assert.IsNotNull(
-                    _myReceiver.EventsReceived.Find(
+                    myReceiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
                             anEvent[UiEvent.UserCancelledKey] == "false"));
                 Assert.IsNotNull(
-                    _myReceiver.EventsReceived.Find(
+                    myReceiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
                             anEvent[ApiEvent.UiBehaviorKey] == "select_account"));
                 Assert.IsNotNull(
-                    _myReceiver.EventsReceived.Find(
+                    myReceiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("ui_event") &&
                             anEvent[UiEvent.AccessDeniedKey] == "false"));
@@ -224,11 +215,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             try
             {
-                using (var httpManager = new MockHttpManager())
+                using (var harness = new MockHttpAndServiceBundle())
                 {
-                    var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
-
-                    var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
+                    var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
 
                     var parameters = new AuthenticationRequestParameters
                     {
@@ -238,11 +227,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         TokenCache = null,
                         RequestContext = RequestContext.CreateForTest(),
                         RedirectUri = new Uri("some://uri#fragment=not-so-good"),
-                        ExtraQueryParameters = "extra=qp"
+                        ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                     };
 
                     new InteractiveRequest(
-                        serviceBundle,
+                        harness.ServiceBundle,
                         parameters,
                         ApiEvent.ApiIds.None,
                         MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -262,13 +251,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+                var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
 
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
-
-                httpManager.AddMockHandler(
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -288,7 +275,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var ui = new MockWebUI();
 
                 var request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -318,12 +305,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
-
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
-                httpManager.AddMockHandler(
+                var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
+                harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Get,
@@ -343,7 +328,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var ui = new MockWebUI();
 
                 var request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -372,12 +357,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
+                var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
 
-                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
                 var webUi = new MockWebUI()
                 {
@@ -394,11 +378,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = null,
                     RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
-                    ExtraQueryParameters = "extra=qp"
+                    ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                 };
 
                 var request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -426,7 +410,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 };
 
                 request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -452,10 +436,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
         {            
-            using (var httpManager = new MockHttpManager())
+            using (var harness = new MockHttpAndServiceBundle())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
+                var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
                 var parameters = new AuthenticationRequestParameters
                 {
                     Authority = authority,
@@ -464,13 +447,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = null,
                     RequestContext = RequestContext.CreateForTest(),
                     RedirectUri = new Uri("some://uri"),
-                    ExtraQueryParameters = "extra=qp&prompt=login"
+                    ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }, {"prompt", "login"}}
                 };
 
-                MockInstanceDiscoveryAndOpenIdRequest(httpManager);
+                MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
                 var request = new InteractiveRequest(
-                    serviceBundle,
+                    harness.ServiceBundle,
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -493,7 +476,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
         }
 
-        
         private static void MockInstanceDiscoveryAndOpenIdRequest(MockHttpManager mockHttpManager)
         {
             mockHttpManager.AddInstanceDiscoveryMockHandler();
