@@ -48,9 +48,9 @@ namespace XForms
 
         private void RefreshCacheView()
         {
-            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
 
             IDictionary<string, MsalAccessTokenCacheItem> accessTokens = new Dictionary<string, MsalAccessTokenCacheItem>();
             foreach (var accessItemStr in tokenCache.GetAllAccessTokenCacheItems(requestContext))
@@ -110,7 +110,7 @@ namespace XForms
         {
             var mi = ((MenuItem)sender);
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
-            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
             // set access token as expired
             accessTokenCacheItem.ExpiresOnUnixTimestamp = GetCurrentTimestamp();
@@ -126,9 +126,9 @@ namespace XForms
             var mi = ((MenuItem)sender);
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
 
-            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
             // todo pass idToken instead of null
-            var requestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null));
+            var requestContext = RequestContext.CreateForTest();
 
             tokenCache.DeleteAccessToken(accessTokenCacheItem, null, requestContext);
 
@@ -139,7 +139,7 @@ namespace XForms
         {
             var mi = ((MenuItem)sender);
             var refreshTokenCacheItem = (MsalRefreshTokenCacheItem)mi.CommandParameter;
-            var tokenCache = App.MsalPublicClient.UserTokenCache;
+            var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
             // invalidate refresh token
             refreshTokenCacheItem.Secret = "InvalidValue";

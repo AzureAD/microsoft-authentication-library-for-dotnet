@@ -50,13 +50,13 @@ namespace XForms
             authority.Text = App.Authority;
             clientIdEntry.Text = App.ClientId;
 
-            numOfAtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllAccessTokensAsString()
+            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccessTokensAsString()
                 .Count.ToString(CultureInfo.InvariantCulture);
-            numOfRtItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllRefreshTokensAsString()
+            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokensAsString()
                 .Count.ToString(CultureInfo.InvariantCulture);
-            numOfIdItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllIdTokensAsString()
+            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllIdTokensAsString()
                 .Count.ToString(CultureInfo.InvariantCulture);
-            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCache.TokenCacheAccessor.GetAllAccountsAsString()
+            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccountsAsString()
                 .Count.ToString(CultureInfo.InvariantCulture);
 
             validateAuthority.IsToggled = App.ValidateAuthority;
@@ -72,24 +72,25 @@ namespace XForms
 
         private void OnClearAllCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCache.Clear();
+            App.MsalPublicClient.UserTokenCacheInternal.Clear();
             RefreshView();
         }
 
         private void OnClearAdalCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCache.ClearAdalCache();
+            App.MsalPublicClient.UserTokenCacheInternal.ClearAdalCache();
             RefreshView();
         }
 
         private void OnClearMsalCache(object sender, EventArgs e)
         {
-            App.MsalPublicClient.UserTokenCache.ClearMsalCache();
+            App.MsalPublicClient.UserTokenCacheInternal.ClearMsalCache();
             RefreshView();
         }
 
         private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
         {
+            // TODO(migration): remove ValidateAuthority toggle...
             App.MsalPublicClient.ValidateAuthority = args.Value;
             App.ValidateAuthority = args.Value;
         }
