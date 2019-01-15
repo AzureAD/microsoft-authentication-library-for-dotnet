@@ -691,33 +691,34 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("ConfidentialClientApplicationTests")]
         public async Task AcquireTokenByRefreshTokenTestAsync()
         {
-         await RunWithMockHttpAsync(
-                async (httpManager, serviceBundle, receiver) =>
-                {
-                    httpManager.AddInstanceDiscoveryMockHandler();
-                    httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
-                    httpManager.AddSuccessTokenResponseMockHandlerForPost();
+            using (var httpManager = new MockHttpManager())
+            {
+                httpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
+                
+                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                          .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), true)
+                                                          .WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                          .WithClientSecret(MsalTestConstants.ClientSecret)
+                                                          .WithHttpManager(httpManager)
+                                                          .BuildConcrete();
 
-                    TokenCache userCahce = new TokenCache();
-                    ClientCredential cc = new ClientCredential(MsalTestConstants.ClientSecret);
-                    ConfidentialClientApplication app = new ConfidentialClientApplication(serviceBundle, MsalTestConstants.ClientId, MsalTestConstants.AuthorityCommonTenant, MsalTestConstants.RedirectUri, cc, userCahce, new TokenCache());
-                    var result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(null, "SomeRefreshToken").ConfigureAwait(false);
+                var result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(null, "SomeRefreshToken").ConfigureAwait(false);
 
-                    Assert.AreEqual(userCahce.TokenCacheAccessor.RefreshTokenCount, 1);
-                    Assert.AreEqual(userCahce.TokenCacheAccessor.AccessTokenCount, 1);
-                    Assert.IsNotNull(result.AccessToken);
-                    Assert.AreEqual(result.AccessToken, "some-access-token");
+                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.RefreshTokenCount, 1);
+                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.AccessTokenCount, 1);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.AccessToken, "some-access-token");
 
-                    userCahce.Clear();
-                    httpManager.AddSuccessTokenResponseMockHandlerForPost();
-                    List<string> scope = new List<string>();
-                    result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(MsalTestConstants.Scope, "SomeRefreshToken").ConfigureAwait(false);
-                    Assert.AreEqual(userCahce.TokenCacheAccessor.RefreshTokenCount, 1);
-                    Assert.AreEqual(userCahce.TokenCacheAccessor.AccessTokenCount, 1);
-                    Assert.IsNotNull(result.AccessToken);
-                    Assert.AreEqual(result.AccessToken, "some-access-token");
-
-                }).ConfigureAwait(false);
+                app.UserTokenCacheInternal.Clear();
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
+                result = await ((IByRefreshToken)app).AcquireTokenByRefreshTokenAsync(MsalTestConstants.Scope, "SomeRefreshToken").ConfigureAwait(false);
+                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.RefreshTokenCount, 1);
+                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.AccessTokenCount, 1);
+                Assert.IsNotNull(result.AccessToken);
+                Assert.AreEqual(result.AccessToken, "some-access-token");
+            }
         }
 
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)

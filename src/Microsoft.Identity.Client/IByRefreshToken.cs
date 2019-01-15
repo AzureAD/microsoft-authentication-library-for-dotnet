@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -49,5 +50,13 @@ namespace Microsoft.Identity.Client
         /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
         /// <param name="refreshToken">The refresh token from ADAL 2.x</param>
         Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken);
+
+        /// <summary>
+        /// TODO(migration): add documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        AcquireTokenByRefreshTokenParameterBuilder AcquireTokenByRefreshToken(IEnumerable<string> scopes, string refreshToken);
     }
 }

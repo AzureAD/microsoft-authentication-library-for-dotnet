@@ -183,7 +183,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            RequestContext requestContext = CreateRequestContext(Guid.Empty);
+            RequestContext requestContext = CreateRequestContext();
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
             if (UserTokenCache == null)
             {
@@ -262,55 +262,14 @@ namespace Microsoft.Identity.Client
                 Account = account,
                 Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
                 RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
-                RequestContext = CreateRequestContext(Guid.Empty),
+                RequestContext = CreateRequestContext(),
                 ExtraQueryParameters = commonParameters.ExtraQueryParameters,
             };
         }
 
-        internal async Task<AuthenticationResult> AcquireByRefreshTokenCommonAsync(IEnumerable<string> scopes, string userProvidedRefreshToken)
-        {
-            var context = CreateRequestContext();
-            SortedSet<string> _scopes;
-
-            if (scopes == null || scopes.Count() == 0)
-            {
-                _scopes = new SortedSet<string>();
-                _scopes.Add(ClientId + "/.default");
-                context.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
-            }
-            else
-            {
-                _scopes = ScopeHelper.CreateSortedSetFromEnumerable(scopes);
-                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, LogMessages.UsingXScopesForRefreshTokenRequest, scopes.Count()));
-            }
-
-            var reqParams = new AuthenticationRequestParameters
-            {
-                SliceParameters = SliceParameters,
-                Authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, false),
-                ClientId = ClientId,
-                TokenCache = UserTokenCache,
-                Scope = _scopes,
-                RedirectUri = new Uri(RedirectUri),
-                RequestContext = context,
-                ValidateAuthority = ValidateAuthority,
-                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
-                IsRefreshTokenRequest = true
-            };
-
-            var handler = new ByRefreshTokenRequest(
-                ServiceBundle,
-                reqParams,
-                ApiEvent.ApiIds.AcquireTokenByRefreshToken,
-                userProvidedRefreshToken);
-
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
         private RequestContext CreateRequestContext()
         {
-            correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(ClientId, MsalLogger.Create(correlationId, Component, ServiceBundle.Config));
+            return new RequestContext(ClientId, MsalLogger.Create(Guid.NewGuid(), Component, ServiceBundle.Config));
         }
 
         /// <summary>
@@ -326,7 +285,7 @@ namespace Microsoft.Identity.Client
         /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token</param>
         /// <returns>An <see cref="AuthenticationResult"/> containing the requested access token</returns>
         /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
-        /// for instance, if no refresh token was in the cache, or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
         /// or performs two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than

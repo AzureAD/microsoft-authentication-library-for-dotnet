@@ -35,5 +35,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         Task<AuthenticationResult> ExecuteAsync(
             IAcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken);
+
+        Task<AuthenticationResult> ExecuteAsync(
+            IAcquireTokenByRefreshTokenParameters silentParameters,
+            CancellationToken cancellationToken);
     }
 }

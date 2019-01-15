@@ -23,9 +23,6 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetStandard)'">
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="LogMessages.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />

@@ -396,7 +396,14 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
             }
 
-            return await AcquireByRefreshTokenCommonAsync(scopes, refreshToken).ConfigureAwait(false);
+            return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
+            IEnumerable<string> scopes,
+            string refreshToken)
+        {
+            return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
         }
 
         internal ClientCredential ClientCredential { get; }

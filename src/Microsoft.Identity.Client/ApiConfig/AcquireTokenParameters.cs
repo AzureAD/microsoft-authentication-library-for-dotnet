@@ -40,7 +40,8 @@ namespace Microsoft.Identity.Client.ApiConfig
                                             IAcquireTokenByAuthorizationCodeParameters,
                                             IAcquireTokenForClientParameters,
                                             IGetAuthorizationRequestUrlParameters,
-                                            IAcquireTokenSilentParameters
+                                            IAcquireTokenSilentParameters,
+                                            IAcquireTokenByRefreshTokenParameters
     {
         public string AuthorizationCode { get; internal set; }
         public bool ForceRefresh { get; internal set; }
@@ -77,5 +78,8 @@ namespace Microsoft.Identity.Client.ApiConfig
         public SecureString Password { get; internal set; }
 
         public string RedirectUri { get; internal set; }
+
+        // ByRefreshToken Parameters
+        public string RefreshToken { get; internal set; }
     }
 }
