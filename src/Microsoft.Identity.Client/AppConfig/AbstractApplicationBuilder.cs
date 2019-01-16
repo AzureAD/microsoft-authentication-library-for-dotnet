@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// Uses a specific <see cref="IMsalHttpClientFactory"/> to communicate
-        /// with the IdP. This enable advanced scenarios such as setting a proxy,
+        /// with the IdP. This enables advanced scenarios such as setting a proxy,
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
@@ -82,8 +82,8 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Sets the Debug logging callback to a default debug methods which displays
-        /// the level of the message and the message. For details see https://aka.ms/msal-net-logging
+        /// Sets the Debug logging callback to a default debug method which displays
+        /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="telemetryCallback">Delegate to the callback sending the telemetry
         /// elaborated by the library to the telemetry endpoint of choice</param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <exception cref="InvalidOperationException"/> is thrown if the the method was already 
+        /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
 
         public T WithTelemetryCallback(TelemetryCallback telemetryCallback)
@@ -150,12 +150,12 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Sets the Tenant Id of the organization from which the application will let
         /// users sign-in. This is classically a GUID or a domain name. See https://aka.ms/msal-net-application-configuration.
-        /// Although this is also possible to set <paramref name="tenantId"/> to <c>common</c>, 
-        /// <c>organizations</c>, and <c>consumers</c>, it's rather recommended to use one of the
+        /// Although it is also possible to set <paramref name="tenantId"/> to <c>common</c>, 
+        /// <c>organizations</c>, and <c>consumers</c>, it's recommended to use one of the
         /// overrides of <see cref="AddKnownAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="tenantId">tenant ID of the Azure AD tenant
-        /// or a domain associated with this Azure AD tenant, in order to sign-in user of a specific organization only</param>
+        /// or a domain associated with this Azure AD tenant, in order to sign-in a user of a specific organization only</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithTenantId(string tenantId)
         {
@@ -164,12 +164,12 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Enables/disable logging of Personally Identifiable Information. See https://aka.ms/msal-net-logging
+        /// Enables/disables logging of Personally Identifiable Information. See https://aka.ms/msal-net-logging
         /// </summary>
-        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of 
-        /// Personally Identifiable data (PII) data. 
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR. 
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
         /// You can set it to <c>true</c> for advanced debugging requiring PII</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithEnablePiiLogging(bool enablePiiLogging)
@@ -207,8 +207,8 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Sets application options, which can, for instance have been read. See https://aka.ms/msal-net-application-configuration.
-        /// from configuration files.
+        /// Sets application options, which can, for instance have been read from configuration files.
+        /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="applicationOptions">Application options</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -602,7 +602,7 @@ namespace Microsoft.Identity.Client.AppConfig
             }
         }
 
-        /// <summary>   
+        /// <summary>
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server</param>
@@ -618,7 +618,7 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Adds a know authority corresponding to an Azure AD B2C policy. 
+        /// Adds a known authority corresponding to an Azure AD B2C policy. 
         /// See https://aka.ms/msal-net-b2c-specificities
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
