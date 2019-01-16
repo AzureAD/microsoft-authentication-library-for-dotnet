@@ -70,23 +70,23 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
             xamarinController.Application = app;
         }
 
-        /// <summary>
-        /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
-        /// </summary>
-        [Test]
-        public void AcquireTokenTest()
-        {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+        //}
 
-        /// <summary>
-        /// Runs through the standard acquire token silent flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenSilentTest()
-        {
-            _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token silent flow
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenSilentTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
+        //}
 
         /// <summary>
         /// Runs through the standard acquire token flow
@@ -100,130 +100,130 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
             _mobileTestHelper.PromptBehaviorTestHelperWithConsent(xamarinController, labResponse);
         }
 
-        /// <summary>
-        /// B2C acquire token with Facebook provider
-        /// b2clogin.com authority
-        /// with subsequent silent call
-        /// </summary>
-        [Test]
-        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
-        public void B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest()
-        {
-            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
-        }
+        ///// <summary>
+        ///// B2C acquire token with Facebook provider
+        ///// b2clogin.com authority
+        ///// with subsequent silent call
+        ///// </summary>
+        //[Test]
+        //[Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
+        //public void B2CFacebookProviderWithB2CLoginAuthorityAcquireTokenTest()
+        //{
+        //    _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+        //}
 
-        /// <summary>
-        /// B2C acquire token with Facebook provider 
-        /// login.microsoftonline.com authority
-        /// with subsequent silent call
-        /// </summary>
-        [Test]
-        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
-        public void B2CFacebookProviderWithMicrosoftAuthorityAcquireTokenTest()
-        {
-            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), false);
-        }
+        ///// <summary>
+        ///// B2C acquire token with Facebook provider 
+        ///// login.microsoftonline.com authority
+        ///// with subsequent silent call
+        ///// </summary>
+        //[Test]
+        //[Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
+        //public void B2CFacebookProviderWithMicrosoftAuthorityAcquireTokenTest()
+        //{
+        //    _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), false);
+        //}
 
-        /// <summary>
-        /// B2C acquire token with Facebook provider
-        /// b2clogin.com authority
-        /// call to edit profile authority with
-        ///  UIBehavior none
-        /// </summary>
-        [Test]
-        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
-        public void B2CFacebookProviderEditPolicyAcquireTokenTest()
-        {
-            _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
-            _mobileTestHelper.B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
-        }
+        ///// <summary>
+        ///// B2C acquire token with Facebook provider
+        ///// b2clogin.com authority
+        ///// call to edit profile authority with
+        /////  UIBehavior none
+        ///// </summary>
+        //[Test]
+        //[Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
+        //public void B2CFacebookProviderEditPolicyAcquireTokenTest()
+        //{
+        //    _mobileTestHelper.B2CFacebookProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CFacebookAccount(), true);
+        //    _mobileTestHelper.B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(xamarinController);
+        //}
 
-        /// <summary>
-        /// B2C acquire token with Google provider
-        /// b2clogin.com authority
-        /// with subsequent silent call
-        /// </summary>
-        [Test]
-        [Ignore("Google Auth does not support embedded webview from b2clogin.com authority. " +
-            "App Center cannot run system browser tests yet, so this test can only be run in " +
-            "system browser locally.")]
-        public void B2CGoogleProviderWithB2CLoginAuthorityAcquireTokenTest()
-        {
-            _mobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), true);
-        }
+        ///// <summary>
+        ///// B2C acquire token with Google provider
+        ///// b2clogin.com authority
+        ///// with subsequent silent call
+        ///// </summary>
+        //[Test]
+        //[Ignore("Google Auth does not support embedded webview from b2clogin.com authority. " +
+        //    "App Center cannot run system browser tests yet, so this test can only be run in " +
+        //    "system browser locally.")]
+        //public void B2CGoogleProviderWithB2CLoginAuthorityAcquireTokenTest()
+        //{
+        //    _mobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), true);
+        //}
 
-        /// <summary>
-        /// B2C acquire token with Google provider 
-        /// login.microsoftonline.com authority
-        /// with subsequent silent call
-        /// </summary>
-        [Test]
-        [Ignore("UI is different in AppCenter compared w/local.")]
-        public void B2CGoogleProviderWithMicrosoftAuthorityAcquireTokenTest()
-        {
-            _mobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), false);
-        }
+        ///// <summary>
+        ///// B2C acquire token with Google provider 
+        ///// login.microsoftonline.com authority
+        ///// with subsequent silent call
+        ///// </summary>
+        //[Test]
+        //[Ignore("UI is different in AppCenter compared w/local.")]
+        //public void B2CGoogleProviderWithMicrosoftAuthorityAcquireTokenTest()
+        //{
+        //    _mobileTestHelper.B2CGoogleProviderAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CGoogleAccount(), false);
+        //}
 
-        /// <summary>
-        /// B2C acquire token with local account 
-        /// b2clogin.com authority
-        /// and subsequent silent call
-        /// </summary>
-        [Test]
-        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
-        public void B2CLocalAccountAcquireTokenTest()
-        {
-            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
-        }
+        ///// <summary>
+        ///// B2C acquire token with local account 
+        ///// b2clogin.com authority
+        ///// and subsequent silent call
+        ///// </summary>
+        //[Test]
+        //[Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
+        //public void B2CLocalAccountAcquireTokenTest()
+        //{
+        //    _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
+        //}
 
-        /// <summary>
-        /// B2C acquire token with local account 
-        /// login.microsoftonline.com authority
-        /// with subsequent silent call
-        /// </summary>
-        [Test]
-        [Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
-        public void B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest()
-        {
-            _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), false);
-        }
+        ///// <summary>
+        ///// B2C acquire token with local account 
+        ///// login.microsoftonline.com authority
+        ///// with subsequent silent call
+        ///// </summary>
+        //[Test]
+        //[Ignore("Current web element search implementation is unable to properly locate certain B2C elements. Will be addressed in future updates")]
+        //public void B2CLocalAccountAcquireTokenWithMicrosoftAuthorityTest()
+        //{
+        //    _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), false);
+        //}
 
-        /// <summary>
-        /// Runs through the standard acquire token ADFSV4 Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV4InteractiveFederatedTest()
-        {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(
-                xamarinController,
-                LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4));
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token ADFSV4 Federated flow
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenADFSV4InteractiveFederatedTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(
+        //        xamarinController,
+        //        LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4));
+        //}
 
-        /// <summary>
-        /// Runs through the standard acquire token ADFSV3 Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV3InteractiveFederatedTest()
-        {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token ADFSV3 Federated flow
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenADFSV3InteractiveFederatedTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
+        //}
 
-        /// <summary>
-        /// Runs through the standard acquire token ADFSV4 Non-Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV4InteractiveNonFederatedTest()
-        {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token ADFSV4 Non-Federated flow
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenADFSV4InteractiveNonFederatedTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+        //}
 
-        /// <summary>
-        /// Runs through the standard acquire token ADFSV3 Non-Federated flow
-        /// </summary>
-        [Test]
-        public void AcquireTokenADFSV3InteractiveNonFederatedTest()
-        {
-            _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
-        }
+        ///// <summary>
+        ///// Runs through the standard acquire token ADFSV3 Non-Federated flow
+        ///// </summary>
+        //[Test]
+        //public void AcquireTokenADFSV3InteractiveNonFederatedTest()
+        //{
+        //    _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
+        //}
     }
 }
