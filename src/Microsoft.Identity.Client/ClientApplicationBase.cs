@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
     /// Abstract class containing common API methods and properties. Both <see cref="Microsoft.Identity.Client.PublicClientApplication"/> and <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>
     /// extend this class. For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
-    public abstract partial class ClientApplicationBase : IClientApplicationBase, IClientApplicationBaseExecutor
+    public abstract partial class ClientApplicationBase : IClientApplicationBase
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         /// <Summary>
@@ -263,7 +263,7 @@ namespace Microsoft.Identity.Client
                 Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
                 RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
                 RequestContext = CreateRequestContext(),
-                ExtraQueryParameters = commonParameters.ExtraQueryParameters,
+                ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(),
             };
         }
 

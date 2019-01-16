@@ -37,7 +37,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-    public partial class ConfidentialClientApplication
+    public partial class ConfidentialClientApplication : IConfidentialClientApplicationExecutor
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
         {
             var requestParams = CreateRequestParameters(onBehalfOfParameters, UserTokenCacheInternal);
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
-            requestParams.SendCertificate = onBehalfOfParameters.WithOnBehalfOfCertificate;
+            requestParams.SendCertificate = onBehalfOfParameters.SendX5C;
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,
                 requestParams,

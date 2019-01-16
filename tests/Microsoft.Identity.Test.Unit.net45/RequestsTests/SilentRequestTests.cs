@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = harness.CreateRequestParams(harness.Cache);
 
                 // set access tokens as expired
-                foreach (string atCacheItemStr in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest()))
+                foreach (string atCacheItemStr in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest(harness.ServiceBundle)))
                 {
                     var accessItem = JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
                     accessItem.ExpiresOnUnixTimestamp =
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         }),
                     TokenCache = null,
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    RequestContext = RequestContext.CreateForTest()
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle)
                 };
 
                 try
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         }),
                     TokenCache = harness.Cache,
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    RequestContext = RequestContext.CreateForTest()
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle)
                 };
 
                 try
@@ -220,7 +220,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Scope = MsalTestConstants.Scope,
                     TokenCache = cache,
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    RequestContext = RequestContext.CreateForTest()
+                    RequestContext = RequestContext.CreateForTest(ServiceBundle)
                 };
                 return parameters;
             }

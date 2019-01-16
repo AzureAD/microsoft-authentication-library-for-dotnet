@@ -65,7 +65,6 @@ namespace Microsoft.Identity.Client.ApiConfig
         public IAccount Account { get; internal set; }
         public string AuthorityOverride { get; internal set; }
         public UserAssertion UserAssertion { get; internal set; }
-        public bool WithOnBehalfOfCertificate { get; internal set; }
 
         // DeviceCode Parameters
         public Func<DeviceCodeResult, Task> DeviceCodeResultCallback { get; internal set; }

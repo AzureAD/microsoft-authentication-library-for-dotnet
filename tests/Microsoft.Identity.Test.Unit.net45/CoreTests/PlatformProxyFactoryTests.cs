@@ -38,14 +38,14 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
     public class PlatformProxyFactoryTests
     {
         [TestMethod]
-        public void PlatformProxyFactoryCachesTheProxy()
+        public void PlatformProxyFactoryDoesNotCacheTheProxy()
         {            
             // Act 
             var proxy1 = PlatformProxyFactory.CreatePlatformProxy(null);
             var proxy2 = PlatformProxyFactory.CreatePlatformProxy(null);
 
             // Assert
-            Assert.IsTrue(proxy1 == proxy2);
+            Assert.IsFalse(proxy1 == proxy2);
         }
 
         [TestMethod]

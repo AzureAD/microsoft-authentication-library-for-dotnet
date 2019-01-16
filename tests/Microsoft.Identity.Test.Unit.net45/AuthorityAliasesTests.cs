@@ -90,7 +90,9 @@ namespace Microsoft.Identity.Test.Unit
                 });
 
                 // mock webUi authorization
-                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success,
                     app.RedirectUri + "?code=some-code"), null, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
                 // mock token request

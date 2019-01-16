@@ -37,6 +37,6 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        bool WithOnBehalfOfCertificate { get; }
+        bool SendX5C { get; }
     }
 }

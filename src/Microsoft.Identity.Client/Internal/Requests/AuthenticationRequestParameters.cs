@@ -45,12 +45,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
         public ITokenCacheInternal TokenCache { get; set; }
-        public SortedSet<string> Scope { get; set; }
+        public SortedSet<string> Scope { get; set; } = new SortedSet<string>();
         public string ClientId { get; set; }
         public string AuthorizationCode { get; set; }
         public Uri RedirectUri { get; set; }
         public string LoginHint { get; set; }
-        public Dictionary<string, string> ExtraQueryParameters { get; set; }
+        public Dictionary<string, string> ExtraQueryParameters { get; set; } = new Dictionary<string, string>();
         public IAccount Account { get; set; }
         public UserAssertion UserAssertion { get; set; }
         public bool IsClientCredentialRequest { get; set; } = false;

@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             var logCallbacks = new List<_LogData>();
 
-            Logger.LogCallback = (level, message, pii) =>
+            using (var harness = new MockHttpAndServiceBundle(logCallback: (level, message, pii) =>
             {
                 if (level == LogLevel.Error)
                 {
@@ -198,9 +198,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         Message = message,
                         IsPii = pii
                     });
-            };
-
-            using (var harness = new MockHttpAndServiceBundle())
+            }))
             {
                 try
                 {
@@ -266,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ClientId = MsalTestConstants.ClientId,
                 Scope = MsalTestConstants.Scope,
                 TokenCache = cache,
-                RequestContext = RequestContext.CreateForTest()
+                RequestContext = RequestContext.CreateForTest(harness.ServiceBundle)
             };
 
             TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);

@@ -40,7 +40,7 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-    public abstract partial class ClientApplicationBase
+    public abstract partial class ClientApplicationBase : IClientApplicationBaseExecutor
     {
         internal ClientApplicationBase(ApplicationConfiguration config)
         {

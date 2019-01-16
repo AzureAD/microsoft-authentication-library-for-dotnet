@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
@@ -96,12 +97,11 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string clientId, string authority)
         : base(PublicClientApplicationBuilder
                 .Create(clientId)
-                //.WithRedirectUri(PlatformProxyFactory.GetPlatformProxy().GetDefaultRedirectUri(clientId))
+                .WithRedirectUri(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId))
                 .AddKnownAuthority(new Uri(authority), true)
                 //.WithUserTokenCache(new TokenCache())
                 .BuildConfiguration())
         {
-            throw new NotImplementedException();
         }
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;

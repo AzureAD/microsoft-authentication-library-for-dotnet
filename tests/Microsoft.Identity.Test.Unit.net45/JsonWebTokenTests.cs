@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit
         internal void SetupMocks(MockHttpManager httpManager)
         {
             httpManager.AddInstanceDiscoveryMockHandler();
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
         }
 
         [TestMethod]
@@ -100,6 +100,7 @@ namespace Microsoft.Identity.Test.Unit
                                                               .AddKnownAuthority(
                                                                   new System.Uri(ClientApplicationBase.DefaultAuthority),
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                              .WithHttpManager(harness.HttpManager)
                                                               .WithX509Certificate2(certificate).BuildConcrete();
 
                 //Check for x5c claim
@@ -130,6 +131,8 @@ namespace Microsoft.Identity.Test.Unit
                                                               .AddKnownAuthority(
                                                                   new System.Uri(ClientApplicationBase.DefaultAuthority),
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                              .WithHttpManager(harness.HttpManager)
+                                                              
                                                               .WithX509Certificate2(certificate).BuildConcrete();
                 
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);

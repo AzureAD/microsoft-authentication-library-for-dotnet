@@ -42,7 +42,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ServiceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(
                 HttpManager, 
                 telemetryCallback: telemetryCallback,
-                logCallback: logCallback);
+                logCallback: logCallback,
+                isExtendedTokenLifetimeEnabled: isExtendedTokenLifetimeEnabled);
         }
 
         public IServiceBundle ServiceBundle { get; }

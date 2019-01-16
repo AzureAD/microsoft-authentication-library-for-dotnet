@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(serviceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
                 Assert.Fail("test should have failed");
             }
             catch (Exception exc)
@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://mytenant.com.b2clogin.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     null,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual(
                     "https://login.microsoftonline.com/6babcaad-604b-40ac-a9d7-9fd97c0b779f/my-policy/oauth2/v2.0/authorize",

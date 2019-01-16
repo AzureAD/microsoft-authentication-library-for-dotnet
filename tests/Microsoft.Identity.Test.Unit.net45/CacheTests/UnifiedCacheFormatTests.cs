@@ -194,15 +194,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TestInitialize(harness.HttpManager);
 
                 PublicClientApplication app = PublicClientApplicationBuilder
-                                              .Create(ClientId).AddKnownAuthority(new Uri(RequestAuthority), true)
+                                              .Create(ClientId)
+                                              .AddKnownAuthority(new Uri(RequestAuthority), true)
+                                              .WithHttpManager(harness.HttpManager)
                                               .BuildConcrete();
 
-                MockWebUI ui = new MockWebUI()
-                {
-                    MockResult = new AuthorizationResult(AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
-                };
-                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success,
                     app.RedirectUri + "?code=some-code"));
 
                 //add mock response for tenant endpoint discovery
