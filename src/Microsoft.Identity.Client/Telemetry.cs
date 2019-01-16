@@ -94,11 +94,5 @@ namespace Microsoft.Identity.Client
         {
             _receiver?.Invoke(events);
         }
-
-        bool ITelemetryReceiver.OnlySendFailureTelemetry
-        {
-            get => TelemetryOnFailureOnly;
-            set => TelemetryOnFailureOnly = value;
-        }
    }
 }

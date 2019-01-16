@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string AuthorityKey = EventNamePrefix + "authority";
         public const string AuthorityTypeKey = EventNamePrefix + "authority_type";
         public const string UiBehaviorKey = EventNamePrefix + "ui_behavior";
-        public const string ValidationStatusKey = EventNamePrefix + "validation_status";
+        public const string ValidationStatusKey = EventNamePrefix + "validation_status"; // todo(migration): needed?
         public const string TenantIdKey = EventNamePrefix + "tenant_id";
         public const string UserIdKey = EventNamePrefix + "user_id";
         public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
 
+        // todo(migration): document where these numerical IDs come from and how to add/update them?
         public enum ApiIds
         {
             None = 0,

@@ -33,19 +33,13 @@ using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Core
 {
-    internal static class ClientInfoClaim
-    {
-        public const string UniqueIdentifier = "uid";
-        public const string UnqiueTenantIdentifier = "utid";
-    }
-
     [DataContract]
     internal class ClientInfo
     {
         [DataMember(Name = ClientInfoClaim.UniqueIdentifier, IsRequired = false)]
         public string UniqueObjectIdentifier { get; set; }
 
-        [DataMember(Name = ClientInfoClaim.UnqiueTenantIdentifier, IsRequired = false)]
+        [DataMember(Name = ClientInfoClaim.UniqueTenantIdentifier, IsRequired = false)]
         public string UniqueTenantIdentifier { get; set; }
 
         public static ClientInfo CreateFromJson(string clientInfo)

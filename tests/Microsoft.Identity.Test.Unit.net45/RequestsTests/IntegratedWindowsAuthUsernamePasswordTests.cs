@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         private void AddMockResponseforManagedAccounts(MockHttpManager httpManager)
         {
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
             // user realm discovery
             httpManager.AddMockHandler(
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
-                AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityHomeTenant);
+                AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
 
                 // MEX
@@ -357,7 +357,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
 
@@ -392,7 +392,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
 
                 // MEX
@@ -428,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
 

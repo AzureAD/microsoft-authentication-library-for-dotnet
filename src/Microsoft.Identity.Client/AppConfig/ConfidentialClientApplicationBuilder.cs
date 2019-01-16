@@ -65,26 +65,6 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// </summary>
-        /// <param name="tokenCache"></param>
-        /// <returns></returns>
-        [Obsolete("You can access the AppTokenCache using the AppTokenCache property on the created IConfidentialClientApplication")]
-        public ConfidentialClientApplicationBuilder WithAppTokenCache(TokenCache tokenCache)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="tokenCache"></param>
-        /// <returns></returns>
-        [Obsolete("You can access the UserTokenCache using the UserTokenCache property on the created IConfidentialClientApplication")]
-        public ConfidentialClientApplicationBuilder WithUserTokenCache(TokenCache tokenCache)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="certificate"></param>

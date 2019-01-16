@@ -99,7 +99,6 @@ namespace Microsoft.Identity.Client
                 .Create(clientId)
                 .WithRedirectUri(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId))
                 .AddKnownAuthority(new Uri(authority), true)
-                //.WithUserTokenCache(new TokenCache())
                 .BuildConfiguration())
         {
         }

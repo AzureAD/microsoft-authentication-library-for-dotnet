@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication"/> which
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
-        [Obsolete("Use ConfidentialClientApplicationBuilder instead.")]  // TODO(migration): proper docs
+        // [Obsolete("Use ConfidentialClientApplicationBuilder instead.")]  // TODO(migration): proper docs
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
@@ -134,12 +134,14 @@ namespace Microsoft.Identity.Client
                 .AddKnownAuthority(new Uri(authority), true)
                 .WithRedirectUri(redirectUri)
                 .WithClientCredential(clientCredential)
-                //.WithUserTokenCache(userTokenCache)
-                //.WithAppTokenCache(appTokenCache)
                 .BuildConfiguration())
         {
             GuardMobileFrameworks();
-            throw new NotImplementedException();
+
+            userTokenCache.SetServiceBundle(ServiceBundle);
+            UserTokenCacheInternal = userTokenCache;
+            appTokenCache.SetServiceBundle(ServiceBundle);
+            AppTokenCacheInternal = userTokenCache;
         }
 
         /// <summary>
@@ -417,10 +419,9 @@ namespace Microsoft.Identity.Client
         internal override AuthenticationRequestParameters CreateRequestParameters(
             IAcquireTokenCommonParameters commonParameters,
             ITokenCacheInternal cache,
-            IAccount account = null,  // todo: can we just use commonParameters.Account?
             Authority customAuthority = null)
         {
-            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, cache, account, customAuthority);
+            AuthenticationRequestParameters requestParams = base.CreateRequestParameters(commonParameters, cache, customAuthority);
             requestParams.ClientCredential = ServiceBundle.Config.ClientCredential;
             return requestParams;
         }

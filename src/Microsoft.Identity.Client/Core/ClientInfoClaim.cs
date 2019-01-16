@@ -25,12 +25,11 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
-namespace Microsoft.Identity.Client.TelemetryCore
+namespace Microsoft.Identity.Client.Core
 {
-    internal interface ITelemetryReceiver
+    internal static class ClientInfoClaim
     {
-        void HandleTelemetryEvents(List<Dictionary<string, string>> events);
+        public const string UniqueIdentifier = "uid";
+        public const string UniqueTenantIdentifier = "utid";
     }
 }

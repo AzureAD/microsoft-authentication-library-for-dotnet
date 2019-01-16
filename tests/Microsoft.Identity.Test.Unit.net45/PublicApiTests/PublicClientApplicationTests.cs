@@ -180,6 +180,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(MsalClientException.StateMismatchError, exc.ErrorCode);
                 }
 
+                // todo(migration): fails due to telemetry
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -309,7 +310,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -443,6 +444,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
                 }
 
+                // todo(migration): telemetry...
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -519,7 +521,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
+                // todo(migration): ensure this isn't a regression to remove this --> httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -1110,6 +1112,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
                 catch (AggregateException ex)
                 {
+                    // todo(migration): this is failing due to ValidateAuthority being changed...
                     Assert.IsNotNull(ex.InnerException);
                     Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
                     var msalExc = (MsalUiRequiredException)ex.InnerException;

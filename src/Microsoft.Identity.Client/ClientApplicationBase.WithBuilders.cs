@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
 
             var handler = new SilentRequest(
                 ServiceBundle,
-                CreateRequestParameters(silentParameters, UserTokenCacheInternal, silentParameters.Account, authorityInstance),
+                CreateRequestParameters(silentParameters, UserTokenCacheInternal, authorityInstance),
                 ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope, // todo(migration): consolidate this properly
                 silentParameters.ForceRefresh);
 
