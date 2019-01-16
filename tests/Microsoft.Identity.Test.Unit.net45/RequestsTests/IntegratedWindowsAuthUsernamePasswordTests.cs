@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         private void AddMockResponseforManagedAccounts(MockHttpManager httpManager)
         {
-            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
 
             // user realm discovery
             httpManager.AddMockHandler(
@@ -311,7 +311,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityOrganizationsTenant);
                 AddMockHandlerDefaultUserRealmDiscovery(httpManager);
 
                 // MEX
@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -576,7 +576,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -602,7 +602,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockResponseforManagedAccounts(httpManager);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -650,7 +650,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 

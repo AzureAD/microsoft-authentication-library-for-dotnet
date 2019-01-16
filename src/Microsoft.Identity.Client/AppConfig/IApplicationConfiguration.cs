@@ -30,7 +30,7 @@ namespace Microsoft.Identity.Client.AppConfig
     internal interface IApplicationConfiguration : IAppConfig
     {
         /// <summary>
-        /// ExtendedLifeTimeEnabled is a Boolean that first party applications (read Office) can set to true in case when the STS has an outage,
+        /// ExtendedLifeTimeEnabled is a Boolean that applications can set to true in case when the STS has an outage,
         /// to be more resilient.
         /// </summary>
         bool IsExtendedTokenLifetimeEnabled { get; }
