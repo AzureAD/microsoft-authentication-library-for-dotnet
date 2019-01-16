@@ -42,17 +42,17 @@ namespace Microsoft.Identity.Client.AppConfig
         AzurePublic,
 
         /// <summary>
-        /// Microsoft Chineses national cloud. Maps to https://login.chinacloudapi.cn
+        /// Microsoft Chinese national cloud. Maps to https://login.chinacloudapi.cn
         /// </summary>
         AzureChina,
 
         /// <summary>
-        /// Microsoft German national cloud. Maps to https://login.microsoftonline.de
+        /// Microsoft German national cloud ("Black Forest"). Maps to https://login.microsoftonline.de
         /// </summary>
         AzureGermany,
 
         /// <summary>
-        /// Us Government cloud. Maps to https://login.microsoftonline.us
+        /// US Government cloud. Maps to https://login.microsoftonline.us
         /// </summary>
         AzureUsGovernment,
     };

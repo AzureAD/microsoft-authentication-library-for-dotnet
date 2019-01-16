@@ -43,8 +43,8 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Constructor of a ConfidentialClientApplicationBuilder from application configuration options
-        /// . See https://aka.ms/msal-net-application-configuration
+        /// Constructor of a ConfidentialClientApplicationBuilder from application configuration options.
+        /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
         /// <param name="options">Public client applications configuration options</param>
         /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
