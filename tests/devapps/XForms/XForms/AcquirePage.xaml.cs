@@ -157,7 +157,7 @@ namespace XForms
             return UserNotSelected.Equals(selectedUserId, StringComparison.OrdinalIgnoreCase) ? null : selectedUserId;
         }
 
-        private async void OnAcquireSilentlyClickedAsync(object sender, EventArgs e)
+        private async Task OnAcquireSilentlyClickedAsync(object sender, EventArgs e)
         {
             acquireResponseLabel.Text = "Starting silent token acquisition";
             await Task.Delay(700).ConfigureAwait(true);
@@ -191,7 +191,7 @@ namespace XForms
             }
         }
 
-        private async void OnAcquireClickedAsync(object sender, EventArgs e)
+        private async Task OnAcquireClickedAsync(object sender, EventArgs e)
         {
             try
             {
@@ -235,7 +235,7 @@ namespace XForms
             }
         }
 
-        private async void OnAcquireByDeviceCodeClickedAsync(object sender, EventArgs e)
+        private async Task OnAcquireByDeviceCodeClickedAsync(object sender, EventArgs e)
         {
             try
             {
@@ -275,7 +275,7 @@ namespace XForms
             acquireResponseTitleLabel.Text = EmptyResult;
         }
 
-        private async void OnClearCacheClickedAsync(object sender, EventArgs e)
+        private async Task OnClearCacheClickedAsync(object sender, EventArgs e)
         {
             var tokenCache = App.MsalPublicClient.UserTokenCache;
             var users = tokenCache.GetAccounts
