@@ -34,66 +34,65 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string Exchange = "https://outlook.office365.com/";
 
         //MSAL test app
-        public const string AcquireTokenButtonID = "acquireToken_button";
-        public const string AcquireTokenWithPromptBehaviorAlwaysID = "acquireTokenPromptBehaviorAlways";
-        public const string AcquireTokenSilentButtonID = "acquireTokenSilent_button";
-        public const string ClientIdEntryID = "clientIdEntry";
-        public const string ResourceEntryID = "resourceEntry";
-        public const string PromptBehaviorEntryID = "promptBehaviorEntry";
+        public const string AcquireTokenButtonId = "acquireToken_button";
+        public const string AcquireTokenWithPromptBehaviorAlwaysId = "acquireTokenPromptBehaviorAlways";
+        public const string AcquireTokenSilentButtonId = "acquireTokenSilent_button";
+        public const string ClientIdEntryId = "clientIdEntry";
+        public const string ResourceEntryId = "resourceEntry";
+        public const string PromptBehaviorEntryId = "promptBehaviorEntry";
         public const string PromptBehaviorAuto = "auto";
         public const string PromptBehaviorAlways = "always";
-        public const string SecondPageID = "secondPage";
-        public const string ClearCacheID = "clearCache";
+        public const string SecondPageId = "secondPage";
+        public const string ClearCacheId = "clearCache";
         public const string SaveID = "saveButton";
-        public const string WebUPNInputID = "i0116";
-        public const string AdfsV4WebPasswordID = "passwordInput";
-        public const string AdfsV4WebSubmitID = "submitButton";
-        public const string WebPasswordID = "i0118";
-        public const string WebSubmitID = "idSIButton9";
-        public const string TestResultID = "testResult";
+        public const string WebUPNInputId = "i0116";
+        public const string AdfsV4WebPasswordId = "passwordInput";
+        public const string AdfsV4WebSubmitId = "submitButton";
+        public const string WebPasswordId = "i0118";
+        public const string WebSubmitId = "idSIButton9";
+        public const string TestResultId = "testResult";
         public const string TestResultSuccessfulMessage = "Result: Success";
         public const string TestResultFailureMessage = "Result: Failure";
+        public const string ClearAllCacheId = "ClearAllCache";
 
-        // MSAL test app
         public const string DefaultScope = "User.Read";
-        public const string AcquirePageID = "AcquirePage";
+        public const string AcquirePageId = "AcquirePage";
         public const string CachePageID = "CachePage";
-        public const string SettingsPageID = "SettingsPage";
+        public const string SettingsPageId = "SettingsPage";
         public const string LogPageId = "LogPage";
-        public const string ScopesEntryID = "scopesList";
-        public const string UiBehaviorPickerID = "uiBehavior";
+        public const string ScopesEntryId = "scopesList";
+        public const string UiBehaviorPickerId = "uiBehavior";
         public const string SelectUser = "userList";
         public const string UserNotSelected = "not selected";
         public const string UserMissingFromResponse = "Missing from the token response";
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
-        public const string RedirectUriEntryID = "redirectUriEntry";
+        public const string RedirectUriEntryId = "redirectUriEntry";
 
-        // MSAL B2C
-        public const string B2cScopes = "https://sometenant.onmicrosoft.com/some/scope";
-        public const string AuthorityPickerID = "b2cAuthorityPicker";
-        public const string WebUPNB2CLocalInputID = "logonIdentifier";
-        public const string B2CWebSubmitID = "next";
-        public const string B2CWebPasswordID = "password";
+        //MSAL B2C
+        public const string AuthorityPickerId = "b2cAuthorityPicker";
+        public const string WebUpnB2CLocalInputId = "logonIdentifier";
+        public const string B2CWebSubmitId = "next";
+        public const string B2CWebPasswordId = "password";
         public const string B2CLoginAuthority = "b2clogin.com";
         public const string MicrosoftOnlineAuthority = "login.microsoftonline.com";
         public const string NonB2CAuthority = "non-b2c authority";
         public const string B2CEditProfileAuthority = "Edit profile policy authority";
-        public const string FacebookAccountID = "FacebookExchange";
-        public const string WebUPNB2CFacebookInputID = "m_login_email";
-        public const string B2CWebPasswordFacebookID = "m_login_password";
-        public const string B2CFacebookSubmitID = "u_0_5";
-        public const string GoogleAccountID = "GoogleExchange";
-        public const string WebUPNB2CGoogleInputID = "Email";
-        public const string B2CWebPasswordGoogleID = "Passwd";
-        public const string B2CGoogleNextID = "next";
-        public const string B2CGoogleSignInID = "signIn";
-        public const string B2CEditProfileContinueID = "continue";
+        public const string FacebookAccountId = "FacebookExchange";
+        public const string WebUpnB2CFacebookInputId = "m_login_email";
+        public const string B2CWebPasswordFacebookId = "m_login_password";
+        public const string B2CFacebookSubmitId = "u_0_5";
+        public const string GoogleAccountId = "GoogleExchange";
+        public const string WebUpnB2CGoogleInputId = "Email";
+        public const string B2CWebPasswordGoogleId = "Passwd";
+        public const string B2CGoogleNextId = "next";
+        public const string B2CGoogleSignInId = "signIn";
+        public const string B2CEditProfileContinueId = "continue";
 
         // these should match the product enum values
-        public const string UIBehaviorConsent = "consent";
-        public const string UIBehaviorSelectAccount = "select_account";
-        public const string UIBehaviorLogin = "login";
-        public const string UIBehaviorNoPrompt = "no_prompt";
+        public const string UiBehaviorConsent = "consent";
+        public const string UiBehaviorSelectAccount = "select_account";
+        public const string UiBehaviorLogin = "login";
+        public const string UiBehaviorNoPrompt = "no_prompt";
 
         // Test Constants
         public const int ResultCheckPolliInterval = 1000;

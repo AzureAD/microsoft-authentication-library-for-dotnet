@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client
     /// A web app is the most common confidential client. The clientId is exposed through the web browser, but the secret is passed only in the back channel 
     /// and never directly exposed. For details see https://aka.ms/msal-net-client-applications
     /// </remarks>
-    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate
+    public sealed class ConfidentialClientApplication : ClientApplicationBase, IConfidentialClientApplication, IConfidentialClientApplicationWithCertificate, IByRefreshToken
     {
         static ConfidentialClientApplication()
         {
@@ -387,6 +387,28 @@ namespace Microsoft.Identity.Client
                 null);
 
             return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires an access token from an existing refresh token and stores it and the refresh token into 
+        /// the application user token cache, where it will be available for further AcquireTokenSilentAsync calls.
+        /// This method can be used in migration to MSAL from ADAL v2 and in various integration 
+        /// scenarios where you have a RefreshToken available. 
+        /// (see https://aka.ms/msal-net-migration-adal2-msal2)
+        /// </summary>
+        /// <param name="scopes">Scope to request from the token endpoint.
+        /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
+        /// <param name="refreshToken">The refresh token (for example previously obtained from ADAL 2.x)</param>
+        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
+        {
+            GuardMobileFrameworks();
+
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
+            }
+
+            return await AcquireByRefreshTokenCommonAsync(scopes, refreshToken).ConfigureAwait(false);
         }
 
         internal ClientCredential ClientCredential { get; }

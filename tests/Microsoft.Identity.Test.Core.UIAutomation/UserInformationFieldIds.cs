@@ -70,8 +70,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             if (_user.IsFederated)
             {
                 // We use the same IDs for ADFSv3 and ADFSv4
-                _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordID;
-                _signInButtonId = CoreUiTestConstants.AdfsV4WebSubmitID;
+                _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordId;
+                _signInButtonId = CoreUiTestConstants.AdfsV4WebSubmitId;
                 return;
             }
 
@@ -81,28 +81,26 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 return;
             }
 
-            _passwordInputId = CoreUiTestConstants.WebPasswordID;
-            _signInButtonId = CoreUiTestConstants.WebSubmitID;
+            _passwordInputId = CoreUiTestConstants.WebPasswordId;
+            _signInButtonId = CoreUiTestConstants.WebSubmitId;
         }
 
         private void DetermineB2CFieldIds()
         {
-            if (_user.B2CIdentityProvider == B2CIdentityProvider.Local)
+            switch (_user.B2CIdentityProvider)
             {
-                _passwordInputId = CoreUiTestConstants.B2CWebPasswordID;
-                _signInButtonId = CoreUiTestConstants.B2CWebSubmitID;
-            }
-
-            if (_user.B2CIdentityProvider == B2CIdentityProvider.Facebook)
-            {
-                _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookID;
-                _passwordInputId = CoreUiTestConstants.B2CFacebookSubmitID;
-            }
-
-            if (_user.B2CIdentityProvider == B2CIdentityProvider.Google)
-            {
-                _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleID;
-                _signInButtonId = CoreUiTestConstants.B2CGoogleSignInID;
+                case B2CIdentityProvider.Local:
+                    _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;
+                    _signInButtonId = CoreUiTestConstants.B2CWebSubmitId;
+                    break;
+                case B2CIdentityProvider.Facebook:
+                    _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookId;
+                    _passwordInputId = CoreUiTestConstants.B2CFacebookSubmitId;
+                    break;
+                case B2CIdentityProvider.Google:
+                    _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleId;
+                    _signInButtonId = CoreUiTestConstants.B2CGoogleSignInId;
+                    break;
             }
         }
     }
