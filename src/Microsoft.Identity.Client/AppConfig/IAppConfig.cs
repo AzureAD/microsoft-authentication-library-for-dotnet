@@ -25,11 +25,11 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    ///     TODO: resolve interface naming for public API...
-    ///     Have this in the public api for developer debugging...
     /// </summary>
     public interface IAppConfig
     {
@@ -60,10 +60,6 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// </summary>
         string TenantId { get; }
-
-        /// <summary>
-        /// </summary>
-        string SliceParameters { get; }
 
         /// <summary>
         /// </summary>

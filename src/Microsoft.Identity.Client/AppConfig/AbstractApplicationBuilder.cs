@@ -26,9 +26,11 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -176,7 +178,6 @@ namespace Microsoft.Identity.Client.AppConfig
             WithComponent(applicationOptions.Component);
             WithEnablePiiLogging(applicationOptions.EnablePiiLogging);
             WithDefaultPlatformLoggingEnabled(applicationOptions.IsDefaultPlatformLoggingEnabled);
-            WithSliceParameters(applicationOptions.SliceParameters);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
@@ -192,16 +193,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithComponent(string component)
         {
             Config.Component = GetValueIfNotEmpty(Config.Component, component);
-            return (T)this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="sliceParameters"></param>
-        /// <returns></returns>
-        public T WithSliceParameters(string sliceParameters)
-        {
-            Config.SliceParameters = GetValueIfNotEmpty(Config.SliceParameters, sliceParameters);
             return (T)this;
         }
 
@@ -236,7 +227,7 @@ namespace Microsoft.Identity.Client.AppConfig
             {
                 string defaultAuthorityInstance = GetDefaultAuthorityInstance();
                 string defaultAuthorityAudience = GetDefaultAuthorityAudience();
-
+                
                 if (string.IsNullOrWhiteSpace(defaultAuthorityInstance) || string.IsNullOrWhiteSpace(defaultAuthorityAudience))
                 {
                     // TODO: better documentation/description in exception of what's going on here...
@@ -275,7 +266,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (!string.IsNullOrWhiteSpace(Config.TenantId) && 
                 Config.AadAuthorityAudience != AadAuthorityAudience.None &&
-                Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdSpecificDirectoryOnly)
+                Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdMyOrg)
             {
                 // Conflict, user has specified a string tenantId and the enum audience value for AAD, which is also the tenant.
                 throw new InvalidOperationException(CoreErrorMessages.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
@@ -376,7 +367,7 @@ namespace Microsoft.Identity.Client.AppConfig
             Guid tenantId,
             bool isDefaultAuthority = false)
         {
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdSpecificDirectoryOnly, $"{tenantId:N}");
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
             Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
             return (T)this;
         }
@@ -398,7 +389,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 return AddKnownAadAuthority(azureCloudInstance, tenantIdGuid, isDefaultAuthority);
             }
 
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdSpecificDirectoryOnly, tenant);
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
             Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
             return (T)this;
         }
@@ -471,20 +462,15 @@ namespace Microsoft.Identity.Client.AppConfig
 
         private static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)
         {
-            if (authorityAudience == AadAuthorityAudience.Default)
-            {
-                authorityAudience = AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount;
-            }
-
             switch (authorityAudience)
             {
             case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
                 return "common";
-            case AadAuthorityAudience.AzureAdOnly:
+            case AadAuthorityAudience.AzureAdMultipleOrgs:
                 return "organizations";
-            case AadAuthorityAudience.MicrosoftAccountOnly:
+            case AadAuthorityAudience.PersonalMicrosoftAccount:
                 return "consumers";
-            case AadAuthorityAudience.AzureAdSpecificDirectoryOnly:
+            case AadAuthorityAudience.AzureAdMyOrg:
                 if (string.IsNullOrWhiteSpace(tenantId))
                 {
                     throw new ArgumentNullException(nameof(tenantId));

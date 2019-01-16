@@ -118,9 +118,9 @@ namespace Microsoft.Identity.Client
                 interactiveParameters.ExtraScopesToConsent,
                 string.IsNullOrWhiteSpace(interactiveParameters.LoginHint) ? requestParams.Account?.Username : interactiveParameters.LoginHint,
 #if NET_CORE_BUILDTIME
-                UIBehavior.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
+                Prompt.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
 #else
-                interactiveParameters.UiBehavior,
+                interactiveParameters.Prompt,
 #endif
                 CreateWebAuthenticationDialogEx(
                     interactiveParameters,
@@ -198,7 +198,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP || DESKTOP
 // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = interactiveParameters.UiBehavior.Equals(UIBehavior.Never);
+            coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never); // todo(migration): what do we do here?
 #if WINDOWS_APP
             coreUiParent.UseCorporateNetwork = UseCorporateNetwork;
 #endif

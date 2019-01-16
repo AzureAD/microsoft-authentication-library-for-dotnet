@@ -533,7 +533,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual("code", qp["response_type"]);
             Assert.AreEqual(redirectUri, qp["redirect_uri"]);
             Assert.AreEqual(MsalTestConstants.DisplayableId, qp["login_hint"]);
-            Assert.AreEqual(UIBehavior.SelectAccount.PromptValue, qp["prompt"]);
+            Assert.AreEqual(Prompt.SelectAccount.PromptValue, qp["prompt"]);
             Assert.AreEqual(TestCommon.CreateDefaultServiceBundle().PlatformProxy.GetProductName(), qp["x-client-sku"]);
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-ver"]));
             Assert.IsFalse(string.IsNullOrEmpty(qp["x-client-os"]));

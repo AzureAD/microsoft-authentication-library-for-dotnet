@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         // Interactive Parameters
         public bool UseEmbeddedWebView { get; internal set; }
-        public UIBehavior UiBehavior { get; internal set; }
+        public Prompt Prompt { get; internal set; }
         public OwnerUiParent UiParent { get; internal set; } = new OwnerUiParent();
 
         // Common Parameters

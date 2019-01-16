@@ -434,7 +434,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 try
                 {
-                    result = app.AcquireTokenAsync(MsalTestConstants.Scope, result.Account, UIBehavior.SelectAccount, null).Result;
+                    result = app.AcquireTokenAsync(MsalTestConstants.Scope, result.Account, Prompt.SelectAccount, null).Result;
                     Assert.Fail("API should have failed here");
                 }
                 catch (AggregateException ex)
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more"))
                     });
 
-                result = app.AcquireTokenAsync(MsalTestConstants.Scope, (IAccount)null, UIBehavior.SelectAccount, null).Result;
+                result = app.AcquireTokenAsync(MsalTestConstants.Scope, (IAccount)null, Prompt.SelectAccount, null).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
@@ -1480,12 +1480,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint").ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", UIBehavior.Consent, "extra_query_params").ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, UIBehavior.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, Prompt.Consent, "extra_query_params").ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     "login hint",
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
@@ -1493,7 +1493,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     account,
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
@@ -1502,12 +1502,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", UIBehavior.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, UIBehavior.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     "login hint",
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant,
@@ -1516,7 +1516,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     account,
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant,

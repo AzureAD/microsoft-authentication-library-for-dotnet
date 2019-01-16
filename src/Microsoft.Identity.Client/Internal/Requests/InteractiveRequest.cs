@@ -44,29 +44,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : RequestBase
     {
         private readonly SortedSet<string> _extraScopesToConsent;
-        private readonly UIBehavior _uiBehavior;
+        private readonly Prompt _prompt;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
         private string _state;
-
-        //public InteractiveRequest(
-        //    IServiceBundle serviceBundle,
-        //    AuthenticationRequestParameters authenticationRequestParameters,
-        //    ApiEvent.ApiIds apiId,
-        //    IEnumerable<string> extraScopesToConsent,
-        //    UIBehavior uiBehavior,
-        //    IWebUI webUi)
-        //    : this(
-        //        serviceBundle,
-        //        authenticationRequestParameters,
-        //        apiId,
-        //        extraScopesToConsent,
-        //        authenticationRequestParameters.Account?.Username,
-        //        uiBehavior,
-        //        webUi)
-        //{
-        //}
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
@@ -74,7 +56,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
             string loginHint,
-            UIBehavior uiBehavior,
+            Prompt prompt,
             IWebUI webUi)
             : base(serviceBundle, authenticationRequestParameters, apiId)
         {
@@ -89,27 +71,19 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(_extraScopesToConsent);
 
-            // TODO: why is LoginHint set here instead of just using the one sent in?
+            // TODO(migration): why is LoginHint set here instead of just using the one sent in?
             authenticationRequestParameters.LoginHint = loginHint;
 
-            // TODO(migration): do we need to handle this case in the param builder or will the split method we have ignore the & prefix
-            //if (!string.IsNullOrWhiteSpace(authenticationRequestParameters.ExtraQueryParameters) &&
-            //    authenticationRequestParameters.ExtraQueryParameters[0] == '&')
-            //{
-            //    authenticationRequestParameters.ExtraQueryParameters =
-            //        authenticationRequestParameters.ExtraQueryParameters.Substring(1);
-            //}
-
             _webUi = webUi;
-            _uiBehavior = uiBehavior;
+            _prompt = prompt;
             AuthenticationRequestParameters.RequestContext.Logger.Info(
                 "Additional scopes - " + _extraScopesToConsent.AsSingleString() + ";" +
-                "UIBehavior - " + _uiBehavior.PromptValue);
+                "Prompt - " + _prompt.PromptValue);
         }
 
         protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
         {
-            apiEvent.UiBehavior = _uiBehavior.PromptValue;
+            apiEvent.Prompt = _prompt.PromptValue;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -200,28 +174,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             CheckForDuplicateQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters, requestParameters);
-            CheckForDuplicateQueryParameters(AuthenticationRequestParameters.SliceParameters, requestParameters);
 
             string qp = requestParameters.ToQueryParameter();
             var builder = new UriBuilder(new Uri(AuthenticationRequestParameters.Endpoints.AuthorizationEndpoint));
             builder.AppendQueryParameters(qp);
 
             return builder.Uri;
-        }
-
-        private void CheckForDuplicateQueryParameters(string queryParams, IDictionary<string, string> requestParameters)
-        {
-            if (!string.IsNullOrWhiteSpace(queryParams))
-            {
-                // Checks for _extraQueryParameters duplicating standard parameters
-                Dictionary<string, string> kvps = CoreHelpers.ParseKeyValueList(
-                    queryParams,
-                    '&',
-                    false,
-                    AuthenticationRequestParameters.RequestContext);
-
-                CheckForDuplicateQueryParameters(kvps, requestParameters);
-            }
         }
 
         private static void CheckForDuplicateQueryParameters(
@@ -274,9 +232,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            if (_uiBehavior.PromptValue != UIBehavior.NoPrompt.PromptValue)
+            if (_prompt.PromptValue != Prompt.NoPrompt.PromptValue)
             {
-                authorizationRequestParameters[OAuth2Parameter.Prompt] = _uiBehavior.PromptValue;
+                authorizationRequestParameters[OAuth2Parameter.Prompt] = _prompt.PromptValue;
             }
             
             return authorizationRequestParameters;

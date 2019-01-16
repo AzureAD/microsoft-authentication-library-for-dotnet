@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Client
     /// In the case of ConfidentialClientApplication, two instances are used, one for the user token cache, and one for the application
     /// token cache (in the case of applications using the client credential flows).
     /// </summary>
-    // TODO(migration): this should be an INTERNAL class now, just the interface should be public.
     public sealed class TokenCache : ITokenCacheInternal
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
@@ -69,7 +68,7 @@ namespace Microsoft.Identity.Client
         internal RequestContext CreateRequestContext()
         {
             return new RequestContext(ServiceBundle.Config.ClientId,
-                MsalLogger.Create(Guid.Empty, string.Empty, ServiceBundle.Config));
+                MsalLogger.Create(Guid.Empty, ServiceBundle.Config));
         }
 
         private const int DefaultExpirationBufferInMinutes = 5;

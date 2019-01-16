@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<MsalTokenResponse> SendHttpMessageAsync(OAuth2Client client, string tokenEndpoint)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
-            builder.AppendQueryParameters(AuthenticationRequestParameters.SliceParameters);
+            builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
             MsalTokenResponse msalTokenResponse =
                 await client
                     .GetTokenAsync(builder.Uri,

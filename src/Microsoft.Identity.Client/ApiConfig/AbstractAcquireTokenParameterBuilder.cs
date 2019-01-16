@@ -121,10 +121,6 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </summary>
         protected virtual void Validate()
         {
-            if (Parameters.Scopes == null)
-            {
-                throw new ArgumentException("Scopes cannot be null", nameof(Parameters.Scopes));
-            }
         }
     }
 }

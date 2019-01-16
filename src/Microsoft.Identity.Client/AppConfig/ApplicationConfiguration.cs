@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
-        public string SliceParameters { get; internal set; }
         public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
         public AuthorityInfo DefaultAuthorityInfo => Authorities.Single(x => x.IsDefault);

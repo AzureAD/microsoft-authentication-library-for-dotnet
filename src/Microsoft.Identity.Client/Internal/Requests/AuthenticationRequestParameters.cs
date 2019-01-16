@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public IAccount Account { get; set; }
         public UserAssertion UserAssertion { get; set; }
         public bool IsClientCredentialRequest { get; set; } = false;
-        public string SliceParameters { get; set; }
         public bool SendCertificate { get; set; }
         public bool IsRefreshTokenRequest { get; set; } = false;
 
@@ -111,8 +110,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (Account != null));
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-            var dict = CoreHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
-            builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
             builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
@@ -132,8 +129,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided? - " + (Account != null));
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-            dict = CoreHelpers.ParseKeyValueList(SliceParameters, '&', true, RequestContext);
-            builder.AppendLine("Slice Parameters Keys(space separated) - " + dict.Keys.AsSingleString());
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
             builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
             builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);

@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="certificate"></param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithX509Certificate2(X509Certificate2 certificate)
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
             Config.Certificate = certificate;
             return this;

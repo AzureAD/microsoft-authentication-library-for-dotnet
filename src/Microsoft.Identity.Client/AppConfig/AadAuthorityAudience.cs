@@ -28,6 +28,7 @@
 namespace Microsoft.Identity.Client.AppConfig
 {
     /*
+     todo(migration): clean up this documentation since we've fixed it...
      previous PR comments:
      Given that our current default authority is common, I think it should be AAD + MSA
      Don't we want to use a [Flags] enum (AAD = 1, MSA =2, AAD+MSA = 3) if we have the notion of Default?
@@ -53,14 +54,9 @@ namespace Microsoft.Identity.Client.AppConfig
         None,
 
         /// <summary>
-        ///     Default is AzureAdOnly ?? TODO: WHAT SHOULD THE DEFAULT BE
-        /// </summary>
-        Default,
-
-        /// <summary>
         /// Maps to https://[instance]/[tenantId]
         /// </summary>
-        AzureAdSpecificDirectoryOnly,
+        AzureAdMyOrg,
 
         /// <summary>
         ///     Maps to https://[instance]/common/
@@ -70,11 +66,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         ///     Maps to https://[instance]/organizations/
         /// </summary>
-        AzureAdOnly,
+        AzureAdMultipleOrgs,
 
         /// <summary>
         ///     Maps to https://[instance]/consumers/
         /// </summary>
-        MicrosoftAccountOnly
+        PersonalMicrosoftAccount
     }
 }

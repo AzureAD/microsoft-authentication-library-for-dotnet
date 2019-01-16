@@ -48,7 +48,6 @@ namespace Microsoft.Identity.Client.Core
             var logger = serviceBundle?.DefaultLogger ?? MsalLogger.Create(
                              Guid.NewGuid(),
                              null,
-                             null,
                              isDefaultPlatformLoggingEnabled: true);
 
             return new RequestContext(null, logger);

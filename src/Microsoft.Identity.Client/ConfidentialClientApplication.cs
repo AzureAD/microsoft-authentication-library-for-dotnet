@@ -78,7 +78,6 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication"/> which
         /// enables app developers to specify the authority
-        // todo(migration): [Obsolete("Use ConfidentialClientApplicationBuilder  instead.")]  // TODO(migration): proper docs
         public ConfidentialClientApplication(string clientId, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
@@ -90,10 +89,25 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
+            SetTokenCaches(userTokenCache, appTokenCache);
+        }
+
+        private void SetTokenCaches(TokenCache userTokenCache, TokenCache appTokenCache)
+        {
+            if (userTokenCache == null)
+            {
+                userTokenCache = new TokenCache(ServiceBundle);
+            }
             userTokenCache.SetServiceBundle(ServiceBundle);
             UserTokenCacheInternal = userTokenCache;
+
+            if (appTokenCache == null)
+            {
+                appTokenCache = new TokenCache(ServiceBundle);
+            }
+
             appTokenCache.SetServiceBundle(ServiceBundle);
-            AppTokenCacheInternal = userTokenCache;
+            AppTokenCacheInternal = appTokenCache;
         }
 
         /// <summary>
@@ -126,7 +140,6 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <seealso cref="ConfidentialClientApplication"/> which
         /// enables app developers to create a confidential client application requesting tokens with the default authority.
-        // [Obsolete("Use ConfidentialClientApplicationBuilder instead.")]  // TODO(migration): proper docs
         public ConfidentialClientApplication(string clientId, string authority, string redirectUri,
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
@@ -137,11 +150,7 @@ namespace Microsoft.Identity.Client
                 .BuildConfiguration())
         {
             GuardMobileFrameworks();
-
-            userTokenCache.SetServiceBundle(ServiceBundle);
-            UserTokenCacheInternal = userTokenCache;
-            appTokenCache.SetServiceBundle(ServiceBundle);
-            AppTokenCacheInternal = userTokenCache;
+            SetTokenCaches(userTokenCache, appTokenCache);
         }
 
         /// <summary>
@@ -414,7 +423,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public ITokenCache AppTokenCache => AppTokenCacheInternal;
 
-        internal ITokenCacheInternal AppTokenCacheInternal { get; }
+        internal ITokenCacheInternal AppTokenCacheInternal { get; set; }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(
             IAcquireTokenCommonParameters commonParameters,

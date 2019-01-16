@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Test.Unit
                                                                   new System.Uri(ClientApplicationBase.DefaultAuthority),
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithHttpManager(harness.HttpManager)
-                                                              .WithX509Certificate2(certificate).BuildConcrete();
+                                                              .WithCertificate(certificate).BuildConcrete();
 
                 //Check for x5c claim
                 harness.HttpManager.AddMockHandler(X5CMockHandler);
@@ -132,8 +132,7 @@ namespace Microsoft.Identity.Test.Unit
                                                                   new System.Uri(ClientApplicationBase.DefaultAuthority),
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithHttpManager(harness.HttpManager)
-                                                              
-                                                              .WithX509Certificate2(certificate).BuildConcrete();
+                                                              .WithCertificate(certificate).BuildConcrete();
                 
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
 

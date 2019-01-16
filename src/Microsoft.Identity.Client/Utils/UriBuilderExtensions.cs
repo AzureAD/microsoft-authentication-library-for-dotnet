@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Utils
 {
@@ -46,6 +48,16 @@ namespace Microsoft.Identity.Client.Utils
             {
                 builder.Query = queryParams;
             }
+        }
+
+        public static void AppendQueryParameters(this UriBuilder builder, Dictionary<string, string> queryParams)
+        {
+            var list = new List<string>();
+            foreach (var kvp in queryParams)
+            {
+                list.Add($"{kvp.Key}={kvp.Value}");
+            }
+            AppendQueryParameters(builder, string.Join("&", list));
         }
     }
 }

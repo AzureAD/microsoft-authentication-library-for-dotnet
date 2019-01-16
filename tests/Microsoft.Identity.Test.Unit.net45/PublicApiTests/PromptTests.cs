@@ -32,20 +32,20 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
 {
     [TestClass]
-    public class UIBehaviorTests
+    public class PromptTests
     {
 
         [TestMethod()]
-        [TestCategory("UIBehaviorTests")]
+        [TestCategory("PromptTests")]
         public void EqualityTest()
         {
-            UIBehavior ub1 = UIBehavior.Never;
-            UIBehavior ub2 = UIBehavior.ForceLogin;
+            Prompt ub1 = Prompt.Consent;
+            Prompt ub2 = Prompt.ForceLogin;
 
             Assert.AreNotEqual(ub1, ub2);
-            Assert.AreEqual(ub1, UIBehavior.Never);
+            Assert.AreEqual(ub1, Prompt.Consent);
             Assert.IsTrue(ub1 != ub2);
-            Assert.IsTrue(ub1 == UIBehavior.Never);
+            Assert.IsTrue(ub1 == Prompt.Consent);
         }
     }
 }

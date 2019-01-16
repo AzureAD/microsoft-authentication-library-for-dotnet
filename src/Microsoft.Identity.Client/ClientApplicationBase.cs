@@ -65,13 +65,8 @@ namespace Microsoft.Identity.Client
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
-        public string Component
-        {
-            get => ServiceBundle.Config.Component;
-
-            // TODO(migration): [Obsolete("TODO(migration): comments")]
-            set { }
-        }
+        [Obsolete("Use the AppBuilders with WithComponent to set this")] // todo(migration): documentation
+        public string Component { get; set; }
 
         /// <Summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
@@ -117,13 +112,8 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise by Microsoft support, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
         /// </summary>
-        public string SliceParameters
-        {
-            get => ServiceBundle.Config.SliceParameters;
-
-            // TODO(migration): [Obsolete("TODO(migration): comments")]
-            set { }
-        }
+        [Obsolete("Use ExtraQueryParameters on each call instead.")]  // todo(migration): documentation
+        public string SliceParameters { get; set; }
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.
@@ -218,7 +208,6 @@ namespace Microsoft.Identity.Client
 
             return new AuthenticationRequestParameters
             {
-                SliceParameters = ServiceBundle.Config.SliceParameters,  // TODO(migration): can users reference this instead of being in authparams?
                 Authority = authorityInstance,
                 ClientId = ServiceBundle.Config.ClientId,
                 TokenCache = cache,
@@ -232,7 +221,7 @@ namespace Microsoft.Identity.Client
 
         private RequestContext CreateRequestContext()
         {
-            return new RequestContext(ClientId, MsalLogger.Create(Guid.NewGuid(), Component, ServiceBundle.Config));
+            return new RequestContext(ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
         }
 
         /// <summary>

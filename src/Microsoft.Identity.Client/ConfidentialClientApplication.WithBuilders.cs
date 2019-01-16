@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client
                 ApiEvent.ApiIds.None,
                 authorizationRequestUrlParameters.ExtraScopesToConsent,
                 authorizationRequestUrlParameters.LoginHint,
-                UIBehavior.SelectAccount,
+                Prompt.SelectAccount,
                 null);
 
             // todo: need to pass through cancellation token here

@@ -71,10 +71,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public const string TokenCacheNullError = "token_cache_null";
 
+        // TODO(migration):  Prompt.Never no longer exists.  Validate removing this error message.
         /// <summary>
         /// One of two conditions was encountered:
         /// <list type="bullet">
-        /// <item><description>The <c>UIBehavior.Never</c> UI behavior was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
+        /// <item><description>The <c>Prompt.Never</c> UI behavior was passed in an interactive token call, but the constraint could not be honored because user interaction is required,
         /// for instance because the user needs to re-sign-in, give consent for more scopes, or perform multiple factor authentication.
         /// </description></item>
         /// <item><description>
