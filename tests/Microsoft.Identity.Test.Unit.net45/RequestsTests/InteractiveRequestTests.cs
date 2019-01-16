@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = cache,
-                    RequestContext = RequestContext.CreateForTest(),
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                 };
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = cache,
-                    RequestContext = RequestContext.CreateForTest(),
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                 };
@@ -225,7 +225,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ClientId = MsalTestConstants.ClientId,
                         Scope = MsalTestConstants.Scope,
                         TokenCache = null,
-                        RequestContext = RequestContext.CreateForTest(),
+                        RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                         RedirectUri = new Uri("some://uri#fragment=not-so-good"),
                         ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                     };
@@ -268,7 +268,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = RequestContext.CreateForTest(),
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
                 };
 
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = RequestContext.CreateForTest(),
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
                 };
 
@@ -376,7 +376,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = RequestContext.CreateForTest(),
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
                 };
@@ -445,7 +445,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ClientId = MsalTestConstants.ClientId,
                     Scope = MsalTestConstants.Scope,
                     TokenCache = null,
-                    RequestContext = RequestContext.CreateForTest(),
+                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
                     ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }, {"prompt", "login"}}
                 };

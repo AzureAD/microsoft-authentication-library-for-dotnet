@@ -129,7 +129,7 @@ namespace Microsoft.Identity.Client
         {
             var requestParams = CreateRequestParameters(onBehalfOfParameters, UserTokenCacheInternal);
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
-            requestParams.SendCertificate = onBehalfOfParameters.WithOnBehalfOfCertificate;
+            requestParams.SendCertificate = onBehalfOfParameters.SendX5C;
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,
                 requestParams,

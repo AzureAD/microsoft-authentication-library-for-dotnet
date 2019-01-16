@@ -68,16 +68,6 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        /// <param name="withCertificate"></param>
-        /// <returns></returns>
-        public AcquireTokenOnBehalfOfParameterBuilder WithCertificate(bool withCertificate)
-        {
-            Parameters.WithOnBehalfOfCertificate = withCertificate;
-            return this;
-        }
-
-        /// <summary>
-        /// </summary>
         /// <param name="withSendX5C"></param>
         /// <returns></returns>
         public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)

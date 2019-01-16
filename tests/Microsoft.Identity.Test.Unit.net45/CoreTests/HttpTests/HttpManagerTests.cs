@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.AuthorityHomeTenant);
 
                 var response = httpManager.SendPostAsync(
-                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
                     null,
                     (IDictionary<string, string>)null,
                     null).Result;
@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.AuthorityHomeTenant, bodyParameters, queryParams);
 
                 var response = httpManager.SendPostAsync(
-                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                     queryParams,
                     bodyParameters,
                     null).Result;

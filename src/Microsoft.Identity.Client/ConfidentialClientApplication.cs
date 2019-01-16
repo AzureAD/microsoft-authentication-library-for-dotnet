@@ -405,7 +405,7 @@ namespace Microsoft.Identity.Client
             return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
         }
 
-        internal ClientCredential ClientCredential { get; }
+        internal ClientCredential ClientCredential => ServiceBundle.Config.ClientCredential;
 
         /// <summary>
         /// TODO(migration):  this is a new public interface

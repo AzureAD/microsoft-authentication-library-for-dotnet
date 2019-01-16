@@ -56,38 +56,41 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [Description("Test unified token cache")]
         public void UnifiedCache_MsalStoresToAndReadRtFromAdalCache()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var httpManager = new MockHttpManager())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithHttpManager(httpManager)
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
                                                         .BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
-                                                                           app.RedirectUri + "?code=some-code"));
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success,
+                    app.RedirectUri + "?code=some-code"));
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
 
                 // make sure Msal stored RT in Adal cache
                 IDictionary<AdalTokenCacheKey, AdalResultWrapper> adalCacheDictionary =
-                    AdalCacheOperations.Deserialize(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence.LoadCache());
+                    AdalCacheOperations.Deserialize(app.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence.LoadCache());
 
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
-                var requestContext = RequestContext.CreateForTest();
+                var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
                 var accounts = app.UserTokenCacheInternal.GetAccounts(MsalTestConstants.AuthorityCommonTenant, requestContext);
                 foreach (IAccount account in accounts)
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
                 }
 
-                harness.HttpManager.AddMockHandler(
+                httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
                         Method = HttpMethod.Post,
@@ -118,11 +121,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             byte[] data = null;
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var httpManager = new MockHttpManager())
             {
                 // login to app
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
                 app.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
@@ -134,13 +138,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     data = args.TokenCache.Serialize();
                 });
 
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                httpManager.AddInstanceDiscoveryMockHandler();
 
-                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
-                                                                           app.RedirectUri + "?code=some-code"));
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success,
+                    app.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -151,12 +157,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // login tp app1 with same credentials
 
                 var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
+                                                         .WithHttpManager(httpManager)
                                                          .AddKnownAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
                                                              true).BuildConcrete();
 
-                MsalMockHelpers.ConfigureMockWebUI(new AuthorizationResult(AuthorizationStatus.Success,
-                                                                           app.RedirectUri + "?code=some-code"));
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app1.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success,
+                    app1.RedirectUri + "?code=some-code"));
 
                 app1.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
                 {
@@ -167,7 +176,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     data = args.TokenCache.Serialize();
                 });
                 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);
 
                 result = app1.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);

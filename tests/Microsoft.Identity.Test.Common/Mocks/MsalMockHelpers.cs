@@ -32,23 +32,30 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
 using NSubstitute;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Test.Common.Mocks
 {
     internal static class MsalMockHelpers
     {
-        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult)
+        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, AuthorizationResult authorizationResult)
         {
-            ConfigureMockWebUI(authorizationResult, new Dictionary<string, string>());
+            ConfigureMockWebUI(platformProxy, authorizationResult, new Dictionary<string, string>());
         }
 
-        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, Dictionary<string, string> queryParamsToValidate)
+        public static void ConfigureMockWebUI(
+            IPlatformProxy platformProxy, 
+            AuthorizationResult authorizationResult, 
+            Dictionary<string, string> queryParamsToValidate)
         {
-            ConfigureMockWebUI(authorizationResult, queryParamsToValidate, null);
+            ConfigureMockWebUI(platformProxy, authorizationResult, queryParamsToValidate, null);
         }
 
-        public static void ConfigureMockWebUI(AuthorizationResult authorizationResult, 
-            Dictionary<string, string> queryParamsToValidate, string environment)
+        public static void ConfigureMockWebUI(
+            IPlatformProxy platformProxy, 
+            AuthorizationResult authorizationResult, 
+            Dictionary<string, string> queryParamsToValidate, 
+            string environment)
         {
             MockWebUI webUi = new MockWebUI
             {
@@ -57,15 +64,14 @@ namespace Microsoft.Identity.Test.Common.Mocks
                 Environment = environment
             };
 
-            ConfigureMockWebUI(webUi);
+            ConfigureMockWebUI(platformProxy, webUi);
         }
 
-        public static void ConfigureMockWebUI(MockWebUI webUi)
+        public static void ConfigureMockWebUI(IPlatformProxy platformProxy, MockWebUI webUi)
         {
             IWebUIFactory mockFactory = Substitute.For<IWebUIFactory>();
             mockFactory.CreateAuthenticationDialog(Arg.Any<CoreUIParent>(), Arg.Any<RequestContext>()).Returns(webUi);
-            // TODO(migration): PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(mockFactory);
-            throw new InvalidOperationException("TODO: MIGRATION WORK NEEDED FOR PLATFORMPROXY");
+            platformProxy.SetWebUiFactory(mockFactory);
         }
     }
 }

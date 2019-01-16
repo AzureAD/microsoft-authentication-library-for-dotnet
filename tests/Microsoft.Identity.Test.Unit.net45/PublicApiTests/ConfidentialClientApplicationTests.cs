@@ -205,6 +205,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
+                // TODO(migration):  do we need to default to NO CACHE and have a WithUserTokenCache() and WithAppTokenCache()
+                // to ensure they're constructed?  Or do we need a way to say "WithNoAppTokenCache/WithNoUserTokenCache"?
                 Assert.IsNull(app.UserTokenCache);
                 Assert.IsNull(app.AppTokenCache);
             }
@@ -368,6 +370,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("token_cache_write") &&
                             anEvent[CacheEvent.TokenTypeKey] == "at"));
+                
+                // TODO(migration):  This is looking for existence of api_event with AcquireTokenForClientWithScope id.
+                // We still need to finalize and implement the updated id telemetry story with the builders.
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -495,7 +500,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithHttpManager(httpManager)
                                                               .BuildConcrete();
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityGuestTenant);
 
                 const string CustomRedirectUri = "custom://redirect-uri";
                 Task<Uri> task = app.GetAuthorizationRequestUrlAsync(
@@ -579,7 +584,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _tokenCacheHelper.PopulateCacheForClientCredential(app.AppTokenCacheInternal.Accessor);
 
                 ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest());
+                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest(app.ServiceBundle));
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -631,11 +636,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // make sure token in Cache was updated
                 ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest());
+                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest(app.ServiceBundle));
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
 
+                // TODO(migration): need to handle api_event api id scenario.
                 Assert.AreEqual(TokenRetrievedFromNetCall, accessTokenInCache.Secret);
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
@@ -663,8 +669,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.UserTokenCache.SetBeforeAccess(BeforeCacheAccess);
                 app.UserTokenCache.SetAfterAccess(AfterCacheAccess);
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant, "p=policy");
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy/", "p=policy");
+                httpManager.AddSuccessTokenResponseMockHandlerForPost("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy/");
 
                 var result = await app.AcquireTokenByAuthorizationCodeAsync("some-code", MsalTestConstants.Scope)
                                       .ConfigureAwait(false);

@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
                 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -207,7 +207,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 var endpoints = resolver.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
-                    RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                    RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
 
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         CoreTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -346,7 +346,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         CoreTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -386,7 +386,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         CoreTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
                     Assert.Fail("ResolveEndpointsAsync should have failed here");
                 }
                 catch (Exception exc)
@@ -421,7 +421,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                     var endpoints = resolver.ResolveEndpointsAsync(
                         instance.AuthorityInfo,
                         CoreTestConstants.FabrikamDisplayableId,
-                        RequestContext.CreateForTest()).ConfigureAwait(false).GetAwaiter().GetResult();
+                        RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
                     Assert.Fail("validation should have failed here");
                 }
                 catch (MsalServiceException exc)
