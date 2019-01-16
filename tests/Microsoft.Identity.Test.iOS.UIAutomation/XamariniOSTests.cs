@@ -92,7 +92,7 @@ namespace Test.Microsoft.Identity.Msal.iOS.UIAutomation
         /// Runs through the standard acquire token flow
         /// </summary>
         [Test]
-        [Ignore("Current web element search implementation is unable to properly wait for select account elements on login page. Will be addressed in future updates.")]
+        //[Ignore("Current web element search implementation is unable to properly wait for select account elements on login page. Will be addressed in future updates.")]
         public void PromptBehaviorConsentSelectAccount()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
