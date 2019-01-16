@@ -45,10 +45,12 @@ namespace Microsoft.Identity.Client.AppConfig
     */
 
     /// <summary>
+    /// Specifies what Microsoft accounts can be signed-in in a given application.
     /// </summary>
     public enum AadAuthorityAudience
     {
         /// <summary>
+        /// The sign-in audience was not specified
         /// </summary>
         None,
 
@@ -58,22 +60,25 @@ namespace Microsoft.Identity.Client.AppConfig
         Default,
 
         /// <summary>
+        /// Users with a Microsoft work or school account in my organization’s Azure AD tenant (i.e. single tenant).
         /// Maps to https://[instance]/[tenantId]
         /// </summary>
         AzureAdSpecificDirectoryOnly,
 
         /// <summary>
-        ///     Maps to https://[instance]/common/
+        /// Users with a personal Microsoft account, or a work or school account in any organization’s Azure AD tenant
+        /// Maps to https://[instance]/common/
         /// </summary>
         AzureAdAndPersonalMicrosoftAccount,
 
         /// <summary>
-        ///     Maps to https://[instance]/organizations/
+        /// Users with a Microsoft work or school account in any organization’s Azure AD tenant (i.e. multi-tenant).
+        /// Maps to https://[instance]/organizations/
         /// </summary>
         AzureAdOnly,
 
         /// <summary>
-        ///     Maps to https://[instance]/consumers/
+        /// Users with a personal Microsoft account. Maps to https://[instance]/consumers/
         /// </summary>
         MicrosoftAccountOnly
     }

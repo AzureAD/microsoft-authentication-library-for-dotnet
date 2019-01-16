@@ -30,12 +30,15 @@ using System.Net.Http;
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
+    /// Http Client Factory
     /// </summary>
     public interface IMsalHttpClientFactory
     {
         /// <summary>
+        /// Method returning an Http client that will be used to
+        /// communicate with Azure AD
         /// </summary>
-        /// <returns></returns>
+        /// <returns>An Http client</returns>
         HttpClient GetHttpClient();
     }
 }

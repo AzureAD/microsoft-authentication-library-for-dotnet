@@ -32,27 +32,27 @@ namespace Microsoft.Identity.Client.AppConfig
     public enum AzureCloudInstance
     {
         /// <summary>
-        ///     Communicates that the AzureCloudInstance is not specified.
+        /// Value communicating that the AzureCloudInstance is not specified.
         /// </summary>
         None,
    
         /// <summary>
-        ///     Maps to https://login.microsoftonline.com
+        /// Microsoft Azure public cloud. Maps to https://login.microsoftonline.com
         /// </summary>
         AzurePublic,
 
         /// <summary>
-        ///     Maps to https://login.chinacloudapi.cn
+        /// Microsoft Chineses national cloud. Maps to https://login.chinacloudapi.cn
         /// </summary>
         AzureChina,
 
         /// <summary>
-        ///     Maps to https://login.microsoftonline.de
+        /// Microsoft German national cloud. Maps to https://login.microsoftonline.de
         /// </summary>
         AzureGermany,
 
         /// <summary>
-        ///     Maps to https://login.microsoftonline.us
+        /// Us Government cloud. Maps to https://login.microsoftonline.us
         /// </summary>
         AzureUsGovernment,
     };

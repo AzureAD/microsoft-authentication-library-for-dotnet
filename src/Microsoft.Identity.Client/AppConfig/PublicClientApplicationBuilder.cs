@@ -41,9 +41,12 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// Creates a PublicClientApplicationBuilder from public client application
+        /// configuration options. See https://aka.ms/msal-net-application-configuration
         /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
+        /// <param name="options">Public client applications configuration options</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder CreateWithApplicationOptions(PublicClientApplicationOptions options)
         {
             var config = new ApplicationConfiguration();
@@ -51,8 +54,13 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// Creates a PublicClientApplicationBuilder from a clientID. 
+        /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
-        /// <param name="clientId"></param>
+        /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
+        /// application registration portal (https://aka.ms/msal-net-register-app)/.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public static PublicClientApplicationBuilder Create(string clientId)
         {
             var config = new ApplicationConfiguration();
