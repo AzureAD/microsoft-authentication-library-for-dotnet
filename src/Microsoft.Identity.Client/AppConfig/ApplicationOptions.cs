@@ -28,8 +28,8 @@
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Base class for options objects with string values loadable from a configuration file 
-    /// (for instance a JSon file as in an asp.net configuration scenario)
+    /// Base class for options objects with string values loadable from a configuration file
+    /// (for instance a JSON file, as in an asp.net configuration scenario)
     /// See https://aka.ms/msal-net-application-configuration
     /// See also derived classes <see cref="PublicClientApplicationOptions"/> 
     /// and <see cref="ConfidentialClientApplicationOptions"/>
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// a domain associated with a tenant, a guid (tenant id), or a meta-tenant (e.g. consumers).
         /// This property is mutually exclusive with <see cref="AadAuthorityAudience"/>
         /// </summary>
-        /// <remarks>The name of the property was chosen o ensure compatibility with AzureAdOptions 
+        /// <remarks>The name of the property was chosen to ensure compatibility with AzureAdOptions 
         /// in ASP.NET Core configuration files (even the semantics would be tenant)</remarks>
         public string TenantId { get; set; }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public LogLevel LogLevel { get; set; }
 
         /// <summary>
-        /// Flag to enable/disable logging of Personally Identifiable data (PII) data. 
+        /// Flag to enable/disable logging of Personally Identifiable Information (PII).
         /// PII logs are never written to default outputs like Console, Logcat or NSLog
         /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR. You can set
         /// it to <c>true</c> for advanced debugging requiring PII. See https://aka.ms/msal-net-logging
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// Flag to enable/disable logging to platform defaults. In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In android, logcat is used. The default value is <c>false</c>. See https://aka.ms/msal-net-logging
+        /// In Android, logcat is used. The default value is <c>false</c>. See https://aka.ms/msal-net-logging
         /// </summary>
         /// <seealso cref="EnablePiiLogging"/>
         public bool IsDefaultPlatformLoggingEnabled { get; set; }

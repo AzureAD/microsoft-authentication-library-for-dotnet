@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.AppConfig
     */
 
     /// <summary>
-    /// Specifies what Microsoft accounts can be signed-in in a given application.
+    /// Specifies which Microsoft accounts can be used for sign-in with a given application.
     /// </summary>
     public enum AadAuthorityAudience
     {
