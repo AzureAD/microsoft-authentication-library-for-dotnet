@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             }
             catch (Exception)
             {
+                // todo(migration): look at way to get logger into servicebundle-specific platformproxy -> MsalLogger.Default.Warning(ex.Message);
                 return "Unknown";
             }
         }

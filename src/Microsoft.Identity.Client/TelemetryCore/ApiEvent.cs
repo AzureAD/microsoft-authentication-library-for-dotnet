@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ApiErrorCodeKey = EventNamePrefix + "api_error_code";
         public const string LoginHintKey = EventNamePrefix + "login_hint";
 
-        // todo(migration): document where these numerical IDs come from and how to add/update them?
         public enum ApiIds
         {
             None = 0,
