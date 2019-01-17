@@ -156,6 +156,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
@@ -180,7 +181,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(MsalClientException.StateMismatchError, exc.ErrorCode);
                 }
 
-                // todo(migration): fails due to telemetry
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -444,12 +444,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     Assert.AreEqual(MsalError.UserMismatch, exc.ErrorCode);
                 }
 
-                // todo(migration): telemetry...
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.ApiIdKey] == "174" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[ApiEvent.ApiIdKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
 
                 var users = app.GetAccountsAsync().Result;
@@ -521,8 +520,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                // todo(migration): ensure this isn't a regression to remove this --> httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
@@ -641,7 +638,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
 
-            // todo(migration): need to properly support api_event apiids.
             Assert.IsNotNull(
                 receiver.EventsReceived.Find(
                     anEvent => // Expect finding such an event
@@ -800,7 +796,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
 
-                // todo(migration): need to properly handle apiids
                 Assert.IsNotNull(receiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                     anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
                     && anEvent[ApiEvent.ApiIdKey] == "31"));
@@ -1235,6 +1230,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithLoggingLevel(LogLevel.Verbose)
+                                                                            .WithDebugLoggingCallback()
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication

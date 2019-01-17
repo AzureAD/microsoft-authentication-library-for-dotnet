@@ -111,10 +111,20 @@ namespace Microsoft.Identity.Client
         {
             var requestParams = CreateRequestParameters(interactiveParameters, UserTokenCacheInternal);
 
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
+            if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
+            }
+            else if (requestParams.Account != null)
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
+            }
+
             var handler = new InteractiveRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenForClientWithScope, // TODO(migration): need to reconcile how to get this.  do we add this in at builder time to differentiate the various calling pattern types?
+                apiId,
                 interactiveParameters.ExtraScopesToConsent,
                 string.IsNullOrWhiteSpace(interactiveParameters.LoginHint) ? requestParams.Account?.Username : interactiveParameters.LoginHint,
 #if NET_CORE_BUILDTIME
@@ -162,8 +172,6 @@ namespace Microsoft.Identity.Client
             IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            // TODO(migration):  proper ApiEvent.ApiIds value here
-
 #if DESKTOP || NET_CORE
             var requestParams = CreateRequestParameters(usernamePasswordParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(

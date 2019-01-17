@@ -167,8 +167,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
             GuardMobileFrameworks();
-
-            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUser
+            
             return await AcquireTokenOnBehalfOf(scopes, userAssertion).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -188,8 +187,6 @@ namespace Microsoft.Identity.Client
             string authority)
         {
             GuardMobileFrameworks();
-
-            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUserAuthority
             return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -208,7 +205,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUser
             return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -229,7 +225,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenOnBehalfOfWithScopeUserAuthority
             return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -247,7 +242,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenByAuthorizationCodeWithCodeScope
             return await AcquireTokenForAuthorizationCode(scopes, authorizationCode)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -284,7 +278,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenForClientWithScopeRefresh
             return await AcquireTokenForClient(scopes)
                 .WithForceRefresh(forceRefresh)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -304,7 +297,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenForClientWithScope
             return await AcquireTokenForClient(scopes)
                 .WithSendX5C(true)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -326,7 +318,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenForClientWithScopeRefresh
             return await AcquireTokenForClient(scopes)
                 .WithForceRefresh(forceRefresh)
                 .WithSendX5C(true)
@@ -349,7 +340,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): ApiEvent.ApiIds.None
             return await GetAuthorizationRequestUrl(scopes).WithLoginHint(loginHint)
                 .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
@@ -376,7 +366,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): ApiEvent.ApiIds.None
             return await GetAuthorizationRequestUrl(scopes)
                 .WithRedirectUri(redirectUri)
                 .WithLoginHint(loginHint)

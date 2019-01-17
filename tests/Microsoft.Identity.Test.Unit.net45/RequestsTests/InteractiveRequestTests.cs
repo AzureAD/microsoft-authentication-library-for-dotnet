@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     {
                         { "extra", "qp" },
                         // Slice Parameters
-                        { "key1", "value1%20with%20encoded@20space" },
+                        { "key1", "value1%20with%20encoded%20space" },
                         { "key2", "value2" }
                     }
                 };

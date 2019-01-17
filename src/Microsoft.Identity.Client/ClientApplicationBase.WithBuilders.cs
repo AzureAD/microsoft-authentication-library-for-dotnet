@@ -73,10 +73,14 @@ namespace Microsoft.Identity.Client
                                         ? GetAuthority(silentParameters.Account)
                                         : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride);
 
+            ApiEvent.ApiIds apiId = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride)
+                                        ? ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority
+                                        : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
+
             var handler = new SilentRequest(
                 ServiceBundle,
                 CreateRequestParameters(silentParameters, UserTokenCacheInternal, authorityInstance),
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope, // todo(migration): consolidate this properly
+                apiId,
                 silentParameters.ForceRefresh);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);

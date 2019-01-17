@@ -205,10 +205,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull("header.payload.signature", result.AccessToken);
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
-                // TODO(migration):  do we need to default to NO CACHE and have a WithUserTokenCache() and WithAppTokenCache()
-                // to ensure they're constructed?  Or do we need a way to say "WithNoAppTokenCache/WithNoUserTokenCache"?
-                Assert.IsNull(app.UserTokenCache);
-                Assert.IsNull(app.AppTokenCache);
+                Assert.IsNotNull(app.UserTokenCache);
+                Assert.IsNotNull(app.AppTokenCache);
             }
         }
 
@@ -345,10 +343,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     new ClientAssertionCertificate(
                         new X509Certificate2(ResourceHelper.GetTestResourceRelativePath("valid.crtfile"))));
 
-                // TODO: previous test had the final parameter here as 2 instead of 1.
-                // However, this 2nd one is NOT consumed by this test and the previous
-                // test did not check for all mock requests to be flushed out...
-
                 var app = CreateConfidentialClient(httpManager, cc, 1, receiver.HandleTelemetryEvents);
                 var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
                 Assert.IsNotNull(
@@ -371,8 +365,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             anEvent[EventBase.EventNameKey].EndsWith("token_cache_write") &&
                             anEvent[CacheEvent.TokenTypeKey] == "at"));
                 
-                // TODO(migration):  This is looking for existence of api_event with AcquireTokenForClientWithScope id.
-                // We still need to finalize and implement the updated id telemetry story with the builders.
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -641,7 +633,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
 
-                // TODO(migration): need to handle api_event api id scenario.
                 Assert.AreEqual(TokenRetrievedFromNetCall, accessTokenInCache.Secret);
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(

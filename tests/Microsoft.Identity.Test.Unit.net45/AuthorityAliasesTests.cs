@@ -133,6 +133,8 @@ namespace Microsoft.Identity.Test.Unit
                 // silent request targeting rt should find rt in cache for authority with any environment alias
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
                 {
+                    result = null;
+
                     httpManager.AddMockHandler(new MockHttpMessageHandler()
                     {
                         Url = string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/oauth2/v2.0/token",
@@ -149,15 +151,21 @@ namespace Microsoft.Identity.Test.Unit
                     try
                     {
                         result = await app.AcquireTokenSilentAsync(
-                            MsalTestConstants.ScopeForAnotherResource,
-                            (await app.GetAccountsAsync().ConfigureAwait(false)).First(),
-                            string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid),
-                            false).ConfigureAwait(false);
+                                     MsalTestConstants.ScopeForAnotherResource,
+                                     (await app.GetAccountsAsync().ConfigureAwait(false)).First(),
+                                     string.Format(
+                                         CultureInfo.InvariantCulture,
+                                         "https://{0}/{1}/",
+                                         envAlias,
+                                         MsalTestConstants.Utid),
+                                     false).ConfigureAwait(false);
                     }
-                    catch (AggregateException ex)
+                    catch (MsalUiRequiredException)
                     {
-                        Assert.IsNotNull(ex.InnerException);
-                        Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
+                    }
+                    catch (Exception ex)
+                    {
+                        Assert.Fail();
                     }
 
                     Assert.IsNull(result);

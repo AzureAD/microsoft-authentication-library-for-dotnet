@@ -249,9 +249,6 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
             string authority, bool forceRefresh)
         {
-            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
-            // TODO(migration): AcquireTokenSilentWithAuthority
-
             return await AcquireTokenSilent(scopes, account)
                 .WithAuthorityOverride(authority)
                 .WithForceRefresh(forceRefresh)
@@ -276,9 +273,6 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
         {
-            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
-            // TODO(migration): AcquireTokenSilentWithoutAuthority
-
             return await AcquireTokenSilent(scopes, account)
                          .ExecuteAsync(CancellationToken.None)
                          .ConfigureAwait(false);

@@ -165,8 +165,6 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScope
-
             return await AcquireTokenInteractive(scopes, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -182,8 +180,6 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
             
-            // TODO(migration): AcquireTokenWithScopeHint
-
             return await AcquireTokenInteractive(scopes, null).WithLoginHint(loginHint)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -201,8 +197,6 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
-
-            // TODO(migration): AcquireTokenWithScopeUser
 
             return await AcquireTokenInteractive(scopes, null).WithAccount(account)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -223,8 +217,6 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
-
-            // TODO(migration): AcquireTokenWithScopeHintBehavior
 
             return await AcquireTokenInteractive(scopes, null)
                 .WithLoginHint(loginHint)
@@ -248,8 +240,6 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
-
-            // TODO(migration): AcquireTokenWithScopeUserBehavior
 
             return await AcquireTokenInteractive(scopes, null)
                 .WithAccount(account)
@@ -277,8 +267,6 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
-
-            // TODO(migration): AcquireTokenWithScopeHintBehaviorAuthority
 
             return await AcquireTokenInteractive(scopes, null)
                 .WithLoginHint(loginHint)
@@ -309,8 +297,6 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScopeUserBehaviorAuthority
-
             return await AcquireTokenInteractive(scopes, null)
                 .WithAccount(account)
                 .WithPrompt(prompt)
@@ -333,8 +319,6 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScope
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -366,8 +350,6 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeHint
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -386,8 +368,6 @@ namespace Microsoft.Identity.Client
             IAccount account, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScopeUser
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
@@ -409,8 +389,6 @@ namespace Microsoft.Identity.Client
                                                                   Prompt prompt, string extraQueryParameters, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScopeHintBehavior
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
@@ -434,8 +412,6 @@ namespace Microsoft.Identity.Client
                                                                   Prompt prompt, string extraQueryParameters, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScopeUserBehavior
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
@@ -463,8 +439,6 @@ namespace Microsoft.Identity.Client
                                                                   Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScopeHintBehaviorAuthority
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
@@ -494,8 +468,6 @@ namespace Microsoft.Identity.Client
                                                                   Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScopeUserBehaviorAuthority
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
@@ -560,8 +532,6 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, SecureString securePassword)
         {
             GuardMobilePlatforms();
-
-            // TODO(migration): AcquireTokenWithScopeUser
 
             return await AcquireTokenWithUsernamePassword(scopes, username, securePassword)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -700,8 +670,6 @@ namespace Microsoft.Identity.Client
             GuardNonWindowsFrameworks();
             GuardIWANetCore();
 
-            // TODO(migration): AcquireTokenWithScopeUser
-
             return await AcquireTokenWithIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
@@ -720,8 +688,6 @@ namespace Microsoft.Identity.Client
             string username)
         {
             GuardNonWindowsFrameworks();
-
-            // TODO(migration): AcquireTokenWithScopeUser
 
             return await AcquireTokenWithIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
