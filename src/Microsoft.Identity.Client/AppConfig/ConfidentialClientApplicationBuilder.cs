@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Creates a ConfidentialClientApplicationBuilder from a clientID. 
+        /// Creates a ConfidentialClientApplicationBuilder from a clientID.
         /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
@@ -72,36 +72,11 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Sets the Application token cache. This cache is used in client credential flows
-        /// (<see cref="IConfidentialClientApplication.AcquireTokenForClientAsync(System.Collections.Generic.IEnumerable{string})"/>
-        /// and its override
-        /// </summary>
-        /// <param name="tokenCache">Application token cache</param>
-        /// <returns></returns>
-        [Obsolete("You can access the AppTokenCache using the AppTokenCache property on the created IConfidentialClientApplication")]
-        public ConfidentialClientApplicationBuilder WithAppTokenCache(TokenCache tokenCache)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Sets the user token cache. In a confidential client application, you should ensure that there is
-        /// one cache per user.
-        /// </summary>
-        /// <param name="tokenCache">User token cache</param>
-        /// <returns></returns>
-        [Obsolete("You can access the UserTokenCache using the UserTokenCache property on the created IConfidentialClientApplication")]
-        public ConfidentialClientApplicationBuilder WithUserTokenCache(TokenCache tokenCache)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Sets the certificate associated with the application
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <returns></returns>
-        public ConfidentialClientApplicationBuilder WithX509Certificate2(X509Certificate2 certificate)
+        public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
             Config.Certificate = certificate;
             return this;

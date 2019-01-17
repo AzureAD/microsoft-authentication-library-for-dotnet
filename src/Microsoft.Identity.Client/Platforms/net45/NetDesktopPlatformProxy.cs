@@ -135,9 +135,9 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 returnValue = result == WindowsNativeMethods.ErrorSuccess &&
                               status == WindowsNativeMethods.NetJoinStatus.NetSetupDomainName;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // todo(migration): look at way to get logger into servicebundle-specific platformproxy -> MsalLogger.Default.WarningPii(ex);
+                Logger.WarningPii(ex);
                 // ignore the exception as the result is already set to false;
             }
 

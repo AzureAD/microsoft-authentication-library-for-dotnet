@@ -51,16 +51,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.Telemetry
 
         private class _TestReceiver : ITelemetryReceiver
         {
-            public List<Dictionary<string, string>> ReceivedEvents = new List<Dictionary<string, string>>();
+            public readonly List<Dictionary<string, string>> ReceivedEvents = new List<Dictionary<string, string>>();
 
             /// <inheritdoc />
             public void HandleTelemetryEvents(List<Dictionary<string, string>> events)
             {
                 ReceivedEvents.AddRange(events);
             }
-
-            /// <inheritdoc />
-            public bool OnlySendFailureTelemetry { get; set; }
         }
 
         private class _TestEvent : EventBase

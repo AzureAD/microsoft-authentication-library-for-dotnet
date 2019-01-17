@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,13 +22,15 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -150,7 +152,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Sets the Tenant Id of the organization from which the application will let
         /// users sign-in. This is classically a GUID or a domain name. See https://aka.ms/msal-net-application-configuration.
-        /// Although it is also possible to set <paramref name="tenantId"/> to <c>common</c>, 
+        /// Although it is also possible to set <paramref name="tenantId"/> to <c>common</c>,
         /// <c>organizations</c>, and <c>consumers</c>, it's recommended to use one of the
         /// overrides of <see cref="AddKnownAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
@@ -221,7 +223,6 @@ namespace Microsoft.Identity.Client.AppConfig
             WithComponent(applicationOptions.Component);
             WithEnablePiiLogging(applicationOptions.EnablePiiLogging);
             WithDefaultPlatformLoggingEnabled(applicationOptions.IsDefaultPlatformLoggingEnabled);
-            WithSliceParameters(applicationOptions.SliceParameters);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
@@ -232,7 +233,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// Sets the identifier of the software component (libraries/SDK) consuming MSAL.NET.
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage 
+        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage
         /// by component libraries. You can, for instance set it to the name of your application.
         /// This is used in telemetry.
         /// </summary>
@@ -241,20 +242,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithComponent(string component)
         {
             Config.Component = GetValueIfNotEmpty(Config.Component, component);
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Sets a custom query parameters named slice= that may be sent to the STS for dogfood testing 
-        /// or debugging. 
-        /// Unless requested otherwise by Microsoft support, you should not set this parameter as it may have adverse effect on the application.
-        /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
-        /// </summary>
-        /// <param name="sliceParameters">name of the slice on which the application will run</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithSliceParameters(string sliceParameters)
-        {
-            Config.SliceParameters = GetValueIfNotEmpty(Config.SliceParameters, sliceParameters);
             return (T)this;
         }
 
@@ -326,9 +313,9 @@ namespace Microsoft.Identity.Client.AppConfig
 
         private string GetDefaultAuthorityAudience()
         {
-            if (!string.IsNullOrWhiteSpace(Config.TenantId) && 
+            if (!string.IsNullOrWhiteSpace(Config.TenantId) &&
                 Config.AadAuthorityAudience != AadAuthorityAudience.None &&
-                Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdSpecificDirectoryOnly)
+                Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdMyOrg)
             {
                 // Conflict, user has specified a string tenantId and the enum audience value for AAD, which is also the tenant.
                 throw new InvalidOperationException(CoreErrorMessages.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
@@ -429,7 +416,7 @@ namespace Microsoft.Identity.Client.AppConfig
             {
                 return AddKnownAadAuthority(cloudInstanceUri, tenantId, isDefaultAuthority);
             }
-            
+
             Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", isDefaultAuthority));
             return (T)this;
         }
@@ -439,7 +426,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// organization (single tenant application) described by its cloud instance and its tenant ID.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure 
+        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
@@ -451,7 +438,7 @@ namespace Microsoft.Identity.Client.AppConfig
             Guid tenantId,
             bool isDefaultAuthority = false)
         {
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdSpecificDirectoryOnly, $"{tenantId:N}");
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
             Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
             return (T)this;
         }
@@ -461,9 +448,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// organization (single tenant application) described by its cloud instance and its domain
         /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure 
+        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
-        /// <param name="tenant">Domain name associated with the Azure AD tenant from which 
+        /// <param name="tenant">Domain name associated with the Azure AD tenant from which
         /// to sign-in users. This can also be a guid</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
@@ -479,18 +466,18 @@ namespace Microsoft.Identity.Client.AppConfig
                 return AddKnownAadAuthority(azureCloudInstance, tenantIdGuid, isDefaultAuthority);
             }
 
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdSpecificDirectoryOnly, tenant);
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
             Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
             return (T)this;
         }
 
         /// <summary>
-        /// Adds a known Azure AD authority to the application to sign-in users specifying 
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
         /// the cloud instance and the sign-in audience. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure 
+        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
-        /// <param name="authorityAudience">Sign-in audience (one AAD organization, 
+        /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
@@ -505,10 +492,10 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Adds a known Azure AD authority to the application to sign-in users specifying 
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
         /// the sign-in audience (the cloud being the Azure public cloud). See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="authorityAudience">Sign-in audience (one AAD organization, 
+        /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
@@ -524,7 +511,7 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Adds a known Azure AD authority to the application to sign-in users specifying 
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
         /// the full authority Uri. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
         /// <param name="authorityUri">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
@@ -577,20 +564,15 @@ namespace Microsoft.Identity.Client.AppConfig
 
         private static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)
         {
-            if (authorityAudience == AadAuthorityAudience.Default)
-            {
-                authorityAudience = AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount;
-            }
-
             switch (authorityAudience)
             {
             case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
                 return "common";
-            case AadAuthorityAudience.AzureAdOnly:
+            case AadAuthorityAudience.AzureAdMultipleOrgs:
                 return "organizations";
-            case AadAuthorityAudience.MicrosoftAccountOnly:
+            case AadAuthorityAudience.PersonalMicrosoftAccount:
                 return "consumers";
-            case AadAuthorityAudience.AzureAdSpecificDirectoryOnly:
+            case AadAuthorityAudience.AzureAdMyOrg:
                 if (string.IsNullOrWhiteSpace(tenantId))
                 {
                     throw new ArgumentNullException(nameof(tenantId));
@@ -618,7 +600,7 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Adds a known authority corresponding to an Azure AD B2C policy. 
+        /// Adds a known authority corresponding to an Azure AD B2C policy.
         /// See https://aka.ms/msal-net-b2c-specificities
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance

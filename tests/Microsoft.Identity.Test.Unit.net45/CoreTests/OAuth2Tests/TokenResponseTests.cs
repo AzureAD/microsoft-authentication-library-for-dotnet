@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.OAuth2Tests
 
                 OAuth2Client client = new OAuth2Client(harness.ServiceBundle.DefaultLogger, harness.HttpManager, new TelemetryManager(harness.ServiceBundle.PlatformProxy, null));
                 Task<MsalTokenResponse> task = client.GetTokenAsync(
-                    new Uri(CoreTestConstants.AuthorityCommonTenant),
+                    new Uri(CoreTestConstants.AuthorityCommonTenant + "oauth2/v2.0/token"),
                     RequestContext.CreateForTest(harness.ServiceBundle));
                 MsalTokenResponse response = task.Result;
                 Assert.IsNotNull(response);

@@ -76,7 +76,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string ParsingMetadataDocumentFailed = "Parsing WS metadata exchange failed";
         public const string ParsingWsTrustResponseFailed = "Parsing WS-Trust response failed";
         public const string PasswordRequiredForManagedUserError = "Password is required for managed user";
-        public const string LoginHintNullForUiOption = "Null login_hint is not allowed for UIBehavior.ActAsCurrentUser";
+        public const string LoginHintNullForUiOption = "Null login_hint is not allowed for Prompt.ActAsCurrentUser";
         public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
 
         public const string BrokerReponseHashMismatch =
@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string NoPromptFailedErrorMessage =
             "One of two conditions was encountered: "
             +
-            "1. The UiBehavior.Never flag was passed, but the constraint could not be honored, because user interaction was required. "
+            "1. The Prompt.Never flag was passed, but the constraint could not be honored, because user interaction was required. "
             +
             "2. An error occurred during a silent web authentication that prevented the http authentication flow from completing in a short enough time frame";
 

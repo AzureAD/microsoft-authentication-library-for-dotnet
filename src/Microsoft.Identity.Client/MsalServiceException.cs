@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Client
         /// provide additional claims, such as doing two factor authentication. The are two cases:
         /// <list type="bullent">
         /// <item><description>
-        /// If your application is a <see cref="PublicClientApplication"/>, you should just call an override of <see cref="PublicClientApplication.AcquireTokenAsync(System.Collections.Generic.IEnumerable{string}, string, UIBehavior, string, System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// If your application is a <see cref="PublicClientApplication"/>, you should just call an override of <see cref="PublicClientApplication.AcquireTokenAsync(System.Collections.Generic.IEnumerable{string}, string, Prompt, string, System.Collections.Generic.IEnumerable{string}, string)"/>
         /// in <see cref="PublicClientApplication"/> having an <c>extraQueryParameter</c> argument, and add the following string <c>$"claims={ex.Claims}"</c>
         /// to the extraQueryParameters, where ex is an instance of this exception.
         /// </description></item>
