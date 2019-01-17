@@ -47,16 +47,16 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token from the authority configured in the app using the authorization code 
-        /// previously received from the STS. 
+        /// Acquires a security token from the authority configured in the app using the authorization code
+        /// previously received from the STS.
         /// It uses the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
         /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users,
         /// and can request an authorization code.
-        /// This method does not lookup the token cache, but stores the result in it, so it can be looked up 
+        /// This method does not lookup the token cache, but stores the result in it, so it can be looked up
         /// using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
+        /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can set optional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>, 
@@ -92,8 +92,8 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires an access token for this application (usually a Web API) from the authority configured in the application, 
-        /// in order to access another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow. 
+        /// Acquires an access token for this application (usually a Web API) from the authority configured in the application,
+        /// in order to access another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
         /// (See https://aka.ms/msal-net-on-behalf-of).
         /// This confidential client application was itself called with a token which will be provided in the
         /// <paramref name="userAssertion">userAssertion</paramref> parameter.

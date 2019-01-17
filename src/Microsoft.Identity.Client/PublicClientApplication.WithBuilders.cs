@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client
         /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction
@@ -80,10 +80,10 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on 
+        /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
-        /// <item><description>the method first acquires a device code from the authority and returns it to the caller via
+        /// <item><description>The method first acquires a device code from the authority and returns it to the caller via
         /// the <paramref name="deviceCodeResultCallback"/>. This callback takes care of interacting with the user
         /// to direct them to authenticate (to a specific URL, with a code)</description></item>
         /// <item><description>The method then proceeds to poll for the security
@@ -96,10 +96,10 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
         /// You can also pass optional parameters by calling:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction
+        /// of the known authorities added to the application construction.
         /// 
         /// TODO: check if we could also pass login_hint or account (I would not think they are taken into account)
         /// 
@@ -112,21 +112,21 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Non-interactive request to acquire a security token for the signed-in user in Windows, 
+        /// Non-interactive request to acquire a security token for the signed-in user in Windows,
         /// via Integrated Windows Authentication. See https://aka.ms/msal-net-iwa.
-        /// The account used in this overrides is pulled from the operating system as the current user principal name
+        /// The account used in this overrides is pulled from the operating system as the current user principal name.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
         /// You can also pass optional parameters by calling:
-        /// <see cref="AcquireTokenWithIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier 
-        /// of the user account for which to acquire a token with Integrated Windows authentication. This is generally in 
+        /// <see cref="AcquireTokenWithIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
+        /// of the user account for which to acquire a token with Integrated Windows authentication. This is generally in
         /// UserPrincipalName (UPN) format, e.g. john.doe@contoso.com. This is normally not needed, but some Windows administrators
         /// set policies preventing applications from looking-up the signed-in user in Windows, and in that case the username
         /// needs to be passed.
         /// You can also chain with
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction
@@ -150,7 +150,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
-        /// of the known authorities added to the application construction
+        /// of the known authorities added to the application construction.
         /// </remarks>
         public AcquireTokenWithUsernamePasswordParameterBuilder AcquireTokenWithUsernamePassword(
             IEnumerable<string> scopes,

@@ -45,8 +45,8 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal AcquireTokenParameters Parameters { get; } = new AcquireTokenParameters();
 
         /// <summary>
-        /// Executes the Token request asynchonously, with a possibility of cancelling the
-        /// asynchonous method.
+        /// Executes the Token request asynchronously, with a possibility of cancelling the
+        /// asynchronous method.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
         /// <returns>Authentication result containing a token for the requested scopes and parameters
@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// Sets Extra Query Parameters for the query string in the HTTP authentication request
         /// </summary>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
         /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>The builder to chain the .With methods</returns>
@@ -119,11 +119,9 @@ namespace Microsoft.Identity.Client.ApiConfig
             return (T)this;
         }
 
-        /// <summary>
-        ///     TODO: replicate the options here that we have in ApplicationBuilder for an AuthorityInfo class?
-        /// 
+        /// <summary> 
         /// Specific authority for which the token is requested. Passing a different value than configured
-        /// at the application constructor narrows down the selection to a specific tenant. 
+        /// at the application constructor narrows down the selection to a specific tenant.
         /// This does not change the configured value in the application. This is specific
         /// to applications managing several accounts (like a mail client with several mailboxes)
         /// </summary>

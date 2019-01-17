@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// Specified the what the interactive experience is for the user.
+        /// Specifies what the interactive experience is for the user.
         /// </summary>
         /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount"/>
         /// </param>
