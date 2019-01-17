@@ -111,7 +111,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         // Slice Parameters
                         { "key1", "value1%20with%20encoded%20space" },
                         { "key2", "value2" }
-                    }
+                    },
+                    LoginHint = MsalTestConstants.DisplayableId,
                 };
 
                 // TODO(migration): this test isn't actually validating that we're sending in the extra query parameters / slice parameters
@@ -121,7 +122,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    MsalTestConstants.DisplayableId,
                     Prompt.SelectAccount,
                     ui);
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -179,7 +179,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = cache,
                     RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
-                    ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }}
+                    ExtraQueryParameters = new Dictionary<string, string> {{ "extra", "qp" }},
+                    LoginHint = MsalTestConstants.DisplayableId,
                 };
 
                 var request = new InteractiveRequest(
@@ -187,7 +188,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    MsalTestConstants.DisplayableId,
                     Prompt.SelectAccount,
                     ui);
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -242,7 +242,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         parameters,
                         ApiEvent.ApiIds.None,
                         MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                        null,
                         Prompt.ForceLogin,
                         new MockWebUI());
                     Assert.Fail("ArgumentException should be thrown here");
@@ -277,6 +276,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = null,
                     RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
+                    LoginHint = MsalTestConstants.DisplayableId,
                 };
 
                 var ui = new MockWebUI();
@@ -286,7 +286,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    MsalTestConstants.DisplayableId,
                     Prompt.SelectAccount,
                     ui);
 
@@ -330,6 +329,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     TokenCache = null,
                     RequestContext = RequestContext.CreateForTest(harness.ServiceBundle),
                     RedirectUri = new Uri("some://uri"),
+                    LoginHint = MsalTestConstants.DisplayableId,
                 };
 
                 var ui = new MockWebUI();
@@ -339,7 +339,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    MsalTestConstants.DisplayableId,
                     Prompt.SelectAccount,
                     ui);
 
@@ -393,7 +392,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    null,
                     Prompt.ForceLogin,
                     webUi);
                 try
@@ -421,7 +419,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    null,
                     Prompt.ForceLogin,
                     webUi);
 
@@ -442,7 +439,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
-        {            
+        {
             using (var harness = new MockHttpAndServiceBundle())
             {
                 var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
@@ -464,7 +461,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     parameters,
                     ApiEvent.ApiIds.None,
                     MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    null,
                     Prompt.ForceLogin,
                     new MockWebUI());
 

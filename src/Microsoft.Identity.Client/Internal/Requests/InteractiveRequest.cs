@@ -55,7 +55,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters authenticationRequestParameters,
             ApiEvent.ApiIds apiId,
             IEnumerable<string> extraScopesToConsent,
-            string loginHint,
             Prompt prompt,
             IWebUI webUi)
             : base(serviceBundle, authenticationRequestParameters, apiId)
@@ -70,9 +69,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             ValidateScopeInput(_extraScopesToConsent);
-
-            // TODO(migration): why is LoginHint set here instead of just using the one sent in?
-            authenticationRequestParameters.LoginHint = loginHint;
 
             _webUi = webUi;
             _prompt = prompt;

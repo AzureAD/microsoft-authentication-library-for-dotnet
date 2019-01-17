@@ -216,6 +216,7 @@ namespace Microsoft.Identity.Client
                 RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
                 RequestContext = CreateRequestContext(),
                 ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(),
+                LoginHint = commonParameters.LoginHint
             };
         }
 

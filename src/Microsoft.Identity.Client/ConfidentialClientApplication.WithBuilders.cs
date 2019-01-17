@@ -161,7 +161,6 @@ namespace Microsoft.Identity.Client
                 requestParameters,
                 ApiEvent.ApiIds.None,
                 authorizationRequestUrlParameters.ExtraScopesToConsent,
-                authorizationRequestUrlParameters.LoginHint,
                 Prompt.SelectAccount,
                 null);
 

@@ -110,6 +110,9 @@ namespace Microsoft.Identity.Client
             CancellationToken cancellationToken)
         {
             var requestParams = CreateRequestParameters(interactiveParameters, UserTokenCacheInternal);
+            requestParams.LoginHint = string.IsNullOrWhiteSpace(interactiveParameters.LoginHint)
+                                          ? requestParams.Account?.Username
+                                          : interactiveParameters.LoginHint;
 
             ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
             if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
@@ -126,7 +129,6 @@ namespace Microsoft.Identity.Client
                 requestParams,
                 apiId,
                 interactiveParameters.ExtraScopesToConsent,
-                string.IsNullOrWhiteSpace(interactiveParameters.LoginHint) ? requestParams.Account?.Username : interactiveParameters.LoginHint,
 #if NET_CORE_BUILDTIME
                 Prompt.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
 #else

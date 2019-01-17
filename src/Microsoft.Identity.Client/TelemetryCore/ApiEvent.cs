@@ -37,9 +37,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
         public const string ApiIdKey = EventNamePrefix + "api_id";
         public const string AuthorityKey = EventNamePrefix + "authority";
         public const string AuthorityTypeKey = EventNamePrefix + "authority_type";
-        // public const string UiBehaviorKey = EventNamePrefix + "ui_behavior";  // todo(migration): cover this with telemetry...
         public const string PromptKey = EventNamePrefix + "ui_behavior";
-        public const string ValidationStatusKey = EventNamePrefix + "validation_status"; // todo(migration): needed?
         public const string TenantIdKey = EventNamePrefix + "tenant_id";
         public const string UserIdKey = EventNamePrefix + "user_id";
         public const string WasSuccessfulKey = EventNamePrefix + "was_successful";
@@ -103,12 +101,6 @@ namespace Microsoft.Identity.Client.TelemetryCore
         {
             set => this[PromptKey] = value?.ToLowerInvariant();
         }
-
-        // TODO(migration):  this was from ValidateAuthority which is no longer used.  
-        //public string ValidationStatus
-        //{
-        //    set => this[ValidationStatusKey] = value?.ToLowerInvariant();
-        //}
 
         public string TenantId
         {
