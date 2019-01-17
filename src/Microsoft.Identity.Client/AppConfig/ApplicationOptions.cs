@@ -45,28 +45,32 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Tenant from which the application will allow users to sign it. This can be:
         /// a domain associated with a tenant, a guid (tenant id), or a meta-tenant (e.g. consumers).
-        /// This property is mutually exclusive with <see cref="AadAuthorityAudience"/>
+        /// This property is mutually exclusive with <see cref="AadAuthorityAudience"/>. If both
+        /// are provided, an exception will be thrown.
         /// </summary>
         /// <remarks>The name of the property was chosen to ensure compatibility with AzureAdOptions 
         /// in ASP.NET Core configuration files (even the semantics would be tenant)</remarks>
         public string TenantId { get; set; }
 
         /// <summary>
-        /// Sign-in audience. This property is mutually exclusive with TenantId...
+        /// Sign-in audience. This property is mutually exclusive with TenantId. If both
+        /// are provided, an exception will be thrown.
         /// </summary>
         public AadAuthorityAudience AadAuthorityAudience { get; set; } = AadAuthorityAudience.None;
 
         /// <summary>
         /// STS instance (for instance https://login.microsoftonline.com for the Azure public cloud). 
         /// The name was chosen to ensure compatibility with AzureAdOptions in ASP.NET Core.
-        /// This property is mutually exclusive with <see cref="AzureCloudInstance"/>
+        /// This property is mutually exclusive with <see cref="AzureCloudInstance"/>. If both
+        /// are provided, an exception will be thrown.
         /// </summary>
         public string Instance { get; set; }
 
         /// <summary>
         /// Specific instance in the case of Azure Active Directory. 
-        /// This property is mutually exclusive with <see cref="Instance"/>. 
         /// It allows users to use the enum instead of the explicit url.
+        /// This property is mutually exclusive with <see cref="Instance"/>. If both
+        /// are provided, an exception will be thrown.
         /// </summary>
         public AzureCloudInstance AzureCloudInstance { get; set; } = AzureCloudInstance.None;
 
