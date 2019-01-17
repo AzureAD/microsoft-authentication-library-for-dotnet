@@ -62,8 +62,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets the redirect URI to add to the Authorization request URL
         /// </summary>
-        /// <param name="redirectUri"></param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
         /// <returns></returns>
         public GetAuthorizationRequestUrlParameterBuilder WithRedirectUri(string redirectUri)
         {

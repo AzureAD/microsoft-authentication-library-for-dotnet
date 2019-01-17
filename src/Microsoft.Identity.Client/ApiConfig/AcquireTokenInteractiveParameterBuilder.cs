@@ -41,6 +41,7 @@ using System.Windows.Forms;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Builder for an Interactive token request
     /// </summary>
     [CLSCompliant(false)]
     public sealed class AcquireTokenInteractiveParameterBuilder :
@@ -71,9 +72,14 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Specifies if the public client application should used an embedded web browser
+        /// or the system default browser
         /// </summary>
-        /// <param name="useEmbeddedWebView"></param>
-        /// <returns></returns>
+        /// <param name="useEmbeddedWebView">If <c>true</c>, will used an embedded web browser,
+        /// otherwise will attempt to use a system web browser. The default depends on the platform:
+        /// <c>false</c> for Xamarin.iOS and Xamarin.Android, and <c>true</c> for .NET Framework,
+        /// and UWP</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
             Parameters.UseEmbeddedWebView = useEmbeddedWebView;
@@ -83,9 +89,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         // TODO: UIBehavior struct is INTERNAL on .net core...  (can we change that?)
 #if !NET_CORE_BUILDTIME
         /// <summary>
+        /// Specified the what the interactive experience is for the user.
         /// </summary>
-        /// <param name="behavior"></param>
-        /// <returns></returns>
+        /// <param name="behavior">Requested interactive experience. The default is <see cref="UIBehavior.SelectAccount"/>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUiBehavior(UIBehavior behavior)
         {
             Parameters.UiBehavior = behavior;

@@ -59,9 +59,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets the Callback delegate that will be called so that your application can
+        /// interact with the user to direct them to authenticate (to a specific URL, with a code)
         /// </summary>
-        /// <param name="deviceCodeResultCallback"></param>
-        /// <returns></returns>
+        /// <param name="deviceCodeResultCallback">callback containing information to show the user about how to authenticate 
+        /// and enter the device code.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenWithDeviceCodeParameterBuilder WithDeviceCodeResultCallback(
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {

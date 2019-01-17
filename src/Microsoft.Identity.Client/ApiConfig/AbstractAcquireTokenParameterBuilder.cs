@@ -35,6 +35,8 @@ using Microsoft.Identity.Client.Utils;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Base class for builders of token requests, which attempt to acquire a token
+    /// based on the provided parameters
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractAcquireTokenParameterBuilder<T>
@@ -43,16 +45,19 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal AcquireTokenParameters Parameters { get; } = new AcquireTokenParameters();
 
         /// <summary>
-        /// 
+        /// Executes the Token request asynchonously, with a possibility of cancelling the
+        /// asynchonous method.
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
+        /// <returns>Authentication result containing a token for the requested scopes and parameters
+        /// set in the builder</returns>
         public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
         /// <summary>
+        /// Specifies which scopes to request
         /// </summary>
-        /// <param name="scopes"></param>
-        /// <returns></returns>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>The builder to chain the .With methods</returns>
         protected T WithScopes(IEnumerable<string> scopes)
         {
             Parameters.Scopes = scopes;
@@ -60,9 +65,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets the <paramref name="loginHint"/>, in order to avoid select account
+        /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive
+        /// with <see cref="WithAccount(IAccount)"/>. If both are used, an exception will be thrown
         /// </summary>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
+        /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithLoginHint(string loginHint)
         {
             Parameters.LoginHint = loginHint;
@@ -70,9 +78,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets the account for which the token will be retrieved. This method is mutually exclusive
+        /// with <see cref="WithLoginHint(string)"/>. If both are used, an exception will be thrown
         /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
+        /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAccount(IAccount account)
         {
             Parameters.Account = account;
@@ -80,9 +90,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
         /// </summary>
-        /// <param name="extraQueryParameters"></param>
-        /// <returns></returns>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
             Parameters.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
@@ -97,8 +110,9 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        /// <param name="extraScopesToConsent"></param>
-        /// <returns></returns>
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront,
+        /// in addition to the scopes for the protected Web API for which you want to acquire a security token.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
         {
             Parameters.ExtraScopesToConsent = extraScopesToConsent;
@@ -109,7 +123,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         ///     TODO: replicate the options here that we have in ApplicationBuilder for an AuthorityInfo class?
         /// </summary>
         /// <param name="authorityUri"></param>
-        /// <returns></returns>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthorityOverride(string authorityUri)
         {
             Parameters.AuthorityOverride = authorityUri;
