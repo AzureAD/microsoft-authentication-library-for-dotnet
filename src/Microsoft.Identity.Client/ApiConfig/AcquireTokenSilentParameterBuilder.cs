@@ -62,11 +62,14 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// token from the user token cache. By default the token is taken from the
         /// the application token cache (forceRefresh=false)
         /// </summary>
-        /// <param name="forceRefresh">If <c>true</c>, the Token request will ignore the access token in the user token cache
-        /// and will attempt to acquire new access token (and refresh the refrehs token). The default is <c>false</c></param>
+        /// <param name="forceRefresh">If <c>true</c>, ignore any access token in the user token cache 
+        /// and attempt to acquire new access token using the refresh token for the account 
+        /// if this one is available. This can be useful in the case when the application developer wants to make
+        /// sure that conditional access policies are applied immediately, rather than after the expiration of the access token. 
+        /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>Avoid setting <paramref name="forceRefresh"/> to <c>true</c> true un-necessarily to
-        /// avoid imparing the performance of your application</remarks>
+        /// <remarks>Avoid un-necessarily setting <paramref name="forceRefresh"/> to <c>true</c> true in order to
+        /// avoid affecting negatively the performance of your application</remarks>
         public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
             Parameters.ForceRefresh = forceRefresh;

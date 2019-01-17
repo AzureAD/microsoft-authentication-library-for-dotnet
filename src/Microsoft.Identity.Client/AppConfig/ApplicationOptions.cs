@@ -88,9 +88,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// In <see cref="Microsoft.Identity.Client.IConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
-        /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
-
-        /// </summary>
+        /// you then need to add the reply URL of the deployed application in the application registration portal
+        /// </remarks>
         public string RedirectUri { get; set; }
 
         /// <summary>
