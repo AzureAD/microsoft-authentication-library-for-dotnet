@@ -118,15 +118,15 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
-        /// with advanced parameters controlling network call. See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
         /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
         /// parameters</returns>
-        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
         /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
-        /// or performs two factor authentication</exception>
+        /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
         /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),

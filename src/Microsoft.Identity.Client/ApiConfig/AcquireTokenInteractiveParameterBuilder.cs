@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         // TODO: UIBehavior struct is INTERNAL on .net core...  (can we change that?)
 #if !NET_CORE_BUILDTIME
         /// <summary>
-        /// Specified the what the interactive experience is for the user.
+        /// Specifies the what the interactive experience is for the user.
         /// </summary>
         /// <param name="behavior">Requested interactive experience. The default is <see cref="UIBehavior.SelectAccount"/>
         /// </param>
