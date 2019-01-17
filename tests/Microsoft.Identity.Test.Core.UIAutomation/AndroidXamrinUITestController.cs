@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -35,7 +35,7 @@ using Xamarin.UITest.Queries;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
-    public class IOSXamarinUiTestController : XamarinUiTestController
+    public class AndroidXamarinUiTestController : XamarinUiTestController
     {
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {
@@ -47,10 +47,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     Application.Tap(x => x.Marked(elementID));
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                        Application.Query(InvokeTapByCssId(elementID));
+                    Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    Application.Query(InvokeTapByHtmlElementValue(elementID));
+                    Application.Tap(QueryByHtmlElementValue(elementID));
                     break;
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
@@ -80,24 +80,15 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             DismissKeyboard();
         }
 
-        private static Func<AppQuery, InvokeJSAppQuery> InvokeTapByCssId(string elementID)
-        {
-            return c => c.Class("WKWebView").InvokeJS(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID));
-        }
-
-        private static Func<AppQuery, InvokeJSAppQuery> InvokeTapByHtmlElementValue(string elementID)
-        {
-            return c => c.Class("WKWebView").InvokeJS(String.Format(CultureInfo.InvariantCulture, "document.evaluate('//*[text()=\"{0}\"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()", elementID));
-        }
-
         protected override Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
         {
-            return c => c.Class("WKWebView").Css(String.Format(CultureInfo.InvariantCulture, "#{0}", elementID));
+            return c => c.Css(string.Format(CultureInfo.InvariantCulture, CssidSelector, elementID));
         }
 
-        protected override Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string elementID)
+        protected override Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string text)
         {
-            return c => c.Class("WKWebView").Css(String.Format(CultureInfo.InvariantCulture, "#{0}", elementID));
+            string xpath = string.Format(CultureInfo.InvariantCulture, XpathSelector, text);
+            return c => c.XPath(xpath);
         }
     }
 }

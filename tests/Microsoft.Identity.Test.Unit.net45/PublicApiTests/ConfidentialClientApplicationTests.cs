@@ -830,4 +830,4 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     }
 }
 
-#endif 
+#endif

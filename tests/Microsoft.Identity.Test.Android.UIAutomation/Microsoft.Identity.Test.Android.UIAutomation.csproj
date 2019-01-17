@@ -65,7 +65,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="XamarinDroidTests.cs" />
+    <Compile Include="AndroidTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

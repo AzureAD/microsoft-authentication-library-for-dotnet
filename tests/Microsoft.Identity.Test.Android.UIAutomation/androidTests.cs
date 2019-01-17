@@ -42,21 +42,21 @@ using Xamarin.UITest;
 namespace Microsoft.Identity.Test.UIAutomation
 {
     /// <summary>
-    /// Configures environment for core/iOS tests to run
+    /// Configures environment for core/Android tests to run
     /// </summary>
     [TestFixture(Platform.Android)]
-    public class XamarinDroidTests
+    public class AndroidTests
     {
         IApp app;
         Platform platform;
-        ITestController xamarinController = new XamarinUITestController();
+        ITestController xamarinController = new AndroidXamarinUiTestController();
         MobileTestHelper _mobileTestHelper = new MobileTestHelper();
 
         /// <summary>
         /// Initializes Xamarin UI tests
         /// </summary>
         /// <param name="platform">The platform where the tests will be performed</param>
-        public XamarinDroidTests(Platform platform)
+        public AndroidTests(Platform platform)
         {
             this.platform = platform;
         }
