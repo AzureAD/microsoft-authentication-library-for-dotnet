@@ -35,6 +35,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
+    /// Builder for AcquireTokenByAuthorizationCode
     /// </summary>
     public sealed class AcquireTokenByAuthorizationCodeParameterBuilder :
         AbstractCcaAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
@@ -43,6 +44,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         public AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
             : base(confidentialClientApplication)
         {
+            // TODO: where do we pass the authorization code? 
         }
 
         /// <summary>

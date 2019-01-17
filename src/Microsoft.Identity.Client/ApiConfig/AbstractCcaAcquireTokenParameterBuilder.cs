@@ -34,6 +34,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
+    /// Base class for confidential client application token request builders
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractCcaAcquireTokenParameterBuilder<T>
@@ -41,7 +42,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
         /// <summary>
-        /// 
+        /// Constructor from an interface on a confidential client application
         /// </summary>
         /// <param name="confidentialClientApplication"></param>
         protected AbstractCcaAcquireTokenParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
