@@ -121,10 +121,29 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
+        /// with advanced parameters controlling network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
-        /// <param name="scopes"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">can be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or performs two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        /// </remarks>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
             return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);

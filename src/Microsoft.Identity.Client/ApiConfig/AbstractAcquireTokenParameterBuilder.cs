@@ -121,8 +121,13 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         ///     TODO: replicate the options here that we have in ApplicationBuilder for an AuthorityInfo class?
+        /// 
+        /// Specific authority for which the token is requested. Passing a different value than configured
+        /// at the application constructor narrows down the selection to a specific tenant. 
+        /// This does not change the configured value in the application. This is specific
+        /// to applications managing several accounts (like a mail client with several mailboxes)
         /// </summary>
-        /// <param name="authorityUri"></param>
+        /// <param name="authorityUri">Uri for the authority</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthorityOverride(string authorityUri)
         {
