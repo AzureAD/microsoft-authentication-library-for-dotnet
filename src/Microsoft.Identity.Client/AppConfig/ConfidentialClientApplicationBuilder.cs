@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
@@ -43,9 +43,12 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// Constructor of a ConfidentialClientApplicationBuilder from application configuration options.
+        /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
-        /// <param name="options"></param>
-        /// <returns></returns>
+        /// <param name="options">Public client applications configuration options</param>
+        /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public static ConfidentialClientApplicationBuilder CreateWithApplicationOptions(
             ConfidentialClientApplicationOptions options)
         {
@@ -55,9 +58,13 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// Creates a ConfidentialClientApplicationBuilder from a clientID.
+        /// See https://aka.ms/msal-net-application-configuration
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <returns></returns>
+        /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
+        /// application registration portal (https://aka.ms/msal-net-register-app)/.</param>
+        /// <returns>A <see cref="ConfidentialClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
         public static ConfidentialClientApplicationBuilder Create(string clientId)
         {
             var config = new ApplicationConfiguration();
@@ -65,9 +72,9 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// 
+        /// Sets the certificate associated with the application
         /// </summary>
-        /// <param name="certificate"></param>
+        /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
@@ -76,9 +83,10 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// 
+        /// Sets the application secret
         /// </summary>
-        /// <param name="clientSecret"></param>
+        /// <param name="clientSecret">Secret string previously shared with AAD at application registration to prove the identity
+        /// of the application (the client) requesting the tokens</param>
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithClientSecret(string clientSecret)
         {
@@ -136,6 +144,8 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
+        /// Builds the ConfidentialClientApplication from the parameters set
+        /// in the builder
         /// </summary>
         /// <returns></returns>
         public IConfidentialClientApplication Build()
