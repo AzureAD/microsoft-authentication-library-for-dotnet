@@ -75,7 +75,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Test runner to run all tests, as test initialization is expensive.
         /// </summary>
-        [Test]
+        //[Test]
         public void RunAllTests()
         {
             var tests = new List<Action>()
@@ -138,7 +138,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token silent flow
         /// </summary>
-        [Test]
         public void AcquireTokenSilentTest()
         {
             _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
@@ -147,7 +146,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token flow
         /// </summary>
-        [Test]
         [Ignore("Current web element search implementation is unable to properly wait for select account elements on login page. Will be addressed in future updates.")]
         public void PromptBehaviorConsentSelectAccount()
         {
@@ -230,7 +228,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV4 Federated flow
         /// </summary>
-        [Test]
         public void AcquireTokenADFSV4InteractiveFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(
@@ -241,7 +238,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV3 Federated flow
         /// </summary>
-        [Test]
         public void AcquireTokenADFSV3InteractiveFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
@@ -250,7 +246,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV4 Non-Federated flow
         /// </summary>
-        [Test]
         public void AcquireTokenADFSV4InteractiveNonFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
@@ -259,7 +254,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV3 Non-Federated flow
         /// </summary>
-        [Test]
         public void AcquireTokenADFSV3InteractiveNonFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
