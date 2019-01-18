@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal static class ClientCredentialHelper
     {
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         ///     Determines whether or not the cached client assertion can be used again for the next authentication request by
         ///     checking it's

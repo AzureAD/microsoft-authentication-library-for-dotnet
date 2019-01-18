@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+#if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (AuthenticationRequestParameters.ClientCredential != null)
             {
                 ClientCredentialHelper.CreateClientCredentialBodyParameters(

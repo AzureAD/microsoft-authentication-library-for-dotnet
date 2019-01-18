@@ -36,7 +36,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
-#if !WINDOWS_APP && !ANDROID && !iOS // Confidential Client not available
+#if DESKTOP || NETSTANDARD1_3 || NET_CORE
 
     [TestClass]
     public class RequestValidationHelperTests
@@ -66,44 +66,33 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds))
             };
 
-            var parameters = new AuthenticationRequestParameters(
-                _serviceBundle,
-                Authority.CreateAuthority(_serviceBundle, MsalTestConstants.AuthorityCommonTenant),
-                null, 
-                new AcquireTokenCommonParameters { Scopes = MsalTestConstants.Scope },
-                RequestContext.CreateForTest());
-
-            parameters.SendX5C = false;
-            parameters.Endpoints = new AuthorityEndpoints(null, null, Audience1);
-            parameters.ClientCredential = credential;
-
             // Validate cached client assertion with parameters
-            Assert.IsTrue(ClientCredentialHelper.ValidateClientAssertion(parameters));
+            Assert.IsTrue(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
 
             // Different audience
             credential.Audience = Audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
 
             // Different x5c, same audience
             credential.Audience = Audience1;
             credential.ContainsX5C = true;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
 
             // Different audience and x5c
             credential.Audience = Audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
 
             // No cached Assertion
             credential.Assertion = "";
 
             // should return false
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
         }
 
         [TestMethod]
@@ -118,28 +107,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds))
             };
 
-            var parameters = new AuthenticationRequestParameters(
-                _serviceBundle,
-                Authority.CreateAuthority(_serviceBundle, MsalTestConstants.AuthorityCommonTenant),
-                null,
-                new AcquireTokenCommonParameters
-                {
-                    Scopes = MsalTestConstants.Scope
-                },
-                RequestContext.CreateForTest(_serviceBundle));
-            parameters.Endpoints = new AuthorityEndpoints(null, null, "Audience1");
-            parameters.SendX5C = false;
-            parameters.ClientCredential = credential;
-
             // Validate cached client assertion with expiration time
             // Cached assertion should be valid
-            Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsTrue(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, "Audience1"), false));
 
             // Setting expiration time to now
             credential.ValidTo = ConvertToTimeT(DateTime.UtcNow);
 
             // cached assertion should have expired
-            Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, "Audience1"), false));
         }
 
         internal static long ConvertToTimeT(DateTime time)
