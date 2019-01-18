@@ -37,6 +37,12 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public class IOSXamarinUiTestController : XamarinUiTestControllerBase
     {
+
+        public IOSXamarinUiTestController()
+        {
+            Platform = Xamarin.UITest.Platform.iOS;
+        }
+
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {
             WaitForElement(elementID, xamarinSelector, timeout);

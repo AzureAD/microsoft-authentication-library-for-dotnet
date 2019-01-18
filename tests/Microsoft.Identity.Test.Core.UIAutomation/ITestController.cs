@@ -112,5 +112,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="text">The text of the element, e.g. foo will find the element div in <div>foo</div>
         /// </param>
         AppWebResult[] WaitForWebElementByText(string text, TimeSpan? timeout = null);
+
+        /// <summary>
+        /// Platform in which the controller is operating
+        /// </summary>
+        Platform Platform { get; set; }
     }
 }

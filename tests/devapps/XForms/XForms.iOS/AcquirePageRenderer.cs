@@ -68,7 +68,7 @@ namespace XForms.iOS
 
         private void OnMsalApplicationUpdated(object sender, EventArgs e)
         {
-            App.MsalPublicClient.iOSKeychainSecurityGroup =".*";
+            App.MsalPublicClient.iOSKeychainSecurityGroup ="*";
         }
 
         public override void ViewDidLoad()

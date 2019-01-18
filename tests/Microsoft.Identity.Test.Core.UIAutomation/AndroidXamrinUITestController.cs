@@ -37,6 +37,12 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public class AndroidXamarinUiTestController : XamarinUiTestControllerBase
     {
+
+        public AndroidXamarinUiTestController()
+        {
+            Platform = Xamarin.UITest.Platform.Android;
+        }
+
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {
             switch (xamarinSelector)

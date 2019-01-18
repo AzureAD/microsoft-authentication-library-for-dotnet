@@ -54,6 +54,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public IApp Application { get; set; }
 
+        public Platform Platform { get; set; }
+
         protected XamarinUiTestControllerBase()
         {
             _defaultSearchTimeout = new TimeSpan(0, 0, DefaultSearchTimeoutSec);

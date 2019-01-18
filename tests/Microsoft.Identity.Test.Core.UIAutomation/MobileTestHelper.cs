@@ -118,10 +118,21 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         private void PrepareForAuthentication(ITestController controller)
         {
             //Clear Cache
-            controller.Tap(CoreUiTestConstants.CachePageID);
-            controller.Tap(CoreUiTestConstants.ClearCacheId);
-            controller.Tap(CoreUiTestConstants.SettingsPageId);
-            controller.Tap(CoreUiTestConstants.ClearAllCacheId);
+            switch (controller.Platform)
+            {
+                case Xamarin.UITest.Platform.iOS:
+                    controller.Tap(CoreUiTestConstants.CachePageID);
+                    controller.Tap(CoreUiTestConstants.ClearCacheId);
+                    controller.Tap(CoreUiTestConstants.SettingsPageId);
+                    controller.Tap(CoreUiTestConstants.ClearAllCacheId);
+                    break;
+                case Xamarin.UITest.Platform.Android:
+                    controller.Tap(CoreUiTestConstants.CachePageAndroidID);
+                    controller.Tap(CoreUiTestConstants.ClearCacheId);
+                    controller.Tap(CoreUiTestConstants.SettingsPageAndroidId);
+                    controller.Tap(CoreUiTestConstants.ClearAllCacheId);
+                    break;
+            }
         }
 
         private void SetInputData(
