@@ -92,6 +92,5 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeUser);
             _harness.ValidateInteractiveParameters(expectedAccount: account, expectedLoginHint: "SomeOtherLoginHint");
         }
-
     }
 }
