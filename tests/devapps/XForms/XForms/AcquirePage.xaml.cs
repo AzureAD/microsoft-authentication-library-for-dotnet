@@ -204,7 +204,7 @@ namespace XForms
                         await App.MsalPublicClient.AcquireTokenAsync(
                             GetScopes(),
                             loginHint,
-                            GetUIBehavior(),
+                            UIBehavior.ForceLogin,
                             GetExtraQueryParams(),
                             App.UIParent).ConfigureAwait(true);
                 }
@@ -214,7 +214,7 @@ namespace XForms
                     res = await App.MsalPublicClient.AcquireTokenAsync(
                         GetScopes(),
                         user,
-                        GetUIBehavior(),
+                        UIBehavior.ForceLogin,
                         GetExtraQueryParams(),
                         App.UIParent).ConfigureAwait(true);
                 }
