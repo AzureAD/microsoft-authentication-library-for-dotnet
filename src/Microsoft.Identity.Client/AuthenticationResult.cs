@@ -77,10 +77,21 @@ namespace Microsoft.Identity.Client
         {
             if (msalAccessTokenCacheItem.HomeAccountId != null)
             {
-                Account = new Account(
-                    msalAccessTokenCacheItem.HomeAccountId,
-                    msalIdTokenCacheItem?.IdToken?.PreferredUsername,
-                    msalAccessTokenCacheItem.Environment);
+                if (msalAccessTokenCacheItem.IsAdfs)
+                {
+                    //Null tenant indicates Adfs authority
+                    Account = new Account(
+                        msalAccessTokenCacheItem.HomeAccountId,
+                        msalIdTokenCacheItem?.IdToken.Upn,
+                        msalAccessTokenCacheItem.Environment);
+                }
+                else
+                {
+                    Account = new Account(
+                        msalAccessTokenCacheItem.HomeAccountId,
+                        msalIdTokenCacheItem?.IdToken?.PreferredUsername,
+                        msalAccessTokenCacheItem.Environment);
+                }
             }
 
             AccessToken = msalAccessTokenCacheItem.Secret;

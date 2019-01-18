@@ -62,9 +62,7 @@ namespace Microsoft.Identity.Client.Instance
             switch (serviceBundle.Config.DefaultAuthorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
-                throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.InvalidAuthorityType,
-                    "ADFS is not a supported authority");
+                return new AdfsAuthority(serviceBundle, authorityInfo);
 
             case AuthorityType.B2C:
                 return new B2CAuthority(serviceBundle, authorityInfo);

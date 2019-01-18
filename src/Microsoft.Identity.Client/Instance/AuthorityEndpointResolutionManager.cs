@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Instance
             {
                 throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.UpnRequired,
-                    CoreErrorMessages.UpnRequiredForAuthroityValidation);
+                    CoreErrorMessages.UpnRequiredForAuthorityValidation);
             }
 
             if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))

@@ -56,6 +56,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ":\"" + CreateIdToken(CoreTestConstants.UniqueId, CoreTestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
+        public static readonly string DefaultAdfsTokenResponse =
+            "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+            "\"scope1 scope2\",\"access_token\":\"some-access-token\"" +
+            ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
+            ":\"" + CreateAdfsIdToken(CoreTestConstants.OnPremiseDisplayableId) +
+            "\",\"id_token_expires_in\":\"3600\"}";
+
         public static string CreateClientInfo()
         {
             return CreateClientInfo(CoreTestConstants.Uid, CoreTestConstants.Utid);
@@ -121,6 +128,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static HttpResponseMessage CreateSuccessTokenResponseMessage()
         {
             return CreateSuccessResponseMessage(DefaultTokenResponse);
+        }
+
+        public static HttpResponseMessage CreateAdfsSuccessTokenResponseMessage()
+        {
+            return CreateSuccessResponseMessage(DefaultAdfsTokenResponse);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage()
@@ -192,6 +204,22 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         "\"sub\": \"K4_SGGxKqW1SxUAmhg6C1F6VPiFzcx-Qd80ehIEdFus\"," +
                         "\"tid\": \"" + tenantId + "\"," +
                         "\"ver\": \"2.0\"}";
+            return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
+        }
+
+        public static string CreateAdfsIdToken(string upn)
+        {
+            string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
+                        "\"iss\": \"" + CoreTestConstants.OnPremiseAuthority + "\"," +
+                        "\"iat\": 1455833828," +
+                        "\"nbf\": 1455833828," +
+                        "\"exp\": 1455837728," +
+                        "\"ipaddr\": \"131.107.159.117\"," +
+                        "\"name\": \"Marrrrrio Bossy\"," +
+                        "\"upn\": \"" + upn + "\"," +
+                        "\"sub\": \"" + CoreTestConstants.OnPremiseUniqueId + "\"," +
+                        "\"ver\": \"2.0\"}";
+
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
 

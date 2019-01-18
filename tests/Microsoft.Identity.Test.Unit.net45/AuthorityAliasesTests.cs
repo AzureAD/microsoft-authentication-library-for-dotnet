@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit
                     catch (MsalUiRequiredException)
                     {
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         Assert.Fail();
                     }

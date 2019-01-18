@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Test.Unit
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithHttpManager(harness.HttpManager)
                                                               .WithCertificate(certificate).BuildConcrete();
-                
+
                 var userAssertion = new UserAssertion(MsalTestConstants.DefaultAccessToken);
 
                 //Check for x5c claim

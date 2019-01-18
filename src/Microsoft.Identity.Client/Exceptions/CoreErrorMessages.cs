@@ -65,8 +65,8 @@ namespace Microsoft.Identity.Client
         public const string FailedToParseIDToken = "Failed to parse the returned id token.";
 
         public const string InvalidAuthorityOpenId = "invalid authority while getting the open id config endpoint";
-        public const string UpnRequiredForAuthroityValidation = "UPN is required for ADFS authority validation.";
-        public const string CannotFindTheAuthEndpont = "Cannot find the auth endpoint";
+        public const string UpnRequiredForAuthorityValidation = "UPN is required for ADFS authority validation.";
+        public const string CannotFindTheAuthEndpoint = "Cannot find the auth endpoint";
 
         public const string UapCannotFindUpn =
            "Cannot find the user logged into Windows, but found a domain the name. Possible cause: the UWP application does not request the Enterprise Authentication capability.";
@@ -125,7 +125,6 @@ namespace Microsoft.Identity.Client
         public const string TelemetryCallbackAlreadySet = "TelemetryCallback has already been set";
         public const string NoClientIdWasSpecified = "No ClientId was specified.";
         public const string MoreThanOneDefaultAuthorityConfigured = "More than one default authority was configured.";
-        public const string AdfsNotCurrentlySupportedAuthorityType = "ADFS is not currently a supported authority type.";
         public const string TenantIdAndAadAuthorityInstanceAreMutuallyExclusive = "TenantId and AadAuthorityAudience are both set, but they're mutually exclusive.";
         public const string InstanceAndAzureCloudInstanceAreMutuallyExclusive = "Instance and AzureCloudInstance are both set but they're mutually exclusive.";
         public const string NoRefreshTokenProvided = "A refresh token must be provided.";
@@ -133,5 +132,8 @@ namespace Microsoft.Identity.Client
         public const string NullTokenCacheError = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
 
         public const string NoRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
+
+        public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =
+            "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
     }
 }

@@ -37,18 +37,19 @@ namespace Microsoft.Identity.Client.Cache
         {
             CredentialType = MsalCacheCommon.RefreshToken;
         }
-        internal MsalRefreshTokenCacheItem(string environment, string clientId, MsalTokenResponse response) :
-            this(environment, clientId, response.RefreshToken, response.ClientInfo)
+        internal MsalRefreshTokenCacheItem(string environment, string clientId, MsalTokenResponse response, string userId=null) :
+            this(environment, clientId, response.RefreshToken, response.ClientInfo, userId)
         {
         }
 
-        internal MsalRefreshTokenCacheItem(string environment, string clientId, string secret, string rawClientInfo) : this()
+        internal MsalRefreshTokenCacheItem(string environment, string clientId, string secret, string rawClientInfo, string userId=null) : this()
         {
             ClientId = clientId;
             Environment = environment;
             Secret = secret;
             RawClientInfo = rawClientInfo;
 
+            HomeAccountId = userId;
             InitUserIdentifier();
         }
 

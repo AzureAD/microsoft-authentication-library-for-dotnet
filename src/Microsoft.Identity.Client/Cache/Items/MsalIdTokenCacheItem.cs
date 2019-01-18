@@ -44,13 +44,15 @@ namespace Microsoft.Identity.Client.Cache
             string environment,
             string clientId,
             MsalTokenResponse response,
-            string tenantId)
+            string tenantId,
+            string userId=null)
             : this(
                 environment,
                 clientId,
                 response.IdToken,
                 response.ClientInfo,
-                tenantId)
+                tenantId,
+                userId)
         {
         }
 
@@ -59,7 +61,8 @@ namespace Microsoft.Identity.Client.Cache
             string clientId,
             string secret,
             string rawClientInfo,
-            string tenantId)
+            string tenantId,
+            string userId=null)
             : this()
         {
             Environment = environment;
@@ -68,6 +71,7 @@ namespace Microsoft.Identity.Client.Cache
             Secret = secret;
             RawClientInfo = rawClientInfo;
 
+            HomeAccountId = userId;
             InitUserIdentifier();
         }
 

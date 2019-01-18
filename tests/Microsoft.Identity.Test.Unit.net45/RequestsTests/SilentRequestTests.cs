@@ -26,11 +26,14 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
@@ -61,15 +64,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
             {
-                var parameters = harness.CreateRequestParams(harness.Cache);
-                var request = new SilentRequest(harness.ServiceBundle, parameters, ApiEvent.ApiIds.None, false);
+                var parameters = harness.CreateRequestParams(harness.Cache, null);
+                var silentParameters = new AcquireTokenSilentParameters();
+                var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                 Assert.IsNotNull(request);
 
                 parameters.Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null);
-                request = new SilentRequest(harness.ServiceBundle, parameters, ApiEvent.ApiIds.None, false);
+                request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                 Assert.IsNotNull(request);
 
-                request = new SilentRequest(harness.ServiceBundle, parameters, ApiEvent.ApiIds.None, false);
+                request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                 Assert.IsNotNull(request);
             }
         }
@@ -81,7 +85,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
-                var parameters = harness.CreateRequestParams(harness.Cache);
+                var parameters = harness.CreateRequestParams(harness.Cache, null);
+                var silentParameters = new AcquireTokenSilentParameters();
 
                 // set access tokens as expired
                 foreach (string atCacheItemStr in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest(harness.ServiceBundle)))
@@ -103,7 +108,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                     });
 
-                var request = new SilentRequest(harness.ServiceBundle, parameters, ApiEvent.ApiIds.None, false);
+                var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
 
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 var result = task.Result;
@@ -119,24 +124,20 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
             {
-                var parameters = new AuthenticationRequestParameters()
-                {
-                    Authority = harness.Authority,
-                    ClientId = MsalTestConstants.ClientId,
-                    Scope = ScopeHelper.CreateSortedSetFromEnumerable(
+                var parameters = harness.CreateRequestParams(
+                    null,
+                    ScopeHelper.CreateSortedSetFromEnumerable(
                         new[]
                         {
                             "some-scope1",
                             "some-scope2"
-                        }),
-                    TokenCache = null,
-                    Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle)
-                };
+                        }));
+
+                var silentParameters = new AcquireTokenSilentParameters();
 
                 try
                 {
-                    var request = new SilentRequest(harness.ServiceBundle, parameters, ApiEvent.ApiIds.None, false);
+                    var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                     Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                     var authenticationResult = task.Result;
                     Assert.Fail("MsalUiRequiredException should be thrown here");
@@ -158,24 +159,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
-                var parameters = new AuthenticationRequestParameters()
-                {
-                    Authority = harness.Authority,
-                    ClientId = MsalTestConstants.ClientId,
-                    Scope = ScopeHelper.CreateSortedSetFromEnumerable(
+                var parameters = harness.CreateRequestParams(
+                    harness.Cache,
+                    ScopeHelper.CreateSortedSetFromEnumerable(
                         new[]
                         {
                             "some-scope1",
                             "some-scope2"
-                        }),
-                    TokenCache = harness.Cache,
-                    Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    RequestContext = RequestContext.CreateForTest(harness.ServiceBundle)
-                };
+                        }));
+                var silentParameters = new AcquireTokenSilentParameters();
 
                 try
                 {
-                    var request = new SilentRequest(harness.ServiceBundle, parameters, ApiEvent.ApiIds.None, false);
+                    var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
                     Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                     var authenticationResult = task.Result;
                     Assert.Fail("MsalUiRequiredException should be thrown here");
@@ -211,16 +207,21 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _mockHttpAndServiceBundle.Dispose();
             }
 
-            public AuthenticationRequestParameters CreateRequestParams(ITokenCacheInternal cache)
+            public AuthenticationRequestParameters CreateRequestParams(ITokenCacheInternal cache, SortedSet<string> scopes)
             {
-                var parameters = new AuthenticationRequestParameters()
+                var commonParameters = new AcquireTokenCommonParameters
                 {
-                    Authority = Authority,
-                    ClientId = MsalTestConstants.ClientId,
-                    Scope = MsalTestConstants.Scope,
-                    TokenCache = cache,
+                    Scopes = scopes ?? MsalTestConstants.Scope,
+                };
+
+                var parameters = new AuthenticationRequestParameters(
+                    ServiceBundle,
+                    Authority,
+                    cache,
+                    commonParameters,
+                    RequestContext.CreateForTest(ServiceBundle))
+                {
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    RequestContext = RequestContext.CreateForTest(ServiceBundle)
                 };
                 return parameters;
             }

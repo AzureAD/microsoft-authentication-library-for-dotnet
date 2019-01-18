@@ -28,17 +28,13 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Security;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.WsTrust;
 
@@ -50,19 +46,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class UsernamePasswordRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private string _username;
-        private readonly SecureString _securePassword;
+        private readonly AcquireTokenWithUsernamePasswordParameters _usernamePasswordParameters;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            string username,
-            SecureString securePassword)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenWithUsernamePasswordParameters usernamePasswordParameters)
+            : base(serviceBundle, authenticationRequestParameters, usernamePasswordParameters)
         {
-            _username = username ?? throw new ArgumentNullException(nameof(username));
-            _securePassword = securePassword;
+            _usernamePasswordParameters = usernamePasswordParameters;
             _commonNonInteractiveHandler = new CommonNonInteractiveHandler(
                 authenticationRequestParameters.RequestContext,
                 serviceBundle);
@@ -86,7 +78,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             var userRealmResponse = await _commonNonInteractiveHandler
-                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _username)
+                                          .QueryUserRealmDataAsync(AuthenticationRequestParameters.AuthorityInfo.UserRealmUriPrefix, _usernamePasswordParameters.Username)
                                           .ConfigureAwait(false);
 
             if (userRealmResponse.IsFederated)
@@ -95,8 +87,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                           userRealmResponse.FederationMetadataUrl,
                                           userRealmResponse.CloudAudienceUrn,
                                           UserAuthType.UsernamePassword,
-                                          _username,
-                                          _securePassword).ConfigureAwait(false);
+                                          _usernamePasswordParameters.Username,
+                                          _usernamePasswordParameters.Password).ConfigureAwait(false);
 
                 // We assume that if the response token type is not SAML 1.1, it is SAML 2
                 return new UserAssertion(
@@ -109,7 +101,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (userRealmResponse.IsManaged)
             {
                 // handle grant flow
-                if (_securePassword == null)
+                if (_usernamePasswordParameters.Password == null)
                 {
                     throw new MsalClientException(MsalError.PasswordRequiredForManagedUserError);
                 }
@@ -127,10 +119,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task UpdateUsernameAsync()
         {
-            if (string.IsNullOrWhiteSpace(_username))
+            if (string.IsNullOrWhiteSpace(_usernamePasswordParameters.Username))
             {
                 string platformUsername = await _commonNonInteractiveHandler.GetPlatformUserAsync().ConfigureAwait(false);
-                _username = platformUsername;
+                _usernamePasswordParameters.Username = platformUsername;
             }
         }
 
@@ -148,8 +140,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
             else
             {
                 dict[OAuth2Parameter.GrantType] = OAuth2GrantType.Password;
-                dict[OAuth2Parameter.Username] = _username;
-                dict[OAuth2Parameter.Password] = new string(_securePassword.PasswordToCharArray());
+                dict[OAuth2Parameter.Username] = _usernamePasswordParameters.Username;
+                dict[OAuth2Parameter.Password] = new string(_usernamePasswordParameters.Password.PasswordToCharArray());
             }
 
             ISet<string> unionScope = new HashSet<string>()

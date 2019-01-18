@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AdfsOpenIdConfigurationEndpointManager : IOpenIdConfigurationEndpointManager
     {
-        
+        private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly IServiceBundle _serviceBundle;
 
         public AdfsOpenIdConfigurationEndpointManager(IServiceBundle serviceBundle)
@@ -71,13 +71,17 @@ namespace Microsoft.Identity.Client.Instance
                 {
                     throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.MissingPassiveAuthEndpoint,
-                        CoreErrorMessages.CannotFindTheAuthEndpont,
+                        CoreErrorMessages.CannotFindTheAuthEndpoint,
                         ExceptionDetail.FromDrsResponse(drsResponse));
                 }
 
                 string resource = string.Format(CultureInfo.InvariantCulture, authorityInfo.CanonicalAuthority);
                 string webFingerUrl = Constants.FormatAdfsWebFingerUrl(
-                    drsResponse.IdentityProviderService.PassiveAuthEndpoint.Host,
+                    string.Format(
+                    CultureInfo.InvariantCulture,
+                    "https://{0}/.well-known/webfinger?rel={1}&resource={2}",
+                    authorityInfo.Host,
+                    DefaultRealm),
                     resource);
 
                 var httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext)
@@ -91,10 +95,10 @@ namespace Microsoft.Identity.Client.Instance
                         httpResponse);
                 }
 
-                var wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);
+                AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);
                 if (wfr.Links.FirstOrDefault(
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
-                             a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase)) == null)
+                             a.Href.Equals("https://" + authorityInfo.Host, StringComparison.OrdinalIgnoreCase)) == null)
                 {
                     throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.InvalidAuthority,

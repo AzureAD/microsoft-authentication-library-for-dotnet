@@ -43,16 +43,16 @@ namespace Microsoft.Identity.Client.Cache
         }
 
         internal MsalAccessTokenCacheItem
-            (string environment, string clientId, MsalTokenResponse response, string tenantId) :
+            (string environment, string clientId, MsalTokenResponse response, string tenantId, string userId=null) :
 
             this(environment, clientId, response.TokenType, response.Scope,
-                 tenantId, response.AccessToken, response.AccessTokenExpiresOn, response.AccessTokenExtendedExpiresOn, response.ClientInfo)
+                 tenantId, response.AccessToken, response.AccessTokenExpiresOn, response.AccessTokenExtendedExpiresOn, response.ClientInfo, userId)
         {
         }
 
         internal MsalAccessTokenCacheItem
             (string environment, string clientId, string tokenType, string scopes,
-             string tenantId, string secret, DateTimeOffset accessTokenExpiresOn, DateTimeOffset accessTokenExtendedExpiresOn, string rawClientInfo) : this()
+             string tenantId, string secret, DateTimeOffset accessTokenExpiresOn, DateTimeOffset accessTokenExtendedExpiresOn, string rawClientInfo, string userId=null) : this()
         {
             Environment = environment;
             ClientId = clientId;
@@ -65,6 +65,7 @@ namespace Microsoft.Identity.Client.Cache
             CachedAt = CoreHelpers.CurrDateTimeInUnixTimestamp();
             RawClientInfo = rawClientInfo;
 
+            HomeAccountId = userId;
             InitUserIdentifier();
         }
 
@@ -92,6 +93,9 @@ namespace Microsoft.Identity.Client.Cache
 
         [DataMember(Name = "access_token_type")]
         internal string TokenType { get; set; }
+
+        [DataMember(Name = "authority_type")]
+        internal bool IsAdfs { get; set; }
 
         internal string Authority => string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
         internal SortedSet<string> ScopeSet => ScopeHelper.ConvertStringToLowercaseSortedSet(NormalizedScopes);

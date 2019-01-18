@@ -28,7 +28,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -38,8 +40,10 @@ namespace Microsoft.Identity.Client.ApiConfig
     public sealed class AcquireTokenSilentParameterBuilder :
         AbstractClientAppBaseAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>
     {
+        private AcquireTokenSilentParameters Parameters { get; } = new AcquireTokenSilentParameters();
+
         /// <inheritdoc />
-        public AcquireTokenSilentParameterBuilder(IClientApplicationBase clientApplicationBase)
+        internal AcquireTokenSilentParameterBuilder(IClientApplicationBase clientApplicationBase)
             : base(clientApplicationBase)
         {
         }
@@ -76,10 +80,38 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 
+        /// <summary>
+        /// </summary>
+        /// <param name="loginHint"></param>
+        /// <returns></returns>
+        public AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
+        {
+            Parameters.LoginHint = loginHint;
+            return this;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
+        {
+            Parameters.Account = account;
+            return this;
+        }
+
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IClientApplicationBaseExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenSilentParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        internal override ApiEvent.ApiIds CalculateApiEventId()
+        {
+            return string.IsNullOrWhiteSpace(CommonParameters.AuthorityOverride)
+                ? ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority
+                : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
         }
 
         /// <summary>

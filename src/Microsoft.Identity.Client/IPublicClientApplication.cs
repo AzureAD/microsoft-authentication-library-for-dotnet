@@ -27,8 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,6 +41,44 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public partial interface IPublicClientApplication : IClientApplicationBase
     {
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="parent"></param>
+        /// <returns></returns>
+        AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(IEnumerable<string> scopes, object parent);
+
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="deviceCodeResultCallback"></param>
+        /// <returns></returns>
+        AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
+            IEnumerable<string> scopes,
+            Func<DeviceCodeResult, Task> deviceCodeResultCallback);
+
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        AcquireTokenWithIntegratedWindowsAuthParameterBuilder AcquireTokenWithIntegratedWindowsAuth(
+            IEnumerable<string> scopes);
+
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        AcquireTokenWithUsernamePasswordParameterBuilder AcquireTokenWithUsernamePassword(
+            IEnumerable<string> scopes,
+            string username,
+            SecureString password);
+
 
 #if !NET_CORE_BUILDTIME
 

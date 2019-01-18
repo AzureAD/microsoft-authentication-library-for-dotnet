@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Exceptions;
@@ -44,20 +45,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal abstract class RequestBase
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
-
         internal ITokenCacheInternal TokenCache => AuthenticationRequestParameters.TokenCache;
-
-        private readonly ApiEvent.ApiIds _apiId;
         protected IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId)
+            IAcquireTokenParameters acquireTokenParameters)
         {
             ServiceBundle = serviceBundle;
-            _apiId = apiId;
-
             AuthenticationRequestParameters = authenticationRequestParameters;
             if (authenticationRequestParameters.Scope == null || authenticationRequestParameters.Scope.Count == 0)
             {
@@ -66,7 +62,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ValidateScopeInput(authenticationRequestParameters.Scope);
 
-            AuthenticationRequestParameters.LogState();
+            AuthenticationRequestParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
+            acquireTokenParameters.LogParameters(AuthenticationRequestParameters.RequestContext.Logger);
         }
 
         private void LogRequestStarted(AuthenticationRequestParameters authenticationRequestParameters)
@@ -170,17 +167,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
             var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
             {
-                ApiId = _apiId,
+                ApiId = AuthenticationRequestParameters.ApiId,
                 AccountId = accountId ?? "",
                 CorrelationId = AuthenticationRequestParameters.RequestContext.Logger.CorrelationId.ToString(),
                 RequestId = AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
                 WasSuccessful = false
             };
-
-            if (AuthenticationRequestParameters.LoginHint != null)
-            {
-                apiEvent.LoginHint = AuthenticationRequestParameters.LoginHint;
-            }
 
             if (AuthenticationRequestParameters.AuthorityInfo != null)
             {
@@ -201,7 +193,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             ClientInfo fromServer = null;
 
-            if (!AuthenticationRequestParameters.IsClientCredentialRequest && !AuthenticationRequestParameters.IsRefreshTokenRequest)
+            if (!AuthenticationRequestParameters.IsClientCredentialRequest &&
+                !AuthenticationRequestParameters.IsRefreshTokenRequest &&
+                AuthenticationRequestParameters.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.Adfs)
             {
                 //client_info is not returned from client credential flows because there is no user present.
                 fromServer = ClientInfo.CreateFromJson(msalTokenResponse.ClientInfo);
@@ -326,10 +320,26 @@ namespace Microsoft.Identity.Client.Internal.Requests
             OAuth2Client client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.ClientInfo, "1");
-            foreach (var entry in AuthenticationRequestParameters.ToParameters(ServiceBundle.PlatformProxy.CryptographyManager))
+
+            // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
+
+#if DESKTOP || NETSTANDARD1_3 || NET_CORE
+            if (AuthenticationRequestParameters.ClientCredential != null)
             {
-                client.AddBodyParameter(entry.Key, entry.Value);
+                var ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
+                    AuthenticationRequestParameters.RequestContext.Logger,
+                    ServiceBundle.PlatformProxy.CryptographyManager,
+                    AuthenticationRequestParameters.ClientCredential,
+                    AuthenticationRequestParameters.ClientId,
+                    AuthenticationRequestParameters.Endpoints,
+                    AuthenticationRequestParameters.SendX5C);
+
+                foreach (var entry in ccBodyParameters)
+                {
+                    client.AddBodyParameter(entry.Key, entry.Value);
+                }
             }
+#endif
 
             client.AddBodyParameter(OAuth2Parameter.Scope,
                 GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());

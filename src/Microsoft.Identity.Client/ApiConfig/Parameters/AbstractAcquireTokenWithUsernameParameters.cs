@@ -25,12 +25,10 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenWithIntegratedWindowsAuthParameters : IAcquireTokenCommonParameters,
-                                                                        IAcquireTokenWithUsernameParameters
+    internal abstract class AbstractAcquireTokenWithUsernameParameters
     {
+        public string Username { get; set; }
     }
 }

@@ -25,36 +25,17 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
+using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenCommonParameters
+    internal class AcquireTokenByAuthorizationCodeParameters : IAcquireTokenParameters
     {
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> Scopes { get; }
+        public string AuthorizationCode { get; set; }
 
-        /// <summary>
-        /// </summary>
-        IAccount Account { get; }
-
-        /// <summary>
-        /// </summary>
-        string LoginHint { get; }
-
-        /// <summary>
-        /// </summary>
-        Dictionary<string, string> ExtraQueryParameters { get; }
-
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> ExtraScopesToConsent { get; }
-
-        /// <summary>
-        /// </summary>
-        string AuthorityOverride { get; }
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

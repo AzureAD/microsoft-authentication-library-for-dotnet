@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// Base class for public client application token request builders
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractPcaAcquireTokenParameterBuilder<T>
+    public abstract class AbstractPublicClientAcquireTokenParameterBuilder<T>
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// 
         /// </summary>
         /// <param name="publicClientApplication"></param>
-        protected AbstractPcaAcquireTokenParameterBuilder(IPublicClientApplication publicClientApplication)
+        protected AbstractPublicClientAcquireTokenParameterBuilder(IPublicClientApplication publicClientApplication)
         {
             PublicClientApplication = publicClientApplication;
         }
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             if (PublicClientApplication is IPublicClientApplicationExecutor executor)
             {
-                Validate();
+                ValidateAndCalculateApiId();
                 return ExecuteAsync(executor, cancellationToken);
             }
 

@@ -25,22 +25,33 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenInteractiveParameters : IAcquireTokenCommonParameters
+    internal class AcquireTokenInteractiveParameters : IAcquireTokenParameters
     {
-        /// <summary>
-        /// </summary>
-        Prompt Prompt { get; }
+        public Prompt Prompt { get; set; }
+        public OwnerUiParent UiParent { get; } = new OwnerUiParent();
+        public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
+        public bool UseEmbeddedWebView { get; set; }
+        public string LoginHint { get; set; }
+        public IAccount Account { get; set; }
 
-        /// <summary>
-        /// </summary>
-        OwnerUiParent UiParent { get; }
+        public void LogParameters(ICoreLogger logger)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("=== InteractiveParameters Data ===");
+            builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
+            builder.AppendLine("User provided: " + (Account != null));
+            builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
+            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? new List<string>()));
+            builder.AppendLine("Prompt: " + Prompt.PromptValue);
 
-        /// <summary>
-        /// </summary>
-        bool UseEmbeddedWebView { get; }
+            logger.Info(builder.ToString());
+        }
     }
 }

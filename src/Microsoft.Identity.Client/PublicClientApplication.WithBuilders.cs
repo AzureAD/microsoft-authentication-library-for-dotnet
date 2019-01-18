@@ -31,6 +31,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
@@ -61,10 +62,10 @@ namespace Microsoft.Identity.Client
         /// You can also pass optional parameters by calling:
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience
         /// when signing-in, <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify
-        /// if you want to use the embedded web browser or the system default browser, 
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAccount(IAccount)"/> or <see cref="AbstractAcquireTokenParameterBuilder{T}.WithLoginHint(string)"/>
+        /// if you want to use the embedded web browser or the system default browser,
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithAccount(IAccount)"/> or <see cref="AcquireTokenInteractiveParameterBuilder.WithLoginHint(string)"/>
         /// to prevent the select account dialog from appearing in the case you want to sign-in a specific account,
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
@@ -165,82 +166,64 @@ namespace Microsoft.Identity.Client
         #region ParameterExecutors
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenInteractiveParameters interactiveParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(interactiveParameters, UserTokenCacheInternal);
-            requestParams.LoginHint = string.IsNullOrWhiteSpace(interactiveParameters.LoginHint)
-                                          ? requestParams.Account?.Username
-                                          : interactiveParameters.LoginHint;
-
-            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
-            if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
-            }
-            else if (requestParams.Account != null)
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
-            }
+            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParams.LoginHint = interactiveParameters.LoginHint;
+            requestParams.Account = interactiveParameters.Account;
 
             var handler = new InteractiveRequest(
                 ServiceBundle,
                 requestParams,
-                apiId,
-                interactiveParameters.ExtraScopesToConsent,
-#if NET_CORE_BUILDTIME
-                Prompt.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
-#else
-                interactiveParameters.Prompt,
-#endif
-                CreateWebAuthenticationDialogEx(
-                    interactiveParameters,
-                    requestParams.RequestContext));
+                interactiveParameters,
+                CreateWebAuthenticationDialogEx(interactiveParameters, requestParams.RequestContext));
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenWithDeviceCodeParameters deviceCodeParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(deviceCodeParameters, UserTokenCacheInternal);
+            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
 
             var handler = new DeviceCodeRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.None,
-                deviceCodeParameters.DeviceCodeResultCallback);
+                deviceCodeParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(integratedWindowsAuthParameters, UserTokenCacheInternal);
+            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+
             var handler = new IntegratedWindowsAuthRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
-                integratedWindowsAuthParameters.Username);
+                integratedWindowsAuthParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
 #if DESKTOP || NET_CORE
-            var requestParams = CreateRequestParameters(usernamePasswordParameters, UserTokenCacheInternal);
+            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenWithScopeUser,
-                usernamePasswordParameters.Username, 
-                usernamePasswordParameters.Password);
+                usernamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
 #else
@@ -255,7 +238,7 @@ namespace Microsoft.Identity.Client
         #endregion // ParameterExecutors
 
         private IWebUI CreateWebAuthenticationDialogEx(
-            IAcquireTokenInteractiveParameters interactiveParameters,
+            AcquireTokenInteractiveParameters interactiveParameters,
             RequestContext requestContext)
         {
             var coreUiParent = interactiveParameters.UiParent.CoreUiParent;

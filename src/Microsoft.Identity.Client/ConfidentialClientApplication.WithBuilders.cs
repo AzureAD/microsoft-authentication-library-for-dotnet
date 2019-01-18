@@ -30,9 +30,14 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
@@ -122,9 +127,9 @@ namespace Microsoft.Identity.Client
         /// URL of the STS authorization endpoint parametrized with the parameters</returns>
         /// <remarks>You can also chain the following optional parameters:
         /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithLoginHint(string)"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
         /// </remarks>
         public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
             IEnumerable<string> scopes)
@@ -133,61 +138,61 @@ namespace Microsoft.Identity.Client
         }
 
         async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(authorizationCodeParameters, UserTokenCacheInternal);
-            requestParams.AuthorizationCode = authorizationCodeParameters.AuthorizationCode;
-            requestParams.SendCertificate = false;
+            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             var handler = new AuthorizationCodeRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope); 
+                authorizationCodeParameters); 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenForClientParameters clientParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenForClientWithScope;
-            if (clientParameters.ForceRefresh)
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh;
-            }
-
-            var requestParams = CreateRequestParameters(clientParameters, AppTokenCacheInternal);
+            var requestParams = CreateRequestParameters(commonParameters, AppTokenCacheInternal);
+            requestParams.SendX5C = clientParameters.SendX5C;
             requestParams.IsClientCredentialRequest = true;
-            requestParams.SendCertificate = clientParameters.SendX5C;
+
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
-                apiId,
-                clientParameters.ForceRefresh);
+                clientParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            IAcquireTokenOnBehalfOfParameters onBehalfOfParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            var requestParams = CreateRequestParameters(onBehalfOfParameters, UserTokenCacheInternal);
+            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParams.SendX5C = onBehalfOfParameters.SendX5C;
             requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
-            requestParams.SendCertificate = onBehalfOfParameters.SendX5C;
+
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser);
+                onBehalfOfParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<Uri> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
+            AcquireTokenCommonParameters commonParameters,
+            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken)
         {
-            var requestParameters = CreateRequestParameters(authorizationRequestUrlParameters, UserTokenCacheInternal);
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParameters.Account = authorizationRequestUrlParameters.Account;
+            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
+
             if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
             {
                 // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?
@@ -197,9 +202,7 @@ namespace Microsoft.Identity.Client
             var handler = new InteractiveRequest(
                 ServiceBundle,
                 requestParameters,
-                ApiEvent.ApiIds.None,
-                authorizationRequestUrlParameters.ExtraScopesToConsent,
-                Prompt.SelectAccount,
+                authorizationRequestUrlParameters.ToInteractiveParameters(),
                 null);
 
             // todo: need to pass through cancellation token here

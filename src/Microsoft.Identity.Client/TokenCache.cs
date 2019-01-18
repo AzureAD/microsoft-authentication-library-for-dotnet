@@ -186,6 +186,8 @@ namespace Microsoft.Identity.Client
 
             IdToken idToken = IdToken.Parse(response.IdToken);
 
+            string subject = idToken?.Subject;
+
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "preferred_username not in idtoken"
             var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername) ? idToken.PreferredUsername : NullPreferredUsernameDisplayLabel;
@@ -199,9 +201,10 @@ namespace Microsoft.Identity.Client
                 instanceDiscoveryMetadataEntry);
 
             var msalAccessTokenCacheItem =
-                new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId)
+                new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
                 {
-                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash
+                    UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
+                    IsAdfs = requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs
                 };
 
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -210,21 +213,31 @@ namespace Microsoft.Identity.Client
             if (idToken != null)
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem
-                    (preferredEnvironmentHost, requestParams.ClientId, response, tenantId);
+                    (preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject);
             }
 
             lock (LockObject)
             {
                 try
                 {
+                    Account account = null;
+                    if (msalAccessTokenCacheItem.HomeAccountId != null)
+                    {
+                        account = msalAccessTokenCacheItem.IsAdfs
+                                      ? new Account(
+                                          msalAccessTokenCacheItem.HomeAccountId,
+                                          idToken?.Upn,
+                                          msalAccessTokenCacheItem.Environment)
+                                      : new Account(
+                                          msalAccessTokenCacheItem.HomeAccountId,
+                                          preferredUsername,
+                                          preferredEnvironmentHost);
+                    }
                     var args = new TokenCacheNotificationArgs
                     {
                         TokenCache = this,
                         ClientId = ClientId,
-                        Account = msalAccessTokenCacheItem.HomeAccountId != null ?
-                                    new Account(msalAccessTokenCacheItem.HomeAccountId,
-                                    preferredUsername, preferredEnvironmentHost) :
-                                    null,
+                        Account = account,
                         HasStateChanged = true
                     };
 
@@ -252,7 +265,7 @@ namespace Microsoft.Identity.Client
                     // if server returns the refresh token back, save it in the cache.
                     if (response.RefreshToken != null)
                     {
-                        msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
+                        msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, subject);
                         requestParams.RequestContext.Logger.Info("Saving RT in cache...");
                         TokenCacheAccessor.SaveRefreshToken(msalRefreshTokenCacheItem, requestParams.RequestContext);
                     }
@@ -299,7 +312,8 @@ namespace Microsoft.Identity.Client
 
                 if (msalAccessTokenItem != null && msalAccessTokenItem.ClientId.Equals(ClientId, StringComparison.OrdinalIgnoreCase) &&
                     environmentAliases.Contains(msalAccessTokenItem.Environment) &&
-                    msalAccessTokenItem.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase) &&
+                    (msalAccessTokenItem.IsAdfs ||
+                    msalAccessTokenItem.TenantId.Equals(tenantId, StringComparison.OrdinalIgnoreCase)) &&
                     msalAccessTokenItem.ScopeSet.Overlaps(scopeSet))
                 {
                     requestParams.RequestContext.Logger.Verbose("Intersecting scopes found - " + msalAccessTokenItem.NormalizedScopes);
@@ -343,6 +357,14 @@ namespace Microsoft.Identity.Client
                         (GetEnvironmentAliases(requestParams.AuthorityInfo.CanonicalAuthority, instanceDiscoveryMetadataEntry));
 
                     if (requestParams.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.B2C)
+                    {
+                        preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
+                    }
+                    else if (requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
+                    {
+                        preferredEnvironmentAlias = requestParams.AuthorityInfo.CanonicalAuthority;
+                    }
+                    else
                     {
                         preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                     }
@@ -416,7 +438,18 @@ namespace Microsoft.Identity.Client
                 requestParams.RequestContext.Logger.Info("Matching entry count -" + tokenCacheItems.Count);
 
                 IEnumerable<MsalAccessTokenCacheItem> filteredItems =
-                    tokenCacheItems.Where(item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
+                    tokenCacheItems.Where(
+                        item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
+
+                //Adfs does not return scopes in resource/scope format
+                if (requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs && !filteredItems.Any())
+                {
+                    SortedSet<string> scopes = ParseScopesForAdfsToken(requestParams.Scope);
+
+                    filteredItems =
+                        tokenCacheItems.Where(
+                            item => ScopeHelper.ScopeContains(item.ScopeSet, scopes));
+                }
 
                 requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
 
@@ -433,7 +466,7 @@ namespace Microsoft.Identity.Client
                 {
                     filteredItems = filteredItems.Where(
                         item => environmentAliases.Contains(item.Environment) &&
-                        item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase));
+                                (item.IsAdfs || item.TenantId.Equals(requestParams.Authority.GetTenantId(), StringComparison.OrdinalIgnoreCase)));
                 }
 
                 // no match
@@ -528,10 +561,10 @@ namespace Microsoft.Identity.Client
         /// <inheritdoc />
         public void SetIosKeychainSecurityGroup(string securityGroup)
         {
-            #if iOS
+#if iOS
             TokenCacheAccessor.SetiOSKeychainSecurityGroup(securityGroup);
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
-            #endif
+#endif
         }
 
         private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenCommonAsync(AuthenticationRequestParameters requestParam)
@@ -1196,6 +1229,22 @@ namespace Microsoft.Identity.Client
         {
             TokenCacheAccessor.Clear();
         }
+
+        internal SortedSet<string> ParseScopesForAdfsToken(SortedSet<string> scopes)
+        {
+            //Adfs tokens return provided scopes without using the resource/scope fomrat of AAD
+            //For instance, if https://myresource/scope1 provided as the scope in the request, the json token response would contain scope: scope1  as a property
+            //This method strips the resource from the scope so the proper comparison can be made
+
+            SortedSet<string> parsedScopes = new SortedSet<string>();
+            foreach (string scope in scopes)
+            {
+                parsedScopes.Add(scope.Substring(scope.LastIndexOf("/") + 1));
+            }
+
+            return parsedScopes;
+        }
+
 
         /// <summary>
         /// Only used by dev test apps

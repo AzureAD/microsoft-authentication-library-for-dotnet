@@ -139,6 +139,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/",
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
+            //Assert.IsTrue(app.ValidateAuthority);
+
+            app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.OnPremiseAuthority);
+            Assert.IsNotNull(app);
+            Assert.AreEqual("https://fs.contoso.com/adfs/", app.Authority);
+            Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
+            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
         }
@@ -1457,6 +1464,62 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void AcquireTokenFromAdfs()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .AddKnownAuthority(new Uri(MsalTestConstants.OnPremiseAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                                app.ServiceBundle.PlatformProxy,
+                                new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+
+                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
+
+                //add mock response for tenant endpoint discovery
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    Method = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    Method = HttpMethod.Post,
+                    ResponseMessage = MockHelpers.CreateAdfsSuccessTokenResponseMessage()
+                });
+
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, result.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), result.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, result.Account.Username);
+
+                //Find token in cache now
+
+                AuthenticationResult cachedAuth = null;
+                try
+                {
+                    cachedAuth = app.AcquireTokenSilentAsync(MsalTestConstants.Scope, result.Account).Result;
+                }
+                catch
+                {
+                    Assert.Fail("Did not find access token");
+                }
+                Assert.IsNotNull(cachedAuth);
+                Assert.IsNotNull(cachedAuth.Account);
+                Assert.AreEqual(MsalTestConstants.OnPremiseUniqueId, cachedAuth.UniqueId);
+                Assert.AreEqual(new AccountId(MsalTestConstants.OnPremiseUniqueId), cachedAuth.Account.HomeAccountId);
+                Assert.AreEqual(MsalTestConstants.OnPremiseDisplayableId, cachedAuth.Account.Username);
             }
         }
 #endif

@@ -70,6 +70,15 @@ namespace Microsoft.Identity.Client
             ValidateId();
         }
 
+        /// <summary>
+        /// Constructor of an AccountId meant for Adfs scenarios since Adfs instances lack tenant ids.
+        /// </summary>
+        /// <param name="identifier">Unique identifier for the account</param>
+        public AccountId(string adfsIdentifier)
+            :this(adfsIdentifier, adfsIdentifier, null)
+        { }
+
+
         internal static AccountId ParseFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -77,6 +86,11 @@ namespace Microsoft.Identity.Client
                 return null;
             }
             string[] elements = str.Split('.');
+
+            if(elements.Length == 1)
+            {
+                return new AccountId(str); //Account id is from Adfs; no . in the string
+            }
 
             return new AccountId(str, elements[0], elements[1]);
         }
@@ -113,7 +127,7 @@ namespace Microsoft.Identity.Client
         [Conditional("DEBUG")]
         private void ValidateId()
         {
-            string expectedId = ObjectId + "." + TenantId;
+            string expectedId = TenantId==null ? ObjectId : ObjectId + "." + TenantId;
             if (!string.Equals(expectedId, Identifier, StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(

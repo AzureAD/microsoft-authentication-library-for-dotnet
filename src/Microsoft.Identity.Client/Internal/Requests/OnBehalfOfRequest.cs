@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.OAuth2;
@@ -38,16 +39,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class OnBehalfOfRequest : RequestBase
     {
+        private readonly AcquireTokenOnBehalfOfParameters _onBehalfOfParameters;
+
         public OnBehalfOfRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenOnBehalfOfParameters onBehalfOfParameters)
+            : base(serviceBundle, authenticationRequestParameters, onBehalfOfParameters)
         {
-            if (authenticationRequestParameters.UserAssertion == null)
-            {
-                throw new ArgumentNullException(nameof(authenticationRequestParameters.UserAssertion));
-            }
+            _onBehalfOfParameters = onBehalfOfParameters;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -82,8 +82,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             var dict = new Dictionary<string, string>
             {
-                [OAuth2Parameter.GrantType] = AuthenticationRequestParameters.UserAssertion.AssertionType,
-                [OAuth2Parameter.Assertion] = AuthenticationRequestParameters.UserAssertion.Assertion,
+                [OAuth2Parameter.GrantType] = _onBehalfOfParameters.UserAssertion.AssertionType,
+                [OAuth2Parameter.Assertion] = _onBehalfOfParameters.UserAssertion.Assertion,
                 [OAuth2Parameter.RequestedTokenUse] = OAuth2RequestedTokenUse.OnBehalfOf
             };
             return dict;

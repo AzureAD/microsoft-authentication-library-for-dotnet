@@ -25,17 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Security;
+using System;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenWithUsernamePasswordParameters : IAcquireTokenCommonParameters,
-                                                                     IAcquireTokenWithUsernameParameters
+    internal class AcquireTokenWithDeviceCodeParameters : IAcquireTokenParameters
     {
-        /// <summary>
-        /// </summary>
-        SecureString Password { get; }
+        public Func<DeviceCodeResult, Task> DeviceCodeResultCallback { get; set; }
+
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

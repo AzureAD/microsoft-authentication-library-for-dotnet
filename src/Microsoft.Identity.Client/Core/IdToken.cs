@@ -47,6 +47,7 @@ namespace Microsoft.Identity.Client.Core
         public const string HomeObjectId = "home_oid";
         public const string GivenName = "given_name";
         public const string FamilyName = "family_name";
+        public const string Upn = "upn";
     }
 
     [DataContract]
@@ -75,6 +76,9 @@ namespace Microsoft.Identity.Client.Core
 
         [DataMember(Name = IdTokenClaim.HomeObjectId, IsRequired = false)]
         public string HomeObjectId { get; set; }
+
+        [DataMember(Name = IdTokenClaim.Upn, IsRequired = false)]
+        public string Upn { get; set; }
 
         [DataMember(Name = IdTokenClaim.GivenName)]
         public string GivenName { get; set; }

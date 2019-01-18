@@ -29,6 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -38,10 +40,12 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// Builder for AcquireTokenByAuthorizationCode
     /// </summary>
     public sealed class AcquireTokenByAuthorizationCodeParameterBuilder :
-        AbstractCcaAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
+        AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
     {
+        private AcquireTokenByAuthorizationCodeParameters Parameters { get; } = new AcquireTokenByAuthorizationCodeParameters();
+
         /// <inheritdoc />
-        public AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+        internal AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
             : base(confidentialClientApplication)
         {
             // TODO: where do we pass the authorization code? 
@@ -69,6 +73,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
+        internal override ApiEvent.ApiIds CalculateApiEventId()
+        {
+            return ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope;
+        }
+
+        /// <inheritdoc />
         protected override void Validate()
         {
             base.Validate();
@@ -82,7 +92,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenByAuthorizationCodeParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
     }
 #endif

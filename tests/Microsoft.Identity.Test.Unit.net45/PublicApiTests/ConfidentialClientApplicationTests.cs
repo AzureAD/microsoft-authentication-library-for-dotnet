@@ -179,6 +179,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                       .WithRedirectUri(MsalTestConstants.RedirectUri).WithClientSecret("secret")
                                                       .BuildConcrete();
 
+            app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                      .AddKnownAdfsAuthority(new Uri(MsalTestConstants.OnPremiseAuthority), true)
+                                                      .WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                      .WithClientCredential(MsalTestConstants.OnPremiseCredentialWithSecret)
+                                                      .BuildConcrete();
+
+
             Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
         }
 
