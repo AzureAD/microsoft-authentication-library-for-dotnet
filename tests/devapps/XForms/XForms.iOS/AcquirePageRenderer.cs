@@ -49,6 +49,8 @@ namespace XForms.iOS
             base.OnElementChanged(e);
             page = e.NewElement as AcquirePage;
 
+#if BUILDENV == APPCENTER
+            Xamarin.Calabash.Start();
             if (!SubscribedToEvent)
             {
                 App.MsalApplicationUpdated += OnMsalApplicationUpdated;
@@ -61,36 +63,12 @@ namespace XForms.iOS
             }
 
             OnMsalApplicationUpdated(null, null);
+#endif
         }
 
         private void OnMsalApplicationUpdated(object sender, EventArgs e)
         {
-            App.MsalPublicClient.KeychainSecurityGroup = GetTeamId() + ".*";
-        }
-
-        private string GetTeamId()
-        {
-            var queryRecord = new SecRecord(SecKind.GenericPassword)
-            {
-                Service = "",
-                Account = "DotNetTeamIDHint",
-                Accessible = SecAccessible.Always
-            };
-
-            SecRecord match = SecKeyChain.QueryAsRecord(queryRecord, out SecStatusCode resultCode);
-
-            if (resultCode == SecStatusCode.ItemNotFound)
-            {
-                SecKeyChain.Add(queryRecord);
-                match = SecKeyChain.QueryAsRecord(queryRecord, out resultCode);
-            }
-
-            if (resultCode == SecStatusCode.Success)
-            {
-                return match.AccessGroup.Split('.')[0];
-            }
-
-            return "";
+            App.MsalPublicClient.iOSKeychainSecurityGroup =".*";
         }
 
         public override void ViewDidLoad()

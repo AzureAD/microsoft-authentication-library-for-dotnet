@@ -35,7 +35,7 @@ using Xamarin.UITest.Queries;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
-    public class IOSXamarinUiTestController : XamarinUiTestController
+    public class IOSXamarinUiTestController : XamarinUiTestControllerBase
     {
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {

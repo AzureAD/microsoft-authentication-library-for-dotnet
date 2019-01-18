@@ -70,7 +70,7 @@
     <Compile Include="ResultVerificationFailureException.cs" />
     <Compile Include="CoreUiTestConstants.cs" />
     <Compile Include="UserInformationFieldIds.cs" />
-    <Compile Include="XamarinUiTestController.cs" />
+    <Compile Include="XamarinUiTestControllerBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

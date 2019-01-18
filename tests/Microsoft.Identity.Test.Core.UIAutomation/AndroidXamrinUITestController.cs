@@ -35,21 +35,32 @@ using Xamarin.UITest.Queries;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
-    public class AndroidXamarinUiTestController : XamarinUiTestController
+    public class AndroidXamarinUiTestController : XamarinUiTestControllerBase
     {
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {
-            WaitForElement(elementID, xamarinSelector, timeout);
-
             switch (xamarinSelector)
             {
                 case XamarinSelector.ByAutomationId:
-                    Application.Tap(x => x.Marked(elementID));
+                    try
+                    {
+                        WaitForElement(elementID, xamarinSelector, timeout);
+                        Application.Tap(x => x.Marked(elementID));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        Console.WriteLine("Failed waiting for element. Attempting to tap regardless...");
+                        Application.Tap(x => x.Marked(elementID));
+                    }
+                    
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
+                    WaitForElement(elementID, xamarinSelector, timeout);
                     Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
+                    WaitForElement(elementID, xamarinSelector, timeout);
                     Application.Tap(QueryByHtmlElementValue(elementID));
                     break;
                 default:

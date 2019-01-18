@@ -51,7 +51,6 @@ namespace XForms.iOS
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
             global::Xamarin.Forms.Forms.Init();
-            Xamarin.Calabash.Start();
             LoadApplication(new App());
 
 #if ARIA_TELEMETRY_ENABLED

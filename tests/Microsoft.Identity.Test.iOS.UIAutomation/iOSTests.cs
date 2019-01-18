@@ -82,7 +82,6 @@ namespace Test.Microsoft.Identity.UIAutomation
             {
                 AcquireTokenTest,
                 AcquireTokenSilentTest,
-
                 AcquireTokenADFSV3InteractiveFederatedTest,
                 AcquireTokenADFSV3InteractiveNonFederatedTest,
                 AcquireTokenADFSV4InteractiveFederatedTest,
@@ -129,7 +128,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
         /// </summary>
-        [Test]
         public void AcquireTokenTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
