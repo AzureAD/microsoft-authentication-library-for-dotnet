@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
     /// <summary>
-    /// Build for AcquireTokenOnBehalfOf (OBO flow)
+    /// Builder for AcquireTokenOnBehalfOf (OBO flow)
     /// </summary>
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
         AbstractCcaAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
@@ -68,14 +68,14 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS. 
-        /// Sending the x5x enables application developers to achieve easy certificates roll-over in Azure AD: 
-        /// this method will send the public certificate to Azure AD along with the token request, 
-        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy. 
-        /// This saves the application admin from the need to explicitly manage the certificate rollover 
+        /// Specifies if the x5c claim (public key of the certificate) should be sent to the STS.
+        /// Sending the x5c enables application developers to achieve easy certificate roll-over in Azure AD:
+        /// this method will send the public certificate to Azure AD along with the token request,
+        /// so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
+        /// This saves the application admin from the need to explicitly manage the certificate rollover
         /// (either via portal or powershell/CLI operation)
         /// </summary>
-        /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>. 
+        /// <param name="withSendX5C"><c>true</c> if the x5c should be sent. Otherwise <c>false</c>.
         /// The default is <c>false</c></param>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenOnBehalfOfParameterBuilder WithSendX5C(bool withSendX5C)
