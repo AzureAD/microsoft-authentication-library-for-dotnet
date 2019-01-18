@@ -192,13 +192,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
-            if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
-            }
-            else if (Parameters.Account != null)
+            if (Parameters.Account != null)
             {
                 apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
+            }
+            else if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
             }
 
             return apiId;

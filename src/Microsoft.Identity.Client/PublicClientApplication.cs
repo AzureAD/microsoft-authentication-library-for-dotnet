@@ -134,7 +134,6 @@ namespace Microsoft.Identity.Client
             {
                 keychainSecurityGroup = value;
                 UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
-                // todo(migration): ensure this is correct, esp since this is obsolete.  Or can we just delete it now?
                 //UserTokenCache.TokenCacheAccessor.SetKeychainSecurityGroup(value);
                 //(UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
                 //    .SetKeychainSecurityGroup(value);
