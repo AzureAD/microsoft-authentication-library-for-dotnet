@@ -327,13 +327,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (AuthenticationRequestParameters.ClientCredential != null)
             {
-                ClientCredentialHelper.CreateClientCredentialBodyParameters(
+                var ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
                     AuthenticationRequestParameters.RequestContext.Logger,
                     ServiceBundle.PlatformProxy.CryptographyManager,
                     AuthenticationRequestParameters.ClientCredential,
                     AuthenticationRequestParameters.ClientId,
                     AuthenticationRequestParameters.Endpoints,
                     AuthenticationRequestParameters.SendX5C);
+
+                foreach (var entry in ccBodyParameters)
+                {
+                    client.AddBodyParameter(entry.Key, entry.Value);
+                }
             }
 #endif
 

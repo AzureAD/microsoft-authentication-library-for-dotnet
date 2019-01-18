@@ -87,9 +87,6 @@ namespace Microsoft.Identity.Client
             AcquireTokenByRefreshTokenParameters byRefreshTokenParameters,
             CancellationToken cancellationToken)
         {
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParameters.IsRefreshTokenRequest = true;
-
             var requestContext = CreateRequestContext();
             if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
             {
@@ -99,6 +96,9 @@ namespace Microsoft.Identity.Client
                 };
                 requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }
+
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParameters.IsRefreshTokenRequest = true;
 
             requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 

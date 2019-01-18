@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public Prompt Prompt { get; set; }
         public OwnerUiParent UiParent { get; } = new OwnerUiParent();
-        public IEnumerable<string> ExtraScopesToConsent { get; set; }
+        public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
         public bool UseEmbeddedWebView { get; set; }
         public string LoginHint { get; set; }
         public IAccount Account { get; set; }
@@ -48,7 +48,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
             builder.AppendLine("User provided: " + (Account != null));
             builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
-            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent));
+            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? new List<string>()));
             builder.AppendLine("Prompt: " + Prompt.PromptValue);
 
             logger.Info(builder.ToString());
