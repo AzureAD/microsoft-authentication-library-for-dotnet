@@ -76,6 +76,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Test runner to run all tests, as test initialization is expensive.
         /// </summary>
         [Test]
+        [Category("FastRun")]
         public void RunAllTests()
         {
             var tests = new List<Action>()
@@ -141,7 +142,6 @@ namespace Microsoft.Identity.Test.UIAutomation
         /// Runs through the standard acquire token flow
         /// </summary>
         [Test]
-        [Category("FastRun")]
         public void PromptBehaviorConsentSelectAccount()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
