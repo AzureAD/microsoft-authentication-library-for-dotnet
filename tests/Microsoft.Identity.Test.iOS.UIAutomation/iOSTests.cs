@@ -76,7 +76,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Test runner to run all tests, as test initialization is expensive.
         /// </summary>
-        //[Test]
+        [Test]
         public void RunAllTests()
         {
             var tests = new List<Action>()
@@ -129,7 +129,6 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
         /// </summary>
-        [Test]
         public void AcquireTokenTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
