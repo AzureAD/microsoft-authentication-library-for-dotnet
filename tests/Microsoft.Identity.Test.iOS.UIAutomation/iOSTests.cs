@@ -229,6 +229,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// and subsequent silent call
         /// </summary>
         [Test]
+        [Ignore("Fails to find B2C elements on the app during setup.")]
         public void B2CLocalAccountAcquireTokenTest()
         {
             _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
