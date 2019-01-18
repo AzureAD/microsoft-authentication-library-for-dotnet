@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     Application.EnterText(x => x.Marked(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.EnterText(QueryByHtmlElementValue(elementID), text);
+                    Application.EnterText(QueryByCssId(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlValue:
                     throw new InvalidOperationException("Test error - you can't input text in an html element that has a value");

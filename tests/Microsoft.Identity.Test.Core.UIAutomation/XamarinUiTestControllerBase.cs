@@ -78,6 +78,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             Tap(elementID, xamarinSelector, new TimeSpan(0, 0, waitTime));
         }
 
+        protected abstract void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout);
+
         public void EnterText(string elementID, string text, XamarinSelector xamarinSelector)
         {
             EnterText(elementID, text, xamarinSelector, _defaultSearchTimeout);
@@ -87,6 +89,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             EnterText(elementID, text, xamarinSelector, new TimeSpan(0, 0, waitTime));
         }
+
+        protected abstract void EnterText(string elementID, string text, XamarinSelector xamarinSelector, TimeSpan timeout);
 
         public AppWebResult[] WaitForWebElementByCssId(string elementID, TimeSpan? timeout = null)
         {
@@ -185,10 +189,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                 });
             }
         }
-
-        protected abstract void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout);
-
-        protected abstract void EnterText(string elementID, string text, XamarinSelector xamarinSelector, TimeSpan timeout);
 
         protected abstract Func<AppQuery, AppWebQuery> QueryByCssId(string elementID);
 
