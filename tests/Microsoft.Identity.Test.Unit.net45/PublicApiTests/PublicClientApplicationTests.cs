@@ -156,6 +156,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
+                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
@@ -309,7 +310,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
 
-                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
                 result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -433,7 +434,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 try
                 {
-                    result = app.AcquireTokenAsync(MsalTestConstants.Scope, result.Account, UIBehavior.SelectAccount, null).Result;
+                    result = app.AcquireTokenAsync(MsalTestConstants.Scope, result.Account, Prompt.SelectAccount, null).Result;
                     Assert.Fail("API should have failed here");
                 }
                 catch (AggregateException ex)
@@ -447,7 +448,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
                             anEvent[EventBase.EventNameKey].EndsWith("api_event") &&
-                            anEvent[ApiEvent.ApiIdKey] == "174" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
+                            anEvent[ApiEvent.ApiIdKey] == "176" && anEvent[ApiEvent.WasSuccessfulKey] == "false" &&
                             anEvent[ApiEvent.ApiErrorCodeKey] == "user_mismatch"));
 
                 var users = app.GetAccountsAsync().Result;
@@ -499,7 +500,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MockHelpers.CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid + "more"))
                     });
 
-                result = app.AcquireTokenAsync(MsalTestConstants.Scope, (IAccount)null, UIBehavior.SelectAccount, null).Result;
+                result = app.AcquireTokenAsync(MsalTestConstants.Scope, (IAccount)null, Prompt.SelectAccount, null).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.UniqueId, result.UniqueId);
@@ -519,8 +520,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddInstanceDiscoveryMockHandler();
-
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
@@ -639,7 +638,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalUiRequiredException.NoTokensFoundError, exc.ErrorCode);
             }
 
-            // todo(migration): need to properly support api_event apiids.
             Assert.IsNotNull(
                 receiver.EventsReceived.Find(
                     anEvent => // Expect finding such an event
@@ -798,7 +796,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
 
-                // todo(migration): need to properly handle apiids
                 Assert.IsNotNull(receiver.EventsReceived.Find(anEvent =>  // Expect finding such an event
                     anEvent[EventBase.EventNameKey].EndsWith("api_event") && anEvent[ApiEvent.WasSuccessfulKey] == "true"
                     && anEvent[ApiEvent.ApiIdKey] == "31"));
@@ -1110,6 +1107,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
                 catch (AggregateException ex)
                 {
+                    // todo(migration): this is failing due to ValidateAuthority being changed...
                     Assert.IsNotNull(ex.InnerException);
                     Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
                     var msalExc = (MsalUiRequiredException)ex.InnerException;
@@ -1232,6 +1230,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithLoggingLevel(LogLevel.Verbose)
+                                                                            .WithDebugLoggingCallback()
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication
@@ -1477,12 +1477,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint").ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", UIBehavior.Consent, "extra_query_params").ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, UIBehavior.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, Prompt.Consent, "extra_query_params").ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     "login hint",
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
@@ -1490,7 +1490,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     account,
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
@@ -1499,12 +1499,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", UIBehavior.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, UIBehavior.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     "login hint",
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant,
@@ -1513,7 +1513,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 async () => await pca.AcquireTokenAsync(
                     CoreTestConstants.Scope,
                     account,
-                    UIBehavior.Consent,
+                    Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
                     CoreTestConstants.AuthorityCommonTenant,

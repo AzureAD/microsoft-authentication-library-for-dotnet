@@ -86,20 +86,16 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 
-        // TODO: UIBehavior struct is INTERNAL on .net core...  (can we change that?)
-#if !NET_CORE_BUILDTIME
         /// <summary>
-        /// Specified the what the interactive experience is for the user.
+        /// Specifies the what the interactive experience is for the user.
         /// </summary>
-        /// <param name="behavior">Requested interactive experience. The default is <see cref="UIBehavior.SelectAccount"/>
-        /// </param>
+        /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenInteractiveParameterBuilder WithUiBehavior(UIBehavior behavior)
+        public AcquireTokenInteractiveParameterBuilder WithPrompt(Prompt prompt)
         {
-            Parameters.UiBehavior = behavior;
+            Parameters.Prompt = prompt;
             return this;
         }
-#endif
 
         private AcquireTokenInteractiveParameterBuilder WithParent(object parent)
         {

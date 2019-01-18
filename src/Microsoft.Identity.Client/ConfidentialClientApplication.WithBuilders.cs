@@ -142,20 +142,27 @@ namespace Microsoft.Identity.Client
             var handler = new AuthorizationCodeRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope);  // TODO(migration): consolidate this appropriately
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);        }
+                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope); 
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
             IAcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenForClientWithScope;
+            if (clientParameters.ForceRefresh)
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenForClientWithScopeRefresh;
+            }
+
             var requestParams = CreateRequestParameters(clientParameters, AppTokenCacheInternal);
             requestParams.IsClientCredentialRequest = true;
             requestParams.SendCertificate = clientParameters.SendX5C;
             var handler = new ClientCredentialRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope, // todo(migration): consolidate this appropriately
+                apiId,
                 clientParameters.ForceRefresh);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
@@ -171,7 +178,7 @@ namespace Microsoft.Identity.Client
             var handler = new OnBehalfOfRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenByAuthorizationCodeWithCodeScope); // TODO(migration): consolidate this with parameters...
+                ApiEvent.ApiIds.AcquireTokenOnBehalfOfWithScopeUser);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -192,8 +199,7 @@ namespace Microsoft.Identity.Client
                 requestParameters,
                 ApiEvent.ApiIds.None,
                 authorizationRequestUrlParameters.ExtraScopesToConsent,
-                authorizationRequestUrlParameters.LoginHint,
-                UIBehavior.SelectAccount,
+                Prompt.SelectAccount,
                 null);
 
             // todo: need to pass through cancellation token here

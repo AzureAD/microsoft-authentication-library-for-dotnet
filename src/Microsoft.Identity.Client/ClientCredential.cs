@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Client
     /// This class has one constructor for each case.
     /// These credentials are added in the application registration portal (in the secret section).
     /// </summary>
-    // TODO: add this --> [Obsolete("ClientCredential is now obsolete.  Callers should use WithClientSecret or WithX509Certificate2 on ConfidentialClientApplicationBuilder.")]
     public sealed class ClientCredential
     {
         /// <summary>

@@ -97,13 +97,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                var cache = new TokenCache(harness.ServiceBundle);
+                var cache = parameters.TokenCache;
 
                 // Check that cache is empty
-                Assert.AreEqual(0, cache.TokenCacheAccessor.AccessTokenCount);
-                Assert.AreEqual(0, cache.TokenCacheAccessor.AccountCount);
-                Assert.AreEqual(0, cache.TokenCacheAccessor.IdTokenCount);
-                Assert.AreEqual(0, cache.TokenCacheAccessor.RefreshTokenCount);
+                Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
+                Assert.AreEqual(0, cache.Accessor.AccountCount);
+                Assert.AreEqual(0, cache.Accessor.IdTokenCount);
+                Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
 
                 DeviceCodeResult actualDeviceCodeResult = null;
                 var request = new DeviceCodeRequest(
@@ -131,10 +131,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
 
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
-                Assert.AreEqual(1, cache.TokenCacheAccessor.AccountCount);
-                Assert.AreEqual(1, cache.TokenCacheAccessor.IdTokenCount);
-                Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
+                Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+                Assert.AreEqual(1, cache.Accessor.AccountCount);
+                Assert.AreEqual(1, cache.Accessor.IdTokenCount);
+                Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
             }
         }
 

@@ -61,9 +61,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
             }
         }
-
-        /// <inheritdoc />
-        public bool OnlySendFailureTelemetry { get; set; }
     }
 
     [TestClass]
@@ -87,13 +84,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             _platformProxy = serviceBundle.PlatformProxy;
             _crypto = _platformProxy.CryptographyManager;
             _telemetryManager = new TelemetryManager(_platformProxy, _myReceiver.HandleTelemetryEvents);
-            Logger.PiiLoggingEnabled = false;
-        }
-
-        [TestCleanup]
-        public void Cleanup()
-        {
-            Logger.PiiLoggingEnabled = false;
         }
 
         private const string TenantId = "1234";
@@ -129,10 +119,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("TelemetryInternalAPI")]
         public void TelemetrySkipEventsIfApiEventWasSuccessful()
         {
-            var myReceiver = new MyReceiver
-            {
-                OnlySendFailureTelemetry = true
-            };
+            _telemetryManager = new TelemetryManager(_platformProxy, _myReceiver.HandleTelemetryEvents, true);
 
             var telemetry = (ITelemetry)_telemetryManager;
 
@@ -157,7 +144,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 telemetry.Flush(reqId, ClientId);
             }
-            Assert.AreEqual(0, myReceiver.EventsReceived.Count);
+            Assert.AreEqual(0, _myReceiver.EventsReceived.Count);
+
+            _telemetryManager = new TelemetryManager(_platformProxy, _myReceiver.HandleTelemetryEvents);
 
             reqId = _telemetryManager.GenerateNewRequestId();
             try
@@ -180,7 +169,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
                 telemetry.Flush(reqId, ClientId);
             }
-            Assert.IsTrue(myReceiver.EventsReceived.Count > 0);
+            Assert.IsTrue(_myReceiver.EventsReceived.Count > 0);
         }
 
         [TestMethod]
@@ -278,7 +267,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PiiLoggingEnabled set to true, TenantId , UserId, and Login Hint are hashed values")]
         public void PiiLoggingEnabledTrue_ApiEventFieldsHashedTest()
         {
-            Logger.PiiLoggingEnabled = true;
+            var serviceBundle = TestCommon.CreateServiceBundleWithCustomHttpManager(null, enablePiiLogging: true);
+            _logger = serviceBundle.DefaultLogger;
 
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
@@ -327,8 +317,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("PiiLoggingEnabled set to false, TenantId & UserId set to null values")]
         public void PiiLoggingEnabledFalse_TenantIdUserIdSetToNullValueTest()
         {
-            Logger.PiiLoggingEnabled = false;
-
             var reqId = _telemetryManager.GenerateNewRequestId();
             try
             {

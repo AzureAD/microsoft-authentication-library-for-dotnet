@@ -32,6 +32,5 @@ namespace Microsoft.Identity.Client.TelemetryCore
     internal interface ITelemetryReceiver
     {
         void HandleTelemetryEvents(List<Dictionary<string, string>> events);
-        bool OnlySendFailureTelemetry { get; set; }
     }
 }

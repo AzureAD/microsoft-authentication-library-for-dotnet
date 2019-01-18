@@ -169,17 +169,29 @@ namespace Microsoft.Identity.Client
             CancellationToken cancellationToken)
         {
             var requestParams = CreateRequestParameters(interactiveParameters, UserTokenCacheInternal);
+            requestParams.LoginHint = string.IsNullOrWhiteSpace(interactiveParameters.LoginHint)
+                                          ? requestParams.Account?.Username
+                                          : interactiveParameters.LoginHint;
+
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
+            if (!string.IsNullOrWhiteSpace(interactiveParameters.LoginHint))
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
+            }
+            else if (requestParams.Account != null)
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
+            }
 
             var handler = new InteractiveRequest(
                 ServiceBundle,
                 requestParams,
-                ApiEvent.ApiIds.AcquireTokenForClientWithScope, // TODO(migration): need to reconcile how to get this.  do we add this in at builder time to differentiate the various calling pattern types?
+                apiId,
                 interactiveParameters.ExtraScopesToConsent,
-                string.IsNullOrWhiteSpace(interactiveParameters.LoginHint) ? requestParams.Account?.Username : interactiveParameters.LoginHint,
 #if NET_CORE_BUILDTIME
-                UIBehavior.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
+                Prompt.SelectAccount,  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
 #else
-                interactiveParameters.UiBehavior,
+                interactiveParameters.Prompt,
 #endif
                 CreateWebAuthenticationDialogEx(
                     interactiveParameters,
@@ -221,8 +233,6 @@ namespace Microsoft.Identity.Client
             IAcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            // TODO(migration):  proper ApiEvent.ApiIds value here
-
 #if DESKTOP || NET_CORE
             var requestParams = CreateRequestParameters(usernamePasswordParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(
@@ -257,7 +267,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP || DESKTOP
 // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = interactiveParameters.UiBehavior.Equals(UIBehavior.Never);
+            coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never); // todo(migration): what do we do here?
 #if WINDOWS_APP
             coreUiParent.UseCorporateNetwork = UseCorporateNetwork;
 #endif

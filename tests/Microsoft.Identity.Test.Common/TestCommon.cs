@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Test.Common
             LogCallback logCallback = null,
             string authority = ClientApplicationBase.DefaultAuthority,
             bool isExtendedTokenLifetimeEnabled = false,
+            bool enablePiiLogging = false,
             string clientId = MsalTestConstants.ClientId)
         {
             var appConfig = new ApplicationConfiguration()
@@ -60,6 +61,7 @@ namespace Microsoft.Identity.Test.Common
                 TelemetryCallback = telemetryCallback,
                 LoggingCallback = logCallback,
                 LogLevel = LogLevel.Verbose,
+                EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled
             };
             appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true));

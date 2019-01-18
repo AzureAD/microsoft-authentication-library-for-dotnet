@@ -61,46 +61,12 @@ namespace Microsoft.Identity.Client
 
         internal IServiceBundle ServiceBundle { get; }
 
-        ///  <summary>
-        ///  Constructor of the base application
-        ///  </summary>
-        ///  <param name="clientId">Client ID (also known as <i>Application ID</i>) of the application as registered in the
-        ///  application registration portal (https://aka.ms/msal-net-register-app)</param>
-        ///  <param name="authority">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
-        ///
-        ///  Usual authorities endpoints for the Azure public Cloud are:
-        ///  <list type="bullet">
-        ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
-        ///  or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
-        ///  <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
-        ///  <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
-        ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
-        ///  </list>
-        ///  Note that this setting needs to be consistent with what is declared in the application registration portal
-        ///  </param>
-        ///  <param name="redirectUri">also named <i>Reply URI</i>, the redirect URI is the URI where the STS will call back the application with the security token. For details see https://aka.ms/msal-net-client-applications</param>
-        ///  <param name="validateAuthority">Boolean telling MSAL.NET if the authority needs to be verified against a list of known authorities.
-        ///  This should be set to <c>false</c> for Azure AD B2C authorities as those are customer specific (a list of known B2C authorities
-        ///  cannot be maintained by MSAL.NET</param>
-        /// <param name="serviceBundle"></param>
-        [Obsolete("TODO(migration): add comments")]
-        internal ClientApplicationBase(string clientId, string authority, string redirectUri,
-            bool validateAuthority, IServiceBundle serviceBundle)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
-        public string Component
-        {
-            get => ServiceBundle.Config.Component;
-
-            // TODO(migration): [Obsolete("TODO(migration): comments")]
-            set { }
-        }
+        [Obsolete("Use the AppBuilders with WithComponent to set this")] // todo(migration): documentation
+        public string Component { get; set; }
 
         /// <Summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
@@ -146,13 +112,8 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise by Microsoft support, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
         /// </summary>
-        public string SliceParameters
-        {
-            get => ServiceBundle.Config.SliceParameters;
-
-            // TODO(migration): [Obsolete("TODO(migration): comments")]
-            set { }
-        }
+        [Obsolete("Use ExtraQueryParameters on each call instead.")]  // todo(migration): documentation
+        public string SliceParameters { get; set; }
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.
@@ -170,13 +131,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         [Obsolete("This is no longer used...  TODO(migration): comments")]
         public bool ValidateAuthority { get; set; }
-
-        /// <summary>
-        /// ExtendedLifeTimeEnabled is a Boolean that first party applications (read Office) can set to true in case when the STS has an outage,
-        /// to be more resilient.
-        /// </summary>
-        // TODO(migration): can/should we put this on the config object?
-        private bool ExtendedLifeTimeEnabled { get; set; }
 
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
@@ -242,7 +196,6 @@ namespace Microsoft.Identity.Client
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
             IAcquireTokenCommonParameters commonParameters,
             ITokenCacheInternal cache,
-            IAccount account = null,  // todo: can we just use commonParameters.Account?
             Authority customAuthority = null)
         {
             Authority authorityInstance = customAuthority ?? (string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
@@ -255,21 +208,21 @@ namespace Microsoft.Identity.Client
 
             return new AuthenticationRequestParameters
             {
-                SliceParameters = ServiceBundle.Config.SliceParameters,  // TODO(migration): can users reference this instead of being in authparams?
                 Authority = authorityInstance,
                 ClientId = ServiceBundle.Config.ClientId,
                 TokenCache = cache,
-                Account = account,
+                Account = commonParameters.Account,
                 Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
                 RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
                 RequestContext = CreateRequestContext(),
                 ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(),
+                LoginHint = commonParameters.LoginHint
             };
         }
 
         private RequestContext CreateRequestContext()
         {
-            return new RequestContext(ClientId, MsalLogger.Create(Guid.NewGuid(), Component, ServiceBundle.Config));
+            return new RequestContext(ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
         }
 
         /// <summary>
@@ -297,9 +250,6 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
             string authority, bool forceRefresh)
         {
-            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
-            // TODO(migration): AcquireTokenSilentWithAuthority
-
             return await AcquireTokenSilent(scopes, account)
                 .WithAuthorityOverride(authority)
                 .WithForceRefresh(forceRefresh)
@@ -324,9 +274,6 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
         {
-            // TODO(migration): ServiceBundle.DefaultLogger.Info("AcquireTokenSilentAsync called");
-            // TODO(migration): AcquireTokenSilentWithoutAuthority
-
             return await AcquireTokenSilent(scopes, account)
                          .ExecuteAsync(CancellationToken.None)
                          .ConfigureAwait(false);

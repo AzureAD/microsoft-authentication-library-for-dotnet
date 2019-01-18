@@ -65,12 +65,11 @@ namespace Microsoft.Identity.Client
 #endif
         /// <summary>
         /// Duplicate query parameter was found in extraQueryParameters.
-        /// <para>What happens?</para> You have used <see cref="ClientApplicationBase.SliceParameters"/> or the <c>extraQueryParameter</c> of overrides
+        /// <para>What happens?</para> You have used <c>extraQueryParameter</c> of overrides
         /// of token acquisition operations in public client and confidential client application and are passing a parameter which is already present in the
         /// URL (either because you had it in another way, or the library added it).
-        /// <para>Mitigation [App Development]</para> RemoveAccount the duplicate parameter from <see cref="ClientApplicationBase.SliceParameters"/> or the token acquisition override.
+        /// <para>Mitigation [App Development]</para> RemoveAccount the duplicate parameter from the token acquisition override.
         /// </summary>
-        /// <seealso cref="P:ClientApplicationBase.SliceParameters"/>
         /// <seealso cref="ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
         public const string DuplicateQueryParameterError = "duplicate_query_parameter";
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved

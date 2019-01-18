@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters);
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -133,7 +133,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters);
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -153,7 +153,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent, string authority);
 
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
             string authority);
@@ -222,7 +222,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters, UIParent parent);
 
         /// <summary>
@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -248,7 +248,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters, UIParent parent);
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent, string authority, UIParent parent);
 
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. 
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -291,7 +291,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
-            UIBehavior behavior,
+            Prompt prompt,
             string extraQueryParameters,
             IEnumerable<string> extraScopesToConsent,
             string authority, UIParent parent);

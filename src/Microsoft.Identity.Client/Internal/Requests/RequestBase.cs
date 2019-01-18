@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         protected void ValidateScopeInput(SortedSet<string> scopesToValidate)
         {
             // Check if scope or additional scope contains client ID.
-            // TODO(migration): instead of failing in the validation, could we simply just remove what the user sets and log that we did so instead?
+            // TODO: instead of failing in the validation, could we simply just remove what the user sets and log that we did so instead?
             if (scopesToValidate.Intersect(ScopeHelper.CreateSortedSetFromEnumerable(OAuth2Value.ReservedScopes)).Any())
             {
                 throw new ArgumentException("MSAL always sends the scopes 'openid profile offline_access'. " +
@@ -345,7 +345,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private async Task<MsalTokenResponse> SendHttpMessageAsync(OAuth2Client client, string tokenEndpoint)
         {
             UriBuilder builder = new UriBuilder(tokenEndpoint);
-            builder.AppendQueryParameters(AuthenticationRequestParameters.SliceParameters);
+            builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
             MsalTokenResponse msalTokenResponse =
                 await client
                     .GetTokenAsync(builder.Uri,

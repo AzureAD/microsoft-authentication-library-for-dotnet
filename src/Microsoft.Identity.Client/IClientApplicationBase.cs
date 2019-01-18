@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
-        string Component { get; set; }
+        string Component { get; set; } // todo(migration):  deprecate set
 
         /// <Summary>
         /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
@@ -100,13 +100,8 @@ namespace Microsoft.Identity.Client
         /// of the form <c>key=value</c> separated by an ampersand character.
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
-        string SliceParameters
-        {
-            get; 
-
-            // [Obsolete]  TODO(migration): need to mark this obsolete
-            set;
-        }
+        [Obsolete("Use ExtraQueryParameters on each call instead.")]  // todo(migration): documentation
+        string SliceParameters { get; set; }
 
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.

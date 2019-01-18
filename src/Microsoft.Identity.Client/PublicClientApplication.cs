@@ -72,7 +72,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="clientId">Client ID (also known as App ID) of the application as registered in the
         /// application registration portal (https://aka.ms/msal-net-register-app)/. REQUIRED</param>
-        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder instead")]
         public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
         }
@@ -93,13 +92,11 @@ namespace Microsoft.Identity.Client
         /// </list>
         /// Note that this setting needs to be consistent with what is declared in the application registration portal
         /// </param>
-        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder class")]
         public PublicClientApplication(string clientId, string authority)
         : base(PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithRedirectUri(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId))
                 .AddKnownAuthority(new Uri(authority), true)
-                //.WithUserTokenCache(new TokenCache())
                 .BuildConfiguration())
         {
         }
@@ -168,8 +165,6 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScope
-
             return await AcquireTokenInteractive(scopes, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -185,8 +180,6 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
             
-            // TODO(migration): AcquireTokenWithScopeHint
-
             return await AcquireTokenInteractive(scopes, null).WithLoginHint(loginHint)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -205,58 +198,52 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScopeUser
-
             return await AcquireTokenInteractive(scopes, null).WithAccount(account)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Interactive request to acquire token for a login with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for a login with control of the UI prompt and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-            UIBehavior behavior, string extraQueryParameters)
+            Prompt prompt, string extraQueryParameters)
         {
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScopeHintBehavior
-
             return await AcquireTokenInteractive(scopes, null)
                 .WithLoginHint(loginHint)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Interactive request to acquire token for an account with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for an account with control of the UI prompt and possibility of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-            UIBehavior behavior, string extraQueryParameters)
+                                                                  Prompt prompt, string extraQueryParameters)
         {
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScopeUserBehavior
-
             return await AcquireTokenInteractive(scopes, null)
                 .WithAccount(account)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -267,7 +254,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -276,16 +263,14 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
+                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScopeHintBehaviorAuthority
-
             return await AcquireTokenInteractive(scopes, null)
                 .WithLoginHint(loginHint)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
                 .WithAuthorityOverride(authority)
@@ -298,7 +283,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -307,16 +292,14 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
+                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
         {
             GuardNetCore();
             GuardUIParentAndroid();
 
-            // TODO(migration): AcquireTokenWithScopeUserBehaviorAuthority
-
             return await AcquireTokenInteractive(scopes, null)
                 .WithAccount(account)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
                 .WithAuthorityOverride(authority)
@@ -336,8 +319,6 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
             GuardNetCore();
-
-            // TODO(migration): AcquireTokenWithScope
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -369,8 +350,6 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeHint
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -390,59 +369,53 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeUser
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Interactive request to acquire token for a login with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for a login with control of the UI prompt and possiblity of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-            UIBehavior behavior, string extraQueryParameters, UIParent parent)
+                                                                  Prompt prompt, string extraQueryParameters, UIParent parent)
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeHintBehavior
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Interactive request to acquire token for an account with control of the UI behavior and possiblity of passing extra query parameters like additional claims
+        /// Interactive request to acquire token for an account with control of the UI prompt and possiblity of passing extra query parameters like additional claims
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-            UIBehavior behavior, string extraQueryParameters, UIParent parent)
+                                                                  Prompt prompt, string extraQueryParameters, UIParent parent)
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeUserBehavior
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -453,7 +426,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -463,15 +436,13 @@ namespace Microsoft.Identity.Client
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-            UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeHintBehaviorAuthority
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
                 .WithAuthorityOverride(authority)
@@ -484,7 +455,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
-        /// <param name="behavior">Designed interactive experience for the user.</param>
+        /// <param name="prompt">Designed interactive experience for the user.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
@@ -494,22 +465,20 @@ namespace Microsoft.Identity.Client
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-        UIBehavior behavior, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
         {
             GuardNetCore();
 
-            // TODO(migration): AcquireTokenWithScopeUserBehaviorAuthority
-
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
-                .WithUiBehavior(behavior)
+                .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
                 .WithAuthorityOverride(authority)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        internal IWebUI CreateWebAuthenticationDialog(UIParent parent, UIBehavior behavior, RequestContext requestContext)
+        internal IWebUI CreateWebAuthenticationDialog(UIParent parent, Prompt prompt, RequestContext requestContext)
         {
             //create instance of UIParent and assign useCorporateNetwork to UIParent
             if (parent == null)
@@ -521,7 +490,7 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP || DESKTOP
             //hidden webview can be used in both WinRT and desktop applications.
-            parent.UseHiddenBrowser = behavior.Equals(UIBehavior.Never);
+            parent.UseHiddenBrowser = prompt.Equals(Prompt.Never);  // todo(migration): what to do here now that Prompt.Never is gone?
 #if WINDOWS_APP
             parent.UseCorporateNetwork = UseCorporateNetwork;
 #endif
@@ -563,8 +532,6 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, SecureString securePassword)
         {
             GuardMobilePlatforms();
-
-            // TODO(migration): AcquireTokenWithScopeUser
 
             return await AcquireTokenWithUsernamePassword(scopes, username, securePassword)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -703,8 +670,6 @@ namespace Microsoft.Identity.Client
             GuardNonWindowsFrameworks();
             GuardIWANetCore();
 
-            // TODO(migration): AcquireTokenWithScopeUser
-
             return await AcquireTokenWithIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
@@ -723,8 +688,6 @@ namespace Microsoft.Identity.Client
             string username)
         {
             GuardNonWindowsFrameworks();
-
-            // TODO(migration): AcquireTokenWithScopeUser
 
             return await AcquireTokenWithIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -757,7 +720,6 @@ namespace Microsoft.Identity.Client
         /// <param name="clientId">Client id of the application</param>
         /// <param name="authority">Default authority to be used for the application</param>
         /// <param name="userTokenCache">Instance of TokenCache.</param>
-        // TODO(migration): [Obsolete("Use PublicClientApplicationBuilder instead")]
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
             : this(PublicClientApplicationBuilder
                    .Create(clientId)
@@ -765,6 +727,11 @@ namespace Microsoft.Identity.Client
                    .BuildConfiguration())
         {
             GuardOnMobilePlatforms();
+
+            if (userTokenCache == null)
+            {
+                userTokenCache = new TokenCache(ServiceBundle);
+            }
 
             userTokenCache.SetServiceBundle(ServiceBundle);
             UserTokenCacheInternal = userTokenCache;
