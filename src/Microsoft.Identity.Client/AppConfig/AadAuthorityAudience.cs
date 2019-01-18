@@ -29,6 +29,7 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
     /// Specifies which Microsoft accounts can be used for sign-in with a given application.
+    /// TODO(migration): aka.ms link that describes these.
     /// </summary>
     public enum AadAuthorityAudience
     {

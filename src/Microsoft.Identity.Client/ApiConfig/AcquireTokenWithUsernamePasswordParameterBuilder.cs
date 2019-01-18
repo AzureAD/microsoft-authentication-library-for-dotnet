@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithUsernamePasswordParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
+        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
     {
         private AcquireTokenWithUsernamePasswordParameters Parameters { get; } = new AcquireTokenWithUsernamePasswordParameters();
 

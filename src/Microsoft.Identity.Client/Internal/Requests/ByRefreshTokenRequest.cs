@@ -36,15 +36,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ByRefreshTokenRequest : RequestBase
     {
-        private readonly AcquireTokenByRefreshTokenParameters _byRefreshTokenParameters;
+        private readonly AcquireTokenByRefreshTokenParameters _refreshTokenParameters;
 
         public ByRefreshTokenRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenByRefreshTokenParameters byRefreshTokenParameters)
-            : base(serviceBundle, authenticationRequestParameters, byRefreshTokenParameters)
+            AcquireTokenByRefreshTokenParameters refreshTokenParameters)
+            : base(serviceBundle, authenticationRequestParameters, refreshTokenParameters)
         {
-            _byRefreshTokenParameters = byRefreshTokenParameters;
+            _refreshTokenParameters = refreshTokenParameters;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
             var msalTokenResponse = await SendTokenRequestAsync(
-                                        GetBodyParameters(_byRefreshTokenParameters.RefreshToken),
+                                        GetBodyParameters(_refreshTokenParameters.RefreshToken),
                                         cancellationToken).ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)

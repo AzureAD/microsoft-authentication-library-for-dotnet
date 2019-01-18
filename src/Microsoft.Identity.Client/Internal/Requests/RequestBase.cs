@@ -45,10 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal abstract class RequestBase
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
-
         internal ITokenCacheInternal TokenCache => AuthenticationRequestParameters.TokenCache;
-
-        //private readonly ApiEvent.ApiIds _apiId;
         protected IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(

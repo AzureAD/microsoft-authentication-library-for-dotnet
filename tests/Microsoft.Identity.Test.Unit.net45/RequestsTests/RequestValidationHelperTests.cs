@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             credential.Audience = Audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience2), false));
 
             // Different x5c, same audience
             credential.Audience = Audience1;
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             credential.Audience = Audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience1), false));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(credential, new AuthorityEndpoints(null, null, Audience2), false));
 
             // No cached Assertion
             credential.Assertion = "";

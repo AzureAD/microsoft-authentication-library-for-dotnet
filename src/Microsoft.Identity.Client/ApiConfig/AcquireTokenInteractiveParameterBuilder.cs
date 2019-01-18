@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenInteractiveParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
+        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
     {
         private object _ownerWindow;
         private AcquireTokenInteractiveParameters Parameters { get; } = new AcquireTokenInteractiveParameters();

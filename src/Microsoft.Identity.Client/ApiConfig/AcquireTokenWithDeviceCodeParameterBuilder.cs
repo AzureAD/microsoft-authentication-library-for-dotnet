@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithDeviceCodeParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder>
+        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder>
     {
         private AcquireTokenWithDeviceCodeParameters Parameters { get; } = new AcquireTokenWithDeviceCodeParameters();
 

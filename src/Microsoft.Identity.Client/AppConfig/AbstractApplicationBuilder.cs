@@ -591,7 +591,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.
-        /// MSAL.NET will only support ADFS 2019</remarks>
+        /// MSAL.NET will only support ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T AddKnownAdfsAuthority(string authorityUri, bool isDefaultAuthority)
         {

@@ -43,7 +43,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     ///     that are only used for AcquireToken?
     /// </summary>
     public sealed class GetAuthorizationRequestUrlParameterBuilder :
-        AbstractCcaAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>
+        AbstractConfidentialClientAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>
     {
         private GetAuthorizationRequestUrlParameters Parameters { get; } = new GetAuthorizationRequestUrlParameters();
 

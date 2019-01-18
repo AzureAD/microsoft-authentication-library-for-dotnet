@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Client
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByRefreshTokenParameters byRefreshTokenParameters,
+            AcquireTokenByRefreshTokenParameters refreshTokenParameters,
             CancellationToken cancellationToken)
         {
             var requestContext = CreateRequestContext();
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
-            var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, byRefreshTokenParameters);
+            var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

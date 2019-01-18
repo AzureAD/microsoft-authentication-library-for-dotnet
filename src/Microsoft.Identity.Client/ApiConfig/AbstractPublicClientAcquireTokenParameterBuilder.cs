@@ -31,44 +31,41 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-
     /// <summary>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractCcaAcquireTokenParameterBuilder<T>
+    public abstract class AbstractPublicClientAcquireTokenParameterBuilder<T>
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="confidentialClientApplication"></param>
-        protected AbstractCcaAcquireTokenParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+        /// <param name="publicClientApplication"></param>
+        protected AbstractPublicClientAcquireTokenParameterBuilder(IPublicClientApplication publicClientApplication)
         {
-            ConfidentialClientApplication = confidentialClientApplication;
+            PublicClientApplication = publicClientApplication;
         }
 
         internal abstract Task<AuthenticationResult> ExecuteAsync(
-            IConfidentialClientApplicationExecutor executor,
+            IPublicClientApplicationExecutor executor,
             CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
+            if (PublicClientApplication is IPublicClientApplicationExecutor executor)
             {
                 ValidateAndCalculateApiId();
                 return ExecuteAsync(executor, cancellationToken);
             }
 
             throw new InvalidOperationException(
-                "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.");
+                "PublicClientApplication implementation does not implement IPublicClientApplicationExecutor.");
         }
 
         /// <summary>
         /// </summary>
-        protected IConfidentialClientApplication ConfidentialClientApplication { get; }
+        protected IPublicClientApplication PublicClientApplication { get; }
     }
-#endif
 }

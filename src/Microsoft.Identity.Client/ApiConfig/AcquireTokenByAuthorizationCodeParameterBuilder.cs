@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenByAuthorizationCodeParameterBuilder :
-        AbstractCcaAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
+        AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenByAuthorizationCodeParameterBuilder>
     {
         private AcquireTokenByAuthorizationCodeParameters Parameters { get; } = new AcquireTokenByAuthorizationCodeParameters();
 

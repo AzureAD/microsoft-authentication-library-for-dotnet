@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// <summary>
     /// </summary>
     public sealed class AcquireTokenWithIntegratedWindowsAuthParameterBuilder :
-        AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
+        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
     {
         private AcquireTokenWithIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenWithIntegratedWindowsAuthParameters();
 

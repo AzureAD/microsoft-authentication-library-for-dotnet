@@ -133,5 +133,8 @@ namespace Microsoft.Identity.Client
         public const string NullTokenCacheError = "Token cache is set to null. Acquire by refresh token requests cannot be executed.";
 
         public const string NoRefreshTokenInResponse = "Acquire by refresh token request completed, but no refresh token was found";
+
+        public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =
+            "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
     }
 }
