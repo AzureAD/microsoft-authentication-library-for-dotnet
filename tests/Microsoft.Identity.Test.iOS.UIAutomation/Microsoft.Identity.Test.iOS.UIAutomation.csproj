@@ -39,7 +39,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
-      <Version>9.0.1</Version>
+      <Version>12.0.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.UITest" Version="2.2.7" />
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="2.0.6" />
@@ -47,7 +47,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
   <!-- Set this env variable locally to overcome issue with VS not being able to run Nunit 2.6 tests-->
   <Target Name="NunitHack" BeforeTargets="Build">

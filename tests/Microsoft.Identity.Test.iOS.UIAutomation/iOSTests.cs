@@ -77,6 +77,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// Test runner to run all tests, as test initialization is expensive.
         /// </summary>
         [Test]
+        [Category("FastRun")]
         public void RunAllTests()
         {
             var tests = new List<Action>()
@@ -129,6 +130,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token flow, using the default app configured UiBehavior = Login
         /// </summary>
+        [Test]
         public void AcquireTokenTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
@@ -137,6 +139,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token silent flow
         /// </summary>
+        [Test]
         public void AcquireTokenSilentTest()
         {
             _mobileTestHelper.AcquireTokenSilentTestHelper(xamarinController, LabUserHelper.GetDefaultUser());
@@ -145,6 +148,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token flow
         /// </summary>
+        [Test]
         [Ignore("Current web element search implementation is unable to properly wait for select account elements on login page. Will be addressed in future updates.")]
         public void PromptBehaviorConsentSelectAccount()
         {
@@ -158,6 +162,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// b2clogin.com authority
         /// with subsequent silent call
         /// </summary>
+        [Test]
         [Ignore("Facebook updated to Graph v3 and app center tests are failing. Ignoring for the moment.")]
         public void B2CFacebookB2CLoginAuthorityAcquireTokenTest()
         {
@@ -169,6 +174,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// login.microsoftonline.com authority
         /// with subsequent silent call
         /// </summary>
+        [Test]
         [Ignore("Facebook updated to Graph v3 and app center tests are failing. Ignoring for the moment.")]
         public void B2CFacebookMicrosoftAuthorityAcquireTokenTest()
         {
@@ -182,6 +188,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// call to edit profile authority with
         ///  UIBehavior none
         /// </summary>
+        [Test]
         [Ignore("Facebook updated to Graph v3 and app center tests are failing. Ignoring for the moment.")]
         public void B2CFacebookEditPolicyAcquireTokenTest()
         {
@@ -195,6 +202,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// b2clogin.com authority
         /// with subsequent silent call
         /// </summary>
+        [Test]
         [Ignore("Google Auth does not support embedded webview from b2clogin.com authority. " +
             "App Center cannot run system browser tests yet, so this test can only be run in " +
             "system browser locally.")]
@@ -208,6 +216,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// login.microsoftonline.com authority
         /// with subsequent silent call
         /// </summary>
+        [Test]
         [Ignore("UI is different in AppCenter compared w/local.")]
         public void B2CGoogleMicrosoftAuthorityAcquireTokenTest()
         {
@@ -219,6 +228,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// b2clogin.com authority
         /// and subsequent silent call
         /// </summary>
+        [Test]
         public void B2CLocalAccountAcquireTokenTest()
         {
             _mobileTestHelper.B2CLocalAccountAcquireTokenSilentTest(xamarinController, LabUserHelper.GetB2CLocalAccount(), true);
@@ -227,6 +237,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV4 Federated flow
         /// </summary>
+        [Test]
         public void AcquireTokenADFSV4InteractiveFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(
@@ -237,6 +248,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV3 Federated flow
         /// </summary>
+        [Test]
         public void AcquireTokenADFSV3InteractiveFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3));
@@ -245,6 +257,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV4 Non-Federated flow
         /// </summary>
+        [Test]
         public void AcquireTokenADFSV4InteractiveNonFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
@@ -253,6 +266,7 @@ namespace Test.Microsoft.Identity.UIAutomation
         /// <summary>
         /// Runs through the standard acquire token ADFSV3 Non-Federated flow
         /// </summary>
+        [Test]
         public void AcquireTokenADFSV3InteractiveNonFederatedTest()
         {
             _mobileTestHelper.AcquireTokenInteractiveTestHelper(xamarinController, LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false));
