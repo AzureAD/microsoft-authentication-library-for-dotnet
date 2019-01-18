@@ -431,8 +431,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         public T AddKnownAadAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -454,8 +454,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// to sign-in users. This can also be a guid</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
+        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         public T AddKnownAadAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,

@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
@@ -43,6 +43,7 @@ using System.Windows.Forms;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Builder for an Interactive token request
     /// </summary>
     public sealed class AcquireTokenInteractiveParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
@@ -63,7 +64,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="parent"></param>
         /// <returns></returns>
         internal static AcquireTokenInteractiveParameterBuilder Create(
-            IPublicClientApplication publicClientApplication, 
+            IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes,
             object parent)
         {
@@ -73,9 +74,14 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Specifies if the public client application should used an embedded web browser
+        /// or the system default browser
         /// </summary>
-        /// <param name="useEmbeddedWebView"></param>
-        /// <returns></returns>
+        /// <param name="useEmbeddedWebView">If <c>true</c>, will used an embedded web browser,
+        /// otherwise will attempt to use a system web browser. The default depends on the platform:
+        /// <c>false</c> for Xamarin.iOS and Xamarin.Android, and <c>true</c> for .NET Framework,
+        /// and UWP</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
             Parameters.UseEmbeddedWebView = useEmbeddedWebView;
@@ -83,9 +89,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets the <paramref name="loginHint"/>, in order to avoid select account
+        /// dialogs in the case the user is signed-in with several identities. This method is mutually exclusive
+        /// with <see cref="WithAccount(IAccount)"/>. If both are used, an exception will be thrown
         /// </summary>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
+        /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithLoginHint(string loginHint)
         {
             Parameters.LoginHint = loginHint;
@@ -93,9 +102,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets the account for which the token will be retrieved. This method is mutually exclusive
+        /// with <see cref="WithLoginHint(string)"/>. If both are used, an exception will be thrown
         /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
+        /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithAccount(IAccount account)
         {
             Parameters.Account = account;
@@ -104,8 +115,9 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         /// <summary>
         /// </summary>
-        /// <param name="extraScopesToConsent"></param>
-        /// <returns></returns>
+        /// <param name="extraScopesToConsent">Scopes that you can request the end user to consent upfront,
+        /// in addition to the scopes for the protected Web API for which you want to acquire a security token.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
         {
             Parameters.ExtraScopesToConsent = extraScopesToConsent;
@@ -113,9 +125,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Specifies the what the interactive experience is for the user.
         /// </summary>
-        /// <param name="prompt"></param>
-        /// <returns></returns>
+        /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount"/>
+        /// </param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithPrompt(Prompt prompt)
         {
             Parameters.Prompt = prompt;

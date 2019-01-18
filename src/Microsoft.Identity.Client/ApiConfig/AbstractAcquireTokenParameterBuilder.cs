@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
@@ -37,6 +37,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Base class for builders of token requests, which attempt to acquire a token
+    /// based on the provided parameters
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractAcquireTokenParameterBuilder<T>
@@ -45,27 +47,31 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal AcquireTokenCommonParameters CommonParameters { get; } = new AcquireTokenCommonParameters();
 
         /// <summary>
-        /// 
+        /// Executes the Token request asynchronously, with a possibility of cancelling the
+        /// asynchronous method.
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">Cancellation token. See <see cref="CancellationToken"/> </param>
+        /// <returns>Authentication result containing a token for the requested scopes and parameters
+        /// set in the builder</returns>
         public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
         internal abstract ApiEvent.ApiIds CalculateApiEventId();
 
         /// <summary>
-        /// 
+        /// Executes the Token request asynchronously.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Authentication result containing a token for the requested scopes and parameters
+        /// set in the builder</returns>
         public Task<AuthenticationResult> ExecuteAsync()
         {
             return ExecuteAsync(CancellationToken.None);
         }
 
         /// <summary>
+        /// Specifies which scopes to request
         /// </summary>
-        /// <param name="scopes"></param>
-        /// <returns></returns>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>The builder to chain the .With methods</returns>
         protected T WithScopes(IEnumerable<string> scopes)
         {
             CommonParameters.Scopes = scopes;
@@ -73,9 +79,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
         /// </summary>
-        /// <param name="extraQueryParameters"></param>
-        /// <returns></returns>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
+        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
             CommonParameters.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
@@ -89,10 +98,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        ///     TODO: replicate the options here that we have in ApplicationBuilder for an AuthorityInfo class?
+        /// Specific authority for which the token is requested. Passing a different value than configured
+        /// at the application constructor narrows down the selection to a specific tenant.
+        /// This does not change the configured value in the application. This is specific
+        /// to applications managing several accounts (like a mail client with several mailboxes)
         /// </summary>
-        /// <param name="authorityUri"></param>
-        /// <returns></returns>
+        /// <param name="authorityUri">Uri for the authority</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthorityOverride(string authorityUri)
         {
             CommonParameters.AuthorityOverride = authorityUri;
@@ -100,7 +112,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         protected virtual void Validate()
         {

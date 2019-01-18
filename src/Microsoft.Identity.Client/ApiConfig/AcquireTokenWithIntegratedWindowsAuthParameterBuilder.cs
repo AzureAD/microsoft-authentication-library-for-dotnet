@@ -34,6 +34,7 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Builder for AcquireTokenWithIntegratedWindowsAuth
     /// </summary>
     public sealed class AcquireTokenWithIntegratedWindowsAuthParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
@@ -59,9 +60,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Specifies the username.
         /// </summary>
-        /// <param name="username"></param>
-        /// <returns></returns>
+        /// <param name="username">Identifier of the user account for which to acquire a token with 
+        /// Integrated Windows authentication. Generally in UserPrincipalName (UPN) format, 
+        /// e.g. <c>john.doe@contoso.com</c></param>
+        /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenWithIntegratedWindowsAuthParameterBuilder WithUsername(string username)
         {
             Parameters.Username = username;

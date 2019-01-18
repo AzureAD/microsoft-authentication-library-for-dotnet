@@ -89,7 +89,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// These default URIs could change in the future.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
-        /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
+        /// you then need to add the reply URL of the deployed application in the application registration portal
+        /// </remarks>
         public string RedirectUri { get; set; }
 
         /// <summary>
