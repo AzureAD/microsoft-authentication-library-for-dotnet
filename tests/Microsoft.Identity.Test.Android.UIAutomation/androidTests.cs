@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         IApp app;
         Platform platform;
         ITestController xamarinController = new AndroidXamarinUiTestController();
-        MobileTestHelper _mobileTestHelper = new MobileTestHelper();
+        MobileTestHelper _mobileTestHelper;
 
         /// <summary>
         /// Initializes Xamarin UI tests
@@ -69,6 +69,7 @@ namespace Microsoft.Identity.Test.UIAutomation
         {
             app = AppFactory.StartApp(platform, "com.Microsoft.XFormsDroid.MSAL");
             xamarinController.Application = app;
+            _mobileTestHelper = new MobileTestHelper(platform);
         }
 
         /// <summary>

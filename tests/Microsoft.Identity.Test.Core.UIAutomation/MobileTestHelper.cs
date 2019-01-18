@@ -39,6 +39,16 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
     /// </summary>
     public class MobileTestHelper
     {
+        private string _acquirePageId;
+        private string _cachePageId;
+        private string _settingsPageId;
+        private string _logPageId;
+
+        public MobileTestHelper(Xamarin.UITest.Platform platform)
+        {
+            SetPageNavigationIds(platform);
+        }
+
         /// <summary>
         /// Runs through the standard acquire token flow, using the login prompt behavior. The ui behavior of "login" is used by default.
         /// </summary>
@@ -117,22 +127,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         private void PrepareForAuthentication(ITestController controller)
         {
-            //Clear Cache
-            switch (controller.Platform)
-            {
-                case Xamarin.UITest.Platform.iOS:
-                    controller.Tap(CoreUiTestConstants.CachePageID);
-                    controller.Tap(CoreUiTestConstants.ClearCacheId);
-                    controller.Tap(CoreUiTestConstants.SettingsPageId);
-                    controller.Tap(CoreUiTestConstants.ClearAllCacheId);
-                    break;
-                case Xamarin.UITest.Platform.Android:
-                    controller.Tap(CoreUiTestConstants.CachePageAndroidID);
-                    controller.Tap(CoreUiTestConstants.ClearCacheId);
-                    controller.Tap(CoreUiTestConstants.SettingsPageAndroidId);
-                    controller.Tap(CoreUiTestConstants.ClearAllCacheId);
-                    break;
-            }
+            controller.Tap(_cachePageId);
+            controller.Tap(CoreUiTestConstants.ClearCacheId);
+            controller.Tap(_settingsPageId);
+            controller.Tap(CoreUiTestConstants.ClearAllCacheId);
         }
 
         private void SetInputData(
@@ -141,14 +139,14 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             string scopes,
             string uiBehavior)
         {
-            controller.Tap(CoreUiTestConstants.SettingsPageId);
+            controller.Tap(_settingsPageId);
 
             //Enter ClientID
             controller.EnterText(CoreUiTestConstants.ClientIdEntryId, clientID, XamarinSelector.ByAutomationId);
             controller.Tap(CoreUiTestConstants.SaveID);
 
             //Enter Scopes
-            controller.Tap(CoreUiTestConstants.AcquirePageId);
+            controller.Tap(_acquirePageId);
             controller.EnterText(CoreUiTestConstants.ScopesEntryId, scopes, XamarinSelector.ByAutomationId);
 
             SetUiBehavior(controller, uiBehavior);
@@ -159,7 +157,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             // Enter Prompt Behavior
             controller.Tap(CoreUiTestConstants.UiBehaviorPickerId);
             controller.Tap(promptBehavior);
-            controller.Tap(CoreUiTestConstants.AcquirePageId);
+            controller.Tap(_acquirePageId);
         }
 
         private void ValidateUiBehaviorString(string uiBehavior)
@@ -213,7 +211,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         private void SetB2CAuthority(ITestController controller, bool isB2CLoginAuthority)
         {
             PrepareForAuthentication(controller);
-            controller.Tap(CoreUiTestConstants.SettingsPageId);
+            controller.Tap(_settingsPageId);
 
             if (isB2CLoginAuthority)
             {
@@ -289,7 +287,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void SetB2CInputDataForEditProfileAuthority(ITestController controller)
         {
-            controller.Tap(CoreUiTestConstants.SettingsPageId);
+            controller.Tap(_settingsPageId);
             // Select Edit Profile for Authority
             SetAuthority(controller, CoreUiTestConstants.B2CEditProfileAuthority);
         }
@@ -340,7 +338,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
-            controller.Tap(CoreUiTestConstants.AcquirePageId);
+            controller.Tap(_acquirePageId);
 
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
@@ -367,7 +365,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             SetB2CAuthority(controller, isB2CLoginAuthority);
             
-            controller.Tap(CoreUiTestConstants.AcquirePageId);
+            controller.Tap(_acquirePageId);
 
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
@@ -387,7 +385,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             SetB2CInputDataForEditProfileAuthority(controller);
 
-            controller.Tap(CoreUiTestConstants.AcquirePageId);
+            controller.Tap(_acquirePageId);
 
             SetUiBehavior(controller, CoreUiTestConstants.UiBehaviorNoPrompt);
 
@@ -501,6 +499,25 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     }
                 }
             } while (true);
+        }
+
+        private void SetPageNavigationIds(Xamarin.UITest.Platform platform)
+        {
+            switch (platform)
+            {
+                case Xamarin.UITest.Platform.Android:
+                    _cachePageId = CoreUiTestConstants.CachePageAndroidID;
+                    _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
+                    _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
+                    _logPageId = CoreUiTestConstants.LogPageAndroidId;
+                    break;
+                case Xamarin.UITest.Platform.iOS:
+                    _cachePageId = CoreUiTestConstants.CachePageID;
+                    _acquirePageId = CoreUiTestConstants.AcquirePageId;
+                    _settingsPageId = CoreUiTestConstants.SettingsPageId;
+                    _logPageId = CoreUiTestConstants.LogPageId;
+                    break;
+            }
         }
     }
 }
