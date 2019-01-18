@@ -76,16 +76,16 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return accessToken;
         }
 
-        private AuthorityType TestGetAuthorityType(string authority)
-        {
-            var authParameters = new AuthenticationRequestParameters
-            {
-                // todo(mzuber): this is going to be wonky probably...
-                Authority = Authority.CreateAuthority(null, authority)
-            };
-            var cacheManager = new CacheManager(null, authParameters);
-            return cacheManager.GetAuthorityType();
-        }
+        //private AuthorityType TestGetAuthorityType(string authority)
+        //{
+        //    var authParameters = new AuthenticationRequestParameters
+        //    {
+        //        // todo(mzuber): this is going to be wonky probably...
+        //        Authority = Authority.CreateAuthority(null, authority)
+        //    };
+        //    var cacheManager = new CacheManager(null, authParameters);
+        //    return cacheManager.GetAuthorityType();
+        //}
 
         [TestMethod]
         public void GetLocalAccountId()

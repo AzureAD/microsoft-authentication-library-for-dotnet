@@ -590,8 +590,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityUri">Authority URL for an ADFS server</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
-        /// MSAL.NET will only support ADFS 2019
+        /// <remarks>You can add several authorities, but only one can be the default authority.
+        /// MSAL.NET will only support ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T AddKnownAdfsAuthority(string authorityUri, bool isDefaultAuthority)
         {
@@ -605,7 +605,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
-        /// <param name="isDefaultAuthority"></param>
+        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
+        /// for the application</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T AddKnownB2CAuthority(string authorityUri, bool isDefaultAuthority)

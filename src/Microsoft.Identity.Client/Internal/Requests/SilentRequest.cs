@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.OAuth2;
@@ -37,17 +38,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : RequestBase
     {
+        private readonly AcquireTokenSilentParameters _silentParameters;
         public SilentRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            bool forceRefresh)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenSilentParameters silentParameters)
+            : base(serviceBundle, authenticationRequestParameters, silentParameters)
         {
-            ForceRefresh = forceRefresh;
+            _silentParameters = silentParameters;
         }
-
-        public bool ForceRefresh { get; }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
@@ -61,7 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             MsalAccessTokenCacheItem msalAccessTokenItem = null;
 
             // Look for access token
-            if (!ForceRefresh)
+            if (!_silentParameters.ForceRefresh)
             {
                 msalAccessTokenItem =
                     await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
@@ -101,6 +100,14 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+        }
+
+        protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
+        {
+            if (_silentParameters.LoginHint != null)
+            {
+                apiEvent.LoginHint = _silentParameters.LoginHint;
+            }
         }
 
         private Dictionary<string, string> GetBodyParameters(string refreshTokenSecret)

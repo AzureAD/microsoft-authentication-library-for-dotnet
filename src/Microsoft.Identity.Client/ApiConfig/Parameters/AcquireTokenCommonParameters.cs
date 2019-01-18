@@ -25,14 +25,16 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+using System.Collections.Generic;
+using Microsoft.Identity.Client.TelemetryCore;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenSilentParameters : IAcquireTokenCommonParameters
+    internal class AcquireTokenCommonParameters
     {
-        /// <summary>
-        /// </summary>
-        bool ForceRefresh { get; }
+        public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
+        public IEnumerable<string> Scopes { get; set; }
+        public Dictionary<string, string> ExtraQueryParameters { get; set; }
+        public string AuthorityOverride { get; set; }
     }
 }

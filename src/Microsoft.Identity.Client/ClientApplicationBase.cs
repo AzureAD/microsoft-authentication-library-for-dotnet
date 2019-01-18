@@ -36,6 +36,7 @@ using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
@@ -194,30 +195,16 @@ namespace Microsoft.Identity.Client
         }
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
-            IAcquireTokenCommonParameters commonParameters,
+            AcquireTokenCommonParameters commonParameters,
             ITokenCacheInternal cache,
             Authority customAuthority = null)
         {
-            Authority authorityInstance = customAuthority ?? (string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
-                                              ? Instance.Authority.CreateAuthority(ServiceBundle)
-                                              : Instance.Authority.CreateAuthorityWithOverride(
-                                                  ServiceBundle,
-                                                  AuthorityInfo.FromAuthorityUri(
-                                                      commonParameters.AuthorityOverride,
-                                                      false)));
-
-            return new AuthenticationRequestParameters
-            {
-                Authority = authorityInstance,
-                ClientId = ServiceBundle.Config.ClientId,
-                TokenCache = cache,
-                Account = commonParameters.Account,
-                Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes),
-                RedirectUri = new Uri(RedirectUri),  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
-                RequestContext = CreateRequestContext(),
-                ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>(),
-                LoginHint = commonParameters.LoginHint
-            };
+            return new AuthenticationRequestParameters(
+                ServiceBundle,
+                customAuthority,
+                cache,
+                commonParameters,
+                CreateRequestContext());
         }
 
         private RequestContext CreateRequestContext()

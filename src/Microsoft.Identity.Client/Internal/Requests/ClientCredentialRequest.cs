@@ -28,6 +28,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -37,21 +38,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ClientCredentialRequest : RequestBase
     {
+        private readonly AcquireTokenForClientParameters _clientParameters;
+
         public ClientCredentialRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            bool forceRefresh)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenForClientParameters clientParameters)
+            : base(serviceBundle, authenticationRequestParameters, clientParameters)
         {
-            ForceRefresh = forceRefresh;
+            _clientParameters = clientParameters;
         }
-
-        public bool ForceRefresh { get; }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!ForceRefresh && TokenCache != null)
+            if (!_clientParameters.ForceRefresh && TokenCache != null)
             {
                 var msalAccessTokenItem =
                     await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);

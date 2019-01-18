@@ -31,11 +31,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
@@ -66,57 +65,44 @@ namespace Microsoft.Identity.Client
         }
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
-            IAcquireTokenSilentParameters silentParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            var authorityInstance = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride)
-                                        ? GetAuthority(silentParameters.Account)
-                                        : Instance.Authority.CreateAuthority(ServiceBundle, silentParameters.AuthorityOverride);
+            var customAuthority = string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
+                                      ? GetAuthority(silentParameters.Account)
+                                      : Instance.Authority.CreateAuthority(ServiceBundle, commonParameters.AuthorityOverride);
 
-            ApiEvent.ApiIds apiId = string.IsNullOrWhiteSpace(silentParameters.AuthorityOverride)
-                                        ? ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority
-                                        : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal, customAuthority);
 
-            var handler = new SilentRequest(
-                ServiceBundle,
-                CreateRequestParameters(silentParameters, UserTokenCacheInternal, authorityInstance),
-                apiId,
-                silentParameters.ForceRefresh);
+            requestParameters.Account = silentParameters.Account;
+            requestParameters.LoginHint = silentParameters.LoginHint;
 
+            var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
-            IAcquireTokenByRefreshTokenParameters byRefreshTokenParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByRefreshTokenParameters refreshTokenParameters,
             CancellationToken cancellationToken)
         {
-            var context = CreateRequestContext();
-            SortedSet<string> scopes;
-
-            if (byRefreshTokenParameters.Scopes == null || !byRefreshTokenParameters.Scopes.Any())
+            var requestContext = CreateRequestContext();
+            if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
             {
-                scopes = new SortedSet<string>
+                commonParameters.Scopes = new SortedSet<string>
                 {
                     ClientId + "/.default"
                 };
-                context.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
-            }
-            else
-            {
-                scopes = ScopeHelper.CreateSortedSetFromEnumerable(byRefreshTokenParameters.Scopes);
-                context.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(scopes.Count()));
+                requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }
 
-            var reqParams = CreateRequestParameters(byRefreshTokenParameters, UserTokenCacheInternal);
-            reqParams.IsRefreshTokenRequest = true;
-            reqParams.Scope = scopes;
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParameters.IsRefreshTokenRequest = true;
 
-            var handler = new ByRefreshTokenRequest(
-                ServiceBundle,
-                reqParams,
-                ApiEvent.ApiIds.AcquireTokenByRefreshToken,
-                byRefreshTokenParameters.RefreshToken);
+            requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
 
+            var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

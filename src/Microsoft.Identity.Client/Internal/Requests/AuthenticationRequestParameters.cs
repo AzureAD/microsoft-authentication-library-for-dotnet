@@ -28,77 +28,76 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthenticationRequestParameters
     {
-        public RequestContext RequestContext { get; set; }
-        public Authority Authority { get; set; }
+        public AuthenticationRequestParameters(
+            IServiceBundle serviceBundle,
+            Authority customAuthority,
+            ITokenCacheInternal tokenCache, 
+            AcquireTokenCommonParameters commonParameters, 
+            RequestContext requestContext)
+        {
+            Authority authorityInstance = customAuthority ?? (string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
+                                                                  ? Instance.Authority.CreateAuthority(serviceBundle)
+                                                                  : Instance.Authority.CreateAuthorityWithOverride(
+                                                                      serviceBundle,
+                                                                      AuthorityInfo.FromAuthorityUri(
+                                                                          commonParameters.AuthorityOverride,
+                                                                          false)));
+
+            Authority = authorityInstance;
+            ClientId = serviceBundle.Config.ClientId;
+            TokenCache = tokenCache;
+            Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
+            ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>();
+            RedirectUri = new Uri(serviceBundle.Config.RedirectUri);  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
+            RequestContext = requestContext;
+            ApiId = commonParameters.ApiId;
+        }
+
+        public ApiEvent.ApiIds ApiId { get; }
+
+        public RequestContext RequestContext { get; }
+        public Authority Authority { get; }
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
         public ITokenCacheInternal TokenCache { get; set; }
-        public SortedSet<string> Scope { get; set; } = new SortedSet<string>();
+        public SortedSet<string> Scope { get; set; }
         public string ClientId { get; set; }
-        public string AuthorizationCode { get; set; }
         public Uri RedirectUri { get; set; }
-        public string LoginHint { get; set; }
-        public Dictionary<string, string> ExtraQueryParameters { get; set; } = new Dictionary<string, string>();
-        public IAccount Account { get; set; }
-        public UserAssertion UserAssertion { get; set; }
-        public bool IsClientCredentialRequest { get; set; } = false;
-        public bool SendCertificate { get; set; }
-        public bool IsRefreshTokenRequest { get; set; } = false;
+        public Dictionary<string, string> ExtraQueryParameters { get; set; }
+
+        #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
+        // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         public ClientCredential ClientCredential { get; set; }
 #endif
 
-        public IDictionary<string, string> ToParameters(ICryptographyManager cryptographyManager)
-        {
-            IDictionary<string, string> parameters = new Dictionary<string, string>();
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
-            if (ClientCredential != null)
-            {
-                if (!string.IsNullOrEmpty(ClientCredential.Secret))
-                {
-                    parameters[OAuth2Parameter.ClientSecret] = ClientCredential.Secret;
-                }
-                else
-                {
-                    if (ClientCredential.Assertion == null || ClientCredential.ValidTo != 0)
-                    {
-                        if (!RequestValidationHelper.ValidateClientAssertion(this))
-                        {
-                            RequestContext.Logger.Info("Client Assertion does not exist or near expiry.");
-                            var jwtToken = new JsonWebToken(cryptographyManager, ClientId, Endpoints?.SelfSignedJwtAudience);
-                            ClientCredential.Assertion = jwtToken.Sign(ClientCredential.Certificate, SendCertificate);
-                            ClientCredential.ValidTo = jwtToken.Payload.ValidTo;
-                            ClientCredential.ContainsX5C = SendCertificate;
-                            ClientCredential.Audience = Endpoints?.SelfSignedJwtAudience;
-                        }
-                        else
-                        {
-                            RequestContext.Logger.Info("Reusing the unexpired Client Assertion...");
-                        }
-                    }
+        // TODO: ideally, this can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
+        public bool SendX5C { get; set; }
+        public string LoginHint { get; set; }
+        public IAccount Account { get; set; }
 
-                    parameters[OAuth2Parameter.ClientAssertionType] = OAuth2AssertionType.JwtBearer;
-                    parameters[OAuth2Parameter.ClientAssertion] = ClientCredential.Assertion;
-                }
-            }
-#endif
-            return parameters;
-        }
+        public bool IsClientCredentialRequest { get; set; }
+        public bool IsRefreshTokenRequest { get; set; }
+        public UserAssertion UserAssertion { get; set; }
 
-        public void LogState()
+        #endregion
+
+        public void LogParameters(ICoreLogger logger)
         {
             // Create Pii enabled string builder
             var builder = new StringBuilder(
@@ -107,17 +106,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Client Id - " + ClientId);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Redirect Uri - " + RedirectUri?.OriginalString);
-            builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("User provided? - " + (Account != null));
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
-            builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
-            builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
-            if (IsClientCredentialRequest)
-            {
-                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential?.Certificate != null));
-            }
-#endif
 
             string messageWithPii = builder.ToString();
 
@@ -126,18 +115,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 Environment.NewLine + "=== Request Data ===" + Environment.NewLine + "Authority Provided? - " +
                 (Authority != null) + Environment.NewLine);
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
-            builder.AppendLine("LoginHint provided? - " + !string.IsNullOrEmpty(LoginHint));
-            builder.AppendLine("User provided? - " + (Account != null));
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
-#if DESKTOP || NETSTANDARD1_3 || NET_CORE
-            builder.AppendLine("Confidential Client? - " + (ClientCredential != null));
-            builder.AppendLine("Client Credential Request? - " + IsClientCredentialRequest);
-            if (IsClientCredentialRequest)
-            {
-                builder.AppendLine("Client Certificate Provided? - " + (ClientCredential?.Certificate != null));
-            }
-#endif
-            RequestContext.Logger.InfoPii(messageWithPii, builder.ToString());
+            logger.InfoPii(messageWithPii, builder.ToString());
         }
     }
 }

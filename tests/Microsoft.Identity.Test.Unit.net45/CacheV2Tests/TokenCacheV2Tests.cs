@@ -91,28 +91,21 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 
             using (var harness = new MockHttpAndServiceBundle())
             {
-                var cacheManager = new CacheManager(
-                    _storageManager,
-                    new AuthenticationRequestParameters
-                    {
-                        Account = MsalTestConstants.User,
+                // TODO:  In MSALC++, the request parameters only really needs the
+                // Authority URI itself since the cache isn't meant to 
+                // do ANY network calls.  
+                // So it would be great if we could reduce the complexity/dependencies
+                // here and do any of the validated authority cache / instance discovery
+                // outside of the context of the authentication parameters and
+                // cache interaction and just track the authority we're using...
 
-                        // TODO:  In MSALC++, the request parameters only really needs the
-                        // Authority URI itself since the cache isn't meant to 
-                        // do ANY network calls.  
-                        // So it would be great if we could reduce the complexity/dependencies
-                        // here and do any of the validated authority cache / instance discovery
-                        // outside of the context of the authentication parameters and
-                        // cache interaction and just track the authority we're using...
+                // AccountId = MsalTestConstants.HomeAccountId,
+                // Authority = new Uri(MsalTestConstants.AuthorityTestTenant),
 
-                        // AccountId = MsalTestConstants.HomeAccountId,
-                        // Authority = new Uri(MsalTestConstants.AuthorityTestTenant),
-                        Authority = Authority.CreateAuthority(
-                            harness.ServiceBundle,
-                            MsalTestConstants.AuthorityTestTenant),
-                        ClientId = MsalTestConstants.ClientId,
-                        Scope = new SortedSet<string>(MsalCacheV2TestConstants.Scope) // todo(mzuber):  WHY SORTED SET?
-                    });
+                var cacheManager = new CacheManager(_storageManager, harness.CreateAuthenticationRequestParameters(
+                                                        MsalTestConstants.AuthorityTestTenant,
+                                                        new SortedSet<string>(MsalCacheV2TestConstants.Scope),
+                                                        account: MsalTestConstants.User));
 
                 Assert.IsTrue(cacheManager.TryReadCache(out var tokenResponse, out var accountResponse));
                 Assert.IsNotNull(tokenResponse);

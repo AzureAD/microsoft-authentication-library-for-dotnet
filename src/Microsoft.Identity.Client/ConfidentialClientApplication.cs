@@ -35,6 +35,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.TelemetryCore;
 using System.Threading;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -415,7 +416,7 @@ namespace Microsoft.Identity.Client
         internal ITokenCacheInternal AppTokenCacheInternal { get; set; }
 
         internal override AuthenticationRequestParameters CreateRequestParameters(
-            IAcquireTokenCommonParameters commonParameters,
+            AcquireTokenCommonParameters commonParameters,
             ITokenCacheInternal cache,
             Authority customAuthority = null)
         {

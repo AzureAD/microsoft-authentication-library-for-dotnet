@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     /// Base class for confidential client application token request builders
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class AbstractCcaAcquireTokenParameterBuilder<T>
+    public abstract class AbstractConfidentialClientAcquireTokenParameterBuilder<T>
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// Constructor from an interface on a confidential client application
         /// </summary>
         /// <param name="confidentialClientApplication"></param>
-        protected AbstractCcaAcquireTokenParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+        protected AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
         {
             ConfidentialClientApplication = confidentialClientApplication;
         }
@@ -59,12 +59,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
             {
-                Validate();
+                ValidateAndCalculateApiId();
                 return ExecuteAsync(executor, cancellationToken);
             }
 
             throw new InvalidOperationException(
-                "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.");
+                CoreErrorMessages.ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor);
         }
 
         /// <summary>

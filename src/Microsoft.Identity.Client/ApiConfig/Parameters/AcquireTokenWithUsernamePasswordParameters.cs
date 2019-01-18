@@ -25,10 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+using System.Security;
+using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    internal interface IAcquireTokenByRefreshTokenParameters : IAcquireTokenCommonParameters
+    internal class AcquireTokenWithUsernamePasswordParameters : AbstractAcquireTokenWithUsernameParameters, IAcquireTokenParameters
     {
-        string RefreshToken { get; }
+        public SecureString Password { get; set; }
+
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

@@ -30,25 +30,24 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class DeviceCodeRequest : RequestBase
     {
-        private readonly Func<DeviceCodeResult, Task> _deviceCodeResultCallback;
+        private readonly AcquireTokenWithDeviceCodeParameters _deviceCodeParameters;
 
         public DeviceCodeRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            Func<DeviceCodeResult, Task> deviceCodeResultCallback)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenWithDeviceCodeParameters deviceCodeParameters)
+            : base(serviceBundle, authenticationRequestParameters, deviceCodeParameters)
         {
-            _deviceCodeResultCallback = deviceCodeResultCallback;
+            _deviceCodeParameters = deviceCodeParameters;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -81,7 +80,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
             var deviceCodeResult = response.GetResult(AuthenticationRequestParameters.ClientId, deviceCodeScopes);
-            await _deviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);
+            await _deviceCodeParameters.DeviceCodeResultCallback(deviceCodeResult).ConfigureAwait(false);
 
             var msalTokenResponse = await WaitForTokenResponseAsync(deviceCodeResult, cancellationToken).ConfigureAwait(false);
             return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);

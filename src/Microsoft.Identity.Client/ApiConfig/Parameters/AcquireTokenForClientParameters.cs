@@ -25,15 +25,29 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+using System.Text;
+using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// </summary>
-    internal interface IGetAuthorizationRequestUrlParameters : IAcquireTokenCommonParameters
+    internal class AcquireTokenForClientParameters : IAcquireTokenParameters
     {
         /// <summary>
         /// </summary>
-        string RedirectUri { get; }
+        public bool ForceRefresh { get; set; }
+
+        /// <summary>
+        /// </summary>
+        public bool SendX5C { get; set; }
+
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("=== AcquireTokenForClientParameters ===");
+            builder.AppendLine("SendX5C: " + SendX5C);
+            builder.AppendLine("ForceRefresh: " + ForceRefresh);
+            logger.Info(builder.ToString());
+        }
     }
 }

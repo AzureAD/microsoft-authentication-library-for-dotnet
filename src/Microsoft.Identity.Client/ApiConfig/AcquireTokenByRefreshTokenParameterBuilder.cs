@@ -28,6 +28,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -36,8 +39,10 @@ namespace Microsoft.Identity.Client.ApiConfig
     public sealed class AcquireTokenByRefreshTokenParameterBuilder :
         AbstractClientAppBaseAcquireTokenParameterBuilder<AcquireTokenByRefreshTokenParameterBuilder>
     {
+        private AcquireTokenByRefreshTokenParameters Parameters { get; } = new AcquireTokenByRefreshTokenParameters();
+
         /// <inheritdoc />
-        public AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
+        internal AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
             : base(clientApplicationBase)
         {
         }
@@ -68,7 +73,13 @@ namespace Microsoft.Identity.Client.ApiConfig
             IClientApplicationBaseExecutor executor,
             CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenByRefreshTokenParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        internal override ApiEvent.ApiIds CalculateApiEventId()
+        {
+            return ApiEvent.ApiIds.AcquireTokenByRefreshToken;
         }
     }
 }
