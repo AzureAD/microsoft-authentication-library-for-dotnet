@@ -34,6 +34,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
@@ -106,15 +107,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
 
                 DeviceCodeResult actualDeviceCodeResult = null;
-                var request = new DeviceCodeRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    ApiEvent.ApiIds.None,
-                    result =>
+
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
+                {
+                    DeviceCodeResultCallback = result =>
                     {
                         actualDeviceCodeResult = result;
                         return Task.FromResult(0);
-                    });
+                    }
+                };
+
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 task.Wait();
                 var authenticationResult = task.Result;
@@ -153,15 +157,15 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cancellationSource = new CancellationTokenSource();
 
                 DeviceCodeResult actualDeviceCodeResult = null;
-                var request = new DeviceCodeRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    ApiEvent.ApiIds.None,
-                    async result =>
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
+                {
+                    DeviceCodeResultCallback = async result =>
                     {
                         await Task.Delay(200, CancellationToken.None).ConfigureAwait(false);
-                        actualDeviceCodeResult = result;
-                    });
+                        actualDeviceCodeResult = result;                    }
+                };
+
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                 // We setup the cancel before calling the RunAsync operation since we don't check the cancel
                 // until later and the mock network calls run insanely fast for us to timeout for them.
@@ -208,11 +212,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         NumberOfAuthorizationPendingRequestsToInject,
                         out HashSet<string> expectedScopes);
 
-                    var request = new DeviceCodeRequest(
-                        harness.ServiceBundle,
-                        parameters,
-                        ApiEvent.ApiIds.None,
-                        result => Task.FromResult(0));
+                    var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
+                    {
+                        DeviceCodeResultCallback = result => Task.FromResult(0)
+                    };
+
+                    var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                     Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                     task.Wait();
@@ -255,17 +260,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             int numAuthorizationPendingResults,
             out HashSet<string> expectedScopes)
         {
-            var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
             var cache = new TokenCache(harness.ServiceBundle);
-
-            var parameters = new AuthenticationRequestParameters()
-            {
-                Authority = authority,
-                ClientId = MsalTestConstants.ClientId,
-                Scope = MsalTestConstants.Scope,
-                TokenCache = cache,
-                RequestContext = RequestContext.CreateForTest(harness.ServiceBundle)
-            };
+            var parameters = harness.CreateAuthenticationRequestParameters(MsalTestConstants.AuthorityHomeTenant, null, cache);
 
             TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 

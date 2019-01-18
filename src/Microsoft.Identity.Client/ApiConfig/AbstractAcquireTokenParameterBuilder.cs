@@ -31,6 +31,8 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -40,7 +42,7 @@ namespace Microsoft.Identity.Client.ApiConfig
     public abstract class AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        internal AcquireTokenParameters Parameters { get; } = new AcquireTokenParameters();
+        internal AcquireTokenCommonParameters CommonParameters { get; } = new AcquireTokenCommonParameters();
 
         /// <summary>
         /// 
@@ -49,33 +51,24 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns></returns>
         public abstract Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken);
 
+        internal abstract ApiEvent.ApiIds CalculateApiEventId();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync()
+        {
+            return ExecuteAsync(CancellationToken.None);
+        }
+
         /// <summary>
         /// </summary>
         /// <param name="scopes"></param>
         /// <returns></returns>
         protected T WithScopes(IEnumerable<string> scopes)
         {
-            Parameters.Scopes = scopes;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
-        public T WithLoginHint(string loginHint)
-        {
-            Parameters.LoginHint = loginHint;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public T WithAccount(IAccount account)
-        {
-            Parameters.Account = account;
+            CommonParameters.Scopes = scopes;
             return (T)this;
         }
 
@@ -85,7 +78,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns></returns>
         public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
         {
-            Parameters.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
+            CommonParameters.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
             return (T)this;
         }
 
@@ -96,23 +89,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// </summary>
-        /// <param name="extraScopesToConsent"></param>
-        /// <returns></returns>
-        public T WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
-        {
-            Parameters.ExtraScopesToConsent = extraScopesToConsent;
-            return (T)this;
-        }
-
-        /// <summary>
         ///     TODO: replicate the options here that we have in ApplicationBuilder for an AuthorityInfo class?
         /// </summary>
         /// <param name="authorityUri"></param>
         /// <returns></returns>
         public T WithAuthorityOverride(string authorityUri)
         {
-            Parameters.AuthorityOverride = authorityUri;
+            CommonParameters.AuthorityOverride = authorityUri;
             return (T)this;
         }
 
@@ -121,6 +104,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </summary>
         protected virtual void Validate()
         {
+        }
+
+        internal void ValidateAndCalculateApiId()
+        {
+            Validate();
+            CommonParameters.ApiId = CalculateApiEventId();
         }
     }
 }

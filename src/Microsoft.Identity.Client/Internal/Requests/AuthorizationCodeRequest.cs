@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
@@ -38,17 +39,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class AuthorizationCodeRequest : RequestBase
     {
+        private readonly AcquireTokenByAuthorizationCodeParameters _authorizationCodeParameters;
+
         public AuthorizationCodeRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters)
+            : base(serviceBundle, authenticationRequestParameters, authorizationCodeParameters)
         {
-            if (string.IsNullOrWhiteSpace(authenticationRequestParameters.AuthorizationCode))
-            {
-                throw new ArgumentNullException(nameof(authenticationRequestParameters.AuthorizationCode));
-            }
-
+            _authorizationCodeParameters = authorizationCodeParameters;
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
         }
 
@@ -69,7 +68,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             var dict = new Dictionary<string, string>
             {
                 [OAuth2Parameter.GrantType] = OAuth2GrantType.AuthorizationCode,
-                [OAuth2Parameter.Code] = AuthenticationRequestParameters.AuthorizationCode,
+                [OAuth2Parameter.Code] = _authorizationCodeParameters.AuthorizationCode,
                 [OAuth2Parameter.RedirectUri] = AuthenticationRequestParameters.RedirectUri.OriginalString
             };
             return dict;

@@ -25,29 +25,26 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class ByRefreshTokenRequest : RequestBase
     {
-        private string _userProvidedRefreshToken;
+        private readonly AcquireTokenByRefreshTokenParameters _byRefreshTokenParameters;
 
         public ByRefreshTokenRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            string userProvidedRefreshToken)
-        : base(serviceBundle, authenticationRequestParameters, apiId)
+            AcquireTokenByRefreshTokenParameters byRefreshTokenParameters)
+            : base(serviceBundle, authenticationRequestParameters, byRefreshTokenParameters)
         {
-            _userProvidedRefreshToken = userProvidedRefreshToken;
+            _byRefreshTokenParameters = byRefreshTokenParameters;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -61,13 +58,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(_userProvidedRefreshToken), cancellationToken)
-                                        .ConfigureAwait(false);
+            var msalTokenResponse = await SendTokenRequestAsync(
+                                        GetBodyParameters(_byRefreshTokenParameters.RefreshToken),
+                                        cancellationToken).ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    CoreErrorMessages.NoRefreshTokenInResponse);
+                AuthenticationRequestParameters.RequestContext.Logger.Info(CoreErrorMessages.NoRefreshTokenInResponse);
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 

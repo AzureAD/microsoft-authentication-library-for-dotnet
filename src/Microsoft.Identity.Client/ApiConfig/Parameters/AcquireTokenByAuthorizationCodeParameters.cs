@@ -25,22 +25,17 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+using System.Text;
+using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenInteractiveParameters : IAcquireTokenCommonParameters
+    internal class AcquireTokenByAuthorizationCodeParameters : IAcquireTokenParameters
     {
-        /// <summary>
-        /// </summary>
-        Prompt Prompt { get; }
+        public string AuthorizationCode { get; set; }
 
-        /// <summary>
-        /// </summary>
-        OwnerUiParent UiParent { get; }
-
-        /// <summary>
-        /// </summary>
-        bool UseEmbeddedWebView { get; }
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

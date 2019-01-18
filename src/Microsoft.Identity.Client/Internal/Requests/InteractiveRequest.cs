@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
@@ -44,42 +45,43 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class InteractiveRequest : RequestBase
     {
         private readonly SortedSet<string> _extraScopesToConsent;
-        private readonly Prompt _prompt;
         private readonly IWebUI _webUi;
         private AuthorizationResult _authorizationResult;
         private string _codeVerifier;
         private string _state;
+        private readonly AcquireTokenInteractiveParameters _interactiveParameters;
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            ApiEvent.ApiIds apiId,
-            IEnumerable<string> extraScopesToConsent,
-            Prompt prompt,
+            AcquireTokenInteractiveParameters interactiveParameters,
             IWebUI webUi)
-            : base(serviceBundle, authenticationRequestParameters, apiId)
+            : base(serviceBundle, authenticationRequestParameters, interactiveParameters)
         {
+            _interactiveParameters = interactiveParameters;
             RedirectUriHelper.Validate(authenticationRequestParameters.RedirectUri);
             webUi?.ValidateRedirectUri(authenticationRequestParameters.RedirectUri);
 
+            // todo(migration): can't this just come directly from interactive parameters instead of needing do to this?
             _extraScopesToConsent = new SortedSet<string>();
-            if (!extraScopesToConsent.IsNullOrEmpty())
+            if (!interactiveParameters.ExtraScopesToConsent.IsNullOrEmpty())
             {
-                _extraScopesToConsent = ScopeHelper.CreateSortedSetFromEnumerable(extraScopesToConsent);
+                _extraScopesToConsent = ScopeHelper.CreateSortedSetFromEnumerable(interactiveParameters.ExtraScopesToConsent);
             }
 
             ValidateScopeInput(_extraScopesToConsent);
 
             _webUi = webUi;
-            _prompt = prompt;
-            AuthenticationRequestParameters.RequestContext.Logger.Info(
-                "Additional scopes - " + _extraScopesToConsent.AsSingleString() + ";" +
-                "Prompt - " + _prompt.PromptValue);
+            interactiveParameters.LogParameters(authenticationRequestParameters.RequestContext.Logger);
         }
 
         protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)
         {
-            apiEvent.Prompt = _prompt.PromptValue;
+            apiEvent.Prompt = _interactiveParameters.Prompt.PromptValue;
+            if (_interactiveParameters.LoginHint != null)
+            {
+                apiEvent.LoginHint = _interactiveParameters.LoginHint;
+            }
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
@@ -149,23 +151,23 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             // Add uid/utid values to QP if user object was passed in.
-            if (AuthenticationRequestParameters.Account != null)
+            if (_interactiveParameters.Account != null)
             {
-                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account.Username))
+                if (!string.IsNullOrEmpty(_interactiveParameters.Account.Username))
                 {
-                    requestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.Account.Username;
+                    requestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.Account.Username;
                 }
 
-                if (AuthenticationRequestParameters.Account?.HomeAccountId?.ObjectId != null)
+                if (_interactiveParameters.Account?.HomeAccountId?.ObjectId != null)
                 {
                     requestParameters[OAuth2Parameter.LoginReq] =
-                        AuthenticationRequestParameters.Account.HomeAccountId.ObjectId;
+                        _interactiveParameters.Account.HomeAccountId.ObjectId;
                 }
 
-                if (!string.IsNullOrEmpty(AuthenticationRequestParameters.Account?.HomeAccountId?.TenantId))
+                if (!string.IsNullOrEmpty(_interactiveParameters.Account?.HomeAccountId?.TenantId))
                 {
                     requestParameters[OAuth2Parameter.DomainReq] =
-                        AuthenticationRequestParameters.Account.HomeAccountId.TenantId;
+                        _interactiveParameters.Account.HomeAccountId.TenantId;
                 }
             }
 
@@ -212,9 +214,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 [OAuth2Parameter.RedirectUri] = AuthenticationRequestParameters.RedirectUri.OriginalString
             };
 
-            if (!string.IsNullOrWhiteSpace(AuthenticationRequestParameters.LoginHint))
+            if (!string.IsNullOrWhiteSpace(_interactiveParameters.LoginHint))
             {
-                authorizationRequestParameters[OAuth2Parameter.LoginHint] = AuthenticationRequestParameters.LoginHint;
+                authorizationRequestParameters[OAuth2Parameter.LoginHint] = _interactiveParameters.LoginHint;
             }
 
             if (AuthenticationRequestParameters.RequestContext?.Logger?.CorrelationId != Guid.Empty)
@@ -228,9 +230,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authorizationRequestParameters[kvp.Key] = kvp.Value;
             }
 
-            if (_prompt.PromptValue != Prompt.NoPrompt.PromptValue)
+            if (_interactiveParameters.Prompt.PromptValue != Prompt.NoPrompt.PromptValue)
             {
-                authorizationRequestParameters[OAuth2Parameter.Prompt] = _prompt.PromptValue;
+                authorizationRequestParameters[OAuth2Parameter.Prompt] = _interactiveParameters.Prompt.PromptValue;
             }
             
             return authorizationRequestParameters;

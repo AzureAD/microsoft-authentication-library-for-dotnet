@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             if (PublicClientApplication is IPublicClientApplicationExecutor executor)
             {
-                Validate();
+                ValidateAndCalculateApiId();
                 return ExecuteAsync(executor, cancellationToken);
             }
 

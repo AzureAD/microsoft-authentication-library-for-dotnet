@@ -25,18 +25,12 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
-{
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenOnBehalfOfParameters : IAcquireTokenCommonParameters
-    {
-        /// <summary>
-        /// </summary>
-        UserAssertion UserAssertion { get; }
+using Microsoft.Identity.Client.Core;
 
-        /// <summary>
-        /// </summary>
-        bool SendX5C { get; }
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
+{
+    internal interface IAcquireTokenParameters
+    {
+        void LogParameters(ICoreLogger logger);
     }
 }

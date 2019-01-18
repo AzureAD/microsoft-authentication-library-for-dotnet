@@ -28,25 +28,30 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
     internal interface IConfidentialClientApplicationExecutor
     {
         Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken);
 
         Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenForClientParameters clientParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken);
 
         Task<AuthenticationResult> ExecuteAsync(
-            IAcquireTokenOnBehalfOfParameters onBehalfOfParameters,
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken);
 
         Task<Uri> ExecuteAsync(
-            IGetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
+            AcquireTokenCommonParameters commonParameters,
+            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken);
     }
 }

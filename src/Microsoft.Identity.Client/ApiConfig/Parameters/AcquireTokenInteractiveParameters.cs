@@ -25,12 +25,33 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Microsoft.Identity.Client.Core;
+
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenWithIntegratedWindowsAuthParameters : IAcquireTokenCommonParameters,
-                                                                        IAcquireTokenWithUsernameParameters
+    internal class AcquireTokenInteractiveParameters : IAcquireTokenParameters
     {
+        public Prompt Prompt { get; set; }
+        public OwnerUiParent UiParent { get; } = new OwnerUiParent();
+        public IEnumerable<string> ExtraScopesToConsent { get; set; }
+        public bool UseEmbeddedWebView { get; set; }
+        public string LoginHint { get; set; }
+        public IAccount Account { get; set; }
+
+        public void LogParameters(ICoreLogger logger)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("=== InteractiveParameters Data ===");
+            builder.AppendLine("LoginHint provided: " + !string.IsNullOrEmpty(LoginHint));
+            builder.AppendLine("User provided: " + (Account != null));
+            builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
+            builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent));
+            builder.AppendLine("Prompt: " + Prompt.PromptValue);
+
+            logger.Info(builder.ToString());
+        }
     }
 }

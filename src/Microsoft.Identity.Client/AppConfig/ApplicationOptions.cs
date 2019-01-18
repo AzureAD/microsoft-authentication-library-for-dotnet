@@ -74,6 +74,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         public AzureCloudInstance AzureCloudInstance { get; set; } = AzureCloudInstance.None;
 
+        //  TODO(migration): can't reference IConfidentialClientApplication here since it's not exposed on all platforms publicly.  In <see cref="Microsoft.Identity.Client.IConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
+
         /// <summary>
         /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
@@ -85,12 +87,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </description></item>
         /// </list>
         /// These default URIs could change in the future.
-        /// In <see cref="Microsoft.Identity.Client.IConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
-
-        /// </summary>
         public string RedirectUri { get; set; }
 
         /// <summary>

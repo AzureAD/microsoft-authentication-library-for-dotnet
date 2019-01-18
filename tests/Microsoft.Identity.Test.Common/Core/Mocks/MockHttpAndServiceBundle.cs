@@ -26,8 +26,14 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -52,6 +58,30 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public void Dispose()
         {
             HttpManager.Dispose();
+        }
+
+        public AuthenticationRequestParameters CreateAuthenticationRequestParameters(
+            string authority, 
+            SortedSet<string> scopes, 
+            ITokenCacheInternal tokenCache = null, 
+            IAccount account = null,
+            Dictionary<string, string> extraQueryParameters = null)
+        {
+            var commonParameters = new AcquireTokenCommonParameters
+            {
+                Scopes = scopes ?? MsalTestConstants.Scope,
+                ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>()
+            };
+
+            return new AuthenticationRequestParameters(
+                ServiceBundle,
+                Authority.CreateAuthority(ServiceBundle, authority),
+                tokenCache,
+                commonParameters,
+                RequestContext.CreateForTest(ServiceBundle))
+            {
+                Account = account
+            };
         }
     }
 }

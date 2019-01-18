@@ -27,24 +27,6 @@
 
 namespace Microsoft.Identity.Client.AppConfig
 {
-    /*
-     todo(migration): clean up this documentation since we've fixed it...
-     previous PR comments:
-     Given that our current default authority is common, I think it should be AAD + MSA
-     Don't we want to use a [Flags] enum (AAD = 1, MSA =2, AAD+MSA = 3) if we have the notion of Default?
-
-     For the naming of the enumeration constants, I propose that we align with the signInAudience of the https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-app-manifest#manifest-reference that is:
-
-     Constant | description
-     ---------- | -------------
-     AzureADMyOrg | Users with a Microsoft work or school account in my organization’s Azure AD tenant (i.e. single tenant)
-     AzureADMultipleOrgs |  Users with a Microsoft work or school account in any organization’s Azure AD tenant (i.e. multi-tenant)
-     AzureADandPersonalMicrosoftAccount |  Users with a personal Microsoft account, or a work or school account in any organization’s Azure AD tenant.
-
-     Maps to instance/common (for instance https://login.microsoftonline.com/common)
-     the reason is instance can be something else (think of national / sovereign clouds, or even B2C)
-    */
-
     /// <summary>
     /// Specifies which Microsoft accounts can be used for sign-in with a given application.
     /// </summary>

@@ -38,10 +38,6 @@ namespace Microsoft.Identity.Client.AppConfig
     {
         private readonly List<AuthorityInfo> _authorityInfos = new List<AuthorityInfo>();
 
-        internal ApplicationConfiguration()
-        {
-        }
-
         public bool IsBrokerEnabled { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }

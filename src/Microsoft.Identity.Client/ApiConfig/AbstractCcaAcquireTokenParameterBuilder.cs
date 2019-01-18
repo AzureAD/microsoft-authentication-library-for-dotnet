@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
             {
-                Validate();
+                ValidateAndCalculateApiId();
                 return ExecuteAsync(executor, cancellationToken);
             }
 

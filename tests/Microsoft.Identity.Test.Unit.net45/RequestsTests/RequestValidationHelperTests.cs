@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
@@ -65,43 +66,44 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds))
             };
 
-            var parameters = new AuthenticationRequestParameters
-            {
-                ClientCredential = credential,
-                SendCertificate = false,
-                Authority = Authority.CreateAuthority(
-                    _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant),
-                Endpoints = new AuthorityEndpoints(null, null, Audience1)
-            };
+            var parameters = new AuthenticationRequestParameters(
+                _serviceBundle,
+                Authority.CreateAuthority(_serviceBundle, MsalTestConstants.AuthorityCommonTenant),
+                null, 
+                new AcquireTokenCommonParameters { Scopes = MsalTestConstants.Scope },
+                RequestContext.CreateForTest());
+
+            parameters.SendX5C = false;
+            parameters.Endpoints = new AuthorityEndpoints(null, null, Audience1);
+            parameters.ClientCredential = credential;
 
             // Validate cached client assertion with parameters
-            Assert.IsTrue(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsTrue(ClientCredentialHelper.ValidateClientAssertion(parameters));
 
             // Different audience
             credential.Audience = Audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
 
             // Different x5c, same audience
             credential.Audience = Audience1;
             credential.ContainsX5C = true;
 
             // cached assertion should be invalid
-            Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
 
             // Different audience and x5c
             credential.Audience = Audience2;
 
             // cached assertion should be invalid
-            Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
 
             // No cached Assertion
             credential.Assertion = "";
 
             // should return false
-            Assert.IsFalse(RequestValidationHelper.ValidateClientAssertion(parameters));
+            Assert.IsFalse(ClientCredentialHelper.ValidateClientAssertion(parameters));
         }
 
         [TestMethod]
@@ -116,15 +118,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 ValidTo = ConvertToTimeT(DateTime.UtcNow + TimeSpan.FromSeconds(JwtToAadLifetimeInSeconds))
             };
 
-            var parameters = new AuthenticationRequestParameters
-            {
-                ClientCredential = credential,
-                SendCertificate = false,
-                Authority = Authority.CreateAuthority(
-                    _serviceBundle,
-                    MsalTestConstants.AuthorityCommonTenant),
-                Endpoints = new AuthorityEndpoints(null, null, "Audience1")
-            };
+            var parameters = new AuthenticationRequestParameters(
+                _serviceBundle,
+                Authority.CreateAuthority(_serviceBundle, MsalTestConstants.AuthorityCommonTenant),
+                null,
+                new AcquireTokenCommonParameters
+                {
+                    Scopes = MsalTestConstants.Scope
+                },
+                RequestContext.CreateForTest(_serviceBundle));
+            parameters.Endpoints = new AuthorityEndpoints(null, null, "Audience1");
+            parameters.SendX5C = false;
+            parameters.ClientCredential = credential;
 
             // Validate cached client assertion with expiration time
             // Cached assertion should be valid

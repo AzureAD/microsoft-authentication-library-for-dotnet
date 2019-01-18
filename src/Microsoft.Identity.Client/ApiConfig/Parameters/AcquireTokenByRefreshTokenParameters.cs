@@ -25,19 +25,17 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
-{
-    /// <inheritdoc />
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenForClientParameters : IAcquireTokenCommonParameters
-    {
-        /// <summary>
-        /// </summary>
-        bool ForceRefresh { get; }
+using System.Text;
+using Microsoft.Identity.Client.Core;
 
-        /// <summary>
-        /// </summary>
-        bool SendX5C { get; }
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
+{
+    internal class AcquireTokenByRefreshTokenParameters : IAcquireTokenParameters
+    {
+        public string RefreshToken { get; set; }
+
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

@@ -26,35 +26,32 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenCommonParameters
+    internal class GetAuthorizationRequestUrlParameters : IAcquireTokenParameters
     {
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> Scopes { get; }
+        public string RedirectUri { get; set; }
+        public IAccount Account { get; set; }
+        public IEnumerable<string> ExtraScopesToConsent { get; set; }
+        public string LoginHint { get; set; }
 
-        /// <summary>
-        /// </summary>
-        IAccount Account { get; }
+        public AcquireTokenInteractiveParameters ToInteractiveParameters()
+        {
+            return new AcquireTokenInteractiveParameters
+            {
+                Account = Account,
+                ExtraScopesToConsent = ExtraScopesToConsent,
+                LoginHint = LoginHint,
+                Prompt = Prompt.SelectAccount,
+                UseEmbeddedWebView = false
+            };
+        }
 
-        /// <summary>
-        /// </summary>
-        string LoginHint { get; }
-
-        /// <summary>
-        /// </summary>
-        Dictionary<string, string> ExtraQueryParameters { get; }
-
-        /// <summary>
-        /// </summary>
-        IEnumerable<string> ExtraScopesToConsent { get; }
-
-        /// <summary>
-        /// </summary>
-        string AuthorityOverride { get; }
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

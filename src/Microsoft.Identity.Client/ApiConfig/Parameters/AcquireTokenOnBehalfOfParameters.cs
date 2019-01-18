@@ -25,22 +25,23 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    internal interface IClientApplicationBaseExecutor
+    internal class AcquireTokenOnBehalfOfParameters : IAcquireTokenParameters
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken);
+        public UserAssertion UserAssertion { get; set; }
+        public bool SendX5C { get; set;}
 
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByRefreshTokenParameters byRefreshTokenParameters,
-            CancellationToken cancellationToken);
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("=== OnBehalfOfParameters ===");
+            builder.AppendLine("SendX5C: " + SendX5C);
+            logger.Info(builder.ToString());
+        }
     }
 }

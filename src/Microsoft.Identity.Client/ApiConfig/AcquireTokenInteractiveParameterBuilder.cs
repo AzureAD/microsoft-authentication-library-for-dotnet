@@ -29,6 +29,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.TelemetryCore;
 
 #if ANDROID
 using Android.App;
@@ -42,11 +44,11 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    [CLSCompliant(false)]
     public sealed class AcquireTokenInteractiveParameterBuilder :
         AbstractPcaAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
     {
         private object _ownerWindow;
+        private AcquireTokenInteractiveParameters Parameters { get; } = new AcquireTokenInteractiveParameters();
 
         /// <inheritdoc />
         internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplication publicClientApplication)
@@ -77,6 +79,36 @@ namespace Microsoft.Identity.Client.ApiConfig
         public AcquireTokenInteractiveParameterBuilder WithUseEmbeddedWebView(bool useEmbeddedWebView)
         {
             Parameters.UseEmbeddedWebView = useEmbeddedWebView;
+            return this;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="loginHint"></param>
+        /// <returns></returns>
+        public AcquireTokenInteractiveParameterBuilder WithLoginHint(string loginHint)
+        {
+            Parameters.LoginHint = loginHint;
+            return this;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
+        public AcquireTokenInteractiveParameterBuilder WithAccount(IAccount account)
+        {
+            Parameters.Account = account;
+            return this;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="extraScopesToConsent"></param>
+        /// <returns></returns>
+        public AcquireTokenInteractiveParameterBuilder WithExtraScopesToConsent(IEnumerable<string> extraScopesToConsent)
+        {
+            Parameters.ExtraScopesToConsent = extraScopesToConsent;
             return this;
         }
 
@@ -124,15 +156,38 @@ namespace Microsoft.Identity.Client.ApiConfig
 #else
             if (_ownerWindow != null)
             {
-                // TODO: Someone set an owner window and we're going to ignore it.  Should we throw?
+                // TODO(migration): Someone set an owner window and we're going to ignore it.  Should we throw?
             }
+#endif
+
+            Parameters.LoginHint = string.IsNullOrWhiteSpace(Parameters.LoginHint)
+                                          ? Parameters.Account?.Username
+                                          : Parameters.LoginHint;
+
+#if NET_CORE_BUILDTIME
+            Parameters.Prompt = Prompt.SelectAccount;  // TODO(migration): fix this so we don't need the ifdef and make sure it's correct.
 #endif
         }
 
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenInteractiveParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+        }
+
+        internal override ApiEvent.ApiIds CalculateApiEventId()
+        {
+            ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
+            if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
+            }
+            else if (Parameters.Account != null)
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
+            }
+
+            return apiId;
         }
     }
 }

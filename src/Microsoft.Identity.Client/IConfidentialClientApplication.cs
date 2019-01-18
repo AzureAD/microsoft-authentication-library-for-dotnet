@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -38,6 +39,38 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface IConfidentialClientApplication : IClientApplicationBase
     {
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="authorizationCode"></param>
+        /// <returns></returns>
+        AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenForAuthorizationCode(
+            IEnumerable<string> scopes,
+            string authorizationCode);
+
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        AcquireTokenForClientParameterBuilder AcquireTokenForClient(IEnumerable<string> scopes);
+
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <param name="userAssertion"></param>
+        /// <returns></returns>
+        AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(IEnumerable<string> scopes, UserAssertion userAssertion);
+
+        /// <summary>
+        /// TODO(migration): fill in jm's documentation
+        /// </summary>
+        /// <param name="scopes"></param>
+        /// <returns></returns>
+        GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
+
         /// <summary>
         /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>

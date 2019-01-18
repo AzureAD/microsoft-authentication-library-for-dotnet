@@ -25,17 +25,29 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Threading.Tasks;
+using System.Text;
+using Microsoft.Identity.Client.Core;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <summary>
-    /// </summary>
-    internal interface IAcquireTokenWithDeviceCodeParameters : IAcquireTokenCommonParameters
+    internal class AcquireTokenForClientParameters : IAcquireTokenParameters
     {
         /// <summary>
         /// </summary>
-        Func<DeviceCodeResult, Task> DeviceCodeResultCallback { get; }
+        public bool ForceRefresh { get; set; }
+
+        /// <summary>
+        /// </summary>
+        public bool SendX5C { get; set; }
+
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine("=== AcquireTokenForClientParameters ===");
+            builder.AppendLine("SendX5C: " + SendX5C);
+            builder.AppendLine("ForceRefresh: " + ForceRefresh);
+            logger.Info(builder.ToString());
+        }
     }
 }

@@ -28,6 +28,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
@@ -36,8 +38,10 @@ namespace Microsoft.Identity.Client.ApiConfig
     public sealed class AcquireTokenWithIntegratedWindowsAuthParameterBuilder :
         AbstractPcaAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
     {
+        private AcquireTokenWithIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenWithIntegratedWindowsAuthParameters();
+
         /// <inheritdoc />
-        public AcquireTokenWithIntegratedWindowsAuthParameterBuilder(IPublicClientApplication publicClientApplication)
+        internal AcquireTokenWithIntegratedWindowsAuthParameterBuilder(IPublicClientApplication publicClientApplication)
             : base(publicClientApplication)
         {
         }
@@ -67,7 +71,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <inheritdoc />
         internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync((IAcquireTokenWithIntegratedWindowsAuthParameters)Parameters, cancellationToken);
+            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        internal override ApiEvent.ApiIds CalculateApiEventId()
+        {
+            return ApiEvent.ApiIds.AcquireTokenWithScopeUser;
         }
     }
 }

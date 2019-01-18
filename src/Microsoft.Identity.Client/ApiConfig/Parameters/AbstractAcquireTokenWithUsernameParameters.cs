@@ -25,15 +25,10 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    /// <inheritdoc />
-    /// <summary>
-    /// </summary>
-    internal interface IGetAuthorizationRequestUrlParameters : IAcquireTokenCommonParameters
+    internal abstract class AbstractAcquireTokenWithUsernameParameters
     {
-        /// <summary>
-        /// </summary>
-        string RedirectUri { get; }
+        public string Username { get; set; }
     }
 }
