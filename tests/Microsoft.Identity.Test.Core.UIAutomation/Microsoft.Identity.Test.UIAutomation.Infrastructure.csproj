@@ -62,14 +62,15 @@
     <PackageReference Include="NUnitTestAdapter" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AndroidXamrinUiTestController.cs" />
     <Compile Include="AppFactory.cs" />
-    <Compile Include="IOSXamarinUITestController.cs" />
+    <Compile Include="IOSXamarinUiTestController.cs" />
     <Compile Include="ITestController.cs" />
     <Compile Include="MobileTestHelper.cs" />
     <Compile Include="ResultVerificationFailureException.cs" />
     <Compile Include="CoreUiTestConstants.cs" />
     <Compile Include="UserInformationFieldIds.cs" />
-    <Compile Include="XamarinUITestController.cs" />
+    <Compile Include="XamarinUiTestControllerBase.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

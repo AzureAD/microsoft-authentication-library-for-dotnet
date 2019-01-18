@@ -25,55 +25,31 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using XForms;
-using XForms.iOS;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.iOS;
-using Security;
-
-[assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
-
-namespace XForms.iOS
+namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    internal class AcquirePageRenderer : PageRenderer
+    public class LabApiConstants
     {
-        AcquirePage page;
-        private bool SubscribedToEvent = false;
+        // constants for Lab api
+        public const string MobileDeviceManagementWithConditionalAccess = "mdmca";
+        public const string MobileAppManagementWithConditionalAccess = "mamca";
+        public const string MobileAppManagement = "mam";
+        public const string MultiFactorAuthentication = "mfa";
+        public const string License = "license";
+        public const string FederationProvider = "federationProvider";
+        public const string FederatedUser = "isFederated";
+        public const string UserType = "usertype";
+        public const string External = "external";
+        public const string B2CProvider = "b2cProvider";
+        public const string B2CLocal = "local";
+        public const string B2CFacebook = "facebook";
+        public const string B2CGoogle = "google";
+        public const string UserContains = "usercontains";
+        public const string AppName = "AppName";
 
-        protected override void OnElementChanged(VisualElementChangedEventArgs e)
-        {
-            base.OnElementChanged(e);
-            page = e.NewElement as AcquirePage;
+        public const string True = "true";
+        public const string False = "false";
 
-#if BUILDENV == APPCENTER
-            Xamarin.Calabash.Start();
-            if (!SubscribedToEvent)
-            {
-                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
-                SubscribedToEvent = true;
-            }
-            else
-            {
-                App.MsalApplicationUpdated -= OnMsalApplicationUpdated;
-                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
-            }
-
-            OnMsalApplicationUpdated(null, null);
-#endif
-        }
-
-        private void OnMsalApplicationUpdated(object sender, EventArgs e)
-        {
-            App.MsalPublicClient.iOSKeychainSecurityGroup ="*";
-        }
-
-        public override void ViewDidLoad()
-        {
-            base.ViewDidLoad();
-        }
+        public const string BetaEndpoint = "http://api.msidlab.com/api/userbeta";
+        public const string LabEndpoint = "http://api.msidlab.com/api/user";
     }
 }

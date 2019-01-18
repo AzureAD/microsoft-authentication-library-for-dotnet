@@ -39,6 +39,16 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
     /// </summary>
     public class MobileTestHelper
     {
+        private string _acquirePageId;
+        private string _cachePageId;
+        private string _settingsPageId;
+        private string _logPageId;
+
+        public MobileTestHelper(Xamarin.UITest.Platform platform)
+        {
+            SetPageNavigationIds(platform);
+        }
+
         /// <summary>
         /// Runs through the standard acquire token flow, using the login prompt behavior. The ui behavior of "login" is used by default.
         /// </summary>
@@ -46,9 +56,36 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public void AcquireTokenInteractiveTestHelper(
             ITestController controller,
             LabResponse labResponse,
-            string promptBehavior = CoreUiTestConstants.UIBehaviorLogin)
+            string promptBehavior = CoreUiTestConstants.UiBehaviorLogin)
         {
             AcquireTokenInteractiveHelper(controller, labResponse, promptBehavior);
+            VerifyResult(controller);
+        }
+
+        public void AcquireTokenInteractiveWithConsentTest(
+            ITestController controller,
+            LabResponse labResponse,
+            string promptBehavior = CoreUiTestConstants.UiBehaviorLogin)
+        {
+            PrepareForAuthentication(controller);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, promptBehavior);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
+
+            //i0116 = UPN text field on AAD sign in endpoint
+            controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
+
+            // on consent, also hit the accept button
+            if (promptBehavior == CoreUiTestConstants.UiBehaviorConsent)
+            {
+                AppWebResult consentHeader = controller.WaitForWebElementByCssId("consentHeader").FirstOrDefault();
+                Assert.IsNotNull(consentHeader);
+                Assert.IsTrue(consentHeader.TextContent.Contains("Permissions requested"));
+
+                controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
+            }
+
             VerifyResult(controller);
         }
 
@@ -59,12 +96,12 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public void AcquireTokenSilentTestHelper(ITestController controller, LabResponse labResponse)
         {
             //acquire token for 1st resource
-            AcquireTokenInteractiveHelper(controller, labResponse, CoreUiTestConstants.UIBehaviorLogin);
+            AcquireTokenInteractiveHelper(controller, labResponse, CoreUiTestConstants.UiBehaviorLogin);
             VerifyResult(controller);
 
             //acquire token for 2nd resource with refresh token
-            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UIBehaviorLogin);
-            controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonID);
+            SetInputData(controller, labResponse.AppId, CoreUiTestConstants.DefaultScope, CoreUiTestConstants.UiBehaviorLogin);
+            controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonId);
             VerifyResult(controller);
         }
 
@@ -78,38 +115,39 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             PerformSignInFlow(controller, labResponse.User);
 
             // on consent, also hit the accept button
-            if (promptBehavior == CoreUiTestConstants.UIBehaviorConsent)
+            if (promptBehavior == CoreUiTestConstants.UiBehaviorConsent)
             {
                 AppWebResult consentHeader = controller.WaitForWebElementByCssId("consentHeader").FirstOrDefault();
                 Assert.IsNotNull(consentHeader);
                 Assert.IsTrue(consentHeader.TextContent.Contains("Permissions requested"));
 
-                controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+                controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
             }
         }
 
         private void PrepareForAuthentication(ITestController controller)
         {
-            //Clear Cache
-            controller.Tap(CoreUiTestConstants.CachePageID);
-            controller.Tap(CoreUiTestConstants.ClearCacheID);
+            controller.Tap(_cachePageId);
+            controller.Tap(CoreUiTestConstants.ClearCacheId);
+            controller.Tap(_settingsPageId);
+            controller.Tap(CoreUiTestConstants.ClearAllCacheId);
         }
 
         private void SetInputData(
             ITestController controller,
-            string clientId,
+            string clientID,
             string scopes,
             string uiBehavior)
         {
-            controller.Tap(CoreUiTestConstants.SettingsPageID);
+            controller.Tap(_settingsPageId);
 
             //Enter ClientID
-            controller.EnterText(CoreUiTestConstants.ClientIdEntryID, clientId, XamarinSelector.ByAutomationId);
+            controller.EnterText(CoreUiTestConstants.ClientIdEntryId, clientID, XamarinSelector.ByAutomationId);
             controller.Tap(CoreUiTestConstants.SaveID);
 
             //Enter Scopes
-            controller.Tap(CoreUiTestConstants.AcquirePageID);
-            controller.EnterText(CoreUiTestConstants.ScopesEntryID, scopes, XamarinSelector.ByAutomationId);
+            controller.Tap(_acquirePageId);
+            controller.EnterText(CoreUiTestConstants.ScopesEntryId, scopes, XamarinSelector.ByAutomationId);
 
             SetUiBehavior(controller, uiBehavior);
         }
@@ -117,17 +155,17 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public void SetUiBehavior(ITestController controller, string promptBehavior)
         {
             // Enter Prompt Behavior
-            controller.Tap(CoreUiTestConstants.UiBehaviorPickerID);
+            controller.Tap(CoreUiTestConstants.UiBehaviorPickerId);
             controller.Tap(promptBehavior);
-            controller.Tap(CoreUiTestConstants.AcquirePageID);
+            controller.Tap(_acquirePageId);
         }
 
         private void ValidateUiBehaviorString(string uiBehavior)
         {
             var okList = new[] {
-                CoreUiTestConstants.UIBehaviorConsent,
-                CoreUiTestConstants.UIBehaviorLogin,
-                CoreUiTestConstants.UIBehaviorSelectAccount };
+                CoreUiTestConstants.UiBehaviorConsent,
+                CoreUiTestConstants.UiBehaviorLogin,
+                CoreUiTestConstants.UiBehaviorSelectAccount };
 
             bool isInList = okList.Any(item => string.Equals(item, uiBehavior, StringComparison.InvariantCulture));
 
@@ -148,7 +186,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <summary>
         /// Runs through the B2C acquire token flow with Facebook Provider
         /// </summary>
-        public void B2CFacebookProviderAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CFacebookAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Facebook, isB2CLoginAuthority);
         }
@@ -157,7 +195,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// Runs through the B2C acquire token flow with Facebook Provider
         /// and Edit Policy authority
         /// </summary>
-        public void B2CFacebookProviderEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
+        public void B2CFacebookEditPolicyAcquireTokenInteractiveTestHelper(ITestController controller)
         {
             PerformB2CSignInEditProfileFlow(controller, B2CIdentityProvider.Facebook);
         }
@@ -165,7 +203,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <summary>
         /// Runs through the B2C acquire token flow with Google Provider
         /// </summary>
-        public void B2CGoogleProviderAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CGoogleAcquireTokenInteractiveTestHelper(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             PerformB2CSignInFlow(controller, labResponse.User, B2CIdentityProvider.Google, isB2CLoginAuthority);
         }
@@ -173,7 +211,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         private void SetB2CAuthority(ITestController controller, bool isB2CLoginAuthority)
         {
             PrepareForAuthentication(controller);
-            controller.Tap(CoreUiTestConstants.SettingsPageID);
+            controller.Tap(_settingsPageId);
 
             if (isB2CLoginAuthority)
             {
@@ -201,10 +239,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// Runs through the B2C acquire token silent flow with Facebook identity provider
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void B2CFacebookProviderAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CFacebookAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             //acquire token for 1st resource   
-            B2CFacebookProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
+            B2CFacebookAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
         }
@@ -213,15 +251,15 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// Runs through the B2C acquire token silent flow with Google identity provider
         /// </summary>
         /// <param name="controller">The test framework that will execute the test interaction</param>
-        public void B2CGoogleProviderAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
+        public void B2CGoogleAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
             //acquire token for 1st resource   
-            B2CGoogleProviderAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
+            B2CGoogleAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
         }
 
-        private void B2CSilentFlowHelper(ITestController controller)
+        public void B2CSilentFlowHelper(ITestController controller)
         {
             //verify results of AT call
             VerifyResult(controller);
@@ -231,7 +269,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             //b2c does not return userinfo in token response
             controller.Tap(CoreUiTestConstants.UserMissingFromResponse);
             //acquire token silent with selected user
-            controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenSilentButtonId);
             VerifyResult(controller);
         }
 
@@ -249,7 +287,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void SetB2CInputDataForEditProfileAuthority(ITestController controller)
         {
-            controller.Tap(CoreUiTestConstants.SettingsPageID);
+            controller.Tap(_settingsPageId);
             // Select Edit Profile for Authority
             SetAuthority(controller, CoreUiTestConstants.B2CEditProfileAuthority);
         }
@@ -257,13 +295,13 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public void SetAuthority(ITestController controller, string authority)
         {
             // Select authority
-            controller.Tap(CoreUiTestConstants.AuthorityPickerID);
+            controller.Tap(CoreUiTestConstants.AuthorityPickerId);
             controller.Tap(authority);
         }
 
         public void PerformB2CLocalAccountSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
         {
-            controller.EnterText(CoreUiTestConstants.WebUPNB2CLocalInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(CoreUiTestConstants.WebUpnB2CLocalInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
 
@@ -272,9 +310,9 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void PerformB2CFacebookProviderSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
         {
-            controller.Tap(CoreUiTestConstants.FacebookAccountID, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(CoreUiTestConstants.WebUPNB2CFacebookInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(CoreUiTestConstants.WebUpnB2CFacebookInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
 
@@ -283,11 +321,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void PerformB2CGoogleProviderSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
         {
-            controller.Tap(CoreUiTestConstants.GoogleAccountID, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(CoreUiTestConstants.GoogleAccountId, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.EnterText(CoreUiTestConstants.WebUPNB2CGoogleInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(CoreUiTestConstants.WebUpnB2CGoogleInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.Tap(CoreUiTestConstants.B2CGoogleNextID, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(CoreUiTestConstants.B2CGoogleNextId, XamarinSelector.ByHtmlIdAttribute);
 
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
 
@@ -300,10 +338,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
-            controller.Tap(CoreUiTestConstants.AcquirePageID);
+            controller.Tap(_acquirePageId);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
 
             switch (b2CIdentityProvider)
             {
@@ -323,18 +361,38 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             VerifyResult(controller);
         }
 
+        public void PerformB2CSelectProviderOnlyFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool isB2CLoginAuthority)
+        {
+            SetB2CAuthority(controller, isB2CLoginAuthority);
+            
+            controller.Tap(_acquirePageId);
+
+            //Acquire token flow
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
+
+            switch (b2CIdentityProvider)
+            {
+                case B2CIdentityProvider.Facebook:
+                    controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
+                    break;
+                default:
+                    throw new InvalidOperationException("B2CIdentityProvider unknown");
+            }
+            VerifyResult(controller);
+        }
+
         public void PerformB2CSignInEditProfileFlow(ITestController controller, B2CIdentityProvider b2CIdentityProvider)
         {
             SetB2CInputDataForEditProfileAuthority(controller);
 
-            controller.Tap(CoreUiTestConstants.AcquirePageID);
+            controller.Tap(_acquirePageId);
 
-            SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorNoPrompt);
+            SetUiBehavior(controller, CoreUiTestConstants.UiBehaviorNoPrompt);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
 
-            controller.Tap(CoreUiTestConstants.B2CEditProfileContinueID, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(CoreUiTestConstants.B2CEditProfileContinueId, XamarinSelector.ByHtmlIdAttribute);
 
             VerifyResult(controller);
         }
@@ -345,13 +403,13 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             AcquireTokenInteractiveTestHelper(
                 controller,
                 labResponse,
-                CoreUiTestConstants.UIBehaviorConsent);
+                CoreUiTestConstants.UiBehaviorConsent);
 
             // 2. Switch ui behavior to "select account"
-            SetUiBehavior(controller, CoreUiTestConstants.UIBehaviorSelectAccount);
+            SetUiBehavior(controller, CoreUiTestConstants.UiBehaviorSelectAccount);
 
             // 3. Hit Acquire Token directly since we are not changing any other setting
-            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
 
             // 4. The web UI should display all users, so click on the current user
             controller.Tap(labResponse.User.Upn, XamarinSelector.ByHtmlValue);
@@ -365,11 +423,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             UserInformationFieldIds userInformationFieldIds = DetermineUserInformationFieldIds(user);
 
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
             //i0116 = UPN text field on AAD sign in endpoint
-            controller.EnterText(CoreUiTestConstants.WebUPNInputID, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+            controller.EnterText(CoreUiTestConstants.WebUPNInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
             //idSIButton9 = Sign in button
-            controller.Tap(CoreUiTestConstants.WebSubmitID, XamarinSelector.ByHtmlIdAttribute);
+            controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
             //i0118 = password text field
             controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
             controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
@@ -378,7 +436,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public static void PerformSignInFlowWithoutUI(ITestController controller)
         {
             //Acquire token flow
-            controller.Tap(CoreUiTestConstants.AcquireTokenButtonID);
+            controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
         }
 
         public static UserInformationFieldIds DetermineUserInformationFieldIds(LabUser user)
@@ -392,7 +450,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             RetryVerificationHelper(() =>
             {
                 //Test results are put into a label that is checked for messages
-                var result = controller.GetText(CoreUiTestConstants.TestResultID);
+                var result = controller.GetText(CoreUiTestConstants.TestResultId);
                 if (result.Contains(CoreUiTestConstants.TestResultSuccessfulMessage))
                 {
                     return;
@@ -441,6 +499,25 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     }
                 }
             } while (true);
+        }
+
+        private void SetPageNavigationIds(Xamarin.UITest.Platform platform)
+        {
+            switch (platform)
+            {
+                case Xamarin.UITest.Platform.Android:
+                    _cachePageId = CoreUiTestConstants.CachePageAndroidID;
+                    _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
+                    _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
+                    _logPageId = CoreUiTestConstants.LogPageAndroidId;
+                    break;
+                case Xamarin.UITest.Platform.iOS:
+                    _cachePageId = CoreUiTestConstants.CachePageID;
+                    _acquirePageId = CoreUiTestConstants.AcquirePageId;
+                    _settingsPageId = CoreUiTestConstants.SettingsPageId;
+                    _logPageId = CoreUiTestConstants.LogPageId;
+                    break;
+            }
         }
     }
 }

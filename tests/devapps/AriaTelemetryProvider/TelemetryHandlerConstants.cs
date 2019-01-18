@@ -25,55 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using XForms;
-using XForms.iOS;
-using Xamarin.Forms;
-using Xamarin.Forms.Platform.iOS;
-using Security;
 
-[assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
-
-namespace XForms.iOS
+namespace Microsoft.Identity.Client.AriaTelemetryProvider
 {
-    internal class AcquirePageRenderer : PageRenderer
+    internal class TelemetryHandlerConstants
     {
-        AcquirePage page;
-        private bool SubscribedToEvent = false;
-
-        protected override void OnElementChanged(VisualElementChangedEventArgs e)
-        {
-            base.OnElementChanged(e);
-            page = e.NewElement as AcquirePage;
-
-#if BUILDENV == APPCENTER
-            Xamarin.Calabash.Start();
-            if (!SubscribedToEvent)
-            {
-                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
-                SubscribedToEvent = true;
-            }
-            else
-            {
-                App.MsalApplicationUpdated -= OnMsalApplicationUpdated;
-                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
-            }
-
-            OnMsalApplicationUpdated(null, null);
-#endif
-        }
-
-        private void OnMsalApplicationUpdated(object sender, EventArgs e)
-        {
-            App.MsalPublicClient.iOSKeychainSecurityGroup ="*";
-        }
-
-        public override void ViewDidLoad()
-        {
-            base.ViewDidLoad();
-        }
+        internal readonly static string MsalEventNameKey = "msal.event_name";
+        internal readonly static string MsalSessionIdKey = "msal.session_id";
+        internal readonly static string MsalScenarioIdKey = "msal.scenario_id";
+        internal readonly static string AriaTenantId = "356c5f7286974ece8d52964f7ad35643-6c8c6db0-888b-446e-a80c-e15e35b8cbcf-7507";
     }
 }

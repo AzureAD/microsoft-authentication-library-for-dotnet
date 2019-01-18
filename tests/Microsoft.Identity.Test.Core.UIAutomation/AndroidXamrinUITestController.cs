@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -35,28 +35,39 @@ using Xamarin.UITest.Queries;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
-    public class IOSXamarinUiTestController : XamarinUiTestControllerBase
+    public class AndroidXamarinUiTestController : XamarinUiTestControllerBase
     {
 
-        public IOSXamarinUiTestController()
+        public AndroidXamarinUiTestController()
         {
-            Platform = Xamarin.UITest.Platform.iOS;
+            Platform = Xamarin.UITest.Platform.Android;
         }
 
         protected override void Tap(string elementID, XamarinSelector xamarinSelector, TimeSpan timeout)
         {
-            WaitForElement(elementID, xamarinSelector, timeout);
-
             switch (xamarinSelector)
             {
                 case XamarinSelector.ByAutomationId:
-                    Application.Tap(x => x.Marked(elementID));
+                    try
+                    {
+                        WaitForElement(elementID, xamarinSelector, timeout);
+                        Application.Tap(x => x.Marked(elementID));
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message);
+                        Console.WriteLine("Failed waiting for element. Attempting to tap regardless...");
+                        Application.Tap(x => x.Marked(elementID));
+                    }
+                    
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                        Application.Query(InvokeTapByCssId(elementID));
+                    WaitForElement(elementID, xamarinSelector, timeout);
+                    Application.Tap(QueryByCssId(elementID));
                     break;
                 case XamarinSelector.ByHtmlValue:
-                    Application.Query(InvokeTapByHtmlElementValue(elementID));
+                    WaitForElement(elementID, xamarinSelector, timeout);
+                    Application.Tap(QueryByHtmlElementValue(elementID));
                     break;
                 default:
                     throw new NotImplementedException("Invalid enum value " + xamarinSelector);
@@ -75,7 +86,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     Application.EnterText(x => x.Marked(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlIdAttribute:
-                    Application.EnterText(QueryByHtmlElementValue(elementID), text);
+                    Application.EnterText(QueryByCssId(elementID), text);
                     break;
                 case XamarinSelector.ByHtmlValue:
                     throw new InvalidOperationException("Test error - you can't input text in an html element that has a value");
@@ -86,24 +97,15 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             DismissKeyboard();
         }
 
-        private static Func<AppQuery, InvokeJSAppQuery> InvokeTapByCssId(string elementID)
-        {
-            return c => c.Class("WKWebView").InvokeJS(String.Format(CultureInfo.InvariantCulture, "document.getElementById('{0}').click()", elementID));
-        }
-
-        private static Func<AppQuery, InvokeJSAppQuery> InvokeTapByHtmlElementValue(string elementID)
-        {
-            return c => c.Class("WKWebView").InvokeJS(String.Format(CultureInfo.InvariantCulture, "document.evaluate('//*[text()=\"{0}\"]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click()", elementID));
-        }
-
         protected override Func<AppQuery, AppWebQuery> QueryByCssId(string elementID)
         {
-            return c => c.Class("WKWebView").Css(String.Format(CultureInfo.InvariantCulture, "#{0}", elementID));
+            return c => c.Css(string.Format(CultureInfo.InvariantCulture, CssidSelector, elementID));
         }
 
-        protected override Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string elementID)
+        protected override Func<AppQuery, AppWebQuery> QueryByHtmlElementValue(string text)
         {
-            return c => c.Class("WKWebView").Css(String.Format(CultureInfo.InvariantCulture, "#{0}", elementID));
+            string xpath = string.Format(CultureInfo.InvariantCulture, XpathSelector, text);
+            return c => c.XPath(xpath);
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// </summary>
         /// <param name="textOrId">ID or text of the element to tap</param>
         /// <param name="waitTime">The time in seconds in which the test controller will search for the element before it times out</param>
-        /// <param name="isWebElement">Set to true if the element to be tapped is within a web view</param>
+        /// <param name="xamarinSelector">Strategy for finding the element</param>
         void Tap(string elementID, int waitTime, XamarinSelector xamarinSelector);
 
         /// <summary>
@@ -112,5 +112,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="text">The text of the element, e.g. foo will find the element div in <div>foo</div>
         /// </param>
         AppWebResult[] WaitForWebElementByText(string text, TimeSpan? timeout = null);
+
+        /// <summary>
+        /// Platform in which the controller is operating
+        /// </summary>
+        Platform Platform { get; set; }
     }
 }

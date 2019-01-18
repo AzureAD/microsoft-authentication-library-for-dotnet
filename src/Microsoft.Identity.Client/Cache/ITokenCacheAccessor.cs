@@ -71,6 +71,9 @@ namespace Microsoft.Identity.Client.Cache
         ICollection<string> GetAllAccountsAsString();
 
 #if iOS
+        void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);
+        
+        // Will remove in v3.
         void SetKeychainSecurityGroup(string keychainSecurityGroup);
 #endif
 

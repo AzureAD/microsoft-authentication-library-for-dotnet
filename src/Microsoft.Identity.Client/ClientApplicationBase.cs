@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public Task RemoveAsync(IAccount account)
         {
-            RequestContext requestContext = CreateRequestContext(Guid.Empty);
+            RequestContext requestContext = CreateRequestContext();
             if (account != null)
             {
                 UserTokenCache?.RemoveAccount(account, requestContext);
@@ -337,6 +337,46 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
+        internal async Task<AuthenticationResult> AcquireByRefreshTokenCommonAsync(IEnumerable<string> scopes, string userProvidedRefreshToken)
+        {
+            var context = CreateRequestContext();
+            SortedSet<string> _scopes;
+
+            if (scopes == null || scopes.Count() == 0)
+            {
+                _scopes = new SortedSet<string>();
+                _scopes.Add(ClientId + "/.default");
+                context.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
+            }
+            else
+            {
+                _scopes = ScopeHelper.CreateSortedSetFromEnumerable(scopes);
+                context.Logger.Info(string.Format(CultureInfo.InvariantCulture, LogMessages.UsingXScopesForRefreshTokenRequest, scopes.Count()));
+            }
+
+            var reqParams = new AuthenticationRequestParameters
+            {
+                SliceParameters = SliceParameters,
+                Authority = Instance.Authority.CreateAuthority(ServiceBundle, Authority, false),
+                ClientId = ClientId,
+                TokenCache = UserTokenCache,
+                Scope = _scopes,
+                RedirectUri = new Uri(RedirectUri),
+                RequestContext = context,
+                ValidateAuthority = ValidateAuthority,
+                IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled,
+                IsRefreshTokenRequest = true
+            };
+
+            var handler = new ByRefreshTokenRequest(
+                ServiceBundle,
+                reqParams,
+                ApiEvent.ApiIds.AcquireTokenByRefreshToken,
+                userProvidedRefreshToken);
+
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
         internal virtual AuthenticationRequestParameters CreateRequestParameters(Authority authority,
             IEnumerable<string> scopes,
             IAccount account, TokenCache cache)
@@ -350,16 +390,15 @@ namespace Microsoft.Identity.Client
                 Account = account,
                 Scope = ScopeHelper.CreateSortedSetFromEnumerable(scopes),
                 RedirectUri = new Uri(RedirectUri),
-                RequestContext = CreateRequestContext(Guid.Empty),
+                RequestContext = CreateRequestContext(),
                 ValidateAuthority = ValidateAuthority,
                 IsExtendedLifeTimeEnabled = ExtendedLifeTimeEnabled
             };
         }
 
-        internal RequestContext CreateRequestContext(Guid correlationId)
+        private RequestContext CreateRequestContext()
         {
-            correlationId = (correlationId != Guid.Empty) ? correlationId : Guid.NewGuid();
-            return new RequestContext(ClientId, new MsalLogger(correlationId, Component));
+            return new RequestContext(ClientId, new MsalLogger(Guid.NewGuid(), Component));
         }
     }
 }
