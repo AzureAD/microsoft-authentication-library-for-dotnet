@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Base class for public client application token request builders
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractPcaAcquireTokenParameterBuilder<T>

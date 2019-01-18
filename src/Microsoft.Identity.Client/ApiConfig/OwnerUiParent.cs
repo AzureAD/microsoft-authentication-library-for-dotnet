@@ -41,6 +41,7 @@ using System.Windows.Forms;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Owner UI parent for the dialog in which authentication will take place.
     /// </summary>
     public class OwnerUiParent
     {
