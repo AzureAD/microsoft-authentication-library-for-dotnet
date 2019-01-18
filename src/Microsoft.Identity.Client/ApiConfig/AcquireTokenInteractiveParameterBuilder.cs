@@ -89,7 +89,8 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <summary>
         /// Specifies the what the interactive experience is for the user.
         /// </summary>
-        /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount</param>
+        /// <param name="prompt">Requested interactive experience. The default is <see cref="Prompt.SelectAccount"/>
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         public AcquireTokenInteractiveParameterBuilder WithPrompt(Prompt prompt)
         {

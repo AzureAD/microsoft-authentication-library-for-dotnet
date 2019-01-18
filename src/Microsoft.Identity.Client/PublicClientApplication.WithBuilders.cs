@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.
         /// 
         /// You can also pass optional parameters by calling:
-        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithUiBehavior(UIBehavior)"/> to specify the user experience
+        /// <see cref="AcquireTokenInteractiveParameterBuilder.WithPrompt(Prompt)"/> to specify the user experience
         /// when signing-in, <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/> to specify
         /// if you want to use the embedded web browser or the system default browser, 
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAccount(IAccount)"/> or <see cref="AbstractAcquireTokenParameterBuilder{T}.WithLoginHint(string)"/>
