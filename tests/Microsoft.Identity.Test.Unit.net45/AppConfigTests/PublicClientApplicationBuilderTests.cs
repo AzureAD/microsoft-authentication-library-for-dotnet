@@ -34,6 +34,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
+    [TestCategory("BuilderTests")]
     public class PublicClientApplicationBuilderTests
     {
         [TestMethod]

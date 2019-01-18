@@ -25,7 +25,6 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -35,6 +34,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
     [TestClass]
+    [TestCategory("BuilderTests")]
     public class ConfidentialClientApplicationBuilderTests
     {
         [TestMethod]
