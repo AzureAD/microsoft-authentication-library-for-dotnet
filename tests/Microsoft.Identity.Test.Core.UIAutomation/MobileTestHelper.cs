@@ -424,13 +424,21 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
-            //i0116 = UPN text field on AAD sign in endpoint
-            controller.EnterText(CoreUiTestConstants.WebUPNInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
-            //idSIButton9 = Sign in button
-            controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
-            //i0118 = password text field
-            controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
-            controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+            try
+            {
+                //i0116 = UPN text field on AAD sign in endpoint
+                controller.EnterText(CoreUiTestConstants.WebUPNInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
+                //idSIButton9 = Sign in button
+                controller.Tap(CoreUiTestConstants.WebSubmitId, XamarinSelector.ByHtmlIdAttribute);
+                //i0118 = password text field
+                controller.EnterText(userInformationFieldIds.PasswordInputId, LabUserHelper.GetUserPassword(user), XamarinSelector.ByHtmlIdAttribute);
+                controller.Tap(userInformationFieldIds.SignInButtonId, XamarinSelector.ByHtmlIdAttribute);
+            }
+            catch
+            {
+                Console.WriteLine("Failed to find UPN input. Attempting to click on UPN from select account screen");
+                controller.Tap(user.Upn, XamarinSelector.ByHtmlValue);
+            }
         }
 
         public static void PerformSignInFlowWithoutUI(ITestController controller)
