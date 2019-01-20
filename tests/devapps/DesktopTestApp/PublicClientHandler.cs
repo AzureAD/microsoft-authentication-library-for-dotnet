@@ -57,7 +57,7 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(
             IEnumerable<string> scopes, 
-            UIBehavior uiBehavior, 
+            Prompt uiBehavior, 
             string extraQueryParams, 
             UIParent uiParent)
         {
@@ -89,7 +89,7 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthorityAsync(
             IEnumerable<string> scopes, 
-            UIBehavior uiBehavior, 
+            Prompt uiBehavior, 
             string extraQueryParams, 
             UIParent uiParent)
         {

@@ -82,7 +82,7 @@ namespace XForms
             UIBehaviorPicker.SelectedItem = Prompt.ForceLogin.PromptValue;
         }
 
-        private UIBehavior GetUIBehavior()
+        private Prompt GetUIBehavior()
         {
             var selectedUIBehavior = UIBehaviorPicker.SelectedItem as string;
 
