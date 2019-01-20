@@ -40,9 +40,9 @@ namespace Microsoft.Identity.Client.Core
         ICoreLogger DefaultLogger { get; }
         IHttpManager HttpManager { get; }
         ITelemetryManager TelemetryManager { get; }
-        IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
         IAadInstanceDiscovery AadInstanceDiscovery { get; }
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
+        IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
     }
 }

@@ -50,20 +50,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
     public class AadAuthorityTests
     {
-        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-
-        }
-
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()

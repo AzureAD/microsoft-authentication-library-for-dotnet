@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Client
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// 
-        /// TODO: check if we could also pass login_hint or account (I would not think they are taken into account)
+        /// TODO(migration): check if we could also pass login_hint or account (I would not think they are taken into account)
         /// 
         /// </remarks>
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(

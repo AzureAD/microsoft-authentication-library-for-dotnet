@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Test.Common
         {
             // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
             new AadInstanceDiscovery(null, null, null, true);
-            new ValidatedAuthoritiesCache(true);
             new AuthorityEndpointResolutionManager(null, true);
         }
 
