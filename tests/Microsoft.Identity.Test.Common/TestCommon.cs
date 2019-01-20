@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Test.Common
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled
             };
-            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true));
+            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true, false));
             return ServiceBundle.Create(appConfig);
         }
 

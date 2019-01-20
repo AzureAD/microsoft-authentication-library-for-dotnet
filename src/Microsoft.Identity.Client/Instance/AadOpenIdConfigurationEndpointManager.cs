@@ -48,14 +48,9 @@ namespace Microsoft.Identity.Client.Instance
             RequestContext requestContext)
         {
             var authorityUri = new Uri(authorityInfo.CanonicalAuthority);
-
-            // TODO(migration):  This used to check for ValidateAuthority as well.
-            // Need info on ensuring that all authorities are in the trusted host list.
-            // Need to validate against Config.KnownAuthorities as well as the static trustedhostlist
-            // SEE:  FailedTenantDiscoveryMissingEndpointsTest
-            if (!AadAuthority.IsInTrustedHostList(authorityUri.Host) /* && !_serviceBundle.Config.IsKnownAuthorityHost(authorityUri.Host) */)
+            if (authorityInfo.ValidateAuthority && !AadAuthority.IsInTrustedHostList(authorityUri.Host))
             {
-                var discoveryResponse = await _serviceBundle.AadInstanceDiscovery.DoInstanceDiscoveryAndCacheAsync(
+                var discoveryResponse = await _serviceBundle.AadInstanceDiscovery.GetMetadataEntryAsync(
                                             authorityUri,
                                             requestContext).ConfigureAwait(false);
 

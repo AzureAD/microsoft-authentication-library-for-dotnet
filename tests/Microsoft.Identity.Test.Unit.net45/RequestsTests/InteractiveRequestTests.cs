@@ -429,6 +429,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
