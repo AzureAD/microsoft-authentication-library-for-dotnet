@@ -45,14 +45,16 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
         public async Task TestInitializeAsync()
         {
             _harness = new AcquireTokenInteractiveBuilderHarness();
-            await _harness.SetupAsync().ConfigureAwait(false);
+            await _harness.SetupAsync()
+                          .ConfigureAwait(false);
         }
 
         [TestMethod]
         public async Task TestAcquireTokenInteractiveBuilderAsync()
         {
-            await AcquireTokenInteractiveParameterBuilder
-                  .Create(_harness.ClientApplication, MsalTestConstants.Scope, null).ExecuteAsync().ConfigureAwait(false);
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.ClientApplication, MsalTestConstants.Scope, null)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
             _harness.ValidateInteractiveParameters();
@@ -64,18 +66,22 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             var account = Substitute.For<IAccount>();
             account.Username.Returns(MsalTestConstants.DisplayableId);
 
-            await AcquireTokenInteractiveParameterBuilder
-                  .Create(_harness.ClientApplication, MsalTestConstants.Scope, null).WithAccount(account).ExecuteAsync().ConfigureAwait(false);
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.ClientApplication, MsalTestConstants.Scope, null)
+                                                         .WithAccount(account)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeUser);
-            _harness.ValidateInteractiveParameters(expectedAccount: account, expectedLoginHint: MsalTestConstants.DisplayableId);
+            _harness.ValidateInteractiveParameters(account, expectedLoginHint: MsalTestConstants.DisplayableId);
         }
 
         [TestMethod]
         public async Task TestAcquireTokenInteractiveBuilderWithLoginHintAsync()
         {
-            await AcquireTokenInteractiveParameterBuilder
-                  .Create(_harness.ClientApplication, MsalTestConstants.Scope, null).WithLoginHint(MsalTestConstants.DisplayableId).ExecuteAsync().ConfigureAwait(false);
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.ClientApplication, MsalTestConstants.Scope, null)
+                                                         .WithLoginHint(MsalTestConstants.DisplayableId)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeHint);
             _harness.ValidateInteractiveParameters(expectedLoginHint: MsalTestConstants.DisplayableId);
@@ -87,11 +93,14 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
             var account = Substitute.For<IAccount>();
             account.Username.Returns(MsalTestConstants.DisplayableId);
 
-            await AcquireTokenInteractiveParameterBuilder
-                  .Create(_harness.ClientApplication, MsalTestConstants.Scope, null).WithAccount(account).WithLoginHint("SomeOtherLoginHint").ExecuteAsync().ConfigureAwait(false);
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.ClientApplication, MsalTestConstants.Scope, null)
+                                                         .WithAccount(account)
+                                                         .WithLoginHint("SomeOtherLoginHint")
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeUser);
-            _harness.ValidateInteractiveParameters(expectedAccount: account, expectedLoginHint: "SomeOtherLoginHint");
+            _harness.ValidateInteractiveParameters(account, expectedLoginHint: "SomeOtherLoginHint");
         }
     }
 }

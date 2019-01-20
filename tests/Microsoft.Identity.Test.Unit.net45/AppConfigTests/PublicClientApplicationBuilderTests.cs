@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Net.Http;
+using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
@@ -40,7 +40,8 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .Build();
             Assert.AreEqual(MsalTestConstants.ClientId, pca.ClientId);
             Assert.IsNotNull(pca.UserTokenCache);
 
@@ -49,85 +50,105 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNull(pca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
             Assert.IsNull(pca.AppConfig.Component);
-            Assert.AreEqual(false, pca.AppConfig.EnablePiiLogging);
+            Assert.IsFalse(pca.AppConfig.EnablePiiLogging);
             Assert.IsNull(pca.AppConfig.HttpClientFactory);
-            Assert.AreEqual(false, pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+            Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(pca.AppConfig.LoggingCallback);
             Assert.AreEqual(Constants.DefaultRedirectUri, pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TelemetryCallback);
-            Assert.AreEqual(null, pca.AppConfig.TenantId);
+            Assert.IsNull(pca.AppConfig.TenantId);
         }
 
         [TestMethod]
         public void TestWithDifferentClientId()
         {
-            var pca = PublicClientApplicationBuilder.Create("this is a test client id").Build();
-            Assert.AreEqual("this is a test client id", pca.ClientId);
+            const string ClientId = "this is a test client id";
+            var pca = PublicClientApplicationBuilder.Create(ClientId)
+                                                    .Build();
+            Assert.AreEqual(ClientId, pca.ClientId);
         }
 
         [TestMethod]
         public void TestConstructor_ClientIdOverride()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId("some other client id").Build();
-            Assert.AreEqual("some other client id", pca.ClientId);
+            const string ClientId = "some other client id";
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithClientId(ClientId)
+                                                    .Build();
+            Assert.AreEqual(ClientId, pca.ClientId);
         }
 
         [TestMethod]
         public void TestConstructor_WithComponent()
         {
-            var pca =
-                PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithComponent("my component name").Build();
-            Assert.AreEqual("my component name", pca.AppConfig.Component);
+            const string Component = "my component name";
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithComponent(Component)
+                                                    .Build();
+            Assert.AreEqual(Component, pca.AppConfig.Component);
         }
 
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallback()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithDebugLoggingCallback().Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithDebugLoggingCallback()
+                                                    .Build();
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
         }
 
         [TestMethod]
         public void TestConstructor_WithDefaultPlatformLoggingEnabledTrue()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithDefaultPlatformLoggingEnabled(true).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithDefaultPlatformLoggingEnabled(true)
+                                                    .Build();
             Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
         [TestMethod]
         public void TestConstructor_WithDefaultPlatformLoggingEnabledFalse()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithDefaultPlatformLoggingEnabled(false).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithDefaultPlatformLoggingEnabled(false)
+                                                    .Build();
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
         [TestMethod]
         public void TestConstructor_WithWithEnablePiiLoggingTrue()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithEnablePiiLogging(true).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithEnablePiiLogging(true)
+                                                    .Build();
             Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
         }
 
         [TestMethod]
         public void TestConstructor_WithWithEnablePiiLoggingFalse()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithEnablePiiLogging(false).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithEnablePiiLogging(false)
+                                                    .Build();
             Assert.IsFalse(pca.AppConfig.EnablePiiLogging);
         }
 
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
         {
-            var httpClientFactory = new MyHttpClientFactory();  
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithHttpClientFactory(httpClientFactory).Build();
+            var httpClientFactory = new MyHttpClientFactory();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithHttpClientFactory(httpClientFactory)
+                                                    .Build();
             Assert.AreEqual(httpClientFactory, pca.AppConfig.HttpClientFactory);
         }
 
         [TestMethod]
         public void TestConstructor_WithLoggingCallback()
         {
-            var pca = PublicClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithLoggingCallback(((level, message, pii) => { })).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithLoggingCallback((level, message, pii) => { })
+                                                    .Build();
 
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
         }
@@ -135,8 +156,9 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithLoggingLevel()
         {
-            var pca = PublicClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithLoggingLevel(LogLevel.Verbose).Build();
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithLoggingLevel(LogLevel.Verbose)
+                                                    .Build();
 
             Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
         }
@@ -144,28 +166,38 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithRedirectUri()
         {
-            var pca = PublicClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithRedirectUri("http://some_redirect_uri/").Build();
+            const string RedirectUri = "http://some_redirect_uri/";
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithRedirectUri(RedirectUri)
+                                                    .Build();
 
-            Assert.AreEqual("http://some_redirect_uri/", pca.AppConfig.RedirectUri);
+            Assert.AreEqual(RedirectUri, pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
         public void TestConstructor_WithTenantId()
         {
-            var pca = PublicClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithTenantId("a_tenant id").Build();
+            const string TenantId = "a_tenant id";
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithTenantId(TenantId)
+                                                    .Build();
 
-            Assert.AreEqual("a_tenant id", pca.AppConfig.TenantId);
+            Assert.AreEqual(TenantId, pca.AppConfig.TenantId);
         }
 
         [TestMethod]
         public void TestConstructor_WithTelemetryCallback()
         {
-            var pca = PublicClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithTelemetryCallback((events => { })).Build();
+            void Callback(List<Dictionary<string, string>> events)
+            {
+            }
+
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithTelemetryCallback(Callback)
+                                                    .Build();
 
             Assert.IsNotNull(pca.AppConfig.TelemetryCallback);
+            Assert.AreEqual((TelemetryCallback)Callback, pca.AppConfig.TelemetryCallback);
         }
     }
 }

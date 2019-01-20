@@ -61,23 +61,26 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestWithDifferentClientId()
         {
-            var cca = ConfidentialClientApplicationBuilder.Create("this is a test client id").Build();
-            Assert.AreEqual("this is a test client id", cca.ClientId);
+            const string ClientId = "this is a test client id";
+            var cca = ConfidentialClientApplicationBuilder.Create(ClientId).Build();
+            Assert.AreEqual(ClientId, cca.ClientId);
         }
 
         [TestMethod]
         public void TestConstructor_ClientIdOverride()
         {
-            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId("some other client id").Build();
-            Assert.AreEqual("some other client id", cca.ClientId);
+            const string ClientId = "some other client id";
+            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId(ClientId).Build();
+            Assert.AreEqual(ClientId, cca.ClientId);
         }
 
         [TestMethod]
         public void TestConstructor_WithComponent()
         {
+            const string Component = "my component name";
             var cca =
-                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithComponent("my component name").Build();
-            Assert.AreEqual("my component name", cca.AppConfig.Component);
+                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithComponent(Component).Build();
+            Assert.AreEqual(Component, cca.AppConfig.Component);
         }
 
         [TestMethod]
@@ -144,19 +147,21 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithRedirectUri()
         {
+            const string RedirectUri = "http://some_redirect_uri/";
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithRedirectUri("http://some_redirect_uri/").Build();
+                      .Create(MsalTestConstants.ClientId).WithRedirectUri(RedirectUri).Build();
 
-            Assert.AreEqual("http://some_redirect_uri/", cca.AppConfig.RedirectUri);
+            Assert.AreEqual(RedirectUri, cca.AppConfig.RedirectUri);
         }
 
         [TestMethod]
         public void TestConstructor_WithTenantId()
         {
+            const string TenantId = "a_tenant id";
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithTenantId("a_tenant id").Build();
+                      .Create(MsalTestConstants.ClientId).WithTenantId(TenantId).Build();
 
-            Assert.AreEqual("a_tenant id", cca.AppConfig.TenantId);
+            Assert.AreEqual(TenantId, cca.AppConfig.TenantId);
         }
 
         [TestMethod]
@@ -171,11 +176,12 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithClientSecret()
         {
+            const string ClientSecret = "secret value here";
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithClientSecret("secret value here").Build();
+                      .Create(MsalTestConstants.ClientId).WithClientSecret(ClientSecret).Build();
 
             Assert.IsNotNull(cca.AppConfig.ClientCredential);
-            Assert.AreEqual("secret value here", cca.AppConfig.ClientCredential.Secret);
+            Assert.AreEqual(ClientSecret, cca.AppConfig.ClientCredential.Secret);
         }
 
         [TestMethod]
