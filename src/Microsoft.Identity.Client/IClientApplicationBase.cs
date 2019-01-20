@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -37,6 +38,11 @@ namespace Microsoft.Identity.Client
     /// </Summary>
     public partial interface IClientApplicationBase
     {
+        /// <summary>
+        /// Details on the configuration of the ClientApplication for debugging purposes.
+        /// </summary>
+        IAppConfig AppConfig { get; }
+
         /// <summary>
         /// TODO(migration): this is a new field, needs documentation.
         /// </summary>

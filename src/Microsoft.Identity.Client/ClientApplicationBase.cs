@@ -63,6 +63,11 @@ namespace Microsoft.Identity.Client
         internal IServiceBundle ServiceBundle { get; }
 
         /// <summary>
+        /// Details on the configuration of the ClientApplication for debugging purposes.
+        /// </summary>
+        public IAppConfig AppConfig => ServiceBundle.Config;
+
+        /// <summary>
         /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
