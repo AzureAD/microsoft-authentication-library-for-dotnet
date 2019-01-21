@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(webUIFactory);
 
             // TODO: use the lab app once localhost is setup as a redirect uri
-            PublicClientApplication pca = new PublicClientApplication("1d18b3b0-251b-4714-a02a-9956cec86c2d");
+            PublicClientApplication pca = new PublicClientApplication(labResponse.AppId);
 
             // tests need to use http://localhost:port so that we can capture the AT
             pca.RedirectUri = SeleniumWebUIFactory.FindFreeLocalhostRedirectUri();
