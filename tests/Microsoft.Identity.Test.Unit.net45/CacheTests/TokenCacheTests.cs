@@ -380,6 +380,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MsalTestConstants.AuthorityTestTenant,
                     MsalTestConstants.Scope);
                 authParams.ClientCredential = MsalTestConstants.CredentialWithSecret;
+                authParams.IsClientCredentialRequest = true;
 
                 var cacheItem = cache.FindAccessTokenAsync(authParams).Result;
 
@@ -915,7 +916,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 serviceBundle,
                 $"https://login.microsoftonline.com/tfp/{tenantID}/somePolicy/oauth2/v2.0/authorize");
 
-            // creating IDToken with empty tenantID and displayableID/PreferedUserName for B2C scenario
+            // creating IDToken with empty tenantID and displayableID/PreferredUserName for B2C scenario
             var response = new MsalTokenResponse
             {
                 IdToken = MockHelpers.CreateIdToken(string.Empty, string.Empty, string.Empty),
@@ -930,6 +931,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             var requestContext = RequestContext.CreateForTest(serviceBundle);
             var requestParams = CreateAuthenticationRequestParameters(serviceBundle, authority, requestContext: requestContext);
+            requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 

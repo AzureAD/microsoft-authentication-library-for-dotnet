@@ -79,11 +79,11 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority/*, bool validateAuthority*/)
+        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority = false)
         {
             return CreateAuthorityWithOverride(
                 serviceBundle,
-                AuthorityInfo.FromAuthorityUri(authority, false));
+                AuthorityInfo.FromAuthorityUri(authority, false, validateAuthority));
         }
 
         public static Authority CreateAuthority(IServiceBundle serviceBundle)

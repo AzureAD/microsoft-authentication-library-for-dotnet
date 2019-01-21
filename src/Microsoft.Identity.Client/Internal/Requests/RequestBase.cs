@@ -291,10 +291,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                   .UpdateCanonicalAuthorityAsync(AuthenticationRequestParameters.RequestContext)
                   .ConfigureAwait(false);
 
-            // todo(migration): send IAuthorityEndpointResolutionManager in to RequestBase as a parameter...
-            var resolutionManager = new AuthorityEndpointResolutionManager(ServiceBundle, false);
-
-            AuthenticationRequestParameters.Endpoints = await resolutionManager.ResolveEndpointsAsync(
+            AuthenticationRequestParameters.Endpoints = await ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                 AuthenticationRequestParameters.AuthorityInfo,
                 AuthenticationRequestParameters.LoginHint,
                 AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);

@@ -365,11 +365,12 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityUri">Uri of the authority</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAuthority(Uri authorityUri, bool isDefaultAuthority)
+        public T AddKnownAuthority(Uri authorityUri, bool isDefaultAuthority, bool validateAuthority = false)
         {
-            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), isDefaultAuthority));
+            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), isDefaultAuthority, validateAuthority));
             return (T)this;
         }
 
@@ -381,14 +382,16 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T AddKnownAadAuthority(
             Uri cloudInstanceUri,
             Guid tenantId,
-            bool isDefaultAuthority)
+            bool isDefaultAuthority,
+            bool validateAuthority = false)
         {
-            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", isDefaultAuthority));
+            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", isDefaultAuthority, validateAuthority));
             return (T)this;
         }
 
@@ -401,6 +404,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenant">domain name associated with the tenant from which to sign-in users</param>
         /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
         /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
         /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
@@ -410,14 +414,15 @@ namespace Microsoft.Identity.Client.AppConfig
         public T AddKnownAadAuthority(
             Uri cloudInstanceUri,
             string tenant,
-            bool isDefaultAuthority = false)
+            bool isDefaultAuthority = false,
+            bool validateAuthority = false)
         {
             if (Guid.TryParse(tenant, out Guid tenantId))
             {
                 return AddKnownAadAuthority(cloudInstanceUri, tenantId, isDefaultAuthority);
             }
 
-            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", isDefaultAuthority));
+            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", isDefaultAuthority, validateAuthority));
             return (T)this;
         }
 

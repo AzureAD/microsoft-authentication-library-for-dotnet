@@ -50,20 +50,6 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
     [DeploymentItem("Resources\\OpenidConfiguration-MissingFields.json")]
     public class AadAuthorityTests
     {
-        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
-
-        [TestInitialize]
-        public void TestInitialize()
-        {
-            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
-        }
-
-        [TestCleanup]
-        public void TestCleanup()
-        {
-
-        }
-
         [TestMethod]
         [TestCategory("AadAuthorityTests")]
         public void SuccessfulValidationTest()
@@ -98,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoftonline.in/mytenant.com");
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoftonline.in/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
 
@@ -185,7 +171,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                             "4fa2-4f35-a59b-54b6f91a9c94\"}")
                     });
 
-                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoft0nline.com/mytenant.com");
+                Authority instance = Authority.CreateAuthority(harness.ServiceBundle, "https://login.microsoft0nline.com/mytenant.com", true);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Aad);
                 try

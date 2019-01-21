@@ -58,7 +58,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private const int ExpectedExpiresIn = 900;
         private const int ExpectedInterval = 1;
         private const string ExpectedVerificationUrl = "https://microsoft.com/devicelogin";
-        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
 
         private string ExpectedMessage =>
             $"To sign in, use a web browser to open the page {ExpectedVerificationUrl} and enter the code {ExpectedUserCode} to authenticate.";
@@ -77,7 +76,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
         }
 
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()

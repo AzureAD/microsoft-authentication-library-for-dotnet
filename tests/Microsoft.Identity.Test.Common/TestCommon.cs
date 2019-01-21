@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Test.Common
         {
             // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
             new AadInstanceDiscovery(null, null, null, true);
-            new ValidatedAuthoritiesCache(true);
             new AuthorityEndpointResolutionManager(null, true);
         }
 
@@ -64,7 +63,7 @@ namespace Microsoft.Identity.Test.Common
                 EnablePiiLogging = enablePiiLogging,
                 IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled
             };
-            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true));
+            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true, false));
             return ServiceBundle.Create(appConfig);
         }
 

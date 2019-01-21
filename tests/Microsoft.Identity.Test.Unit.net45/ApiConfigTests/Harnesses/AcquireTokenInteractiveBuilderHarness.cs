@@ -71,8 +71,6 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 (expectedExtraScopesToConsent ?? new List<string>()).AsSingleString(),
                 InteractiveParametersReceived.ExtraScopesToConsent.AsSingleString());
             Assert.AreEqual(expectedLoginHint, InteractiveParametersReceived.LoginHint);
-
-            // todo(migration): shouldn't interactive request have a default prompt value?
             Assert.AreEqual(expectedPromptValue, InteractiveParametersReceived.Prompt.PromptValue);
             Assert.IsNotNull(InteractiveParametersReceived.UiParent);
             Assert.AreEqual(expectedEmbeddedWebView, InteractiveParametersReceived.UseEmbeddedWebView);

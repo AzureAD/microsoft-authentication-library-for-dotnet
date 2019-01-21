@@ -1083,7 +1083,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
-
+                httpManager.AddInstanceDiscoveryMockHandler();
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
                 //populate cache

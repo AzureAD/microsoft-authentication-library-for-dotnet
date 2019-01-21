@@ -56,9 +56,9 @@ namespace Microsoft.Identity.Client.Core
             PlatformProxy = PlatformProxyFactory.CreatePlatformProxy(DefaultLogger);
             HttpManager = config.HttpManager ?? new HttpManager(config.HttpClientFactory);
             TelemetryManager = new TelemetryManager(PlatformProxy, config.TelemetryCallback);
-            ValidatedAuthoritiesCache = new ValidatedAuthoritiesCache(shouldClearCaches);
             AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
+            AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
         }
 
         public ICoreLogger DefaultLogger { get; }
@@ -70,13 +70,13 @@ namespace Microsoft.Identity.Client.Core
         public ITelemetryManager TelemetryManager { get; }
 
         /// <inheritdoc />
-        public IValidatedAuthoritiesCache ValidatedAuthoritiesCache { get; }
-
-        /// <inheritdoc />
         public IAadInstanceDiscovery AadInstanceDiscovery { get; }
 
         /// <inheritdoc />
         public IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
+
+        /// <inheritdoc />
+        public IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
 
         /// <inheritdoc />
         public IPlatformProxy PlatformProxy { get; }
