@@ -29,6 +29,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 {
     public interface ILabService
     {
-        LabResponse GetLabResponse(UserQueryParameters query);
+        LabResponse GetLabResponse(UserQuery query);
     }
 }
