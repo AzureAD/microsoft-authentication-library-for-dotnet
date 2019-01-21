@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static void PerformLogin(this IWebDriver driver, LabUser user)
         {
-            UserInformationFieldIds fields = new UserInformationFieldIds(user, TestEnviroment.Desktop);
+            UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
             Trace.WriteLine("Logging in ... Entering username");
             driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);

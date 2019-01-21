@@ -30,23 +30,15 @@ using System;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
-    public enum TestEnviroment
-    {
-        Desktop,
-        Mobile
-    }
-
     public class UserInformationFieldIds
     {
         private readonly LabUser _user;
-        private readonly TestEnviroment _testEnviroment;
         private string _passwordInputId;
         private string _passwordSignInButtonId;
 
-        public UserInformationFieldIds(LabUser user, TestEnviroment testEnviroment)
+        public UserInformationFieldIds(LabUser user)
         {
             _user = user;
-            _testEnviroment = testEnviroment;
         }
 
         public string PasswordInputId
