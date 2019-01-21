@@ -33,7 +33,7 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Core.UIAutomation;
+using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
             Trace.WriteLine("Logging in ... Entering username");
-            driver.FindElement(By.Id(CoreUiTestConstants.WebUpnInputId)).SendKeys(user.Upn);
+            driver.FindElement(By.Id(CoreUiTestConstants.WebUPNInputId)).SendKeys(user.Upn);
 
             Trace.WriteLine("Logging in ... Clicking next after username");
             driver.FindElement(By.Id(fields.SignInButtonId)).Click();

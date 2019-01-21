@@ -26,7 +26,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+#if BUILDENV != APPCENTER
 using AuthenticationServices;
+#endif
 using Foundation;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
@@ -42,8 +44,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         protected static UIViewController viewController;
         protected SFSafariViewController safariViewController;
         protected SFAuthenticationSession sfAuthenticationSession;
+        /* For app center builds, this will need to build on a hosted mac agent. The mac agent does not have the latest SDK's required to build 'ASWebAuthenticationSession'
+        * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
+#if BUILDENV != APPCENTER
         protected ASWebAuthenticationSession asWebAuthenticationSession;
-
+#endif
         protected nint taskId = UIApplication.BackgroundTaskInvalid;
         protected NSObject didEnterBackgroundNotification;
         protected NSObject willEnterForegroundNotification;

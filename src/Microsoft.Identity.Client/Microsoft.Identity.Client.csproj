@@ -1,5 +1,5 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
-
+  
   <Import Project="../MSAL.Frameworks.props" />
 
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->

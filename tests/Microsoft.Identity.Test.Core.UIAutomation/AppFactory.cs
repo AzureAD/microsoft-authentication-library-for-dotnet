@@ -28,7 +28,7 @@
 using System;
 using Xamarin.UITest;
 
-namespace Microsoft.Identity.Test.Core.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     /// <summary>
     /// Initializes the app object that represents the main gateway to interact with the app on the device
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
                 case Platform.Android:
                      return ConfigureApp.Android.InstalledApp(targetApp).StartApp();
                 case Platform.iOS:
-                    return ConfigureApp.iOS.StartApp();
+                     return ConfigureApp.iOS.InstalledApp(targetApp).StartApp();
                 default:
                     throw new PlatformNotSupportedException("Unkown platform: " + platform);
             }
