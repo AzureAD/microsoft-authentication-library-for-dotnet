@@ -34,7 +34,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// to be more resilient.
         /// </summary>
         bool IsExtendedTokenLifetimeEnabled { get; }
-        
-        AuthorityInfo DefaultAuthorityInfo { get; }
+
+        /// <summary>
+        /// </summary>
+        AuthorityInfo AuthorityInfo { get; }
     }
 }

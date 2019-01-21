@@ -124,7 +124,6 @@ namespace Microsoft.Identity.Client
         public const string LoggingCallbackAlreadySet = "LoggingCallback has already been set";
         public const string TelemetryCallbackAlreadySet = "TelemetryCallback has already been set";
         public const string NoClientIdWasSpecified = "No ClientId was specified.";
-        public const string MoreThanOneDefaultAuthorityConfigured = "More than one default authority was configured.";
         public const string AdfsNotCurrentlySupportedAuthorityType = "ADFS is not currently a supported authority type.";
         public const string TenantIdAndAadAuthorityInstanceAreMutuallyExclusive = "TenantId and AadAuthorityAudience are both set, but they're mutually exclusive.";
         public const string InstanceAndAzureCloudInstanceAreMutuallyExclusive = "Instance and AzureCloudInstance are both set but they're mutually exclusive.";

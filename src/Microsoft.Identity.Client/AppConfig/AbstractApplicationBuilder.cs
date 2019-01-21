@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// users sign-in. This is classically a GUID or a domain name. See https://aka.ms/msal-net-application-configuration.
         /// Although it is also possible to set <paramref name="tenantId"/> to <c>common</c>,
         /// <c>organizations</c>, and <c>consumers</c>, it's recommended to use one of the
-        /// overrides of <see cref="AddKnownAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// overrides of <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="tenantId">tenant ID of the Azure AD tenant
         /// or a domain associated with this Azure AD tenant, in order to sign-in a user of a specific organization only</param>
@@ -255,13 +255,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             TryAddDefaultAuthority();
 
-            // validate that we only have ONE default authority
-            if (Config.Authorities.Where(x => x.IsDefault).ToList().Count != 1)
-            {
-                throw new InvalidOperationException(CoreErrorMessages.MoreThanOneDefaultAuthorityConfigured);
-            }
-
-            if (Config.Authorities.Any(x => x.AuthorityType == AuthorityType.Adfs))
+            if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
                 throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
             }
@@ -271,6 +265,11 @@ namespace Microsoft.Identity.Client.AppConfig
 
         private void TryAddDefaultAuthority()
         {
+            if (Config.AuthorityInfo != null)
+            {
+                return;
+            }
+
             AuthorityType? defaultAuthorityType = DetermineDefaultAuthorityType();
             if (defaultAuthorityType.HasValue)
             {
@@ -284,17 +283,15 @@ namespace Microsoft.Identity.Client.AppConfig
                         $"DefaultAuthorityType is {defaultAuthorityType.Value} but defaultAuthorityInstance({defaultAuthorityInstance}) or defaultAuthorityAudience({defaultAuthorityAudience}) is invalid.");
                 }
 
-                Config.AddAuthorityInfo(
-                    new AuthorityInfo(
+                Config.AuthorityInfo = new AuthorityInfo(
                         defaultAuthorityType.Value,
                         new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
-                        true));
+                        true);
             }
-
-            if (!Config.Authorities.Any())
+            else
             {
                 // Add the default.
-                AddKnownAadAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
+                WithAadAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
             }
         }
 
@@ -360,17 +357,15 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Adds a known authority to the application from its Uri. See https://aka.ms/msal-net-application-configuration.
         /// This constructor is mainly used for scenarios where the authority is not a standard Azure AD authority,
         /// nor an ADFS authority, nor an Azure AD B2C authority. For Azure AD, even in national and sovereign clouds, prefer
-        /// using other overrides such as <see cref="AddKnownAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// using other overrides such as <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="authorityUri">Uri of the authority</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
         /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAuthority(Uri authorityUri, bool isDefaultAuthority, bool validateAuthority = false)
+        public T WithAuthority(Uri authorityUri, bool validateAuthority = false)
         {
-            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), isDefaultAuthority, validateAuthority));
+            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
             return (T)this;
         }
 
@@ -380,18 +375,15 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="cloudInstanceUri">Azure Cloud instance</param>
         /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
         /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAadAuthority(
+        public T WithAadAuthority(
             Uri cloudInstanceUri,
             Guid tenantId,
-            bool isDefaultAuthority,
             bool validateAuthority = false)
         {
-            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", isDefaultAuthority, validateAuthority));
+            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", validateAuthority);
             return (T)this;
         }
 
@@ -402,27 +394,24 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="cloudInstanceUri">Uri to the Azure Cloud instance (for instance
         /// <c>https://login.microsoftonline.com)</c></param>
         /// <param name="tenant">domain name associated with the tenant from which to sign-in users</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
         /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
         /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
-        /// it's recommended to use another override (<see cref="AddKnownAadAuthority(AzureCloudInstance, Guid, bool)"/>
-        /// and <see cref="AddKnownAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/></remarks>
+        /// it's recommended to use another override (<see cref="WithAadAuthority(AzureCloudInstance, Guid, bool)"/>
+        /// and <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/></remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAadAuthority(
+        public T WithAadAuthority(
             Uri cloudInstanceUri,
             string tenant,
-            bool isDefaultAuthority = false,
             bool validateAuthority = false)
         {
             if (Guid.TryParse(tenant, out Guid tenantId))
             {
-                return AddKnownAadAuthority(cloudInstanceUri, tenantId, isDefaultAuthority);
+                return WithAadAuthority(cloudInstanceUri, tenantId);
             }
 
-            Config.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", isDefaultAuthority, validateAuthority));
+            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", validateAuthority);
             return (T)this;
         }
 
@@ -434,17 +423,16 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
-        public T AddKnownAadAuthority(
+        public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
-            bool isDefaultAuthority = false)
+            bool validateAuthority = false)
         {
             string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -456,23 +444,22 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
         /// <param name="tenant">Domain name associated with the Azure AD tenant from which
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// to sign-in users. This can also be a guid</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
-        public T AddKnownAadAuthority(
+        public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
-            bool isDefaultAuthority = false)
+            bool validateAuthority = false)
         {
             if (Guid.TryParse(tenant, out Guid tenantIdGuid))
             {
-                return AddKnownAadAuthority(azureCloudInstance, tenantIdGuid, isDefaultAuthority);
+                return WithAadAuthority(azureCloudInstance, tenantIdGuid, validateAuthority);
             }
 
             string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -485,14 +472,13 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool isDefaultAuthority = false)
+        public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = false)
         {
             string authorityUri = GetAuthorityUri(azureCloudInstance, authorityAudience);
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -503,15 +489,14 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
 
-        public T AddKnownAadAuthority(AadAuthorityAudience authorityAudience, bool isDefaultAuthority = false)
+        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = false)
         {
             string authorityUri = GetAuthorityUri(AzureCloudInstance.AzurePublic, authorityAudience);
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -529,13 +514,12 @@ namespace Microsoft.Identity.Client.AppConfig
         ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
         ///  </list>
         ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAadAuthority(string authorityUri, bool isDefaultAuthority = false)
+        public T WithAadAuthority(string authorityUri, bool validateAuthority = false)
         {
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Aad, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -593,14 +577,13 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server</param>
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.
         /// MSAL.NET will only support ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownAdfsAuthority(string authorityUri, bool isDefaultAuthority)
+        public T WithAdfsAuthority(string authorityUri, bool validateAuthority)
         {
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.Adfs, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -610,13 +593,12 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
-        /// <param name="isDefaultAuthority">Boolean telling if this is the default authority
-        /// for the application</param>
+        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T AddKnownB2CAuthority(string authorityUri, bool isDefaultAuthority)
+        public T WithB2CAuthority(string authorityUri, bool validateAuthority)
         {
-            Config.AddAuthorityInfo(new AuthorityInfo(AuthorityType.B2C, authorityUri, isDefaultAuthority));
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.B2C, authorityUri, validateAuthority);
             return (T)this;
         }
 
