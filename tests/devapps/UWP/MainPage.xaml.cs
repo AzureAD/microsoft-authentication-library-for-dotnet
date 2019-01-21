@@ -125,7 +125,10 @@ namespace UWP
             AuthenticationResult result = null;
             try
             {
-                result = await _pca.AcquireTokenAsync(Scopes).ConfigureAwait(false);
+                var users = await _pca.GetAccountsAsync().ConfigureAwait(false);
+                var user = users.FirstOrDefault();
+
+                result = await _pca.AcquireTokenAsync(Scopes, user, UIBehavior.ForceLogin, "").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
