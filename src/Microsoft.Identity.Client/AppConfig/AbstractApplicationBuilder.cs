@@ -593,12 +593,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithB2CAuthority(string authorityUri, bool validateAuthority)
+        public T WithB2CAuthority(string authorityUri)
         {
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.B2C, authorityUri, validateAuthority);
+            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
             return (T)this;
         }
 
