@@ -72,6 +72,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriEntryId = "redirectUriEntry";
 
+        // ADFSv2 fields
+        public const string AdfsV2WebUsernameInputId = "ContentPlaceHolder1_UsernameTextBox";
+        public const string AdfsV2WebPasswordInputId = "ContentPlaceHolder1_PasswordTextBox";
+        public const string AdfsV2WebSubmitButtonId = "ContentPlaceHolder1_SubmitButton";
+
         //MSAL B2C
         public const string AuthorityPickerId = "b2cAuthorityPicker";
         public const string WebUpnB2CLocalInputId = "logonIdentifier";

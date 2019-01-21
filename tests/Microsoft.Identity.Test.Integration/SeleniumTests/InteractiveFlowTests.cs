@@ -43,18 +43,103 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             // Arrange
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
-            LabUser user = labResponse.User;
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
 
+        [TestMethod]
+        public async Task Interactive_AdfsV3_NotFederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV4,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = false
+            };
+
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Interactive_AdfsV3_FederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV4,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Interactive_AdfsV2_FederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV2,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Interactive_AdfsV4_NotFederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV4,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = false
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Interactive_AdfsV4_FederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV4,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        private async Task RunTestForUserAsync(LabResponse labResponse)
+        {
             Action<IWebDriver> seleniumLogic = (driver) =>
-             {
-                 Trace.WriteLine("Starting Selenium automation");
-                 driver.PerformLogin(user);
-             };
+            {
+                Trace.WriteLine("Starting Selenium automation");
+                driver.PerformLogin(labResponse.User);
+            };
 
             SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
             PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(webUIFactory);
 
-            // TODO: use the lab app once localhost is setup as a redirect uri
             PublicClientApplication pca = new PublicClientApplication(labResponse.AppId);
 
             // tests need to use http://localhost:port so that we can capture the AT

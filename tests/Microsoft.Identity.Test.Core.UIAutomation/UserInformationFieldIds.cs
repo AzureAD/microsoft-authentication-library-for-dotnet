@@ -30,15 +30,23 @@ using System;
 
 namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
+    public enum TestEnviroment
+    {
+        Desktop,
+        Mobile
+    }
+
     public class UserInformationFieldIds
     {
         private readonly LabUser _user;
+        private readonly TestEnviroment _testEnviroment;
         private string _passwordInputId;
-        private string _signInButtonId;
+        private string _passwordSignInButtonId;
 
-        public UserInformationFieldIds(LabUser user)
+        public UserInformationFieldIds(LabUser user, TestEnviroment testEnviroment)
         {
             _user = user;
+            _testEnviroment = testEnviroment;
         }
 
         public string PasswordInputId
@@ -53,25 +61,56 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             }
         }
 
-        public string SignInButtonId
+        public string PasswordSignInButtonId
         {
             get
             {
-                if (String.IsNullOrWhiteSpace(_signInButtonId))
+                if (String.IsNullOrWhiteSpace(_passwordSignInButtonId))
                 {
                     DetermineFieldIds();
                 }
-                return _signInButtonId;
+                return _passwordSignInButtonId;
             }
         }
 
-        private void DetermineFieldIds()
+        /// <summary>
+        /// When starting auth, the firt screen, which collects the username, is from AAD. 
+        /// Subsequent screens can be from ADFS.
+        /// </summary>
+        public string AADSignInButtonId
         {
+            get
+            {
+                return CoreUiTestConstants.WebSubmitId;
+            }
+        }
+
+        /// <summary>
+        /// When starting auth, the firt screen, which collects the username, is from AAD. 
+        /// Subsequent screens can be from ADFS.
+        /// </summary>
+        public string AADUsernameInputId
+        {
+            get
+            {
+                return CoreUiTestConstants.WebUPNInputId;
+            }
+        }        
+
+        private void DetermineFieldIds()
+        {          
             if (_user.IsFederated)
             {
+                if (_user.FederationProvider == FederationProvider.AdfsV2)
+                {
+                    _passwordInputId = CoreUiTestConstants.AdfsV2WebPasswordInputId;
+                    _passwordSignInButtonId = CoreUiTestConstants.AdfsV2WebSubmitButtonId;
+                    return;
+                }
+
                 // We use the same IDs for ADFSv3 and ADFSv4
                 _passwordInputId = CoreUiTestConstants.AdfsV4WebPasswordId;
-                _signInButtonId = CoreUiTestConstants.AdfsV4WebSubmitId;
+                _passwordSignInButtonId = CoreUiTestConstants.AdfsV4WebSubmitId;
                 return;
             }
 
@@ -82,7 +121,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             }
 
             _passwordInputId = CoreUiTestConstants.WebPasswordId;
-            _signInButtonId = CoreUiTestConstants.WebSubmitId;
+            _passwordSignInButtonId = CoreUiTestConstants.WebSubmitId;
         }
 
         private void DetermineB2CFieldIds()
@@ -91,15 +130,15 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             {
                 case B2CIdentityProvider.Local:
                     _passwordInputId = CoreUiTestConstants.B2CWebPasswordId;
-                    _signInButtonId = CoreUiTestConstants.B2CWebSubmitId;
+                    _passwordSignInButtonId = CoreUiTestConstants.B2CWebSubmitId;
                     break;
                 case B2CIdentityProvider.Facebook:
                     _passwordInputId = CoreUiTestConstants.B2CWebPasswordFacebookId;
-                    _passwordInputId = CoreUiTestConstants.B2CFacebookSubmitId;
+                    _passwordSignInButtonId = CoreUiTestConstants.B2CFacebookSubmitId;
                     break;
                 case B2CIdentityProvider.Google:
                     _passwordInputId = CoreUiTestConstants.B2CWebPasswordGoogleId;
-                    _signInButtonId = CoreUiTestConstants.B2CGoogleSignInId;
+                    _passwordSignInButtonId = CoreUiTestConstants.B2CGoogleSignInId;
                     break;
             }
         }
