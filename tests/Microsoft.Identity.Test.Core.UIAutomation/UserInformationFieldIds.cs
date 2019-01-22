@@ -28,7 +28,7 @@
 using Microsoft.Identity.Test.LabInfrastructure;
 using System;
 
-namespace Microsoft.Identity.Test.Core.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public class UserInformationFieldIds
     {
