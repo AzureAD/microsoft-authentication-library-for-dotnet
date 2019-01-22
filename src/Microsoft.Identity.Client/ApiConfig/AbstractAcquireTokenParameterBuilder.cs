@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// to applications managing several accounts (like a mail client with several mailboxes)
         /// </summary>
         /// <param name="authorityUri">Uri for the authority</param>
-        /// <param name="validateAuthority"></param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(Uri authorityUri, bool validateAuthority = false)
         {
@@ -114,12 +114,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users from a single
+        /// organization (single tenant application) specified by its tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="cloudInstanceUri"></param>
-        /// <param name="tenantId"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="cloudInstanceUri">Azure Cloud instance</param>
+        /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
             Uri cloudInstanceUri,
             Guid tenantId,
@@ -130,12 +131,20 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users from a single
+        /// organization (single tenant application) described by its domain name. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="cloudInstanceUri"></param>
-        /// <param name="tenant"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="cloudInstanceUri">Uri to the Azure Cloud instance (for instance
+        /// <c>https://login.microsoftonline.com)</c></param>
+        /// <param name="tenant">domain name associated with the tenant from which to sign-in users</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <remarks>
+        /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
+        /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
+        /// it's recommended to use another override (<see cref="WithAadAuthority(AzureCloudInstance, Guid, bool)"/>
+        /// and <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// </remarks>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
             Uri cloudInstanceUri,
             string tenant,
@@ -146,12 +155,15 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users from a single
+        /// organization (single tenant application) described by its cloud instance and its tenant ID.
+        /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance"></param>
-        /// <param name="tenantId"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
+        /// worldwide cloud, Azure German Cloud, US government ...)</param>
+        /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -162,12 +174,16 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users from a single
+        /// organization (single tenant application) described by its cloud instance and its domain
+        /// name or tenant ID. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance"></param>
-        /// <param name="tenant"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
+        /// worldwide cloud, Azure German Cloud, US government ...)</param>
+        /// <param name="tenant">Domain name associated with the Azure AD tenant from which
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// to sign-in users. This can also be a guid</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
@@ -178,12 +194,16 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
+        /// the cloud instance and the sign-in audience. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="azureCloudInstance"></param>
-        /// <param name="authorityAudience"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
+        /// worldwide cloud, Azure German Cloud, US government ...)</param>
+        /// <param name="authorityAudience">Sign-in audience (one AAD organization,
+        /// any work and school accounts, or any work and school accounts and Microsoft personal
+        /// accounts</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
@@ -191,11 +211,14 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
+        /// the sign-in audience (the cloud being the Azure public cloud). See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="authorityAudience"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="authorityAudience">Sign-in audience (one AAD organization,
+        /// any work and school accounts, or any work and school accounts and Microsoft personal
+        /// accounts</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
@@ -203,11 +226,21 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Azure AD authority to the application to sign-in users specifying
+        /// the full authority Uri. See https://aka.ms/msal-net-application-configuration.
         /// </summary>
-        /// <param name="authorityUri"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="authorityUri">URL of the security token service (STS) from which MSAL.NET will acquire the tokens.
+        ///  Usual authorities endpoints for the Azure public Cloud are:
+        ///  <list type="bullet">
+        ///  <item><description><c>https://login.microsoftonline.com/tenant/</c> where <c>tenant</c> is the tenant ID of the Azure AD tenant
+        ///  or a domain associated with this Azure AD tenant, in order to sign-in users of a specific organization only</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/common/</c> to sign-in users with any work and school accounts or Microsoft personal account</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/organizations/</c> to sign-in users with any work and school accounts</description></item>
+        ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
+        ///  </list>
+        ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
@@ -215,11 +248,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs
         /// </summary>
-        /// <param name="authorityUri"></param>
-        /// <param name="validateAuthority"></param>
-        /// <returns></returns>
+        /// <param name="authorityUri">Authority URL for an ADFS server</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <remarks>MSAL.NET will only support ADFS 2019 or later.</remarks>
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
@@ -227,10 +261,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        /// 
+        /// Adds a known authority corresponding to an Azure AD B2C policy.
+        /// See https://aka.ms/msal-net-b2c-specificities
         /// </summary>
-        /// <param name="authorityUri"></param>
-        /// <returns></returns>
+        /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
+        /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
+        /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);

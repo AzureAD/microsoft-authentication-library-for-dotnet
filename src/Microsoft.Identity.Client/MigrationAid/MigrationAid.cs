@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
         /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Can be possibly set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-application-configuration", true)]
         bool ValidateAuthority { get; }
 
 #if !DESKTOP && !NET_CORE
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
         /// and before an operation acquiring a token or interacting with the STS.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Can be possibly set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-application-configuration", true)]
         public bool ValidateAuthority { get; set; }
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved

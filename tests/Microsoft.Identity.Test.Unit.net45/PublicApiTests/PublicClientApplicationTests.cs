@@ -121,14 +121,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
 
             app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.AuthorityGuestTenant);
             Assert.IsNotNull(app);
             Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
 
             app = new PublicClientApplication(MsalTestConstants.ClientId,
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/",
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
+            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
         }
 
