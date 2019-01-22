@@ -83,19 +83,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
         }
 
-        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
-        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
-        {
-            if (keychainSecurityGroup == null)
-            {
-                keychainGroup = GetBundleId();
-            }
-            else
-            {
-                keychainGroup = keychainSecurityGroup;
-            }
-        }
-
         private string GetTeamId()
         {
             var queryRecord = new SecRecord(SecKind.GenericPassword)

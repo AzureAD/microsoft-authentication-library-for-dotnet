@@ -37,7 +37,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestCategory("UserTests")]
         public void Constructor_IdIsNotRequired()
         {
-            // 1. Id not is required
+            // 1. Id is not required
             new Account(null, "d", "n");
 
             // 2. Other properties are optional too
