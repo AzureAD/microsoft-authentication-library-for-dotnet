@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authorizationCode">The authorization code received from the service authorization endpoint.</param>
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can set optional parameters by chaining the builder with:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>,
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>,
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>,
         /// </remarks>
         public AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenForAuthorizationCode(

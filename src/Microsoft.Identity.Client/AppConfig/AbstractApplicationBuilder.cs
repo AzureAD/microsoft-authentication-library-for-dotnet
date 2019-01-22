@@ -320,7 +320,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (Config.AadAuthorityAudience != AadAuthorityAudience.None)
             {
-                return GetAadAuthorityAudienceValue(Config.AadAuthorityAudience, Config.TenantId);
+                return AuthorityInfo.GetAadAuthorityAudienceValue(Config.AadAuthorityAudience, Config.TenantId);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.TenantId))
@@ -347,7 +347,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (Config.AzureCloudInstance != AzureCloudInstance.None)
             {
-                return GetCloudUrl(Config.AzureCloudInstance);
+                return AuthorityInfo.GetCloudUrl(Config.AzureCloudInstance);
             }
 
             return string.Empty;
@@ -431,8 +431,7 @@ namespace Microsoft.Identity.Client.AppConfig
             Guid tenantId,
             bool validateAuthority = true)
         {
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenantId, validateAuthority);
             return (T)this;
         }
 
@@ -453,13 +452,7 @@ namespace Microsoft.Identity.Client.AppConfig
             string tenant,
             bool validateAuthority = true)
         {
-            if (Guid.TryParse(tenant, out Guid tenantIdGuid))
-            {
-                return WithAadAuthority(azureCloudInstance, tenantIdGuid, validateAuthority);
-            }
-
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenant, validateAuthority);
             return (T)this;
         }
 
@@ -477,8 +470,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
-            string authorityUri = GetAuthorityUri(azureCloudInstance, authorityAudience);
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
             return (T)this;
         }
 
@@ -495,8 +487,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
-            string authorityUri = GetAuthorityUri(AzureCloudInstance.AzurePublic, authorityAudience);
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
             return (T)this;
         }
 
@@ -519,58 +510,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
         {
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
             return (T)this;
-        }
-
-        internal static string GetCloudUrl(AzureCloudInstance azureCloudInstance)
-        {
-            switch (azureCloudInstance)
-            {
-            case AzureCloudInstance.AzurePublic:
-                return "https://login.microsoftonline.com";
-            case AzureCloudInstance.AzureChina:
-                return "https://login.chinacloudapi.cn";
-            case AzureCloudInstance.AzureGermany:
-                return "https://login.microsoftonline.de";
-            case AzureCloudInstance.AzureUsGovernment:
-                return "https://login.microsoftonline.us";
-            default:
-                throw new ArgumentException(nameof(azureCloudInstance));
-            }
-        }
-
-        internal static string GetAuthorityUri(
-            AzureCloudInstance azureCloudInstance,
-            AadAuthorityAudience authorityAudience,
-            string tenantId = null)
-        {
-            string cloudUrl = GetCloudUrl(azureCloudInstance);
-            string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
-
-            return $"{cloudUrl}/{tenantValue}";
-        }
-
-        private static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)
-        {
-            switch (authorityAudience)
-            {
-            case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
-                return "common";
-            case AadAuthorityAudience.AzureAdMultipleOrgs:
-                return "organizations";
-            case AadAuthorityAudience.PersonalMicrosoftAccount:
-                return "consumers";
-            case AadAuthorityAudience.AzureAdMyOrg:
-                if (string.IsNullOrWhiteSpace(tenantId))
-                {
-                    throw new ArgumentNullException(nameof(tenantId));
-                }
-
-                return tenantId;
-            default:
-                throw new ArgumentException(nameof(authorityAudience));
-            }
         }
 
         /// <summary>
@@ -583,7 +524,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAdfsAuthority(authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -597,7 +538,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {
-            Config.AuthorityInfo = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+            Config.AuthorityInfo = AuthorityInfo.FromB2CAuthority(authorityUri);
             return (T)this;
         }
 
