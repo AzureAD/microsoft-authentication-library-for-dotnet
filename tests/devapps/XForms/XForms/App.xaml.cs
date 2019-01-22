@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Xamarin.Forms;
 
 namespace XForms
@@ -80,23 +81,21 @@ namespace XForms
 
         public static void InitPublicClient()
         {
-            MsalPublicClient = new PublicClientApplication(ClientId, Authority);
+            var builder = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(new Uri(Authority), ValidateAuthority);
 
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)
             {
                 case "iOS":
-                    MsalPublicClient.RedirectUri = RedirectUriOnIos;
+                    builder.WithRedirectUri(RedirectUriOnIos);
                     break;
                 case "Android":
-                    MsalPublicClient.RedirectUri = RedirectUriOnAndroid;
+                    builder.WithRedirectUri(RedirectUriOnAndroid);
                     break;
             }
 
-            MsalPublicClient.ValidateAuthority = ValidateAuthority;
-
-            if (MsalApplicationUpdated != null)
-                MsalApplicationUpdated(null, null);
+            MsalPublicClient = builder.BuildConcrete();
+            MsalApplicationUpdated?.Invoke(null, null);
         }
 
         protected override void OnStart()
