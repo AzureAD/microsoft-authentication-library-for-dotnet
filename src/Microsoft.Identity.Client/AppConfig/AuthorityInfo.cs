@@ -35,11 +35,9 @@ namespace Microsoft.Identity.Client.AppConfig
         public AuthorityInfo(
             AuthorityType authorityType,
             string authority,
-            bool isDefault,
             bool validateAuthority = false)
         {
             AuthorityType = authorityType;
-            IsDefault = isDefault;
             ValidateAuthority = validateAuthority;
 
             Host = new UriBuilder(authority).Host;
@@ -85,17 +83,16 @@ namespace Microsoft.Identity.Client.AppConfig
         public string Host { get; }
         public string CanonicalAuthority { get; set; }
         public AuthorityType AuthorityType { get; }
-        public bool IsDefault { get; }
         public string UserRealmUriPrefix { get; }
         public bool ValidateAuthority { get; }
 
-        internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool isDefaultAuthority, bool validateAuthority)
+        internal static AuthorityInfo FromAuthorityUri(string authorityUri, bool validateAuthority)
         {
             string canonicalUri = CanonicalizeAuthorityUri(authorityUri);
             ValidateAuthorityUri(canonicalUri);
 
             var authorityType = Instance.Authority.GetAuthorityType(canonicalUri);
-            return new AuthorityInfo(authorityType, canonicalUri, isDefaultAuthority, validateAuthority);
+            return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
 
         // TODO: consolidate this with the same method in Authority.cs

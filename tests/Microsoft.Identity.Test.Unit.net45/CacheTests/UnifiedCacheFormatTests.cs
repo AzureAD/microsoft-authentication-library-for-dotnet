@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 PublicClientApplication app = PublicClientApplicationBuilder
                                               .Create(ClientId)
-                                              .AddKnownAuthority(new Uri(RequestAuthority), true)
+                                              .WithAuthority(new Uri(RequestAuthority), true)
                                               .WithHttpManager(harness.HttpManager)
                                               .BuildConcrete();
 

@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .WithUserTokenLegacyCachePersistenceForTest(
                                                             new TestLegacyCachePersistance())
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 // login to app
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
                                                          .WithHttpManager(httpManager)
-                                                         .AddKnownAuthority(
+                                                         .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
                                                              true).BuildConcrete();
 
@@ -208,7 +208,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             using (var harness = new MockHttpAndServiceBundle())
             {
                 var app = PublicClientApplicationBuilder
-                          .Create(MsalTestConstants.ClientId).AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                          .Create(MsalTestConstants.ClientId).WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance()).BuildConcrete();
 
                 CreateAdalCache(harness.ServiceBundle.DefaultLogger, app.UserTokenCacheInternal.LegacyPersistence, MsalTestConstants.Scope.ToString());
