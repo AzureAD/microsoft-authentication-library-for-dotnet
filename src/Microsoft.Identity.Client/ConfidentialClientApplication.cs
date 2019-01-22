@@ -260,7 +260,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenForClientWithScope
             return await AcquireTokenForClient(scopes)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }

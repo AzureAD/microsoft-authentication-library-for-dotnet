@@ -135,5 +135,7 @@ namespace Microsoft.Identity.Client
 
         public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
+
+        public const string ClientSecretAndCertificateAreMutuallyExclusive = "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.";
     }
 }

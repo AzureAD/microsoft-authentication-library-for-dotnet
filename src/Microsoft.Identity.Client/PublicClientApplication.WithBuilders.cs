@@ -101,9 +101,6 @@ namespace Microsoft.Identity.Client
         /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
-        /// 
-        /// TODO(migration): check if we could also pass login_hint or account (I would not think they are taken into account)
-        /// 
         /// </remarks>
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
             IEnumerable<string> scopes,
@@ -243,7 +240,6 @@ namespace Microsoft.Identity.Client
         {
             var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
 
-            // TODO(migration): can we just make this a consistent property that happens to not be used on some platforms so we don't have to #ifdef this?
 #if ANDROID || iOS
             coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView;
 #endif

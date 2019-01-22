@@ -51,7 +51,6 @@ namespace Microsoft.Identity.Client
         void SetIosKeychainSecurityGroup(string securityGroup);
 
         // These methods are only for test...  
-        // TODO(migration): separate out into a separate interface?
         ICollection<MsalAccessTokenCacheItem> GetAllAccessTokensForClient(RequestContext requestContext);
         ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokensForClient(RequestContext requestContext);
         ICollection<MsalIdTokenCacheItem> GetAllIdTokensForClient(RequestContext requestContext);

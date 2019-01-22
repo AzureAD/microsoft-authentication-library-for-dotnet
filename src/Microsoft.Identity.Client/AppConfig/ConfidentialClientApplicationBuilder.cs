@@ -125,9 +125,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (countOfCredentialTypesSpecified > 1)
             {
-                // TODO(migration): move text into string literals file.
-                throw new InvalidOperationException(
-                    "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.");
+                throw new InvalidOperationException(CoreErrorMessages.ClientSecretAndCertificateAreMutuallyExclusive);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.ClientSecret))

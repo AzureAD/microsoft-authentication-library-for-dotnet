@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
     ///     want to receive telemetry
     ///     events only in case of failure or all the time, by setting the <see cref="TelemetryOnFailureOnly" /> boolean.
     /// </summary>
-    [Obsolete("TODO(migration): need documentation/migration info here")]
+    [Obsolete("Telemetry is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration", true)]
     public class Telemetry : ITelemetryReceiver
     {
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Client
         ///     Get the instance of the Telemetry helper for MSAL.NET
         /// </summary>
         /// <returns>a unique instance of <see cref="Telemetry" /></returns>
-        [Obsolete("TODO(migration): need documentation info here.")]
+        [Obsolete("Telemetry is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration", true)]
         public static Telemetry GetInstance()
         {
             throw new NotImplementedException();

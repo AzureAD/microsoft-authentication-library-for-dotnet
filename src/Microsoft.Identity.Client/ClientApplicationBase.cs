@@ -67,18 +67,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public IAppConfig AppConfig => ServiceBundle.Config;
 
-        /// <summary>
-        /// Identifier of the component (libraries/SDK) consuming MSAL.NET.
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
-        /// </summary>
-        [Obsolete("Use the AppBuilders with WithComponent to set this")] // todo(migration): documentation
-        public string Component { get; set; }
-
         /// <Summary>
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
-        /// TODO(migration):  VALIDATE THIS DOCUMENTATION.  What is DefaultAuthority now?
         /// </Summary>
         public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority;
 
@@ -86,41 +78,7 @@ namespace Microsoft.Identity.Client
         /// Gets the Client ID (also known as <i>Application ID</i>) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
         /// and as passed in the constructor of the application
         /// </summary>
-        public string ClientId => ServiceBundle.Config.ClientId;
-
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-        /// <summary>
-        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
-        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
-        /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
-        /// <list type="bullet">
-        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
-        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
-        /// platforms to call back the application)
-        /// </description></item>
-        /// </list>
-        /// These default URIs could change in the future.
-        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
-        /// </summary>
-        /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
-        /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
-        public string RedirectUri
-        {
-            get => ServiceBundle.Config.RedirectUri;
-
-            // TODO(migration): [Obsolete("TODO(migration): comments")]
-            set { }
-        }
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
-
-        /// <summary>
-        /// Sets or Gets a custom query parameters that may be sent to the STS for dogfood testing or debugging. This is a string of segments
-        /// of the form <c>key=value</c> separated by an ampersand character.
-        /// Unless requested otherwise by Microsoft support, this parameter should not be set by application developers as it may have adverse effect on the application.
-        /// This property is also concatenated to the <c>extraQueryParameter</c> parameters of token acquisition operations.
-        /// </summary>
-        [Obsolete("Use ExtraQueryParameters on each call instead.")]  // todo(migration): documentation
-        public string SliceParameters { get; set; }
+        public string ClientId => AppConfig.ClientId;
 
         /// <Summary>
         /// Token Cache instance for storing User tokens.
@@ -129,15 +87,6 @@ namespace Microsoft.Identity.Client
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
         internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
-
-        /// <summary>
-        /// Gets/sets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
-        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific
-        /// (a list of known B2C authorities cannot be maintained by MSAL.NET). This property can be set just after the construction of the application
-        /// and before an operation acquiring a token or interacting with the STS.
-        /// </summary>
-        [Obsolete("This is no longer used...  TODO(migration): comments")]
-        public bool ValidateAuthority { get; set; }
 
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.

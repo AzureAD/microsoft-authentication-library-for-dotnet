@@ -167,11 +167,6 @@ namespace Microsoft.Identity.Client.ApiConfig
             }
             // It's ok on Windows Desktop to not have an owner window, the system will just center on the display
             // instead of a parent.
-#else
-            if (_ownerWindow != null)
-            {
-                // TODO(migration): Someone set an owner window and we're going to ignore it.  Should we throw?
-            }
 #endif
 
             Parameters.LoginHint = string.IsNullOrWhiteSpace(Parameters.LoginHint)
