@@ -69,9 +69,9 @@ namespace Microsoft.Identity.Client
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            var customAuthority = string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
+            var customAuthority = commonParameters.AuthorityOverride == null
                                       ? GetAuthority(silentParameters.Account)
-                                      : Instance.Authority.CreateAuthority(ServiceBundle, commonParameters.AuthorityOverride);
+                                      : Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, commonParameters.AuthorityOverride);
 
             var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal, customAuthority);
 
@@ -123,7 +123,7 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/> or one of its
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(System.Uri, bool)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as

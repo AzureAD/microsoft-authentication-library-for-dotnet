@@ -243,11 +243,14 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account,
             string authority, bool forceRefresh)
         {
-            return await AcquireTokenSilent(scopes, account)
-                .WithAuthorityOverride(authority)
-                .WithForceRefresh(forceRefresh)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+            var builder = AcquireTokenSilent(scopes, account)
+                .WithForceRefresh(forceRefresh);
+            if (!string.IsNullOrWhiteSpace(authority))
+            {
+                builder.WithAuthority(new Uri(authority));
+            }
+
+            return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>

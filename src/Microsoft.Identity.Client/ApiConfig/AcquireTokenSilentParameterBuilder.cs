@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <inheritdoc />
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
-            return string.IsNullOrWhiteSpace(CommonParameters.AuthorityOverride)
+            return CommonParameters.AuthorityOverride == null
                 ? ApiEvent.ApiIds.AcquireTokenSilentWithoutAuthority
                 : ApiEvent.ApiIds.AcquireTokenSilentWithAuthority;
         }
