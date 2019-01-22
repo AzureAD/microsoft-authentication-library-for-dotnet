@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
-                .AddKnownAuthority(new Uri(DefaultAuthority), true)
+                .WithAuthority(new Uri(DefaultAuthority), true)
                 .WithRedirectUri(redirectUri)
                 .WithClientCredential(clientCredential)
                 .BuildConfiguration())
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
-                .AddKnownAuthority(new Uri(authority), true)
+                .WithAuthority(new Uri(authority), true)
                 .WithRedirectUri(redirectUri)
                 .WithClientCredential(clientCredential)
                 .BuildConfiguration())

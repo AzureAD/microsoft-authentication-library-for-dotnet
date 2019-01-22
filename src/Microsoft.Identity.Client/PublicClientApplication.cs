@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         : base(PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithRedirectUri(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId))
-                .AddKnownAuthority(new Uri(authority), true)
+                .WithAuthority(new Uri(authority), true)
                 .BuildConfiguration())
         {
         }
@@ -722,7 +722,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
             : this(PublicClientApplicationBuilder
                    .Create(clientId)
-                   .AddKnownAuthority(new Uri(authority), true)
+                   .WithAuthority(new Uri(authority), true)
                    .BuildConfiguration())
         {
             GuardOnMobilePlatforms();

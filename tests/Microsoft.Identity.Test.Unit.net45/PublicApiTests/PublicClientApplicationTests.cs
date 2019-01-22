@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
@@ -201,7 +201,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
@@ -238,7 +238,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
@@ -280,7 +280,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
@@ -330,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
                                                                             .BuildConcrete();
 
@@ -389,7 +389,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
@@ -466,7 +466,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -521,7 +521,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -620,7 +620,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             var receiver = new MyReceiver();
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                         .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                         .BuildConcrete();
 
@@ -659,7 +659,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -691,7 +691,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -724,7 +724,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
@@ -767,7 +767,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
@@ -811,7 +811,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -855,7 +855,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCacheWithOneAccessToken(app.UserTokenCacheInternal.Accessor);
@@ -981,7 +981,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1080,7 +1080,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -1125,7 +1125,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1146,7 +1146,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1227,7 +1227,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .WithLoggingLevel(LogLevel.Verbose)
@@ -1276,7 +1276,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                                            .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
@@ -1361,7 +1361,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(CoreTestConstants.B2CLoginAuthority), true)
+                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1387,7 +1387,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(CoreTestConstants.B2CAuthority), true)
+                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1411,7 +1411,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(CoreTestConstants.B2CLoginAuthority), true)
+                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1444,7 +1444,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .AddKnownAuthority(new Uri(CoreTestConstants.B2CRandomHost), true)
+                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CRandomHost), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(

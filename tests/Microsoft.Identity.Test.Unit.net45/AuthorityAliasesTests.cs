@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
-                          .AddKnownAuthority(authorityUri, true)
+                          .WithAuthority(authorityUri, true)
                           .WithHttpManager(httpManager)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
                           .BuildConcrete();

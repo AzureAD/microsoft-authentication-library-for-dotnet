@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(httpManager);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -259,7 +259,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockResponseForFederatedAccounts(httpManager);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -366,7 +366,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -400,7 +400,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     "https://msft.sts.microsoft.com/adfs/services/trust/mex");
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -437,7 +437,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport");
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -482,7 +482,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -534,7 +534,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                        .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -576,7 +576,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -602,7 +602,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockResponseforManagedAccounts(httpManager);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -650,7 +650,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .AddKnownAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 

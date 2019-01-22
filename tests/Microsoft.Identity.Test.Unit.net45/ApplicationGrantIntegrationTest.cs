@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
         public async Task ApplicationGrantIntegrationTestAsync()
         {
             var confidentialClient = ConfidentialClientApplicationBuilder
-                                     .Create(ClientId).AddKnownAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
+                                     .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
                                      .WithClientSecret(_password).BuildConcrete();
 
             var res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Unit.Integration
 
             // passing empty password to make sure that AT returned from cache
             confidentialClient = ConfidentialClientApplicationBuilder
-                                 .Create(ClientId).AddKnownAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
+                                 .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
                                  .WithClientSecret("wrong_password").BuildConcrete();
             confidentialClient.AppTokenCacheInternal.Deserialize(appCache.Serialize());
             confidentialClient.UserTokenCacheInternal.Deserialize(userCache.Serialize());

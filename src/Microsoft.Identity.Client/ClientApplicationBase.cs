@@ -78,8 +78,9 @@ namespace Microsoft.Identity.Client
         /// Gets the URL of the authority, or security token service (STS) from which MSAL.NET will acquire security tokens
         /// The return value of this property is either the value provided by the developer in the constructor of the application, or otherwise
         /// the value of the <see cref="DefaultAuthority"/> static member (that is <c>https://login.microsoftonline.com/common/</c>)
+        /// TODO(migration):  VALIDATE THIS DOCUMENTATION.  What is DefaultAuthority now?
         /// </Summary>
-        public string Authority => ServiceBundle.Config.DefaultAuthorityInfo.CanonicalAuthority;
+        public string Authority => ServiceBundle.Config.AuthorityInfo.CanonicalAuthority;
 
         /// <summary>
         /// Gets the Client ID (also known as <i>Application ID</i>) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)

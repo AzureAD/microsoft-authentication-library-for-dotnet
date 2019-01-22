@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                                       serviceBundle,
                                                                       AuthorityInfo.FromAuthorityUri(
                                                                           commonParameters.AuthorityOverride,
-                                                                          false,
                                                                           false)));
 
             Authority = authorityInstance;
