@@ -271,5 +271,37 @@ namespace Microsoft.Identity.Client
         }
 #pragma warning restore 1998
 #endif
+
+#if iOS
+        /// <summary> 
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group. 
+        /// If you use this property, you MUST add the capability to your Application Entitlement. 
+        /// When using this property, the value must contain the TeamId prefix, which is why this is now obsolete. 
+        /// </summary> 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
+        public string KeychainSecurityGroup { get { throw new NotImplementedException(); } }
+#endif
+    }
+
+    /// <Summary> 
+    /// Interface defining common API methods and properties. 
+    /// For details see https://aka.ms/msal-net-client-applications 
+    /// </Summary> 
+    public partial interface IPublicApplicationBase
+    {
+#if iOS
+        /// <summary> 
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group. 
+        /// If you use this property, you MUST add the capability to your Application Entitlement. 
+        /// When using this property, the value must contain the TeamId prefix, which is why this is now obsolete. 
+        /// </summary> 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
+        string KeychainSecurityGroup { get; }
+
+#endif
     }
 }
