@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -283,7 +283,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
@@ -426,7 +426,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -455,7 +455,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

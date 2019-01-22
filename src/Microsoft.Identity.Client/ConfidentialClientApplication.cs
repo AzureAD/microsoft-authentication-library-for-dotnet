@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
             string authority)
         {
             GuardMobileFrameworks();
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(new Uri(authority)).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(new Uri(authority)).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -371,7 +371,7 @@ namespace Microsoft.Identity.Client
                 .WithLoginHint(loginHint)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
         }

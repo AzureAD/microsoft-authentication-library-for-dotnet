@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig
@@ -104,10 +105,135 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// to applications managing several accounts (like a mail client with several mailboxes)
         /// </summary>
         /// <param name="authorityUri">Uri for the authority</param>
+        /// <param name="validateAuthority"></param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAuthorityOverride(string authorityUri)
+        public T WithAuthority(Uri authorityUri, bool validateAuthority = false)
         {
-            CommonParameters.AuthorityOverride = authorityUri;
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cloudInstanceUri"></param>
+        /// <param name="tenantId"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            Uri cloudInstanceUri,
+            Guid tenantId,
+            bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cloudInstanceUri"></param>
+        /// <param name="tenant"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            Uri cloudInstanceUri,
+            string tenant,
+            bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="azureCloudInstance"></param>
+        /// <param name="tenantId"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            AzureCloudInstance azureCloudInstance,
+            Guid tenantId,
+            bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenantId, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="azureCloudInstance"></param>
+        /// <param name="tenant"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(
+            AzureCloudInstance azureCloudInstance,
+            string tenant,
+            bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, tenant, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="azureCloudInstance"></param>
+        /// <param name="authorityAudience"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorityAudience"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorityUri"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorityUri"></param>
+        /// <param name="validateAuthority"></param>
+        /// <returns></returns>
+        public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
+        {
+            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="authorityUri"></param>
+        /// <returns></returns>
+        public T WithB2CAuthority(string authorityUri)
+        {
+            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
             return (T)this;
         }
 

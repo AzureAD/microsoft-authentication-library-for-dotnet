@@ -95,6 +95,124 @@ namespace Microsoft.Identity.Client.AppConfig
             return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
 
+        internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
+        {
+            return FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, string tenant, bool validateAuthority)
+        {
+            if (Guid.TryParse(tenant, out Guid tenantId))
+            {
+                return FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
+            }
+            return FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAadAuthority(
+            AzureCloudInstance azureCloudInstance,
+            Guid tenantId,
+            bool validateAuthority)
+        {
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
+            return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAadAuthority(
+            AzureCloudInstance azureCloudInstance,
+            string tenant,
+            bool validateAuthority)
+        {
+            if (Guid.TryParse(tenant, out Guid tenantIdGuid))
+            {
+                return FromAadAuthority(azureCloudInstance, tenantIdGuid, validateAuthority);
+            }
+
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenant);
+            return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAadAuthority(
+            AzureCloudInstance azureCloudInstance,
+            AadAuthorityAudience authorityAudience,
+            bool validateAuthority)
+        {
+            string authorityUri = GetAuthorityUri(azureCloudInstance, authorityAudience);
+            return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority)
+        {
+            string authorityUri = GetAuthorityUri(AzureCloudInstance.AzurePublic, authorityAudience);
+            return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAadAuthority(string authorityUri, bool validateAuthority)
+        {
+            return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromAdfsAuthority(string authorityUri, bool validateAuthority)
+        {
+            return new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
+        }
+
+        internal static AuthorityInfo FromB2CAuthority(string authorityUri)
+        {
+            return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+        }
+
+        internal static string GetCloudUrl(AzureCloudInstance azureCloudInstance)
+        {
+            switch (azureCloudInstance)
+            {
+            case AzureCloudInstance.AzurePublic:
+                return "https://login.microsoftonline.com";
+            case AzureCloudInstance.AzureChina:
+                return "https://login.chinacloudapi.cn";
+            case AzureCloudInstance.AzureGermany:
+                return "https://login.microsoftonline.de";
+            case AzureCloudInstance.AzureUsGovernment:
+                return "https://login.microsoftonline.us";
+            default:
+                throw new ArgumentException(nameof(azureCloudInstance));
+            }
+        }
+
+        internal static string GetAuthorityUri(
+            AzureCloudInstance azureCloudInstance,
+            AadAuthorityAudience authorityAudience,
+            string tenantId = null)
+        {
+            string cloudUrl = GetCloudUrl(azureCloudInstance);
+            string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
+
+            return $"{cloudUrl}/{tenantValue}";
+        }
+
+        internal static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)
+        {
+            switch (authorityAudience)
+            {
+            case AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount:
+                return "common";
+            case AadAuthorityAudience.AzureAdMultipleOrgs:
+                return "organizations";
+            case AadAuthorityAudience.PersonalMicrosoftAccount:
+                return "consumers";
+            case AadAuthorityAudience.AzureAdMyOrg:
+                if (string.IsNullOrWhiteSpace(tenantId))
+                {
+                    throw new ArgumentNullException(nameof(tenantId));
+                }
+
+                return tenantId;
+            default:
+                throw new ArgumentException(nameof(authorityAudience));
+            }
+        }
+
+
         // TODO: consolidate this with the same method in Authority.cs
         private static string GetFirstPathSegment(string authority)
         {
