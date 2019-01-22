@@ -23,7 +23,11 @@ function Test-IsChocolateyInstalled {
   
   return $ChocoInstalled
 }
-   
+
+# Set NUNIT_HACK environment variable on dev machines so that NUnit runner does the right thing for automation tests.
+# Also set it locally so that it's immediately available.
+[Environment]::SetEnvironmentVariable("NUNIT_HACK", "1", "User")
+$env:NUNIT_HACK = "1"
 
 
 if (-Not (Test-IsChocolateyInstalled)) {
