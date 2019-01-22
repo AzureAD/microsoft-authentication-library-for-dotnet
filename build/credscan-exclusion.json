@@ -52,6 +52,18 @@
 	  {
 	    "file": "CryptographyTests.cs", 
       "_justification": "Password contained within this file is not used for any production application/code. It is used as a means to access a self signed certificate used only for testing."
+    },
+    {
+	    "file": "CoreTestConstants.cs", 
+      "_justification": "Strings used for test purposes."
+    },
+    {
+	    "file": "MsalTestConstants.cs", 
+      "_justification": "Strings used for test purposes."
+    },
+    {
+	    "file": "OAuth2Parameter.cs", 
+      "_justification": "RFC well-known strings that are "
 	  }
   ]
 }
