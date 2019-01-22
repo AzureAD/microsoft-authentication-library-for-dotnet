@@ -62,7 +62,7 @@
       "_justification": "Strings used for test purposes."
     },
     {
-	    "file": "OAuth2Parameter.cs", 
+	    "file": "OAuthConstants.cs", 
       "_justification": "RFC well-known strings that are "
 	  }
   ]
