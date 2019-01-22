@@ -147,7 +147,7 @@ namespace DesktopTestApp
             {
                 // Use the override authority provided
                 PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
-                    .AddKnownAuthority(new Uri(interactiveAuthority), true)
+                    .WithAuthority(new Uri(interactiveAuthority), true)
                     .WithComponent(_component)
                     .BuildConcrete();
 
