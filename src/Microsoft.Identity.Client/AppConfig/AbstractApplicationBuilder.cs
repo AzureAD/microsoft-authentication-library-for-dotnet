@@ -381,7 +381,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithAadAuthority(
             Uri cloudInstanceUri,
             Guid tenantId,
-            bool validateAuthority = false)
+            bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", validateAuthority);
             return (T)this;
@@ -404,7 +404,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithAadAuthority(
             Uri cloudInstanceUri,
             string tenant,
-            bool validateAuthority = false)
+            bool validateAuthority = true)
         {
             if (Guid.TryParse(tenant, out Guid tenantId))
             {
@@ -429,7 +429,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
-            bool validateAuthority = false)
+            bool validateAuthority = true)
         {
             string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
             Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
@@ -451,7 +451,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
-            bool validateAuthority = false)
+            bool validateAuthority = true)
         {
             if (Guid.TryParse(tenant, out Guid tenantIdGuid))
             {
@@ -475,7 +475,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = false)
+        public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             string authorityUri = GetAuthorityUri(azureCloudInstance, authorityAudience);
             Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
@@ -493,7 +493,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
 
-        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = false)
+        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             string authorityUri = GetAuthorityUri(AzureCloudInstance.AzurePublic, authorityAudience);
             Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
@@ -517,7 +517,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="validateAuthority">TODO(migration): documentation</param>
         /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(string authorityUri, bool validateAuthority = false)
+        public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
         {
             Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
             return (T)this;
@@ -581,7 +581,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <remarks>You can add several authorities, but only one can be the default authority.
         /// MSAL.NET will only support ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAdfsAuthority(string authorityUri, bool validateAuthority)
+        public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
             Config.AuthorityInfo = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
             return (T)this;
