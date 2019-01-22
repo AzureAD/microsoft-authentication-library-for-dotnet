@@ -63,7 +63,7 @@
     },
     {
 	    "file": "OAuthConstants.cs", 
-      "_justification": "RFC well-known strings that are "
+      "_justification": "RFC well-known strings such as GET param names. No param values or secrets here."
 	  }
   ]
 }
