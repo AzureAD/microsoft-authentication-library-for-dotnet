@@ -154,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccountsAsString().Count);
                 Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
 
-                // login tp app1 with same credentials
+                // login to app1 with same credentials
 
                 var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
                                                          .WithHttpManager(httpManager)

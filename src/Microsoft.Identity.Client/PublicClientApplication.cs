@@ -121,24 +121,6 @@ namespace Microsoft.Identity.Client
                 UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
             }
         }
-
-        /// <inheritdoc />
-        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
-        public string KeychainSecurityGroup
-        {
-            get
-            {
-                return keychainSecurityGroup;
-            }
-            set
-            {
-                keychainSecurityGroup = value;
-                UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
-                //UserTokenCache.TokenCacheAccessor.SetKeychainSecurityGroup(value);
-                //(UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
-                //    .SetKeychainSecurityGroup(value);
-            }
-        }
 #endif
 
 #if WINDOWS_APP

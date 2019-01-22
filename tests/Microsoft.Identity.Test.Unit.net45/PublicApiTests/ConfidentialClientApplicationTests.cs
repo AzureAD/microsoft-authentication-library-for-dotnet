@@ -613,7 +613,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
 
-                // add mock response for successful token retrival
+                // add mock response for successful token retrieval
                 const string TokenRetrievedFromNetCall = "token retrieved from network call";
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler

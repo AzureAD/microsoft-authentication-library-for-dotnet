@@ -1,5 +1,4 @@
 ﻿//----------------------------------------------------------------------
-//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -210,7 +209,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     AddStateInAuthorizationResult = false,
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code&state=mistmatched")
+                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code&state=mismatched")
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
