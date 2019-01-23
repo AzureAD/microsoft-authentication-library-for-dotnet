@@ -384,7 +384,7 @@ namespace Microsoft.Identity.Client.AppConfig
             Guid tenantId,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             return (T)this;
         }
 
@@ -408,12 +408,7 @@ namespace Microsoft.Identity.Client.AppConfig
             string tenant,
             bool validateAuthority = true)
         {
-            if (Guid.TryParse(tenant, out Guid tenantId))
-            {
-                return WithAadAuthority(cloudInstanceUri, tenantId);
-            }
-
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
             return (T)this;
         }
 
