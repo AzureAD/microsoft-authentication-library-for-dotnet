@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
+
 namespace Microsoft.Identity.Client
 {
     internal static class LogMessages
@@ -34,7 +36,7 @@ namespace Microsoft.Identity.Client
 
         public static string UsingXScopesForRefreshTokenRequest(int numScopes)
         {
-            return $"Using {numScopes} scopes for acquire token by refresh token request";
+            return string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", numScopes);
         }
     }
 }

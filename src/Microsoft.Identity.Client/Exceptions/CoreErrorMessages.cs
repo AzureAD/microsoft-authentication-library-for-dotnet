@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -137,5 +139,12 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
 
         public const string ClientSecretAndCertificateAreMutuallyExclusive = "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.";
+
+        public static string DefaultAuthorityTypeInstanceAudienceMismatch(AuthorityType authorityType, string defaultAuthorityInstance, string defaultAuthorityAudience)
+        {
+            return string.Format(CultureInfo.InvariantCulture, 
+                          "DefaultAuthorityType is {0} but defaultAuthorityInstance({1}) or defaultAuthorityAudience({2}) is invalid.",
+                                 authorityType, defaultAuthorityInstance, defaultAuthorityAudience);
+        }
     }
 }

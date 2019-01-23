@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
@@ -278,9 +279,11 @@ namespace Microsoft.Identity.Client.AppConfig
 
                 if (string.IsNullOrWhiteSpace(defaultAuthorityInstance) || string.IsNullOrWhiteSpace(defaultAuthorityAudience))
                 {
-                    // TODO: better documentation/description in exception of what's going on here...
                     throw new InvalidOperationException(
-                        $"DefaultAuthorityType is {defaultAuthorityType.Value} but defaultAuthorityInstance({defaultAuthorityInstance}) or defaultAuthorityAudience({defaultAuthorityAudience}) is invalid.");
+                        CoreErrorMessages.DefaultAuthorityTypeInstanceAudienceMismatch(
+                            defaultAuthorityType.Value,
+                            defaultAuthorityInstance,
+                            defaultAuthorityAudience));
                 }
 
                 Config.AuthorityInfo = new AuthorityInfo(
