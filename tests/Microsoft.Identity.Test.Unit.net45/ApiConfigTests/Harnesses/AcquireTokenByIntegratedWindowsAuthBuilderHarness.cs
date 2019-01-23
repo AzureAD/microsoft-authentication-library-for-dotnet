@@ -35,9 +35,9 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 {
-    internal class AcquireTokenWithIntegratedWindowsAuthBuilderHarness : AbstractBuilderHarness
+    internal class AcquireTokenByIntegratedWindowsAuthBuilderHarness : AbstractBuilderHarness
     {
-        public AcquireTokenWithIntegratedWindowsAuthParameters IntegratedWindowsAuthParametersReceived { get; private set; }
+        public AcquireTokenByIntegratedWindowsAuthParameters IntegratedWindowsAuthParametersReceived { get; private set; }
         public IPublicClientApplication ClientApplication { get; private set; }
 
         public async Task SetupAsync()
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 
             await ((IPublicClientApplicationExecutor)ClientApplication).ExecuteAsync(
                 Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),
-                Arg.Do<AcquireTokenWithIntegratedWindowsAuthParameters>(parameters => IntegratedWindowsAuthParametersReceived = parameters),
+                Arg.Do<AcquireTokenByIntegratedWindowsAuthParameters>(parameters => IntegratedWindowsAuthParametersReceived = parameters),
                 CancellationToken.None).ConfigureAwait(false);
         }
 

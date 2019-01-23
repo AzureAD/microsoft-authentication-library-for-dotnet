@@ -45,12 +45,12 @@ namespace Microsoft.Identity.Client.ApiConfig
 
         Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
+            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken);
 
         Task<AuthenticationResult> ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
+            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken);
     }
 }
