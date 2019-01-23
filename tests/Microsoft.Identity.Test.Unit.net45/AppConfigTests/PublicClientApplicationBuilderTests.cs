@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestWithDifferentClientId()
         {
-            const string ClientId = "this is a test client id";
+            const string ClientId = "fe81f2b0-4000-433a-915d-5feb0fb2aea5";
             var pca = PublicClientApplicationBuilder.Create(ClientId)
                                                     .Build();
             Assert.AreEqual(ClientId, pca.ClientId);
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_ClientIdOverride()
         {
-            const string ClientId = "some other client id";
+            const string ClientId = "7b94cb0c-3744-4e6e-908b-ae10368b765d";
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                     .WithClientId(ClientId)
                                                     .Build();
@@ -254,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             };
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
                                                     .Build();
-            Assert.AreEqual(CoreTestConstants.AuthorityOrganizationsTenant, pca.Authority);
+            Assert.AreEqual(MsalTestConstants.AuthorityOrganizationsTenant, pca.Authority);
         }
     }
 }

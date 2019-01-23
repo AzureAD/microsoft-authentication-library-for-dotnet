@@ -1359,7 +1359,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             {
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CLoginAuthority), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1367,10 +1367,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CLoginAuthority);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CLoginAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
             }
@@ -1385,7 +1385,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CAuthority), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1393,10 +1393,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CAuthority);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
             }
@@ -1409,7 +1409,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CLoginAuthority), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CLoginAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
 
@@ -1417,17 +1417,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,
-                        CoreTestConstants.B2CLoginAuthority + "?code=some-code")
+                        MsalTestConstants.B2CLoginAuthority + "?code=some-code")
                 };
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CLoginAuthority);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CLoginAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CLoginAuthority);
 
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
             }
@@ -1442,17 +1442,17 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(CoreTestConstants.B2CRandomHost), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CRandomHost), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CRandomHost);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CRandomHost);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CRandomHost);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CRandomHost);
 
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
                 Assert.IsNotNull(result.Account);
             }
@@ -1472,52 +1472,52 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             IEnumerable<Func<Task<AuthenticationResult>>> acquireTokenInteractiveMethods = new List<Func<Task<AuthenticationResult>>>
             {
                 // without UI Parent
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint").ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params").ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, Prompt.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, "login hint").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, account).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params").ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, account, Prompt.Consent, "extra_query_params").ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(
-                    CoreTestConstants.Scope,
+                    MsalTestConstants.Scope,
                     "login hint",
                     Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
-                    CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
+                    MsalTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
 
                 async () => await pca.AcquireTokenAsync(
-                    CoreTestConstants.Scope,
+                    MsalTestConstants.Scope,
                     account,
                     Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
-                    CoreTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
+                    MsalTestConstants.AuthorityCommonTenant).ConfigureAwait(false),
 
                 // with UIParent
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
-                async () => await pca.AcquireTokenAsync(CoreTestConstants.Scope, account, Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, "login hint", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, account, (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, "login hint", Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
+                async () => await pca.AcquireTokenAsync(MsalTestConstants.Scope, account, Prompt.Consent, "extra_query_params", (UIParent)null).ConfigureAwait(false),
                 async () => await pca.AcquireTokenAsync(
-                    CoreTestConstants.Scope,
+                    MsalTestConstants.Scope,
                     "login hint",
                     Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
-                    CoreTestConstants.AuthorityCommonTenant,
+                    MsalTestConstants.AuthorityCommonTenant,
                     (UIParent)null).ConfigureAwait(false),
 
                 async () => await pca.AcquireTokenAsync(
-                    CoreTestConstants.Scope,
+                    MsalTestConstants.Scope,
                     account,
                     Prompt.Consent,
                     "extra_query_params",
                     new[] {"extra scopes" },
-                    CoreTestConstants.AuthorityCommonTenant,
+                    MsalTestConstants.AuthorityCommonTenant,
                     (UIParent)null).ConfigureAwait(false),
 
-                async () => await pca.AcquireTokenByIntegratedWindowsAuthAsync(CoreTestConstants.Scope).ConfigureAwait(false)
+                async () => await pca.AcquireTokenByIntegratedWindowsAuthAsync(MsalTestConstants.Scope).ConfigureAwait(false)
 
             };
 

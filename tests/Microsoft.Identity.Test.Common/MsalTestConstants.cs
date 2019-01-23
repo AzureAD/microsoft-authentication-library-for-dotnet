@@ -59,8 +59,10 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityGuidTenant2 = "https://" + ProductionPrefNetworkEnvironment + "/987654321/";
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
-        public const string ClientId = "client_id";
-        public static readonly string ClientId_1 = "client_id_1";
+        public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
+        public const string B2CRandomHost = "https://sometenantid.randomhost.com/tfp/sometenantid/policy/";
+        public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
+        public static readonly string ClientId_1 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";

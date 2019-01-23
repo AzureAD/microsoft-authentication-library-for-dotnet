@@ -958,6 +958,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 requestContext ?? RequestContext.CreateForTest(serviceBundle));
         }
 
+        [TestMethod]
+        [Ignore]  // todo(migration): need to figure out cache issue
+        [TestCategory("TokenCacheTests")]
+        public void TestCacheDeserializeWithoutServiceBundle()
+        {
+            var tokenCache = new TokenCache();
+            tokenCache.Deserialize(new byte[0]);
+        }
+
         /*
         [TestMethod]
         [TestCategory("TokenCacheTests")]
