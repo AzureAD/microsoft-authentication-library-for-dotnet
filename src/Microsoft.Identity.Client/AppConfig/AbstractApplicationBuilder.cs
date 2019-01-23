@@ -362,7 +362,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityUri">Uri of the authority</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAuthority(Uri authorityUri, bool validateAuthority = false)
+        public T WithAuthority(Uri authorityUri, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
             return (T)this;

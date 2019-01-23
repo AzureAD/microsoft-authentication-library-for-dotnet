@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public AuthorityInfo(
             AuthorityType authorityType,
             string authority,
-            bool validateAuthority = false)
+            bool validateAuthority)
         {
             AuthorityType = authorityType;
             ValidateAuthority = validateAuthority;
@@ -92,6 +92,13 @@ namespace Microsoft.Identity.Client.AppConfig
             ValidateAuthorityUri(canonicalUri);
 
             var authorityType = Instance.Authority.GetAuthorityType(canonicalUri);
+
+            // If the authority type is B2C, validateAuthority must be false.
+            if (authorityType == AuthorityType.B2C)
+            {
+                validateAuthority = false;
+            }
+
             return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
 
