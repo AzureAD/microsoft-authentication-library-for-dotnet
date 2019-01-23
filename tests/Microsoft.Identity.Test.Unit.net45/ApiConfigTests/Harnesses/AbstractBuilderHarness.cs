@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             CoreAssert.AreScopesEqual(
                 (expectedScopes ?? MsalTestConstants.Scope).AsSingleString(),
                 CommonParametersReceived.Scopes.AsSingleString());
-            Assert.AreEqual(expectedExtraQueryParameters, CommonParametersReceived.ExtraQueryParameters);
+            CollectionAssert.AreEqual(expectedExtraQueryParameters, CommonParametersReceived.ExtraQueryParameters);
         }
     }
 }

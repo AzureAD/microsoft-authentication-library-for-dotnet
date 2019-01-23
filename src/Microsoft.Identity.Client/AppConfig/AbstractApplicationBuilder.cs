@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 
@@ -258,6 +259,16 @@ namespace Microsoft.Identity.Client.AppConfig
             if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
                 throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
+            }
+
+            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
+            {
+                Config.RedirectUri = Constants.DefaultRedirectUri;
+            }
+
+            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
+            {
+                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
             }
 
             return Config;

@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -152,6 +153,42 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .Create(MsalTestConstants.ClientId).WithRedirectUri(RedirectUri).Build();
 
             Assert.AreEqual(RedirectUri, cca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithNullRedirectUri()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                      .Create(MsalTestConstants.ClientId).WithRedirectUri(null).Build();
+
+            Assert.AreEqual(Constants.DefaultRedirectUri, cca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithEmptyRedirectUri()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                      .Create(MsalTestConstants.ClientId).WithRedirectUri(string.Empty).Build();
+
+            Assert.AreEqual(Constants.DefaultRedirectUri, cca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithWhitespaceRedirectUri()
+        {
+            var cca = ConfidentialClientApplicationBuilder
+                      .Create(MsalTestConstants.ClientId).WithRedirectUri("      ").Build();
+
+            Assert.AreEqual(Constants.DefaultRedirectUri, cca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithInvalidRedirectUri()
+        {
+            Assert.ThrowsException<InvalidOperationException>(() =>
+                ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithRedirectUri("this is not a valid uri")
+                                                    .Build());
         }
 
         [TestMethod]

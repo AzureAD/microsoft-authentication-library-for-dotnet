@@ -137,5 +137,10 @@ namespace Microsoft.Identity.Client
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
 
         public const string ClientSecretAndCertificateAreMutuallyExclusive = "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.";
+
+        public static string InvalidRedirectUriReceived(string invalidRedirectUri)
+        {
+            return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class.";
+        }
     }
 }
