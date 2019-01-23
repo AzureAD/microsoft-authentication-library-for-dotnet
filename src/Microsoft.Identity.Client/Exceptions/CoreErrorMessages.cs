@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -141,6 +143,13 @@ namespace Microsoft.Identity.Client
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
         {
             return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class.";
+        }
+
+        public static string DefaultAuthorityTypeInstanceAudienceMismatch(AuthorityType authorityType, string defaultAuthorityInstance, string defaultAuthorityAudience)
+        {
+            return string.Format(CultureInfo.InvariantCulture,
+                          "DefaultAuthorityType is {0} but defaultAuthorityInstance({1}) or defaultAuthorityAudience({2}) is invalid.",
+                                 authorityType, defaultAuthorityInstance, defaultAuthorityAudience);
         }
     }
 }

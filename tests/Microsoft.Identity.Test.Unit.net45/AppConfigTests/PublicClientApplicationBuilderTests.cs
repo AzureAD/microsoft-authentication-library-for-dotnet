@@ -25,10 +25,12 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -54,7 +56,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNull(pca.AppConfig.HttpClientFactory);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
             Assert.IsNull(pca.AppConfig.LoggingCallback);
-            Assert.AreEqual(Constants.DefaultRedirectUri, pca.AppConfig.RedirectUri);
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TelemetryCallback);
             Assert.IsNull(pca.AppConfig.TenantId);
         }
@@ -172,6 +174,46 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .Build();
 
             Assert.AreEqual(RedirectUri, pca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithNullRedirectUri()
+        {
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithRedirectUri(null)
+                                                    .Build();
+
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithEmptyRedirectUri()
+        {
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithRedirectUri(string.Empty)
+                                                    .Build();
+
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithWhitespaceRedirectUri()
+        {
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithRedirectUri("    ")
+                                                    .Build();
+
+            Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithConstantsDefaultRedirectUri()
+        {
+            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithRedirectUri(Constants.DefaultRedirectUri)
+                                                    .Build();
+
+            Assert.AreEqual(Constants.DefaultRedirectUri, pca.AppConfig.RedirectUri);
         }
 
         [TestMethod]

@@ -104,7 +104,9 @@ namespace Microsoft.Identity.Client.AppConfig
 
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
-            return FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", validateAuthority);
+#pragma warning disable CA1305 // Specify IFormatProvider
+            return FromAuthorityUri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/", cloudInstanceUri, tenantId.ToString("N")), validateAuthority);
+#pragma warning restore CA1305 // Specify IFormatProvider
         }
 
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, string tenant, bool validateAuthority)
@@ -113,7 +115,7 @@ namespace Microsoft.Identity.Client.AppConfig
             {
                 return FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             }
-            return FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", validateAuthority);
+            return FromAuthorityUri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/", cloudInstanceUri, tenant), validateAuthority);
         }
 
         internal static AuthorityInfo FromAadAuthority(
@@ -121,7 +123,9 @@ namespace Microsoft.Identity.Client.AppConfig
             Guid tenantId,
             bool validateAuthority)
         {
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, $"{tenantId:N}");
+#pragma warning disable CA1305 // Specify IFormatProvider
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenantId.ToString("N"));
+#pragma warning restore CA1305 // Specify IFormatProvider
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
 
@@ -194,7 +198,7 @@ namespace Microsoft.Identity.Client.AppConfig
             string cloudUrl = GetCloudUrl(azureCloudInstance);
             string tenantValue = GetAadAuthorityAudienceValue(authorityAudience, tenantId);
 
-            return $"{cloudUrl}/{tenantValue}";
+            return string.Format(CultureInfo.InvariantCulture, "{0}/{1}", cloudUrl, tenantValue);
         }
 
         internal static string GetAadAuthorityAudienceValue(AadAuthorityAudience authorityAudience, string tenantId)

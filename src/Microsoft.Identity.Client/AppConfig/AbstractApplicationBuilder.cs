@@ -28,9 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
@@ -246,7 +248,7 @@ namespace Microsoft.Identity.Client.AppConfig
             return (T)this;
         }
 
-        internal virtual ApplicationConfiguration BuildConfiguration()
+        internal virtual void Validate()
         {
             // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
@@ -260,17 +262,11 @@ namespace Microsoft.Identity.Client.AppConfig
             {
                 throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
             }
+        }
 
-            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
-            {
-                Config.RedirectUri = Constants.DefaultRedirectUri;
-            }
-
-            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
-            {
-                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
-            }
-
+        internal ApplicationConfiguration BuildConfiguration()
+        {
+            Validate();
             return Config;
         }
 
@@ -289,9 +285,11 @@ namespace Microsoft.Identity.Client.AppConfig
 
                 if (string.IsNullOrWhiteSpace(defaultAuthorityInstance) || string.IsNullOrWhiteSpace(defaultAuthorityAudience))
                 {
-                    // TODO: better documentation/description in exception of what's going on here...
                     throw new InvalidOperationException(
-                        $"DefaultAuthorityType is {defaultAuthorityType.Value} but defaultAuthorityInstance({defaultAuthorityInstance}) or defaultAuthorityAudience({defaultAuthorityAudience}) is invalid.");
+                        CoreErrorMessages.DefaultAuthorityTypeInstanceAudienceMismatch(
+                            defaultAuthorityType.Value,
+                            defaultAuthorityInstance,
+                            defaultAuthorityAudience));
                 }
 
                 Config.AuthorityInfo = new AuthorityInfo(
@@ -392,7 +390,7 @@ namespace Microsoft.Identity.Client.AppConfig
             Guid tenantId,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenantId:N}/", validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
             return (T)this;
         }
 
@@ -416,12 +414,7 @@ namespace Microsoft.Identity.Client.AppConfig
             string tenant,
             bool validateAuthority = true)
         {
-            if (Guid.TryParse(tenant, out Guid tenantId))
-            {
-                return WithAadAuthority(cloudInstanceUri, tenantId);
-            }
-
-            Config.AuthorityInfo = AuthorityInfo.FromAuthorityUri($"{cloudInstanceUri}/{tenant}/", validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
             return (T)this;
         }
 
