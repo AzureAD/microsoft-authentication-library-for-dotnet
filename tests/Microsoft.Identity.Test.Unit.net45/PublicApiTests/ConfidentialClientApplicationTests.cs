@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 new TokenCache(),
                 new TokenCache());
 
-            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, app.AppConfig.RedirectUri);
         }
 
         [TestMethod]

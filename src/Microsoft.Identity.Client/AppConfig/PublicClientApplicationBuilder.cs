@@ -105,6 +105,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <inheritdoc />
         internal override void Validate()
         {
+            base.Validate();
+
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))
             {
                 Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)

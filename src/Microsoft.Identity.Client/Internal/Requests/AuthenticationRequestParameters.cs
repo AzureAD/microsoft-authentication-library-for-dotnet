@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             TokenCache = tokenCache;
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>();
-            RedirectUri = new Uri(serviceBundle.Config.RedirectUri);  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
+            RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             ApiId = commonParameters.ApiId;
         }

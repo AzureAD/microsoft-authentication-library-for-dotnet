@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 
@@ -57,6 +58,7 @@ namespace Microsoft.Identity.Test.Common
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
+                RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId),
                 TelemetryCallback = telemetryCallback,
                 LoggingCallback = logCallback,
                 LogLevel = LogLevel.Verbose,
