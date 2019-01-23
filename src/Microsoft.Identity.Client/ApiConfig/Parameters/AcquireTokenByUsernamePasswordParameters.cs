@@ -25,10 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System.Security;
+using Microsoft.Identity.Client.Core;
+
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
-    internal abstract class AbstractAcquireTokenWithUsernameParameters
+    internal class AcquireTokenByUsernamePasswordParameters : AbstractAcquireTokenByUsernameParameters, IAcquireTokenParameters
     {
-        public string Username { get; set; }
+        public SecureString Password { get; set; }
+
+        /// <inheritdoc />
+        public void LogParameters(ICoreLogger logger)
+        {
+        }
     }
 }

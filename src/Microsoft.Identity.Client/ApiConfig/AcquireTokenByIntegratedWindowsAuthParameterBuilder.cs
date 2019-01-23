@@ -34,15 +34,15 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
-    /// Builder for AcquireTokenWithIntegratedWindowsAuth
+    /// Builder for AcquireTokenByIntegratedWindowsAuth
     /// </summary>
-    public sealed class AcquireTokenWithIntegratedWindowsAuthParameterBuilder :
-        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithIntegratedWindowsAuthParameterBuilder>
+    public sealed class AcquireTokenByIntegratedWindowsAuthParameterBuilder :
+        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenByIntegratedWindowsAuthParameterBuilder>
     {
-        private AcquireTokenWithIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenWithIntegratedWindowsAuthParameters();
+        private AcquireTokenByIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenByIntegratedWindowsAuthParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenWithIntegratedWindowsAuthParameterBuilder(IPublicClientApplication publicClientApplication)
+        internal AcquireTokenByIntegratedWindowsAuthParameterBuilder(IPublicClientApplication publicClientApplication)
             : base(publicClientApplication)
         {
         }
@@ -53,10 +53,10 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="publicClientApplication"></param>
         /// <param name="scopes"></param>
         /// <returns></returns>
-        internal static AcquireTokenWithIntegratedWindowsAuthParameterBuilder Create(
+        internal static AcquireTokenByIntegratedWindowsAuthParameterBuilder Create(
             IPublicClientApplication publicClientApplication, IEnumerable<string> scopes)
         {
-            return new AcquireTokenWithIntegratedWindowsAuthParameterBuilder(publicClientApplication).WithScopes(scopes);
+            return new AcquireTokenByIntegratedWindowsAuthParameterBuilder(publicClientApplication).WithScopes(scopes);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// Integrated Windows authentication. Generally in UserPrincipalName (UPN) format, 
         /// e.g. <c>john.doe@contoso.com</c></param>
         /// <returns>The builder to chain the .With methods</returns>
-        public AcquireTokenWithIntegratedWindowsAuthParameterBuilder WithUsername(string username)
+        public AcquireTokenByIntegratedWindowsAuthParameterBuilder WithUsername(string username)
         {
             Parameters.Username = username;
             return this;

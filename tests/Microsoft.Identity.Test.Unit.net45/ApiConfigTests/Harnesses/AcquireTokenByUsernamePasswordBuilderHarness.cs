@@ -36,9 +36,9 @@ using NSubstitute;
 
 namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 {
-    internal class AcquireTokenWithUsernamePasswordBuilderHarness : AbstractBuilderHarness
+    internal class AcquireTokenByUsernamePasswordBuilderHarness : AbstractBuilderHarness
     {
-        public AcquireTokenWithUsernamePasswordParameters UsernamePasswordParametersReceived { get; private set; }
+        public AcquireTokenByUsernamePasswordParameters UsernamePasswordParametersReceived { get; private set; }
         public IPublicClientApplication ClientApplication { get; private set; }
 
         public async Task SetupAsync()
@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 
             await ((IPublicClientApplicationExecutor)ClientApplication).ExecuteAsync(
                 Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),
-                Arg.Do<AcquireTokenWithUsernamePasswordParameters>(parameters => UsernamePasswordParametersReceived = parameters),
+                Arg.Do<AcquireTokenByUsernamePasswordParameters>(parameters => UsernamePasswordParametersReceived = parameters),
                 CancellationToken.None).ConfigureAwait(false);
         }
 

@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
         /// You can also pass optional parameters by calling:
-        /// <see cref="AcquireTokenWithIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
+        /// <see cref="AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
         /// of the user account for which to acquire a token with Integrated Windows authentication. This is generally in
         /// UserPrincipalName (UPN) format, e.g. john.doe@contoso.com. This is normally not needed, but some Windows administrators
         /// set policies preventing applications from looking-up the signed-in user in Windows, and in that case the username
@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
-        AcquireTokenWithIntegratedWindowsAuthParameterBuilder AcquireTokenWithIntegratedWindowsAuth(
+        AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes);
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Client
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
-        AcquireTokenWithUsernamePasswordParameterBuilder AcquireTokenWithUsernamePassword(
+        AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
             SecureString password);

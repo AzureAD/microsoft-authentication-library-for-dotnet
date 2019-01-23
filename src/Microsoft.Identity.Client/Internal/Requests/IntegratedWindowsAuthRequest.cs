@@ -45,12 +45,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class IntegratedWindowsAuthRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private readonly AcquireTokenWithIntegratedWindowsAuthParameters _integratedWindowsAuthParameters;
+        private readonly AcquireTokenByIntegratedWindowsAuthParameters _integratedWindowsAuthParameters;
 
         public IntegratedWindowsAuthRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters)
+            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters)
             : base(serviceBundle, authenticationRequestParameters, integratedWindowsAuthParameters)
         {
             _integratedWindowsAuthParameters = integratedWindowsAuthParameters;

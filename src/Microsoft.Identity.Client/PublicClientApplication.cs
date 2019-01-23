@@ -514,7 +514,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobilePlatforms();
 
-            return await AcquireTokenWithUsernamePassword(scopes, username, securePassword)
+            return await AcquireTokenByUsernamePassword(scopes, username, securePassword)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -651,7 +651,7 @@ namespace Microsoft.Identity.Client
             GuardNonWindowsFrameworks();
             GuardIWANetCore();
 
-            return await AcquireTokenWithIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenByIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
 
@@ -670,7 +670,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNonWindowsFrameworks();
 
-            return await AcquireTokenWithIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenByIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         private static void GuardNonWindowsFrameworks()
