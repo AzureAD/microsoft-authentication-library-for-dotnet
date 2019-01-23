@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client
     /// of AcquireTokenAsync in <see cref="PublicClientApplication"/> should prompt the user.
     /// </summary>
     // todo(migration): documentation / akams links
-    [Obsolete("UIBehavior struct is now obsolete.  Please use Prompt struct instead.")]
+    [Obsolete("UIBehavior struct is now obsolete.  Please use Prompt struct instead.", true)]
     public struct UIBehavior
     {
     }

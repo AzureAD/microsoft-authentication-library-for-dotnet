@@ -256,6 +256,11 @@ namespace Microsoft.Identity.Client.AppConfig
                 throw new InvalidOperationException(CoreErrorMessages.NoClientIdWasSpecified);
             }
 
+            if (!Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
+            {
+                throw new InvalidOperationException(CoreErrorMessages.ClientIdMustBeAGuid);
+            }
+
             TryAddDefaultAuthority();
 
             if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
@@ -277,23 +282,13 @@ namespace Microsoft.Identity.Client.AppConfig
                 return;
             }
 
-            AuthorityType? defaultAuthorityType = DetermineDefaultAuthorityType();
-            if (defaultAuthorityType.HasValue)
+            if (!string.IsNullOrWhiteSpace(Config.Instance) || !string.IsNullOrWhiteSpace(Config.TenantId))
             {
                 string defaultAuthorityInstance = GetDefaultAuthorityInstance();
                 string defaultAuthorityAudience = GetDefaultAuthorityAudience();
 
-                if (string.IsNullOrWhiteSpace(defaultAuthorityInstance) || string.IsNullOrWhiteSpace(defaultAuthorityAudience))
-                {
-                    throw new InvalidOperationException(
-                        CoreErrorMessages.DefaultAuthorityTypeInstanceAudienceMismatch(
-                            defaultAuthorityType.Value,
-                            defaultAuthorityInstance,
-                            defaultAuthorityAudience));
-                }
-
                 Config.AuthorityInfo = new AuthorityInfo(
-                        defaultAuthorityType.Value,
+                        AuthorityType.Aad,
                         new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
                         true);
             }
@@ -302,19 +297,6 @@ namespace Microsoft.Identity.Client.AppConfig
                 // Add the default.
                 WithAadAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
             }
-        }
-
-        private AuthorityType? DetermineDefaultAuthorityType()
-        {
-            if (Config.AadAuthorityAudience != AadAuthorityAudience.None)
-            {
-                return AuthorityType.Aad;
-            }
-
-            // TODO: Once we have policy information in ApplicationOptions, we can determine B2C here.
-            // TODO: do we have enough to get a default authority type of ADFS?  How do we verify?
-
-            return null;
         }
 
         private string GetDefaultAuthorityAudience()
@@ -337,7 +319,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 return Config.TenantId;
             }
 
-            return string.Empty;
+            return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdMultipleOrgs, string.Empty);
         }
 
         private string GetDefaultAuthorityInstance()
@@ -359,7 +341,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 return AuthorityInfo.GetCloudUrl(Config.AzureCloudInstance);
             }
 
-            return string.Empty;
+            return AuthorityInfo.GetCloudUrl(AzureCloudInstance.AzurePublic);
         }
 
         /// <summary>

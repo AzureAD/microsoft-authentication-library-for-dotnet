@@ -31,6 +31,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
@@ -240,6 +241,20 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             Assert.IsNotNull(pca.AppConfig.TelemetryCallback);
             Assert.AreEqual((TelemetryCallback)Callback, pca.AppConfig.TelemetryCallback);
+        }
+
+        [TestMethod]
+        public void TestCreateWithOptions()
+        {
+            var options = new PublicClientApplicationOptions
+            {
+                Instance = "https://login.microsoftonline.com",
+                TenantId = "organizations",
+                ClientId = MsalTestConstants.ClientId
+            };
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                                                    .Build();
+            Assert.AreEqual(CoreTestConstants.AuthorityOrganizationsTenant, pca.Authority);
         }
     }
 }
