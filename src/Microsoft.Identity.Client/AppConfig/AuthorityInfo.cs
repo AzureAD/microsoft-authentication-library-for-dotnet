@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public AuthorityInfo(
             AuthorityType authorityType,
             string authority,
-            bool validateAuthority = false)
+            bool validateAuthority)
         {
             AuthorityType = authorityType;
             ValidateAuthority = validateAuthority;

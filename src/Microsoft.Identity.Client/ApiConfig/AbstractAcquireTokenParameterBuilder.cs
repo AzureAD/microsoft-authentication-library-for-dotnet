@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="authorityUri">Uri for the authority</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAuthority(Uri authorityUri, bool validateAuthority = false)
+        public T WithAuthority(Uri authorityUri, bool validateAuthority = true)
         {
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
             return (T)this;
