@@ -304,4 +304,14 @@ namespace Microsoft.Identity.Client
 
 #endif
     }
+
+    /// <summary>
+    /// Structure containing static members that you can use to specify how the interactive overrides 
+    /// of AcquireTokenAsync in <see cref="PublicClientApplication"/> should prompt the user. 
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete("UIBehavior struct is now obsolete.  Please use Prompt struct instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
+    public struct UIBehavior
+    {
+    }
 }
