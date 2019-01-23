@@ -86,6 +86,56 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use RemoveAccountAsync instead (See https://aka.ms/msal-net-2-released)", true)]
         void Remove(IUser user);
+
+        /// <summary>
+        /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
+        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead.  See https://aka.ms/msal-net-application-configuration", true)]
+        string Component { get; set; }
+
+        /// <summary>
+        /// Sets or Gets a custom query parameters that may be sent to the STS for dogfood testing or debugging. This is a string of segments
+        /// of the form <c>key=value</c> separated by an ampersand character.
+        /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use ExtraQueryParameters on each call instead.  See https://aka.ms/msal-net-application-configuration", true)]
+        string SliceParameters { get; set; }
+
+        /// <summary>
+        /// Gets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
+        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific 
+        /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-application-configuration", true)]
+        bool ValidateAuthority { get; }
+
+#if !DESKTOP && !NET_CORE
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+#endif
+        /// <summary>
+        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
+        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
+        /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
+        /// <list type="bullet">
+        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
+        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
+        /// platforms to call back the application)
+        /// </description></item>
+        /// </list>
+        /// These default URIs could change in the future.
+        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
+        /// </summary>
+        /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
+        /// you then need to add the reply URL of the deployed application in the application registration portal.
+        /// </remarks>
+        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-application-configuration", true)]
+        string RedirectUri { get; set; }
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
+
     }
 
     /// <Summary>
@@ -121,6 +171,53 @@ namespace Microsoft.Identity.Client
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use RemoveAccountAsync instead (See https://aka.ms/msal-net-2-released)", true)]
         public void Remove(IUser user) { throw new NotImplementedException(); }
+
+        /// <summary>
+        /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
+        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead. See https://aka.ms/msal-net-application-configuration", true)]
+        public string Component { get; set; }
+
+        /// <summary>
+        /// Sets or Gets a custom query parameters that may be sent to the STS for dogfood testing or debugging. This is a string of segments
+        /// of the form <c>key=value</c> separated by an ampersand character.
+        /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use ExtraQueryParameters on each call instead. See https://aka.ms/msal-net-application-configuration", true)]
+        public string SliceParameters { get; set; }
+
+        /// <summary>
+        /// Gets/sets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
+        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific
+        /// (a list of known B2C authorities cannot be maintained by MSAL.NET). This property can be set just after the construction of the application
+        /// and before an operation acquiring a token or interacting with the STS.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-application-configuration", true)]
+        public bool ValidateAuthority { get; set; }
+
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
+        /// <summary>
+        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
+        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
+        /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
+        /// <list type="bullet">
+        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
+        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
+        /// platforms to call back the application)
+        /// </description></item>
+        /// </list>
+        /// These default URIs could change in the future.
+        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
+        /// </summary>
+        /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
+        /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
+        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-application-configuration", true)]
+        public string RedirectUri { get; set; }
+#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     }
 
     public partial class AuthenticationResult

@@ -55,15 +55,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
 
             // TODO: use the lab app once localhost is setup as a redirect uri
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId).BuildConcrete();
+            // tests need to use http://localhost:port so that we can capture the AT
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
+                                                                        .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
+                                                                        .BuildConcrete();
+
             pca.ServiceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
 
-            // tests need to use http://localhost:port so that we can capture the AT
-            pca.RedirectUri = SeleniumWebUIFactory.FindFreeLocalhostRedirectUri();
-            AuthenticationResult result = null;
-
             // Act
-            result = await pca.AcquireTokenAsync(new[] { "user.read" }).ConfigureAwait(false);
+            AuthenticationResult result = await pca.AcquireTokenAsync(new[] { "user.read" }).ConfigureAwait(false);
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));

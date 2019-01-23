@@ -110,8 +110,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                // TODO(migration): this test isn't actually validating that we're sending in the extra query parameters / slice parameters
-
                 var request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,

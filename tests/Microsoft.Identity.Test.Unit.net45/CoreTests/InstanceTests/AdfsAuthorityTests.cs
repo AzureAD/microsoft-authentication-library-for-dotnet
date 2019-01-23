@@ -113,8 +113,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
-                var resolver = new AuthorityEndpointResolutionManager(harness.ServiceBundle);
-                var endpoints = resolver.ResolveEndpointsAsync(
+                var endpoints = harness.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
                     RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();
@@ -122,14 +121,13 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/authorize/", endpoints.AuthorizationEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs/oauth2/token/", endpoints.TokenEndpoint);
                 Assert.AreEqual("https://fs.contoso.com/adfs", endpoints.SelfSignedJwtAudience);
-                // todo(migration): change what's being checked appropriately --> Assert.AreEqual(1, harness.ServiceBundle.ValidatedAuthoritiesCache.Count);
 
                 // attempt to do authority validation again. NO network call should be made
                 instance = Authority.CreateAuthority(harness.ServiceBundle, CoreTestConstants.OnPremiseAuthority);
                 Assert.IsNotNull(instance);
                 Assert.AreEqual(instance.AuthorityInfo.AuthorityType, AuthorityType.Adfs);
 
-                endpoints = resolver.ResolveEndpointsAsync(
+                endpoints = harness.ServiceBundle.AuthorityEndpointResolutionManager.ResolveEndpointsAsync(
                     instance.AuthorityInfo,
                     CoreTestConstants.FabrikamDisplayableId,
                     RequestContext.CreateForTest(harness.ServiceBundle)).ConfigureAwait(false).GetAwaiter().GetResult();

@@ -48,12 +48,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         ITokenCache UserTokenCache { get; }
 
-        /// <summary>
-        /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
-        /// </summary>
-        string Component { get; set; } // todo(migration):  deprecate set
-
         /// <Summary>
         /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
         /// The return value of this propety is either the value provided by the developer in the constructor of the application, or otherwise 
@@ -67,47 +61,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string ClientId { get; }
 
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
-        /// <summary>
-        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
-        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
-        /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
-        /// <list type="bullet">
-        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
-        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
-        /// platforms to call back the application)
-        /// </description></item>
-        /// </list>
-        /// These default URIs could change in the future.
-        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
-        /// </summary>
-        /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
-        /// you then need to add the reply URL of the deployed application in the application registration portal.
-        /// </remarks>
-        string RedirectUri { get; set; }
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
-
-        /// <summary>
-        /// Gets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
-        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific 
-        /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
-        /// </summary>
-        bool ValidateAuthority { get; }
-
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
         Task<IEnumerable<IAccount>> GetAccountsAsync();
-
-        /// <summary>
-        /// Sets or Gets a custom query parameters that may be sent to the STS for dogfood testing or debugging. This is a string of segments
-        /// of the form <c>key=value</c> separated by an ampersand character.
-        /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
-        /// </summary>
-        [Obsolete("Use ExtraQueryParameters on each call instead.")]  // todo(migration): documentation
-        string SliceParameters { get; set; }
 
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.

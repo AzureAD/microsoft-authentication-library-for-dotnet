@@ -121,14 +121,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
+            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
 
             app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.AuthorityGuestTenant);
             Assert.IsNotNull(app);
             Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
+            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
 
             app = new PublicClientApplication(MsalTestConstants.ClientId,
@@ -138,7 +138,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/",
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.RedirectUri);
+            Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
             //Assert.IsTrue(app.ValidateAuthority);
         }
 
@@ -243,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
 
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
 
@@ -335,7 +335,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -351,7 +351,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -395,7 +395,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -418,7 +418,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"),
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"),
                     dict);
 
                 httpManager.AddMockHandler(
@@ -471,7 +471,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
@@ -487,7 +487,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 // repeat interactive call and pass in the same user
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -1106,7 +1106,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 }
                 catch (AggregateException ex)
                 {
-                    // todo(migration): this is failing due to ValidateAuthority being changed...
                     Assert.IsNotNull(ex.InnerException);
                     Assert.IsTrue(ex.InnerException is MsalUiRequiredException);
                     var msalExc = (MsalUiRequiredException)ex.InnerException;
@@ -1366,7 +1365,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CLoginAuthority);
@@ -1392,7 +1391,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CAuthority);
@@ -1423,7 +1422,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CLoginAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CLoginAuthority);
@@ -1448,7 +1447,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CRandomHost);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.B2CRandomHost);

@@ -360,8 +360,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// using other overrides such as <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="authorityUri">Uri of the authority</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority</remarks>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(Uri authorityUri, bool validateAuthority = false)
         {
@@ -375,8 +374,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="cloudInstanceUri">Azure Cloud instance</param>
         /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority</remarks>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
             Uri cloudInstanceUri,
@@ -394,12 +392,13 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="cloudInstanceUri">Uri to the Azure Cloud instance (for instance
         /// <c>https://login.microsoftonline.com)</c></param>
         /// <param name="tenant">domain name associated with the tenant from which to sign-in users</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <remarks>
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
         /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
         /// it's recommended to use another override (<see cref="WithAadAuthority(AzureCloudInstance, Guid, bool)"/>
-        /// and <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/></remarks>
+        /// and <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
             Uri cloudInstanceUri,
@@ -423,9 +422,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
@@ -443,10 +441,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="azureCloudInstance">Instance of Azure Cloud (for instance Azure
         /// worldwide cloud, Azure German Cloud, US government ...)</param>
         /// <param name="tenant">Domain name associated with the Azure AD tenant from which
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// to sign-in users. This can also be a guid</param>
         /// <returns>The builder to chain the .With methods</returns>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         public T WithAadAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
@@ -465,8 +462,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
@@ -481,10 +477,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="authorityAudience">Sign-in audience (one AAD organization,
         /// any work and school accounts, or any work and school accounts and Microsoft personal
         /// accounts</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-
         public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
@@ -505,8 +499,7 @@ namespace Microsoft.Identity.Client.AppConfig
         ///  <item><description><c>https://login.microsoftonline.com/consumers/</c> to sign-in users with only personal Microsoft accounts (live)</description></item>
         ///  </list>
         ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
         {
@@ -518,9 +511,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Adds a known Authority corresponding to an ADFS server. See https://aka.ms/msal-net-adfs
         /// </summary>
         /// <param name="authorityUri">Authority URL for an ADFS server</param>
-        /// <param name="validateAuthority">TODO(migration): documentation</param>
-        /// <remarks>You can add several authorities, but only one can be the default authority.
-        /// MSAL.NET will only support ADFS 2019 or later.</remarks>
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
+        /// <remarks>MSAL.NET will only support ADFS 2019 or later.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
@@ -534,7 +526,6 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
-        /// <remarks>You can add several authorities, but only one can be the default authority.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {

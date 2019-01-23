@@ -35,9 +35,8 @@ namespace Microsoft.Identity.Client
     public sealed partial class TokenCacheNotificationArgs
     {
         /// <summary>
-        /// Gets teh <see cref="ITokenCache"/> involved in the transaction
+        /// Gets the <see cref="ITokenCache"/> involved in the transaction
         /// </summary>
-        // TODO(migration): note that this changed from TokenCache to ITokenCache
         public ITokenCache TokenCache { get; internal set; }
 
         /// <summary>

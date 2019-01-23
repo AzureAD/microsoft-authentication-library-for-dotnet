@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app.AppTokenCache);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual(MsalTestConstants.RedirectUri, app.RedirectUri);
+            Assert.AreEqual(MsalTestConstants.RedirectUri, app.AppConfig.RedirectUri);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.IsNotNull(app.ClientCredential);
             Assert.IsNotNull(app.ClientCredential.Secret);
