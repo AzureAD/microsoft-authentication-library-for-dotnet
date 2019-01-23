@@ -25,33 +25,24 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using System.Threading.Tasks;
+using Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
+namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 {
-    internal abstract class AbstractBuilderHarness
+    [TestClass]
+    [TestCategory("BuilderTests")]
+    public class AcquireTokenOnBehalfOfBuilderTests
     {
-        public AcquireTokenCommonParameters CommonParametersReceived { get; protected set; }
+        private AcquireTokenOnBehalfOfBuilderHarness _harness;
 
-        public void ValidateCommonParameters(
-            ApiEvent.ApiIds expectedApiId,
-            string expectedAuthorityOverride = null,
-            Dictionary<string, string> expectedExtraQueryParameters = null,
-            IEnumerable<string> expectedScopes = null)
+        [TestInitialize]
+        public async Task TestInitializeAsync()
         {
-            Assert.IsNotNull(CommonParametersReceived);
-
-            Assert.AreEqual(expectedApiId, CommonParametersReceived.ApiId);
-            Assert.AreEqual(expectedAuthorityOverride, CommonParametersReceived.AuthorityOverride);
-            CoreAssert.AreScopesEqual(
-                (expectedScopes ?? MsalTestConstants.Scope).AsSingleString(),
-                CommonParametersReceived.Scopes.AsSingleString());
-            CollectionAssert.AreEqual(expectedExtraQueryParameters, CommonParametersReceived.ExtraQueryParameters);
+            _harness = new AcquireTokenOnBehalfOfBuilderHarness();
+            await _harness.SetupAsync()
+                          .ConfigureAwait(false);
         }
     }
 }

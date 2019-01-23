@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public AuthorityInfo AuthorityInfo { get; internal set; }
         public string ClientId { get; internal set; }
         public string TenantId { get; internal set; }
-        public string RedirectUri { get; internal set; } = Constants.DefaultRedirectUri;
+        public string RedirectUri { get; internal set; }
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Warning;
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }

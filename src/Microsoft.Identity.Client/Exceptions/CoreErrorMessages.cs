@@ -140,9 +140,14 @@ namespace Microsoft.Identity.Client
 
         public const string ClientSecretAndCertificateAreMutuallyExclusive = "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.";
 
+        public static string InvalidRedirectUriReceived(string invalidRedirectUri)
+        {
+            return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class.";
+        }
+
         public static string DefaultAuthorityTypeInstanceAudienceMismatch(AuthorityType authorityType, string defaultAuthorityInstance, string defaultAuthorityAudience)
         {
-            return string.Format(CultureInfo.InvariantCulture, 
+            return string.Format(CultureInfo.InvariantCulture,
                           "DefaultAuthorityType is {0} but defaultAuthorityInstance({1}) or defaultAuthorityAudience({2}) is invalid.",
                                  authorityType, defaultAuthorityInstance, defaultAuthorityAudience);
         }

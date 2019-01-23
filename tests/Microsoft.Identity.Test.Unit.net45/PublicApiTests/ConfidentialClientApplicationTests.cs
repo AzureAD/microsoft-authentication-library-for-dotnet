@@ -184,6 +184,21 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("ConfidentialClientApplicationTests")]
+        public void TestConstructorWithNullRedirectUri()
+        {
+            var app = new ConfidentialClientApplication(
+                MsalTestConstants.ClientId,
+                ClientApplicationBase.DefaultAuthority,
+                null,
+                new ClientCredential("the_secret"),
+                new TokenCache(),
+                new TokenCache());
+
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, app.AppConfig.RedirectUri);
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
         public async Task ConfidentialClientUsingSecretNoCacheProvidedTestAsync()
         {
             using (var httpManager = new MockHttpManager())

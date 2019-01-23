@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig;
@@ -101,6 +102,22 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
 
             _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScopeUser);
             _harness.ValidateInteractiveParameters(account, expectedLoginHint: "SomeOtherLoginHint");
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractiveBuilderWithPromptAndExtraQueryParametersAsync()
+        {
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.ClientApplication, MsalTestConstants.Scope, null)
+                                                         .WithLoginHint(MsalTestConstants.DisplayableId)
+                                                         .WithExtraQueryParameters("domain_hint=mydomain.com")
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+
+            _harness.ValidateCommonParameters(
+                ApiEvent.ApiIds.AcquireTokenWithScopeHint,
+                expectedExtraQueryParameters: new Dictionary<string, string> { { "domain_hint", "mydomain.com" }});
+            _harness.ValidateInteractiveParameters(
+                expectedLoginHint: MsalTestConstants.DisplayableId);
         }
     }
 }

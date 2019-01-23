@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -99,6 +100,23 @@ namespace Microsoft.Identity.Client.AppConfig
         internal PublicClientApplication BuildConcrete()
         {
             return new PublicClientApplication(BuildConfiguration());
+        }
+
+        /// <inheritdoc />
+        internal override void Validate()
+        {
+            base.Validate();
+
+            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
+            {
+                Config.RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null)
+                                                         .GetDefaultRedirectUri(Config.ClientId);
+            }
+
+            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
+            {
+                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
+            }
         }
     }
 }

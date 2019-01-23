@@ -30,7 +30,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
@@ -246,7 +248,7 @@ namespace Microsoft.Identity.Client.AppConfig
             return (T)this;
         }
 
-        internal virtual ApplicationConfiguration BuildConfiguration()
+        internal virtual void Validate()
         {
             // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
@@ -260,7 +262,11 @@ namespace Microsoft.Identity.Client.AppConfig
             {
                 throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
             }
+        }
 
+        internal ApplicationConfiguration BuildConfiguration()
+        {
+            Validate();
             return Config;
         }
 
