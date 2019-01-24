@@ -302,7 +302,9 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
         }
 
         private static object GetParentObjectFromUiParent(UIParent parent)
@@ -333,6 +335,7 @@ namespace Microsoft.Identity.Client
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -352,6 +355,7 @@ namespace Microsoft.Identity.Client
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -375,6 +379,7 @@ namespace Microsoft.Identity.Client
                 .WithLoginHint(loginHint)
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -398,6 +403,7 @@ namespace Microsoft.Identity.Client
                 .WithAccount(account)
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -427,6 +433,7 @@ namespace Microsoft.Identity.Client
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
                 .WithAuthority(new Uri(authority))
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -456,6 +463,7 @@ namespace Microsoft.Identity.Client
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
                 .WithAuthority(new Uri(authority))
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

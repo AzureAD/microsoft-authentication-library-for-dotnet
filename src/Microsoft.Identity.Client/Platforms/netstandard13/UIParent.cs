@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client
     public sealed class UIParent
     {
         internal CoreUIParent CoreUIParent { get; }
-
+        
         /// <summary>
         /// Platform agnostic default constructor.
         /// </summary>
