@@ -130,10 +130,10 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
         /// 
-        /// You can also user null for <paramref name="account"/> and then use one of the following:
+        /// You can also use null for <paramref name="account"/> and then use one of the following:
         /// <see cref="AcquireTokenSilentParameterBuilder.WithAccount(IAccount)"/> or 
         /// <see cref="AcquireTokenSilentParameterBuilder.WithLoginHint(string)"/> to specifiy the account in the
-        /// case where you application manages several accounts.
+        /// case where your application manages several accounts.
         /// </remarks>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {

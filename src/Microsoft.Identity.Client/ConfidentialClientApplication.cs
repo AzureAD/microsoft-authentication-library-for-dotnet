@@ -427,12 +427,12 @@ namespace Microsoft.Identity.Client
         internal ClientCredential ClientCredential => ServiceBundle.Config.ClientCredential;
 
         /// <Summary>
-        /// Application token cache. This case access tokens and refresh tokens for the application. It's maintained 
+        /// Application token cache. This case hold access tokens and refresh tokens for the application. It's maintained 
         /// and updated silently if needed when <see cref="AcquireTokenForClient(IEnumerable{string})"/> or one
         /// of the overrides of <see cref="AcquireTokenForClientAsync(IEnumerable{string})"/>
         /// </Summary>
-        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization 
-        /// (See https://aka.ms/msal-net-token-cache-serialization). This is taken care of by MSAL.NET on other platforms
+        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms
         /// </remarks>
         public ITokenCache AppTokenCache => AppTokenCacheInternal;
 
