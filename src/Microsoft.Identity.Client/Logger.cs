@@ -102,6 +102,7 @@ namespace Microsoft.Identity.Client
     /// }
     /// </code>
     /// </example>
+    [Obsolete("Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration.", true)]
     public sealed class Logger
     {
         internal static readonly object LockObj = new object();
@@ -117,6 +118,7 @@ namespace Microsoft.Identity.Client
         /// For details see https://aka.ms/msal-net-logging
         /// </summary>
         /// <exception cref="ArgumentException">will be thrown if the LogCallback was already set</exception>
+        [Obsolete("Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration.", true)]
         public static LogCallback LogCallback
         {
             set
@@ -140,6 +142,7 @@ namespace Microsoft.Identity.Client
         /// Enables you to configure the level of logging you want. The default value is <see cref="LogLevel.Info"/>. Setting it to <see cref="LogLevel.Error"/> will only get errors
         /// Setting it to <see cref="LogLevel.Warning"/> will get errors and warning, etc..
         /// </summary>
+        [Obsolete("Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration.", true)]
         public static LogLevel Level { get; set; } = LogLevel.Info;
 
         /// <summary>
@@ -149,12 +152,14 @@ namespace Microsoft.Identity.Client
         /// it to <c>true</c> for advanced debugging requiring PII
         /// </summary>
         /// <seealso cref="DefaultLoggingEnabled"/>
+        [Obsolete("Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration.", true)]
         public static bool PiiLoggingEnabled { get; set; } = false;
 
         /// <summary>
         /// Flag to enable/disable logging to platform defaults. In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
         /// In android, logcat is used. The default value is <c>false</c>
         /// </summary>
+        [Obsolete("Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration.", true)]
         public static bool DefaultLoggingEnabled { get; set; } = false;
     }
 }

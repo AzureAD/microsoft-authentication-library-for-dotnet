@@ -248,6 +248,19 @@ namespace Microsoft.Identity.Client.AppConfig
             return (T)this;
         }
 
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
+        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
+        {
+            Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
+            return (T)this;
+        }
+
         internal virtual void Validate()
         {
             // Validate that we have a client id

@@ -42,6 +42,8 @@ namespace Microsoft.Identity.Client.TelemetryCore
             _tokenCacheAccessor = tokenCacheAccessor;
         }
 
+        internal ITokenCacheAccessor Accessor => _tokenCacheAccessor;
+
 #if iOS
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
         {

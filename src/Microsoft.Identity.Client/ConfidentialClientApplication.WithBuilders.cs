@@ -117,26 +117,6 @@ namespace Microsoft.Identity.Client
             return AcquireTokenOnBehalfOfParameterBuilder.Create(this, scopes, userAssertion);
         }
 
-        /// <summary>
-        /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
-        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
-        /// This override enables you to specify a login hint and extra query parameter.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
-        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
-        /// <remarks>You can also chain the following optional parameters:
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
-        /// </remarks>
-        public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
-            IEnumerable<string> scopes)
-        {
-            return GetAuthorizationRequestUrlParameterBuilder.Create(this, scopes);
-        }
-
         async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
@@ -182,31 +162,6 @@ namespace Microsoft.Identity.Client
                 onBehalfOfParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<Uri> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParameters.Account = authorizationRequestUrlParameters.Account;
-            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
-
-            if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
-            {
-                // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?
-                requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
-            }
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParameters,
-                authorizationRequestUrlParameters.ToInteractiveParameters(),
-                null);
-
-            // todo: need to pass through cancellation token here
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
         }
     }
 #endif

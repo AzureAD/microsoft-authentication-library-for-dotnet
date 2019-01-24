@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
     /// <item><description>.NET Core does not support UI, and therefore this platform does not provide the interactive token acquisition methods</description></item>
     /// </list>
     /// </remarks>
-    public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
+    public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         /// <summary>
@@ -479,9 +479,9 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP || DESKTOP
             //hidden webview can be used in both WinRT and desktop applications.
-            parent.UseHiddenBrowser = prompt.Equals(Prompt.Never);  // todo(migration): what to do here now that Prompt.Never is gone?
+            parent.UseHiddenBrowser = prompt.Equals(Prompt.Never);
 #if WINDOWS_APP
-            parent.UseCorporateNetwork = UseCorporateNetwork;
+            parent.UseCorporateNetwork = AppConfig.UseCorporateNetwork;
 #endif
 #endif
 
@@ -638,6 +638,33 @@ namespace Microsoft.Identity.Client
         {
             return await AcquireTokenWithDeviceCode(scopes, deviceCodeResultCallback)
                 .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires an access token from an existing refresh token and stores it and the refresh token into
+        /// the application user token cache, where it will be available for further AcquireTokenSilentAsync calls.
+        /// This method can be used in migration to MSAL from ADAL v2 and in various integration
+        /// scenarios where you have a RefreshToken available.
+        /// (see https://aka.ms/msal-net-migration-adal2-msal2)
+        /// </summary>
+        /// <param name="scopes">Scope to request from the token endpoint.
+        /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
+        /// <param name="refreshToken">The refresh token (for example previously obtained from ADAL 2.x)</param>
+        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
+            }
+
+            return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
+            IEnumerable<string> scopes,
+            string refreshToken)
+        {
+            return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME

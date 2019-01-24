@@ -83,9 +83,15 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public TokenCache()
         {
+            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
             ServiceBundle = null;
-            TokenCacheAccessor = null;
-            LegacyCachePersistence = null;
+
+            // We have to create a "fake" telemetry manager here that won't have telemetry actually wired up so that 
+            // we can preserve the existing semantics of creating the TokenCache, performing operations on it such as Deserialize(), and then 
+            // attaching it to a ClientApplication.
+            // When we've fully moved to the builder-based API that doesn't take concrete TokenCache objects (and deprecated this public constructor), we can remove this.
+            TokenCacheAccessor = new TelemetryTokenCacheAccessor(new TelemetryManager(proxy, null, false), proxy.CreateTokenCacheAccessor());
+            LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
         }
 
         internal TokenCache(IServiceBundle serviceBundle)
@@ -96,8 +102,13 @@ namespace Microsoft.Identity.Client
         internal void SetServiceBundle(IServiceBundle serviceBundle)
         {
             ServiceBundle = serviceBundle;
-            TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());
-            LegacyCachePersistence = ServiceBundle.PlatformProxy.CreateLegacyCachePersistence();
+
+            // Recreate the TokenCacheAccessor with proper telemetry hookup now that the TokenCache is attached to a ClientApplication / ServiceBundle
+            TokenCacheAccessor = new TelemetryTokenCacheAccessor(ServiceBundle.TelemetryManager, TokenCacheAccessor?.Accessor ?? ServiceBundle.PlatformProxy.CreateTokenCacheAccessor());
+            if (LegacyCachePersistence == null)
+            {
+                LegacyCachePersistence = serviceBundle.PlatformProxy.CreateLegacyCachePersistence();
+            }
         }
 
         /// <summary>
@@ -117,7 +128,7 @@ namespace Microsoft.Identity.Client
         /// used in particular to provide a custom token cache serialization
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
-        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead.")]
+        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead.", true)]
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
         internal readonly object LockObject = new object();
