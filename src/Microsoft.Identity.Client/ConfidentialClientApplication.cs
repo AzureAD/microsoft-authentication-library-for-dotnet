@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Client
         internal ClientCredential ClientCredential => ServiceBundle.Config.ClientCredential;
 
         /// <Summary>
-        /// Application token cache. This case hold access tokens and refresh tokens for the application. It's maintained 
+        /// Application token cache. This case holds access tokens and refresh tokens for the application. It's maintained 
         /// and updated silently if needed when <see cref="AcquireTokenForClient(IEnumerable{string})"/> or one
         /// of the overrides of <see cref="AcquireTokenForClientAsync(IEnumerable{string})"/>
         /// </Summary>
