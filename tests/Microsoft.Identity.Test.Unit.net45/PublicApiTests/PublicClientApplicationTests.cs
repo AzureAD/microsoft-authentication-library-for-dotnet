@@ -1465,7 +1465,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void NetCore_AcquireToken_ThrowsPlatformNotSupported()
         {
             // Arrange
-            PublicClientApplication pca = new PublicClientApplication("cid");
+            PublicClientApplication pca = new PublicClientApplication(MsalTestConstants.ClientId);
             var account = new Account("a.b", null, null);
 
             // All interactive auth overloads
