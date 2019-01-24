@@ -133,6 +133,7 @@ namespace Microsoft.Identity.Client.Instance
         {
             foreach (var entry in instanceDiscoveryResponse.Metadata ?? Enumerable.Empty<InstanceDiscoveryMetadataEntry>())
             {
+                entry.TenantDiscoveryEndpoint = instanceDiscoveryResponse.TenantDiscoveryEndpoint;
                 foreach (string aliasedAuthority in entry.Aliases ?? Enumerable.Empty<string>())
                 {
                     TryAddValue(aliasedAuthority, entry);
@@ -145,6 +146,7 @@ namespace Microsoft.Identity.Client.Instance
                 {
                     PreferredNetwork = host,
                     PreferredCache = host,
+                    TenantDiscoveryEndpoint = instanceDiscoveryResponse.TenantDiscoveryEndpoint,
                     Aliases = null
                 });
         }

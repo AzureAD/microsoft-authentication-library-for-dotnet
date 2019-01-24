@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// Specifies if the public client application should used an embedded web browser
         /// or the system default browser
         /// </summary>
-        /// <param name="useEmbeddedWebView">If <c>true</c>, will used an embedded web browser,
+        /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
         /// otherwise will attempt to use a system web browser. The default depends on the platform:
         /// <c>false</c> for Xamarin.iOS and Xamarin.Android, and <c>true</c> for .NET Framework,
         /// and UWP</param>
@@ -167,11 +167,6 @@ namespace Microsoft.Identity.Client.ApiConfig
             }
             // It's ok on Windows Desktop to not have an owner window, the system will just center on the display
             // instead of a parent.
-#else
-            if (_ownerWindow != null)
-            {
-                // TODO(migration): Someone set an owner window and we're going to ignore it.  Should we throw?
-            }
 #endif
 
             Parameters.LoginHint = string.IsNullOrWhiteSpace(Parameters.LoginHint)
@@ -192,13 +187,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal override ApiEvent.ApiIds CalculateApiEventId()
         {
             ApiEvent.ApiIds apiId = ApiEvent.ApiIds.AcquireTokenWithScope;
-            if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
-            {
-                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
-            }
-            else if (Parameters.Account != null)
+            if (Parameters.Account != null)
             {
                 apiId = ApiEvent.ApiIds.AcquireTokenWithScopeUser;
+            }
+            else if (!string.IsNullOrWhiteSpace(Parameters.LoginHint))
+            {
+                apiId = ApiEvent.ApiIds.AcquireTokenWithScopeHint;
             }
 
             return apiId;

@@ -57,7 +57,7 @@ namespace CommonCache.Test.MsalV2
 
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-                var app = PublicClientApplicationBuilder.Create(v1App.ClientId).AddKnownAuthority(new Uri(v1App.Authority), true).Build();
+                var app = PublicClientApplicationBuilder.Create(v1App.ClientId).WithAuthority(new Uri(v1App.Authority), true).Build();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(
                     app.UserTokenCache,

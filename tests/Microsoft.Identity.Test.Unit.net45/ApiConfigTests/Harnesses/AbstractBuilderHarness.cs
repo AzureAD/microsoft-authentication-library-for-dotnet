@@ -25,15 +25,33 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Instance
+using System.Collections.Generic;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 {
-    internal interface IValidatedAuthoritiesCache
+    internal abstract class AbstractBuilderHarness
     {
-        bool TryAddValue(string key, Authority authority);
-        bool TryGetValue(string key, out Authority authority);
+        public AcquireTokenCommonParameters CommonParametersReceived { get; protected set; }
 
-        bool ContainsKey(string key);
+        public void ValidateCommonParameters(
+            ApiEvent.ApiIds expectedApiId,
+            string expectedAuthorityOverride = null,
+            Dictionary<string, string> expectedExtraQueryParameters = null,
+            IEnumerable<string> expectedScopes = null)
+        {
+            Assert.IsNotNull(CommonParametersReceived);
 
-        int Count { get; }
+            Assert.AreEqual(expectedApiId, CommonParametersReceived.ApiId);
+            Assert.AreEqual(expectedAuthorityOverride, CommonParametersReceived.AuthorityOverride);
+            CoreAssert.AreScopesEqual(
+                (expectedScopes ?? MsalTestConstants.Scope).AsSingleString(),
+                CommonParametersReceived.Scopes.AsSingleString());
+            CollectionAssert.AreEqual(expectedExtraQueryParameters, CommonParametersReceived.ExtraQueryParameters);
+        }
     }
 }

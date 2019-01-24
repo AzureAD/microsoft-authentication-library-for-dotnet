@@ -110,8 +110,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                // TODO(migration): this test isn't actually validating that we're sending in the extra query parameters / slice parameters
-
                 var request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
@@ -429,6 +427,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
+
                 var parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,

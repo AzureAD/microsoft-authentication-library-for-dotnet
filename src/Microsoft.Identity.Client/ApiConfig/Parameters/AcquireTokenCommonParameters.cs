@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
@@ -35,6 +36,6 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
         public IEnumerable<string> Scopes { get; set; }
         public Dictionary<string, string> ExtraQueryParameters { get; set; }
-        public string AuthorityOverride { get; set; }
+        public AuthorityInfo AuthorityOverride { get; set; }
     }
 }

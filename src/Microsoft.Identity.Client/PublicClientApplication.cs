@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client
         : base(PublicClientApplicationBuilder
                 .Create(clientId)
                 .WithRedirectUri(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId))
-                .AddKnownAuthority(new Uri(authority), true)
+                .WithAuthority(new Uri(authority), true)
                 .BuildConfiguration())
         {
         }
@@ -119,25 +119,6 @@ namespace Microsoft.Identity.Client
             {
                 keychainSecurityGroup = value;
                 UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
-            }
-        }
-
-        /// <inheritdoc />
-        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
-        public string KeychainSecurityGroup
-        {
-            get
-            {
-                return keychainSecurityGroup;
-            }
-            set
-            {
-                keychainSecurityGroup = value;
-                UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
-                // todo(migration): ensure this is correct, esp since this is obsolete.  Or can we just delete it now?
-                //UserTokenCache.TokenCacheAccessor.SetKeychainSecurityGroup(value);
-                //(UserTokenCache.LegacyCachePersistence as iOSLegacyCachePersistence)
-                //    .SetKeychainSecurityGroup(value);
             }
         }
 #endif
@@ -273,7 +254,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -302,7 +283,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
@@ -321,7 +302,9 @@ namespace Microsoft.Identity.Client
             GuardNetCore();
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
         }
 
         private static object GetParentObjectFromUiParent(UIParent parent)
@@ -352,6 +335,7 @@ namespace Microsoft.Identity.Client
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithLoginHint(loginHint)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -371,6 +355,7 @@ namespace Microsoft.Identity.Client
 
             return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
                 .WithAccount(account)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -394,6 +379,7 @@ namespace Microsoft.Identity.Client
                 .WithLoginHint(loginHint)
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -417,6 +403,7 @@ namespace Microsoft.Identity.Client
                 .WithAccount(account)
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -445,7 +432,8 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -474,7 +462,8 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
+                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -533,7 +522,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobilePlatforms();
 
-            return await AcquireTokenWithUsernamePassword(scopes, username, securePassword)
+            return await AcquireTokenByUsernamePassword(scopes, username, securePassword)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -670,7 +659,7 @@ namespace Microsoft.Identity.Client
             GuardNonWindowsFrameworks();
             GuardIWANetCore();
 
-            return await AcquireTokenWithIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenByIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
 
@@ -689,7 +678,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNonWindowsFrameworks();
 
-            return await AcquireTokenWithIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenByIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         private static void GuardNonWindowsFrameworks()
@@ -723,7 +712,7 @@ namespace Microsoft.Identity.Client
         public PublicClientApplication(string clientId, string authority, TokenCache userTokenCache)
             : this(PublicClientApplicationBuilder
                    .Create(clientId)
-                   .AddKnownAuthority(new Uri(authority), true)
+                   .WithAuthority(new Uri(authority), true)
                    .BuildConfiguration())
         {
             GuardOnMobilePlatforms();

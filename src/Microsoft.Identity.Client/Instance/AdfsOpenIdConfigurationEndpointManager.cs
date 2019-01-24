@@ -48,13 +48,12 @@ namespace Microsoft.Identity.Client.Instance
             _serviceBundle = serviceBundle;
         }
 
-        /// <inheritdoc />
         public async Task<string> GetOpenIdConfigurationEndpointAsync(
             AuthorityInfo authorityInfo,
             string userPrincipalName,
             RequestContext requestContext)
         {
-            // todo(migration):  make sure this is correct or if we need to check authority type (e.g. b2c) if (authorityInfo.ValidateAuthority)
+            if (authorityInfo.ValidateAuthority)
             {
                 var drsResponse = await GetMetadataFromEnrollmentServerAsync(userPrincipalName, requestContext)
                                       .ConfigureAwait(false);

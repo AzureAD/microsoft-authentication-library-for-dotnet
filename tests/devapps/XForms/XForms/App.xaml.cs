@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Xamarin.Forms;
 
 namespace XForms
@@ -39,10 +40,18 @@ namespace XForms
         public static PublicClientApplication MsalPublicClient;
         public static UIParent UIParent { get; set; }
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
+        // For system browser
+        //public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
         public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
-        public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+        // For system browser
+        //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+        
+        public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
+        // For system browser
+        //public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";
@@ -62,6 +71,8 @@ namespace XForms
 
         public static string[] Scopes = DefaultScopes;
 
+        public static event EventHandler MsalApplicationUpdated;
+
         public App()
         {
             MainPage = new NavigationPage(new XForms.MainPage());
@@ -78,20 +89,21 @@ namespace XForms
 
         public static void InitPublicClient()
         {
-            MsalPublicClient = new PublicClientApplication(ClientId, Authority);
+            var builder = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(new Uri(Authority), ValidateAuthority);
 
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)
             {
                 case "iOS":
-                    MsalPublicClient.RedirectUri = RedirectUriOnIos;
+                    builder.WithRedirectUri(RedirectUriOnIos);
                     break;
                 case "Android":
-                    MsalPublicClient.RedirectUri = RedirectUriOnAndroid;
+                    builder.WithRedirectUri(RedirectUriOnAndroid);
                     break;
             }
 
-            MsalPublicClient.ValidateAuthority = ValidateAuthority;
+            MsalPublicClient = builder.BuildConcrete();
+            MsalApplicationUpdated?.Invoke(null, null);
         }
 
         protected override void OnStart()

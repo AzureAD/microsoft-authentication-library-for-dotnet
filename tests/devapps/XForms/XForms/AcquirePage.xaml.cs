@@ -72,36 +72,36 @@ namespace XForms
         {
             var options = new List<string>
             {
-                UIBehavior.SelectAccount.PromptValue,
-                UIBehavior.ForceLogin.PromptValue,
-                UIBehavior.Consent.PromptValue,
-                UIBehavior.NoPrompt.PromptValue
+                Prompt.SelectAccount.PromptValue,
+                Prompt.ForceLogin.PromptValue,
+                Prompt.Consent.PromptValue,
+                Prompt.NoPrompt.PromptValue
             };
 
             UIBehaviorPicker.ItemsSource = options;
-            UIBehaviorPicker.SelectedItem = UIBehavior.ForceLogin.PromptValue;
+            UIBehaviorPicker.SelectedItem = Prompt.ForceLogin.PromptValue;
         }
 
-        private UIBehavior GetUIBehavior()
+        private Prompt GetUIBehavior()
         {
             var selectedUIBehavior = UIBehaviorPicker.SelectedItem as string;
 
-            if (UIBehavior.ForceLogin.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
+            if (Prompt.ForceLogin.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
             {
-                return UIBehavior.ForceLogin;
+                return Prompt.ForceLogin;
             }
 
-            if (UIBehavior.Consent.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
+            if (Prompt.Consent.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
             {
-                return UIBehavior.Consent;
+                return Prompt.Consent;
             }
 
-            if (UIBehavior.NoPrompt.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
+            if (Prompt.NoPrompt.PromptValue.Equals(selectedUIBehavior, StringComparison.OrdinalIgnoreCase))
             {
-                return UIBehavior.NoPrompt;
+                return Prompt.NoPrompt;
             }
 
-            return UIBehavior.SelectAccount;
+            return Prompt.SelectAccount;
         }
 
         private string GetExtraQueryParams()
@@ -299,6 +299,8 @@ namespace XForms
             {
                 acquireResponseLabel.Text = "Exception - " + exception.Message;
             }
+
+            System.Console.WriteLine(exception.Message);
         }
     }
 }

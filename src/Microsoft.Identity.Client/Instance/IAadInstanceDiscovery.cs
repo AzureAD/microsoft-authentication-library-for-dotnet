@@ -33,10 +33,6 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal interface IAadInstanceDiscovery
     {
-        Task<InstanceDiscoveryResponse> DoInstanceDiscoveryAndCacheAsync(
-            Uri authority,
-            RequestContext requestContext);
-
         Task<InstanceDiscoveryMetadataEntry> GetMetadataEntryAsync(
             Uri authority,
             RequestContext requestContext);

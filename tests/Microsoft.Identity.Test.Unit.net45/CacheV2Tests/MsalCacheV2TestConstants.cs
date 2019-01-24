@@ -11,8 +11,6 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public const string Uid = "my-uid";
         public const string Utid = "my-utid";
 
-        public const string ClientId = "client_id";
-
         public const string AuthorityTestTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         
         public const long ValidExpiresIn = 3600;

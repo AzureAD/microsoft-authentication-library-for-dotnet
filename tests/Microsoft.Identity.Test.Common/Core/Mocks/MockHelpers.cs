@@ -32,7 +32,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -53,19 +53,19 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
             ":\"" + CreateClientInfo() + "\",\"id_token\"" +
-            ":\"" + CreateIdToken(CoreTestConstants.UniqueId, CoreTestConstants.DisplayableId) +
+            ":\"" + CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
         public static readonly string DefaultAdfsTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
             "\"scope1 scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
-            ":\"" + CreateAdfsIdToken(CoreTestConstants.OnPremiseDisplayableId) +
+            ":\"" + CreateAdfsIdToken(MsalTestConstants.OnPremiseDisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
         public static string CreateClientInfo()
         {
-            return CreateClientInfo(CoreTestConstants.Uid, CoreTestConstants.Utid);
+            return CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid);
         }
 
         public static string CreateClientInfo(string uid, string utid)
@@ -173,7 +173,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)
         {
-            string idToken = CreateIdToken(uniqueId, displayableId, CoreTestConstants.Utid);
+            string idToken = CreateIdToken(uniqueId, displayableId, MsalTestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
             HttpContent content =
                 new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static string CreateIdToken(string uniqueId, string displayableId)
         {
-            return CreateIdToken(uniqueId, displayableId, CoreTestConstants.Utid);
+            return CreateIdToken(uniqueId, displayableId, MsalTestConstants.Utid);
         }
 
         public static string CreateIdToken(string uniqueId, string displayableId, string tenantId)
@@ -210,14 +210,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         public static string CreateAdfsIdToken(string upn)
         {
             string id = "{\"aud\": \"e854a4a7-6c34-449c-b237-fc7a28093d84\"," +
-                        "\"iss\": \"" + CoreTestConstants.OnPremiseAuthority + "\"," +
+                        "\"iss\": \"" + MsalTestConstants.OnPremiseAuthority + "\"," +
                         "\"iat\": 1455833828," +
                         "\"nbf\": 1455833828," +
                         "\"exp\": 1455837728," +
                         "\"ipaddr\": \"131.107.159.117\"," +
                         "\"name\": \"Marrrrrio Bossy\"," +
                         "\"upn\": \"" + upn + "\"," +
-                        "\"sub\": \"" + CoreTestConstants.OnPremiseUniqueId + "\"," +
+                        "\"sub\": \"" + MsalTestConstants.OnPremiseUniqueId + "\"," +
                         "\"ver\": \"2.0\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));

@@ -49,10 +49,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
         {
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.AuthorityHomeTenant);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
 
                 var response = httpManager.SendPostAsync(
-                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
+                    new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token"),
                     null,
                     (IDictionary<string, string>)null,
                     null).Result;
@@ -80,10 +80,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
 
             using (var httpManager = new MockHttpManager())
             {
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(CoreTestConstants.AuthorityHomeTenant, bodyParameters, queryParams);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant, bodyParameters, queryParams);
 
                 var response = httpManager.SendPostAsync(
-                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
+                    new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/v2.0/token?key1=qp1&key2=qp2"),
                     queryParams,
                     bodyParameters,
                     null).Result;
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddSuccessTokenResponseMockHandlerForGet(queryParameters: queryParams);
 
                 var response = httpManager.SendGetAsync(
-                    new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
+                    new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token?key1=qp1&key2=qp2"),
                     queryParams,
                     null).Result;
 
@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 RequestContext.CreateForTest())
                                                             .ConfigureAwait(false);
@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 httpManager.AddResiliencyMessageMockHandler(HttpMethod.Post, HttpStatusCode.BadGateway);
 
                 var msalHttpResponse = await httpManager.SendPostForceResponseAsync(
-                                                            new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                            new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                             new Dictionary<string, string>(),
                                                             new StringContent("body"),
                                                             RequestContext.CreateForTest())
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendPostAsync(
-                                                                new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 (IDictionary<string, string>)null,
                                                                 RequestContext.CreateForTest())
@@ -204,7 +204,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendGetAsync(
-                                                                new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 RequestContext.CreateForTest())
                                                             .ConfigureAwait(false);
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 try
                 {
                     var msalHttpResponse = await httpManager.SendPostAsync(
-                                                                new Uri(CoreTestConstants.AuthorityHomeTenant + "oauth2/token"),
+                                                                new Uri(MsalTestConstants.AuthorityHomeTenant + "oauth2/token"),
                                                                 new Dictionary<string, string>(),
                                                                 new Dictionary<string, string>(),
                                                                 RequestContext.CreateForTest())

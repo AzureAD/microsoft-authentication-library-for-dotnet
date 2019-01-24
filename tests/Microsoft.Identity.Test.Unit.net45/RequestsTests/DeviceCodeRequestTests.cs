@@ -60,7 +60,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         private const int ExpectedInterval = 1;
         private const string ExpectedVerificationUrl = "https://microsoft.com/devicelogin";
         private const string ExpectedAdfsVerificationUrl = "https://fs.contoso.com/adfs/oauth2/deviceauth";
-        private IValidatedAuthoritiesCache _validatedAuthoritiesCache;
 
         private string ExpectedMessage =>
             $"To sign in, use a web browser to open the page {ExpectedVerificationUrl} and enter the code {ExpectedUserCode} to authenticate.";
@@ -89,7 +88,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         public void TestInitialize()
         {
             TestCommon.ResetStateAndInitMsal();
-            _validatedAuthoritiesCache = new ValidatedAuthoritiesCache();
         }
 
         private HttpResponseMessage CreateDeviceCodeResponseSuccessMessage()
@@ -181,15 +179,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
 
                 DeviceCodeResult actualDeviceCodeResult = null;
-                var request = new DeviceCodeRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    ApiEvent.ApiIds.None,
-                    result =>
+
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
+                {
+                    DeviceCodeResultCallback = result =>
                     {
                         actualDeviceCodeResult = result;
                         return Task.FromResult(0);
-                    });
+                    }
+                };
+
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 task.Wait();
                 var authenticationResult = task.Result;
@@ -401,7 +402,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
             }
 
-            return authParameters;
+            return parameters;
         }
 
         private class _LogData

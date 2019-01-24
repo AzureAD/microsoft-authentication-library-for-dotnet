@@ -27,6 +27,7 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -102,9 +103,9 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <inheritdoc />
-        internal override ApplicationConfiguration BuildConfiguration()
+        internal override void Validate()
         {
-            base.BuildConfiguration();
+            base.Validate();
 
             int countOfCredentialTypesSpecified = 0;
 
@@ -125,9 +126,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (countOfCredentialTypesSpecified > 1)
             {
-                // TODO(migration): move text into string literals file.
-                throw new InvalidOperationException(
-                    "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.");
+                throw new InvalidOperationException(CoreErrorMessages.ClientSecretAndCertificateAreMutuallyExclusive);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
@@ -140,7 +139,15 @@ namespace Microsoft.Identity.Client.AppConfig
                 Config.ClientCredential = new ClientCredential(new ClientAssertionCertificate(Config.Certificate));
             }
 
-            return Config;
+            if (string.IsNullOrWhiteSpace(Config.RedirectUri))
+            {
+                Config.RedirectUri = Constants.DefaultConfidentialClientRedirectUri;
+            }
+
+            if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
+            {
+                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
+            }
         }
 
         /// <summary>

@@ -28,6 +28,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -38,15 +40,14 @@ namespace Microsoft.Identity.Client
     public partial interface IClientApplicationBase
     {
         /// <summary>
+        /// Details on the configuration of the ClientApplication for debugging purposes.
+        /// </summary>
+        IAppConfig AppConfig { get; }
+
+        /// <summary>
         /// TODO(migration): this is a new field, needs documentation.
         /// </summary>
         ITokenCache UserTokenCache { get; }
-
-        /// <summary>
-        /// Identifier of the component (libraries/SDK) consuming MSAL.NET. 
-        /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
-        /// </summary>
-        string Component { get; set; } // todo(migration):  deprecate set
 
         /// <Summary>
         /// Gets the URL of the authority, or the security token service (STS) from which MSAL.NET will acquire security tokens.
@@ -61,47 +62,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         string ClientId { get; }
 
-#if !DESKTOP && !NET_CORE
-#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
-#endif
-        /// <summary>
-        /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens. 
-        /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app)
-        /// In MSAL.NET, <see cref="T:PublicClientApplication"/> define the following default RedirectUri values:
-        /// <list type="bullet">
-        /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
-        /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android (as this will be used by the system web browser by default on these
-        /// platforms to call back the application)
-        /// </description></item>
-        /// </list>
-        /// These default URIs could change in the future.
-        /// In <see cref="Microsoft.Identity.Client.ConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
-        /// </summary>
-        /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
-        /// you then need to add the reply URL of the deployed application in the application registration portal.
-        /// </remarks>
-        string RedirectUri { get; set; }
-#pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
-
-        /// <summary>
-        /// Gets a boolean value telling the application if the authority needs to be verified against a list of known authorities. The default
-        /// value is <c>true</c>. It should currently be set to <c>false</c> for Azure AD B2C authorities as those are customer specific 
-        /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
-        /// </summary>
-        bool ValidateAuthority { get; }
-
         /// <summary>
         /// Returns all the available <see cref="IAccount">accounts</see> in the user token cache for the application.
         /// </summary>
         Task<IEnumerable<IAccount>> GetAccountsAsync();
-
-        /// <summary>
-        /// Sets or Gets a custom query parameters that may be sent to the STS for dogfood testing or debugging. This is a string of segments
-        /// of the form <c>key=value</c> separated by an ampersand character.
-        /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
-        /// </summary>
-        [Obsolete("Use ExtraQueryParameters on each call instead.")]  // todo(migration): documentation
-        string SliceParameters { get; set; }
 
         /// <summary>
         /// Get the <see cref="IAccount"/> by its identifier among the accounts available in the token cache.
@@ -154,6 +118,32 @@ namespace Microsoft.Identity.Client
             IAccount account,
             string authority,
             bool forceRefresh);
+
+        /// <summary>
+        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
+        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or the user needs to perform two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(System.Uri, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        /// </remarks>
+        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account);
 
         /// <summary>
         /// Removes all tokens in the cache for the specified account.

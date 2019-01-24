@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit
                     MsalTestConstants.DefaultPassword);
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(
+                                                              .WithAuthority(
                                                                   new System.Uri(ClientApplicationBase.DefaultAuthority),
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithHttpManager(harness.HttpManager)
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Test.Unit
                     MsalTestConstants.DefaultPassword);
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(
+                                                              .WithAuthority(
                                                                   new System.Uri(ClientApplicationBase.DefaultAuthority),
                                                                   true).WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithHttpManager(harness.HttpManager)

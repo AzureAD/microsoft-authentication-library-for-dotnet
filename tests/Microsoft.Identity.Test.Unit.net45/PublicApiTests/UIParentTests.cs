@@ -1,5 +1,4 @@
 ﻿//----------------------------------------------------------------------
-//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -66,7 +65,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
-        public void UIParent_NetstndardCtor()
+        public void UIParent_NetstandardCtor()
         {
             object parent = "parent";
             UIParent uiParent = new UIParent(parent, true);

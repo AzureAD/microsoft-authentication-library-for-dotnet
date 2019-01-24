@@ -156,7 +156,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void ConstructorsTest()
         {
             var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .AddKnownAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
+                                                          .WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientSecret(MsalTestConstants.ClientSecret)
                                                           .BuildConcrete();
@@ -166,7 +166,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNotNull(app.AppTokenCache);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            Assert.AreEqual(MsalTestConstants.RedirectUri, app.RedirectUri);
+            Assert.AreEqual(MsalTestConstants.RedirectUri, app.AppConfig.RedirectUri);
             Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
             Assert.IsNotNull(app.ClientCredential);
             Assert.IsNotNull(app.ClientCredential.Secret);
@@ -175,18 +175,35 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.IsNull(app.ClientCredential.Assertion);
 
             app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                      .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
+                                                      .WithAuthority(new Uri(MsalTestConstants.AuthorityGuestTenant), true)
                                                       .WithRedirectUri(MsalTestConstants.RedirectUri).WithClientSecret("secret")
                                                       .BuildConcrete();
 
+            Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
+
             app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                      .AddKnownAdfsAuthority(new Uri(MsalTestConstants.OnPremiseAuthority), true)
+                                                      .WithAdfsAuthority(MsalTestConstants.OnPremiseAuthority, true)
                                                       .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                       .WithClientCredential(MsalTestConstants.OnPremiseCredentialWithSecret)
                                                       .BuildConcrete();
 
 
-            Assert.AreEqual(MsalTestConstants.AuthorityGuestTenant, app.Authority);
+            Assert.AreEqual(MsalTestConstants.OnPremiseAuthority, app.Authority);
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void TestConstructorWithNullRedirectUri()
+        {
+            var app = new ConfidentialClientApplication(
+                MsalTestConstants.ClientId,
+                ClientApplicationBase.DefaultAuthority,
+                null,
+                new ClientCredential("the_secret"),
+                new TokenCache(),
+                new TokenCache());
+
+            Assert.AreEqual(Constants.DefaultConfidentialClientRedirectUri, app.AppConfig.RedirectUri);
         }
 
         [TestMethod]
@@ -198,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -226,7 +243,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -271,7 +288,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             TelemetryCallback telemetryCallback = null)
         {
             var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                          .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientCredential(cc)
                                                           .WithHttpManager(httpManager)
@@ -389,7 +406,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -417,7 +434,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -456,7 +473,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -493,7 +510,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -551,7 +568,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
+                                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -574,7 +591,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
                 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                                                              .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -609,7 +626,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
+                                                              .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
@@ -620,7 +637,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
 
-                // add mock response for successful token retrival
+                // add mock response for successful token retrieval
                 const string TokenRetrievedFromNetCall = "token retrieved from network call";
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
@@ -658,7 +675,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                              .AddKnownAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
+                                                              .WithAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret("secret")
                                                               .WithHttpManager(httpManager)
@@ -677,7 +694,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
 
                 app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .AddKnownAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
+                                                          .WithAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientSecret("secret")
                                                           .WithHttpManager(httpManager)
@@ -702,7 +719,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
                 
                 var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .AddKnownAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), true)
+                                                          .WithAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), true)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientSecret(MsalTestConstants.ClientSecret)
                                                           .WithHttpManager(httpManager)

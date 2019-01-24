@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Test.Unit
 
                 var app = PublicClientApplicationBuilder
                     .Create(MsalTestConstants.ClientId)
-                          .AddKnownAuthority(authorityUri, true)
+                          .WithAuthority(authorityUri, true)
                           .WithHttpManager(httpManager)
                           .WithUserTokenLegacyCachePersistenceForTest(new TestLegacyCachePersistance())
                           .BuildConcrete();
@@ -93,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success,
-                    app.RedirectUri + "?code=some-code"), null, MsalTestConstants.ProductionPrefNetworkEnvironment);
+                    app.AppConfig.RedirectUri + "?code=some-code"), null, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
                 // mock token request
                 httpManager.AddMockHandler(new MockHttpMessageHandler

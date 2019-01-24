@@ -72,9 +72,6 @@ namespace Microsoft.Identity.Client.Cache
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);
-        
-        // Will remove in v3.
-        void SetKeychainSecurityGroup(string keychainSecurityGroup);
 #endif
 
         void Clear();

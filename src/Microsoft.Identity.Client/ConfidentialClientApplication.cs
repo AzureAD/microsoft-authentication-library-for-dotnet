@@ -83,7 +83,7 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
-                .AddKnownAuthority(new Uri(DefaultAuthority), true)
+                .WithAuthority(new Uri(DefaultAuthority), true)
                 .WithRedirectUri(redirectUri)
                 .WithClientCredential(clientCredential)
                 .BuildConfiguration())
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
-                .AddKnownAuthority(new Uri(authority), true)
+                .WithAuthority(new Uri(authority), true)
                 .WithRedirectUri(redirectUri)
                 .WithClientCredential(clientCredential)
                 .BuildConfiguration())
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
             string authority)
         {
             GuardMobileFrameworks();
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(new Uri(authority)).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthorityOverride(authority).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(new Uri(authority)).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -260,7 +260,6 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            // TODO(migration): AcquireTokenForClientWithScope
             return await AcquireTokenForClient(scopes)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -372,7 +371,7 @@ namespace Microsoft.Identity.Client
                 .WithLoginHint(loginHint)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthorityOverride(authority)
+                .WithAuthority(new Uri(authority))
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
         }

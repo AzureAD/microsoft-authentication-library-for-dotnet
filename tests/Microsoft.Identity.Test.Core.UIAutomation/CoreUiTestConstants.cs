@@ -25,7 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Test.Core.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
     public static class CoreUiTestConstants
     {
@@ -34,12 +34,18 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public const string Exchange = "https://outlook.office365.com/";
 
         //MSAL test app
-        public const string AcquireTokenId = "acquireToken";
-        public const string AcquireTokenSilentId = "acquireTokenSilent";
+        public const string AcquireTokenButtonId = "acquireToken_button";
+        public const string AcquireTokenWithPromptBehaviorAlwaysId = "acquireTokenPromptBehaviorAlways";
+        public const string AcquireTokenSilentButtonId = "acquireTokenSilent_button";
         public const string ClientIdEntryId = "clientIdEntry";
+        public const string ResourceEntryId = "resourceEntry";
+        public const string PromptBehaviorEntryId = "promptBehaviorEntry";
+        public const string PromptBehaviorAuto = "auto";
+        public const string PromptBehaviorAlways = "always";
+        public const string SecondPageId = "secondPage";
         public const string ClearCacheId = "clearCache";
-        public const string SaveId = "saveButton";
-        public const string WebUpnInputId = "i0116";
+        public const string SaveID = "saveButton";
+        public const string WebUPNInputId = "i0116";
         public const string AdfsV4WebPasswordId = "passwordInput";
         public const string AdfsV4WebSubmitId = "submitButton";
         public const string WebPasswordId = "i0118";
@@ -50,9 +56,14 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public const string ClearAllCacheId = "ClearAllCache";
 
         public const string DefaultScope = "User.Read";
-        public const string AcquirePageId = "Acquire";
-        public const string CachePageId = "Cache";
-        public const string SettingsPageId = "Settings";
+        public const string AcquirePageId = "AcquirePage";
+        public const string CachePageID = "CachePage";
+        public const string SettingsPageId = "SettingsPage";
+        public const string LogPageId = "LogPage";
+        public const string AcquirePageAndroidId = "Acquire";
+        public const string CachePageAndroidID = "Cache";
+        public const string SettingsPageAndroidId = "Settings";
+        public const string LogPageAndroidId = "Log";
         public const string ScopesEntryId = "scopesList";
         public const string UiBehaviorPickerId = "uiBehavior";
         public const string SelectUser = "userList";
@@ -60,6 +71,11 @@ namespace Microsoft.Identity.Test.Core.UIAutomation
         public const string UserMissingFromResponse = "Missing from the token response";
         public const string RedirectUriOnAndroid = "urn:ietf:wg:oauth:2.0:oob";
         public const string RedirectUriEntryId = "redirectUriEntry";
+
+        // ADFSv2 fields
+        public const string AdfsV2WebUsernameInputId = "ContentPlaceHolder1_UsernameTextBox";
+        public const string AdfsV2WebPasswordInputId = "ContentPlaceHolder1_PasswordTextBox";
+        public const string AdfsV2WebSubmitButtonId = "ContentPlaceHolder1_SubmitButton";
 
         //MSAL B2C
         public const string AuthorityPickerId = "b2cAuthorityPicker";

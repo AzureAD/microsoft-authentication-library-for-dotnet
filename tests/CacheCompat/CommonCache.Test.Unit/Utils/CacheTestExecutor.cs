@@ -71,7 +71,7 @@ namespace CommonCache.Test.Unit.Utils
 
             var api = new LabServiceApi(new KeyVaultSecretsProvider());
             var labUser = api.GetLabResponse(
-                new UserQueryParameters
+                new UserQuery
                 {
                     UserType = UserType.Member,
                     IsFederatedUser = false

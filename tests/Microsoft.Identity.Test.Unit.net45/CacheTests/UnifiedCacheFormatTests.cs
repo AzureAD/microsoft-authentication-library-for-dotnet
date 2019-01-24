@@ -195,14 +195,14 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 PublicClientApplication app = PublicClientApplicationBuilder
                                               .Create(ClientId)
-                                              .AddKnownAuthority(new Uri(RequestAuthority), true)
+                                              .WithAuthority(new Uri(RequestAuthority), true)
                                               .WithHttpManager(harness.HttpManager)
                                               .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success,
-                    app.RedirectUri + "?code=some-code"));
+                    app.AppConfig.RedirectUri + "?code=some-code"));
 
                 //add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler

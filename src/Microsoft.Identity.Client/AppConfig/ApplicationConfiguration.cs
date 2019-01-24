@@ -36,15 +36,13 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
-        private readonly List<AuthorityInfo> _authorityInfos = new List<AuthorityInfo>();
-
         public bool IsBrokerEnabled { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
-        public IEnumerable<AuthorityInfo> Authorities => _authorityInfos.AsEnumerable();
+        public AuthorityInfo AuthorityInfo { get; internal set; }
         public string ClientId { get; internal set; }
         public string TenantId { get; internal set; }
-        public string RedirectUri { get; internal set; } = Constants.DefaultRedirectUri;
+        public string RedirectUri { get; internal set; }
         public bool EnablePiiLogging { get; internal set; }
         public LogLevel LogLevel { get; internal set; } = LogLevel.Warning;
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
@@ -52,7 +50,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
         public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
-        public AuthorityInfo DefaultAuthorityInfo => Authorities.Single(x => x.IsDefault);
         public string Component { get; internal set; }
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
@@ -78,10 +75,5 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
         internal string Instance { get; set; }
-
-        internal void AddAuthorityInfo(AuthorityInfo authorityInfo)
-        {
-            _authorityInfos.Add(authorityInfo);
-        }
     }
 }

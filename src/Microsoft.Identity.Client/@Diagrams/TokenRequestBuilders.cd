@@ -172,23 +172,23 @@
       <FileName>ApiConfig\AcquireTokenWithDeviceCodeParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenWithIntegratedWindowsAuthParameterBuilder">
+  <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByIntegratedWindowsAuthParameterBuilder">
     <Position X="13.5" Y="6.5" Width="4" />
     <Members>
-      <Method Name="AcquireTokenWithIntegratedWindowsAuthParameterBuilder" Hidden="true" />
+      <Method Name="AcquireTokenByIntegratedWindowsAuthParameterBuilder" Hidden="true" />
       <Method Name="Create" Hidden="true" />
       <Method Name="ExecuteAsync" Hidden="true" />
     </Members>
     <TypeIdentifier>
       <HashCode>AAAAABAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAEA=</HashCode>
-      <FileName>ApiConfig\AcquireTokenWithIntegratedWindowsAuthParameterBuilder.cs</FileName>
+      <FileName>ApiConfig\AcquireTokenByIntegratedWindowsAuthParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenWithUsernamePasswordParameterBuilder" Collapsed="true">
+  <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByUsernamePasswordParameterBuilder" Collapsed="true">
     <Position X="12.25" Y="5.25" Width="3.5" />
     <TypeIdentifier>
       <HashCode>AAIAABAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAEA=</HashCode>
-      <FileName>ApiConfig\AcquireTokenWithUsernamePasswordParameterBuilder.cs</FileName>
+      <FileName>ApiConfig\AcquireTokenByUsernamePasswordParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

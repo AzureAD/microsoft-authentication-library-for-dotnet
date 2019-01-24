@@ -32,8 +32,6 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
@@ -48,20 +46,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AcquireTokenCommonParameters commonParameters, 
             RequestContext requestContext)
         {
-            Authority authorityInstance = customAuthority ?? (string.IsNullOrWhiteSpace(commonParameters.AuthorityOverride)
-                                                                  ? Instance.Authority.CreateAuthority(serviceBundle)
-                                                                  : Instance.Authority.CreateAuthorityWithOverride(
+            Authority authorityInstance = customAuthority ?? (commonParameters.AuthorityOverride == null
+                                                                  ? Authority.CreateAuthority(serviceBundle)
+                                                                  : Authority.CreateAuthorityWithOverride(
                                                                       serviceBundle,
-                                                                      AuthorityInfo.FromAuthorityUri(
-                                                                          commonParameters.AuthorityOverride,
-                                                                          false)));
+                                                                      commonParameters.AuthorityOverride));
 
             Authority = authorityInstance;
             ClientId = serviceBundle.Config.ClientId;
             TokenCache = tokenCache;
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>();
-            RedirectUri = new Uri(serviceBundle.Config.RedirectUri);  // todo(migration): can we consistently check for redirecturi override here from commonParameters?
+            RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             ApiId = commonParameters.ApiId;
         }

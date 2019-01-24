@@ -85,11 +85,11 @@ namespace Microsoft.Identity.Client.Instance
                     CoreErrorMessages.UpnRequiredForAuthorityValidation);
             }
 
-            if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
+            /*if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
             {
                 var auth = (AdfsAuthority)authority;
                 return auth._validForDomainsList.Contains(GetDomainFromUpn(userPrincipalName));
-            }
+            }*/
 
             return false;
         }
@@ -97,13 +97,13 @@ namespace Microsoft.Identity.Client.Instance
         protected void AddToValidatedAuthorities(string userPrincipalName)
         {
             var authorityInstance = this;
-            if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
+            /*if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
             {
                 authorityInstance = (AdfsAuthority)authority;
             }
 
             authorityInstance._validForDomainsList.Add(GetDomainFromUpn(userPrincipalName));
-            ServiceBundle.ValidatedAuthoritiesCache.TryAddValue(AuthorityInfo.CanonicalAuthority, authorityInstance);
+            ServiceBundle.ValidatedAuthoritiesCache.TryAddValue(AuthorityInfo.CanonicalAuthority, authorityInstance);*/
         }
 
         private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(

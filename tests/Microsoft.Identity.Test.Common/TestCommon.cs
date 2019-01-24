@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Unit;
 
@@ -41,7 +42,6 @@ namespace Microsoft.Identity.Test.Common
         {
             // This initializes the classes so that the statics inside them are fully initialized, and clears any cached content in them.
             new AadInstanceDiscovery(null, null, null, true);
-            new ValidatedAuthoritiesCache(true);
             new AuthorityEndpointResolutionManager(null, true);
         }
 
@@ -58,13 +58,14 @@ namespace Microsoft.Identity.Test.Common
             {
                 ClientId = clientId,
                 HttpManager = httpManager,
+                RedirectUri = PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(clientId),
                 TelemetryCallback = telemetryCallback,
                 LoggingCallback = logCallback,
                 LogLevel = LogLevel.Verbose,
                 EnablePiiLogging = enablePiiLogging,
-                IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled
+                IsExtendedTokenLifetimeEnabled = isExtendedTokenLifetimeEnabled,
+                AuthorityInfo = AuthorityInfo.FromAuthorityUri(authority, false)
             };
-            appConfig.AddAuthorityInfo(AuthorityInfo.FromAuthorityUri(authority, true));
             return ServiceBundle.Create(appConfig);
         }
 

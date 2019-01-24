@@ -57,7 +57,7 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(
             IEnumerable<string> scopes, 
-            UIBehavior uiBehavior, 
+            Prompt uiBehavior, 
             string extraQueryParams, 
             UIParent uiParent)
         {
@@ -89,7 +89,7 @@ namespace DesktopTestApp
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthorityAsync(
             IEnumerable<string> scopes, 
-            UIBehavior uiBehavior, 
+            Prompt uiBehavior, 
             string extraQueryParams, 
             UIParent uiParent)
         {
@@ -147,7 +147,7 @@ namespace DesktopTestApp
             {
                 // Use the override authority provided
                 PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
-                    .AddKnownAuthority(new Uri(interactiveAuthority), true)
+                    .WithAuthority(new Uri(interactiveAuthority), true)
                     .WithComponent(_component)
                     .BuildConcrete();
 

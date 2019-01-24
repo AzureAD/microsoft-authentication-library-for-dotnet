@@ -25,6 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Globalization;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {
@@ -135,5 +137,13 @@ namespace Microsoft.Identity.Client
 
         public const string ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor =
             "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.";
+
+        public const string ClientSecretAndCertificateAreMutuallyExclusive = "ClientSecret and Certificate are mutually exclusive properties.  Only specify one.";
+        public const string ClientIdMustBeAGuid = "Error: ClientId is not a Guid.";
+
+        public static string InvalidRedirectUriReceived(string invalidRedirectUri)
+        {
+            return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class.";
+        }
     }
 }

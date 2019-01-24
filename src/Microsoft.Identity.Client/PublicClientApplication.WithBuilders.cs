@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction
         /// </remarks>
@@ -98,12 +98,9 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You can also pass optional parameters by calling:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
-        /// 
-        /// TODO: check if we could also pass login_hint or account (I would not think they are taken into account)
-        /// 
         /// </remarks>
         public AcquireTokenWithDeviceCodeParameterBuilder AcquireTokenWithDeviceCode(
             IEnumerable<string> scopes,
@@ -121,21 +118,21 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>
         /// You can also pass optional parameters by calling:
-        /// <see cref="AcquireTokenWithIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
+        /// <see cref="AcquireTokenByIntegratedWindowsAuthParameterBuilder.WithUsername(string)"/> to pass the identifier
         /// of the user account for which to acquire a token with Integrated Windows authentication. This is generally in
         /// UserPrincipalName (UPN) format, e.g. john.doe@contoso.com. This is normally not needed, but some Windows administrators
         /// set policies preventing applications from looking-up the signed-in user in Windows, and in that case the username
         /// needs to be passed.
         /// You can also chain with
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
-        public AcquireTokenWithIntegratedWindowsAuthParameterBuilder AcquireTokenWithIntegratedWindowsAuth(
+        public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes)
         {
-            return AcquireTokenWithIntegratedWindowsAuthParameterBuilder.Create(this, scopes);
+            return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(this, scopes);
         }
 
         /// <summary>
@@ -149,16 +146,16 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also pass optional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthorityOverride(string)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
-        public AcquireTokenWithUsernamePasswordParameterBuilder AcquireTokenWithUsernamePassword(
+        public AcquireTokenByUsernamePasswordParameterBuilder AcquireTokenByUsernamePassword(
             IEnumerable<string> scopes,
             string username,
             SecureString password)
         {
-            return AcquireTokenWithUsernamePasswordParameterBuilder.Create(this, scopes, username, password);
+            return AcquireTokenByUsernamePasswordParameterBuilder.Create(this, scopes, username, password);
         }
 
         #endregion // ParameterBuilders
@@ -200,7 +197,7 @@ namespace Microsoft.Identity.Client
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
+            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
@@ -215,7 +212,7 @@ namespace Microsoft.Identity.Client
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
             AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithUsernamePasswordParameters usernamePasswordParameters,
+            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
 #if DESKTOP || NET_CORE
@@ -243,7 +240,6 @@ namespace Microsoft.Identity.Client
         {
             var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
 
-            // TODO(migration): can we just make this a consistent property that happens to not be used on some platforms so we don't have to #ifdef this?
 #if ANDROID || iOS
             coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView;
 #endif

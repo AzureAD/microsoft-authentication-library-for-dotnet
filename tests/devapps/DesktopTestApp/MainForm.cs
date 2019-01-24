@@ -342,28 +342,28 @@ namespace DesktopTestApp
             callResult.Text = output;
         }
 
-        private UIBehavior GetUIBehavior()
+        private Prompt GetUIBehavior()
         {
-            UIBehavior behavior = UIBehavior.SelectAccount;
+            Prompt behavior = Prompt.SelectAccount;
 
             if (forceLogin.Checked)
             {
-                behavior = UIBehavior.ForceLogin;
+                behavior = Prompt.ForceLogin;
             }
 
             if (never.Checked)
             {
-                behavior = UIBehavior.Never;
+                behavior = Prompt.Never;
             }
 
             if (consent.Checked)
             {
-                behavior = UIBehavior.Consent;
+                behavior = Prompt.Consent;
             }
 
             if (noPrompt.Checked)
             {
-                behavior = UIBehavior.NoPrompt;
+                behavior = Prompt.NoPrompt;
             }
 
             return behavior;

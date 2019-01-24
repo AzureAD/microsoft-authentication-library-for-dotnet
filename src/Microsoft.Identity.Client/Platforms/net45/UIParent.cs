@@ -54,6 +54,7 @@ namespace Microsoft.Identity.Client
         public UIParent(object ownerWindow)
         {
             CoreUIParent = new CoreUIParent(ownerWindow);
+            CoreUIParent.UseEmbeddedWebview = true;
         }
 
 #if DESKTOP_RUNTIME

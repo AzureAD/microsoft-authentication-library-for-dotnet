@@ -25,44 +25,35 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
-namespace Microsoft.Identity.Client.Instance
+namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 {
-    internal class ValidatedAuthoritiesCache : IValidatedAuthoritiesCache
+    internal class AcquireTokenByIntegratedWindowsAuthBuilderHarness : AbstractBuilderHarness
     {
-        // TODO: The goal of creating this class was to remove statics, but for the time being
-        // we don't have a good separation to cache these across ClientApplication instances
-        // in the case where a ConfidentialClientApplication is created per-request, for example.
-        // So moving this back to static to keep the existing behavior but the rest of the code
-        // won't know this is static.
-        private static readonly ConcurrentDictionary<string, Authority> _validatedAuthorities =
-            new ConcurrentDictionary<string, Authority>();
+        public AcquireTokenByIntegratedWindowsAuthParameters IntegratedWindowsAuthParametersReceived { get; private set; }
+        public IPublicClientApplication ClientApplication { get; private set; }
 
-        public ValidatedAuthoritiesCache(bool shouldClearCache = true)
+        public async Task SetupAsync()
         {
-            if (shouldClearCache)
-            {
-                _validatedAuthorities.Clear();
-            }
+            ClientApplication = Substitute.For<IPublicClientApplication, IPublicClientApplicationExecutor>();
+
+            await ((IPublicClientApplicationExecutor)ClientApplication).ExecuteAsync(
+                Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),
+                Arg.Do<AcquireTokenByIntegratedWindowsAuthParameters>(parameters => IntegratedWindowsAuthParametersReceived = parameters),
+                CancellationToken.None).ConfigureAwait(false);
         }
 
-        public int Count => _validatedAuthorities.Count;
-
-        public bool ContainsKey(string key)
+        public void ValidateInteractiveParameters(string expectedUsername = null)
         {
-            return _validatedAuthorities.ContainsKey(key);
-        }
-
-        public bool TryAddValue(string key, Authority authority)
-        {
-            return _validatedAuthorities.TryAdd(key, authority);
-        }
-
-        public bool TryGetValue(string key, out Authority authority)
-        {
-            return _validatedAuthorities.TryGetValue(key, out authority);
+            Assert.IsNotNull(IntegratedWindowsAuthParametersReceived);
+            Assert.AreEqual(expectedUsername, IntegratedWindowsAuthParametersReceived.Username);
         }
     }
 }

@@ -36,13 +36,13 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
     /// </summary>
-    public sealed class AcquireTokenWithUsernamePasswordParameterBuilder :
-        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithUsernamePasswordParameterBuilder>
+    public sealed class AcquireTokenByUsernamePasswordParameterBuilder :
+        AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenByUsernamePasswordParameterBuilder>
     {
-        private AcquireTokenWithUsernamePasswordParameters Parameters { get; } = new AcquireTokenWithUsernamePasswordParameters();
+        private AcquireTokenByUsernamePasswordParameters Parameters { get; } = new AcquireTokenByUsernamePasswordParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenWithUsernamePasswordParameterBuilder(IPublicClientApplication publicClientApplication)
+        internal AcquireTokenByUsernamePasswordParameterBuilder(IPublicClientApplication publicClientApplication)
             : base(publicClientApplication)
         {
         }
@@ -54,23 +54,23 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <returns></returns>
-        internal static AcquireTokenWithUsernamePasswordParameterBuilder Create(
+        internal static AcquireTokenByUsernamePasswordParameterBuilder Create(
             IPublicClientApplication publicClientApplication,
             IEnumerable<string> scopes,
             string username,
             SecureString password)
         {
-            return new AcquireTokenWithUsernamePasswordParameterBuilder(publicClientApplication)
+            return new AcquireTokenByUsernamePasswordParameterBuilder(publicClientApplication)
                    .WithScopes(scopes).WithUsername(username).WithPassword(password);
         }
 
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithUsername(string username)
+        private AcquireTokenByUsernamePasswordParameterBuilder WithUsername(string username)
         {
             Parameters.Username = username;
             return this;
         }
 
-        private AcquireTokenWithUsernamePasswordParameterBuilder WithPassword(SecureString password)
+        private AcquireTokenByUsernamePasswordParameterBuilder WithPassword(SecureString password)
         {
             Parameters.Password = password;
             return this;

@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Test.Core.UIAutomation
+namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 {
 #pragma warning disable 1032  // add constructor for exception that takes message
     [Serializable]

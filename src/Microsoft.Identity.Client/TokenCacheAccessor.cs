@@ -189,12 +189,6 @@ namespace Microsoft.Identity.Client
             throw new System.NotImplementedException();
         }
 
-        [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", false)]
-        public void SetKeychainSecurityGroup(string keychainSecurityGroup)
-        {
-            throw new System.NotImplementedException();
-        }
-
         public void Clear()
         {
             AccessTokenCacheDictionary.Clear();

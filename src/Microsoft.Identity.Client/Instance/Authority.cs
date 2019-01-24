@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.Instance
 
         public static Authority CreateAuthorityWithOverride(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
         {
-            switch (serviceBundle.Config.DefaultAuthorityInfo.AuthorityType)
+            switch (serviceBundle.Config.AuthorityInfo.AuthorityType)
             {
             case AuthorityType.Adfs:
                 return new AdfsAuthority(serviceBundle, authorityInfo);
@@ -77,16 +77,16 @@ namespace Microsoft.Identity.Client.Instance
             }
         }
 
-        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority/*, bool validateAuthority*/)
+        public static Authority CreateAuthority(IServiceBundle serviceBundle, string authority, bool validateAuthority = false)
         {
             return CreateAuthorityWithOverride(
                 serviceBundle,
-                AuthorityInfo.FromAuthorityUri(authority, false));
+                AuthorityInfo.FromAuthorityUri(authority, validateAuthority));
         }
 
         public static Authority CreateAuthority(IServiceBundle serviceBundle)
         {
-            return CreateAuthorityWithOverride(serviceBundle, serviceBundle.Config.DefaultAuthorityInfo);
+            return CreateAuthorityWithOverride(serviceBundle, serviceBundle.Config.AuthorityInfo);
         }
 
         internal virtual Task UpdateCanonicalAuthorityAsync(RequestContext requestContext)

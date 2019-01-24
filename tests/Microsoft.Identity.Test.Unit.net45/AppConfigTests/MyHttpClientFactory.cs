@@ -25,18 +25,17 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Security;
-using Microsoft.Identity.Client.Core;
+using System;
+using System.Net.Http;
+using Microsoft.Identity.Client.AppConfig;
 
-namespace Microsoft.Identity.Client.ApiConfig.Parameters
+namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
-    internal class AcquireTokenWithUsernamePasswordParameters : AbstractAcquireTokenWithUsernameParameters, IAcquireTokenParameters
+    public class MyHttpClientFactory : IMsalHttpClientFactory
     {
-        public SecureString Password { get; set; }
-
-        /// <inheritdoc />
-        public void LogParameters(ICoreLogger logger)
+        public HttpClient GetHttpClient()
         {
+            throw new NotImplementedException();
         }
     }
 }

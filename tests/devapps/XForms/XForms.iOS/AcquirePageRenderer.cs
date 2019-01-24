@@ -33,6 +33,7 @@ using XForms;
 using XForms.iOS;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
+using Security;
 
 [assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
 
@@ -41,11 +42,33 @@ namespace XForms.iOS
     internal class AcquirePageRenderer : PageRenderer
     {
         AcquirePage page;
+        private bool SubscribedToEvent = false;
 
         protected override void OnElementChanged(VisualElementChangedEventArgs e)
         {
             base.OnElementChanged(e);
             page = e.NewElement as AcquirePage;
+
+#if BUILDENV == APPCENTER
+            Xamarin.Calabash.Start();
+            if (!SubscribedToEvent)
+            {
+                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
+                SubscribedToEvent = true;
+            }
+            else
+            {
+                App.MsalApplicationUpdated -= OnMsalApplicationUpdated;
+                App.MsalApplicationUpdated += OnMsalApplicationUpdated;
+            }
+
+            OnMsalApplicationUpdated(null, null);
+#endif
+        }
+
+        private void OnMsalApplicationUpdated(object sender, EventArgs e)
+        {
+            App.MsalPublicClient.iOSKeychainSecurityGroup ="*";
         }
 
         public override void ViewDidLoad()

@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AuthorityEndpointResolutionManager : IAuthorityEndpointResolutionManager
     {
-        // TODO(migration): finalize whether we need this to remain static or if we can/should recreate this with each PCA.
         private static readonly ConcurrentDictionary<string, AuthorityEndpointCacheEntry> EndpointCacheEntries =
             new ConcurrentDictionary<string, AuthorityEndpointCacheEntry>();
 

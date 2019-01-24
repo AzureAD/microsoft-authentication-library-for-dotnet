@@ -46,12 +46,12 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal class UsernamePasswordRequest : RequestBase
     {
         private readonly CommonNonInteractiveHandler _commonNonInteractiveHandler;
-        private readonly AcquireTokenWithUsernamePasswordParameters _usernamePasswordParameters;
+        private readonly AcquireTokenByUsernamePasswordParameters _usernamePasswordParameters;
 
         public UsernamePasswordRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenWithUsernamePasswordParameters usernamePasswordParameters)
+            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters)
             : base(serviceBundle, authenticationRequestParameters, usernamePasswordParameters)
         {
             _usernamePasswordParameters = usernamePasswordParameters;

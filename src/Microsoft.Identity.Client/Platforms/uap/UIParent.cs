@@ -44,6 +44,7 @@ namespace Microsoft.Identity.Client
         public UIParent()
         {
             CoreUIParent = new CoreUIParent();
+            CoreUIParent.UseEmbeddedWebview = true;
         }
 
         #if WINDOWS_APP_RUNTIME
