@@ -1,4 +1,5 @@
 ﻿using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +15,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using AuthenticationResult = Microsoft.Identity.Client.AuthenticationResult;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -25,15 +27,17 @@ namespace UWP
     public sealed partial class MainPage : Page
     {
         private IPublicClientApplication _pca;
-        private readonly static string ClientID = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations/";
-        private readonly static IEnumerable<string> Scopes = new[] { "user.read" };
+        private AuthenticationContext _authenticationContext;
+        private readonly static string ClientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
+        private readonly static string Authority = "https://login.microsoftonline.com/common/";
+        private readonly static IEnumerable<string> Scopes = new[] { "https://graph.windows.net/.default" };
 
         public MainPage()
         {
             this.InitializeComponent();
 
             _pca = new PublicClientApplication(ClientID, Authority);
+            _authenticationContext = new AuthenticationContext(Authority);
 
 #if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
@@ -47,7 +51,6 @@ namespace UWP
             try
             {
                 result = await _pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes).ConfigureAwait(false);
-                 // result = await _pca.AcquireTokenByIntegratedWindowsAuthAsync(Scopes, "bogavril@microsoft.com"); // can also use this overload
             }
             catch (Exception ex)
             {
@@ -62,10 +65,17 @@ namespace UWP
         private async void ShowCacheCountAsync(object sender, RoutedEventArgs e)
         {
             var accounts = await _pca.GetAccountsAsync().ConfigureAwait(false);
-            await DisplayMessageAsync(
-                $"There are {accounts.Count()} in the token cache. " +
+            string message =
+                $"There are {accounts.Count()} in the MSAL token cache. " +
                 Environment.NewLine +
-                string.Join(", ", accounts.Select(a => a.Username))).ConfigureAwait(false);
+                string.Join(", ", accounts.Select(a => a.Username)) +
+                Environment.NewLine +
+                $"There are { _authenticationContext.TokenCache.Count} items in the ADAL token cache. "
+                + Environment.NewLine +
+                string.Join(", ", _authenticationContext.TokenCache.ReadItems().Select(i => i.DisplayableId));
+
+            await DisplayMessageAsync(message).ConfigureAwait(false); ;
+
         }
 
         private async void ClearCacheAsync(object sender, RoutedEventArgs e)
@@ -75,6 +85,21 @@ namespace UWP
             {
                 await _pca.RemoveAsync(account).ConfigureAwait(false);
             }
+        }
+
+        private async void ADALButton_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            AuthenticationContext authenticationContext = new AuthenticationContext(Authority);
+            var result = await authenticationContext.AcquireTokenAsync(
+                "https://graph.windows.net",
+                ClientID,
+                new Uri("urn:ietf:wg:oauth:2.0:oob"),
+                new PlatformParameters(PromptBehavior.SelectAccount, false))
+                .ConfigureAwait(false);
+
+            await DisplayMessageAsync("Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken)
+                .ConfigureAwait(false);
+
         }
 
         private async void AccessTokenSilentButton_ClickAsync(object sender, RoutedEventArgs e)
@@ -100,7 +125,10 @@ namespace UWP
             AuthenticationResult result = null;
             try
             {
-                result = await _pca.AcquireTokenAsync(Scopes).ConfigureAwait(false);
+                var users = await _pca.GetAccountsAsync().ConfigureAwait(false);
+                var user = users.FirstOrDefault();
+
+                result = await _pca.AcquireTokenAsync(Scopes, user, UIBehavior.ForceLogin, "").ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -120,6 +148,7 @@ namespace UWP
         {
             await DisplayMessageAsync("Signed in User - " + result.Account.Username + "\nAccessToken: \n" + result.AccessToken).ConfigureAwait(false);
         }
+
 
         private async Task DisplayMessageAsync(string message)
         {
