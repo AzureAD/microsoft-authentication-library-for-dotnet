@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Unit;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
@@ -38,12 +38,12 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     {
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager)
         {
-            AddInstanceDiscoveryMockHandler(httpManager, CoreTestConstants.AuthorityCommonTenant);
+            AddInstanceDiscoveryMockHandler(httpManager, MsalTestConstants.AuthorityCommonTenant);
         }
 
         public static void AddInstanceDiscoveryMockHandler(this MockHttpManager httpManager, string url)
         {
-            httpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(CoreTestConstants.GetDiscoveryEndpoint(url)));
+            httpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(MsalTestConstants.GetDiscoveryEndpoint(url)));
         }
 
         public static void AddSuccessTokenResponseMockHandlerForPost(

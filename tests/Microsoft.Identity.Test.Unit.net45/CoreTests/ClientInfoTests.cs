@@ -41,8 +41,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests
         {
             ClientInfo clientInfo = ClientInfo.CreateFromJson("eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9");
             Assert.IsNotNull(clientInfo);
-            Assert.AreEqual(CoreTestConstants.Uid, clientInfo.UniqueObjectIdentifier);
-            Assert.AreEqual(CoreTestConstants.Utid, clientInfo.UniqueTenantIdentifier);
+            Assert.AreEqual(MsalTestConstants.Uid, clientInfo.UniqueObjectIdentifier);
+            Assert.AreEqual(MsalTestConstants.Utid, clientInfo.UniqueTenantIdentifier);
         }
     }
 }
