@@ -26,16 +26,17 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
-    //TODO: add a layer of user and password caching to speed up the tests
     public static class LabUserHelper
     {
         static LabServiceApi _labService;
         static KeyVaultSecretsProvider _keyVaultSecretsProvider;
-        static LabResponse _defaultLabResponse;
+        private static readonly IDictionary<UserQuery, LabResponse> _userCache =
+            new Dictionary<UserQuery, LabResponse>();
 
 
         static LabUserHelper()
@@ -44,76 +45,54 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             _labService = new LabServiceApi(_keyVaultSecretsProvider);
         }
 
-        public static UserQueryParameters DefaultUserQuery => new UserQueryParameters
-        {
-            IsMamUser = false,
-            IsMfaUser = false,
-            IsFederatedUser = false
-        };
 
-        public static UserQueryParameters B2CLocalAccountUserQuery => new UserQueryParameters
+        public static LabResponse GetLabUserData(UserQuery query)
         {
-            UserType = UserType.B2C,
-            B2CIdentityProvider = B2CIdentityProvider.Local
-        };
+            if (_userCache.ContainsKey(query))
+            {
+                Debug.WriteLine("User cache hit");
+                return _userCache[query];
+            }
 
-        public static UserQueryParameters B2CFacebookUserQuery => new UserQueryParameters
-        {
-            UserType = UserType.B2C,
-            B2CIdentityProvider = B2CIdentityProvider.Facebook
-        };
-
-        public static UserQueryParameters B2CGoogleUserQuery => new UserQueryParameters
-        {
-            UserType = UserType.B2C,
-            B2CIdentityProvider = B2CIdentityProvider.Google
-        };
-
-        public static LabResponse GetLabUserData(UserQueryParameters query)
-        {
             var user = _labService.GetLabResponse(query);
             if (user == null)
             {
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
             }
+
+            Debug.WriteLine("User cache miss");
+            _userCache.Add(query, user);
+
             return user;
         }
 
         public static LabResponse GetDefaultUser()
         {
-            if (_defaultLabResponse == null)
-            {
-                _defaultLabResponse = GetLabUserData(DefaultUserQuery);
-            }
-
-            return _defaultLabResponse;
+            return GetLabUserData(UserQuery.DefaultUserQuery);
         }
 
         public static LabResponse GetB2CLocalAccount()
         {
-            var user = B2CLocalAccountUserQuery;
-            return GetLabUserData(user);
+            return GetLabUserData(UserQuery.B2CLocalAccountUserQuery);
         }
 
         public static LabResponse GetB2CFacebookAccount()
         {
-            var user = B2CFacebookUserQuery;
-            return GetLabUserData(user);
+            return GetLabUserData(UserQuery.B2CFacebookUserQuery);
         }
 
         public static LabResponse GetB2CGoogleAccount()
         {
-            var user = B2CGoogleUserQuery;
-            return GetLabUserData(user);
+            return GetLabUserData(UserQuery.B2CGoogleUserQuery);
         }
 
         public static LabResponse GetAdfsUser(FederationProvider federationProvider, bool federated = true)
         {
-            var user = DefaultUserQuery;
-            user.FederationProvider = federationProvider;
-            user.IsFederatedUser = true;
-            user.IsFederatedUser = federated;
-            return GetLabUserData(user);
+            var query = UserQuery.DefaultUserQuery;
+            query.FederationProvider = federationProvider;
+            query.IsFederatedUser = true;
+            query.IsFederatedUser = federated;
+            return GetLabUserData(query);
         }
 
         public static string GetUserPassword(LabUser user)

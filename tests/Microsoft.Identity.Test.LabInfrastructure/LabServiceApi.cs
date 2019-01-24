@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             _keyVault = keyVault;
         }
 
-        private LabResponse GetLabResponseFromApi(UserQueryParameters query)
+        private LabResponse GetLabResponseFromApi(UserQuery query)
         {
             //Fetch user
             string result = CreateLabQuery(query);
@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return response;
         }
 
-        private string CreateLabQuery(UserQueryParameters query)
+        private string CreateLabQuery(UserQuery query)
         {
             HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
@@ -127,7 +127,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </summary>
         /// <param name="query">Any and all parameters that the returned user should satisfy.</param>
         /// <returns>Users that match the given query parameters.</returns>
-        public LabResponse GetLabResponse(UserQueryParameters query)
+        public LabResponse GetLabResponse(UserQuery query)
         {
             var response = GetLabResponseFromApi(query);
             var user = response.User;
