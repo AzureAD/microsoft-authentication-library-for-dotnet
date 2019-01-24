@@ -68,8 +68,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.GetiOSAccountKey());
             Assert.AreEqual("accesstoken-clientid-contoso.com-user.read user.write", key.GetiOSServiceKey());
             Assert.AreEqual("accesstoken-clientid-contoso.com", key.GetiOSGenericKey());
+            
+            Assert.AreEqual("uid.utid-m7wizgxzfro0k4ytgwbclbecpmuf5trhsuba0vptum8=-accesstoken-clientid-contoso.com-n5wvhdusof/wfsjgk1muxrk89nwfynymsl4qefkynbu=", key.GetUWPFixedSizeKey());
 
-            Assert.AreEqual("uid.utid-login.microsoftonline.com-accesstoken-clientid-contoso.com-n5wvhdusof/wfsjgk1muxrk89nwfynymsl4qefkynbu=", key.GetUWPFixedSizeKey());
         }
 
         [TestMethod]
