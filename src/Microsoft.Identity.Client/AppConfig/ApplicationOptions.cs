@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// 
         /// For Web Apps and Web APIs, the redirect URI can be the URL of the application
         /// 
-        /// Finally for daemon applications (confidential client applications using only the Client Credential flow
+        /// For daemon applications (confidential client applications using only the Client Credential flow
         /// that is calling <c>AcquireTokenForClient</c>), no reply URI is needed.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
