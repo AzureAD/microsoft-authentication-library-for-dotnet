@@ -128,7 +128,7 @@ namespace UWP
                 var users = await _pca.GetAccountsAsync().ConfigureAwait(false);
                 var user = users.FirstOrDefault();
 
-                result = await _pca.AcquireTokenAsync(Scopes, user, UIBehavior.ForceLogin, "").ConfigureAwait(false);
+                result = await _pca.AcquireTokenAsync(Scopes, user, Prompt.SelectAccount, "").ConfigureAwait(false);
             }
             catch (Exception ex)
             {

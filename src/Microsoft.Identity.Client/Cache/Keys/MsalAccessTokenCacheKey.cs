@@ -101,8 +101,7 @@ namespace Microsoft.Identity.Client.Cache
         {
             return MsalCacheCommon.GetCredentialKey(
               _homeAccountId,
-              crypto.CreateSha256Hash(_environment),
-              //_environment,
+              cryptographyManager.CreateSha256Hash(_environment),              
               MsalCacheCommon.AccessToken,
               _clientId,
               _tenantId,
