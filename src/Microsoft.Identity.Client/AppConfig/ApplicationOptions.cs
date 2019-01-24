@@ -74,19 +74,22 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         public AzureCloudInstance AzureCloudInstance { get; set; } = AzureCloudInstance.None;
 
-        //  TODO(migration): can't reference IConfidentialClientApplication here since it's not exposed on all platforms publicly.  In <see cref="Microsoft.Identity.Client.IConfidentialClientApplication"/>, this can be the URL of the Web application / Web API.
-
         /// <summary>
         /// The redirect URI (also known as Reply URI or Reply URL), is the URI at which Azure AD will contact back the application with the tokens.
         /// This redirect URI needs to be registered in the app registration (https://aka.ms/msal-net-register-app).
-        /// In MSAL.NET, <see cref="T:IPublicClientApplication"/> define the following default RedirectUri values:
+        /// In MSAL.NET, <c>IPublicClientApplication</c> defines the following default RedirectUri values:
         /// <list type="bullet">
         /// <item><description><c>urn:ietf:wg:oauth:2.0:oob</c> for desktop (.NET Framework and .NET Core) applications</description></item>
         /// <item><description><c>msal{ClientId}</c> for Xamarin iOS and Xamarin Android without broker (as this will be used by the system web browser by default on these
         /// platforms to call back the application)
         /// </description></item>
         /// </list>
-        /// These default URIs could change in the future.
+        /// These default URIs could change in the future. 
+        /// 
+        /// For Web Apps and Web APIs, the redirect URI can be the URL of the application
+        /// 
+        /// Finally for daemon applications (confidential client applications using only the Client Credential flow
+        /// that is calling <c>AcquireTokenForClient</c>), no reply URI is needed.
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal
