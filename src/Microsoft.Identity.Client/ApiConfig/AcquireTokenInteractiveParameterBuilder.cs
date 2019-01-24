@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// Specifies if the public client application should used an embedded web browser
         /// or the system default browser
         /// </summary>
-        /// <param name="useEmbeddedWebView">If <c>true</c>, will used an embedded web browser,
+        /// <param name="useEmbeddedWebView">If <c>true</c>, will use an embedded web browser,
         /// otherwise will attempt to use a system web browser. The default depends on the platform:
         /// <c>false</c> for Xamarin.iOS and Xamarin.Android, and <c>true</c> for .NET Framework,
         /// and UWP</param>

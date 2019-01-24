@@ -44,9 +44,7 @@ namespace Microsoft.Identity.Client.UI
         {
         }
 
-#if ANDROID || iOS
         internal bool UseEmbeddedWebview { get; set; }
-#endif
 
 #if MAC
         /// <summary>
