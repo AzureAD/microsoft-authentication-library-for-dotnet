@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client
     public interface IConfidentialClientApplication : IClientApplicationBase
     {
         /// <summary>
-        /// Acquires a security token from the authority configured in the app using the authorization code
+        /// [V3 API] Acquires a security token from the authority configured in the app using the authorization code
         /// previously received from the STS.
         /// It uses the OAuth 2.0 authorization code flow (See https://aka.ms/msal-net-authorization-code).
         /// It's usually used in Web Apps (for instance ASP.NET / ASP.NET Core Web apps) which sign-in users,
@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client
             string authorizationCode);
 
         /// <summary>
-        /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
+        /// [V3 API] Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
         /// using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// </summary>
         /// <param name="scopes">scopes requested to access a protected API. For this flow (client credentials), the scopes
@@ -75,7 +75,7 @@ namespace Microsoft.Identity.Client
         AcquireTokenForClientParameterBuilder AcquireTokenForClient(IEnumerable<string> scopes);
 
         /// <summary>
-        /// Acquires an access token for this application (usually a Web API) from the authority configured in the application,
+        /// [V3 API] Acquires an access token for this application (usually a Web API) from the authority configured in the application,
         /// in order to access another downstream protected Web API on behalf of a user using the OAuth 2.0 On-Behalf-Of flow.
         /// (See https://aka.ms/msal-net-on-behalf-of).
         /// This confidential client application was itself called with a token which will be provided in the
@@ -90,6 +90,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(IEnumerable<string> scopes, UserAssertion userAssertion);
 
+        // TODO : Move to IClientApplicationBase
         /// <summary>
         /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
@@ -107,7 +108,7 @@ namespace Microsoft.Identity.Client
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
 
         /// <summary>
-        /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
+        /// [V3 API] Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
@@ -117,7 +118,7 @@ namespace Microsoft.Identity.Client
             UserAssertion userAssertion);
 
         /// <summary>
-        /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
+        /// [V3 API] Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
@@ -129,7 +130,7 @@ namespace Microsoft.Identity.Client
             string authority);
 
         /// <summary>
-        /// Acquires security token from the authority using authorization code previously received.
+        /// [V2 API] Acquires security token from the authority using authorization code previously received.
         /// This method does not lookup token cache, but stores the result in it, so it can be looked up using other methods such as <see cref="IClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/>.
         /// </summary>
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
@@ -140,7 +141,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes);
 
         /// <summary>
-        /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
+        /// [V2 API] Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
@@ -148,7 +149,7 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes);
 
         /// <summary>
-        /// Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
+        /// [V2 API] Acquires token from the service for the confidential client. This method attempts to look up valid access token in the cache.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
@@ -158,7 +159,7 @@ namespace Microsoft.Identity.Client
             bool forceRefresh);
 
         /// <summary>
-        /// Gets URL of the authorize endpoint including the query parameters.
+        /// [V2 API] URL of the authorize endpoint including the query parameters.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
@@ -170,7 +171,7 @@ namespace Microsoft.Identity.Client
             string extraQueryParameters);
 
         /// <summary>
-        /// Gets URL of the authorize endpoint including the query parameters.
+        /// [V2 API] Gets URL of the authorize endpoint including the query parameters.
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
