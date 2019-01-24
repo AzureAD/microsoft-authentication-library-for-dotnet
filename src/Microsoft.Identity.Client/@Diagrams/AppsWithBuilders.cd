@@ -7,7 +7,6 @@
       <Method Name="ClientApplicationBase" Hidden="true" />
       <Method Name="CreateRequestContext" Hidden="true" />
       <Method Name="CreateRequestParameters" Hidden="true" />
-      <Property Name="ExtendedLifeTimeEnabled" Hidden="true" />
       <Method Name="GetAccountAsync" Hidden="true" />
       <Method Name="GetAccountsAsync" Hidden="true" />
       <Method Name="GetAuthority" Hidden="true" />
@@ -20,7 +19,7 @@
       <Property Name="UserTokenCacheInternal" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAABSCAAEAAAAIChBgQBAAAABBIAAAAECJAAEAAEEA=</HashCode>
+      <HashCode>AAAABSCAAEAAAAIChBgQBAEAABBAAAAAECJAAEAAEEA=</HashCode>
       <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -49,14 +48,14 @@
     </Members>
     <InheritanceLine Type="Microsoft.Identity.Client.ClientApplicationBase" FixedToPoint="true">
       <Path>
-        <Point X="5" Y="3.718" />
+        <Point X="5" Y="3.911" />
         <Point X="5" Y="4.375" />
-        <Point X="2.875" Y="4.375" />
-        <Point X="2.875" Y="4.75" />
+        <Point X="3.312" Y="4.375" />
+        <Point X="3.312" Y="4.75" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAEAEAQAEAAAAAQQyAAQAAAAAAAkBQAAAAEAAEA=</HashCode>
+      <HashCode>AAAAAAEAEAQAEAAAAAQQyAAQCAAAAAAgBAAgAAEAAEA=</HashCode>
       <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -78,17 +77,18 @@
       <Method Name="IConfidentialClientApplicationExecutor.ExecuteAsync" Hidden="true" />
       <Method Name="IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync" Hidden="true" />
       <Method Name="IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync" Hidden="true" />
+      <Method Name="SetTokenCaches" Hidden="true" />
     </Members>
     <InheritanceLine Type="Microsoft.Identity.Client.ClientApplicationBase" FixedToPoint="true">
       <Path>
-        <Point X="5" Y="3.718" />
+        <Point X="5" Y="3.911" />
         <Point X="5" Y="4.375" />
-        <Point X="12.438" Y="4.375" />
-        <Point X="12.438" Y="7.5" />
+        <Point X="11" Y="4.375" />
+        <Point X="11" Y="7.5" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAFAAEAEQQDAAAiCAAKAFAAAAAAACAACAACAAAAAA=</HashCode>
+      <HashCode>AAAAFAAFAEQQDAAAiCAAKAFAAAAAAACAACAACAAAAAA=</HashCode>
       <FileName>ConfidentialClientApplication.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>

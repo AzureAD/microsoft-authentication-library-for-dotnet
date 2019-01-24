@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
+        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
         /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
@@ -129,6 +129,11 @@ namespace Microsoft.Identity.Client
         /// force refreshing the token, as well as
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
+        /// 
+        /// You can also use null for <paramref name="account"/> and then use one of the following:
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithAccount(IAccount)"/> or 
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithLoginHint(string)"/> to specifiy the account in the
+        /// case where your application manages several accounts.
         /// </remarks>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
