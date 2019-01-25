@@ -31,7 +31,7 @@
                     <DataTemplate>
                         <ViewCell>
                             <ViewCell.ContextActions>
-                                <MenuItem Clicked="ShowAccessTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                                <!--  todo: this fails on latest android <MenuItem Clicked="ShowAccessTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />-->
                                 <MenuItem Clicked="OnExpire" Text="Expire" CommandParameter="{Binding Value}" />
                                 <MenuItem Clicked="OnAtDelete" Text="Delete" CommandParameter="{Binding Value}" />
                             </ViewCell.ContextActions>
@@ -61,7 +61,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowRefreshTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <!-- TODO: this fails on latest android <MenuItem Clicked="ShowRefreshTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />-->
                             <MenuItem Clicked="OnInvalidate" Text="Invalidate" CommandParameter="{Binding Value}" />
                         </ViewCell.ContextActions>
                         <ViewCell.View>
@@ -91,7 +91,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowIdTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <!--TODO: this fails on latest android <MenuItem Clicked="ShowIdTokenDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />-->
                         </ViewCell.ContextActions>
                         <ViewCell.View>
 
@@ -120,7 +120,7 @@
                     <ViewCell>
 
                         <ViewCell.ContextActions>
-                            <MenuItem Clicked="ShowAccountDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />
+                            <!--TODO: this fails on latest android <MenuItem Clicked="ShowAccountDetailsAsync" Text="ShowDetails" CommandParameter="{Binding Value}" />-->
                         </ViewCell.ContextActions>
                         <ViewCell.View>
 
@@ -146,7 +146,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <Button  Text="Clear"  Clicked="OnClearClickedAsync" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>
+        <!--TODO: this fails on latest android <Button  Text="Clear"  Clicked="OnClearClickedAsync" TextColor="Blue" Font="Bold,15" AutomationId="clearCache"/>-->
 
     </StackLayout>
 </ContentPage>

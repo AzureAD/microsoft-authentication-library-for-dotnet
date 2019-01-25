@@ -114,7 +114,7 @@
       <Version>0.0.8</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
-      <Version>2.5.0.122203</Version>
+      <Version>3.4.0.1029999</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.TestCloud.Agent">
       <Version>0.21.7</Version>
@@ -134,5 +134,5 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <!-- Import the Xamarin targets workaround -->
-  <Import Project="..\Patch.Xamarin.Common.targets" />
+  <!-- <Import Project="..\Patch.Xamarin.Common.targets" /> -->
 </Project>
