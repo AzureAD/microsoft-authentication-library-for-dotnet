@@ -69,6 +69,11 @@ namespace Microsoft.Identity.Client.AppConfig
             return (T)this;
         }
 
+        public T WithLoggingConfig(LoggingConfig loggingConfig)
+        {
+            // TODO - wire this up
+        }
+
         /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>

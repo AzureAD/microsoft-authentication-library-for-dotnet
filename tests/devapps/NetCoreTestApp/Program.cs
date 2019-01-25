@@ -33,6 +33,7 @@ using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace NetCoreTestApp
 {
@@ -42,22 +43,50 @@ namespace NetCoreTestApp
         private readonly static string ClientIdForConfidentialApp = "<enter id>";
 
         private readonly static string Username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
+        private readonly static string Authority = "https://login.microsoftonline.com/organizations"; // common will not work for WIA and U/P but it is a good test case
         private readonly static IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
         public static void Main(string[] args)
         {
+            // with discrete logging calls (current API)
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(ClientIdForPublicApp)
+                .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithLoggingCallback(Log)
+                .WithLoggingLevel(LogLevel.Verbose)
+                .WithEnablePiiLogging(true)                
+                .Build();
 
-            PublicClientApplication pca = new PublicClientApplication(
-                ClientIdForPublicApp,
-                Authority,
-                TokenCacheHelper.GetUserCache()); // token cache serialization https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization
+            // with a logging config
+            IPublicClientApplication pca2 = PublicClientApplicationBuilder
+                .Create(ClientIdForPublicApp)
+                .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithLoggingConfig(
+                    LoggingConfig
+                    .Create(Log)
+                    .WithLogLevel(LogLevel.Verbose)
+                    .EnablePii(true)
+                    .Build())
+                .Build();
 
-            Logger.LogCallback = Log;
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
+            // or with logging config separated out
+            var loggingConfig = LoggingConfig
+                    .Create(Log)
+                    .WithLogLevel(LogLevel.Verbose)
+                    .EnablePii(true)
+                    .Build();
+
+            IPublicClientApplication pca3 = PublicClientApplicationBuilder
+                .Create(ClientIdForPublicApp)
+                .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                .WithLoggingConfig(loggingConfig)
+                .Build();
+
+            pca.UserTokenCache.SetAfterAccess(TokenCacheHelper.BeforeAccessNotification);
+            pca.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
+
 #if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
@@ -65,7 +94,7 @@ namespace NetCoreTestApp
             RunConsoleAppLogicAsync(pca).Wait();
         }
 
-        private static async Task RunConsoleAppLogicAsync(PublicClientApplication pca)
+        private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
         {
             while (true)
             {
@@ -153,7 +182,7 @@ namespace NetCoreTestApp
             }
         }
 
-        private static async Task FetchTokenAndCallGraphAsync(PublicClientApplication pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
             await authTask.ConfigureAwait(false);
 
@@ -200,7 +229,7 @@ namespace NetCoreTestApp
         }
 
 
-        private static async Task DisplayAccountsAsync(PublicClientApplication pca)
+        private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 
@@ -237,6 +266,7 @@ namespace NetCoreTestApp
             Console.WriteLine($"{level} {message}");
             Console.ResetColor();
         }
+
 
         private static SecureString GetPasswordFromConsole()
         {
