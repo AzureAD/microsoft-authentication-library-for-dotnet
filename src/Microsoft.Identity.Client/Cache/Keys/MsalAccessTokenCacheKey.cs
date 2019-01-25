@@ -90,20 +90,19 @@ namespace Microsoft.Identity.Client.Cache
         /// <remarks>
         /// accountId - two guids plus separator - 73 chars        
         /// "accesstoken" string - 11 chars
-        /// env - a sha256 string - 44 chars
+        /// env - ussually loging.microsoft.net - 20 chars
         /// clientid - a guid - 36 chars
         /// tenantid - a guid - 36 chars
         /// scopes - a sha256 string - 44 chars
         /// delimiters - 4 chars
-        /// total: 248 chars
+        /// total: 224 chars
         /// </remarks>
         public string GetUWPFixedSizeKey()
         {
             var crypto = PlatformProxyFactory.GetPlatformProxy().CryptographyManager;
             return MsalCacheCommon.GetCredentialKey(
               _homeAccountId,
-              crypto.CreateSha256Hash(_environment),
-              //_environment,
+              _environment,
               MsalCacheCommon.AccessToken,
               _clientId,
               _tenantId,
