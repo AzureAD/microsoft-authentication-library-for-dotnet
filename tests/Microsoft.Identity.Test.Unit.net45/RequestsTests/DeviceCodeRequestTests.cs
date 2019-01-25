@@ -202,54 +202,47 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
             }))
             {
-                try
+                const int NumberOfAuthorizationPendingRequestsToInject = 2;
+                var parameters = CreateAuthenticationParametersAndSetupMocks(
+                    harness,
+                    NumberOfAuthorizationPendingRequestsToInject,
+                    out HashSet<string> expectedScopes);
+
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
                 {
-                    const int NumberOfAuthorizationPendingRequestsToInject = 2;
-                    var parameters = CreateAuthenticationParametersAndSetupMocks(
-                        harness,
-                        NumberOfAuthorizationPendingRequestsToInject,
-                        out HashSet<string> expectedScopes);
+                    DeviceCodeResultCallback = result => Task.FromResult(0)
+                };
 
-                    var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
-                    {
-                        DeviceCodeResultCallback = result => Task.FromResult(0)
-                    };
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
-                    var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
+                task.Wait();
 
-                    Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                    task.Wait();
+                // Ensure we got logs so the log callback is working.
+                Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
 
-                    // Ensure we got logs so the log callback is working.
-                    Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
+                // Ensure we have authorization_pending data in the logs
+                List<_LogData> authPendingLogs =
+                    logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
+                Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
 
-                    // Ensure we have authorization_pending data in the logs
-                    List<_LogData> authPendingLogs =
-                        logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
-                    Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
+                // Ensure the authorization_pending logs are Info level and not Error
+                Assert.AreEqual(
+                    2,
+                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
+                    "authorization_pending logs should be INFO");
 
-                    // Ensure the authorization_pending logs are Info level and not Error
-                    Assert.AreEqual(
-                        2,
-                        authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
-                        "authorization_pending logs should be INFO");
+                // Ensure we don't have Error level logs in this scenario.
+                string errorLogs = string.Join(
+                    "--",
+                    logCallbacks
+                        .Where(x => x.Level == LogLevel.Error)
+                        .Select(x => x.Message)
+                        .ToArray());
 
-                    // Ensure we don't have Error level logs in this scenario.
-                    string errorLogs = string.Join(
-                        "--",
-                        logCallbacks
-                            .Where(x => x.Level == LogLevel.Error)
-                            .Select(x => x.Message)
-                            .ToArray());
-
-                    Assert.IsFalse(
-                        logCallbacks.Any(x => x.Level == LogLevel.Error),
-                        "Error level logs should not exist but got: " + errorLogs);
-                }
-                finally
-                {
-                    Logger.LogCallback = null;
-                }
+                Assert.IsFalse(
+                    logCallbacks.Any(x => x.Level == LogLevel.Error),
+                    "Error level logs should not exist but got: " + errorLogs);
             }
         }
 

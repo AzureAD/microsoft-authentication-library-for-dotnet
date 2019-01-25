@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -106,12 +107,40 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
+        async Task<Uri> IClientApplicationBaseExecutor.ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
+            CancellationToken cancellationToken)
+        {
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParameters.Account = authorizationRequestUrlParameters.Account;
+            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
+
+            if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
+            {
+                // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?
+                requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
+            }
+
+            var handler = new InteractiveRequest(
+                ServiceBundle,
+                requestParameters,
+                authorizationRequestUrlParameters.ToInteractiveParameters(),
+                null);
+
+            // todo: need to pass through cancellation token here
+            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
+        }
+
+
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
         /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
+        /// <param name="account">Account for which the token is requested. This parameter is optional.
+        /// If nothing is passed and no Account or LoginHint are provided then if one and only
+        /// one account is in the cache, that account is used.  Otherwise, an exception will be thrown.  <see cref="IAccount"/></param>
         /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
         /// parameters</returns>
         /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
@@ -132,12 +161,32 @@ namespace Microsoft.Identity.Client
         /// 
         /// You can also use null for <paramref name="account"/> and then use one of the following:
         /// <see cref="AcquireTokenSilentParameterBuilder.WithAccount(IAccount)"/> or 
-        /// <see cref="AcquireTokenSilentParameterBuilder.WithLoginHint(string)"/> to specifiy the account in the
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithLoginHint(string)"/> to specify the account in the
         /// case where your application manages several accounts.
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account = null)
         {
             return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);
+        }
+
+        /// <summary>
+        /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
+        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
+        /// This override enables you to specify a login hint and extra query parameter.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
+        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
+        /// <remarks>You can also chain the following optional parameters:
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// </remarks>
+        public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
+            IEnumerable<string> scopes)
+        {
+            return GetAuthorizationRequestUrlParameterBuilder.Create(this, scopes);
         }
     }
 }

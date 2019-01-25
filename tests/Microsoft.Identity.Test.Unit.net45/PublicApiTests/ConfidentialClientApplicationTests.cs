@@ -27,12 +27,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
@@ -369,17 +371,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                     EventBase
                                         .TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
                     ));
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("token_cache_lookup") &&
-                            anEvent[CacheEvent.TokenTypeKey] == "at"));
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("token_cache_write") &&
-                            anEvent[CacheEvent.TokenTypeKey] == "at"));
-                
+
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
@@ -731,6 +723,48 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
+        }
+
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public void EnsurePublicApiSurfaceExistsOnInterface()
+        {
+            IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                                     .Build();
+
+            // This test is to ensure that the methods we want/need on the IConfidentialClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
+            // It's solely to ensure we know that the methods we want/need are available where we expect them since we tend to do most testing on the concrete types.
+
+            var authCodeBuilder = app.AcquireTokenForAuthorizationCode(MsalTestConstants.Scope, "authorizationcode");
+            PublicClientApplicationTests.CheckBuilderCommonMethods(authCodeBuilder);
+            
+            var clientBuilder = app.AcquireTokenForClient(MsalTestConstants.Scope)
+               .WithForceRefresh(true)
+               .WithSendX5C(true);
+            PublicClientApplicationTests.CheckBuilderCommonMethods(clientBuilder);
+
+            var onBehalfOfBuilder = app.AcquireTokenOnBehalfOf(
+                                           MsalTestConstants.Scope,
+                                           new UserAssertion("assertion", "assertiontype"))
+                                       .WithSendX5C(true);
+            PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
+
+            var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
+               .WithAccount(MsalTestConstants.User)
+               .WithForceRefresh(true)
+               .WithLoginHint("loginhint");
+            PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
+
+            var requestUrlBuilder = app.GetAuthorizationRequestUrl(MsalTestConstants.Scope)
+                                       .WithAccount(MsalTestConstants.User)
+                                       .WithLoginHint("loginhint")
+                                       .WithExtraScopesToConsent(MsalTestConstants.Scope)
+                                       .WithRedirectUri(MsalTestConstants.RedirectUri);
+            PublicClientApplicationTests.CheckBuilderCommonMethods(requestUrlBuilder);
+
+            var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(MsalTestConstants.Scope, "refreshtoken")
+                                                              .WithRefreshToken("refreshtoken");
+            PublicClientApplicationTests.CheckBuilderCommonMethods(byRefreshTokenBuilder);
         }
 
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)

@@ -78,18 +78,19 @@ namespace XForms
             MainPage = new NavigationPage(new XForms.MainPage());
 
             InitPublicClient();
-
-            Logger.LogCallback = delegate (LogLevel level, string message, bool containsPii)
-            {
-                Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, containsPii); });
-            };
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
         }
 
         public static void InitPublicClient()
         {
-            var builder = PublicClientApplicationBuilder.Create(ClientId).WithAuthority(new Uri(Authority), ValidateAuthority);
+            var builder = PublicClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(Authority), ValidateAuthority)
+                .WithLoggingCallback((level, message, pii) =>
+                {
+                    Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
+                })
+                .WithLoggingLevel(LogLevel.Verbose)
+                .WithEnablePiiLogging(true);
 
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)
@@ -101,6 +102,10 @@ namespace XForms
                     builder.WithRedirectUri(RedirectUriOnAndroid);
                     break;
             }
+
+#if iOS
+            builder.WithIosKeychainSecurityGroup("*");
+#endif
 
             MsalPublicClient = builder.BuildConcrete();
             MsalApplicationUpdated?.Invoke(null, null);

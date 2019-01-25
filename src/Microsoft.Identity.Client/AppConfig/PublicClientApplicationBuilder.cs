@@ -79,12 +79,42 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="enableBroker"></param>
         /// <returns></returns>
-        public PublicClientApplicationBuilder WithEnableBroker(bool enableBroker)
+        internal PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
             // TODO: * This should become public only on mobile platforms that support using a broker
             Config.IsBrokerEnabled = enableBroker;
             return this;
         }
+
+#if !NET_CORE_BUILDTIME // include for other platforms and for runtime
+#if iOS
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keychainSecurityGroup"></param>
+        /// <returns></returns>
+        public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            Config.IosKeychainSecurityGroup = keychainSecurityGroup;
+            return this;
+        }
+#endif // iOS
+#endif // !NET_CORE_BUILDTIME
+
+#if WINDOWS_APP
+        /// <summary>
+        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// </summary>
+        /// <param name="useCorporateNetwork">When set to true, the application will try to connect to the corporate network using windows integrated authentication.</param>
+        /// <returns>A <see cref="PublicClientApplicationBuilder"/> from which to set more
+        /// parameters, and to create a public client application instance</returns>
+        public PublicClientApplicationBuilder WithUseCorporateNetwork(bool useCorporateNetwork)
+        {
+            Config.UseCorporateNetwork = useCorporateNetwork;
+            return this;
+        }
+#endif
 
         /// <summary>
         /// </summary>

@@ -36,6 +36,9 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
+        public bool UseCorporateNetwork { get; internal set; }
+        public string IosKeychainSecurityGroup { get; internal set; }
+
         public bool IsBrokerEnabled { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
@@ -51,6 +54,7 @@ namespace Microsoft.Identity.Client.AppConfig
         public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
         public string Component { get; internal set; }
+        public Dictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
         internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }

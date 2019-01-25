@@ -27,10 +27,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
@@ -1457,6 +1460,54 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.Account);
             }
         }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void EnsurePublicApiSurfaceExistsOnInterface()
+        {
+            IPublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                         .Build();
+
+            // This test is to ensure that the methods we want/need on the IPublicClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
+            // It's solely to ensure we know that the methods we want/need are available where we expect them since we tend to do most testing on the concrete types.
+
+            var interactiveBuilder = app.AcquireTokenInteractive(MsalTestConstants.Scope, null)
+               .WithAccount(MsalTestConstants.User)
+               .WithExtraScopesToConsent(MsalTestConstants.Scope)
+               .WithLoginHint("loginhint")
+               .WithPrompt(Prompt.ForceLogin)
+               .WithUseEmbeddedWebView(true);
+            CheckBuilderCommonMethods(interactiveBuilder);
+
+            var iwaBuilder = app.AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
+               .WithUsername("upn@live.com");
+            CheckBuilderCommonMethods(iwaBuilder);
+
+            var usernamePasswordBuilder = app.AcquireTokenByUsernamePassword(MsalTestConstants.Scope, "upn@live.com", new SecureString());
+            CheckBuilderCommonMethods(usernamePasswordBuilder);
+
+            var deviceCodeBuilder = app.AcquireTokenWithDeviceCode(MsalTestConstants.Scope, result => Task.FromResult(0))
+               .WithDeviceCodeResultCallback(result => Task.FromResult(0));
+            CheckBuilderCommonMethods(deviceCodeBuilder);
+
+            var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
+               .WithForceRefresh(true)
+               .WithAccount(MsalTestConstants.User)
+               .WithLoginHint("loginhint");
+            CheckBuilderCommonMethods(silentBuilder);
+
+            var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(MsalTestConstants.Scope, "refreshtoken")
+                                  .WithRefreshToken("refreshtoken");
+            CheckBuilderCommonMethods(byRefreshTokenBuilder);
+
+            var requestUrlBuilder = app.GetAuthorizationRequestUrl(MsalTestConstants.Scope)
+                                       .WithAccount(MsalTestConstants.User)
+                                       .WithLoginHint("loginhint")
+                                       .WithExtraScopesToConsent(MsalTestConstants.Scope)
+                                       .WithRedirectUri(MsalTestConstants.RedirectUri);
+            CheckBuilderCommonMethods(requestUrlBuilder);
+        }
+
 #endif
 
 #if NET_CORE
@@ -1529,5 +1580,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
 #endif
+        public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            builder.WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
+                .WithAadAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                .WithAadAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
+                .WithAadAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), true)
+                .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid(), true)
+                .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), true)
+                .WithAadAuthority(MsalTestConstants.AuthorityGuestTenant, true)
+                .WithAdfsAuthority(MsalTestConstants.AuthorityGuestTenant, true)
+                .WithB2CAuthority(MsalTestConstants.B2CAuthority)
+                .WithExtraQueryParameters(
+                    new Dictionary<string, string>
+                    {
+                        {"key1", "value1"}
+                    });
+        }
     }
 }

@@ -56,10 +56,21 @@ namespace Microsoft.Identity.Client.Internal.Requests
             ClientId = serviceBundle.Config.ClientId;
             TokenCache = tokenCache;
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
-            ExtraQueryParameters = commonParameters.ExtraQueryParameters ?? new Dictionary<string, string>();
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             ApiId = commonParameters.ApiId;
+
+            // Set application wide query parameters.
+            ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
+
+            // Copy in call-specific query parameters.
+            if (commonParameters.ExtraQueryParameters != null)
+            {
+                foreach (var kvp in commonParameters.ExtraQueryParameters)
+                {
+                    ExtraQueryParameters[kvp.Key] = kvp.Value;
+                }
+            }
         }
 
         public ApiEvent.ApiIds ApiId { get; }

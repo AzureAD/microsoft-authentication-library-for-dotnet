@@ -803,9 +803,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [TestCategory("TokenCacheTests")]
         public void CanDeserializeTokenCacheInNet462()
         {
-            var previousLogLevel = Logger.Level;
-            // Setting LogLevel.Verbose causes certain static dependencies to load
-            Logger.Level = LogLevel.Verbose;
             var tokenCache = new TokenCache(TestCommon.CreateDefaultServiceBundle())
             {
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
@@ -814,7 +811,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
 #pragma warning restore CS0618 // Type or member is obsolete
-            Logger.Level = previousLogLevel;
         }
 
         [TestMethod]

@@ -145,5 +145,11 @@ namespace Microsoft.Identity.Client
         {
             return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class.";
         }
+
+        public const string TelemetryClassIsObsolete =
+            "Telemetry is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration";
+
+        public const string LoggingClassIsObsolete =
+            "Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration";
     }
 }

@@ -120,8 +120,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 task.Wait();
                 var result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
-                Assert.AreEqual(1, cache.TokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.RefreshTokenCount);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.AccessTokenCount);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
         }
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 string atKey = atItem.GetKey().ToString();
                 atItem.Secret = atKey;
-                cache.TokenCacheAccessor.SaveAccessToken(atItem);
+                ((ITokenCacheInternal)cache).Accessor.SaveAccessToken(atItem);
 
                 var ui = new MockWebUI()
                 {
@@ -188,8 +188,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 task.Wait();
                 var result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, cache.TokenCacheAccessor.RefreshTokenCount);
-                Assert.AreEqual(2, cache.TokenCacheAccessor.AccessTokenCount);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.RefreshTokenCount);
+                Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.AccessTokenCount);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
 
                 Assert.IsNotNull(
