@@ -59,7 +59,7 @@ namespace XForms
             numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccountsAsString()
                 .Count.ToString(CultureInfo.InvariantCulture);
 
-            validateAuthority.IsToggled = App.ValidateAuthority;
+            validateAuthoritySwitch.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.AppConfig.RedirectUri;
         }
 
