@@ -25,9 +25,11 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace AutomationApp
 {
@@ -35,9 +37,14 @@ namespace AutomationApp
     {
         #region Properties
         public IAccount CurrentUser { get; set; }
-
-        private PublicClientApplication _publicClientApplication;
+        private IPublicClientApplication _publicClientApplication;
+        private readonly AppLogger _appLogger;
         #endregion
+
+        internal TokenHandler(AppLogger appLogger)
+        {
+            _appLogger = appLogger;
+        }
 
         private void EnsurePublicClientApplication(Dictionary<string, string> input)
         {
@@ -51,9 +58,20 @@ namespace AutomationApp
                 return;
             }
 
-            _publicClientApplication = input.ContainsKey("authority")
-                ? new PublicClientApplication(input["client_id"], input["authority"])
-                : new PublicClientApplication(input["client_id"]);
+            var builder = PublicClientApplicationBuilder
+                .Create(input["client_id"])
+                .WithLoggingCallback(_appLogger.Log);
+
+#if ARIA_TELEMETRY_ENABLED
+            builder.WithTelemetryCallback(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+#endif
+
+            if (input.ContainsKey("authority"))
+            {
+                builder.WithAuthority(new Uri(input["authority"]));
+            }
+
+            _publicClientApplication = builder.Build();
         }
 
         public async Task<AuthenticationResult> AcquireTokenAsync(Dictionary<string, string> input)

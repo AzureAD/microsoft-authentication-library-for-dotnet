@@ -48,7 +48,7 @@ namespace DesktopTestApp
         private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private string _b2CClientId = null;
 
-        private readonly PublicClientHandler _publicClientHandler = new PublicClientHandler(PublicClientId);
+        private readonly PublicClientHandler _publicClientHandler;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
@@ -67,12 +67,7 @@ namespace DesktopTestApp
             userPasswordTextBox.PasswordChar = '*';
 
             LoadSettings();
-            Logger.LogCallback = LogDelegate;
-
-#if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
-#endif
+            _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
         }
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)
@@ -94,7 +89,7 @@ namespace DesktopTestApp
                 };
             }
 
-            this.BeginInvoke(new MethodInvoker(action));
+            BeginInvoke(new MethodInvoker(action));
         }
 
         public void RefreshUserList()
@@ -456,9 +451,6 @@ namespace DesktopTestApp
         {
             _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
             Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
-
-            Logger.Level = (LogLevel)Enum.Parse(typeof(LogLevel), (string)logLevel.SelectedItem);
-            Logger.PiiLoggingEnabled = PiiLoggingEnabled.Checked;
         }
 
 #endregion

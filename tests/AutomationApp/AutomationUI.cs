@@ -38,18 +38,15 @@ namespace AutomationApp
     public partial class AutomationUI : Form
     {
         private delegate Task<AuthenticationResult> Command(Dictionary<string, string> input);
-        private readonly AppLogger _appLogger = new AppLogger();
+        private readonly AppLogger _appLogger;
         private Command _commandToRun;
-        private readonly TokenHandler _tokenHandlerApp = new TokenHandler();
+        private readonly TokenHandler _tokenHandlerApp;
 
         public AutomationUI()
         {
+            _appLogger = new AppLogger();
+            _tokenHandlerApp = new TokenHandler(_appLogger);
             InitializeComponent();
-            Logger.LogCallback = _appLogger.Log;
-#if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
-#endif
         }
 
         public Dictionary<string, string> CreateDictionaryFromJson(string json)
@@ -113,7 +110,7 @@ namespace AutomationApp
 
         private void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
-            if (!String.IsNullOrWhiteSpace(authenticationResult.AccessToken))
+            if (!string.IsNullOrWhiteSpace(authenticationResult.AccessToken))
             {
                 testResultBox.Text = "Result: Success";
             }

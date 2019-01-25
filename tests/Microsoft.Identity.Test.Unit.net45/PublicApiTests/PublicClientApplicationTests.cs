@@ -1461,24 +1461,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-        public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
-        {
-            builder.WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
-                   .WithAadAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
-                   .WithAadAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
-                   .WithAadAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), true)
-                   .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid(), true)
-                   .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), true)
-                   .WithAadAuthority(MsalTestConstants.AuthorityGuestTenant, true)
-                   .WithAdfsAuthority(MsalTestConstants.AuthorityGuestTenant, true)
-                   .WithB2CAuthority(MsalTestConstants.B2CAuthority)
-                   .WithExtraQueryParameters(
-                       new Dictionary<string, string>
-                       {
-                           {"key1", "value1"}
-                       });
-        }
-
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
@@ -1598,5 +1580,22 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
 #endif
+        public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
+        {
+            builder.WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
+                .WithAadAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                .WithAadAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
+                .WithAadAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), true)
+                .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid(), true)
+                .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid().ToString("N", CultureInfo.InvariantCulture), true)
+                .WithAadAuthority(MsalTestConstants.AuthorityGuestTenant, true)
+                .WithAdfsAuthority(MsalTestConstants.AuthorityGuestTenant, true)
+                .WithB2CAuthority(MsalTestConstants.B2CAuthority)
+                .WithExtraQueryParameters(
+                    new Dictionary<string, string>
+                    {
+                        {"key1", "value1"}
+                    });
+        }
     }
 }
