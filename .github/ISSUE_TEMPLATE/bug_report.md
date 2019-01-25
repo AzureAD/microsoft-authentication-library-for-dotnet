@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Please do NOT file bugs without filling in this form.
 ---
 
 **Which Version of MSAL are you using ?**
@@ -24,6 +24,13 @@ For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-
     * [ ] OBO
 
 Other? - please describe;
+
+**Is this a new or existing app?**
+<!-- Ex:
+a. The app is in production, and I have upgraded to a new version of ADAL
+b. The app is in production, uses the same version of ADAL, but started seeing this issue
+c. This is a new app or experiment
+-->
 
 **Repro**
 
