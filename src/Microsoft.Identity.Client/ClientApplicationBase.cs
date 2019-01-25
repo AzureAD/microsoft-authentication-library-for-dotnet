@@ -251,7 +251,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
+        /// [V2 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority specified as the <paramref name="authority"/> parameter.
         /// This override enables you to specify a redirectUri, login hint extra query parameters, extra scope to consent (which are not for the
         /// same resource as the <paramref name="scopes"/>), and an authority.

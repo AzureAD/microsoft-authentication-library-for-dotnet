@@ -147,9 +147,9 @@ namespace Microsoft.Identity.Client
         }
 
         public const string TelemetryClassIsObsolete =
-            "Telemetry is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration";
+            "Telemetry is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration";
 
         public const string LoggingClassIsObsolete =
-            "Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-application-configuration.";
+            "Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration";
     }
 }

@@ -79,12 +79,28 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="enableBroker"></param>
         /// <returns></returns>
-        internal PublicClientApplicationBuilder WithEnableBroker(bool enableBroker)
+        internal PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
             // TODO: * This should become public only on mobile platforms that support using a broker
             Config.IsBrokerEnabled = enableBroker;
             return this;
         }
+
+#if !NET_CORE_BUILDTIME // include for other platforms and for runtime
+#if iOS
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keychainSecurityGroup"></param>
+        /// <returns></returns>
+        public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
+        {
+            Config.IosKeychainSecurityGroup = keychainSecurityGroup;
+            return this;
+        }
+#endif // iOS
+#endif // !NET_CORE_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>

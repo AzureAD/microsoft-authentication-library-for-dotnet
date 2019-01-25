@@ -98,6 +98,9 @@ namespace Microsoft.Identity.Client
         internal void SetServiceBundle(IServiceBundle serviceBundle)
         {
             ServiceBundle = serviceBundle;
+#if iOS
+            SetIosKeychainSecurityGroup(ServiceBundle.Config.IosKeychainSecurityGroup);
+#endif // iOS
         }
 
         /// <summary>

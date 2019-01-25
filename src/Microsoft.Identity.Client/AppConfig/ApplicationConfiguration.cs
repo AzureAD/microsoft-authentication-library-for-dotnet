@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.AppConfig
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
         public bool UseCorporateNetwork { get; internal set; }
+        public string IosKeychainSecurityGroup { get; internal set; }
 
         public bool IsBrokerEnabled { get; internal set; }
 

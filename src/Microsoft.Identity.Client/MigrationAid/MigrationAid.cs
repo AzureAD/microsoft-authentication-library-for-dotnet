@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Client
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
         bool UseCorporateNetwork { get; set; }
 #endif // WINDOWS_APP
     }
@@ -270,7 +270,7 @@ namespace Microsoft.Identity.Client
         /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
         public bool UseCorporateNetwork { get; set; }
 #endif
 
@@ -306,6 +306,16 @@ namespace Microsoft.Identity.Client
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
         public string KeychainSecurityGroup { get { throw new NotImplementedException(); } }
+
+        /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
+        public string iOSKeychainSecurityGroup
+        {
+            get => throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration");
+            set => throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration");
+        }
 #endif
     }
 
@@ -326,6 +336,17 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
         string KeychainSecurityGroup { get; }
 
+        /// <summary>
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
+        /// If you use this property, you MUST add the capability to your Application Entitlement.
+        /// In this property, the value should not contain the TeamId prefix, MSAL will resolve the TeamId at runtime.
+        /// For more details, please see https://aka.ms/msal-net-sharing-cache-on-ios
+        /// </summary>
+        /// <remarks>This API may change in future release.</remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
+        string iOSKeychainSecurityGroup { get; set; }
 #endif
     }
 

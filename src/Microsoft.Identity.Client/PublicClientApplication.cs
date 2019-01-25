@@ -105,24 +105,6 @@ namespace Microsoft.Identity.Client
         // however include the signatures at runtime only to prevent MissingMethodExceptions from NetStandard
 #if !NET_CORE_BUILDTIME // include for other platforms and for runtime
 
-#if iOS
-        private string keychainSecurityGroup;
-
-        /// <inheritdoc />
-        public string iOSKeychainSecurityGroup
-        {
-            get
-            {
-                return keychainSecurityGroup;
-            }
-            set
-            {
-                keychainSecurityGroup = value;
-                UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
-            }
-        }
-#endif
-
         // Android does not support AcquireToken* without UIParent params, but include it at runtime
         // only to avoid MissingMethodExceptions from NetStandard
 #if !ANDROID_BUILDTIME // include for other other platform and for runtime

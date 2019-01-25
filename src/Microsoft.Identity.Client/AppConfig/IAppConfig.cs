@@ -90,5 +90,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         bool UseCorporateNetwork { get; }
 #endif // WINDOWS_APP
+
+#if iOS
+        string IosKeychainSecurityGroup { get; }
+#endif // iOS
     }
 }
