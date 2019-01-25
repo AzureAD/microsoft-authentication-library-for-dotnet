@@ -40,10 +40,18 @@ namespace XForms
         public static PublicClientApplication MsalPublicClient;
         public static UIParent UIParent { get; set; }
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
+        // For system browser
+        //public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";
         public const string B2cClientId = "e3b9ad76-9763-4827-b088-80c7a7888f79";
 
         public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
-        public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; //For system browser, use adaliosxformsapp://com.yourcompany.xformsapp
+        // For system browser
+        //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
+        
+        public static string RedirectUriOnIos = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
+        // For system browser
+        //public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
+
         public const string RedirectUriB2C = "msale3b9ad76-9763-4827-b088-80c7a7888f79://auth";
 
         public const string DefaultAuthority = "https://login.microsoftonline.com/common";

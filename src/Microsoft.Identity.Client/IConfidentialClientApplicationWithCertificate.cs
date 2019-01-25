@@ -16,7 +16,7 @@ namespace Microsoft.Identity.Client
     public interface IConfidentialClientApplicationWithCertificate
     {
         /// <summary>
-        /// Acquires token from the service for the confidential client using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
+        /// [V2 API] Acquires token from the service for the confidential client using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// This method enables application developers to achieve easy certificates roll-over
         /// in Azure AD: this method will send the public certificate to Azure AD
         /// along with the token request, so that Azure AD can use it to validate the subject name based on a trusted issuer policy.
@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes);
 
         /// <summary>
-        /// Acquires token from the service for the confidential client using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
+        /// [V2 API] Acquires token from the service for the confidential client using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// This method attempts to look up valid access token in the cache unless<paramref name="forceRefresh"/> is true
         /// This method enables application developers to achieve easy certificates roll-over
         /// in Azure AD: this method will send the public certificate to Azure AD
@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes, bool forceRefresh);
 
         /// <summary>
-        /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
+        ///[V2 API] Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion);
 
         /// <summary>
-        /// Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
+        /// [V2 API] Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>

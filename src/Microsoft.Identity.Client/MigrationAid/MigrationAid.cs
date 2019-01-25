@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead.  See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         string Component { get; set; }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use ExtraQueryParameters on each call instead.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use ExtraQueryParameters on each call instead.  See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         string SliceParameters { get; set; }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Microsoft.Identity.Client
         /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         bool ValidateAuthority { get; }
 
 #if !DESKTOP && !NET_CORE
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
         /// you then need to add the reply URL of the deployed application in the application registration portal.
         /// </remarks>
-        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         string RedirectUri { get; set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
@@ -177,7 +177,7 @@ namespace Microsoft.Identity.Client
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string Component { get; set; }
 
         /// <summary>
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use ExtraQueryParameters on each call instead. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use ExtraQueryParameters on each call instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string SliceParameters { get; set; }
 
         /// <summary>
@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
         /// and before an operation acquiring a token or interacting with the STS.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public bool ValidateAuthority { get; set; }
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
@@ -215,7 +215,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
-        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string RedirectUri { get; set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     }
@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Client
         /// <param name="password">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-up)", true)]
+        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-up)", true)]
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
         {
             { throw new NotImplementedException(); }

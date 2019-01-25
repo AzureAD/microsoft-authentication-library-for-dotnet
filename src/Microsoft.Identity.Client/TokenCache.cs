@@ -67,8 +67,8 @@ namespace Microsoft.Identity.Client
 
         internal RequestContext CreateRequestContext()
         {
-            return new RequestContext(ServiceBundle.Config.ClientId,
-                MsalLogger.Create(Guid.Empty, ServiceBundle.Config));
+            return new RequestContext(ServiceBundle?.Config.ClientId,
+                MsalLogger.Create(Guid.Empty, ServiceBundle?.Config));
         }
 
         private const int DefaultExpirationBufferInMinutes = 5;

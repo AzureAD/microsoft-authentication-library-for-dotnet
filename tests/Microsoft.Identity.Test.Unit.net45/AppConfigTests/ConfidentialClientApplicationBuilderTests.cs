@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestWithDifferentClientId()
         {
-            const string ClientId = "this is a test client id";
+            const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
             var cca = ConfidentialClientApplicationBuilder.Create(ClientId).Build();
             Assert.AreEqual(ClientId, cca.ClientId);
         }
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_ClientIdOverride()
         {
-            const string ClientId = "some other client id";
+            const string ClientId = "73cc145e-798f-430c-8d6d-618f1a5802e9";
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId(ClientId).Build();
             Assert.AreEqual(ClientId, cca.ClientId);
         }

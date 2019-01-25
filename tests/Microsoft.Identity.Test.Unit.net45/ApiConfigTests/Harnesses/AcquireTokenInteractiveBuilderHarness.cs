@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
                 (expectedExtraScopesToConsent ?? new List<string>()).AsSingleString(),
                 InteractiveParametersReceived.ExtraScopesToConsent.AsSingleString());
             Assert.AreEqual(expectedLoginHint, InteractiveParametersReceived.LoginHint);
-            Assert.AreEqual(expectedPromptValue, InteractiveParametersReceived.Prompt.PromptValue);
+            Assert.AreEqual(expectedPromptValue ?? Prompt.SelectAccount.PromptValue, InteractiveParametersReceived.Prompt.PromptValue);
             Assert.IsNotNull(InteractiveParametersReceived.UiParent);
             Assert.AreEqual(expectedEmbeddedWebView, InteractiveParametersReceived.UseEmbeddedWebView);
         }

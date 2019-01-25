@@ -56,7 +56,6 @@ namespace Microsoft.Identity.Client.Http
                     nameof(redirectUri));
             }
 
-            // Currently only MSAL supports the system browser, on Android and iOS
             if (usesSystemBrowser &&
                 Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {

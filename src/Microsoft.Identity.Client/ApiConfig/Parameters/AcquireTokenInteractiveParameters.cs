@@ -34,7 +34,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenInteractiveParameters : IAcquireTokenParameters
     {
-        public Prompt Prompt { get; set; }
+        public Prompt Prompt { get; set; } = Prompt.SelectAccount;
         public OwnerUiParent UiParent { get; } = new OwnerUiParent();
         public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
         public bool UseEmbeddedWebView { get; set; }

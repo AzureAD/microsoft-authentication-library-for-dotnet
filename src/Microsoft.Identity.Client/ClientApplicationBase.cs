@@ -81,9 +81,15 @@ namespace Microsoft.Identity.Client
         public string ClientId => AppConfig.ClientId;
 
         /// <Summary>
-        /// Token Cache instance for storing User tokens.
-        /// TODO(migration): this is a new public property, need to document.
+        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used 
+        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// or one of the overrides of <see cref="AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
+        /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
+        /// cache (see <c>IConfidentialClientApplication</c>).
         /// </Summary>
+        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
+        /// </remarks>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
         internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
@@ -168,7 +174,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
+        /// [V2 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
@@ -203,7 +209,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// [V2 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
