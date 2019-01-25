@@ -64,8 +64,7 @@ namespace NetCoreTestApp
                 .Create(ClientIdForPublicApp)
                 .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .WithLoggingConfig(
-                    LoggingConfig
-                    .Create(Log)
+                    LoggingConfig.Create(Log)
                     .WithLogLevel(LogLevel.Verbose)
                     .EnablePii(true)
                     .Build())
