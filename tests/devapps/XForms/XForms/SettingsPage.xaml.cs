@@ -59,8 +59,7 @@ namespace XForms
             numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccountsAsString()
                 .Count.ToString(CultureInfo.InvariantCulture);
 
-            // TODO(migration): how to handle this?
-            //validateAuthority.IsToggled = App.ValidateAuthority;
+            validateAuthoritySwitch.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.AppConfig.RedirectUri;
         }
 
@@ -91,9 +90,8 @@ namespace XForms
 
         private void OnValidateAuthorityToggled(object sender, ToggledEventArgs args)
         {
-            // TODO(migration): this isn't possible, PCA is immutable.  When these change, we need to reinit the PCA.
-            //App.MsalPublicClient.ValidateAuthority = args.Value;
             App.ValidateAuthority = args.Value;
+            App.InitPublicClient();
         }
 
         private void InitPublicClientAndRefreshView()
