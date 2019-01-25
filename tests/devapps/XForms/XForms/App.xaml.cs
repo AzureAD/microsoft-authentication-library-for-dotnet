@@ -103,6 +103,10 @@ namespace XForms
                     break;
             }
 
+#if iOS
+            builder.WithIosKeychainSecurityGroup("*");
+#endif
+
             MsalPublicClient = builder.BuildConcrete();
             MsalApplicationUpdated?.Invoke(null, null);
         }

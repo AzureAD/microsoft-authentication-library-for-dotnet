@@ -92,6 +92,8 @@ namespace Microsoft.Identity.Client.AppConfig
 #endif // WINDOWS_APP
 
 #if iOS
+        /// <summary>
+        /// </summary>
         string IosKeychainSecurityGroup { get; }
 #endif // iOS
     }
