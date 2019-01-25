@@ -371,17 +371,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                     EventBase
                                         .TenantPlaceHolder) // The tenant info is expected to be replaced by a holder
                     ));
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("token_cache_lookup") &&
-                            anEvent[CacheEvent.TokenTypeKey] == "at"));
-                Assert.IsNotNull(
-                    receiver.EventsReceived.Find(
-                        anEvent => // Expect finding such an event
-                            anEvent[EventBase.EventNameKey].EndsWith("token_cache_write") &&
-                            anEvent[CacheEvent.TokenTypeKey] == "at"));
-                
+
                 Assert.IsNotNull(
                     receiver.EventsReceived.Find(
                         anEvent => // Expect finding such an event
