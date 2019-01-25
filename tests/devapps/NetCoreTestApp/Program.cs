@@ -71,8 +71,7 @@ namespace NetCoreTestApp
                 .Build();
 
             // or with logging config separated out
-            var loggingConfig = LoggingConfig
-                    .Create(Log)
+            var loggingConfig = LoggingConfig.Create(Log)
                     .WithLogLevel(LogLevel.Verbose)
                     .EnablePii(true)
                     .Build();
