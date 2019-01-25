@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client
 {
@@ -244,12 +245,35 @@ namespace Microsoft.Identity.Client
         public IUser User { get { throw new NotImplementedException(); } }
     }
 
+    public partial interface IPublicClientApplication
+    {
+#if WINDOWS_APP
+        /// <summary>
+        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-application-configuration", true)]
+        bool UseCorporateNetwork { get; set; }
+#endif // WINDOWS_APP
+    }
+
     /// <Summary>
     /// Abstract class containing common API methods and properties. 
     /// For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public partial class PublicClientApplication
     {
+#if WINDOWS_APP
+        /// <summary>
+        /// Flag to enable authentication with the user currently logged-in in Windows.
+        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-application-configuration", true)]
+        public bool UseCorporateNetwork { get; set; }
+#endif
+
 #if DESKTOP || NET_CORE
 #pragma warning disable 1998
         /// <summary>
@@ -289,7 +313,7 @@ namespace Microsoft.Identity.Client
     /// Interface defining common API methods and properties. 
     /// For details see https://aka.ms/msal-net-client-applications 
     /// </Summary> 
-    public partial interface IPublicApplicationBase
+    public partial interface IPublicClientApplication
     {
 #if iOS
         /// <summary> 
@@ -314,4 +338,100 @@ namespace Microsoft.Identity.Client
     public struct UIBehavior
     {
     }
+
+    /// <summary>
+    /// </summary>
+    [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+    public sealed class Logger
+    {
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static LogCallback LogCallback
+        {
+            set => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static LogLevel Level
+        {
+            get => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+            set => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static bool PiiLoggingEnabled { get; set; } = false;
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static bool DefaultLoggingEnabled { get; set; } = false;
+    }
+
+    /// <summary>
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+    public class Telemetry : ITelemetryReceiver
+    {
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public delegate void Receiver(List<Dictionary<string, string>> events);
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public static Telemetry GetInstance()
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public bool TelemetryOnFailureOnly
+        {
+            get => throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            set => throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public void RegisterReceiver(Receiver r)
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public bool HasRegisteredReceiver()
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        void ITelemetryReceiver.HandleTelemetryEvents(List<Dictionary<string, string>> events)
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+   }
 }

@@ -31,224 +31,224 @@ using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client.TelemetryCore
 {
-    internal class TelemetryTokenCacheAccessor : ITokenCacheAccessor
-    {
-        private readonly ITokenCacheAccessor _tokenCacheAccessor;
-        private readonly ITelemetryManager _telemetryManager;
+//    internal class TelemetryTokenCacheAccessor : ITokenCacheAccessor
+//    {
+//        private readonly ITokenCacheAccessor _tokenCacheAccessor;
+//        private readonly ITelemetryManager _telemetryManager;
 
-        public TelemetryTokenCacheAccessor(ITelemetryManager telemetryManager, ITokenCacheAccessor tokenCacheAccessor)
-        {
-            _telemetryManager = telemetryManager;
-            _tokenCacheAccessor = tokenCacheAccessor;
-        }
+//        public TelemetryTokenCacheAccessor(ITelemetryManager telemetryManager, ITokenCacheAccessor tokenCacheAccessor)
+//        {
+//            _telemetryManager = telemetryManager;
+//            _tokenCacheAccessor = tokenCacheAccessor;
+//        }
 
-        internal ITokenCacheAccessor Accessor => _tokenCacheAccessor;
+//        internal ITokenCacheAccessor Accessor => _tokenCacheAccessor;
 
-#if iOS
-        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
-        {
-            _tokenCacheAccessor.SetiOSKeychainSecurityGroup(keychainSecurityGroup);
-        }
-#endif
+//#if iOS
+//        public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)
+//        {
+//            _tokenCacheAccessor.SetiOSKeychainSecurityGroup(keychainSecurityGroup);
+//        }
+//#endif
 
-        // The content of this class has to be placed outside of its base class TokenCacheAccessor,
-        // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
-        public void SaveAccessToken(MsalAccessTokenCacheItem item, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT }))
-            {
-                SaveAccessToken(item);
-            }
-        }
+//        // The content of this class has to be placed outside of its base class TokenCacheAccessor,
+//        // otherwise we would have to modify multiple implementations of TokenCacheAccessor on different platforms.
+//        public void SaveAccessToken(MsalAccessTokenCacheItem item, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.AT }))
+//            {
+//                SaveAccessToken(item);
+//            }
+//        }
 
-        public void SaveRefreshToken(MsalRefreshTokenCacheItem item, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT }))
-            {
-                SaveRefreshToken(item);
-            }
-        }
+//        public void SaveRefreshToken(MsalRefreshTokenCacheItem item, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.RT }))
+//            {
+//                SaveRefreshToken(item);
+//            }
+//        }
 
-        public void SaveIdToken(MsalIdTokenCacheItem item, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ID }))
-            {
-                SaveIdToken(item);
-            }
-        }
+//        public void SaveIdToken(MsalIdTokenCacheItem item, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ID }))
+//            {
+//                SaveIdToken(item);
+//            }
+//        }
 
-        public void SaveAccount(MsalAccountCacheItem item, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ACCOUNT }))
-            {
-                SaveAccount(item);
-            }
-        }
+//        public void SaveAccount(MsalAccountCacheItem item, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheWrite) { TokenType = CacheEvent.TokenTypes.ACCOUNT }))
+//            {
+//                SaveAccount(item);
+//            }
+//        }
 
-        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.AT }))
-            {
-                DeleteAccessToken(cacheKey);
-            }
-        }
+//        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.AT }))
+//            {
+//                DeleteAccessToken(cacheKey);
+//            }
+//        }
 
-        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT }))
-            {
-                DeleteRefreshToken(cacheKey);
-            }
-        }
+//        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.RT }))
+//            {
+//                DeleteRefreshToken(cacheKey);
+//            }
+//        }
 
-        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ID }))
-            {
-                DeleteIdToken(cacheKey);
-            }
-        }
+//        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ID }))
+//            {
+//                DeleteIdToken(cacheKey);
+//            }
+//        }
 
-        public void DeleteAccount(MsalAccountCacheKey cacheKey, RequestContext requestContext)
-        {
-            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
-                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ACCOUNT }))
-            {
-                DeleteAccount(cacheKey);
-            }
-        }
+//        public void DeleteAccount(MsalAccountCacheKey cacheKey, RequestContext requestContext)
+//        {
+//            using (_telemetryManager.CreateTelemetryHelper(requestContext.TelemetryRequestId, requestContext.ClientId,
+//                new CacheEvent(CacheEvent.TokenCacheDelete) { TokenType = CacheEvent.TokenTypes.ACCOUNT }))
+//            {
+//                DeleteAccount(cacheKey);
+//            }
+//        }
 
-        /// <inheritdoc />
-        public int RefreshTokenCount => _tokenCacheAccessor.RefreshTokenCount;
+//        /// <inheritdoc />
+//        public int RefreshTokenCount => _tokenCacheAccessor.RefreshTokenCount;
 
-        /// <inheritdoc />
-        public int AccessTokenCount => _tokenCacheAccessor.AccessTokenCount;
+//        /// <inheritdoc />
+//        public int AccessTokenCount => _tokenCacheAccessor.AccessTokenCount;
 
-        /// <inheritdoc />
-        public int AccountCount => _tokenCacheAccessor.AccountCount;
+//        /// <inheritdoc />
+//        public int AccountCount => _tokenCacheAccessor.AccountCount;
 
-        /// <inheritdoc />
-        public int IdTokenCount => _tokenCacheAccessor.IdTokenCount;
+//        /// <inheritdoc />
+//        public int IdTokenCount => _tokenCacheAccessor.IdTokenCount;
 
-        /// <inheritdoc />
-        public void ClearRefreshTokens()
-        {
-            _tokenCacheAccessor.ClearRefreshTokens();
-        }
+//        /// <inheritdoc />
+//        public void ClearRefreshTokens()
+//        {
+//            _tokenCacheAccessor.ClearRefreshTokens();
+//        }
 
-        /// <inheritdoc />
-        public void ClearAccessTokens()
-        {
-            _tokenCacheAccessor.ClearAccessTokens();
-        }
+//        /// <inheritdoc />
+//        public void ClearAccessTokens()
+//        {
+//            _tokenCacheAccessor.ClearAccessTokens();
+//        }
 
-        /// <inheritdoc />
-        public void SaveAccessToken(MsalAccessTokenCacheItem item)
-        {
-            _tokenCacheAccessor.SaveAccessToken(item);
-        }
+//        /// <inheritdoc />
+//        public void SaveAccessToken(MsalAccessTokenCacheItem item)
+//        {
+//            _tokenCacheAccessor.SaveAccessToken(item);
+//        }
 
-        /// <inheritdoc />
-        public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
-        {
-            _tokenCacheAccessor.SaveRefreshToken(item);
-        }
+//        /// <inheritdoc />
+//        public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
+//        {
+//            _tokenCacheAccessor.SaveRefreshToken(item);
+//        }
 
-        /// <inheritdoc />
-        public void SaveIdToken(MsalIdTokenCacheItem item)
-        {
-            _tokenCacheAccessor.SaveIdToken(item);
-        }
+//        /// <inheritdoc />
+//        public void SaveIdToken(MsalIdTokenCacheItem item)
+//        {
+//            _tokenCacheAccessor.SaveIdToken(item);
+//        }
 
-        /// <inheritdoc />
-        public void SaveAccount(MsalAccountCacheItem item)
-        {
-            _tokenCacheAccessor.SaveAccount(item);
-        }
+//        /// <inheritdoc />
+//        public void SaveAccount(MsalAccountCacheItem item)
+//        {
+//            _tokenCacheAccessor.SaveAccount(item);
+//        }
 
-        /// <inheritdoc />
-        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
-        {
-            return _tokenCacheAccessor.GetAccessToken(accessTokenKey);
-        }
+//        /// <inheritdoc />
+//        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+//        {
+//            return _tokenCacheAccessor.GetAccessToken(accessTokenKey);
+//        }
 
-        /// <inheritdoc />
-        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
-        {
-            return _tokenCacheAccessor.GetRefreshToken(refreshTokenKey);
-        }
+//        /// <inheritdoc />
+//        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
+//        {
+//            return _tokenCacheAccessor.GetRefreshToken(refreshTokenKey);
+//        }
 
-        /// <inheritdoc />
-        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
-        {
-            return _tokenCacheAccessor.GetIdToken(idTokenKey);
-        }
+//        /// <inheritdoc />
+//        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
+//        {
+//            return _tokenCacheAccessor.GetIdToken(idTokenKey);
+//        }
 
-        /// <inheritdoc />
-        public string GetAccount(MsalAccountCacheKey accountKey)
-        {
-            return _tokenCacheAccessor.GetAccount(accountKey);
-        }
+//        /// <inheritdoc />
+//        public string GetAccount(MsalAccountCacheKey accountKey)
+//        {
+//            return _tokenCacheAccessor.GetAccount(accountKey);
+//        }
 
-        /// <inheritdoc />
-        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
-        {
-            _tokenCacheAccessor.DeleteAccessToken(cacheKey);
-        }
+//        /// <inheritdoc />
+//        public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
+//        {
+//            _tokenCacheAccessor.DeleteAccessToken(cacheKey);
+//        }
 
-        /// <inheritdoc />
-        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
-        {
-            _tokenCacheAccessor.DeleteRefreshToken(cacheKey);
-        }
+//        /// <inheritdoc />
+//        public void DeleteRefreshToken(MsalRefreshTokenCacheKey cacheKey)
+//        {
+//            _tokenCacheAccessor.DeleteRefreshToken(cacheKey);
+//        }
 
-        /// <inheritdoc />
-        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
-        {
-            _tokenCacheAccessor.DeleteIdToken(cacheKey);
-        }
+//        /// <inheritdoc />
+//        public void DeleteIdToken(MsalIdTokenCacheKey cacheKey)
+//        {
+//            _tokenCacheAccessor.DeleteIdToken(cacheKey);
+//        }
 
-        /// <inheritdoc />
-        public void DeleteAccount(MsalAccountCacheKey cacheKey)
-        {
-            _tokenCacheAccessor.DeleteAccount(cacheKey);
-        }
+//        /// <inheritdoc />
+//        public void DeleteAccount(MsalAccountCacheKey cacheKey)
+//        {
+//            _tokenCacheAccessor.DeleteAccount(cacheKey);
+//        }
 
-        /// <inheritdoc />
-        public ICollection<string> GetAllAccessTokensAsString()
-        {
-            return _tokenCacheAccessor.GetAllAccessTokensAsString();
-        }
+//        /// <inheritdoc />
+//        public ICollection<string> GetAllAccessTokensAsString()
+//        {
+//            return _tokenCacheAccessor.GetAllAccessTokensAsString();
+//        }
 
-        /// <inheritdoc />
-        public ICollection<string> GetAllRefreshTokensAsString()
-        {
-            return _tokenCacheAccessor.GetAllRefreshTokensAsString();
-        }
+//        /// <inheritdoc />
+//        public ICollection<string> GetAllRefreshTokensAsString()
+//        {
+//            return _tokenCacheAccessor.GetAllRefreshTokensAsString();
+//        }
 
-        /// <inheritdoc />
-        public ICollection<string> GetAllIdTokensAsString()
-        {
-            return _tokenCacheAccessor.GetAllIdTokensAsString();
-        }
+//        /// <inheritdoc />
+//        public ICollection<string> GetAllIdTokensAsString()
+//        {
+//            return _tokenCacheAccessor.GetAllIdTokensAsString();
+//        }
 
-        /// <inheritdoc />
-        public ICollection<string> GetAllAccountsAsString()
-        {
-            return _tokenCacheAccessor.GetAllAccountsAsString();
-        }
+//        /// <inheritdoc />
+//        public ICollection<string> GetAllAccountsAsString()
+//        {
+//            return _tokenCacheAccessor.GetAllAccountsAsString();
+//        }
 
-        /// <inheritdoc />
-        public void Clear()
-        {
-            _tokenCacheAccessor.Clear();
-        }
-    }
+//        /// <inheritdoc />
+//        public void Clear()
+//        {
+//            _tokenCacheAccessor.Clear();
+//        }
+//    }
 }

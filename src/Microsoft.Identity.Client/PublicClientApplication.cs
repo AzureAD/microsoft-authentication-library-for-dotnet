@@ -123,14 +123,6 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-#if WINDOWS_APP
-        /// <summary>
-        /// Flag to enable authentication with the user currently logged-in in Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
-        /// </summary>
-        public bool UseCorporateNetwork { get; set; }
-#endif
-
         // Android does not support AcquireToken* without UIParent params, but include it at runtime
         // only to avoid MissingMethodExceptions from NetStandard
 #if !ANDROID_BUILDTIME // include for other other platform and for runtime
@@ -465,27 +457,6 @@ namespace Microsoft.Identity.Client
                 .WithAuthority(new Uri(authority))
                 .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal IWebUI CreateWebAuthenticationDialog(UIParent parent, Prompt prompt, RequestContext requestContext)
-        {
-            //create instance of UIParent and assign useCorporateNetwork to UIParent
-            if (parent == null)
-            {
-#pragma warning disable CS0618 // Throws a good exception on Android, but ctor cannot be removed for backwards compat reasons
-                parent = new UIParent();
-#pragma warning restore CS0618 // Type or member is obsolete
-            }
-
-#if WINDOWS_APP || DESKTOP
-            //hidden webview can be used in both WinRT and desktop applications.
-            parent.UseHiddenBrowser = prompt.Equals(Prompt.Never);
-#if WINDOWS_APP
-            parent.UseCorporateNetwork = AppConfig.UseCorporateNetwork;
-#endif
-#endif
-
-            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(parent.CoreUIParent, requestContext);
         }
 
         private void GuardNetCore()

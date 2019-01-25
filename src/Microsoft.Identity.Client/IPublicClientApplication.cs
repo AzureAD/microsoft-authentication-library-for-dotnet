@@ -150,16 +150,6 @@ namespace Microsoft.Identity.Client
         string iOSKeychainSecurityGroup { get; set; }
 #endif // iOS
 
-#if WINDOWS_APP
-       /// <summary>
-        /// Flag to enable authentication with the user currently logeed-in in Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-application-configuration", true)]
-        bool UseCorporateNetwork { get; set; }
-#endif // WINDOWS_APP
-
         // expose the interactive API without UIParent only for platforms that 
         // do not need it to operate like desktop, UWP, iOS.
 #if !ANDROID_BUILDTIME
