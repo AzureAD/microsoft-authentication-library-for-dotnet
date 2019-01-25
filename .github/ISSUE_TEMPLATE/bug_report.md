@@ -4,11 +4,11 @@ about: Please do NOT file bugs without filling in this form.
 ---
 
 **Which Version of MSAL are you using ?**
-Note that to get help, you need to run the latest preview or non-preview version
+Note that to get help, you need to run the latest version. Preview version are also ok. 
 For ADAL, please log issues to https://github.com/AzureAD/azure-activedirectory-library-for-dotnet
-<!-- E.g. MSAL 2.6.2, MSAL 1.3.0-preview -->
+<!-- E.g. MSAL 2.6.2, MSAL 3.0.0-preview -->
 
-**Which platform has the issue?**
+**Platform**
 <!-- Ex: net45, netcore, UWP, xamarin android, xamarin iOS -->
 
 **What authentication flow has the issue?**
@@ -27,8 +27,8 @@ Other? - please describe;
 
 **Is this a new or existing app?**
 <!-- Ex:
-a. The app is in production, and I have upgraded to a new version of ADAL
-b. The app is in production, uses the same version of ADAL, but started seeing this issue
+a. The app is in production, and I have upgraded to a new version of MSAL
+b. The app is in production, I haven't upgraded MSAL, but started seeing this issue
 c. This is a new app or experiment
 -->
 
