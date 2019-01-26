@@ -90,7 +90,7 @@ namespace XForms
             RefreshCacheView();
         }
 
-        private async Task OnClearClickedAsync(object sender, EventArgs e)
+        private async void OnClearClickedAsync(object sender, EventArgs e)
         {
             foreach (var user in await App.MsalPublicClient.GetAccountsAsync().ConfigureAwait(false))
             {
@@ -150,7 +150,7 @@ namespace XForms
             RefreshCacheView();
         }
 
-        public async Task ShowAccessTokenDetailsAsync(object sender, EventArgs e)
+        public async void ShowAccessTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var accessTokenCacheItem = (MsalAccessTokenCacheItem)mi.CommandParameter;
@@ -159,7 +159,7 @@ namespace XForms
             await Navigation.PushAsync(new AccessTokenCacheItemDetails(accessTokenCacheItem, null)).ConfigureAwait(false);
         }
 
-        public async Task ShowRefreshTokenDetailsAsync(object sender, EventArgs e)
+        public async void ShowRefreshTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var refreshTokenCacheItem = (MsalRefreshTokenCacheItem)mi.CommandParameter;
@@ -167,7 +167,7 @@ namespace XForms
             await Navigation.PushAsync(new RefreshTokenCacheItemDetails(refreshTokenCacheItem)).ConfigureAwait(false);
         }
 
-        public async Task ShowIdTokenDetailsAsync(object sender, EventArgs e)
+        public async void ShowIdTokenDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var idTokenCacheItem = (MsalIdTokenCacheItem)mi.CommandParameter;
@@ -176,7 +176,7 @@ namespace XForms
             await Navigation.PushAsync(new IdTokenCacheItemDetails(idTokenCacheItem)).ConfigureAwait(false);
         }
 
-        public async Task ShowAccountDetailsAsync(object sender, EventArgs e)
+        public async void ShowAccountDetailsAsync(object sender, EventArgs e)
         {
             var mi = (MenuItem)sender;
             var accountCacheItem = (MsalAccountCacheItem)mi.CommandParameter;

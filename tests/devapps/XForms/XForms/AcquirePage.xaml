@@ -42,8 +42,8 @@
                 </StackLayout>
 
                 <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                    <!--  TODO: this fails on latest android <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken_button"/>-->
-                    <!--  TODO: this fails on latest android <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>-->
+                      <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken_button"/>
+                      <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>
                 </StackLayout>
             </StackLayout>
         </Frame>
@@ -63,7 +63,7 @@
                     </StackLayout>
 
                 </StackLayout>
-                <!--TODO: this fails on latest android <Button  Text="AcquireSilently" Clicked="OnAcquireSilentlyClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenSilent_button"/>-->
+                <Button  Text="AcquireSilently" Clicked="OnAcquireSilentlyClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenSilent_button"/>
 
             </StackLayout>
         </Frame>
