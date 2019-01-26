@@ -397,10 +397,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
-            
-            controller.WaitForWebElementByCssId(CoreUiTestConstants.B2CEditProfileContinueId);
-
+          
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueId, XamarinSelector.ByHtmlIdAttribute);
+
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.B2CEditProfileContinueId);
 
             VerifyResult(controller);
         }
