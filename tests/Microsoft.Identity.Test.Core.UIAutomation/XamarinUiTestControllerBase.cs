@@ -90,6 +90,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             EnterText(elementID, text, xamarinSelector, new TimeSpan(0, 0, waitTime));
         }
 
+        public void Screenshot(string text)
+        {
+            Console.WriteLine(text + "\n");
+        }
+
         protected abstract void EnterText(string elementID, string text, XamarinSelector xamarinSelector, TimeSpan timeout);
 
         public AppWebResult[] WaitForWebElementByCssId(string elementID, TimeSpan? timeout = null)
