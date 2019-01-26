@@ -401,6 +401,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueId, XamarinSelector.ByHtmlIdAttribute);
 
+            Thread.Sleep(1000);
+
             VerifyResult(controller);
         }
 
