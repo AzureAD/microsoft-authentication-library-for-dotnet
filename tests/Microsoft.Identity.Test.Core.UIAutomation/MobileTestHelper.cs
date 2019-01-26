@@ -313,19 +313,13 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         {
             controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.Screenshot("Tapped to log in by Facebook");
-
             Thread.Sleep(1000);
 
             controller.EnterText(CoreUiTestConstants.WebUpnB2CFacebookInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
-            controller.Screenshot("Username entered");
-
             Thread.Sleep(1000);
 
             controller.EnterText(userInformationFieldIds.PasswordInputId, user.Password, XamarinSelector.ByHtmlIdAttribute);
-
-            controller.Screenshot("Password entered");
 
             Thread.Sleep(1000);
 
