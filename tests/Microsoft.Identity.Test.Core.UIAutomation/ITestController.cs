@@ -90,6 +90,12 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="automationID">ID of the element to tap</param>
         void SetSwitchState(string automationID);
 
+        /// <summary>
+        /// Returns the text of a screenshot
+        /// </summary>
+        /// <param name="text">Information to show in the screenshot</param>
+        void Screenshot(string text);
+
         IApp Application { get; set; }
 
         /// <summary>
