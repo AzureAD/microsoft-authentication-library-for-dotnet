@@ -27,7 +27,6 @@
 
 using System;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Test.LabInfrastructure;
 using NUnit.Framework;
@@ -311,17 +310,17 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void PerformB2CFacebookProviderSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
         {
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.FacebookAccountId);
+
             controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
 
-            Thread.Sleep(1000);
-
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.WebUpnB2CFacebookInputId);
+            
             controller.EnterText(CoreUiTestConstants.WebUpnB2CFacebookInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
-
-            Thread.Sleep(1000);
 
             controller.EnterText(userInformationFieldIds.PasswordInputId, user.Password, XamarinSelector.ByHtmlIdAttribute);
 
-            Thread.Sleep(1000);
+            controller.WaitForWebElementByCssId(userInformationFieldIds.PasswordSignInButtonId);
 
             controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
@@ -398,10 +397,10 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
             //Acquire token flow
             controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
+            
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.B2CEditProfileContinueId);
 
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueId, XamarinSelector.ByHtmlIdAttribute);
-
-            Thread.Sleep(1000);
 
             VerifyResult(controller);
         }
