@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Http
 
         Task<HttpResponse> SendGetAsync(
             Uri endpoint,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             RequestContext requestContext);
 
         Task<IHttpWebResponse> SendPostForceResponseAsync(
