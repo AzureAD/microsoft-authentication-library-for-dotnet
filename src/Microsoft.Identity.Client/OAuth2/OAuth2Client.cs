@@ -112,13 +112,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 httpEvent.HttpMethod = method.Method;
 
                 IDictionary<string, string> headersAsDictionary = response.HeadersAsDictionary;
-                if(headersAsDictionary.ContainsKey("x-ms-request-id") &&
+                if (headersAsDictionary.ContainsKey("x-ms-request-id") &&
                     headersAsDictionary["x-ms-request-id"] != null)
                 {
                     httpEvent.RequestIdHeader = headersAsDictionary["x-ms-request-id"];
                 }
 
-                if(headersAsDictionary.ContainsKey("x-ms-clitelem") && 
+                if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
                     headersAsDictionary["x-ms-clitelem"] != null)
                 {
                     XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(headersAsDictionary["x-ms-clitelem"], requestContext);
@@ -137,12 +137,13 @@ namespace Microsoft.Identity.Client.OAuth2
                     {
                         httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
                     }
-                    catch (SerializationException) // in the rare case we get an error response we cannot deserialize
+                    catch (SerializationException e) // in the rare case we get an error response we cannot deserialize
                     {
                         throw MsalExceptionFactory.GetServiceException(
                             CoreErrorCodes.NonParsableOAuthError,
                             CoreErrorMessages.NonParsableOAuthError,
-                            response);
+                            response, 
+                            e);
                     }
                 }
             }
@@ -173,15 +174,15 @@ namespace Microsoft.Identity.Client.OAuth2
 
             try
             {
-                var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+                MsalTokenResponse msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
 
                 if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
                 {
-                    throw MsalExceptionFactory.GetUiRequiredException(
+                    throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.InvalidGrantError,
                         msalTokenResponse.ErrorDescription,
-                        null,
-                        ExceptionDetail.FromHttpResponse(response));
+                        response, 
+                        isUiRequiredException: true);
                 }
 
                 serviceEx = MsalExceptionFactory.GetServiceException(

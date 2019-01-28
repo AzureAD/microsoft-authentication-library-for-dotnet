@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Client.Utils
             return DeserializeFromJson<T>(json.ToByteArray());
         }
 
-        internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext)
+        internal static T TryToDeserializeFromJson<T>(string json, RequestContext requestContext = null)
         {
             if (string.IsNullOrEmpty(json))
             {
@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client.Utils
             }
             catch (System.Runtime.Serialization.SerializationException ex)
             {
-                requestContext.Logger.WarningPii(ex);
+                requestContext?.Logger?.WarningPii(ex);
             }
 
             return result;

@@ -222,6 +222,16 @@ namespace Microsoft.Identity.Client
         public HttpResponseHeaders Headers { get; internal set; }
 
         /// <summary>
+        /// A string that provides more details about the error. Sent by the server.
+        /// </summary>
+        public string SubError { get; internal set; }
+
+        /// <summary>
+        /// An ID that can used to piece up a single authentication flow.
+        /// </summary>
+        public string CorrelationId { get; internal set; }
+
+        /// <summary>
         /// Creates and returns a string representation of the current exception.
         /// </summary>
         /// <returns>A string representation of the current exception.</returns>

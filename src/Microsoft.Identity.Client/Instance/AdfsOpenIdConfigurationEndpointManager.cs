@@ -54,23 +54,15 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (authorityInfo.ValidateAuthority)
             {
-                var drsResponse = await GetMetadataFromEnrollmentServerAsync(userPrincipalName, requestContext)
+                DrsMetadataResponse drsResponse = await GetMetadataFromEnrollmentServerAsync(userPrincipalName, requestContext)
                                       .ConfigureAwait(false);
-
-                if (!string.IsNullOrEmpty(drsResponse.Error))
-                {
-                    MsalExceptionFactory.GetServiceException(
-                        drsResponse.Error,
-                        drsResponse.ErrorDescription,
-                        ExceptionDetail.FromDrsResponse(drsResponse));
-                }
 
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
                     throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.MissingPassiveAuthEndpoint,
                         CoreErrorMessages.CannotFindTheAuthEndpont,
-                        ExceptionDetail.FromDrsResponse(drsResponse));
+                        drsResponse);
                 }
 
                 string resource = string.Format(CultureInfo.InvariantCulture, authorityInfo.CanonicalAuthority);
