@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         private string _acquirePageId;
         private string _cachePageId;
         private string _settingsPageId;
-        // private string _logPageId;
 
         public MobileTestHelper(Xamarin.UITest.Platform platform)
         {
@@ -517,13 +516,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     _cachePageId = CoreUiTestConstants.CachePageAndroidID;
                     _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
                     _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
-                    //_logPageId = CoreUiTestConstants.LogPageAndroidId;
                     break;
                 case Xamarin.UITest.Platform.iOS:
                     _cachePageId = CoreUiTestConstants.CachePageID;
                     _acquirePageId = CoreUiTestConstants.AcquirePageId;
                     _settingsPageId = CoreUiTestConstants.SettingsPageId;
-                    //_logPageId = CoreUiTestConstants.LogPageId;
                     break;
             }
         }

@@ -133,8 +133,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
-  <!-- Import the Xamarin targets workaround -->
-  <!-- <Import Project="..\Patch.Xamarin.Common.targets" /> -->
   <PropertyGroup>
     <CodeAnalysisRuleSet>../../../../build/SolutionWideAnalyzerConfig.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
