@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Http
             IDictionary<string, string> headers,
             RequestContext requestContext);
 
-        Task<IHttpWebResponse> SendPostForceResponseAsync(
+        Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,

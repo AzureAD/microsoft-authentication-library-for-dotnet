@@ -50,7 +50,8 @@ namespace DesktopTestApp
 #endif
                 .BuildConcrete();
 
-            PublicClientApplication.UserTokenCache.Deserialize(TokenCacheHelper.GetUserCache().Serialize());
+           
+            CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
         }
 
         public string ApplicationId { get; set; }
@@ -62,9 +63,9 @@ namespace DesktopTestApp
         public PublicClientApplication PublicClientApplication { get; set; }
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveAsync(
-            IEnumerable<string> scopes, 
-            Prompt uiBehavior, 
-            string extraQueryParams, 
+            IEnumerable<string> scopes,
+            Prompt uiBehavior,
+            string extraQueryParams,
             UIParent uiParent)
         {
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
@@ -81,22 +82,22 @@ namespace DesktopTestApp
             }
             else
             {
-                result =await PublicClientApplication.AcquireTokenAsync(
+                result = await PublicClientApplication.AcquireTokenAsync(
                     scopes,
                     LoginHint,
                     uiBehavior,
                     extraQueryParams,
                     uiParent).ConfigureAwait(false);
             }
-
             CurrentUser = result.Account;
+
             return result;
         }
 
         public async Task<AuthenticationResult> AcquireTokenInteractiveWithAuthorityAsync(
-            IEnumerable<string> scopes, 
-            Prompt uiBehavior, 
-            string extraQueryParams, 
+            IEnumerable<string> scopes,
+            Prompt uiBehavior,
+            string extraQueryParams,
             UIParent uiParent)
         {
             CreateOrUpdatePublicClientApp(InteractiveAuthority, ApplicationId);
@@ -140,25 +141,20 @@ namespace DesktopTestApp
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)
         {
-            if (string.IsNullOrWhiteSpace(interactiveAuthority))
-            {
-                // Use default authority
-                PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
-                    .WithComponent(_component)
-                    .BuildConcrete();
+            var builder = PublicClientApplicationBuilder.Create(ApplicationId)
+                .WithComponent(_component);
 
-                PublicClientApplication.UserTokenCache.Deserialize(TokenCacheHelper.GetUserCache().Serialize());
-            }
-            else
+            if (!string.IsNullOrWhiteSpace(interactiveAuthority))
             {
                 // Use the override authority provided
-                PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
-                    .WithAuthority(new Uri(interactiveAuthority), true)
-                    .WithComponent(_component)
-                    .BuildConcrete();
+                builder = builder.WithAuthority(new Uri(interactiveAuthority), true);
 
-                PublicClientApplication.UserTokenCache.Deserialize(TokenCacheHelper.GetUserCache().Serialize());
             }
+
+            PublicClientApplication = builder.BuildConcrete();
+
+            PublicClientApplication.UserTokenCache.SetBeforeAccess(TokenCacheHelper.BeforeAccessNotification);
+            PublicClientApplication.UserTokenCache.SetAfterAccess(TokenCacheHelper.AfterAccessNotification);
         }
     }
 }
