@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client.AppConfig
         private static string GetFirstPathSegment(string authority)
         {
             var uri = new Uri(authority);
-            if (uri.Segments.Length == 2)
+            if (uri.Segments.Length >= 2)
             {
                 return new Uri(authority).Segments[1]
                                          .TrimEnd('/');
