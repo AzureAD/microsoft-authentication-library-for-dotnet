@@ -78,12 +78,12 @@ namespace Microsoft.Identity.Client.Instance
 
         protected bool ExistsInValidatedAuthorityCache(string userPrincipalName)
         {
-            if (string.IsNullOrEmpty(userPrincipalName))
+            /*if (string.IsNullOrEmpty(userPrincipalName))
             {
                 throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.UpnRequired,
                     CoreErrorMessages.UpnRequiredForAuthorityValidation);
-            }
+            }*/
 
             /*if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
             {

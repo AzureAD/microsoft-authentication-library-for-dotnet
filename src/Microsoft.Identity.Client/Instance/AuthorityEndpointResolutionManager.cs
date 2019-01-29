@@ -58,12 +58,12 @@ namespace Microsoft.Identity.Client.Instance
             string userPrincipalName,
             RequestContext requestContext)
         {
-            if (authorityInfo.AuthorityType == AuthorityType.Adfs && string.IsNullOrEmpty(userPrincipalName))
+           /* if (authorityInfo.AuthorityType == AuthorityType.Adfs && string.IsNullOrEmpty(userPrincipalName))
             {
                 throw MsalExceptionFactory.GetClientException(
                     CoreErrorCodes.UpnRequired,
                     CoreErrorMessages.UpnRequiredForAuthorityValidation);
-            }
+            }*/
 
             if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))
             {
@@ -161,7 +161,10 @@ namespace Microsoft.Identity.Client.Instance
                     }
                 }
 
-                updatedCacheEntry.ValidForDomainsList.Add(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName));
+                if(!string.IsNullOrEmpty(userPrincipalName))
+                {
+                    updatedCacheEntry.ValidForDomainsList.Add(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName));
+                }    
             }
 
             EndpointCacheEntries.TryAdd(authorityInfo.CanonicalAuthority, updatedCacheEntry);

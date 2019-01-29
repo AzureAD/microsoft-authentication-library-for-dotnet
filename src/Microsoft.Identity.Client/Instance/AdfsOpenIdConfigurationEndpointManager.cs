@@ -55,33 +55,9 @@ namespace Microsoft.Identity.Client.Instance
         {
             if (authorityInfo.ValidateAuthority)
             {
-                var drsResponse = await GetMetadataFromEnrollmentServerAsync(userPrincipalName, requestContext)
-                                      .ConfigureAwait(false);
-
-                if (!string.IsNullOrEmpty(drsResponse.Error))
-                {
-                    MsalExceptionFactory.GetServiceException(
-                        drsResponse.Error,
-                        drsResponse.ErrorDescription,
-                        ExceptionDetail.FromDrsResponse(drsResponse));
-                }
-
-                if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
-                {
-                    throw MsalExceptionFactory.GetServiceException(
-                        CoreErrorCodes.MissingPassiveAuthEndpoint,
-                        CoreErrorMessages.CannotFindTheAuthEndpoint,
-                        ExceptionDetail.FromDrsResponse(drsResponse));
-                }
-
-                string resource = string.Format(CultureInfo.InvariantCulture, authorityInfo.CanonicalAuthority);
-                string webFingerUrl = Constants.FormatAdfsWebFingerUrl(
-                    string.Format(
-                    CultureInfo.InvariantCulture,
-                    "https://{0}/.well-known/webfinger?rel={1}&resource={2}",
-                    authorityInfo.Host,
-                    DefaultRealm),
-                    resource);
+                string resource = string.Format(CultureInfo.InvariantCulture, "https://{0}", authorityInfo.Host);
+                string webFingerUrl = Constants.FormatAdfsWebFingerUrl(authorityInfo.Host, resource);
+             
 
                 var httpResponse = await _serviceBundle.HttpManager.SendGetAsync(new Uri(webFingerUrl), null, requestContext)
                                                        .ConfigureAwait(false);
@@ -108,35 +84,5 @@ namespace Microsoft.Identity.Client.Instance
             return authorityInfo.CanonicalAuthority + Constants.WellKnownOpenIdConfigurationPath;
         }
 
-        private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(
-            string userPrincipalName,
-            RequestContext requestContext)
-        {
-            try
-            {
-                // attempt to connect to on-premise enrollment server first.
-                return await QueryEnrollmentServerEndpointAsync(
-                   Constants.FormatEnterpriseRegistrationOnPremiseUri(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)),
-                   requestContext).ConfigureAwait(false);
-            }
-            catch (Exception exc)
-            {
-                requestContext.Logger.InfoPiiWithPrefix(
-                    exc,
-                    "On-Premise ADFS enrollment server endpoint lookup failed. Error - ");
-            }
-
-            return await QueryEnrollmentServerEndpointAsync(
-               Constants.FormatEnterpriseRegistrationInternetUri(AdfsUpnHelper.GetDomainFromUpn(userPrincipalName)),
-               requestContext).ConfigureAwait(false);
-        }
-
-        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(string endpoint, RequestContext requestContext)
-        {
-            var client = new OAuth2Client(requestContext.Logger, _serviceBundle.HttpManager, _serviceBundle.TelemetryManager);
-            client.AddQueryParameter("api-version", "1.0");
-            return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext)
-                               .ConfigureAwait(false);
-        }
     }
 }

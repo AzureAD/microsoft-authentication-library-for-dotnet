@@ -168,7 +168,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
                     harness,
                     NumberOfAuthorizationPendingRequestsToInject,
-                    out HashSet<string> expectedScopes);
+                    out HashSet<string> expectedScopes,
+                    true);
 
                 var cache = parameters.TokenCache;
 
@@ -336,12 +337,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
             if (isAdfs)
             {
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        Method = HttpMethod.Get,
-                        ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
-                    });
+                harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    Method = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
             }
             else
             {

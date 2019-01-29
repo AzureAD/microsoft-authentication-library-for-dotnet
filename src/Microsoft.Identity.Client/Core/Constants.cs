@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client.Core
         {
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "https://{0}/adfs/.well-known/webfinger?rel={1}&resource={2}",
+                "https://{0}/.well-known/webfinger?rel={1}&resource={2}",
                 host,
                 Constants.DefaultRealm,
                 resource);

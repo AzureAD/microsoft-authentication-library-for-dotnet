@@ -355,13 +355,13 @@ namespace Microsoft.Identity.Client
                     environmentAliases.UnionWith
                         (GetEnvironmentAliases(requestParams.AuthorityInfo.CanonicalAuthority, instanceDiscoveryMetadataEntry));
 
-                    if (requestParams.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.B2C)
-                    {
-                        preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
-                    }
-                    else if (requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
+                    if(requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
                     {
                         preferredEnvironmentAlias = requestParams.AuthorityInfo.CanonicalAuthority;
+                    }
+                    else if (requestParams.AuthorityInfo.AuthorityType != AppConfig.AuthorityType.B2C)
+                    {
+                        preferredEnvironmentAlias = instanceDiscoveryMetadataEntry.PreferredCache;
                     }
                     else
                     {
@@ -439,16 +439,6 @@ namespace Microsoft.Identity.Client
                 IEnumerable<MsalAccessTokenCacheItem> filteredItems =
                     tokenCacheItems.Where(
                         item => ScopeHelper.ScopeContains(item.ScopeSet, requestParams.Scope));
-
-                //Adfs does not return scopes in resource/scope format
-                if (requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs && !filteredItems.Any())
-                {
-                    SortedSet<string> scopes = ParseScopesForAdfsToken(requestParams.Scope);
-
-                    filteredItems =
-                        tokenCacheItems.Where(
-                            item => ScopeHelper.ScopeContains(item.ScopeSet, scopes));
-                }
 
                 requestParams.RequestContext.Logger.Info("Matching entry count after filtering by scopes - " + filteredItems.Count());
 

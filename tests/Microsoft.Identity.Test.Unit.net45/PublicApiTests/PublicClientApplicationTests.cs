@@ -1483,6 +1483,19 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
+                httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    Method = HttpMethod.Get,
+                    Url = "https://fs.contoso.com/.well-known/webfinger",
+                    QueryParams = new Dictionary<string, string>
+                    {
+                            {"resource", "https://fs.contoso.com"},
+                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
+                    },
+                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
+                });
+
                 //add mock response for tenant endpoint discovery
                 httpManager.AddMockHandler(new MockHttpMessageHandler
                 {

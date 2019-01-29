@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         public static readonly string DefaultAdfsTokenResponse =
             "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
-            "\"scope1 scope2\",\"access_token\":\"some-access-token\"" +
+            "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
             ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\"" +
             ":\"" + CreateAdfsIdToken(MsalTestConstants.OnPremiseDisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
@@ -227,7 +227,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return
                 CreateSuccessResponseMessage(
-                    "{\"subject\": \"https://fabrikam.com\",\"links\": [{\"rel\": " +
+                    "{\"subject\": \"https://fs.contoso.com\",\"links\": [{\"rel\": " +
                     "\"http://schemas.microsoft.com/rel/trusted-realm\"," +
                     "\"href\": \"" + href + "\"}]}");
         }
