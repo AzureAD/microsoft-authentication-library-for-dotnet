@@ -88,9 +88,9 @@ namespace XForms
                 .WithLoggingCallback((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
-                })
-                .WithLoggingLevel(LogLevel.Verbose)
-                .WithEnablePiiLogging(true);
+                },
+                LogLevel.Verbose,
+                true);
 
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)

@@ -54,13 +54,13 @@ namespace MacCocoaApp
             _pca = PublicClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(new Uri(Authority))
-                .WithLoggingLevel(LogLevel.Verbose)
-                .WithEnablePiiLogging(true)
                 .WithLoggingCallback((level, message, pii) =>
                 {
                     Console.WriteLine($"MSAL {level} {pii} {message}");
                     Console.ResetColor();
-                })
+                },
+                LogLevel.Verbose,
+                true)
                 .Build();
 
             _pca.UserTokenCache.SetBeforeAccess(args =>
