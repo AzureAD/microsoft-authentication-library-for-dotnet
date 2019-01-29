@@ -725,39 +725,34 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual("access-token-2", cache.GetAllAccessTokensForClient(requestParams.RequestContext).First().Secret);
         }
 
-        /*[TestMethod]
+        [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void CacheAdfsTokenTest()
         {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            var serviceBundle = TestCommon.CreateDefaultAdfsServiceBundle();
             ITokenCacheInternal adfsCache = new TokenCache(serviceBundle);
             var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.OnPremiseAuthority);
 
             MsalTokenResponse response = new MsalTokenResponse();
-            //creating IDToken with empty tenantID and displayableID/PreferedUserName for B2C scenario
-            response.IdToken = MockHelpers.CreateIdToken(String.Empty, String.Empty, null);
+            
+            response.IdToken = MockHelpers.CreateIdToken(String.Empty, MsalTestConstants.FabrikamDisplayableId, null);
             response.ClientInfo = null;
             response.AccessToken = "access-token";
-            response.ExpiresIn = 3599;
+            response.ExpiresIn = 3599; 
             response.CorrelationId = "correlation-id";
             response.RefreshToken = "refresh-token";
             response.Scope = MsalTestConstants.Scope.AsSingleString();
             response.TokenType = "Bearer";
 
             RequestContext requestContext = RequestContext.CreateForTest(serviceBundle);
-            AuthenticationRequestParameters requestParams = new AuthenticationRequestParameters()
-            {
-                RequestContext = requestContext,
-                Authority = authority,
-                ClientId = MsalTestConstants.ClientId,
-                TenantUpdatedCanonicalAuthority = MsalTestConstants.OnPremiseAuthority
-            };
+            var requestParams = CreateAuthenticationRequestParameters(serviceBundle);
+            requestParams.TenantUpdatedCanonicalAuthority = MsalTestConstants.AuthorityTestTenant;
 
             adfsCache.SaveAccessAndRefreshToken(requestParams, response);
 
             Assert.AreEqual(1, adfsCache.Accessor.RefreshTokenCount);
             Assert.AreEqual(1, adfsCache.Accessor.AccessTokenCount);
-        }*/
+        }
 
         private void AfterAccessChangedNotification(TokenCacheNotificationArgs args)
         {
