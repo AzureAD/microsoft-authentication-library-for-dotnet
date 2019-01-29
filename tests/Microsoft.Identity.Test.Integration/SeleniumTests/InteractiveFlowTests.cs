@@ -76,7 +76,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsFederatedUser = true
             };
 
-
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
