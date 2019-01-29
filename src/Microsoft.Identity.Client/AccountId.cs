@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Constructor of an AccountId meant for Adfs scenarios since Adfs instances lack tenant ids.
         /// </summary>
-        /// <param name="identifier">Unique identifier for the account</param>
+        /// <param name="adfsIdentifier">Unique identifier for the account if authority is ADFS</param>
         public AccountId(string adfsIdentifier)
             :this(adfsIdentifier, adfsIdentifier, null)
         { }
