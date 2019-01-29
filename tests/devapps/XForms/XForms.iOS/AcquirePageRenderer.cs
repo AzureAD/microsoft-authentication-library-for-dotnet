@@ -48,7 +48,7 @@ namespace XForms.iOS
             base.OnElementChanged(e);
             page = e.NewElement as AcquirePage;
 
-#if BUILDENV == APPCENTER
+#if iOS
             Xamarin.Calabash.Start();
 #endif
         }
