@@ -28,6 +28,7 @@
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.PlatformsCommon.Factories
 {
@@ -41,20 +42,22 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// </summary>
         public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
         {
+            var finalLogger = logger ?? MsalLogger.Create(Guid.NewGuid(), null, false);
+
 #if NET_CORE
-            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(logger);
+            return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
 #elif ANDROID
-            return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(logger);
+            return new Microsoft.Identity.Client.Platforms.Android.AndroidPlatformProxy(finalLogger);
 #elif iOS
-            return new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy(logger);
+            return new Microsoft.Identity.Client.Platforms.iOS.iOSPlatformProxy(finalLogger);
 #elif MAC
-            return new Platforms.Mac.MacPlatformProxy(logger);
+            return new Platforms.Mac.MacPlatformProxy(finalLogger);
 #elif WINDOWS_APP
-            return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(logger);
+            return new Microsoft.Identity.Client.Platforms.uap.UapPlatformProxy(finalLogger);
 #elif NETSTANDARD1_3
-            return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(logger);
+            return new Microsoft.Identity.Client.Platforms.netstandard13.Netstandard13PlatformProxy(finalLogger);
 #elif DESKTOP
-            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(logger);
+            return new Microsoft.Identity.Client.Platforms.net45.NetDesktopPlatformProxy(finalLogger);
 #else
             throw new PlatformNotSupportedException();
 #endif

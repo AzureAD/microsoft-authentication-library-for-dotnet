@@ -25,6 +25,8 @@
 //
 // ------------------------------------------------------------------------------
 
+using System.ComponentModel;
+
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
@@ -36,6 +38,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// The sign-in audience was not specified
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         None,
 
         /// <summary>

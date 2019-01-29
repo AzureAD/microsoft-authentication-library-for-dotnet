@@ -770,6 +770,7 @@ namespace Microsoft.Identity.Client
                     requestContext).ConfigureAwait(false);
                 return instanceDiscoveryMetadata;
             }
+
             return null;
         }
 
