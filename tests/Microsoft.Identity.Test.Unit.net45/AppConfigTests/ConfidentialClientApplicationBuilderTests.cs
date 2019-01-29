@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNotNull(cca.UserTokenCache);
 
             // Validate Defaults
-            Assert.AreEqual(LogLevel.Warning, cca.AppConfig.LogLevel);
+            Assert.AreEqual(LogLevel.Info, cca.AppConfig.LogLevel);
             Assert.IsNull(cca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNull(cca.AppConfig.Component);

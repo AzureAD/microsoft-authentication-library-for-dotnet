@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNotNull(pca.UserTokenCache);
 
             // Validate Defaults
-            Assert.AreEqual(LogLevel.Warning, pca.AppConfig.LogLevel);
+            Assert.AreEqual(LogLevel.Info, pca.AppConfig.LogLevel);
             Assert.IsNull(pca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
             Assert.IsNull(pca.AppConfig.Component);
@@ -102,6 +102,48 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
             Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
+
+        [TestMethod]
+        public void TestConstructor_WithDebugLoggingCallbackAndAppConfig()
+        {
+            // Ensure that values in the options are not reset to defaults when not sent into WithLoggingCallback
+            var options = new PublicClientApplicationOptions
+            {
+                ClientId = MsalTestConstants.ClientId,
+                LogLevel = LogLevel.Error,
+                EnablePiiLogging = true,
+                IsDefaultPlatformLoggingEnabled = true
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .WithLoggingCallback((level, message, pii) => { }).Build();
+
+            Assert.AreEqual(LogLevel.Error, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
+            Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithDebugLoggingCallbackAndAppConfigWithOverride()
+        {
+            // Ensure that values in the options are reset to new values when sent into WithLoggingCallback
+            var options = new PublicClientApplicationOptions
+            {
+                ClientId = MsalTestConstants.ClientId,
+                LogLevel = LogLevel.Error,
+                EnablePiiLogging = false,
+                IsDefaultPlatformLoggingEnabled = true
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .WithLoggingCallback((level, message, pii) => { },
+                    LogLevel.Verbose, true, false).Build();
+
+            Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
+            Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+        }
+
 
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()

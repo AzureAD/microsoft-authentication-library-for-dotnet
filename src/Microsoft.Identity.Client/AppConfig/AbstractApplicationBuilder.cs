@@ -89,9 +89,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// was already set on the application builder
         public T WithLoggingCallback(
             LogCallback loggingCallback, 
-            LogLevel logLevel = LogLevel.Info, 
-            bool enablePiiLogging = false, 
-            bool enableDefaultPlatformLogging = false)
+            LogLevel? logLevel = null, 
+            bool? enablePiiLogging = null, 
+            bool? enableDefaultPlatformLogging = null)
         {
             if (Config.LoggingCallback != null)
             {
@@ -99,9 +99,9 @@ namespace Microsoft.Identity.Client.AppConfig
             }
 
             Config.LoggingCallback = loggingCallback;
-            Config.LogLevel = logLevel;
-            Config.EnablePiiLogging = enablePiiLogging;
-            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging;
+            Config.LogLevel = logLevel ?? Config.LogLevel;
+            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
+            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
             return (T)this;
         }
 
@@ -122,8 +122,8 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder by calling <see cref="WithLoggingCallback(LogCallback, LogLevel, bool, bool)"/>
-        /// <seealso cref="WithLoggingCallback(LogCallback, LogLevel, bool, bool)"/>
+        /// was already set on the application builder by calling <see cref="WithLoggingCallback(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// <seealso cref="WithLoggingCallback(LogCallback, LogLevel?, bool?, bool?)"/>
         public T WithDebugLoggingCallback(
             LogLevel logLevel = LogLevel.Info,
             bool enablePiiLogging = false, 
@@ -211,6 +211,12 @@ namespace Microsoft.Identity.Client.AppConfig
             WithRedirectUri(applicationOptions.RedirectUri);
             WithTenantId(applicationOptions.TenantId);
             WithComponent(applicationOptions.Component);
+
+            WithLoggingCallback(
+                null, 
+                applicationOptions.LogLevel, 
+                applicationOptions.EnablePiiLogging,
+                applicationOptions.IsDefaultPlatformLoggingEnabled);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
