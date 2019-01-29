@@ -83,11 +83,11 @@ namespace Test.Microsoft.Identity.UIAutomation
             var tests = new List<Action>()
             {
                 AcquireTokenTest,
-                AcquireTokenSilentTest,
-                AcquireTokenADFSV3InteractiveFederatedTest,
-                AcquireTokenADFSV3InteractiveNonFederatedTest,
-                AcquireTokenADFSV4InteractiveFederatedTest,
-                AcquireTokenADFSV4InteractiveNonFederatedTest,
+                //AcquireTokenSilentTest,
+                //AcquireTokenADFSV3InteractiveFederatedTest,
+                //AcquireTokenADFSV3InteractiveNonFederatedTest,
+                //AcquireTokenADFSV4InteractiveFederatedTest,
+                //AcquireTokenADFSV4InteractiveNonFederatedTest,
 
                 //B2CFacebookB2CLoginAuthorityAcquireTokenTest,
                 //B2CFacebookMicrosoftAuthorityAcquireTokenTest,

@@ -103,8 +103,10 @@ namespace XForms
                     break;
             }
 
+#if BUILDENV == APPCENTER
 #if iOS
             builder.WithIosKeychainSecurityGroup("*");
+#endif
 #endif
 
             MsalPublicClient = builder.BuildConcrete();
