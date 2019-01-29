@@ -59,8 +59,6 @@ namespace Microsoft.Identity.Client.Internal
             }
         }
 
-        //public static ICoreLogger Default { get; set; }
-
         public static ICoreLogger Create(Guid correlationId, IApplicationConfiguration config, bool isDefaultPlatformLoggingEnabled = false)
         {
             return new MsalLogger(
@@ -70,6 +68,11 @@ namespace Microsoft.Identity.Client.Internal
                 config?.EnablePiiLogging ?? false,
                 config?.IsDefaultPlatformLoggingEnabled ?? isDefaultPlatformLoggingEnabled,
                 config?.LoggingCallback ?? null);
+        }
+
+        public static ICoreLogger CreateNullLogger()
+        {
+            return new NullLogger();
         }
 
         public Guid CorrelationId { get; }
