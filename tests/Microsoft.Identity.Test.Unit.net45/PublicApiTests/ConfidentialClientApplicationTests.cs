@@ -735,7 +735,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // This test is to ensure that the methods we want/need on the IConfidentialClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
             // It's solely to ensure we know that the methods we want/need are available where we expect them since we tend to do most testing on the concrete types.
 
-            var authCodeBuilder = app.AcquireTokenForAuthorizationCode(MsalTestConstants.Scope, "authorizationcode");
+            var authCodeBuilder = app.AcquireTokenByAuthorizationCode(MsalTestConstants.Scope, "authorizationcode");
             PublicClientApplicationTests.CheckBuilderCommonMethods(authCodeBuilder);
             
             var clientBuilder = app.AcquireTokenForClient(MsalTestConstants.Scope)
