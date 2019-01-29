@@ -256,5 +256,101 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                                                     .Build();
             Assert.AreEqual(MsalTestConstants.AuthorityOrganizationsTenant, pca.Authority);
         }
+
+        [TestMethod]
+        public void TestAuthorities()
+        {
+            IPublicClientApplication app;
+
+            // No AAD Authority
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .Build();
+            Assert.AreEqual("https://login.microsoftonline.com/common/", app.Authority);
+
+            // Azure Cloud Instance + AAD Authority Audience
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .WithAadAuthority(
+                                                    AzureCloudInstance.AzureChina,
+                                                    AadAuthorityAudience.AzureAdMultipleOrgs)
+                                                .Build();
+            Assert.AreEqual("https://login.chinacloudapi.cn/organizations/", app.Authority);
+
+            // Azure Cloud Instance + common
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .WithAadAuthority(
+                                                    AzureCloudInstance.AzureChina,
+                                                    "common")
+                                                .Build();
+            Assert.AreEqual("https://login.chinacloudapi.cn/common/", app.Authority);
+
+            // Azure Cloud Instance + consumers
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .WithAadAuthority(
+                                                    AzureCloudInstance.AzureChina,
+                                                    "consumers")
+                                                .Build();
+            Assert.AreEqual("https://login.chinacloudapi.cn/consumers/", app.Authority);
+
+            // Azure Cloud Instance + domain
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .WithAadAuthority(
+                                                    AzureCloudInstance.AzureChina,
+                                                    "contoso.com")
+                                                .Build();
+            Assert.AreEqual("https://login.chinacloudapi.cn/contoso.com/", app.Authority);
+
+            // Azure Cloud Instance + tenantId(GUID)
+            Guid tenantId = Guid.NewGuid();
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .WithAadAuthority(
+                                                    AzureCloudInstance.AzureChina,
+                                                    tenantId)
+                                                .Build();
+            Assert.AreEqual($"https://login.chinacloudapi.cn/{tenantId:D}/", app.Authority);
+
+            // Azure Cloud Instance + tenantId(string)
+            tenantId = Guid.NewGuid();
+            app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                .WithAadAuthority(
+                                                    AzureCloudInstance.AzureChina,
+                                                    tenantId.ToString())
+                                                .Build();
+            Assert.AreEqual($"https://login.chinacloudapi.cn/{tenantId:D}/", app.Authority);
+        }
+
+        [TestMethod]
+        public void TestAuthorityInvalidTenant()
+        {
+            try
+            {
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithAadAuthority(AadAuthorityAudience.AzureAdMyOrg)
+                                                    .WithTenantId("contoso.com")
+                                                    .Build();
+                Assert.Fail("Should not reach here, exception should be thrown");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(ex is InvalidOperationException);
+                Assert.AreEqual(CoreErrorMessages.AzureAdMyOrgRequiresSpecifyingATenant, ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public void TestAadAuthorityWithInvalidSegmentCount()
+        {
+            try
+            {
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                        .WithAadAuthority("https://login.microsoftonline.fr")
+                                                        .Build();
+                Assert.Fail("Should not reach here, exception should be thrown");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(ex is InvalidOperationException);
+                Assert.AreEqual(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments, ex.Message);
+            }
+        }
     }
 }
