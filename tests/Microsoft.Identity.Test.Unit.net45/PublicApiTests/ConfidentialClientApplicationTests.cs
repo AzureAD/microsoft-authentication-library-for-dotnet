@@ -281,6 +281,70 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
+        [TestMethod]
+        [TestCategory("ConfidentialClientApplicationTests")]
+        public async Task ConfidentialClientUsingAdfsAsync()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+
+                var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                              .WithAuthority(new Uri(MsalTestConstants.OnPremiseAuthority), true)
+                                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
+                                                              .WithClientSecret(MsalTestConstants.ClientSecret)
+                                                              .WithHttpManager(httpManager)
+                                                              .BuildConcrete();
+
+                httpManager.AddMockHandler(
+                new MockHttpMessageHandler
+                {
+                    Method = HttpMethod.Get,
+                    Url = "https://fs.contoso.com/.well-known/webfinger",
+                    QueryParams = new Dictionary<string, string>
+                    {
+                                            {"resource", "https://fs.contoso.com"},
+                                            {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
+                    },
+                    ResponseMessage = MockHelpers.CreateSuccessWebFingerResponseMessage("https://fs.contoso.com")
+                });
+
+                httpManager.AddMockHandler(new MockHttpMessageHandler
+                {
+                    Method = HttpMethod.Get,
+                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                });
+
+                httpManager.AddMockHandlerSuccessfulClientCredentialTokenResponseMessage();
+
+                var result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.RefreshTokenCount); // no refresh tokens are returned
+
+                // call AcquireTokenForClientAsync again to get result back from the cache
+                result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
+                Assert.IsNotNull(result);
+                Assert.IsNotNull("header.payload.signature", result.AccessToken);
+                Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
+
+                // make sure user token cache is empty
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+
+                // check app token cache count to be 1
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.RefreshTokenCount); // no refresh tokens are returned
+            }
+        }
+
         private ConfidentialClientApplication CreateConfidentialClient(
             MockHttpManager httpManager,
             ClientCredential cc,
