@@ -70,23 +70,25 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             _secureString = str;
         }
 
-        private void AddMockHandlerDefaultUserRealmDiscovery(MockHttpManager httpManager)
+        private MockHttpMessageHandler AddMockHandlerDefaultUserRealmDiscovery(MockHttpManager httpManager)
         {
-            // user realm discovery
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedMethod = HttpMethod.Get,
+                ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
-                    Method = HttpMethod.Get,
-                    ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-                    {
-                        Content = new StringContent(
+                    Content = new StringContent(
                             "{\"ver\":\"1.0\",\"account_type\":\"federated\",\"domain_name\":\"microsoft.com\"," +
                             "\"federation_protocol\":\"WSTrust\",\"federation_metadata_url\":" +
                             "\"https://msft.sts.microsoft.com/adfs/services/trust/mex\"," +
                             "\"federation_active_auth_url\":\"https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed\"" +
                             ",\"cloud_instance_name\":\"login.microsoftonline.com\"}")
-                    }
-                });
+                }
+            };
+
+            // user realm discovery
+            httpManager.AddMockHandler(handler);
+            return handler;
         }
 
         private void AddMockHandlerDefaultUserRealmDiscovery_ManagedUser(MockHttpManager httpManager)
@@ -95,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Get,
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent(
@@ -114,8 +116,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Url = "https://msft.sts.microsoft.com/adfs/services/trust/mex",
-                    Method = HttpMethod.Get,
+                    ExpectedUrl = "https://msft.sts.microsoft.com/adfs/services/trust/mex",
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent(
@@ -129,8 +131,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Url = "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed",
-                    Method = HttpMethod.Post,
+                    ExpectedUrl = "https://msft.sts.microsoft.com/adfs/services/trust/2005/usernamemixed",
+                    ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent(
@@ -144,8 +146,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Url = "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport",
-                    Method = HttpMethod.Post,
+                    ExpectedUrl = "https://msft.sts.microsoft.com/adfs/services/trust/13/windowstransport",
+                    ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent(
@@ -159,9 +161,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Url = authority + "oauth2/v2.0/token",
-                    Method = HttpMethod.Post,
-                    PostData = new Dictionary<string, string>
+                    ExpectedUrl = authority + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = new Dictionary<string, string>
                     {
                         {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
                         {"scope", "openid offline_access profile r1/scope1 r1/scope2"}
@@ -187,13 +189,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Get,
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent(
                             "{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
                     },
-                    QueryParams = new Dictionary<string, string>
+                    ExpectedQueryParams = new Dictionary<string, string>
                     {
                         {"api-version", "1.0"}
                     }
@@ -243,7 +245,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(
@@ -280,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
-                AddMockHandlerDefaultUserRealmDiscovery(httpManager);
+                MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
                 AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
@@ -298,6 +300,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
+                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
             }
         }
 
@@ -345,8 +348,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Url = "https://msft.sts.microsoft.com/adfs/services/trust/mex",
-                        Method = HttpMethod.Get,
+                        ExpectedUrl = "https://msft.sts.microsoft.com/adfs/services/trust/mex",
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(
@@ -503,8 +506,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Url = "https://login.microsoftonline.com/common/oauth2/v2.0/token",
-                        Method = HttpMethod.Post,
+                        ExpectedUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
                     });
 
@@ -541,13 +544,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(
                                 "{\"ver\":\"1.0\",\"account_type\":\"Managed\",\"domain_name\":\"id.com\"}")
                         },
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         }
@@ -556,7 +559,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidRequestTokenResponseMessage()
                     });
 
@@ -592,9 +595,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
-                        PostDataObject = new Dictionary<string, object>
+                        ExpectedPostDataObject = new Dictionary<string, object>
                         {
                             {"grant_type", "password"},
                             {"username", MsalTestConstants.User.Username},
@@ -666,9 +669,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage(),
-                        PostDataObject = new Dictionary<string, object>
+                        ExpectedPostDataObject = new Dictionary<string, object>
                         {
                             {"grant_type", "password"},
                             {"username", MsalTestConstants.User.Username},

@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                             File.ReadAllText(
                                 ResourceHelper.GetTestResourceRelativePath(@"OpenidConfiguration-QueryParams-B2C.json")))
@@ -625,7 +625,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage =
                             MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(TokenRetrievedFromNetCall)
                     });

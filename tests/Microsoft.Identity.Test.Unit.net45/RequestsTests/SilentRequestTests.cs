@@ -104,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                     });
 
