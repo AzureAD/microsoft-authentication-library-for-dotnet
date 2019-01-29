@@ -60,10 +60,10 @@ namespace AutomationApp
 
             var builder = PublicClientApplicationBuilder
                 .Create(input["client_id"])
-                .WithLoggingCallback(_appLogger.Log);
+                .WithLogging(_appLogger.Log);
 
 #if ARIA_TELEMETRY_ENABLED
-            builder.WithTelemetryCallback(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+            builder.WithTelemetry(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
 #endif
 
             if (input.ContainsKey("authority"))

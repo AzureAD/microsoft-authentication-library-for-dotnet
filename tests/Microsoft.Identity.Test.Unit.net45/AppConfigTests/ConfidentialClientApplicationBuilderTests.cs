@@ -100,10 +100,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithLoggingCallback()
+        public void TestConstructor_WithLogging()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithLoggingCallback(((level, message, pii) => { })).Build();
+                      .Create(MsalTestConstants.ClientId).WithLogging(((level, message, pii) => { })).Build();
 
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
         }
@@ -165,10 +165,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithTelemetryCallback()
+        public void TestConstructor_WithTelemetry()
         {
             var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithTelemetryCallback((events => { })).Build();
+                      .Create(MsalTestConstants.ClientId).WithTelemetry((events => { })).Build();
 
             Assert.IsNotNull(cca.AppConfig.TelemetryCallback);
         }

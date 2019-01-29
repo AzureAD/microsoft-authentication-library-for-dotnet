@@ -106,7 +106,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallbackAndAppConfig()
         {
-            // Ensure that values in the options are not reset to defaults when not sent into WithLoggingCallback
+            // Ensure that values in the options are not reset to defaults when not sent into WithLogging
             var options = new PublicClientApplicationOptions
             {
                 ClientId = MsalTestConstants.ClientId,
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             };
 
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
-                .WithLoggingCallback((level, message, pii) => { }).Build();
+                .WithLogging((level, message, pii) => { }).Build();
 
             Assert.AreEqual(LogLevel.Error, pca.AppConfig.LogLevel);
             Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         [TestMethod]
         public void TestConstructor_WithDebugLoggingCallbackAndAppConfigWithOverride()
         {
-            // Ensure that values in the options are reset to new values when sent into WithLoggingCallback
+            // Ensure that values in the options are reset to new values when sent into WithLogging
             var options = new PublicClientApplicationOptions
             {
                 ClientId = MsalTestConstants.ClientId,
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             };
 
             var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
-                .WithLoggingCallback((level, message, pii) => { },
+                .WithLogging((level, message, pii) => { },
                     LogLevel.Verbose, true, false).Build();
 
             Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
@@ -156,10 +156,10 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithLoggingCallback()
+        public void TestConstructor_WithLogging()
         {
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithLoggingCallback((level, message, pii) => { }, LogLevel.Verbose, true, true)
+                                                    .WithLogging((level, message, pii) => { }, LogLevel.Verbose, true, true)
                                                     .Build();
 
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
@@ -231,14 +231,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithTelemetryCallback()
+        public void TestConstructor_WithTelemetry()
         {
             void Callback(List<Dictionary<string, string>> events)
             {
             }
 
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithTelemetryCallback(Callback)
+                                                    .WithTelemetry(Callback)
                                                     .Build();
 
             Assert.IsNotNull(pca.AppConfig.TelemetryCallback);

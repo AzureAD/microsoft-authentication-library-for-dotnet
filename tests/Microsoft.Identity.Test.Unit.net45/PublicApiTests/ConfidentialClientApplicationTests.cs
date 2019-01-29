@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientCredential(cc)
                                                           .WithHttpManager(httpManager)
-                                                          .WithTelemetryCallback(telemetryCallback)
+                                                          .WithTelemetry(telemetryCallback)
                                                           .BuildConcrete();
 
             httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
@@ -613,7 +613,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                              .WithTelemetry(receiver.HandleTelemetryEvents)
                                                               .BuildConcrete();
 
                 _tokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);

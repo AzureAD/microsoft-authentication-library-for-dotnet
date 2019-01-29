@@ -54,7 +54,7 @@ namespace MacCocoaApp
             _pca = PublicClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(new Uri(Authority))
-                .WithLoggingCallback((level, message, pii) =>
+                .WithLogging((level, message, pii) =>
                 {
                     Console.WriteLine($"MSAL {level} {pii} {message}");
                     Console.ResetColor();

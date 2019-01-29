@@ -85,7 +85,7 @@ namespace XForms
             var builder = PublicClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(new Uri(Authority), ValidateAuthority)
-                .WithLoggingCallback((level, message, pii) =>
+                .WithLogging((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
                 },

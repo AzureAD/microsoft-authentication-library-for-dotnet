@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder
-        public T WithLoggingCallback(
+        public T WithLogging(
             LogCallback loggingCallback, 
             LogLevel? logLevel = null, 
             bool? enablePiiLogging = null, 
@@ -122,14 +122,14 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder by calling <see cref="WithLoggingCallback(LogCallback, LogLevel?, bool?, bool?)"/>
-        /// <seealso cref="WithLoggingCallback(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
         public T WithDebugLoggingCallback(
             LogLevel logLevel = LogLevel.Info,
             bool enablePiiLogging = false, 
             bool withDefaultPlatformLoggingEnabled = false)
         {
-            WithLoggingCallback(
+            WithLogging(
                 (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
                 logLevel,
                 enablePiiLogging,
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
 
-        public T WithTelemetryCallback(TelemetryCallback telemetryCallback)
+        public T WithTelemetry(TelemetryCallback telemetryCallback)
         {
             if (Config.TelemetryCallback  != null)
             {
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Client.AppConfig
             WithTenantId(applicationOptions.TenantId);
             WithComponent(applicationOptions.Component);
 
-            WithLoggingCallback(
+            WithLogging(
                 null, 
                 applicationOptions.LogLevel, 
                 applicationOptions.EnablePiiLogging,

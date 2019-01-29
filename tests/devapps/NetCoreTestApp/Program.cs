@@ -56,9 +56,9 @@ namespace NetCoreTestApp
             IPublicClientApplication pca = PublicClientApplicationBuilder
                 .Create(ClientIdForPublicApp)
                 .WithAuthority(new Uri(Authority))
-                .WithLoggingCallback(Log, LogLevel.Verbose, true)
+                .WithLogging(Log, LogLevel.Verbose, true)
 #if ARIA_TELEMETRY_ENABLED
-                .WithTelemetryCallback(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
+                .WithTelemetry(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
                 .Build();
 
