@@ -1219,22 +1219,6 @@ namespace Microsoft.Identity.Client
             TokenCacheAccessor.Clear();
         }
 
-        internal SortedSet<string> ParseScopesForAdfsToken(SortedSet<string> scopes)
-        {
-            //Adfs tokens return provided scopes without using the resource/scope fomrat of AAD
-            //For instance, if https://myresource/scope1 provided as the scope in the request, the json token response would contain scope: scope1  as a property
-            //This method strips the resource from the scope so the proper comparison can be made
-
-            SortedSet<string> parsedScopes = new SortedSet<string>();
-            foreach (string scope in scopes)
-            {
-                parsedScopes.Add(scope.Substring(scope.LastIndexOf("/") + 1));
-            }
-
-            return parsedScopes;
-        }
-
-
         /// <summary>
         /// Only used by dev test apps
         /// </summary>

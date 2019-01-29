@@ -58,13 +58,6 @@ namespace Microsoft.Identity.Client.Instance
             string userPrincipalName,
             RequestContext requestContext)
         {
-           /* if (authorityInfo.AuthorityType == AuthorityType.Adfs && string.IsNullOrEmpty(userPrincipalName))
-            {
-                throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.UpnRequired,
-                    CoreErrorMessages.UpnRequiredForAuthorityValidation);
-            }*/
-
             if (TryGetCacheValue(authorityInfo, userPrincipalName, out var endpoints))
             {
                 requestContext.Logger.Info("Resolving authority endpoints... Already resolved? - TRUE");

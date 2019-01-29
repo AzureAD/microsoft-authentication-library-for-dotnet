@@ -263,11 +263,6 @@ namespace Microsoft.Identity.Client.AppConfig
 
 
             TryAddDefaultAuthority();
-
-            if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
-            {
-                //throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
-            }
         }
 
         internal ApplicationConfiguration BuildConfiguration()

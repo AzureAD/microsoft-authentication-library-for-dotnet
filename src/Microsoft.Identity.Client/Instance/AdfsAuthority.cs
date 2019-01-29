@@ -56,16 +56,6 @@ namespace Microsoft.Identity.Client.Instance
             _telemetryManager = serviceBundle.TelemetryManager;
         }
 
-        private string GetDomainFromUpn(string upn)
-        {
-            if (!upn.Contains("@"))
-            {
-                throw new ArgumentException("userPrincipalName does not contain @ character.");
-            }
-
-            return upn.Split('@')[1];
-        }
-
         internal override string GetTenantId()
         {
             return null;
@@ -74,74 +64,6 @@ namespace Microsoft.Identity.Client.Instance
         internal override void UpdateTenantId(string tenantId)
         {
             throw new NotImplementedException();
-        }
-
-        protected bool ExistsInValidatedAuthorityCache(string userPrincipalName)
-        {
-            /*if (string.IsNullOrEmpty(userPrincipalName))
-            {
-                throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.UpnRequired,
-                    CoreErrorMessages.UpnRequiredForAuthorityValidation);
-            }*/
-
-            /*if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
-            {
-                var auth = (AdfsAuthority)authority;
-                return auth._validForDomainsList.Contains(GetDomainFromUpn(userPrincipalName));
-            }*/
-
-            return false;
-        }
-
-        protected void AddToValidatedAuthorities(string userPrincipalName)
-        {
-            var authorityInstance = this;
-            /*if (ServiceBundle.ValidatedAuthoritiesCache.TryGetValue(AuthorityInfo.CanonicalAuthority, out Authority authority))
-            {
-                authorityInstance = (AdfsAuthority)authority;
-            }
-
-            authorityInstance._validForDomainsList.Add(GetDomainFromUpn(userPrincipalName));
-            ServiceBundle.ValidatedAuthoritiesCache.TryAddValue(AuthorityInfo.CanonicalAuthority, authorityInstance);*/
-        }
-
-        private async Task<DrsMetadataResponse> GetMetadataFromEnrollmentServerAsync(
-            string userPrincipalName,
-            RequestContext requestContext)
-        {
-            try
-            {
-                //attempt to connect to on-premise enrollment server first.
-                return await QueryEnrollmentServerEndpointAsync(
-                           string.Format(
-                               CultureInfo.InvariantCulture,
-                               "https://enterpriseregistration.{0}/enrollmentserver/contract",
-                               GetDomainFromUpn(userPrincipalName)),
-                           requestContext).ConfigureAwait(false);
-            }
-            catch (Exception exc)
-            {
-                requestContext.Logger.InfoPiiWithPrefix(
-                    exc,
-                    "On-Premise ADFS enrollment server endpoint lookup failed. Error - ");
-            }
-
-            return await QueryEnrollmentServerEndpointAsync(
-                       string.Format(
-                           CultureInfo.InvariantCulture,
-                           "https://enterpriseregistration.windows.net/{0}/enrollmentserver/contract",
-                           GetDomainFromUpn(userPrincipalName)),
-                       requestContext).ConfigureAwait(false);
-        }
-
-        private async Task<DrsMetadataResponse> QueryEnrollmentServerEndpointAsync(
-            string endpoint, RequestContext requestContext)
-        {
-            var client = new OAuth2Client(_logger, _httpManager, _telemetryManager);
-            client.AddQueryParameter("api-version", "1.0");
-            return await client.ExecuteRequestAsync<DrsMetadataResponse>(new Uri(endpoint), HttpMethod.Get, requestContext)
-                               .ConfigureAwait(false);
         }
     }
 }
