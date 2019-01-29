@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
 
-            using (var harness = new MockHttpAndServiceBundle())
+            using (var harness = new MockHttpAndServiceBundle(authority: MsalTestConstants.OnPremiseAuthority))
             {
                 var parameters = CreateAuthenticationParametersAndSetupMocks(
                     harness,
@@ -331,9 +331,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             out HashSet<string> expectedScopes,
             bool isAdfs = false)
         {
-            var authority = isAdfs ? Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.OnPremiseAuthority) : Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
             var cache = new TokenCache(harness.ServiceBundle);
-            var parameters = harness.CreateAuthenticationRequestParameters(MsalTestConstants.AuthorityHomeTenant, null, cache);
+            var parameters = isAdfs ? harness.CreateAuthenticationRequestParameters(MsalTestConstants.OnPremiseAuthority, null, cache) :
+                                      harness.CreateAuthenticationRequestParameters(MsalTestConstants.AuthorityHomeTenant, null, cache);
 
             if (isAdfs)
             {
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Post,
-                        Url = "https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        Url = isAdfs ? "https://fs.contoso.com/adfs/oauth2/v2.0/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
@@ -398,7 +398,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                             {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
                             {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}
                         },
-                        ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage()
+                        ResponseMessage = isAdfs ? MockHelpers.CreateAdfsSuccessTokenResponseMessage() : MockHelpers.CreateSuccessTokenResponseMessage()
                     });
             }
 
