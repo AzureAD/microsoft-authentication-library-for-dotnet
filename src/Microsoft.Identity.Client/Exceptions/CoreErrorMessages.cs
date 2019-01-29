@@ -151,5 +151,9 @@ namespace Microsoft.Identity.Client
 
         public const string LoggingClassIsObsolete =
             "Logging is now specified per ClientApplication.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration";
+
+        public const string AuthorityDoesNotHaveTwoSegments =
+            "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common";
+        public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant guid.";
     }
 }

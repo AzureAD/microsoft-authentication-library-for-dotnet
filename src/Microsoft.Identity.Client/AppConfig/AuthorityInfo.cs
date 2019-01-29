@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Client.AppConfig
         internal static AuthorityInfo FromAadAuthority(Uri cloudInstanceUri, Guid tenantId, bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
-            return FromAuthorityUri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/", cloudInstanceUri, tenantId.ToString("N")), validateAuthority);
+            return FromAuthorityUri(string.Format(CultureInfo.InvariantCulture, "{0}/{1}/", cloudInstanceUri, tenantId.ToString("D")), validateAuthority);
 #pragma warning restore CA1305 // Specify IFormatProvider
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.Identity.Client.AppConfig
             bool validateAuthority)
         {
 #pragma warning disable CA1305 // Specify IFormatProvider
-            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenantId.ToString("N"));
+            string authorityUri = GetAuthorityUri(azureCloudInstance, AadAuthorityAudience.AzureAdMyOrg, tenantId.ToString("D"));
 #pragma warning restore CA1305 // Specify IFormatProvider
             return new AuthorityInfo(AuthorityType.Aad, authorityUri, validateAuthority);
         }
@@ -214,7 +214,7 @@ namespace Microsoft.Identity.Client.AppConfig
             case AadAuthorityAudience.AzureAdMyOrg:
                 if (string.IsNullOrWhiteSpace(tenantId))
                 {
-                    throw new ArgumentNullException(nameof(tenantId));
+                    throw new InvalidOperationException(CoreErrorMessages.AzureAdMyOrgRequiresSpecifyingATenant);
                 }
 
                 return tenantId;
@@ -227,7 +227,14 @@ namespace Microsoft.Identity.Client.AppConfig
         // TODO: consolidate this with the same method in Authority.cs
         private static string GetFirstPathSegment(string authority)
         {
-            return new Uri(authority).Segments[1].TrimEnd('/');
+            var uri = new Uri(authority);
+            if (uri.Segments.Length >= 2)
+            {
+                return new Uri(authority).Segments[1]
+                                         .TrimEnd('/');
+            }
+
+            throw new InvalidOperationException(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments);
         }
 
         private static string CanonicalizeAuthorityUri(string uri)
