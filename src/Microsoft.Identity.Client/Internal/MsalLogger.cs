@@ -41,6 +41,7 @@ namespace Microsoft.Identity.Client.Internal
         private readonly LogCallback _loggingCallback;
         private readonly LogLevel _logLevel;
         private readonly bool _isDefaultPlatformLoggingEnabled;
+        private static readonly Lazy<ICoreLogger> _nullLogger = new Lazy<ICoreLogger>(() => new NullLogger());
 
         internal MsalLogger(Guid correlationId, string component, LogLevel logLevel, bool enablePiiLogging, bool isDefaultPlatformLoggingEnabled, LogCallback loggingCallback)
         {
@@ -70,10 +71,7 @@ namespace Microsoft.Identity.Client.Internal
                 config?.LoggingCallback ?? null);
         }
 
-        public static ICoreLogger CreateNullLogger()
-        {
-            return new NullLogger();
-        }
+        public static ICoreLogger NullLogger => _nullLogger.Value;
 
         public Guid CorrelationId { get; }
 

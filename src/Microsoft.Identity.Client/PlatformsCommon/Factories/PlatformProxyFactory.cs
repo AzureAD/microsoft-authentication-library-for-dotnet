@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Factories
         /// </summary>
         public static IPlatformProxy CreatePlatformProxy(ICoreLogger logger)
         {
-            var finalLogger = logger ?? MsalLogger.CreateNullLogger();
+            var finalLogger = logger ?? MsalLogger.NullLogger;
 
 #if NET_CORE
             return new Microsoft.Identity.Client.Platforms.netcore.NetCorePlatformProxy(finalLogger);
