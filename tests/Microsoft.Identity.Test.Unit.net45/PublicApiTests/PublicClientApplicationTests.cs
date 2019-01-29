@@ -1231,8 +1231,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetryCallback(receiver.HandleTelemetryEvents)
-                                                                            .WithLoggingLevel(LogLevel.Verbose)
-                                                                            .WithDebugLoggingCallback()
+                                                                            .WithDebugLoggingCallback(logLevel: LogLevel.Verbose)
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication

@@ -92,34 +92,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithDefaultPlatformLoggingEnabledTrue()
-        {
-            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithDefaultPlatformLoggingEnabled(true).Build();
-            Assert.IsTrue(cca.AppConfig.IsDefaultPlatformLoggingEnabled);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithDefaultPlatformLoggingEnabledFalse()
-        {
-            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithDefaultPlatformLoggingEnabled(false).Build();
-            Assert.IsFalse(cca.AppConfig.IsDefaultPlatformLoggingEnabled);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithWithEnablePiiLoggingTrue()
-        {
-            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithEnablePiiLogging(true).Build();
-            Assert.IsTrue(cca.AppConfig.EnablePiiLogging);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithWithEnablePiiLoggingFalse()
-        {
-            var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithEnablePiiLogging(false).Build();
-            Assert.IsFalse(cca.AppConfig.EnablePiiLogging);
-        }
-
-        [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
         {
             var httpClientFactory = new MyHttpClientFactory();  
@@ -134,15 +106,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                       .Create(MsalTestConstants.ClientId).WithLoggingCallback(((level, message, pii) => { })).Build();
 
             Assert.IsNotNull(cca.AppConfig.LoggingCallback);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithLoggingLevel()
-        {
-            var cca = ConfidentialClientApplicationBuilder
-                      .Create(MsalTestConstants.ClientId).WithLoggingLevel(LogLevel.Verbose).Build();
-
-            Assert.AreEqual(LogLevel.Verbose, cca.AppConfig.LogLevel);
         }
 
         [TestMethod]
