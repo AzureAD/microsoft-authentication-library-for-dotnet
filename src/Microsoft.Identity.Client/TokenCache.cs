@@ -42,9 +42,18 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Json;
 
@@ -65,7 +74,11 @@ namespace Microsoft.Identity.Client
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
-        private ICoreLogger Logger => ServiceBundle.DefaultLogger;
+        private ICoreLogger _logger => ServiceBundle.DefaultLogger;
+
+        private TokenCacheCallback _userConfiguredBeforeAccess;
+        private TokenCacheCallback _userConfiguredAfterAccess;
+        private TokenCacheCallback _userConfiguredBeforeWrite;
 
         internal IServiceBundle ServiceBundle { get; private set; }
 
@@ -76,6 +89,8 @@ namespace Microsoft.Identity.Client
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
+
+        ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
 
         /// <summary>
         ///
@@ -111,6 +126,7 @@ namespace Microsoft.Identity.Client
             ServiceBundle = serviceBundle;
             _accessor = ServiceBundle.PlatformProxy.CreateTokenCacheAccessor();
             LegacyCachePersistence = legacyCachePersistenceForTest;
+            _defaultTokenCacheBlobStorage = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
         }
 
         /// <summary>
@@ -129,22 +145,60 @@ namespace Microsoft.Identity.Client
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
+
+
         /// <summary>
         /// Notification method called before any library method accesses the cache.
         /// </summary>
-        internal TokenCacheCallback BeforeAccess { get; set; }
+        internal TokenCacheCallback BeforeAccess
+        {
+            get
+            {
+                return UserHasConfiguredBlobSerialization() ?
+                    _userConfiguredBeforeAccess :
+                    _defaultTokenCacheBlobStorage.OnBeforeAccess;
+            }
+            set
+            {
+                _userConfiguredBeforeAccess = value;
+            }
+        }
 
         /// <summary>
         /// Notification method called before any library method writes to the cache. This notification can be used to reload
         /// the cache state from a row in database and lock that row. That database row can then be unlocked in the
         /// <see cref="AfterAccess"/>notification.
         /// </summary>
-        internal TokenCacheCallback BeforeWrite { get; set; }
+        internal TokenCacheCallback BeforeWrite
+        {
+            get
+            {
+                return UserHasConfiguredBlobSerialization() ?
+                    _userConfiguredBeforeWrite :
+                    _defaultTokenCacheBlobStorage.OnBeforeWrite;
+            }
+            set
+            {
+                _userConfiguredBeforeWrite = value;
+            }
+        }
 
         /// <summary>
         /// Notification method called after any library method accesses the cache.
         /// </summary>
-        internal TokenCacheCallback AfterAccess { get; set; }
+        internal TokenCacheCallback AfterAccess
+        {
+            get
+            {
+                return UserHasConfiguredBlobSerialization() ?
+                    _userConfiguredAfterAccess :
+                    _defaultTokenCacheBlobStorage.OnAfterAccess;
+            }
+            set
+            {
+                _userConfiguredAfterAccess = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the flag indicating whether the state of the cache has changed.
@@ -152,8 +206,8 @@ namespace Microsoft.Identity.Client
         /// Caller applications should reset the flag after serializing and persisting the state of the cache.
         /// </summary>
         [Obsolete("Please use the equivalent flag TokenCacheNotificationArgs.HasStateChanged, " +
-            "which indicates if the operation triggering the notification is modifying the cache or not." +
-            " Setting the flag is not required.")]
+        "which indicates if the operation triggering the notification is modifying the cache or not." +
+        " Setting the flag is not required.")]
         public bool HasStateChanged
         {
             get => _hasStateChanged;
@@ -265,7 +319,7 @@ namespace Microsoft.Identity.Client
                     if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
                     {
                         CacheFallbackOperations.WriteAdalRefreshToken(
-                            Logger,
+                            _logger,
                             LegacyCachePersistence,
                             msalRefreshTokenCacheItem,
                             msalIdTokenCacheItem,
@@ -575,7 +629,7 @@ namespace Microsoft.Identity.Client
                         return null;
                     }
                     return CacheFallbackOperations.GetAdalEntryForMsal(
-                        Logger,
+                        _logger,
                         LegacyCachePersistence,
                         preferredEnvironmentHost,
                         environmentAliases,
@@ -699,7 +753,7 @@ namespace Microsoft.Identity.Client
                 IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
                 IEnumerable<MsalAccountCacheItem> accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
 
-                var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(Logger, LegacyCachePersistence, ClientId);
+                var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
                 OnAfterAccess(args);
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
@@ -861,7 +915,7 @@ namespace Microsoft.Identity.Client
         internal void RemoveAdalUser(IAccount account)
         {
             CacheFallbackOperations.RemoveAdalUser(
-                Logger,
+                _logger,
                 LegacyCachePersistence,
                 ClientId,
                 account.Username,
@@ -900,9 +954,9 @@ namespace Microsoft.Identity.Client
 
         void ITokenCacheInternal.ClearAdalCache()
         {
-            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(Logger, LegacyCachePersistence.LoadCache());
+            IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary = AdalCacheOperations.Deserialize(_logger, LegacyCachePersistence.LoadCache());
             dictionary.Clear();
-            LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(Logger, dictionary));
+            LegacyCachePersistence.WriteCache(AdalCacheOperations.Serialize(_logger, dictionary));
         }
 
         void ITokenCacheInternal.ClearMsalCache()
@@ -910,7 +964,7 @@ namespace Microsoft.Identity.Client
             _accessor.Clear();
         }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME 
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
@@ -922,7 +976,7 @@ namespace Microsoft.Identity.Client
         public void SetBeforeAccess(TokenCacheCallback beforeAccess)
         {
             GuardOnMobilePlatforms();
-            BeforeAccess = beforeAccess;
+            _userConfiguredBeforeAccess = beforeAccess;
         }
 
         /// <summary>
@@ -937,7 +991,7 @@ namespace Microsoft.Identity.Client
         public void SetAfterAccess(TokenCacheCallback afterAccess)
         {
             GuardOnMobilePlatforms();
-            AfterAccess = afterAccess;
+            _userConfiguredAfterAccess = afterAccess;
         }
 
         /// <summary>
@@ -949,7 +1003,14 @@ namespace Microsoft.Identity.Client
         public void SetBeforeWrite(TokenCacheCallback beforeWrite)
         {
             GuardOnMobilePlatforms();
-            BeforeWrite = beforeWrite;
+            _userConfiguredBeforeWrite = beforeWrite;
+        }
+
+        private bool UserHasConfiguredBlobSerialization()
+        {
+            return _userConfiguredBeforeAccess != null ||
+                _userConfiguredBeforeAccess != null ||
+                _userConfiguredBeforeWrite != null;
         }
 
         /// <summary>
@@ -1053,7 +1114,7 @@ namespace Microsoft.Identity.Client
 
         private static void GuardOnMobilePlatforms()
         {
-#if ANDROID || iOS || WINDOWS_APP
+#if ANDROID || iOS
         throw new PlatformNotSupportedException("You should not use these TokenCache methods object on mobile platforms. " +
             "They meant to allow applications to define their own storage strategy on .net desktop and non-mobile platforms such as .net core. " +
             "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
