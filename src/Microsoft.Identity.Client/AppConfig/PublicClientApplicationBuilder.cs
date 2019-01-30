@@ -98,8 +98,8 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
             return this;
         }
-#endif
-#endif
+#endif // iOS || NETSTANDARD1_3
+#endif // !ANDROID_BUILDTIME && !WINDOWS_APP && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
