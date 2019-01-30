@@ -71,7 +71,7 @@ namespace XForms
 
         public static string[] Scopes = DefaultScopes;
 
-        public static event EventHandler MsalApplicationUpdated;
+        public static event EventHandler FinalizingPublicClientBuilder;
 
         public App()
         {
@@ -104,13 +104,15 @@ namespace XForms
             }
 
 #if BUILDENV == APPCENTER
-#if iOS
-            builder.WithIosKeychainSecurityGroup("*");
-#endif
+            FinalizingPublicClientBuilder?.Invoke(builder, null);
 #endif
 
             MsalPublicClient = builder.BuildConcrete();
-            MsalApplicationUpdated?.Invoke(null, null);
+        }
+
+        public static bool CheckFinalizingPublicClientBuilderSub()
+        {
+            return FinalizingPublicClientBuilder == null;
         }
 
         protected override void OnStart()

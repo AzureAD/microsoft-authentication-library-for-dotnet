@@ -34,6 +34,7 @@ using XForms.iOS;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using Security;
+using Microsoft.Identity.Client.AppConfig;
 
 [assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
 
@@ -48,9 +49,19 @@ namespace XForms.iOS
             base.OnElementChanged(e);
             page = e.NewElement as AcquirePage;
 
-#if iOS
+#if BUILDENV == APPCENTER
             Xamarin.Calabash.Start();
+
+            if (!App.CheckFinalizingPublicClientBuilderSub())
+            {
+                App.FinalizingPublicClientBuilder += OnFinalizingPublicClientBuilder;
+            }
 #endif
+        }
+
+        private void OnFinalizingPublicClientBuilder(object sender, EventArgs e)
+        {
+            (sender as PublicClientApplicationBuilder).WithIosKeychainSecurityGroup("*");
         }
 
         public override void ViewDidLoad()
