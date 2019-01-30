@@ -161,53 +161,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             return authResult?.AccessToken;
         }
 
-        private async Task<string> AuthenticationCallbackMSALAsync(string authority, string resource, string scope)
-        {
-            if (_authResult != null)
-            {
-                return _authResult.AccessToken;
-            }
-            //var authContext = new AuthenticationContext(authority, keyVaultTokenCache);
-
-            var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                              .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                              .WithRedirectUri(MsalTestConstants.RedirectUri)
-                                              .WithClientCredential(cc)
-                                              .WithHttpManager(httpManager)
-                                              .WithTelemetryCallback(telemetryCallback)
-                                              .BuildConcrete();
-
-            AuthenticationResult authResult;
-            switch (_config.AuthType)
-            {
-                case KeyVaultAuthenticationType.ClientCertificate:
-                    if (_assertionCert == null)
-                    {
-                        var cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
-                        if (cert == null)
-                        {
-                            throw new InvalidOperationException(
-                                "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-                        }
-                        _assertionCert = new ClientAssertionCertificate(_config.ClientId, cert);
-                    }
-                    authResult = await authContext.AcquireTokenAsync(resource, _assertionCert).ConfigureAwait(false);
-                    break;
-                case KeyVaultAuthenticationType.ClientSecret:
-                    ClientCredential cred = new ClientCredential(_config.ClientId, _config.KeyVaultSecret);
-                    authResult = await authContext.AcquireTokenAsync(resource, cred).ConfigureAwait(false);
-                    break;
-                case KeyVaultAuthenticationType.UserCredential:
-                    authResult = await authContext.AcquireTokenAsync(resource, _config.ClientId, new UserCredential()).ConfigureAwait(false);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            _authResult = authResult;
-            return authResult?.AccessToken;
-        }
-
         public void Dispose()
         {
             if (_keyVaultClient != null)
