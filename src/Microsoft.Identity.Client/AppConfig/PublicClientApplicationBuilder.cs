@@ -86,8 +86,7 @@ namespace Microsoft.Identity.Client.AppConfig
             return this;
         }
 
-#if !ANDROID_BUILDTIME && !WINDOWS_APP && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
-#if iOS || NETSTANDARD1_3
+#if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         /// 
         /// </summary>
@@ -95,11 +94,14 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns></returns>
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
+#if iOS || NETSTANDARD1_3
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
             return this;
-        }
+#else
+            return this;
 #endif // iOS || NETSTANDARD1_3
-#endif // !ANDROID_BUILDTIME && !WINDOWS_APP && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
+        }
+#endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
