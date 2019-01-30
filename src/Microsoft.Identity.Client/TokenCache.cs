@@ -1121,7 +1121,7 @@ namespace Microsoft.Identity.Client
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
         }
-#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME
 
     }
 }

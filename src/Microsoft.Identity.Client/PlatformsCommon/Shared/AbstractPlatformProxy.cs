@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         protected abstract ICryptographyManager InternalGetCryptographyManager();
         protected abstract IPlatformLogger InternalGetPlatformLogger();
 
-        public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage() // todo move to each platform
+        public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage() 
         {
             return new NullTokenCacheBlobStorage();
         }
