@@ -172,13 +172,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
         }
 
-        internal void AddMockResponseForFederatedAccounts(MockHttpManager httpManager)
+        internal MockHttpMessageHandler AddMockResponseForFederatedAccounts(MockHttpManager httpManager)
         {
             httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityCommonTenant);
-            AddMockHandlerDefaultUserRealmDiscovery(httpManager);
+            MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
             AddMockHandlerMex(httpManager);
             AddMockHandlerWsTrustUserName(httpManager);
             AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
+            return realmDiscoveryHandler;
         }
 
         private void AddMockResponseforManagedAccounts(MockHttpManager httpManager)
@@ -301,6 +302,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-SKU");
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-Ver");
             }
         }
 
@@ -314,7 +317,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
-                AddMockResponseForFederatedAccounts(httpManager);
+                MockHttpMessageHandler realmDiscoveryHandler = AddMockResponseForFederatedAccounts(httpManager);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
@@ -330,6 +333,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual("some-access-token", result.AccessToken);
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.User.Username, result.Account.Username);
+                Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-SKU");
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-Ver");
             }
         }
 
