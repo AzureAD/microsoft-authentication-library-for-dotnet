@@ -302,8 +302,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-SKU");
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-Ver");
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientSku,
+                    "Client info header should contain " + MsalTestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientVer,
+                    "Client info header should contain " + MsalTestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase);
             }
         }
 
@@ -334,8 +338,12 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.IsNotNull(result.Account);
                 Assert.AreEqual(MsalTestConstants.User.Username, result.Account.Username);
                 Assert.IsNotNull(realmDiscoveryHandler.ActualRequestMessge.Headers);
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-SKU");
-                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), "x-client-Ver");
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientSku,
+                    "Client info header should contain " + MsalTestConstants.XClientSku,
+                    StringComparison.OrdinalIgnoreCase);
+                StringAssert.Contains(realmDiscoveryHandler.ActualRequestMessge.Headers.ToString(), MsalTestConstants.XClientVer,
+                    "Client info header should contain " + MsalTestConstants.XClientVer,
+                    StringComparison.OrdinalIgnoreCase);
             }
         }
 
