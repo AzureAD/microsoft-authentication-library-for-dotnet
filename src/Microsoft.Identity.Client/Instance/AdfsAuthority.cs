@@ -44,16 +44,9 @@ namespace Microsoft.Identity.Client.Instance
         private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
 
-        private readonly ICoreLogger _logger;
-        private readonly IHttpManager _httpManager;
-        private readonly ITelemetryManager _telemetryManager;
-
         public AdfsAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
             : base(serviceBundle, authorityInfo)
         {
-            _logger = serviceBundle.DefaultLogger;
-            _httpManager = serviceBundle.HttpManager;
-            _telemetryManager = serviceBundle.TelemetryManager;
         }
 
         internal override string GetTenantId()

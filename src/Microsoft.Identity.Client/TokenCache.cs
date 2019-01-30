@@ -187,6 +187,11 @@ namespace Microsoft.Identity.Client
 
             string subject = idToken?.Subject;
 
+            if (idToken != null && string.IsNullOrEmpty(subject))
+            {
+                requestParams.RequestContext.Logger.Warning("Subject not present in Id token");
+            }
+
             // The preferred_username value cannot be null or empty in order to comply with the ADAL/MSAL Unified cache schema.
             // It will be set to "preferred_username not in idtoken"
             var preferredUsername = !string.IsNullOrWhiteSpace(idToken?.PreferredUsername) ? idToken.PreferredUsername : NullPreferredUsernameDisplayLabel;
