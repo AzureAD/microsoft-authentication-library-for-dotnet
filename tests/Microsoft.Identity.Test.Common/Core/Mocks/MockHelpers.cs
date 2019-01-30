@@ -217,8 +217,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         "\"ipaddr\": \"131.107.159.117\"," +
                         "\"name\": \"Marrrrrio Bossy\"," +
                         "\"upn\": \"" + upn + "\"," +
-                        "\"sub\": \"" + MsalTestConstants.OnPremiseUniqueId + "\"," +
-                        "\"ver\": \"2.0\"}";
+                        "\"sub\": \"" + MsalTestConstants.OnPremiseUniqueId + "\"}";
 
             return string.Format(CultureInfo.InvariantCulture, "someheader.{0}.somesignature", Base64UrlHelpers.Encode(id));
         }
@@ -291,6 +290,21 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
                 "{{\"authorization_endpoint\":\"{0}oauth2/v2.0/authorize{2}\",\"token_endpoint\":\"{0}oauth2/v2.0/token{2}\",\"issuer\":\"https://sts.windows.net/{1}\"}}",
                 authority, tenant, qp));
+        }
+
+        public static HttpResponseMessage CreateAdfsOpenIdConfigurationResponse(string authority, string qp = "")
+        {
+            var authorityUri = new Uri(authority);
+            string path = authorityUri.AbsolutePath.Substring(1);
+
+            if (!string.IsNullOrEmpty(qp))
+            {
+                qp = "?" + qp;
+            }
+
+            return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
+                "{{\"authorization_endpoint\":\"{0}oauth2/authorize\",\"token_endpoint\":\"{0}oauth2/token\",\"issuer\":\"{0}\"}}",
+                authority, qp));
         }
 
         public static HttpMessageHandler CreateInstanceDiscoveryMockHandler(string url)

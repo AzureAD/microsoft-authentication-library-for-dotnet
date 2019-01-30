@@ -340,7 +340,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     Method = HttpMethod.Get,
-                    ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
+                    ResponseMessage = MockHelpers.CreateAdfsOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
                 });
             }
             else
@@ -373,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler
                     {
                         Method = HttpMethod.Post,
-                        Url = isAdfs ? "https://fs.contoso.com/adfs/oauth2/v2.0/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        Url = isAdfs ? "https://fs.contoso.com/adfs/oauth2/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
