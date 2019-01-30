@@ -51,17 +51,7 @@ namespace XForms.iOS
 
 #if BUILDENV == APPCENTER
             Xamarin.Calabash.Start();
-
-            if (!App.CheckFinalizingPublicClientBuilderSub())
-            {
-                App.FinalizingPublicClientBuilder += OnFinalizingPublicClientBuilder;
-            }
 #endif
-        }
-
-        private void OnFinalizingPublicClientBuilder(object sender, EventArgs e)
-        {
-            (sender as PublicClientApplicationBuilder).WithIosKeychainSecurityGroup("*");
         }
 
         public override void ViewDidLoad()

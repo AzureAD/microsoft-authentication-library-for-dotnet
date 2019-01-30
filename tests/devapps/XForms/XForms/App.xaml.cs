@@ -71,8 +71,6 @@ namespace XForms
 
         public static string[] Scopes = DefaultScopes;
 
-        public static event EventHandler FinalizingPublicClientBuilder;
-
         public App()
         {
             MainPage = new NavigationPage(new XForms.MainPage());
@@ -104,15 +102,10 @@ namespace XForms
             }
 
 #if BUILDENV == APPCENTER
-            FinalizingPublicClientBuilder?.Invoke(builder, null);
+            builder.WithIosKeychainSecurityGroup("*");
 #endif
 
             MsalPublicClient = builder.BuildConcrete();
-        }
-
-        public static bool CheckFinalizingPublicClientBuilderSub()
-        {
-            return FinalizingPublicClientBuilder == null;
         }
 
         protected override void OnStart()
