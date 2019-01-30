@@ -86,9 +86,6 @@ namespace Microsoft.Identity.Client.AppConfig
             return this;
         }
 
-#if !NET_CORE_BUILDTIME // include for other platforms and for runtime
-#if iOS
-
         /// <summary>
         /// 
         /// </summary>
@@ -99,8 +96,6 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
             return this;
         }
-#endif // iOS
-#endif // !NET_CORE_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
