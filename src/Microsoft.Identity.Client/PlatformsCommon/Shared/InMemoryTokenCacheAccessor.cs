@@ -37,9 +37,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
     /// Keeps the 4 token cache dictionaries in memory. Token Cache extensions 
     /// are responsible for persistance. 
     /// </summary>
-    /// <remarks>
-    /// Only this accessor is currently compatible with the TokenCache serialization
-    /// </remarks>
     internal class InMemoryTokenCacheAccessor : ITokenCacheAccessor
     {
         internal readonly IDictionary<string, MsalAccessTokenCacheItem> AccessTokenCacheDictionary =

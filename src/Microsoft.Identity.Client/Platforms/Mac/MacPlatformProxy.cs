@@ -155,7 +155,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         /// </remarks>
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new TokenCacheAccessor(); 
+            return new InMemoryTokenCacheAccessor(); 
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new MacUIFactory();

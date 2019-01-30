@@ -976,7 +976,7 @@ namespace Microsoft.Identity.Client
         public void SetBeforeAccess(TokenCacheCallback beforeAccess)
         {
             GuardOnMobilePlatforms();
-            _userConfiguredBeforeAccess = beforeAccess;
+            BeforeAccess = beforeAccess;
         }
 
         /// <summary>
@@ -991,7 +991,7 @@ namespace Microsoft.Identity.Client
         public void SetAfterAccess(TokenCacheCallback afterAccess)
         {
             GuardOnMobilePlatforms();
-            _userConfiguredAfterAccess = afterAccess;
+            AfterAccess = afterAccess;
         }
 
         /// <summary>
@@ -1003,15 +1003,9 @@ namespace Microsoft.Identity.Client
         public void SetBeforeWrite(TokenCacheCallback beforeWrite)
         {
             GuardOnMobilePlatforms();
-            _userConfiguredBeforeWrite = beforeWrite;
+            BeforeWrite = beforeWrite;
         }
 
-        private bool UserHasConfiguredBlobSerialization()
-        {
-            return _userConfiguredBeforeAccess != null ||
-                _userConfiguredBeforeAccess != null ||
-                _userConfiguredBeforeWrite != null;
-        }
 
         /// <summary>
         /// Deserializes the token cache from a serialization blob in the unified cache format
