@@ -34,7 +34,6 @@ using XForms.iOS;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
 using Security;
-using Microsoft.Identity.Client.AppConfig;
 
 [assembly: ExportRenderer(typeof(AcquirePage), typeof(AcquirePageRenderer))]
 
