@@ -1,0 +1,95 @@
+﻿// ------------------------------------------------------------------------------
+// 
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+// 
+// This code is licensed under the MIT License.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// 
+// ------------------------------------------------------------------------------
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
+
+namespace Microsoft.Identity.Client.UI
+{
+    internal class CustomWebUiHandler : IWebUI
+    {
+        private readonly ICustomWebUi _customWebUi;
+
+        public CustomWebUiHandler(ICustomWebUi customWebUi)
+        {
+            _customWebUi = customWebUi;
+        }
+
+        /// <inheritdoc />
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri,
+            Uri redirectUri,
+            RequestContext requestContext)
+        {
+            requestContext.Logger.Info("Using CustomWebUi to acquire the authorization code");
+
+            try
+            {
+                var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri)
+                                            .ConfigureAwait(false);
+
+                if (uri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) &&
+                    uri.AbsolutePath.Equals(redirectUri.AbsolutePath))
+                {
+                    requestContext.Logger.Info("Redirect Uri was matched.  Returning success from CustomWebUiHandler.");
+
+                    IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);
+
+                    return new AuthorizationResult(AuthorizationStatus.Success, uri.OriginalString)
+                    {
+                        State = inputQp[OAuth2Parameter.State]
+                    };
+                }
+
+                requestContext.Logger.Warning("Redirect Uri was not a match to the proper uri.  Failing CustomWebUiHandler.");
+                return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+            }
+            catch (OperationCanceledException)
+            {
+                requestContext.Logger.Info("CustomWebUi AcquireAuthorizationCode was canceled.");
+                return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
+            }
+            catch (Exception ex)
+            {
+                requestContext.Logger.WarningPiiWithPrefix(ex, "CustomWebUi AcquireAuthorizationCode failed");
+                return new AuthorizationResult(AuthorizationStatus.UnknownError, null);
+            }
+        }
+
+        /// <inheritdoc />
+        public void ValidateRedirectUri(Uri redirectUri)
+        {
+            RedirectUriHelper.Validate(redirectUri, usesSystemBrowser: false);
+        }
+    }
+}
