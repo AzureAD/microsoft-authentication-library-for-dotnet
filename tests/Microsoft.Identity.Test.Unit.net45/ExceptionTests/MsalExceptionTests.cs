@@ -26,7 +26,10 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Net;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.ExceptionTests
@@ -35,7 +38,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
     public class MsalExceptionTests
     {
         [TestMethod]
-        [TestCategory("MsalExceptionTests")]
         public void ExceptionsArePubliclyCreatable_MsalException()
         {
             var innerEx = new InvalidOperationException();
@@ -47,12 +49,59 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 
         [TestMethod]
-        [TestCategory("MsalExceptionTests")]
         public void ExceptionsArePubliclyCreatable_MsalSilentTokenAcquisitionException()
         {
             var ex = new MsalUiRequiredException(null, null);
 
             Assert.IsNull(ex.InnerException);
+        }
+
+        [TestMethod]
+        public void Exception_ToString()
+        {
+            var innerException = new InvalidOperationException("innerMsg");
+            MsalException ex = new MsalException("errCode", "errMessage", innerException);
+
+            Assert.IsTrue(ex.ToString().Contains("errCode"));
+            Assert.IsTrue(ex.ToString().Contains("errMessage"));
+            Assert.IsTrue(ex.ToString().Contains("innerMsg"));
+        }
+
+        [TestMethod]
+        public void ServiceException_ToString()
+        {
+            // Arrange
+
+            const string jsonError = @"{ ""error"":""invalid_tenant"", ""suberror"":""MySuberror"",
+            ""claims"":""some_claims"",
+            ""error_description"":""AADSTS90002: Tenant 'x' not found. "", ""error_codes"":[90002],""timestamp"":""2019-01-28 14:16:04Z"",
+            ""trace_id"":""43f14373-8d7d-466e-a5f1-6e3889291e00"",
+            ""correlation_id"":""6347d33d-941a-4c35-9912-a9cf54fb1b3e""}";
+
+            string innerExMsg = "innerExMsg";
+            var innerException = new NotImplementedException(innerExMsg);
+
+            HttpResponse httpResponse = new HttpResponse()
+            {
+                Body = jsonError,
+                StatusCode = HttpStatusCode.BadRequest, // 400                
+            };
+
+            // Act
+            var ex = MsalExceptionFactory.GetServiceException(
+                "errCode",
+                "errMessage",
+                httpResponse,
+                innerException);
+
+            Assert.IsTrue(ex.ToString().Contains("errCode"));
+            Assert.IsTrue(ex.ToString().Contains("errMessage"));
+            Assert.IsTrue(ex.ToString().Contains("innerExMsg"));
+            Assert.IsTrue(ex.ToString().Contains("invalid_tenant"));
+            Assert.IsTrue(ex.ToString().Contains("MySuberror"));
+            Assert.IsTrue(ex.ToString().Contains("some_claims"));
+            Assert.IsTrue(ex.ToString().Contains("AADSTS90002"));
+
         }
     }
 }

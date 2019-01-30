@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Http
             }
             catch (TaskCanceledException exception)
             {
-                requestContext.Logger.ErrorPii(exception);
+                requestContext.Logger.Error("The HTTP request failed or it was cancelled. " + exception.Message);
                 isRetryable = true;
                 timeoutException = exception;
             }
@@ -170,7 +170,7 @@ namespace Microsoft.Identity.Client.Http
                         retry: false).ConfigureAwait(false);
                 }
 
-                requestContext.Logger.Info("Request retry failed.");
+                requestContext.Logger.Error("Request retry failed.");
                 if (timeoutException != null)
                 {
                     throw MsalExceptionFactory.GetServiceException(

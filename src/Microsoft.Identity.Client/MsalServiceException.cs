@@ -237,7 +237,14 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format(CultureInfo.InvariantCulture, "\n\tStatusCode: {0}\n\tClaims: {1}", StatusCode, Claims);
+            return base.ToString() + string.Format(
+                CultureInfo.InvariantCulture,
+                "\n\tStatusCode: {0}\n\tClaims: {1} \n\tResponseBody: {2} \n\tHeaders: {3}", 
+                StatusCode, 
+                Claims,
+                ResponseBody, 
+                Headers
+                );
         }
     }
 }
