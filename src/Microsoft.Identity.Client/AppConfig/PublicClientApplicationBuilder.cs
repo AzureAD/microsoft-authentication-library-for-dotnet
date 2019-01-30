@@ -86,6 +86,8 @@ namespace Microsoft.Identity.Client.AppConfig
             return this;
         }
 
+#if !ANDROID_BUILDTIME && !WINDOWS_APP && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
+#if iOS || NETSTANDARD1_3
         /// <summary>
         /// 
         /// </summary>
@@ -96,6 +98,8 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
             return this;
         }
+#endif
+#endif
 
 #if WINDOWS_APP
         /// <summary>
