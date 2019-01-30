@@ -93,8 +93,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
-                        PostData = new Dictionary<string, string>()
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedPostData = new Dictionary<string, string>()
                         {
                             {"grant_type", "refresh_token"}
                         },

@@ -266,8 +266,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             harness.HttpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Post,
-                    PostData = new Dictionary<string, string>()
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = new Dictionary<string, string>()
                     {
                         {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
                         {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}
@@ -280,8 +280,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        Url = "https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedUrl = "https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
@@ -300,8 +300,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        PostData = new Dictionary<string, string>()
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedPostData = new Dictionary<string, string>()
                         {
                             {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
                             {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}

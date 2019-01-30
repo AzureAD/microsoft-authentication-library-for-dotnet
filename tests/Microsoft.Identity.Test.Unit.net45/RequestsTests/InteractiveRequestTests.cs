@@ -85,8 +85,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        QueryParams = new Dictionary<string, string>()
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedQueryParams = new Dictionary<string, string>()
                         {
                             {"key1", "value1%20with%20encoded%20space"},
                             {"key2", "value2"}
@@ -258,7 +258,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse() // returns a non json response
                     });
 
@@ -307,7 +307,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = MockHelpers.CreateTooManyRequestsJsonResponse() // returns a non json response
                     });
 

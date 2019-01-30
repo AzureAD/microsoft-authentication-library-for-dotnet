@@ -207,12 +207,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 //add mock response for tenant endpoint discovery
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Get,
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(MsalTestConstants.AuthorityHomeTenant)
                 });
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Post,
+                    ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TokenResponse)
                 });
 

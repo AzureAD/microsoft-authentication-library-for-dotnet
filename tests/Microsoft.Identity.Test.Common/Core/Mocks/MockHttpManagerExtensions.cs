@@ -55,10 +55,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
-                    Url = authority + "oauth2/v2.0/token",
-                    Method = HttpMethod.Post,
-                    PostData = bodyParameters,
-                    QueryParams = queryParameters,
+                    ExpectedUrl = authority + "oauth2/v2.0/token",
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = bodyParameters,
+                    ExpectedQueryParams = queryParameters,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
         }
@@ -71,9 +71,9 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
-                    Method = HttpMethod.Get,
-                    PostData = bodyParameters,
-                    QueryParams = queryParameters,
+                    ExpectedMethod = HttpMethod.Get,
+                    ExpectedPostData = bodyParameters,
+                    ExpectedQueryParams = queryParameters,
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
         }
@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
-                    Method = httpMethod,
+                    ExpectedMethod = httpMethod,
                     ResponseMessage = MockHelpers.CreateResiliencyMessage(httpStatusCode)
                 });
         }
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
-                    Method = httpMethod,
+                    ExpectedMethod = httpMethod,
                     ResponseMessage = MockHelpers.CreateRequestTimeoutResponseMessage(),
                     ExceptionToThrow = new TaskCanceledException("request timed out")
                 });
@@ -107,8 +107,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Url = authority + "v2.0/.well-known/openid-configuration",
-                    Method = HttpMethod.Get,
+                    ExpectedUrl = authority + "v2.0/.well-known/openid-configuration",
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateOpenIdConfigurationResponse(authority, qp)
                 });
         }
@@ -118,8 +118,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
-                    Url = url,
-                    Method = httpMethod,
+                    ExpectedUrl = url,
+                    ExpectedMethod = httpMethod,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.NotFound)
                     {
                         Content = new StringContent("Not found")
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
                 {
-                    Method = HttpMethod.Post,
+                    ExpectedMethod = HttpMethod.Post,
                     ResponseMessage = MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage()
                 });
         }
@@ -142,7 +142,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Get,
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                     {
                         Content = new StringContent("Foo")

@@ -253,7 +253,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             "some-scope1 some-scope2",
                             MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
@@ -359,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.Scope.ToString(),
                             MockHelpers.CreateIdToken(
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.Scope.AsSingleString(),
                             MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
@@ -495,7 +495,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.Scope.AsSingleString(),
                             MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
@@ -744,7 +744,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -825,7 +825,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -868,7 +868,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -896,7 +896,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -924,7 +924,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -951,7 +951,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -996,7 +996,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -1022,7 +1022,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -1050,7 +1050,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -1094,7 +1094,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
                     });
                 try
