@@ -213,5 +213,10 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+
+        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
+        {
+            return new UapTokenCacheBlobStorage();
+        }
     }
 }
