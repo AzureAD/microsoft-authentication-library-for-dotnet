@@ -71,7 +71,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         public void ServiceException_ToString()
         {
             // Arrange
-
             const string jsonError = @"{ ""error"":""invalid_tenant"", ""suberror"":""MySuberror"",
             ""claims"":""some_claims"",
             ""error_description"":""AADSTS90002: Tenant 'x' not found. "", ""error_codes"":[90002],""timestamp"":""2019-01-28 14:16:04Z"",
@@ -94,6 +93,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 httpResponse,
                 innerException);
 
+            // Assert
             Assert.IsTrue(ex.ToString().Contains("errCode"));
             Assert.IsTrue(ex.ToString().Contains("errMessage"));
             Assert.IsTrue(ex.ToString().Contains("innerExMsg"));

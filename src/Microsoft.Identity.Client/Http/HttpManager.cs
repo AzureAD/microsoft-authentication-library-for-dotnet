@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Http
             }
             catch (TaskCanceledException exception)
             {
-                requestContext.Logger.Error("The HTTP request failed or it was cancelled. " + exception.Message);
+                requestContext.Logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
                 isRetryable = true;
                 timeoutException = exception;
             }
