@@ -25,12 +25,12 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Globalization;
-using System.Text;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
+using System;
+using System.Globalization;
+using System.Text;
 
 namespace Microsoft.Identity.Client.Exceptions
 {
@@ -118,8 +118,9 @@ namespace Microsoft.Identity.Client.Exceptions
 
                 if (ex is MsalServiceException msalServiceException)
                 {
-                    sb.AppendLine(
-                        string.Format(CultureInfo.CurrentCulture, ", StatusCode: {0}", msalServiceException.StatusCode));
+                    sb.AppendLine($"HTTP StatusCode {msalServiceException.StatusCode}");
+                    sb.AppendLine($"SubError {msalServiceException.SubError}");
+                    sb.AppendLine($"CorrelationId {msalServiceException.CorrelationId}");
                 }
 
                 if (ex.InnerException != null)
@@ -137,6 +138,7 @@ namespace Microsoft.Identity.Client.Exceptions
 
             return sb.ToString();
         }
+
 
         private static void ValidateRequiredArgs(string errorCode, string errorMessage)
         {

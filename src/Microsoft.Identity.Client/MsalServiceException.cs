@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client
         /// can rely on for exception handling.
         /// </param>
         /// <param name="errorMessage">The error message that explains the reason for the exception.</param>
-        /// <param name="statusCode">Status code of the resposne received from the service.</param>
+        /// <param name="statusCode">HTTP status code of the resposne received from the service.</param>
         /// <param name="innerException">
         /// The exception that is the cause of the current exception, or a null reference if no inner
         /// exception is specified.
@@ -237,7 +237,12 @@ namespace Microsoft.Identity.Client
         /// <returns>A string representation of the current exception.</returns>
         public override string ToString()
         {
-            return base.ToString() + string.Format(CultureInfo.InvariantCulture, "\n\tStatusCode: {0}\n\tClaims: {1}", StatusCode, Claims);
+            return base.ToString() + string.Format(
+                CultureInfo.InvariantCulture,
+                "\n\tStatusCode: {0} \n\tResponseBody: {1} \n\tHeaders: {2}", 
+                StatusCode, 
+                ResponseBody, 
+                Headers);
         }
     }
 }
