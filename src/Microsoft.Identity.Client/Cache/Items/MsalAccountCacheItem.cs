@@ -28,6 +28,7 @@
 using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -72,6 +73,16 @@ namespace Microsoft.Identity.Client.Cache
             FamilyName = familyName;
 
             InitUserIdentifier();
+        }
+
+        internal static MsalAccountCacheItem FromJsonString(string json)
+        {
+            return JsonConvert.DeserializeObject<MsalAccountCacheItem>(json);
+        }
+
+        internal string ToJsonString()
+        {
+            return JsonConvert.SerializeObject(this);
         }
 
         [DataMember(Name = "realm")]

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
@@ -840,6 +841,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
             byte[] serializedCache = ((ITokenCache)cache).Serialize();
+
+            string cacheString = new UTF8Encoding().GetString(serializedCache);
+
             cache.Accessor.ClearAccessTokens();
             cache.Accessor.ClearRefreshTokens();
 

@@ -362,9 +362,8 @@ namespace Microsoft.Identity.Client.Cache
                 var environment = new Uri(authority).Host;
 
                 List<MsalAccountCacheItem> accounts = new List<MsalAccountCacheItem>();
-                foreach (string accountStr in tokenCacheAccessor.GetAllAccountsAsString())
+                foreach (var accountItem in tokenCacheAccessor.GetAllAccounts())
                 {
-                    var accountItem = JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountStr, requestContext);
                     if (accountItem != null && accountItem.Environment.Equals(environment, StringComparison.OrdinalIgnoreCase))
                     {
                         accounts.Add(accountItem);
@@ -372,11 +371,8 @@ namespace Microsoft.Identity.Client.Cache
                 }
                 if (accounts.Count > 0)
                 {
-                    foreach (var rtString in tokenCacheAccessor.GetAllRefreshTokensAsString())
+                    foreach (var rtCacheItem in tokenCacheAccessor.GetAllRefreshTokens())
                     {
-                        var rtCacheItem =
-                            JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(rtString, requestContext);
-
                         //TODO - authority check needs to be updated for alias check
                         if (rtCacheItem != null && environment.Equals(rtCacheItem.Environment, StringComparison.OrdinalIgnoreCase)
                             && rtCacheItem.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase))

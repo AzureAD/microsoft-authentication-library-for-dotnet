@@ -58,10 +58,10 @@ namespace Microsoft.Identity.Client
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
         void RemoveMsalAccount(IAccount account, RequestContext requestContext);
-        ICollection<string> GetAllAccessTokenCacheItems(RequestContext requestContext);
-        ICollection<string> GetAllRefreshTokenCacheItems(RequestContext requestContext);
-        ICollection<string> GetAllIdTokenCacheItems(RequestContext requestContext);
-        ICollection<string> GetAllAccountCacheItems(RequestContext requestContext);
+        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokenCacheItems(RequestContext requestContext);
+        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokenCacheItems(RequestContext requestContext);
+        ICollection<MsalIdTokenCacheItem> GetAllIdTokenCacheItems(RequestContext requestContext);
+        ICollection<MsalAccountCacheItem> GetAllAccountCacheItems(RequestContext requestContext);
         void AddAccessTokenCacheItem(MsalAccessTokenCacheItem accessItem);
         void AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem);
 

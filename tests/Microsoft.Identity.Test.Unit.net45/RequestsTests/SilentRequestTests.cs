@@ -89,9 +89,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var silentParameters = new AcquireTokenSilentParameters();
 
                 // set access tokens as expired
-                foreach (string atCacheItemStr in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest(harness.ServiceBundle)))
+                foreach (var accessItem in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest(harness.ServiceBundle)))
                 {
-                    var accessItem = JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
                     accessItem.ExpiresOnUnixTimestamp =
                         ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
                         .ToString(CultureInfo.InvariantCulture);
