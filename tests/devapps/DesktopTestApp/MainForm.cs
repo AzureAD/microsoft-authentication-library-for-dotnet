@@ -311,9 +311,8 @@ namespace DesktopTestApp
         private void CreateException(Exception ex)
         {
             string output = string.Empty;
-            MsalException exception = ex as MsalException;
 
-            if (exception != null)
+            if (ex is MsalException exception)
             {
                 output += string.Format(
                     CultureInfo.InvariantCulture,
@@ -396,9 +395,9 @@ namespace DesktopTestApp
 
             cachePageTableLayout.RowCount = 0;
             var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
-                .GetAllRefreshTokensForClient(RequestContext.CreateForTest());
+                .GetAllRefreshTokens(true);
             var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
-                    .GetAllAccessTokensForClient(RequestContext.CreateForTest());
+                    .GetAllAccessTokens(true);
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {

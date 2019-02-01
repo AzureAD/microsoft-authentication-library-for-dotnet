@@ -50,14 +50,10 @@ namespace XForms
             authority.Text = App.Authority;
             clientIdEntry.Text = App.ClientId;
 
-            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccessTokensAsString()
-                .Count.ToString(CultureInfo.InvariantCulture);
-            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokensAsString()
-                .Count.ToString(CultureInfo.InvariantCulture);
-            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllIdTokensAsString()
-                .Count.ToString(CultureInfo.InvariantCulture);
-            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccountsAsString()
-                .Count.ToString(CultureInfo.InvariantCulture);
+            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccessTokenCount.ToString(CultureInfo.InvariantCulture);
+            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.RefreshTokenCount.ToString(CultureInfo.InvariantCulture);
+            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.IdTokenCount.ToString(CultureInfo.InvariantCulture);
+            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccountCount.ToString(CultureInfo.InvariantCulture);
 
             validateAuthoritySwitch.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.AppConfig.RedirectUri;

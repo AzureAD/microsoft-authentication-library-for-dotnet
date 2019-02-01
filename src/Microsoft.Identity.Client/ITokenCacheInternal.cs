@@ -37,6 +37,8 @@ namespace Microsoft.Identity.Client
 {
     internal interface ITokenCacheInternal : ITokenCache
     {
+        object LockObject { get; }
+
         void RemoveAccount(IAccount account, RequestContext requestContext);
         IEnumerable<IAccount> GetAccounts(string authority, RequestContext requestContext);
 
@@ -50,36 +52,18 @@ namespace Microsoft.Identity.Client
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
-        // These methods are only for test...  
-        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokensForClient(RequestContext requestContext);
-        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokensForClient(RequestContext requestContext);
-        ICollection<MsalIdTokenCacheItem> GetAllIdTokensForClient(RequestContext requestContext);
-        ICollection<MsalAccountCacheItem> GetAllAccounts(RequestContext requestContext);
         ILegacyCachePersistence LegacyPersistence { get; }
         ITokenCacheAccessor Accessor { get; }
+
         void RemoveMsalAccount(IAccount account, RequestContext requestContext);
-        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokenCacheItems(RequestContext requestContext);
-        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokenCacheItems(RequestContext requestContext);
-        ICollection<MsalIdTokenCacheItem> GetAllIdTokenCacheItems(RequestContext requestContext);
-        ICollection<MsalAccountCacheItem> GetAllAccountCacheItems(RequestContext requestContext);
-        void AddAccessTokenCacheItem(MsalAccessTokenCacheItem accessItem);
-        void AddRefreshTokenCacheItem(MsalRefreshTokenCacheItem msalRefreshTokenCacheItem);
 
-        void SaveAccessTokenCacheItem(MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem);
-
-        void DeleteAccessToken(MsalAccessTokenCacheItem msalAccessTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem,
-            RequestContext requestContext);
-
-        void SaveRefreshTokenCacheItem(
-            MsalRefreshTokenCacheItem msalRefreshTokenCacheItem,
-            MsalIdTokenCacheItem msalIdTokenCacheItem);
+        IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens(bool filterByClientId);
+        IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens(bool filterByClientId);
+        IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens(bool filterByClientId);
+        IEnumerable<MsalAccountCacheItem> GetAllAccounts();
 
         void ClearAdalCache();
         void ClearMsalCache();
         void Clear();
-
-        MsalAccountCacheItem GetAccount(MsalRefreshTokenCacheItem refreshTokenCacheItem, RequestContext requestContext);
     }
 }

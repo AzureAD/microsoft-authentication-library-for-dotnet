@@ -7,6 +7,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace DesktopTestApp
 {
@@ -42,7 +43,7 @@ namespace DesktopTestApp
         private void InvalidateRefreshTokenBtn_Click(object sender, System.EventArgs e)
         {
             _rtItem.Secret = GarbageRtValue;
-            _cache.SaveRefreshTokenCacheItem(_rtItem, null);
+            _cache.AddRefreshTokenCacheItem(_rtItem, null);
             invalidateRefreshTokenBtn.Enabled = false;
         }
 

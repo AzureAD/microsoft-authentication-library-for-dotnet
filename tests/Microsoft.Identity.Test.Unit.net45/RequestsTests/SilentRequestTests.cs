@@ -41,6 +41,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -89,7 +90,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var silentParameters = new AcquireTokenSilentParameters();
 
                 // set access tokens as expired
-                foreach (var accessItem in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest(harness.ServiceBundle)))
+                foreach (var accessItem in harness.Cache.GetAllAccessTokens(true))
                 {
                     accessItem.ExpiresOnUnixTimestamp =
                         ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)

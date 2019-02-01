@@ -7,6 +7,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace DesktopTestApp
 {

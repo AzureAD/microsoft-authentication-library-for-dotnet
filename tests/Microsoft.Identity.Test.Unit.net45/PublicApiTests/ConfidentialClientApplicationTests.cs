@@ -582,8 +582,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 
                 _tokenCacheHelper.PopulateCacheForClientCredential(app.AppTokenCacheInternal.Accessor);
 
-                ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest(app.ServiceBundle));
+                var accessTokens = app.AppTokenCacheInternal.GetAllAccessTokens(true);
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -634,8 +633,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenRetrievedFromNetCall, result.AccessToken);
 
                 // make sure token in Cache was updated
-                ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest(app.ServiceBundle));
+                var accessTokens = app.AppTokenCacheInternal.GetAllAccessTokens(true);
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
