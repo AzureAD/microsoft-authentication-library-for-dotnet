@@ -455,12 +455,6 @@ namespace DesktopTestApp
 
         private void LoadSettings()
         {
-            if (_publicClientHandler == null)
-            {
-                Debug.WriteLine("PublicClientHandler was not defined when loading settings. Skipping loading settings.");
-                return;
-            }
-
             _publicClientHandler.ExtraQueryParams = extraQueryParams.Text;
             Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
         }
