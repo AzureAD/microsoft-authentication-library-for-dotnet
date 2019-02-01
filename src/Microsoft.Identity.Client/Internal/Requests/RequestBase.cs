@@ -25,20 +25,20 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             LogRequestStarted(AuthenticationRequestParameters);
             string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
-            var apiEvent = InitializeApiEvent(accountId);
+            ApiEvent apiEvent = InitializeApiEvent(accountId);
 
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
@@ -135,7 +135,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 try
                 {
-                    var authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
 
                     apiEvent.TenantId = authenticationResult.TenantId;
@@ -165,7 +165,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private ApiEvent InitializeApiEvent(string accountId)
         {
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
-            var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
+            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 AccountId = accountId ?? "",
@@ -210,7 +210,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, msalTokenResponse);
+                Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, msalTokenResponse);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else
@@ -218,20 +218,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return new AuthenticationResult(
                     new MsalAccessTokenCacheItem(
                         AuthenticationRequestParameters.AuthorityInfo.Host,
-                        AuthenticationRequestParameters.ClientId, 
+                        AuthenticationRequestParameters.ClientId,
                         msalTokenResponse,
                         idToken?.TenantId),
                     new MsalIdTokenCacheItem(
                         AuthenticationRequestParameters.AuthorityInfo.Host,
-                        AuthenticationRequestParameters.ClientId, 
-                        msalTokenResponse, 
+                        AuthenticationRequestParameters.ClientId,
+                        msalTokenResponse,
                         idToken?.TenantId));
             }
         }
 
         private static string GetTenantUpdatedCanonicalAuthority(string authority, string replacementTenantId)
         {
-            var authUri = new Uri(authority);
+            Uri authUri = new Uri(authority);
             string[] pathSegments = authUri.AbsolutePath.Substring(1).Split(
                 new[]
                 {
@@ -309,7 +309,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected async Task<MsalTokenResponse> SendTokenRequestAsync(
             string tokenEndpoint,
-            IDictionary<string, string> additionalBodyParameters, 
+            IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
             OAuth2Client client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
@@ -321,7 +321,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (AuthenticationRequestParameters.ClientCredential != null)
             {
-                var ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
+                Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
                     AuthenticationRequestParameters.RequestContext.Logger,
                     ServiceBundle.PlatformProxy.CryptographyManager,
                     AuthenticationRequestParameters.ClientCredential,
@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.Endpoints,
                     AuthenticationRequestParameters.SendX5C);
 
-                foreach (var entry in ccBodyParameters)
+                foreach (KeyValuePair<string, string> entry in ccBodyParameters)
                 {
                     client.AddBodyParameter(entry.Key, entry.Value);
                 }
@@ -339,7 +339,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
             client.AddBodyParameter(OAuth2Parameter.Scope,
                 GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
 
-            foreach (var kvp in additionalBodyParameters)
+            client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
+
+            foreach (KeyValuePair<string, string> kvp in additionalBodyParameters)
             {
                 client.AddBodyParameter(kvp.Key, kvp.Value);
             }

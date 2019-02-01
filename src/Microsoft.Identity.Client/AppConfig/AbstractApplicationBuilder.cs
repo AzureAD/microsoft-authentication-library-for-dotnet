@@ -28,12 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -56,6 +51,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
+        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
         {
@@ -88,9 +84,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder
         public T WithLogging(
-            LogCallback loggingCallback, 
-            LogLevel? logLevel = null, 
-            bool? enablePiiLogging = null, 
+            LogCallback loggingCallback,
+            LogLevel? logLevel = null,
+            bool? enablePiiLogging = null,
             bool? enableDefaultPlatformLogging = null)
         {
             if (Config.LoggingCallback != null)
@@ -102,6 +98,19 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.LogLevel = logLevel ?? Config.LogLevel;
             Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
             Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Use when the AAD admin has enabled conditional access. Acquiring the token normally will result in a
+        /// <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
+        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details
+        /// </summary>
+        /// <param name="claims">A string with one or multiple claims.</param>
+        /// <returns>The builder to chain .With methods</returns>
+        public T WithClaims(string claims)
+        {
+            Config.Claims = claims;
             return (T)this;
         }
 
@@ -126,7 +135,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
         public T WithDebugLoggingCallback(
             LogLevel logLevel = LogLevel.Info,
-            bool enablePiiLogging = false, 
+            bool enablePiiLogging = false,
             bool withDefaultPlatformLoggingEnabled = false)
         {
             WithLogging(
@@ -148,7 +157,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         public T WithTelemetry(TelemetryCallback telemetryCallback)
         {
-            if (Config.TelemetryCallback  != null)
+            if (Config.TelemetryCallback != null)
             {
                 throw new InvalidOperationException(CoreErrorMessages.TelemetryCallbackAlreadySet);
             }
@@ -213,8 +222,8 @@ namespace Microsoft.Identity.Client.AppConfig
             WithComponent(applicationOptions.Component);
 
             WithLogging(
-                null, 
-                applicationOptions.LogLevel, 
+                null,
+                applicationOptions.LogLevel,
                 applicationOptions.EnablePiiLogging,
                 applicationOptions.IsDefaultPlatformLoggingEnabled);
 
@@ -246,7 +255,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithExtraQueryParameters(Dictionary<string, string> extraQueryParameters)
+        public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
         {
             Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
             return (T)this;

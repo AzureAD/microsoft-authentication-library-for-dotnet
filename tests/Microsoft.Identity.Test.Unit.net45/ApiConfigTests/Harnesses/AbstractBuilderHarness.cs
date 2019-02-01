@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
@@ -51,7 +52,9 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             CoreAssert.AreScopesEqual(
                 (expectedScopes ?? MsalTestConstants.Scope).AsSingleString(),
                 CommonParametersReceived.Scopes.AsSingleString());
-            CollectionAssert.AreEqual(expectedExtraQueryParameters, CommonParametersReceived.ExtraQueryParameters);
+            CollectionAssert.AreEqual(
+                expectedExtraQueryParameters, 
+                CommonParametersReceived.ExtraQueryParameters.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
         }
     }
 }

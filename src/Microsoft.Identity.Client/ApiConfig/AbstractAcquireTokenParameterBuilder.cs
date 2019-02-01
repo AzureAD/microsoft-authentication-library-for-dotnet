@@ -92,6 +92,20 @@ namespace Microsoft.Identity.Client.ApiConfig
             return (T)this;
         }
 
+
+        /// <summary>
+        /// Sets claims in the query. Use when the AAD admin has enabled conditional access. Acquiring the token normally will result in a
+        /// <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
+        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details
+        /// </summary>
+        /// <param name="claims">A string with one or multiple claims.</param>
+        /// <returns>The builder to chain .With methods</returns>
+        public T WithClaims(string claims)
+        {
+            CommonParameters.Claims = claims;
+            return (T)this;
+        }
+
         // This exists for back compat with old-style API.  Once we deprecate it, we can remove this.
         internal T WithExtraQueryParameters(string extraQueryParameters)
         {

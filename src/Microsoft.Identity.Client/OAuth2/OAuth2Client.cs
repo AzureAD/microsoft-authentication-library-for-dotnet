@@ -58,7 +58,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public void AddQueryParameter(string key, string value)
         {
-            _queryParameters[key] = value;
+            if (!String.IsNullOrWhiteSpace(key) && !String.IsNullOrWhiteSpace(value))
+            {
+                _queryParameters[key] = value;
+            }
         }
 
         public void AddBodyParameter(string key, string value)

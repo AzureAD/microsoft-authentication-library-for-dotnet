@@ -62,6 +62,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
+            Claims = serviceBundle.Config.Claims;
 
             // Copy in call-specific query parameters.
             if (commonParameters.ExtraQueryParameters != null)
@@ -84,7 +85,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public SortedSet<string> Scope { get; set; }
         public string ClientId { get; set; }
         public Uri RedirectUri { get; set; }
-        public Dictionary<string, string> ExtraQueryParameters { get; set; }
+        public IDictionary<string, string> ExtraQueryParameters { get; }
+        public string Claims { get; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
