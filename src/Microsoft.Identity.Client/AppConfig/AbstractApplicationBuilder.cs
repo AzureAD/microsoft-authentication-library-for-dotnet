@@ -72,10 +72,26 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>
+        /// <param name="loggingCallback"></param>
+        /// <param name="logLevel">Desired level of logging.  The default is LogLevel.Info</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// </param>
+        /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
+        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In android, logcat is used. The default value is <c>false</c>
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder
-        public T WithLoggingCallback(LogCallback loggingCallback)
+        public T WithLogging(
+            LogCallback loggingCallback, 
+            LogLevel? logLevel = null, 
+            bool? enablePiiLogging = null, 
+            bool? enableDefaultPlatformLogging = null)
         {
             if (Config.LoggingCallback != null)
             {
@@ -83,6 +99,9 @@ namespace Microsoft.Identity.Client.AppConfig
             }
 
             Config.LoggingCallback = loggingCallback;
+            Config.LogLevel = logLevel ?? Config.LogLevel;
+            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
+            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
             return (T)this;
         }
 
@@ -90,19 +109,31 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Sets the Debug logging callback to a default debug method which displays
         /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
         /// </summary>
+        /// <param name="logLevel">Desired level of logging.  The default is LogLevel.Info</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// </param>
+        /// <param name="withDefaultPlatformLoggingEnabled">Flag to enable/disable logging to platform defaults.
+        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In android, logcat is used. The default value is <c>false</c>
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder by calling <see cref="WithLoggingCallback(LogCallback)"/>
-        /// <seealso cref="WithLoggingCallback(LogCallback)"/>
-        /// <seealso cref="WithLoggingLevel(LogLevel)"/>
-        public T WithDebugLoggingCallback()
+        /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        public T WithDebugLoggingCallback(
+            LogLevel logLevel = LogLevel.Info,
+            bool enablePiiLogging = false, 
+            bool withDefaultPlatformLoggingEnabled = false)
         {
-            if (Config.LoggingCallback != null)
-            {
-                throw new InvalidOperationException(CoreErrorMessages.LoggingCallbackAlreadySet);
-            }
-
-            Config.LoggingCallback = (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); };
+            WithLogging(
+                (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
+                logLevel,
+                enablePiiLogging,
+                withDefaultPlatformLoggingEnabled);
             return (T)this;
         }
 
@@ -115,7 +146,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
 
-        public T WithTelemetryCallback(TelemetryCallback telemetryCallback)
+        public T WithTelemetry(TelemetryCallback telemetryCallback)
         {
             if (Config.TelemetryCallback  != null)
             {
@@ -169,49 +200,6 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Enables/disables logging of Personally Identifiable Information. See https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
-        /// Personally Identifiable Information (PII).
-        /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
-        /// You can set it to <c>true</c> for advanced debugging requiring PII</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithEnablePiiLogging(bool enablePiiLogging)
-        {
-            Config.EnablePiiLogging = enablePiiLogging;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Enables you to configure the level of logging you want. See https://aka.ms/msal-net-logging
-        /// The default value is <see cref="LogLevel.Info"/>.
-        /// Setting it to <see cref="LogLevel.Error"/> will only get errors
-        /// Setting it to <see cref="LogLevel.Warning"/> will get errors and warning, etc..
-        /// </summary>
-        /// <param name="logLevel">Desired level of logging</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithLoggingLevel(LogLevel logLevel)
-        {
-            Config.LogLevel = logLevel;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Flag to enable/disable logging to platform defaults. See https://aka.ms/msal-net-logging
-        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In android, logcat is used. The default value is <c>false</c>
-        /// </summary>
-        /// <param name="enabled">Boolean telling if default logging is
-        /// enabled or not</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithDefaultPlatformLoggingEnabled(bool enabled)
-        {
-            Config.IsDefaultPlatformLoggingEnabled = enabled;
-            return (T)this;
-        }
-
-        /// <summary>
         /// Sets application options, which can, for instance have been read from configuration files.
         /// See https://aka.ms/msal-net-application-configuration.
         /// </summary>
@@ -222,10 +210,13 @@ namespace Microsoft.Identity.Client.AppConfig
             WithClientId(applicationOptions.ClientId);
             WithRedirectUri(applicationOptions.RedirectUri);
             WithTenantId(applicationOptions.TenantId);
-            WithLoggingLevel(applicationOptions.LogLevel);
             WithComponent(applicationOptions.Component);
-            WithEnablePiiLogging(applicationOptions.EnablePiiLogging);
-            WithDefaultPlatformLoggingEnabled(applicationOptions.IsDefaultPlatformLoggingEnabled);
+
+            WithLogging(
+                null, 
+                applicationOptions.LogLevel, 
+                applicationOptions.EnablePiiLogging,
+                applicationOptions.IsDefaultPlatformLoggingEnabled);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;

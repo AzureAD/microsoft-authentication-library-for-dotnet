@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
@@ -393,7 +393,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -623,7 +623,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var receiver = new MyReceiver();
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                        .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                        .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                         .BuildConcrete();
 
             try
@@ -771,7 +771,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -1230,9 +1230,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
-                                                                            .WithLoggingLevel(LogLevel.Verbose)
-                                                                            .WithDebugLoggingCallback()
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
+                                                                            .WithDebugLoggingCallback(logLevel: LogLevel.Verbose)
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication
@@ -1279,7 +1278,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 // Interactive call and authentication fails with access denied
