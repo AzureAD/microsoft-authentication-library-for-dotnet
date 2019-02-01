@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                var cache = parameters.TokenCache;
+                var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
                 Assert.AreEqual(0, cache.Accessor.AccessTokenCount);

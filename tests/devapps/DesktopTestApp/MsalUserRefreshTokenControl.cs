@@ -43,7 +43,7 @@ namespace DesktopTestApp
         private void InvalidateRefreshTokenBtn_Click(object sender, System.EventArgs e)
         {
             _rtItem.Secret = GarbageRtValue;
-            _cache.AddRefreshTokenCacheItem(_rtItem, null);
+            _cache.AddRefreshTokenCacheItem(_rtItem);
             invalidateRefreshTokenBtn.Enabled = false;
         }
 

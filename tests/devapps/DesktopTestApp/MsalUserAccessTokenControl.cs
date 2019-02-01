@@ -38,7 +38,7 @@ namespace DesktopTestApp
         {
             expiresOnLabel.Text = DateTimeOffset.UtcNow.ToString(CultureInfo.CurrentCulture);
             _item.ExpiresOnUnixTimestamp = CoreHelpers.DateTimeToUnixTimestamp(DateTimeOffset.UtcNow);
-            _cache.SaveAccessTokenCacheItem(_item, null);
+            _cache.AddAccessTokenCacheItem(_item);
         }
 
         private void deleteAccessTokenButton_Click(object sender, EventArgs e)

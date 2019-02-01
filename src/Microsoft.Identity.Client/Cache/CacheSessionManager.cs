@@ -10,36 +10,37 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal class CacheSessionManager : ICacheSessionManager
     {
-        private readonly ITokenCacheInternal _tokenCacheInternal;
         private readonly AuthenticationRequestParameters _requestParams;
 
         public CacheSessionManager(ITokenCacheInternal tokenCacheInternal,
             AuthenticationRequestParameters requestParams)
         {
-            _tokenCacheInternal = tokenCacheInternal;
+            TokenCacheInternal = tokenCacheInternal;
             _requestParams = requestParams;
         }
 
-        public bool HasCache => _tokenCacheInternal != null;
+        public ITokenCacheInternal TokenCacheInternal { get; }
+     
+        public bool HasCache => TokenCacheInternal != null;
 
         public Task<MsalAccessTokenCacheItem> FindAccessTokenAsync()
         {
-            throw new NotImplementedException();
+            return TokenCacheInternal.FindAccessTokenAsync(_requestParams);
         }
 
-        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse response)
+        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse tokenResponse)
         {
-            throw new NotImplementedException();
+            return TokenCacheInternal.SaveAccessAndRefreshToken(_requestParams, tokenResponse);
         }
 
-        public MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey)
+        public MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey)
         {
-            throw new NotImplementedException();
+            return TokenCacheInternal.GetIdTokenCacheItem(idTokenCacheKey, _requestParams.RequestContext);
         }
 
         public Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
-            throw new NotImplementedException();
+            return TokenCacheInternal.FindRefreshTokenAsync(_requestParams);
         }
     }
 }

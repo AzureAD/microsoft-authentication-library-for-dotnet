@@ -9,10 +9,11 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal interface ICacheSessionManager
     {
+        ITokenCacheInternal TokenCacheInternal { get; }
         bool HasCache { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
-        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse response);
-        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey);
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse tokenResponse);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
     }
 }
