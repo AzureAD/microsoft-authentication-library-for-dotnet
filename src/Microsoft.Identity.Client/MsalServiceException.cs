@@ -222,7 +222,31 @@ namespace Microsoft.Identity.Client
         public HttpResponseHeaders Headers { get; internal set; }
 
         /// <summary>
-        /// A string that provides more details about the error. Sent by the server.
+        /// A string that provides more details about the error. Common sub errors are:
+        /// <list type="bullet">
+        /// <item>
+        /// <term>message_only</term>
+        /// <description>
+        /// User will be shown an informational message with no immediate remediation steps.
+        /// For example, access was blocked due to location or the device is not domain joined
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <term>additional_action</term>
+        /// <description>
+        /// This indicates additional action is required that is in the user control, 
+        /// but is outside of the sign in session .For example, enroll in MDM or
+        /// install an app that uses Intune app protection.
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <term>basic_action</term>
+        /// <description>
+        /// This indicates a simple action is required by the end user, like MFA.
+        /// Custom controls fall into this category..
+        /// </description>
+        /// </item>
+        /// </list>
         /// </summary>
         public string SubError { get; internal set; }
 
