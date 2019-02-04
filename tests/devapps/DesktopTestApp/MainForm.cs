@@ -31,6 +31,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,7 +49,7 @@ namespace DesktopTestApp
         private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private string _b2CClientId = null;
 
-        private readonly PublicClientHandler _publicClientHandler;
+        private PublicClientHandler _publicClientHandler;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
@@ -65,10 +66,15 @@ namespace DesktopTestApp
             tabControl1.Selecting += TabControl1_Selecting;
             logLevel.SelectedIndex = logLevel.Items.Count - 1;
             userPasswordTextBox.PasswordChar = '*';
-
-            LoadSettings();
-            _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
+            LoadSettings();
+        }
+
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)
         {
