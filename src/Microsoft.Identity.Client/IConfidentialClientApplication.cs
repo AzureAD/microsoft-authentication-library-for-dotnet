@@ -65,7 +65,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>,
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>,
         /// </remarks>
-        AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenForAuthorizationCode(
+        AcquireTokenByAuthorizationCodeParameterBuilder AcquireTokenByAuthorizationCode(
             IEnumerable<string> scopes,
             string authorizationCode);
 

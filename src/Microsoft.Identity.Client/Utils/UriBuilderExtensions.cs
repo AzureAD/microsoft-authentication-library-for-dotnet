@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Utils
             }
         }
 
-        public static void AppendQueryParameters(this UriBuilder builder, Dictionary<string, string> queryParams)
+        public static void AppendQueryParameters(this UriBuilder builder, IDictionary<string, string> queryParams)
         {
             var list = new List<string>();
             foreach (var kvp in queryParams)

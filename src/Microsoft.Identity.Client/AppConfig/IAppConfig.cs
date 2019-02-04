@@ -75,7 +75,11 @@ namespace Microsoft.Identity.Client.AppConfig
 
         /// <summary>
         /// </summary>
-        Dictionary<string, string> ExtraQueryParameters { get; }
+        IDictionary<string, string> ExtraQueryParameters { get; }
+
+        /// <summary>
+        /// </summary>
+        string Claims { get; }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
