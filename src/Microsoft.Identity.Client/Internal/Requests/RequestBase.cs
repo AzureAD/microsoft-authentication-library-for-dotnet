@@ -42,6 +42,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
+    /// <summary>
+    /// Base class for all flows. Use by implementing <see cref="ExecuteAsync(CancellationToken)"/>
+    /// and optionally calling protected helper methods such as SendTokenRequestAsync, which knows
+    /// how to use all params when making the request.
+    /// </summary>
     internal abstract class RequestBase
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
