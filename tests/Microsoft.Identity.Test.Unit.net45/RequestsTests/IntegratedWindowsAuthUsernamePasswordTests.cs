@@ -25,26 +25,22 @@
 //
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Test.Unit.PublicApiTests;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -156,20 +152,22 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
         }
 
-        private void AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority)
+        private MockHttpMessageHandler AddMockHandlerAadSuccess(MockHttpManager httpManager, string authority)
         {
-            httpManager.AddMockHandler(
-                new MockHttpMessageHandler
-                {
-                    ExpectedUrl = authority + "oauth2/v2.0/token",
-                    ExpectedMethod = HttpMethod.Post,
-                    ExpectedPostData = new Dictionary<string, string>
+            var handler = new MockHttpMessageHandler
+            {
+                ExpectedUrl = authority + "oauth2/v2.0/token",
+                ExpectedMethod = HttpMethod.Post,
+                ExpectedPostData = new Dictionary<string, string>
                     {
                         {"grant_type", "urn:ietf:params:oauth:grant-type:saml1_1-bearer"},
                         {"scope", "openid offline_access profile r1/scope1 r1/scope2"}
                     },
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-                });
+                ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+            };
+            httpManager.AddMockHandler(handler);
+
+            return handler;
         }
 
         internal MockHttpMessageHandler AddMockResponseForFederatedAccounts(MockHttpManager httpManager)
@@ -278,6 +276,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [DeploymentItem(@"Resources\WsTrustResponse13.xml")]
         public async Task AcquireTokenByIntegratedWindowsAuthTestAsync()
         {
+            IDictionary<string, string> extraQueryParamsAndClaims =
+                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+
             using (var httpManager = new MockHttpManager())
             {
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -286,11 +288,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
-                AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
+                var mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
+                mockTokenRequestHttpHandler.ExpectedQueryParams = extraQueryParamsAndClaims;
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
+                                                        .WithClaims(MsalTestConstants.Claims)
+                                                        .WithExtraQueryParameters(MsalTestConstants.ExtraQueryParams)
                                                         .BuildConcrete();
 
                 var result = await app

@@ -87,6 +87,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         "provided url ({0}) does not contain query parameters, as expected",
                         uri.AbsolutePath));
                 IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
+                Assert.AreEqual(ExpectedQueryParams.Count, inputQp.Count, "Different number of query params`");
                 foreach (string key in ExpectedQueryParams.Keys)
                 {
                     Assert.IsTrue(
@@ -96,19 +97,6 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                             "expected QP ({0}) not found in the url ({1})",
                             key,
                             uri.AbsolutePath));
-                    Assert.AreEqual(ExpectedQueryParams[key], inputQp[key]);
-                }
-            }
-
-
-            // Match QP passed in for validation.
-            if (ExpectedQueryParams != null)
-            {
-                Assert.IsFalse(string.IsNullOrEmpty(uri.Query));
-                IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
-                foreach (string key in ExpectedQueryParams.Keys)
-                {
-                    Assert.IsTrue(inputQp.ContainsKey(key));
                     Assert.AreEqual(ExpectedQueryParams[key], inputQp[key]);
                 }
             }

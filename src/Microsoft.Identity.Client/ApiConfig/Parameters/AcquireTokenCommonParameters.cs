@@ -35,7 +35,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     {
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
         public IEnumerable<string> Scopes { get; set; }
-        public Dictionary<string, string> ExtraQueryParameters { get; set; }
+        public IDictionary<string, string> ExtraQueryParameters { get; set; }
+        public string Claims { get; set; }
         public AuthorityInfo AuthorityOverride { get; set; }
     }
 }
