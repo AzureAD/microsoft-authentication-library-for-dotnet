@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
-            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
+            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.BetaEndpoint);
 
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);

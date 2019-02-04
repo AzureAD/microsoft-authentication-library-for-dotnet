@@ -130,6 +130,38 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
+        [TestMethod]
+        public async Task Interactive_AdfsV2019_NotFederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = false
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task Interactive_AdfsV2019_FederatedAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+        }
+
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
             Action<IWebDriver> seleniumLogic = (driver) =>
