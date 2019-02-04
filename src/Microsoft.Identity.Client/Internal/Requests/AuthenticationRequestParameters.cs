@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -54,7 +55,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             Authority = authorityInstance;
             ClientId = serviceBundle.Config.ClientId;
-            TokenCache = tokenCache;
+            CacheSessionManager = new CacheSessionManager(tokenCache, this);
             Scope = ScopeHelper.CreateSortedSetFromEnumerable(commonParameters.Scopes);
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
@@ -84,7 +85,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
-        public ITokenCacheInternal TokenCache { get; set; }
+        public ICacheSessionManager CacheSessionManager{ get; set; }
         public SortedSet<string> Scope { get; set; }
         public string ClientId { get; set; }
         public Uri RedirectUri { get; set; }

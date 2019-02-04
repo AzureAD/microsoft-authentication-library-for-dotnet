@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
     internal abstract class RequestBase
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
-        internal ITokenCacheInternal TokenCache => AuthenticationRequestParameters.TokenCache;
+        internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         protected IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(
@@ -74,13 +74,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
-                TokenCache != null,
+                CacheManager.HasCache,
                 GetType().Name);
 
             string messageWithoutPii = string.Format(
                 CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}",
-                TokenCache != null,
+                CacheManager.HasCache,
                 GetType().Name);
 
             if (authenticationRequestParameters.AuthorityInfo != null &&
@@ -206,11 +206,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = GetTenantUpdatedCanonicalAuthority(
                 AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority, idToken?.TenantId);
 
-            if (TokenCache != null)
+            if (CacheManager.HasCache)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, msalTokenResponse);
+                var tuple = CacheManager.SaveAccessAndRefreshToken(msalTokenResponse);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else

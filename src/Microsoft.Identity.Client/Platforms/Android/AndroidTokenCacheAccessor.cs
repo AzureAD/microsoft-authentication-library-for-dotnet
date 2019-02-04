@@ -77,28 +77,28 @@ namespace Microsoft.Identity.Client.Platforms.Android
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _accessTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), JsonHelper.SerializeToJson(item));
+            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
             editor.Apply();
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _refreshTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), JsonHelper.SerializeToJson(item));
+            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
             editor.Apply();
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
             ISharedPreferencesEditor editor = _idTokenSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), JsonHelper.SerializeToJson(item));
+            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
             editor.Apply();
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
             ISharedPreferencesEditor editor = _accountSharedPreference.Edit();
-            editor.PutString(item.GetKey().ToString(), JsonHelper.SerializeToJson(item));
+            editor.PutString(item.GetKey().ToString(), item.ToJsonString());
             editor.Apply();
         }
 
@@ -136,46 +136,26 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
-        public ICollection<string> GetAllAccessTokensAsString()
+        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            return _accessTokenSharedPreference.All.Values.Cast<string>().ToList();
+            return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllRefreshTokensAsString()
+        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            return _refreshTokenSharedPreference.All.Values.Cast<string>().ToList();
+            return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllIdTokensAsString()
+        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            return _idTokenSharedPreference.All.Values.Cast<string>().ToList();
+            return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllAccountsAsString()
+        public ICollection<MsalAccountCacheItem> GetAllAccounts()
         {
-            return _accountSharedPreference.All.Values.Cast<string>().ToList();
-        }
-        /*
-        public ICollection<string> GetAllAccessTokenKeys()
-        {
-            return _accessTokenSharedPreference.All.Keys.ToList();
+            return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllRefreshTokenKeys()
-        {
-            return _refreshTokenSharedPreference.All.Keys.ToList();
-        }
-
-        public ICollection<string> GetAllIdTokenKeys()
-        {
-            return _idTokenSharedPreference.All.Keys.ToList();
-        }
-
-        public ICollection<string> GetAllAccountKeys()
-        {
-            return _accountSharedPreference.All.Keys.ToList();
-        }
-        */
         public void Clear()
         {
             DeleteAll(_accessTokenSharedPreference);
@@ -184,24 +164,24 @@ namespace Microsoft.Identity.Client.Platforms.Android
             DeleteAll(_accountSharedPreference);
         }
 
-        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            return _accessTokenSharedPreference.GetString(accessTokenKey.ToString(), null);
+            return MsalAccessTokenCacheItem.FromJsonString(_accessTokenSharedPreference.GetString(accessTokenKey.ToString(), null));
         }
 
-        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
+        public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
-            return _refreshTokenSharedPreference.GetString(refreshTokenKey.ToString(), null);
+            return MsalRefreshTokenCacheItem.FromJsonString(_refreshTokenSharedPreference.GetString(refreshTokenKey.ToString(), null));
         }
 
-        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
+        public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
-            return _idTokenSharedPreference.GetString(idTokenKey.ToString(), null);
+            return MsalIdTokenCacheItem.FromJsonString(_idTokenSharedPreference.GetString(idTokenKey.ToString(), null));
         }
 
-        public string GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
-            return _accountSharedPreference.GetString(accountKey.ToString(), null);
+            return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountKey.ToString(), null));
         }
 
         /// <inheritdoc />

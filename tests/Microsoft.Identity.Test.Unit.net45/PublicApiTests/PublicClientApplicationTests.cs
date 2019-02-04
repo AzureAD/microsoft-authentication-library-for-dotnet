@@ -682,7 +682,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(MsalTestConstants.ScopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokensAsString().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
             }
         }
 

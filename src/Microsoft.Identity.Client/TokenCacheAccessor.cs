@@ -36,17 +36,17 @@ namespace Microsoft.Identity.Client
 {
     internal class TokenCacheAccessor : ITokenCacheAccessor
     {
-        internal readonly IDictionary<string, string> AccessTokenCacheDictionary =
-            new ConcurrentDictionary<string, string>();
+        internal readonly IDictionary<string, MsalAccessTokenCacheItem> AccessTokenCacheDictionary =
+            new ConcurrentDictionary<string, MsalAccessTokenCacheItem>();
 
-        internal readonly IDictionary<string, string> RefreshTokenCacheDictionary =
-            new ConcurrentDictionary<string, string>();
+        internal readonly IDictionary<string, MsalRefreshTokenCacheItem> RefreshTokenCacheDictionary =
+            new ConcurrentDictionary<string, MsalRefreshTokenCacheItem>();
 
-        internal readonly IDictionary<string, string> IdTokenCacheDictionary =
-            new ConcurrentDictionary<string, string>();
+        internal readonly IDictionary<string, MsalIdTokenCacheItem> IdTokenCacheDictionary =
+            new ConcurrentDictionary<string, MsalIdTokenCacheItem>();
 
-        internal readonly IDictionary<string, string> AccountCacheDictionary =
-            new ConcurrentDictionary<string, string>();
+        internal readonly IDictionary<string, MsalAccountCacheItem> AccountCacheDictionary =
+            new ConcurrentDictionary<string, MsalAccountCacheItem>();
 
         /// <inheritdoc />
         public int RefreshTokenCount => RefreshTokenCacheDictionary.Count;
@@ -74,66 +74,61 @@ namespace Microsoft.Identity.Client
 
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
-            AccessTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
+            AccessTokenCacheDictionary[item.GetKey().ToString()] = item;
         }
 
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
-            RefreshTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
+            RefreshTokenCacheDictionary[item.GetKey().ToString()] = item;
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
-            IdTokenCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
+            IdTokenCacheDictionary[item.GetKey().ToString()] = item;
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
-            AccountCacheDictionary[item.GetKey().ToString()] = JsonHelper.SerializeToJson(item);
+            AccountCacheDictionary[item.GetKey().ToString()] = item;
         }
 
-        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
-            var strKey = accessTokenKey.ToString();
-            if (!AccessTokenCacheDictionary.ContainsKey(strKey))
+            if (AccessTokenCacheDictionary.TryGetValue(accessTokenKey.ToString(), out var cacheItem))
             {
-                return null;
+                return cacheItem;
             }
 
-            return AccessTokenCacheDictionary[strKey];
+            return null;
         }
 
-        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
+        public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
-            var strKey = refreshTokenKey.ToString();
-            if (!RefreshTokenCacheDictionary.ContainsKey(strKey))
+            if (RefreshTokenCacheDictionary.TryGetValue(refreshTokenKey.ToString(), out var cacheItem))
             {
-                return null;
+                return cacheItem;
             }
 
-            return RefreshTokenCacheDictionary[strKey];
+            return null;
         }
 
-        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
+        public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
-            var strKey = idTokenKey.ToString();
-            if (!IdTokenCacheDictionary.ContainsKey(strKey))
+            if (IdTokenCacheDictionary.TryGetValue(idTokenKey.ToString(), out var cacheItem))
             {
-                return null;
+                return cacheItem;
             }
-
-            return IdTokenCacheDictionary[strKey];
+            return null;
         }
 
-        public string GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
-            var strKey = accountKey.ToString();
-            if (!AccountCacheDictionary.ContainsKey(strKey))
+            if (AccountCacheDictionary.TryGetValue(accountKey.ToString(), out var cacheItem))
             {
-                return null;
+                return cacheItem;
             }
 
-            return AccountCacheDictionary[strKey];
+            return null;
         }
 
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
@@ -156,32 +151,24 @@ namespace Microsoft.Identity.Client
             AccountCacheDictionary.Remove(cacheKey.ToString());
         }
         
-        public ICollection<string> GetAllAccessTokensAsString()
+        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            return
-                new ReadOnlyCollection<string>(
-                    AccessTokenCacheDictionary.Values.ToList());
+            return new ReadOnlyCollection<MsalAccessTokenCacheItem>(AccessTokenCacheDictionary.Values.ToList());
         }
 
-        public ICollection<string> GetAllRefreshTokensAsString()
+        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            return
-                new ReadOnlyCollection<string>(
-                    RefreshTokenCacheDictionary.Values.ToList());
+            return new ReadOnlyCollection<MsalRefreshTokenCacheItem>(RefreshTokenCacheDictionary.Values.ToList());
         }
 
-        public ICollection<string> GetAllIdTokensAsString()
+        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            return
-                new ReadOnlyCollection<string>(
-                   IdTokenCacheDictionary.Values.ToList());
+            return new ReadOnlyCollection<MsalIdTokenCacheItem>(IdTokenCacheDictionary.Values.ToList());
         }
 
-        public ICollection<string> GetAllAccountsAsString()
+        public ICollection<MsalAccountCacheItem> GetAllAccounts()
         {
-            return
-                new ReadOnlyCollection<string>(
-                   AccountCacheDictionary.Values.ToList());
+            return new ReadOnlyCollection<MsalAccountCacheItem>(AccountCacheDictionary.Values.ToList());
         }
 
         public void SetiOSKeychainSecurityGroup(string keychainSecurityGroup)

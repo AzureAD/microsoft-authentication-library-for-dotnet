@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public void SaveAccessToken(MsalAccessTokenCacheItem item)
         {
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, JsonHelper.SerializeToJson(item));
+            SetCacheValue(composite,  item.ToJsonString());
             var key = item.GetKey().GetUWPFixedSizeKey(_cryptographyManager);
 
             _accessTokenContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/key] = composite;
@@ -109,37 +109,37 @@ namespace Microsoft.Identity.Client.Platforms.uap
         public void SaveRefreshToken(MsalRefreshTokenCacheItem item)
         {
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, JsonHelper.SerializeToJson(item));
+            SetCacheValue(composite, item.ToJsonString());
             _refreshTokenContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/item.GetKey().ToString()] = composite;
         }
 
         public void SaveIdToken(MsalIdTokenCacheItem item)
         {
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, JsonHelper.SerializeToJson(item));
+            SetCacheValue(composite,  item.ToJsonString());
             _idTokenContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/item.GetKey().ToString()] = composite;
         }
 
         public void SaveAccount(MsalAccountCacheItem item)
         {
             ApplicationDataCompositeValue composite = new ApplicationDataCompositeValue();
-            SetCacheValue(composite, JsonHelper.SerializeToJson(item));
+            SetCacheValue(composite,  item.ToJsonString());
             _accountContainer.Values[/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/item.GetKey().ToString()] = composite;
         }
 
-        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
             var keyStr = accessTokenKey.GetUWPFixedSizeKey(_cryptographyManager);
             if (!_accessTokenContainer.Values.ContainsKey(/*encodedKey*/keyStr))
             {
                 return null;
             }
-            return CoreHelpers.ByteArrayToString(
+            return MsalAccessTokenCacheItem.FromJsonString(CoreHelpers.ByteArrayToString(
                 GetCacheValue((ApplicationDataCompositeValue)_accessTokenContainer.Values[
-                    /*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(accessTokenKey)*/keyStr]));
+                    /*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(accessTokenKey)*/keyStr])));
         }
 
-        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
+        public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
             var keyStr = refreshTokenKey.ToString();
             //var encodedKey = CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(refreshTokenKey);
@@ -147,23 +147,23 @@ namespace Microsoft.Identity.Client.Platforms.uap
             {
                 return null;
             }
-            return CoreHelpers.ByteArrayToString(
-                GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[/*encodedKey*/keyStr]));
+            return MsalRefreshTokenCacheItem.FromJsonString(CoreHelpers.ByteArrayToString(
+                GetCacheValue((ApplicationDataCompositeValue)_refreshTokenContainer.Values[/*encodedKey*/keyStr])));
         }
 
-        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
+        public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
             var keyStr = idTokenKey.ToString();
             if (!_idTokenContainer.Values.ContainsKey(/*encodedKey*/keyStr))
             {
                 return null;
             }
-            return CoreHelpers.ByteArrayToString(
+            return MsalIdTokenCacheItem.FromJsonString(CoreHelpers.ByteArrayToString(
                 GetCacheValue((ApplicationDataCompositeValue)_idTokenContainer.Values[
-                    /*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(idTokenKey)*/keyStr]));
+                    /*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(idTokenKey)*/keyStr])));
         }
 
-        public string GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
             var keyStr = accountKey.ToString();
             if (!_accountContainer.Values.ContainsKey(/*encodedKey*/keyStr))
@@ -171,9 +171,9 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 return null;
             }
 
-            return CoreHelpers.ByteArrayToString(
+            return MsalAccountCacheItem.FromJsonString(CoreHelpers.ByteArrayToString(
                 GetCacheValue((ApplicationDataCompositeValue)_accountContainer.Values[
-                    /*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(accountKey)*/keyStr]));
+                    /*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(accountKey)*/keyStr])));
         }
 
         public void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey)
@@ -196,45 +196,45 @@ namespace Microsoft.Identity.Client.Platforms.uap
             _accountContainer.Values.Remove(/*CoreCryptographyHelpers.CreateBase64UrlEncodedSha256Hash(cacheKey)*/cacheKey.ToString());
         }
 
-        public ICollection<string> GetAllAccessTokensAsString()
+        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            ICollection<string> list = new List<string>();
+            ICollection<MsalAccessTokenCacheItem> list = new List<MsalAccessTokenCacheItem>();
             foreach (ApplicationDataCompositeValue item in _accessTokenContainer.Values.Values)
             {
-                list.Add(CoreHelpers.CreateString(GetCacheValue(item)));
+                list.Add(MsalAccessTokenCacheItem.FromJsonString(CoreHelpers.CreateString(GetCacheValue(item))));
             }
 
             return list;
         }
 
-        public ICollection<string> GetAllRefreshTokensAsString()
+        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            ICollection<string> list = new List<string>();
+            ICollection<MsalRefreshTokenCacheItem> list = new List<MsalRefreshTokenCacheItem>();
             foreach (ApplicationDataCompositeValue item in _refreshTokenContainer.Values.Values)
             {
-                list.Add(CoreHelpers.CreateString(GetCacheValue(item)));
+                list.Add(MsalRefreshTokenCacheItem.FromJsonString(CoreHelpers.CreateString(GetCacheValue(item))));
             }
 
             return list;
         }
 
-        public ICollection<string> GetAllIdTokensAsString()
+        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            ICollection<string> list = new List<string>();
+            ICollection<MsalIdTokenCacheItem> list = new List<MsalIdTokenCacheItem>();
             foreach (ApplicationDataCompositeValue item in _idTokenContainer.Values.Values)
             {
-                list.Add(CoreHelpers.CreateString(GetCacheValue(item)));
+                list.Add(MsalIdTokenCacheItem.FromJsonString(CoreHelpers.CreateString(GetCacheValue(item))));
             }
 
             return list;
         }
 
-        public ICollection<string> GetAllAccountsAsString()
+        public ICollection<MsalAccountCacheItem> GetAllAccounts()
         {
-            ICollection<string> list = new List<string>();
+            ICollection<MsalAccountCacheItem> list = new List<MsalAccountCacheItem>();
             foreach (ApplicationDataCompositeValue item in _accountContainer.Values.Values)
             {
-                list.Add(CoreHelpers.CreateString(GetCacheValue(item)));
+                list.Add(MsalAccountCacheItem.FromJsonString(CoreHelpers.CreateString(GetCacheValue(item))));
             }
 
             return list;
