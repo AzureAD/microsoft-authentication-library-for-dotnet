@@ -25,6 +25,12 @@
 //
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -32,12 +38,6 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public void AddQueryParameter(string key, string value)
         {
-            if (!String.IsNullOrWhiteSpace(key) && !String.IsNullOrWhiteSpace(value))
+            if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
             {
                 _queryParameters[key] = value;
             }
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             HttpResponse response = null;
-            var endpointUri = CreateFullEndpointUri(endPoint);
+            Uri endpointUri = CreateFullEndpointUri(endPoint);
             var httpEvent = new HttpEvent()
             {
                 HttpPath = endpointUri,
@@ -145,7 +145,7 @@ namespace Microsoft.Identity.Client.OAuth2
                         throw MsalExceptionFactory.GetServiceException(
                             CoreErrorCodes.NonParsableOAuthError,
                             CoreErrorMessages.NonParsableOAuthError,
-                            response, 
+                            response,
                             e);
                     }
                 }
@@ -184,7 +184,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.InvalidGrantError,
                         msalTokenResponse.ErrorDescription,
-                        response, 
+                        response,
                         isUiRequiredException: true);
                 }
 

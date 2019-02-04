@@ -49,12 +49,14 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
 
             Assert.AreEqual(expectedApiId, CommonParametersReceived.ApiId);
             Assert.AreEqual(expectedAuthorityOverride, CommonParametersReceived.AuthorityOverride);
+
             CoreAssert.AreScopesEqual(
                 (expectedScopes ?? MsalTestConstants.Scope).AsSingleString(),
                 CommonParametersReceived.Scopes.AsSingleString());
+
             CollectionAssert.AreEqual(
                 expectedExtraQueryParameters, 
-                CommonParametersReceived.ExtraQueryParameters.ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
+                CommonParametersReceived.ExtraQueryParameters?.ToList());
         }
     }
 }

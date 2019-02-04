@@ -329,7 +329,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     AuthenticationRequestParameters.Endpoints,
                     AuthenticationRequestParameters.SendX5C);
 
-                foreach (KeyValuePair<string, string> entry in ccBodyParameters)
+                foreach (var entry in ccBodyParameters)
                 {
                     client.AddBodyParameter(entry.Key, entry.Value);
                 }
@@ -341,7 +341,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
 
-            foreach (KeyValuePair<string, string> kvp in additionalBodyParameters)
+            foreach (var kvp in additionalBodyParameters)
             {
                 client.AddBodyParameter(kvp.Key, kvp.Value);
             }

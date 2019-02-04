@@ -25,6 +25,14 @@
 //
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,20 +41,6 @@ using System.Net;
 using System.Net.Http;
 using System.Security;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Common.Core.Helpers;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Test.Unit.PublicApiTests;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -294,8 +288,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 MockHttpMessageHandler realmDiscoveryHandler = AddMockHandlerDefaultUserRealmDiscovery(httpManager);
                 AddMockHandlerMex(httpManager);
                 AddMockHandlerWsTrustWindowsTransport(httpManager);
-                var tokenRequestHandler = AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
-                tokenRequestHandler.ExpectedQueryParams = extraQueryParamsAndClaims;
+                var mockTokenRequestHttpHandler = AddMockHandlerAadSuccess(httpManager, MsalTestConstants.AuthorityCommonTenant);
+                mockTokenRequestHttpHandler.ExpectedQueryParams = extraQueryParamsAndClaims;
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)

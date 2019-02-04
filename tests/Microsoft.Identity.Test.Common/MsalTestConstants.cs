@@ -77,15 +77,16 @@ namespace Microsoft.Identity.Test.Unit
         public const string DefaultAccessToken = "DefaultAccessToken";
         public const string DefaultClientAssertion = "DefaultClientAssertion";
         public const string RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9";
-        public const string XClientSku =  "x-client-SKU";
+        public const string XClientSku = "x-client-SKU";
         public const string XClientVer = "x-client-Ver";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
 
-        public static readonly IDictionary<string, string> ExtraQueryParams = new Dictionary<string, string>()
+        public static readonly IDictionary<string, string> ExtraQueryParams 
+            = new Dictionary<string, string>()
             {
-                        {"extra", "qp" },
-                        {"key1", "value1%20with%20encoded%20space"},
-                        {"key2", "value2"}
+                {"extra", "qp" },
+                {"key1", "value1%20with%20encoded%20space"},
+                {"key2", "value2"}
             };
 
         public enum AuthorityType { B2C };
