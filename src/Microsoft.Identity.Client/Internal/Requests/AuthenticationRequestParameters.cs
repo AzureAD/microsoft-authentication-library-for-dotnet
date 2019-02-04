@@ -62,7 +62,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
-            Claims = serviceBundle.Config.Claims;
 
             // Copy in call-specific query parameters.
             if (commonParameters.ExtraQueryParameters != null)
@@ -72,6 +71,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     ExtraQueryParameters[kvp.Key] = kvp.Value;
                 }
             }
+
+            // Prefer the call-specific claims, otherwise use the app config
+            Claims = commonParameters.Claims ?? serviceBundle.Config.Claims;
+
         }
 
         public ApiEvent.ApiIds ApiId { get; }
