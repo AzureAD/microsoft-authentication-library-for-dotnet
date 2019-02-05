@@ -106,7 +106,7 @@ namespace DesktopTestApp
             userList.Refresh();
         }
 
-#region PublicClient UI Controls
+        #region PublicClient UI Controls
 
         private void loginHint_TextChanged(object sender, EventArgs e)
         {
@@ -145,9 +145,9 @@ namespace DesktopTestApp
             tabControl1.SelectedTab = logsTabPage;
         }
 
-#endregion
+        #endregion
 
-#region PublicClientApplication Acquire Token
+        #region PublicClientApplication Acquire Token
         private async void AcquireTokenInteractive_Click(object sender, EventArgs e)
         {
             using (new UIProgressScope(this))
@@ -200,6 +200,7 @@ namespace DesktopTestApp
                             username).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
+                    RefreshUserList();
 
                 }
                 catch (Exception exc)
@@ -235,6 +236,7 @@ namespace DesktopTestApp
                     password).ConfigureAwait(true);
 
                 SetResultPageInfo(authResult);
+                RefreshUserList();
             }
             catch (Exception exc)
             {
@@ -312,7 +314,7 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-#endregion
+        #endregion
 
         private void CreateException(Exception ex)
         {
@@ -369,7 +371,7 @@ namespace DesktopTestApp
             return behavior;
         }
 
-#region App logic
+        #region App logic
 
         public void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
@@ -385,9 +387,9 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-#endregion
+        #endregion
 
-#region Cache Tab Operations
+        #region Cache Tab Operations
         private void LoadCacheTabPage()
         {
             while (cachePageTableLayout.Controls.Count > 0)
@@ -440,9 +442,9 @@ namespace DesktopTestApp
                 rs.Height = ctl.Height;
             }
         }
-#endregion
+        #endregion
 
-#region Settings Tab Operations
+        #region Settings Tab Operations
         private void TabControl1_Selecting(object sender, TabControlCancelEventArgs e)
         {
             //tab page is not settings tab. Apply values from settings page.
@@ -458,7 +460,7 @@ namespace DesktopTestApp
             Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
         }
 
-#endregion
+        #endregion
 
         private void clearLogsButton_Click(object sender, EventArgs e)
         {
@@ -520,7 +522,7 @@ namespace DesktopTestApp
                 GetB2CClientIdFromLab();
 
                 ClearResultPageInfo();
-                
+
                 _publicClientHandler.InteractiveAuthority = B2CAuthority;
                 _publicClientHandler.ApplicationId = _b2CClientId;
 
@@ -576,7 +578,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
-                
+
                 _publicClientHandler.InteractiveAuthority = B2CAuthority;
                 _publicClientHandler.ApplicationId = _b2CClientId;
 
