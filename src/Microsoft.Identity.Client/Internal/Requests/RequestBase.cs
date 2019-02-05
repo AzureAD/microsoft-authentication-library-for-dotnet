@@ -39,6 +39,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {

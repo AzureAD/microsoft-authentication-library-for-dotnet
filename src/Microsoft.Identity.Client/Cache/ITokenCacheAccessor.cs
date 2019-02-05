@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Cache
 {

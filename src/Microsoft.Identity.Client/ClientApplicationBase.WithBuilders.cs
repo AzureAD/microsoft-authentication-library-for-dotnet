@@ -55,14 +55,14 @@ namespace Microsoft.Identity.Client
                 UserTokenCacheInternal = new TokenCache(ServiceBundle);
             }
 
-            CreateRequestContext().Logger.Info(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                    ServiceBundle.PlatformProxy.GetProductName(),
-                    MsalIdHelper.GetMsalVersion(),
-                    AssemblyUtils.GetAssemblyFileVersionAttribute(),
-                    AssemblyUtils.GetAssemblyInformationalVersion()));
+            //CreateRequestContext().Logger.Info(
+            //    string.Format(
+            //        CultureInfo.InvariantCulture,
+            //        "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+            //        ServiceBundle.PlatformProxy.GetProductName(),
+            //        MsalIdHelper.GetMsalVersion(),
+            //        AssemblyUtils.GetAssemblyFileVersionAttribute(),
+            //        AssemblyUtils.GetAssemblyInformationalVersion()));
         }
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(

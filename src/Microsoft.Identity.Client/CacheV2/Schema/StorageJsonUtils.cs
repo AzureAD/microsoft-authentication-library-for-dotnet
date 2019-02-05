@@ -60,7 +60,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return json;
         }
 
-        private static string CredentialTypeToString(CredentialType credentialType)
+        public static string CredentialTypeToString(CredentialType credentialType)
         {
             switch (credentialType)
             {
@@ -96,7 +96,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return credential;
         }
 
-        private static CredentialType CredentialTypeToEnum(string credentialTypeString)
+        public static CredentialType CredentialTypeToEnum(string credentialTypeString)
         {
             if (string.Compare(
                     credentialTypeString,

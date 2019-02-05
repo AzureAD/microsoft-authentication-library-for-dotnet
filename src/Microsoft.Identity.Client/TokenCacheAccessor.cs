@@ -30,6 +30,7 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client

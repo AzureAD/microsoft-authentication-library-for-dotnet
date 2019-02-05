@@ -190,7 +190,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
-                string username = loginHintTextBox.Text; // Can be blank 
+                string username = loginHintTextBox.Text; // Can be blank
 
                 try
                 {
@@ -216,7 +216,7 @@ namespace DesktopTestApp
                 ClearResultPageInfo();
                 userPasswordTextBox.PasswordChar = '*';
 
-                string username = loginHintTextBox.Text; //Can be blank for U/P 
+                string username = loginHintTextBox.Text; //Can be blank for U/P
                 SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
 
                 await AcquireTokenByUsernamePasswordAsync(username, securePassword).ConfigureAwait(true);
@@ -520,7 +520,7 @@ namespace DesktopTestApp
                 GetB2CClientIdFromLab();
 
                 ClearResultPageInfo();
-                
+
                 _publicClientHandler.InteractiveAuthority = B2CAuthority;
                 _publicClientHandler.ApplicationId = _b2CClientId;
 
@@ -576,7 +576,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
-                
+
                 _publicClientHandler.InteractiveAuthority = B2CAuthority;
                 _publicClientHandler.ApplicationId = _b2CClientId;
 

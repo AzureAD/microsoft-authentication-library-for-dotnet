@@ -27,9 +27,11 @@
 
 using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.Serialization;
-using Microsoft.Identity.Json;
+using Microsoft.Identity.Client.CacheV2.Impl.Utils;
+using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Items
 {
     [DataContract]
     internal class MsalRefreshTokenCacheItem : MsalCredentialCacheItemBase
@@ -53,19 +55,33 @@ namespace Microsoft.Identity.Client.Cache
             InitUserIdentifier();
         }
 
+        internal MsalRefreshTokenCacheKey GetKey()
+        {
+            return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId);
+        }
+
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)
         {
-            return JsonConvert.DeserializeObject<MsalRefreshTokenCacheItem>(json);
+            return FromJObject(JObject.Parse(json));
+        }
+
+        internal static MsalRefreshTokenCacheItem FromJObject(JObject j)
+        {
+            var item = new MsalRefreshTokenCacheItem();
+            item.PopulateFieldsFromJObject(j);
+
+            return item;
+        }
+
+        internal override JObject ToJObject()
+        {
+            var json = base.ToJObject();
+            return json;
         }
 
         internal string ToJsonString()
         {
-            return JsonConvert.SerializeObject(this);
-        }
-
-        internal MsalRefreshTokenCacheKey GetKey()
-        {
-            return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId);
+            return ToJObject().ToString();
         }
     }
 }
