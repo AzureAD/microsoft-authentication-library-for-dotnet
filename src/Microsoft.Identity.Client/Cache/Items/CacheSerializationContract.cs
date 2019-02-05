@@ -56,46 +56,62 @@ namespace Microsoft.Identity.Client.Cache.Items
             var contract = new CacheSerializationContract();
 
             // Access Tokens
-            foreach (var token in root[AccessTokenKey].Values())
+            if (root.ContainsKey(AccessTokenKey))
             {
-                if (token is JObject j)
+                foreach (var token in root[AccessTokenKey]
+                    .Values())
                 {
-                    var item = MsalAccessTokenCacheItem.FromJObject(j);
-                    contract.AccessTokens[item.GetKey()
-                                              .ToString()] = item;
+                    if (token is JObject j)
+                    {
+                        var item = MsalAccessTokenCacheItem.FromJObject(j);
+                        contract.AccessTokens[item.GetKey()
+                                                  .ToString()] = item;
+                    }
                 }
             }
 
             // Refresh Tokens
-            foreach (var token in root[RefreshTokenKey].Values())
+            if (root.ContainsKey(RefreshTokenKey))
             {
-                if (token is JObject j)
+                foreach (var token in root[RefreshTokenKey]
+                    .Values())
                 {
-                    var item = MsalRefreshTokenCacheItem.FromJObject(j);
-                    contract.RefreshTokens[item.GetKey()
-                                              .ToString()] = item;
+                    if (token is JObject j)
+                    {
+                        var item = MsalRefreshTokenCacheItem.FromJObject(j);
+                        contract.RefreshTokens[item.GetKey()
+                                                   .ToString()] = item;
+                    }
                 }
             }
 
             // Id Tokens
-            foreach (var token in root[IdTokenKey].Values())
+            if (root.ContainsKey(IdTokenKey))
             {
-                if (token is JObject j)
+                foreach (var token in root[IdTokenKey]
+                    .Values())
                 {
-                    var item = MsalIdTokenCacheItem.FromJObject(j);
-                    contract.IdTokens[item.GetKey()
+                    if (token is JObject j)
+                    {
+                        var item = MsalIdTokenCacheItem.FromJObject(j);
+                        contract.IdTokens[item.GetKey()
                                               .ToString()] = item;
+                    }
                 }
             }
 
             // Access Tokens
-            foreach (var token in root[AccountKey].Values())
+            if (root.ContainsKey(AccountKey))
             {
-                if (token is JObject j)
+                foreach (var token in root[AccountKey]
+                    .Values())
                 {
-                    var item = MsalAccountCacheItem.FromJObject(j);
-                    contract.Accounts[item.GetKey()
-                                          .ToString()] = item;
+                    if (token is JObject j)
+                    {
+                        var item = MsalAccountCacheItem.FromJObject(j);
+                        contract.Accounts[item.GetKey()
+                                              .ToString()] = item;
+                    }
                 }
             }
 

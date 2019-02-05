@@ -26,6 +26,8 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
@@ -366,6 +368,89 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         #endregion // JSON SERIALIZATION TESTS
 
+        [TestMethod]
+        [DeploymentItem(@"Resources\cachecompat_python.bin")]
+        public void TestPythonCacheSerializationInterop()
+        {
+            var accessor = new TokenCacheAccessor();
+            var s = new TokenCacheJsonSerializer(accessor);
+            string pythonBinFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_python.bin");
+            byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
+            s.Deserialize(bytes);
+
+            // todo(cache): python format is using a different key name for the root object
+            // this is being worked on by the python team to get an updated cachecompat_python.bin file
+            // for us to test with.  once that's there, will update this test.
+
+            Assert.AreEqual(0, accessor.AccessTokenCount, nameof(accessor.AccessTokenCount));
+            Assert.AreEqual(0, accessor.RefreshTokenCount, nameof(accessor.RefreshTokenCount));
+            Assert.AreEqual(0, accessor.IdTokenCount, nameof(accessor.IdTokenCount));
+            Assert.AreEqual(0, accessor.AccountCount, nameof(accessor.AccountCount));
+        }
+
+        [TestMethod]
+        [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
+        public void TestMsalNet2XCacheSerializationInterop()
+        {
+            var accessor = new TokenCacheAccessor();
+            var s = new TokenCacheDictionarySerializer(accessor);
+            string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
+            byte[] bytes = File.ReadAllBytes(binFilePath);
+            s.Deserialize(bytes);
+
+            Assert.AreEqual(1, accessor.AccessTokenCount, nameof(accessor.AccessTokenCount));
+            Assert.AreEqual(1, accessor.RefreshTokenCount, nameof(accessor.RefreshTokenCount));
+            Assert.AreEqual(1, accessor.IdTokenCount, nameof(accessor.IdTokenCount));
+            Assert.AreEqual(1, accessor.AccountCount, nameof(accessor.AccountCount));
+
+            var expectedAccessTokenItem = new MsalAccessTokenCacheItem
+            {
+                AdditionalFieldsJson = "{\r\n  \"access_token_type\": \"Bearer\"\r\n}",
+                Environment = "login.windows.net",
+                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
+                RawClientInfo = string.Empty,
+                ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
+                TenantId = "26039cce-489d-4002-8293-5b0c5134eacb",
+                ExpiresOnUnixTimestamp = "1548846619",
+                ExtendedExpiresOnUnixTimestamp = "1548846619",
+                NormalizedScopes = "User.Read User.ReadBasic.All profile openid email"
+            };
+            AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.AccessTokenCacheDictionary.Values.First());
+
+            var expectedRefreshTokenItem = new MsalRefreshTokenCacheItem
+            {
+                Environment = "login.windows.net",
+                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
+                RawClientInfo = string.Empty,
+                ClientId = "b945c513-3946-4ecd-b179-6499803a2167"
+            };
+            AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.RefreshTokenCacheDictionary.Values.First());
+
+            var expectedIdTokenItem = new MsalIdTokenCacheItem
+            {
+                Environment = "login.windows.net",
+                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
+                RawClientInfo = string.Empty,
+                ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
+                TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
+            };
+            AssertIdTokenCacheItemsAreEqual(expectedIdTokenItem, accessor.IdTokenCacheDictionary.Values.First());
+
+            var expectedAccountItem = new MsalAccountCacheItem
+            {
+                Environment = "login.windows.net",
+                HomeAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619.26039cce-489d-4002-8293-5b0c5134eacb",
+                RawClientInfo = "eyJ1aWQiOiIxM2RkMmMxOS04NGNkLTQxNmEtYWU3ZC00OTU3M2U0MjU2MTkiLCJ1dGlkIjoiMjYwMzljY2UtNDg5ZC00MDAyLTgyOTMtNWIwYzUxMzRlYWNiIn0",
+                PreferredUsername = "abhi@ddobalianoutlook.onmicrosoft.com",
+                Name = "Abhi Test",
+                GivenName = string.Empty,
+                FamilyName = string.Empty,
+                LocalAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619",
+                TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
+            };
+            AssertAccountCacheItemsAreEqual(expectedAccountItem, accessor.AccountCacheDictionary.Values.First());
+        }
+
         private void AssertAccessorsAreEqual(ITokenCacheAccessor expected, ITokenCacheAccessor actual)
         {
             Assert.AreEqual(expected.AccessTokenCount, actual.AccessTokenCount);
@@ -464,37 +549,37 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AssertCacheItemBaseItemsAreEqual(MsalCacheItemBase expected, MsalCacheItemBase actual)
         {
-            Assert.AreEqual(expected.AdditionalFieldsJson, actual.AdditionalFieldsJson);
-            Assert.AreEqual(expected.ClientInfo, actual.ClientInfo);
-            Assert.AreEqual(expected.Environment, actual.Environment);
-            Assert.AreEqual(expected.HomeAccountId, actual.HomeAccountId);
-            Assert.AreEqual(expected.RawClientInfo, actual.RawClientInfo);
+            Assert.AreEqual(expected.AdditionalFieldsJson, actual.AdditionalFieldsJson, nameof(actual.AdditionalFieldsJson));
+            //Assert.AreEqual(expected.ClientInfo, actual.ClientInfo, nameof(actual.ClientInfo));
+            Assert.AreEqual(expected.Environment, actual.Environment, nameof(actual.Environment));
+            Assert.AreEqual(expected.HomeAccountId, actual.HomeAccountId, nameof(actual.HomeAccountId));
+            Assert.AreEqual(expected.RawClientInfo, actual.RawClientInfo, nameof(actual.RawClientInfo));
         }
 
         private void AssertCredentialCacheItemBaseItemsAreEqual(MsalCredentialCacheItemBase expected, MsalCredentialCacheItemBase actual)
         {
             AssertCacheItemBaseItemsAreEqual(expected, actual);
 
-            Assert.AreEqual(expected.ClientId, actual.ClientId);
-            Assert.AreEqual(expected.CredentialType, actual.CredentialType);
+            Assert.AreEqual(expected.ClientId, actual.ClientId, nameof(actual.ClientId));
+            Assert.AreEqual(expected.CredentialType, actual.CredentialType, nameof(actual.CredentialType));
         }
 
         private void AssertAccessTokenCacheItemsAreEqual(MsalAccessTokenCacheItem expected, MsalAccessTokenCacheItem actual)
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
 
-            Assert.AreEqual(expected.Authority, actual.Authority);
-            Assert.AreEqual(expected.ExpiresOnUnixTimestamp, actual.ExpiresOnUnixTimestamp);
-            Assert.AreEqual(expected.ExtendedExpiresOnUnixTimestamp, actual.ExtendedExpiresOnUnixTimestamp);
-            // todo(cache): Assert.AreEqual(expected.CachedAt, actual.CachedAt);
-            Assert.AreEqual(expected.ExpiresOn, actual.ExpiresOn);
-            Assert.AreEqual(expected.ExtendedExpiresOn, actual.ExtendedExpiresOn);
-            Assert.AreEqual(expected.IsExtendedLifeTimeToken, actual.IsExtendedLifeTimeToken);
-            Assert.AreEqual(expected.NormalizedScopes, actual.NormalizedScopes);
-            CollectionAssert.AreEqual(expected.ScopeSet, actual.ScopeSet);
-            Assert.AreEqual(expected.TenantId, actual.TenantId);
-            // todo(cache): Assert.AreEqual(expected.TokenType, actual.TokenType);
-            // todo(cache): Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash);
+            Assert.AreEqual(expected.Authority, actual.Authority, nameof(actual.Authority));
+            Assert.AreEqual(expected.ExpiresOnUnixTimestamp, actual.ExpiresOnUnixTimestamp, nameof(actual.ExpiresOnUnixTimestamp));
+            Assert.AreEqual(expected.ExtendedExpiresOnUnixTimestamp, actual.ExtendedExpiresOnUnixTimestamp, nameof(actual.ExtendedExpiresOnUnixTimestamp));
+            // todo(cache): Assert.AreEqual(expected.CachedAt, actual.CachedAt, nameof(actual.CachedAt));
+            Assert.AreEqual(expected.ExpiresOn, actual.ExpiresOn, nameof(actual.ExpiresOn));
+            Assert.AreEqual(expected.ExtendedExpiresOn, actual.ExtendedExpiresOn, nameof(actual.ExtendedExpiresOn));
+            Assert.AreEqual(expected.IsExtendedLifeTimeToken, actual.IsExtendedLifeTimeToken, nameof(actual.IsExtendedLifeTimeToken));
+            Assert.AreEqual(expected.NormalizedScopes, actual.NormalizedScopes, nameof(actual.NormalizedScopes));
+            CollectionAssert.AreEqual(expected.ScopeSet, actual.ScopeSet, nameof(actual.ScopeSet));
+            Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
+            // todo(cache): Assert.AreEqual(expected.TokenType, actual.TokenType, nameof(actual.TokenType));
+            // todo(cache): Assert.AreEqual(expected.UserAssertionHash, actual.UserAssertionHash, nameof(actual.UserAssertionHash));
         }
 
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)
@@ -505,20 +590,20 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
-            Assert.AreEqual(expected.TenantId, actual.TenantId);
+            Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
         }
 
         private void AssertAccountCacheItemsAreEqual(MsalAccountCacheItem expected, MsalAccountCacheItem actual)
         {
             AssertCacheItemBaseItemsAreEqual(expected, actual);
 
-            Assert.AreEqual(expected.PreferredUsername, actual.PreferredUsername);
-            Assert.AreEqual(expected.Name, actual.Name);
-            Assert.AreEqual(expected.GivenName, actual.GivenName);
-            Assert.AreEqual(expected.FamilyName, actual.FamilyName);
-            Assert.AreEqual(expected.LocalAccountId, actual.LocalAccountId);
-            Assert.AreEqual(expected.AuthorityType, actual.AuthorityType);
-            Assert.AreEqual(expected.TenantId, actual.TenantId);
+            Assert.AreEqual(expected.PreferredUsername, actual.PreferredUsername, nameof(actual.PreferredUsername));
+            Assert.AreEqual(expected.Name, actual.Name, nameof(actual.Name));
+            Assert.AreEqual(expected.GivenName, actual.GivenName, nameof(actual.GivenName));
+            Assert.AreEqual(expected.FamilyName, actual.FamilyName, nameof(actual.FamilyName));
+            Assert.AreEqual(expected.LocalAccountId, actual.LocalAccountId, nameof(actual.LocalAccountId));
+            Assert.AreEqual(expected.AuthorityType, actual.AuthorityType, nameof(actual.AuthorityType));
+            Assert.AreEqual(expected.TenantId, actual.TenantId, nameof(actual.TenantId));
         }
     }
 }
