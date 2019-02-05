@@ -381,11 +381,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
-            Uri cloudInstanceUri,
+            string cloudInstanceUri,
             Guid tenantId,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
             return (T)this;
         }
 
@@ -405,11 +405,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
-            Uri cloudInstanceUri,
+            string cloudInstanceUri,
             string tenant,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
             return (T)this;
         }
 
