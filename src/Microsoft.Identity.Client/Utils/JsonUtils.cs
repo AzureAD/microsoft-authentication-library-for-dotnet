@@ -25,30 +25,43 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.CacheV2.Schema
+using Microsoft.Identity.Json.Linq;
+
+namespace Microsoft.Identity.Client.Utils
 {
-    internal static class StorageJsonKeys
+    internal static class JsonUtils
     {
-        public const string HomeAccountId = "home_account_id";
-        public const string Environment = "environment";
-        public const string Realm = "realm";
-        public const string LocalAccountId = "local_account_id";
-        public const string Username = "username";
-        public const string AuthorityType = "authority_type";
-        public const string AlternativeAccountId = "alternative_account_id";
-        public const string GivenName = "given_name";
-        public const string FamilyName = "family_name";
-        public const string MiddleName = "middle_name";
-        public const string Name = "name";
-        public const string AvatarUrl = "avatar_url";
-        public const string CredentialType = "credential_type";
-        public const string ClientId = "client_id";
-        public const string Secret = "secret";
-        public const string Target = "target";
-        public const string CachedAt = "cached_at";
-        public const string ExpiresOn = "expires_on";
-        public const string ExtendedExpiresOn = "extended_expires_on";
-        public const string ClientInfo = "client_info";
-        public const string FamilyId = "family_id";
+        public static string GetExistingOrEmptyString(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                return val.ToObject<string>();
+            }
+
+            return string.Empty;
+        }
+
+        public static string ExtractExistingOrEmptyString(JObject json, string key)
+        {
+            if (json.TryGetValue(key, out var val))
+            {
+                string strVal = val.ToObject<string>();
+                json.Remove(key);
+                return strVal;
+            }
+
+            return string.Empty;
+        }
+
+        public static long ExtractParsedIntOrZero(JObject json, string key)
+        {
+            string strVal = ExtractExistingOrEmptyString(json, key);
+            if (!string.IsNullOrWhiteSpace(strVal) && long.TryParse(strVal, out long result))
+            {
+                return result;
+            }
+
+            return 0;
+        }
     }
 }

@@ -28,6 +28,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 

@@ -42,28 +42,28 @@ namespace Microsoft.Identity.Client.Cache
         public byte[] Serialize()
         {
             var cache = new CacheSerializationContract();
-            foreach (var t in _accessor.GetAllAccessTokens())
+            foreach (var token in _accessor.GetAllAccessTokens())
             {
-                cache.AccessTokens[t.GetKey()
-                                    .ToString()] = t;
+                cache.AccessTokens[token.GetKey()
+                                    .ToString()] = token;
             }
 
-            foreach (var t in _accessor.GetAllRefreshTokens())
+            foreach (var token in _accessor.GetAllRefreshTokens())
             {
-                cache.RefreshTokens[t.GetKey()
-                                     .ToString()] = t;
+                cache.RefreshTokens[token.GetKey()
+                                     .ToString()] = token;
             }
 
-            foreach (var t in _accessor.GetAllIdTokens())
+            foreach (var token in _accessor.GetAllIdTokens())
             {
-                cache.IdTokens[t.GetKey()
-                                .ToString()] = t;
+                cache.IdTokens[token.GetKey()
+                                .ToString()] = token;
             }
 
-            foreach (var t in _accessor.GetAllAccounts())
+            foreach (var acct in _accessor.GetAllAccounts())
             {
-                cache.Accounts[t.GetKey()
-                                .ToString()] = t;
+                cache.Accounts[acct.GetKey()
+                                .ToString()] = acct;
             }
 
             return cache.ToJsonString()

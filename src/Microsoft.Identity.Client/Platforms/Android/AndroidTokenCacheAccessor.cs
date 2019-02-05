@@ -32,7 +32,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache.Keys;
 
 namespace Microsoft.Identity.Client.Platforms.Android
 {

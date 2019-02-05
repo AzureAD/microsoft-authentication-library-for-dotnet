@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.CacheV2.Schema
+namespace Microsoft.Identity.Client.Cache
 {
     internal static class StorageJsonValues
     {

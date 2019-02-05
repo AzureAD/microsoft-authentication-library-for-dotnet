@@ -33,7 +33,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Json.Linq;
-using Microsoft.Identity.Test.Unit.CacheV2Tests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
@@ -94,11 +93,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TenantId = "the_tenant_id",
                 AuthorityType = "authority type", // todo(cache): what should this be?
                 RawClientInfo = null, // "raw client info", // todo(cache): what should this be?
-                LocalAccountId = MockTestConstants.LocalAccountId,
+                LocalAccountId = MsalTestConstants.LocalAccountId,
                 Name = MsalTestConstants.Name,
-                GivenName = MockTestConstants.GivenName,
-                FamilyName = MockTestConstants.FamilyName,
-                PreferredUsername = MockTestConstants.Username
+                GivenName = MsalTestConstants.GivenName,
+                FamilyName = MsalTestConstants.FamilyName,
+                PreferredUsername = MsalTestConstants.Username
             };
         }
 

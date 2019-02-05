@@ -28,9 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Runtime.Serialization;
-using Microsoft.Identity.Client.CacheV2.Impl.Utils;
-using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
@@ -41,7 +39,7 @@ namespace Microsoft.Identity.Client.Cache.Items
     {
         internal MsalAccessTokenCacheItem()
         {
-            CredentialType = MsalCacheCommon.AccessToken;
+            CredentialType = StorageJsonValues.CredentialTypeAccessToken;
         }
 
         internal MsalAccessTokenCacheItem(
@@ -95,8 +93,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string CachedAt { get; set; }
         internal string ExpiresOnUnixTimestamp { get; set; }
         internal string ExtendedExpiresOnUnixTimestamp { get; set; }
-
-        [DataMember(Name = "user_assertion_hash", EmitDefaultValue = false)]  // todo(cache): need to figure out how this maps
         public string UserAssertionHash { get; set; }
 
         internal string Authority =>
@@ -121,7 +117,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             // This handles a bug with the name in previous MSAL.  It used "ext_expires_on" instead of
             // "extended_expires_on" per spec, so this works around that.
-            long ext_expires_on = JsonUtils.ExtractParsedIntOrZero(j, "ext_expires_on");
+            long ext_expires_on = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn_MsalCompat);
             long extendedExpiresOn = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExtendedExpiresOn);
             if (extendedExpiresOn == 0 && ext_expires_on > 0)
             {
@@ -136,6 +132,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 NormalizedScopes = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
+                UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
             };
 
             item.PopulateFieldsFromJObject(j);
@@ -149,6 +146,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             json[StorageJsonKeys.Realm] = TenantId;
             json[StorageJsonKeys.Target] = NormalizedScopes;
+            json[StorageJsonKeys.UserAssertionHash] = UserAssertionHash;
 
             // todo(cache): item.CachedAt is always calculating CURRENT TIME instead of actually storing the time we were cached.
 #pragma warning disable CA1305 // Specify IFormatProvider
@@ -157,9 +155,10 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             json[StorageJsonKeys.ExpiresOn] = ExpiresOnUnixTimestamp;
             json[StorageJsonKeys.ExtendedExpiresOn] = ExtendedExpiresOnUnixTimestamp;
+            
             // previous versions of msal used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compat
-            json["ext_expires_on"] = ExtendedExpiresOnUnixTimestamp;
+            json[StorageJsonKeys.ExtendedExpiresOn_MsalCompat] = ExtendedExpiresOnUnixTimestamp;
 
             return json;
         }
