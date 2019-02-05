@@ -310,8 +310,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
         {
             return new MockHttpMessageHandler()
             {
-                Url = url,
-                Method = HttpMethod.Get,
+                ExpectedUrl = url,
+                ExpectedMethod = HttpMethod.Get,
                 ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(content)

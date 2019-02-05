@@ -66,6 +66,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string UniqueId = "unique_id";
         public const string IdentityProvider = "my-idp";
         public const string Name = "First Last";
+        public const string Claims = "claim1claim2";
         public const string DisplayableId = "displayable@id.com";
         public const string RedirectUri = "urn:ietf:wg:oauth:2.0:oob";
         public const string ClientSecret = "client_secret";
@@ -76,7 +77,18 @@ namespace Microsoft.Identity.Test.Unit
         public const string DefaultAccessToken = "DefaultAccessToken";
         public const string DefaultClientAssertion = "DefaultClientAssertion";
         public const string RawClientId = "eyJ1aWQiOiJteS11aWQiLCJ1dGlkIjoibXktdXRpZCJ9";
+        public const string XClientSku = "x-client-SKU";
+        public const string XClientVer = "x-client-Ver";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
+
+        public static readonly IDictionary<string, string> ExtraQueryParams 
+            = new Dictionary<string, string>()
+            {
+                {"extra", "qp" },
+                {"key1", "value1%20with%20encoded%20space"},
+                {"key2", "value2"}
+            };
+
         public enum AuthorityType { B2C };
         public static string[] ProdEnvAliases = new string[] {
                                 "login.microsoftonline.com",

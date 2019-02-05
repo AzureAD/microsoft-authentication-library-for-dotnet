@@ -41,27 +41,33 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
     internal class MockHttpMessageHandler : HttpMessageHandler
     {
         public HttpResponseMessage ResponseMessage { get; set; }
-        public string Url { get; set; }
-        public IDictionary<string, string> QueryParams { get; set; }
-        public IDictionary<string, string> PostData { get; set; }
-        public IDictionary<string, object> PostDataObject { get; set; }
-        public IDictionary<string, string> Headers { get; set; }
-        public HttpMethod Method { get; set; }
+        public string ExpectedUrl { get; set; }
+        public IDictionary<string, string> ExpectedQueryParams { get; set; }
+        public IDictionary<string, string> ExpectedPostData { get; set; }
+        public IDictionary<string, object> ExpectedPostDataObject { get; set; }
+        public HttpMethod ExpectedMethod { get; set; }
         public Exception ExceptionToThrow { get; set; }
         public Action<HttpRequestMessage> AdditionalRequestValidation { get; set; }
 
+        /// <summary>
+        /// Once the http message is executed, this property holds the request message
+        /// </summary>
+        public HttpRequestMessage ActualRequestMessge { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            ActualRequestMessge = request;
+
             if (ExceptionToThrow != null)
             {
                 throw ExceptionToThrow;
             }
 
             var uri = request.RequestUri;
-            if (!string.IsNullOrEmpty(Url))
+            if (!string.IsNullOrEmpty(ExpectedUrl))
             {
                 Assert.AreEqual(
-                    Url,
+                    ExpectedUrl,
                     uri.AbsoluteUri.Split(
                         new[]
                         {
@@ -69,10 +75,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         })[0]);
             }
 
-            Assert.AreEqual(Method, request.Method);
+            Assert.AreEqual(ExpectedMethod, request.Method);
 
             // Match QP passed in for validation. 
-            if (QueryParams != null)
+            if (ExpectedQueryParams != null)
             {
                 Assert.IsFalse(
                     string.IsNullOrEmpty(uri.Query),
@@ -81,7 +87,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                         "provided url ({0}) does not contain query parameters, as expected",
                         uri.AbsolutePath));
                 IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
-                foreach (string key in QueryParams.Keys)
+                Assert.AreEqual(ExpectedQueryParams.Count, inputQp.Count, "Different number of query params`");
+                foreach (string key in ExpectedQueryParams.Keys)
                 {
                     Assert.IsTrue(
                         inputQp.ContainsKey(key),
@@ -90,37 +97,25 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                             "expected QP ({0}) not found in the url ({1})",
                             key,
                             uri.AbsolutePath));
-                    Assert.AreEqual(QueryParams[key], inputQp[key]);
+                    Assert.AreEqual(ExpectedQueryParams[key], inputQp[key]);
                 }
             }
 
-            // Match QP passed in for validation.
-            if (QueryParams != null)
-            {
-                Assert.IsFalse(string.IsNullOrEmpty(uri.Query));
-                IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(uri.Query.Substring(1), '&', false, null);
-                foreach (string key in QueryParams.Keys)
-                {
-                    Assert.IsTrue(inputQp.ContainsKey(key));
-                    Assert.AreEqual(QueryParams[key], inputQp[key]);
-                }
-            }
-
-            if (PostData != null)
+            if (ExpectedPostData != null)
             {
                 string postData = request.Content.ReadAsStringAsync().Result;
                 Dictionary<string, string> requestPostDataPairs = CoreHelpers.ParseKeyValueList(postData, '&', true, null);
 
-                foreach (string key in PostData.Keys)
+                foreach (string key in ExpectedPostData.Keys)
                 {
                     Assert.IsTrue(requestPostDataPairs.ContainsKey(key));
                     if (key.Equals(OAuth2Parameter.Scope, StringComparison.OrdinalIgnoreCase))
                     {
-                        CoreAssert.AreScopesEqual(PostData[key], requestPostDataPairs[key]);
+                        CoreAssert.AreScopesEqual(ExpectedPostData[key], requestPostDataPairs[key]);
                     }
                     else
                     {
-                        Assert.AreEqual(PostData[key], requestPostDataPairs[key]);
+                        Assert.AreEqual(ExpectedPostData[key], requestPostDataPairs[key]);
                     }
                 }
             }

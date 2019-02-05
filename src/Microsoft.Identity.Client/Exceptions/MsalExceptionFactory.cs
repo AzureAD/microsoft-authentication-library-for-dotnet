@@ -25,10 +25,12 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Globalization;
 using System.Text;
-using Microsoft.Identity.Client.Http;
 
 namespace Microsoft.Identity.Client.Exceptions
 {
@@ -52,71 +54,54 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throws an <see cref="MsalClientException" /> exception
-        /// </summary>
-        /// <param name="errorCode">The error code</param>
-        /// <param name="errorMessage">A user friendly message</param>
-        /// <param name="httpResponse"></param>
-        public static Exception GetServiceException(string errorCode, string errorMessage, IHttpWebResponse httpResponse)
-        {
-            ValidateRequiredArgs(errorCode, errorMessage);
-            return GetServiceException(errorCode, errorMessage, null, ExceptionDetail.FromHttpResponse(httpResponse));
-        }
-
-        /// <summary>
-        ///     Throws an <see cref="MsalClientException" /> exception
-        /// </summary>
-        /// <param name="errorCode">The error code</param>
-        /// <param name="errorMessage">A user friendly message</param>
-        /// <param name="exceptionDetail">More exception params</param>
-        public static Exception GetServiceException(string errorCode, string errorMessage, ExceptionDetail exceptionDetail)
-        {
-            ValidateRequiredArgs(errorCode, errorMessage);
-            return GetServiceException(errorCode, errorMessage, null, exceptionDetail);
-        }
-
-        /// <summary>
-        ///     Throw an <see cref="MsalServiceException" /> exception
+        ///     Throw an <see cref="MsalServiceException" /> exception. 
+        ///     All details should be passed in if available.
         /// </summary>
         public static Exception GetServiceException(
             string errorCode,
             string errorMessage,
-            Exception innerException,
-            ExceptionDetail exceptionDetail)
+            HttpResponse httpResponse = null,
+            Exception innerException = null,
+            bool isUiRequiredException = false)
         {
             ValidateRequiredArgs(errorCode, errorMessage);
 
-            return new MsalServiceException(errorCode, errorMessage, innerException)
-            {
-                Claims = exceptionDetail?.Claims,
-                ResponseBody = exceptionDetail?.ResponseBody,
-                StatusCode = exceptionDetail?.StatusCode ?? 0,
-                Headers = exceptionDetail?.HttpResponseHeaders
-            };
+            MsalServiceException exception = isUiRequiredException ?
+                new MsalUiRequiredException(errorCode, errorMessage, innerException) :
+                new MsalServiceException(errorCode, errorMessage, innerException);
+
+            // In most cases we can deserialize the body to get more details such as the suberror
+            OAuth2ResponseBase oAuth2Response =
+                JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
+
+            UpdateException(httpResponse, oAuth2Response, exception);
+
+            return exception;
         }
 
-        /// <summary>
-        ///     Throw an <see cref="MsalUiRequiredException" />
-        /// </summary>
-        public static Exception GetUiRequiredException(
+        public static Exception GetServiceException(
             string errorCode,
             string errorMessage,
-            Exception innerException,
-            ExceptionDetail exceptionDetail)
+            OAuth2ResponseBase oAuth2Response
+            )
         {
             ValidateRequiredArgs(errorCode, errorMessage);
 
-            return new MsalUiRequiredException(errorCode, errorMessage, innerException)
-            {
-                Claims = exceptionDetail?.Claims,
-                ResponseBody = exceptionDetail?.ResponseBody,
-                StatusCode = exceptionDetail?.StatusCode ?? 0
-            };
+            MsalServiceException exception = new MsalServiceException(errorCode, errorMessage);
+            UpdateException(null, oAuth2Response, exception);
+
+            return exception;
         }
 
-        public static string GetPiiScrubbedDetails(Exception ex)
+        private static void UpdateException(HttpResponse httpResponse, OAuth2ResponseBase oAuth2Response, MsalServiceException exception)
         {
-            return GetPiiScrubbedExceptionDetails(ex);
+            exception.ResponseBody = httpResponse?.Body;
+            exception.StatusCode = httpResponse != null ? (int)httpResponse.StatusCode : 0;
+            exception.Headers = httpResponse?.Headers;
+
+            exception.Claims = oAuth2Response?.Claims;
+            exception.SubError = oAuth2Response?.SubError;
+            exception.CorrelationId = oAuth2Response?.CorrelationId;
         }
 
         public static string GetPiiScrubbedExceptionDetails(Exception ex)
@@ -133,8 +118,9 @@ namespace Microsoft.Identity.Client.Exceptions
 
                 if (ex is MsalServiceException msalServiceException)
                 {
-                    sb.AppendLine(
-                        string.Format(CultureInfo.CurrentCulture, ", StatusCode: {0}", msalServiceException.StatusCode));
+                    sb.AppendLine($"HTTP StatusCode {msalServiceException.StatusCode}");
+                    sb.AppendLine($"SubError {msalServiceException.SubError}");
+                    sb.AppendLine($"CorrelationId {msalServiceException.CorrelationId}");
                 }
 
                 if (ex.InnerException != null)
@@ -152,6 +138,7 @@ namespace Microsoft.Identity.Client.Exceptions
 
             return sb.ToString();
         }
+
 
         private static void ValidateRequiredArgs(string errorCode, string errorMessage)
         {

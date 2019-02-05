@@ -91,8 +91,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://mytenant.com.b2clogin.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2CLogin.json")))
                     });
@@ -127,8 +127,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.com/tfp/mytenant.com/my-policy/v2.0/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-B2C.json")))
                     });

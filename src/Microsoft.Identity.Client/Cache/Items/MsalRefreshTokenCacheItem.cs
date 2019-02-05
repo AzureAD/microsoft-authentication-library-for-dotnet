@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Client.OAuth2;
 using System.Runtime.Serialization;
+using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -50,6 +51,16 @@ namespace Microsoft.Identity.Client.Cache
             RawClientInfo = rawClientInfo;
 
             InitUserIdentifier();
+        }
+
+        internal static MsalRefreshTokenCacheItem FromJsonString(string json)
+        {
+            return JsonConvert.DeserializeObject<MsalRefreshTokenCacheItem>(json);
+        }
+
+        internal string ToJsonString()
+        {
+            return JsonConvert.SerializeObject(this);
         }
 
         internal MsalRefreshTokenCacheKey GetKey()

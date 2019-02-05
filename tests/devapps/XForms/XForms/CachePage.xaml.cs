@@ -33,6 +33,7 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -50,36 +51,30 @@ namespace XForms
         {
             var tokenCache = App.MsalPublicClient.UserTokenCacheInternal;
 
-            var requestContext = RequestContext.CreateForTest();
-
             IDictionary<string, MsalAccessTokenCacheItem> accessTokens = new Dictionary<string, MsalAccessTokenCacheItem>();
-            foreach (var accessItemStr in tokenCache.GetAllAccessTokenCacheItems(requestContext))
+            foreach (var accessItem in tokenCache.GetAllAccessTokens(true))
             {
-                MsalAccessTokenCacheItem accessItem = JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(accessItemStr);
                 accessTokens.Add(accessItem.GetKey().ToString(), accessItem);
             }
             accessTokenCacheItems.ItemsSource = accessTokens;
 
             IDictionary<string, MsalRefreshTokenCacheItem> refreshTokens = new Dictionary<string, MsalRefreshTokenCacheItem>();
-            foreach (var refreshItemStr in tokenCache.GetAllRefreshTokenCacheItems(requestContext))
+            foreach (var refreshItem in tokenCache.GetAllRefreshTokens(true))
             {
-                MsalRefreshTokenCacheItem refreshItem = JsonHelper.DeserializeFromJson<MsalRefreshTokenCacheItem>(refreshItemStr);
                 refreshTokens.Add(refreshItem.GetKey().ToString(), refreshItem);
             }
             refreshTokenCacheItems.ItemsSource = refreshTokens;
 
             IDictionary<string, MsalIdTokenCacheItem> idTokens = new Dictionary<string, MsalIdTokenCacheItem>();
-            foreach (var idItemStr in tokenCache.GetAllIdTokenCacheItems(requestContext))
+            foreach (var idItem in tokenCache.GetAllIdTokens(true))
             {
-                MsalIdTokenCacheItem idItem = JsonHelper.DeserializeFromJson<MsalIdTokenCacheItem>(idItemStr);
                 idTokens.Add(idItem.GetKey().ToString(), idItem);
             }
             idTokenCacheItems.ItemsSource = idTokens;
 
             IDictionary<string, MsalAccountCacheItem> accounts = new Dictionary<string, MsalAccountCacheItem>();
-            foreach (var accountStr in tokenCache.GetAllAccountCacheItems(requestContext))
+            foreach (var accountItem in tokenCache.GetAllAccounts())
             {
-                MsalAccountCacheItem accountItem = JsonHelper.DeserializeFromJson<MsalAccountCacheItem>(accountStr);
                 accounts.Add(accountItem.GetKey().ToString(), accountItem);
             }
             accountsCacheItems.ItemsSource = accounts;

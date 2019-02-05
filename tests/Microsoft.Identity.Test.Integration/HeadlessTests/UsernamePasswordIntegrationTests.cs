@@ -105,7 +105,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
-        public void AcquireTokenWithManagedUsernameIncorrectPassword()
+        public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
             var user = LabUserHelper.GetDefaultUser().User;
 
@@ -115,8 +115,23 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
 
-            var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
-                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
+            try
+            {
+                var result =
+                     await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword)
+                     .ConfigureAwait(false);
+            }
+            catch (MsalServiceException ex)
+            {
+                Assert.IsTrue(!string.IsNullOrWhiteSpace(ex.CorrelationId));
+                Assert.AreEqual(400, ex.StatusCode);
+                Assert.AreEqual("invalid_grant", ex.ErrorCode);
+                Assert.IsTrue(ex.Message.StartsWith("AADSTS50126: Invalid username or password"));
+
+                return;
+            }
+
+            Assert.Fail("Bad exception or no exception thrown");
         }
 
         [TestMethod]

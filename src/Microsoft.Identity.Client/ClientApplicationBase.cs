@@ -202,7 +202,7 @@ namespace Microsoft.Identity.Client
                 .WithForceRefresh(forceRefresh);
             if (!string.IsNullOrWhiteSpace(authority))
             {
-                builder.WithAuthority(new Uri(authority));
+                builder.WithAuthority(authority);
             }
 
             return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -275,7 +275,7 @@ namespace Microsoft.Identity.Client
                 .WithLoginHint(loginHint)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
         }

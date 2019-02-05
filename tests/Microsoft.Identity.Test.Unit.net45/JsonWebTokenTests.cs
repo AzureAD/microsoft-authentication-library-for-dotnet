@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Test.Unit
 
         private readonly MockHttpMessageHandler X5CMockHandler = new MockHttpMessageHandler()
         {
-            Method = HttpMethod.Post,
+            ExpectedMethod = HttpMethod.Post,
             ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                 MsalTestConstants.Scope.AsSingleString(),
                 MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
