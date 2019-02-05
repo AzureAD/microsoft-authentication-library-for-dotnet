@@ -97,7 +97,10 @@ namespace Microsoft.Identity.Client.Cache
         [DataMember(Name = "authority_type")]
         internal bool IsAdfs { get; set; }
 
-        internal string Authority => string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
+        internal string Authority =>
+                                    IsAdfs ? string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, "adfs") :
+                                    string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");
+
         internal SortedSet<string> ScopeSet => ScopeHelper.ConvertStringToLowercaseSortedSet(NormalizedScopes);
 
         internal DateTimeOffset ExpiresOn

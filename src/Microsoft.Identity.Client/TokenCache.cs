@@ -216,26 +216,25 @@ namespace Microsoft.Identity.Client
             MsalIdTokenCacheItem msalIdTokenCacheItem = null;
             if (idToken != null)
             {
-                msalIdTokenCacheItem = new MsalIdTokenCacheItem
-                    (preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject);
+                msalIdTokenCacheItem = new MsalIdTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
+                {
+                    IsAdfs = msalAccessTokenCacheItem.IsAdfs
+                };
             }
 
             lock (LockObject)
             {
                 try
                 {
+
                     Account account = null;
+                    string username = msalAccessTokenCacheItem.IsAdfs ? idToken?.Upn : preferredUsername;
                     if (msalAccessTokenCacheItem.HomeAccountId != null)
                     {
-                        account = msalAccessTokenCacheItem.IsAdfs
-                                      ? new Account(
+                        account = new Account(
                                           msalAccessTokenCacheItem.HomeAccountId,
-                                          idToken?.Upn,
-                                          msalAccessTokenCacheItem.Environment)
-                                      : new Account(
-                                          msalAccessTokenCacheItem.HomeAccountId,
-                                          preferredUsername,
-                                          preferredEnvironmentHost);
+                                          username,
+                                          preferredEnvironmentHost);               
                     }
                     var args = new TokenCacheNotificationArgs
                     {
