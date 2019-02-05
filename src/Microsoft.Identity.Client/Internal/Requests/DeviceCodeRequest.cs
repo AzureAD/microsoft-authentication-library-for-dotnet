@@ -64,6 +64,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             client.AddBodyParameter(OAuth2Parameter.ClientId, AuthenticationRequestParameters.ClientId);
             client.AddBodyParameter(OAuth2Parameter.Scope, deviceCodeScopes.AsSingleString());
+            client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
+
 
             // Talked with Shiung, devicecode will be added to the discovery endpoint "soon".
             // Fow now, the string replace is correct.
@@ -74,8 +76,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
                                                                            "common",
                                                                            "organizations");
 
+            var builder = new UriBuilder(deviceCodeEndpoint);
+            builder.AppendQueryParameters(AuthenticationRequestParameters.ExtraQueryParameters);
+
             var response = await client.ExecuteRequestAsync<DeviceCodeResponse>(
-                               new Uri(deviceCodeEndpoint),
+                               builder.Uri,
                                HttpMethod.Post,
                                AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
 
