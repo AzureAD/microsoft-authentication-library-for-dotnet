@@ -27,10 +27,12 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -46,8 +48,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private readonly static TokenCache keyVaultTokenCache = new TokenCache();
 
         private KeyVaultClient _keyVaultClient;
-
-        private ClientAssertionCertificate _assertionCert;
 
         private KeyVaultConfiguration _config;
 
@@ -128,30 +128,33 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             {
                 return _authResult.AccessToken;
             }
-            var authContext = new AuthenticationContext(authority, keyVaultTokenCache);
 
             AuthenticationResult authResult;
+            IConfidentialClientApplication app;
+            X509Certificate2 cert = null;
             switch (_config.AuthType)
             {
                 case KeyVaultAuthenticationType.ClientCertificate:
-                    if (_assertionCert == null)
+                    cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
+                    if (cert == null)
                     {
-                        var cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
-                        if (cert == null)
-                        {
-                            throw new InvalidOperationException(
-                                "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-                        }
-                        _assertionCert = new ClientAssertionCertificate(_config.ClientId, cert);
+                        throw new InvalidOperationException(
+                            "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
                     }
-                    authResult = await authContext.AcquireTokenAsync(resource, _assertionCert).ConfigureAwait(false);
+
+                    app = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
+                                              .WithAuthority(new Uri(authority), true)
+                                              .WithCertificate(cert)
+                                              .Build();
+
+                    authResult = await app.AcquireTokenForClientAsync(new[] { resource + "/.default" }).ConfigureAwait(false);
                     break;
                 case KeyVaultAuthenticationType.ClientSecret:
-                    ClientCredential cred = new ClientCredential(_config.ClientId, _config.KeyVaultSecret);
-                    authResult = await authContext.AcquireTokenAsync(resource, cred).ConfigureAwait(false);
-                    break;
-                case KeyVaultAuthenticationType.UserCredential:
-                    authResult = await authContext.AcquireTokenAsync(resource, _config.ClientId, new UserCredential()).ConfigureAwait(false);
+                    app = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
+                                              .WithAuthority(new Uri(authority), true)
+                                              .WithClientSecret(_config.KeyVaultSecret)
+                                              .Build();
+                    authResult = await app.AcquireTokenForClientAsync(new[] { resource + "/.default" }).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

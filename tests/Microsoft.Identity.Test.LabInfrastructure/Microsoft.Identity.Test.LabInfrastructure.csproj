@@ -6,7 +6,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.2" />
-    <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="4.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
