@@ -129,6 +129,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 return _authResult.AccessToken;
             }
 
+            var scopes = new[] { resource + "/.default" };
+
             AuthenticationResult authResult;
             IConfidentialClientApplication app;
             X509Certificate2 cert = null;
@@ -147,14 +149,14 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                                               .WithCertificate(cert)
                                               .Build();
 
-                    authResult = await app.AcquireTokenForClientAsync(new[] { resource + "/.default" }).ConfigureAwait(false);
+                    authResult = await app.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
                     break;
                 case KeyVaultAuthenticationType.ClientSecret:
                     app = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
                                               .WithAuthority(new Uri(authority), true)
                                               .WithClientSecret(_config.KeyVaultSecret)
                                               .Build();
-                    authResult = await app.AcquireTokenForClientAsync(new[] { resource + "/.default" }).ConfigureAwait(false);
+                    authResult = await app.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
