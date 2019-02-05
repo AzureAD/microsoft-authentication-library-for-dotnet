@@ -62,16 +62,16 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public async Task WithExtraQueryParamsAndClaimsAsync()
         {
-        
+
             IDictionary<string, string> extraQueryParamsAndClaims =
                 MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
             extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
 
             using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
-                TokenCache cache = new TokenCache(harness.ServiceBundle);
+                var cache = new TokenCache(harness.ServiceBundle);
 
-                MockWebUI ui = new MockWebUI()
+                var ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
-                MockHttpMessageHandler tokenResponseHandler = new MockHttpMessageHandler
+                var tokenResponseHandler = new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Post,
                     ExpectedQueryParams = extraQueryParamsAndClaims,
