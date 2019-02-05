@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -257,7 +257,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
@@ -406,7 +406,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -436,7 +436,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }

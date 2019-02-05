@@ -121,9 +121,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="authorityUri">Uri for the authority</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAuthority(Uri authorityUri, bool validateAuthority = true)
+        public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri.ToString(), validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
             return (T)this;
         }
 
@@ -136,11 +136,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
-            Uri cloudInstanceUri,
+            string cloudInstanceUri,
             Guid tenantId,
             bool validateAuthority = true)
         {
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
             return (T)this;
         }
 
@@ -160,11 +160,11 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAadAuthority(
-            Uri cloudInstanceUri,
+            string cloudInstanceUri,
             string tenant,
             bool validateAuthority = true)
         {
-            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
+            CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
             return (T)this;
         }
 
