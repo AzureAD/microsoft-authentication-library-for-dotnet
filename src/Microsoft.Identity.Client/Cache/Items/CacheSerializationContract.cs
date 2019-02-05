@@ -35,11 +35,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 {
     internal class CacheSerializationContract
     {
-        private const string AccessTokenKey = "access_tokens";
-        private const string RefreshTokenKey = "refresh_tokens";
-        private const string IdTokenKey = "id_tokens";
-        private const string AccountKey = "accounts";
-
         public Dictionary<string, MsalAccessTokenCacheItem> AccessTokens { get; set; } =
             new Dictionary<string, MsalAccessTokenCacheItem>();
 
@@ -56,9 +51,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             var contract = new CacheSerializationContract();
 
             // Access Tokens
-            if (root.ContainsKey(AccessTokenKey))
+            if (root.ContainsKey(StorageJsonValues.CredentialTypeAccessToken))
             {
-                foreach (var token in root[AccessTokenKey]
+                foreach (var token in root[StorageJsonValues.CredentialTypeAccessToken]
                     .Values())
                 {
                     if (token is JObject j)
@@ -71,9 +66,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             // Refresh Tokens
-            if (root.ContainsKey(RefreshTokenKey))
+            if (root.ContainsKey(StorageJsonValues.CredentialTypeRefreshToken))
             {
-                foreach (var token in root[RefreshTokenKey]
+                foreach (var token in root[StorageJsonValues.CredentialTypeRefreshToken]
                     .Values())
                 {
                     if (token is JObject j)
@@ -86,9 +81,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             // Id Tokens
-            if (root.ContainsKey(IdTokenKey))
+            if (root.ContainsKey(StorageJsonValues.CredentialTypeIdToken))
             {
-                foreach (var token in root[IdTokenKey]
+                foreach (var token in root[StorageJsonValues.CredentialTypeIdToken]
                     .Values())
                 {
                     if (token is JObject j)
@@ -101,9 +96,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             // Access Tokens
-            if (root.ContainsKey(AccountKey))
+            if (root.ContainsKey(StorageJsonValues.AccountRootKey))
             {
-                foreach (var token in root[AccountKey]
+                foreach (var token in root[StorageJsonValues.AccountRootKey]
                     .Values())
                 {
                     if (token is JObject j)
@@ -129,7 +124,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 accessTokensRoot[kvp.Key] = kvp.Value.ToJObject();
             }
 
-            root[AccessTokenKey] = accessTokensRoot;
+            root[StorageJsonValues.CredentialTypeAccessToken] = accessTokensRoot;
 
             // Refresh Tokens
             var refreshTokensRoot = new JObject();
@@ -138,7 +133,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 refreshTokensRoot[kvp.Key] = kvp.Value.ToJObject();
             }
 
-            root[RefreshTokenKey] = refreshTokensRoot;
+            root[StorageJsonValues.CredentialTypeRefreshToken] = refreshTokensRoot;
 
             // Id Tokens
             var idTokensRoot = new JObject();
@@ -147,7 +142,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 idTokensRoot[kvp.Key] = kvp.Value.ToJObject();
             }
 
-            root[IdTokenKey] = idTokensRoot;
+            root[StorageJsonValues.CredentialTypeIdToken] = idTokensRoot;
 
             // Accounts
             var accountsRoot = new JObject();
@@ -156,7 +151,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 accountsRoot[kvp.Key] = kvp.Value.ToJObject();
             }
 
-            root[AccountKey] = accountsRoot;
+            root[StorageJsonValues.AccountRootKey] = accountsRoot;
 
             return root.ToString();
         }
