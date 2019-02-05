@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Secret = "access_token_secret",
                 TenantId = "the_tenant_id",
                 RawClientInfo = null, // todo(cache): what should this be?
-                TokenType = "token type", // todo(cache): what should this be?
                 UserAssertionHash = "assertion hash", // todo(cache): what should this be
             };
         }
@@ -519,6 +518,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(expected.FamilyName, actual.FamilyName);
             Assert.AreEqual(expected.LocalAccountId, actual.LocalAccountId);
             Assert.AreEqual(expected.AuthorityType, actual.AuthorityType);
+            Assert.AreEqual(expected.TenantId, actual.TenantId);
         }
     }
 }

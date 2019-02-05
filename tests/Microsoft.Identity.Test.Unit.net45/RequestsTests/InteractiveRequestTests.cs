@@ -134,7 +134,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,

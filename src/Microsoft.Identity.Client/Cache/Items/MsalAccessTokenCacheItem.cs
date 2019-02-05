@@ -52,7 +52,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             : this(
                 environment,
                 clientId,
-                response.TokenType,
                 response.Scope,
                 tenantId,
                 response.AccessToken,
@@ -65,7 +64,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal MsalAccessTokenCacheItem(
             string environment,
             string clientId,
-            string tokenType,
             string scopes,
             string tenantId,
             string secret,
@@ -76,7 +74,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         {
             Environment = environment;
             ClientId = clientId;
-            TokenType = tokenType;
             NormalizedScopes = scopes;
             TenantId = tenantId;
             Secret = secret;
@@ -101,10 +98,6 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         [DataMember(Name = "user_assertion_hash", EmitDefaultValue = false)]  // todo(cache): need to figure out how this maps
         public string UserAssertionHash { get; set; }
-
-        // TODO(cache): internal code is putting things like "BEARER" in this field.  this isn't what's in the spec.  need to reconcile
-        [DataMember(Name = "access_token_type")] // todo(cache): how is this mapped?  it doesn't appear to be even used...
-        internal string TokenType { get; set; }
 
         internal string Authority =>
             string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", Environment, TenantId ?? "common");

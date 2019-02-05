@@ -150,6 +150,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 FamilyName = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.FamilyName),
                 LocalAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.LocalAccountId),
                 AuthorityType = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.AuthorityType),
+                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
             };
 
             item.PopulateFieldsFromJObject(j);
@@ -168,6 +169,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             // todo(cache): we don't support middle name json[StorageJsonKeys.MiddleName] = MiddleName;
             json[StorageJsonKeys.LocalAccountId] = LocalAccountId;
             json[StorageJsonKeys.AuthorityType] = AuthorityType;
+            json[StorageJsonKeys.Realm] = TenantId;
 
             return json;
         }

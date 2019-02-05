@@ -87,7 +87,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     "",
@@ -121,7 +120,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -160,7 +158,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -201,7 +198,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -233,7 +229,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -269,7 +264,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     "",
@@ -365,7 +359,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -441,7 +434,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -483,7 +475,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -525,7 +516,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -868,7 +858,6 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(response.AccessToken, atItem.Secret);
             Assert.AreEqual(MsalTestConstants.AuthorityTestTenant, atItem.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, atItem.ClientId);
-            Assert.AreEqual(response.TokenType, atItem.TokenType);
             Assert.AreEqual(response.Scope, atItem.ScopeSet.AsSingleString());
 
             // todo add test for idToken serialization
