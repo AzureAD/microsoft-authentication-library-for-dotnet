@@ -996,7 +996,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal byte[] SerializeNewFormat()
+        /// <summary>
+        /// Serializes to the V3 unified cache format.
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        public byte[] SerializeV3()
         {
             GuardOnMobilePlatforms();
 
@@ -1006,7 +1010,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeserializeNewFormat(byte[] bytes)
+        /// <summary>
+        /// De-serializes from the V3 unified cache format.
+        /// </summary>
+        /// <param name="bytes">Byte stream representation of the cache</param>
+        public void DeserializeV3(byte[] bytes)
         {
             GuardOnMobilePlatforms();
 

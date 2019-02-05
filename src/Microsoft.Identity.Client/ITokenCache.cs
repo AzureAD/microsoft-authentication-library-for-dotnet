@@ -76,6 +76,18 @@ namespace Microsoft.Identity.Client
         void Deserialize(byte[] unifiedState);
 
         /// <summary>
+        /// Serializes to the V3 unified cache format.
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        byte[] SerializeV3();
+
+        /// <summary>
+        /// De-serializes from the V3 unified cache format.
+        /// </summary>
+        /// <param name="bytes">Byte stream representation of the cache</param>
+        void DeserializeV3(byte[] bytes);
+
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
