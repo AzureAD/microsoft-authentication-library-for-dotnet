@@ -76,13 +76,21 @@ namespace Microsoft.Identity.Client
         void Deserialize(byte[] unifiedState);
 
         /// <summary>
-        /// Serializes to the V3 unified cache format.
+        /// Serializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeV3 and DeserializeV3.
         /// </summary>
         /// <returns>Byte stream representation of the cache</returns>
         byte[] SerializeV3();
 
         /// <summary>
-        /// De-serializes from the V3 unified cache format.
+        /// Deserializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeV3 and DeserializeV3
         /// </summary>
         /// <param name="bytes">Byte stream representation of the cache</param>
         void DeserializeV3(byte[] bytes);

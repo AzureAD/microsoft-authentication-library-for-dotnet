@@ -59,8 +59,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (token is JObject j)
                     {
                         var item = MsalAccessTokenCacheItem.FromJObject(j);
-                        contract.AccessTokens[item.GetKey()
-                                                  .ToString()] = item;
+                        contract.AccessTokens[item.GetKey().ToString()] = item;
                     }
                 }
             }
@@ -74,8 +73,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (token is JObject j)
                     {
                         var item = MsalRefreshTokenCacheItem.FromJObject(j);
-                        contract.RefreshTokens[item.GetKey()
-                                                   .ToString()] = item;
+                        contract.RefreshTokens[item.GetKey().ToString()] = item;
                     }
                 }
             }
@@ -89,13 +87,12 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (token is JObject j)
                     {
                         var item = MsalIdTokenCacheItem.FromJObject(j);
-                        contract.IdTokens[item.GetKey()
-                                              .ToString()] = item;
+                        contract.IdTokens[item.GetKey().ToString()] = item;
                     }
                 }
             }
 
-            // Access Tokens
+            // Accounts
             if (root.ContainsKey(StorageJsonValues.AccountRootKey))
             {
                 foreach (var token in root[StorageJsonValues.AccountRootKey]
@@ -104,8 +101,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                     if (token is JObject j)
                     {
                         var item = MsalAccountCacheItem.FromJObject(j);
-                        contract.Accounts[item.GetKey()
-                                              .ToString()] = item;
+                        contract.Accounts[item.GetKey().ToString()] = item;
                     }
                 }
             }

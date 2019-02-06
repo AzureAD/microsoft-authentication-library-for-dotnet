@@ -1019,6 +1019,11 @@ namespace Microsoft.Identity.Client
         {
             GuardOnMobilePlatforms();
 
+            if (bytes == null || bytes.Length == 0)
+            {
+                return;
+            }
+
             lock (LockObject)
             {
                 new TokenCacheJsonSerializer(_accessor).Deserialize(bytes);

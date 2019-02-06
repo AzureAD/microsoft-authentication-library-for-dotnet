@@ -86,7 +86,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal string TenantId { get; set; }
 
         /// <summary>
-        ///     String comprised of scopes that have been lowercased and ordered.
+        /// String comprised of scopes that have been lowercased and ordered.
         /// </summary>
         /// <remarks>Normalization is important when creating unique keys.</remarks>
         internal string NormalizedScopes { get; set; }
@@ -148,7 +148,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             json[StorageJsonKeys.CachedAt] = CachedAt;
             json[StorageJsonKeys.ExpiresOn] = ExpiresOnUnixTimestamp;
             json[StorageJsonKeys.ExtendedExpiresOn] = ExtendedExpiresOnUnixTimestamp;
-            
+
             // previous versions of msal used "ext_expires_on" instead of the correct "extended_expires_on".
             // this is here for back compat
             json[StorageJsonKeys.ExtendedExpiresOn_MsalCompat] = ExtendedExpiresOnUnixTimestamp;

@@ -32,7 +32,6 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
-    [DataContract]
     internal class MsalRefreshTokenCacheItem : MsalCredentialCacheItemBase
     {
         internal MsalRefreshTokenCacheItem()
@@ -86,8 +85,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal string ToJsonString()
         {
-            return ToJObject()
-                .ToString();
+            return ToJObject().ToString();
         }
     }
 }

@@ -60,10 +60,10 @@ namespace Microsoft.Identity.Client.Cache
                                 .ToString()] = token;
             }
 
-            foreach (var acct in _accessor.GetAllAccounts())
+            foreach (var accountItem in _accessor.GetAllAccounts())
             {
-                cache.Accounts[acct.GetKey()
-                                .ToString()] = acct;
+                cache.Accounts[accountItem.GetKey()
+                                .ToString()] = accountItem;
             }
 
             return cache.ToJsonString()
