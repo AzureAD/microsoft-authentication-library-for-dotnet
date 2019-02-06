@@ -112,7 +112,6 @@ namespace Microsoft.Identity.Client.Cache.Items
         internal static MsalAccessTokenCacheItem FromJObject(JObject j)
         {
             long cachedAt = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.CachedAt);
-            // todo(cache): item.CachedAt is always calculating CURRENT TIME instead of actually storing the time we were cached.
             long expiresOn = JsonUtils.ExtractParsedIntOrZero(j, StorageJsonKeys.ExpiresOn);
 
             // This handles a bug with the name in previous MSAL.  It used "ext_expires_on" instead of
@@ -127,9 +126,8 @@ namespace Microsoft.Identity.Client.Cache.Items
             var item = new MsalAccessTokenCacheItem
             {
                 TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
-
-                // todo(cache): item.CachedAt
                 NormalizedScopes = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Target),
+                CachedAt = cachedAt.ToString(CultureInfo.InvariantCulture),
                 ExpiresOnUnixTimestamp = expiresOn.ToString(CultureInfo.InvariantCulture),
                 ExtendedExpiresOnUnixTimestamp = extendedExpiresOn.ToString(CultureInfo.InvariantCulture),
                 UserAssertionHash = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.UserAssertionHash),
@@ -147,12 +145,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             json[StorageJsonKeys.Realm] = TenantId;
             json[StorageJsonKeys.Target] = NormalizedScopes;
             json[StorageJsonKeys.UserAssertionHash] = UserAssertionHash;
-
-            // todo(cache): item.CachedAt is always calculating CURRENT TIME instead of actually storing the time we were cached.
-#pragma warning disable CA1305 // Specify IFormatProvider
-            json[StorageJsonKeys.CachedAt] = CachedAt?.ToString();
-#pragma warning restore CA1305 // Specify IFormatProvider
-
+            json[StorageJsonKeys.CachedAt] = CachedAt;
             json[StorageJsonKeys.ExpiresOn] = ExpiresOnUnixTimestamp;
             json[StorageJsonKeys.ExtendedExpiresOn] = ExtendedExpiresOnUnixTimestamp;
             
