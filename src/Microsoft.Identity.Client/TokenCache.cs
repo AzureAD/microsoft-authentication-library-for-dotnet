@@ -25,28 +25,16 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
-
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
-using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using System;
@@ -54,8 +42,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Json;
 
 namespace Microsoft.Identity.Client
 {
@@ -76,6 +62,7 @@ namespace Microsoft.Identity.Client
 
         private ICoreLogger _logger => ServiceBundle.DefaultLogger;
 
+        private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
         private TokenCacheCallback _userConfiguredBeforeAccess;
         private TokenCacheCallback _userConfiguredAfterAccess;
         private TokenCacheCallback _userConfiguredBeforeWrite;
@@ -90,7 +77,6 @@ namespace Microsoft.Identity.Client
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
         ILegacyCachePersistence ITokenCacheInternal.LegacyPersistence => LegacyCachePersistence;
 
-        ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
 
         /// <summary>
         ///
@@ -100,6 +86,7 @@ namespace Microsoft.Identity.Client
             ServiceBundle = null;
             var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
+            _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
         }
 
@@ -152,16 +139,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal TokenCacheCallback BeforeAccess
         {
-            get
-            {
-                return UserHasConfiguredBlobSerialization() ?
+            get => UserHasConfiguredBlobSerialization() ?
                     _userConfiguredBeforeAccess :
                     _defaultTokenCacheBlobStorage.OnBeforeAccess;
-            }
-            set
-            {
-                _userConfiguredBeforeAccess = value;
-            }
+            set => _userConfiguredBeforeAccess = value;
         }
 
         /// <summary>
@@ -171,16 +152,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal TokenCacheCallback BeforeWrite
         {
-            get
-            {
-                return UserHasConfiguredBlobSerialization() ?
+            get => UserHasConfiguredBlobSerialization() ?
                     _userConfiguredBeforeWrite :
                     _defaultTokenCacheBlobStorage.OnBeforeWrite;
-            }
-            set
-            {
-                _userConfiguredBeforeWrite = value;
-            }
+            set => _userConfiguredBeforeWrite = value;
         }
 
         /// <summary>
@@ -188,16 +163,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         internal TokenCacheCallback AfterAccess
         {
-            get
-            {
-                return UserHasConfiguredBlobSerialization() ?
+            get => UserHasConfiguredBlobSerialization() ?
                     _userConfiguredAfterAccess :
                     _defaultTokenCacheBlobStorage.OnAfterAccess;
-            }
-            set
-            {
-                _userConfiguredAfterAccess = value;
-            }
+            set => _userConfiguredAfterAccess = value;
         }
 
         /// <summary>
@@ -565,93 +534,94 @@ namespace Microsoft.Identity.Client
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
                 new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
             {
-            if (requestParams.Authority == null)
-            {
-                return null;
-            }
-
-            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParams.AuthorityInfo.CanonicalAuthority,
-                requestParams.RequestContext).ConfigureAwait(false);
-
-            var environmentAliases = GetEnvironmentAliases(requestParams.AuthorityInfo.CanonicalAuthority,
-                instanceDiscoveryMetadataEntry);
-
-            var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParams.AuthorityInfo.Host,
-                instanceDiscoveryMetadataEntry);
-
-            lock (LockObject)
-            {
-                requestParams.RequestContext.Logger.Info("Looking up refresh token in the cache..");
-
-                TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+                if (requestParams.Authority == null)
                 {
-                    TokenCache = this,
-                    ClientId = ClientId,
-                    Account = requestParams.Account
-                };
+                    return null;
+                }
 
-                MsalRefreshTokenCacheKey key = new MsalRefreshTokenCacheKey(
-                    preferredEnvironmentHost, requestParams.ClientId, requestParams.Account?.HomeAccountId?.Identifier);
+                var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(requestParams.AuthorityInfo.CanonicalAuthority,
+                    requestParams.RequestContext).ConfigureAwait(false);
 
-                OnBeforeAccess(args);
-                try
+                var environmentAliases = GetEnvironmentAliases(requestParams.AuthorityInfo.CanonicalAuthority,
+                    instanceDiscoveryMetadataEntry);
+
+                var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParams.AuthorityInfo.Host,
+                    instanceDiscoveryMetadataEntry);
+
+                lock (LockObject)
                 {
-                    MsalRefreshTokenCacheItem msalRefreshTokenCacheItem =_accessor.GetRefreshToken(key);
+                    requestParams.RequestContext.Logger.Info("Looking up refresh token in the cache..");
 
-                    // trying to find rt by authority aliases
-                    if (msalRefreshTokenCacheItem == null)
+                    TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
                     {
-                        var refreshTokens = _accessor.GetAllRefreshTokens();
+                        TokenCache = this,
+                        ClientId = ClientId,
+                        Account = requestParams.Account
+                    };
 
-                        foreach (var refreshToken in refreshTokens)
+                    MsalRefreshTokenCacheKey key = new MsalRefreshTokenCacheKey(
+                        preferredEnvironmentHost, requestParams.ClientId, requestParams.Account?.HomeAccountId?.Identifier);
+
+                    OnBeforeAccess(args);
+                    try
+                    {
+                        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = _accessor.GetRefreshToken(key);
+
+                        // trying to find rt by authority aliases
+                        if (msalRefreshTokenCacheItem == null)
                         {
-                            if (refreshToken.ClientId.Equals(requestParams.ClientId, StringComparison.OrdinalIgnoreCase) &&
-                                environmentAliases.Contains(refreshToken.Environment) &&
-                                requestParams.Account?.HomeAccountId?.Identifier == refreshToken.HomeAccountId)
+                            var refreshTokens = _accessor.GetAllRefreshTokens();
+
+                            foreach (var refreshToken in refreshTokens)
                             {
-                                msalRefreshTokenCacheItem = refreshToken;
-                                continue;
+                                if (refreshToken.ClientId.Equals(requestParams.ClientId, StringComparison.OrdinalIgnoreCase) &&
+                                    environmentAliases.Contains(refreshToken.Environment) &&
+                                    requestParams.Account?.HomeAccountId?.Identifier == refreshToken.HomeAccountId)
+                                {
+                                    msalRefreshTokenCacheItem = refreshToken;
+                                    continue;
+                                }
                             }
                         }
+
+                        requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
+
+                        if (msalRefreshTokenCacheItem != null)
+                        {
+                            return msalRefreshTokenCacheItem;
+                        }
+
+                        requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
+
+                        if (requestParams.Account == null)
+                        {
+                            return null;
+                        }
+                        return CacheFallbackOperations.GetAdalEntryForMsal(
+                            _logger,
+                            LegacyCachePersistence,
+                            preferredEnvironmentHost,
+                            environmentAliases,
+                            requestParams.ClientId,
+                            requestParams.LoginHint,
+                            requestParams.Account.HomeAccountId?.Identifier,
+                            null);
                     }
-
-                    requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
-
-                    if (msalRefreshTokenCacheItem != null)
+                    finally
                     {
-                        return msalRefreshTokenCacheItem;
+                        OnAfterAccess(args);
                     }
-
-                    requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
-
-                    if (requestParams.Account == null)
-                    {
-                        return null;
-                    }
-                    return CacheFallbackOperations.GetAdalEntryForMsal(
-                        _logger,
-                        LegacyCachePersistence,
-                        preferredEnvironmentHost,
-                        environmentAliases,
-                        requestParams.ClientId,
-                        requestParams.LoginHint,
-                        requestParams.Account.HomeAccountId?.Identifier,
-                        null);
                 }
-                finally
-                {
-                    OnAfterAccess(args);
-                }
-            }            }
+            }
         }
 
         /// <inheritdoc />
         public void SetIosKeychainSecurityGroup(string securityGroup)
         {
-            #if iOS
+#if iOS
             _accessor.SetiOSKeychainSecurityGroup(securityGroup);
             (LegacyCachePersistence as Microsoft.Identity.Client.Platforms.iOS.iOSLegacyCachePersistence).SetKeychainSecurityGroup(securityGroup);
-            #endif
+#endif
         }
 
         MsalIdTokenCacheItem ITokenCacheInternal.GetIdTokenCacheItem(MsalIdTokenCacheKey msalIdTokenCacheKey, RequestContext requestContext)
@@ -964,7 +934,15 @@ namespace Microsoft.Identity.Client
             _accessor.Clear();
         }
 
+        private bool UserHasConfiguredBlobSerialization()
+        {
+            return _userConfiguredBeforeAccess != null ||
+                _userConfiguredBeforeAccess != null ||
+                _userConfiguredBeforeWrite != null;
+        }
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME 
+
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
         /// delegate to deserialize a cache entry for the application and accounts specified in the <see cref="TokenCacheNotificationArgs"/>.
@@ -1105,6 +1083,7 @@ namespace Microsoft.Identity.Client
                 };
             }
         }
+
 
         private static void GuardOnMobilePlatforms()
         {

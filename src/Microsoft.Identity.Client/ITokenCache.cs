@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface ITokenCache
     {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME 
         /// <summary>
         /// 
         /// </summary>

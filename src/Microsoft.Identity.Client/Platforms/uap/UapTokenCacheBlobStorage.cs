@@ -1,23 +1,51 @@
-﻿using Microsoft.Identity.Client.Core;
+﻿//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <remarks>All continuations must be on the same thread, i.e. ConfigureAwait(true)
+    /// because the TokenCache calls are under lock() so continuing on different threads will cause 
+    /// deadlocks.
+    /// </remarks>
     internal class UapTokenCacheBlobStorage : ITokenCacheBlobStorage
     {
-        private const string LocalSettingsContainerName = "MicrosoftAuthenticationLibrary3";
+        private const string CacheFileName = "msalcache.dat";
 
-        private const string CacheValue = "CacheValue";
-        private const string CacheValueSegmentCount = "CacheValueSegmentCount";
-        private const string CacheValueLength = "CacheValueLength";
-        private const int MaxCompositeValueLength = 1024;
         private readonly ICryptographyManager _cryptographyManager;
 
         public UapTokenCacheBlobStorage(ICryptographyManager cryptographyManager, ICoreLogger logger)
@@ -32,83 +60,47 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public void OnBeforeAccess(TokenCacheNotificationArgs args)
         {
-            if (args?.TokenCache != null)
-            {
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                byte[] state = GetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values);
-                if (state != null)
-                {
-                    args.TokenCache.Deserialize(state);
-                }
-            }
+            OnBeforeAccessAsync(args);
         }
-
+      
         public void OnAfterAccess(TokenCacheNotificationArgs args)
         {
-            if (args?.TokenCache != null && args.HasStateChanged)
+            OnAfterAccessAsync(args);
+        }
+
+
+        private void OnAfterAccessAsync(TokenCacheNotificationArgs args)
+        {
+            if (args.HasStateChanged)
             {
-                var localSettings = ApplicationData.Current.LocalSettings;
-                localSettings.CreateContainer(LocalSettingsContainerName, ApplicationDataCreateDisposition.Always);
-                SetCacheValue(localSettings.Containers[LocalSettingsContainerName].Values, args.TokenCache.Serialize());
+                StorageFile cacheFile = ApplicationData.Current.LocalFolder.CreateFileAsync(
+                    CacheFileName,
+                    CreationCollisionOption.ReplaceExisting).AsTask().GetAwaiter().GetResult();
+
+                byte[] blob = args.TokenCache.SerializeV3();
+                byte[] encryptedBlob = _cryptographyManager.Encrypt(blob);
+
+                FileIO.WriteBytesAsync(cacheFile, encryptedBlob).GetAwaiter().GetResult();
             }
         }
 
-        // TODO bogavril: consolidate with similar methods from UapLegacyCachePersistance
-        internal void SetCacheValue(IPropertySet containerValues, byte[] value)
+        private void OnBeforeAccessAsync(TokenCacheNotificationArgs args)
         {
-            byte[] encryptedValue = _cryptographyManager.Encrypt(value);
-            containerValues[CacheValueLength] = encryptedValue.Length;
-            if (encryptedValue.Length == 0)
+            var cacheFile = ApplicationData.Current.LocalFolder.TryGetItemAsync(CacheFileName)
+                                .AsTask().GetAwaiter().GetResult() as IStorageFile;
+
+            if (cacheFile != null)
             {
-                containerValues[CacheValueSegmentCount] = 1;
-                containerValues[CacheValue + 0] = null;
-            }
-            else
-            {
-                int segmentCount = (encryptedValue.Length / MaxCompositeValueLength) + ((encryptedValue.Length % MaxCompositeValueLength == 0) ? 0 : 1);
-                byte[] subValue = new byte[MaxCompositeValueLength];
-                for (int i = 0; i < segmentCount - 1; i++)
+                IBuffer buffer = FileIO.ReadBufferAsync(cacheFile).AsTask().GetAwaiter().GetResult();
+
+                if (buffer.Length != 0)
                 {
-                    Array.Copy(encryptedValue, i * MaxCompositeValueLength, subValue, 0, MaxCompositeValueLength);
-                    containerValues[CacheValue + i] = subValue;
-                }
-
-                int copiedLength = (segmentCount - 1) * MaxCompositeValueLength;
-                Array.Copy(encryptedValue, copiedLength, subValue, 0, encryptedValue.Length - copiedLength);
-                containerValues[CacheValue + (segmentCount - 1)] = subValue;
-                containerValues[CacheValueSegmentCount] = segmentCount;
-            }
-        }
-
-        internal byte[] GetCacheValue(IPropertySet containerValues)
-        {
-            if (!containerValues.ContainsKey(CacheValueLength))
-            {
-                return null;
-            }
-
-            int encyptedValueLength = (int)containerValues[CacheValueLength];
-            int segmentCount = (int)containerValues[CacheValueSegmentCount];
-
-            byte[] encryptedValue = new byte[encyptedValueLength];
-            if (segmentCount == 1)
-            {
-                encryptedValue = (byte[])containerValues[CacheValue + 0];
-            }
-            else
-            {
-                for (int i = 0; i < segmentCount - 1; i++)
-                {
-                    Array.Copy((byte[])containerValues[CacheValue + i], 0, encryptedValue, i * MaxCompositeValueLength, MaxCompositeValueLength);
+                    byte[] encryptedblob = buffer.ToArray();
+                    byte[] decryptedBlob = _cryptographyManager.Decrypt(encryptedblob);
+                    args.TokenCache.DeserializeV3(decryptedBlob);
                 }
             }
-
-            Array.Copy((byte[])containerValues[CacheValue + (segmentCount - 1)], 0, encryptedValue, (segmentCount - 1) * MaxCompositeValueLength, encyptedValueLength - (segmentCount - 1) * MaxCompositeValueLength);
-            return _cryptographyManager.Decrypt(encryptedValue);
         }
-
-
 
     }
 }

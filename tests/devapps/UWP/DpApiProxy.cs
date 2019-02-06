@@ -16,13 +16,13 @@ namespace UWP
            String strDescriptor)
         {
             // Create a DataProtectionProvider object for the specified descriptor.
-            DataProtectionProvider Provider = new DataProtectionProvider(strDescriptor);
+            DataProtectionProvider provider = new DataProtectionProvider(strDescriptor);
 
             // Encode the plaintext input message to a buffer.
             IBuffer buffMsg = CryptographicBuffer.CreateFromByteArray(blobToProtect);
 
             // Encrypt the message.
-            IBuffer buffProtected = await Provider.ProtectAsync(buffMsg).AsTask().ConfigureAwait(false);
+            IBuffer buffProtected = await provider.ProtectAsync(buffMsg).AsTask().ConfigureAwait(false);
 
             // Execution of the SampleProtectAsync function resumes here
             // after the awaited task (Provider.ProtectAsync) completes.
@@ -33,10 +33,10 @@ namespace UWP
             IBuffer buffProtected)
         {
             // Create a DataProtectionProvider object.
-            DataProtectionProvider Provider = new DataProtectionProvider();
+            DataProtectionProvider provider = new DataProtectionProvider();
 
             // Decrypt the protected message specified on input.
-            IBuffer buffUnprotected = await Provider.UnprotectAsync(buffProtected).AsTask().ConfigureAwait(false);
+            IBuffer buffUnprotected = await provider.UnprotectAsync(buffProtected).AsTask().ConfigureAwait(false);
 
             // Execution of the SampleUnprotectData method resumes here
             // after the awaited task (Provider.UnprotectAsync) completes
