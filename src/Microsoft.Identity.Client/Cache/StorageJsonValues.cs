@@ -25,30 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.CacheV2.Schema
+namespace Microsoft.Identity.Client.Cache
 {
-    internal static class StorageJsonKeys
+    internal static class StorageJsonValues
     {
-        public const string HomeAccountId = "home_account_id";
-        public const string Environment = "environment";
-        public const string Realm = "realm";
-        public const string LocalAccountId = "local_account_id";
-        public const string Username = "username";
-        public const string AuthorityType = "authority_type";
-        public const string AlternativeAccountId = "alternative_account_id";
-        public const string GivenName = "given_name";
-        public const string FamilyName = "family_name";
-        public const string MiddleName = "middle_name";
-        public const string Name = "name";
-        public const string AvatarUrl = "avatar_url";
-        public const string CredentialType = "credential_type";
-        public const string ClientId = "client_id";
-        public const string Secret = "secret";
-        public const string Target = "target";
-        public const string CachedAt = "cached_at";
-        public const string ExpiresOn = "expires_on";
-        public const string ExtendedExpiresOn = "extended_expires_on";
-        public const string ClientInfo = "client_info";
-        public const string FamilyId = "family_id";
+        public const string AuthorityTypeAdfs = "ADFS";
+        public const string AuthorityTypeMsa = "MSA";
+        public const string AuthorityTypeMsSts = "MSSTS";
+        public const string AuthorityTypeOther = "Other";
+        public const string CredentialTypeRefreshToken = "RefreshToken";
+        public const string CredentialTypeAccessToken = "AccessToken";
+        public const string CredentialTypeIdToken = "IdToken";
+        public const string AccountRootKey = "Account";
+        public const string CredentialTypeOther = "Other";
     }
 }

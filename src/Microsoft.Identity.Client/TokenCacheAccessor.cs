@@ -28,9 +28,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 
 namespace Microsoft.Identity.Client
 {

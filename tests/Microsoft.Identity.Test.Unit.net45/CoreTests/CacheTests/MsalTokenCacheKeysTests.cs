@@ -28,6 +28,7 @@
 using System;
 using System.Linq;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

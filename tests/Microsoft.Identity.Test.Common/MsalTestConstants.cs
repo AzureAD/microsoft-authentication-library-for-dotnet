@@ -81,6 +81,11 @@ namespace Microsoft.Identity.Test.Unit
         public const string XClientVer = "x-client-Ver";
         public const TokenSubjectType TokenSubjectTypeUser = 0;
 
+        public const string LocalAccountId = "test_local_account_id";
+        public const string GivenName = "Joe";
+        public const string FamilyName = "Doe";
+        public const string Username = "joe@localhost.com";
+
         public static readonly IDictionary<string, string> ExtraQueryParams 
             = new Dictionary<string, string>()
             {

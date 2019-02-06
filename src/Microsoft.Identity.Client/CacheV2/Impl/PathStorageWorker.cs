@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
 using Microsoft.Identity.Json;

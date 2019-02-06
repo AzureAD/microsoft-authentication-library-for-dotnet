@@ -39,6 +39,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
@@ -996,7 +997,11 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal byte[] SerializeNewFormat()
+        /// <summary>
+        /// Serializes to the V3 unified cache format.
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        public byte[] SerializeV3()
         {
             GuardOnMobilePlatforms();
 
@@ -1006,9 +1011,18 @@ namespace Microsoft.Identity.Client
             }
         }
 
-        internal void DeserializeNewFormat(byte[] bytes)
+        /// <summary>
+        /// De-serializes from the V3 unified cache format.
+        /// </summary>
+        /// <param name="bytes">Byte stream representation of the cache</param>
+        public void DeserializeV3(byte[] bytes)
         {
             GuardOnMobilePlatforms();
+
+            if (bytes == null || bytes.Length == 0)
+            {
+                return;
+            }
 
             lock (LockObject)
             {
