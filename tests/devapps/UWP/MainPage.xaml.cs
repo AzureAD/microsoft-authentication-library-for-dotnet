@@ -33,17 +33,18 @@ namespace UWP
 
             _pca = new PublicClientApplication(ClientID, Authority);
 
-            // custom serialization
+            // custom serialization - this is very similar to what MSAL is doing
+            // but extenders can implement their own cache.
             _pca.UserTokenCache.SetAfterAccess((tokenCacheNotifcation) =>
             {
                 if (tokenCacheNotifcation.HasStateChanged)
                 {
                     StorageFile cacheFile = ApplicationData.Current.LocalFolder.CreateFileAsync(
-                        "msal_cache.bin",
-                        CreationCollisionOption.ReplaceExisting).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
+                        "msal_user_cache.bin",
+                        CreationCollisionOption.ReplaceExisting).AsTask().GetAwaiter().GetResult();
 
                     byte[] blob = tokenCacheNotifcation.TokenCache.Serialize();
-                    IBuffer buffer = DpApiProxy.SampleProtectAsync(blob, "LOCAL=user").ConfigureAwait(false).GetAwaiter().GetResult();
+                    IBuffer buffer = DpApiProxy.SampleProtectAsync(blob, "LOCAL=user").GetAwaiter().GetResult();
 
                     FileIO.WriteBufferAsync(cacheFile, buffer).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
@@ -52,7 +53,7 @@ namespace UWP
             _pca.UserTokenCache.SetBeforeAccess((tokenCacheNotifcation) =>
             {
 
-                IStorageFile cacheFile = (ApplicationData.Current.LocalFolder.TryGetItemAsync("msal_cache.bin")
+                IStorageFile cacheFile = (ApplicationData.Current.LocalFolder.TryGetItemAsync("msal_user_cache.bin")
                     .AsTask().ConfigureAwait(false).GetAwaiter().GetResult()) as IStorageFile;
 
                 if (cacheFile != null)
@@ -209,65 +210,5 @@ namespace UWP
                        AccessToken.Text = message;
                    });
         }
-
-        //public async Task ProtectAsync()
-        //{
-        //    // Initialize function arguments.
-        //    String strMsg = "This is a message to be protected.";
-        //    String strDescriptor = "LOCAL=user";
-        //    BinaryStringEncoding encoding = BinaryStringEncoding.Utf8;
-
-        //    // Protect a message to the local user.
-        //    IBuffer buffProtected = await this.SampleProtectAsync(
-        //        strMsg,
-        //        strDescriptor,
-        //        encoding).ConfigureAwait(false);
-
-        //    // Decrypt the previously protected message.
-        //    String strDecrypted = await this.SampleUnprotectDataAsync(
-        //        buffProtected,
-        //        encoding).ConfigureAwait(false);
-        //}
-
-        //public async Task<IBuffer> SampleProtectAsync(
-        //    String strMsg,
-        //    String strDescriptor,
-        //    BinaryStringEncoding encoding)
-        //{
-        //    // Create a DataProtectionProvider object for the specified descriptor.
-        //    DataProtectionProvider Provider = new DataProtectionProvider(strDescriptor);
-
-        //    // Encode the plaintext input message to a buffer.
-        //    encoding = BinaryStringEncoding.Utf8;
-        //    IBuffer buffMsg = CryptographicBuffer.ConvertStringToBinary(strMsg, encoding);
-
-        //    // Encrypt the message.
-        //    IBuffer buffProtected = await Provider.ProtectAsync(buffMsg);
-
-        //    // Execution of the SampleProtectAsync function resumes here
-        //    // after the awaited task (Provider.ProtectAsync) completes.
-        //    return buffProtected;
-        //}
-
-        //public async Task<String> SampleUnprotectDataAsync(
-        //    IBuffer buffProtected,
-        //    BinaryStringEncoding encoding)
-        //{
-        //    // Create a DataProtectionProvider object.
-        //    DataProtectionProvider Provider = new DataProtectionProvider();
-
-        //    // Decrypt the protected message specified on input.
-        //    IBuffer buffUnprotected = await Provider.UnprotectAsync(buffProtected);
-
-        //    // Execution of the SampleUnprotectData method resumes here
-        //    // after the awaited task (Provider.UnprotectAsync) completes
-        //    // Convert the unprotected message from an IBuffer object to a string.
-        //    String strClearText = CryptographicBuffer.ConvertBinaryToString(encoding, buffUnprotected);
-
-        //    // Return the plaintext string.
-        //    return strClearText;
-        //}
-
-
     }
 }

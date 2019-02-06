@@ -208,13 +208,11 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            //return new UapTokenCacheAccessor(CryptographyManager);
             return new InMemoryTokenCacheAccessor();
         }
 
         public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
         {
-            //return new NullTokenCacheBlobStorage();
             return new UapTokenCacheBlobStorage(CryptographyManager, Logger);
         }
 

@@ -103,7 +103,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer messageBuffer = CryptographicBuffer.ConvertStringToBinary(message, BinaryStringEncoding.Utf8);
-            IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(messageBuffer).AsTask());
+            IBuffer protectedBuffer = dataProtectionProvider.ProtectAsync(messageBuffer).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
             return Convert.ToBase64String(protectedBuffer.ToArray(0, (int)protectedBuffer.Length));
         }
 
@@ -116,7 +116,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
             IBuffer messageBuffer = Convert.FromBase64String(encryptedMessage).AsBuffer();
-            IBuffer unprotectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(messageBuffer).AsTask());
+            IBuffer unprotectedBuffer = dataProtectionProvider.UnprotectAsync(messageBuffer).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
             return CryptographicBuffer.ConvertBinaryToString(BinaryStringEncoding.Utf8, unprotectedBuffer);
         }
 
@@ -128,7 +128,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
-            IBuffer protectedBuffer = RunAsyncTaskAndWait(dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask());
+            IBuffer protectedBuffer = dataProtectionProvider.ProtectAsync(message.AsBuffer()).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
             return protectedBuffer.ToArray(0, (int)protectedBuffer.Length);
         }
 
@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
             }
 
             DataProtectionProvider dataProtectionProvider = new DataProtectionProvider(ProtectionDescriptor);
-            IBuffer buffer = RunAsyncTaskAndWait(dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask());
+            IBuffer buffer = dataProtectionProvider.UnprotectAsync(encryptedMessage.AsBuffer()).AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
             return buffer.ToArray(0, (int)buffer.Length);
         }
 
@@ -151,19 +151,5 @@ namespace Microsoft.Identity.Client.Platforms.uap
             throw new NotImplementedException();
         }
 
-        private static T RunAsyncTaskAndWait<T>(Task<T> task)
-        {
-            try
-            {
-                Task.Run(async () => await task.ConfigureAwait(false)).Wait();
-                return task.Result;
-            }
-            catch (AggregateException ae)
-            {
-                // Any exception thrown as a result of running task will cause AggregateException to be thrown with 
-                // actual exception as inner.
-                throw ae.InnerExceptions[0];
-            }
-        }
     }
 }
