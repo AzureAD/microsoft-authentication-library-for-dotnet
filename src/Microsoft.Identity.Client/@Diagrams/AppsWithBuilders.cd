@@ -19,7 +19,7 @@
       <Property Name="UserTokenCacheInternal" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAABSCAAEAAAAIChBgQBAEAABBAAAAAECJAAEAAEEA=</HashCode>
+      <HashCode>AAAABSCEAEAAAAICjBgQBAEAABBAAAAAECJAAEAAEEA=</HashCode>
       <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -28,14 +28,13 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Microsoft.Identity.Client.PublicClientApplication">
-    <Position X="0.5" Y="4.75" Width="10.25" />
+    <Position X="0.5" Y="5.5" Width="10.25" />
     <Members>
       <Method Name="AcquireTokenAsync" Hidden="true" />
       <Method Name="AcquireTokenByIntegratedWindowsAuthAsync" Hidden="true" />
       <Method Name="AcquireTokenByUsernamePasswordAsync" Hidden="true" />
       <Method Name="AcquireTokenWithDeviceCodeAsync" Hidden="true" />
       <Method Name="CreateWebAuthenticationDialog" Hidden="true" />
-      <Method Name="CreateWebAuthenticationDialogEx" Hidden="true" />
       <Method Name="GetParentObjectFromUiParent" Hidden="true" />
       <Method Name="GuardIWANetCore" Hidden="true" />
       <Method Name="GuardMobilePlatforms" Hidden="true" />
@@ -48,20 +47,20 @@
     </Members>
     <InheritanceLine Type="Microsoft.Identity.Client.ClientApplicationBase" FixedToPoint="true">
       <Path>
-        <Point X="5" Y="3.911" />
-        <Point X="5" Y="4.375" />
-        <Point X="3.312" Y="4.375" />
-        <Point X="3.312" Y="4.75" />
+        <Point X="5" Y="4.488" />
+        <Point X="5" Y="5.125" />
+        <Point X="3.375" Y="5.125" />
+        <Point X="3.375" Y="5.5" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAAAEAEAQAEAAAAAQQyAAQCAAAAAAgBAAgAAEAAEA=</HashCode>
+      <HashCode>AAAAAAEAEAQAAAAAAAQQyAAQCAAAAAAgBAAgCAEAAEA=</HashCode>
       <FileName>MigrationAid\MigrationAid.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Microsoft.Identity.Client.ConfidentialClientApplication">
-    <Position X="1.75" Y="7.5" Width="12.5" />
+    <Position X="2.25" Y="8.75" Width="12.5" />
     <Members>
       <Method Name="AcquireTokenByAuthorizationCodeAsync" Hidden="true" />
       <Method Name="AcquireTokenForClientAsync" Hidden="true" />
@@ -70,7 +69,6 @@
       <Property Name="ClientCredential" Hidden="true" />
       <Method Name="ConfidentialClientApplication" Hidden="true" />
       <Method Name="CreateRequestParameters" Hidden="true" />
-      <Method Name="GetAuthorizationRequestUrlAsync" Hidden="true" />
       <Method Name="GuardMobileFrameworks" Hidden="true" />
       <Method Name="IByRefreshToken.AcquireTokenByRefreshToken" Hidden="true" />
       <Method Name="IByRefreshToken.AcquireTokenByRefreshTokenAsync" Hidden="true" />
@@ -81,14 +79,14 @@
     </Members>
     <InheritanceLine Type="Microsoft.Identity.Client.ClientApplicationBase" FixedToPoint="true">
       <Path>
-        <Point X="5" Y="3.911" />
-        <Point X="5" Y="4.375" />
-        <Point X="11" Y="4.375" />
-        <Point X="11" Y="7.5" />
+        <Point X="5" Y="4.488" />
+        <Point X="5" Y="5.125" />
+        <Point X="11.125" Y="5.125" />
+        <Point X="11.125" Y="8.75" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
-      <HashCode>AAAAFAAFAEQQDAAAiCAAKAFAAAAAAACAACAACAAAAAA=</HashCode>
+      <HashCode>AAAAFAABAEQQDAAAgCAACAFAAAAAAACAACAACAAABAA=</HashCode>
       <FileName>ConfidentialClientApplication.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -99,7 +97,7 @@
   <Interface Name="Microsoft.Identity.Client.ITokenCache">
     <Position X="11.5" Y="0.75" Width="3.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAABAAAAAAGBAAAABAAAAiAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAABAGBAIAABAAAAiAAAAAA=</HashCode>
       <FileName>ITokenCache.cs</FileName>
     </TypeIdentifier>
   </Interface>
