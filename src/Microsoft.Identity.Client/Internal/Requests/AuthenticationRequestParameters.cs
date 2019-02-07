@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             ApiId = commonParameters.ApiId;
+            IsBrokerEnabled = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
@@ -91,6 +92,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public Uri RedirectUri { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; }
         public string Claims { get; }
+
+        public bool IsBrokerEnabled { get; set; }
 
         #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.

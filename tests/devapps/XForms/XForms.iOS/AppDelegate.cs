@@ -74,6 +74,17 @@ namespace XForms.iOS
             {
                 return false;
             }
+            AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+
+            return true;
+        }
+
+        public override bool OpenUrl(UIApplication application, NSUrl url, string sourceApplication, NSObject annotation)
+        {
+            if (AuthenticationContinuationHelper.IsBrokerResponse(sourceApplication))
+            {
+                AuthenticationContinuationHelper.SetBrokerContinuationEventArgs(url);
+            }
 
             return true;
         }

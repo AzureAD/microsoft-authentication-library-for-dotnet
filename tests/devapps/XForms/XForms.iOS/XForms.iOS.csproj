@@ -116,7 +116,7 @@
     <PackageReference Include="System.Reflection.Emit">
       <Version>4.3.0</Version>
       <ExcludeAssets>all</ExcludeAssets>
-    </PackageReference>    
+    </PackageReference>
     <PackageReference Include="Xamarin.Forms">
       <Version>2.5.0.122203</Version>
     </PackageReference>

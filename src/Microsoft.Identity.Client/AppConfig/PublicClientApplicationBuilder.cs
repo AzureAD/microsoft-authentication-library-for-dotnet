@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="enableBroker"></param>
         /// <returns></returns>
-        internal PublicClientApplicationBuilder WithBroker(bool enableBroker)
+        public PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
             // TODO: * This should become public only on mobile platforms that support using a broker
             Config.IsBrokerEnabled = enableBroker;

@@ -128,6 +128,11 @@ namespace Microsoft.Identity.Client
         /// The library is loaded on a platform which is not supported.
         /// </summary>
         public const string PlatformNotSupported = "platform_not_supported";
+               
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string BrokerReponseHashMismatch = "Unencrypted broker response hash did not match the expected hash";
 
 #if iOS
         /// <summary>

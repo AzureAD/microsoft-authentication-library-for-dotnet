@@ -53,7 +53,7 @@
     <AndroidUseSharedRuntime>False</AndroidUseSharedRuntime>
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
   </PropertyGroup>
-<!-- Set this env variable locally to enable Telemetry on developer applications-->
+  <!-- Set this env variable locally to enable Telemetry on developer applications-->
   <PropertyGroup Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''">
     <DefineConstants>$(DefineConstants);ARIA_TELEMETRY_ENABLED</DefineConstants>
   </PropertyGroup>

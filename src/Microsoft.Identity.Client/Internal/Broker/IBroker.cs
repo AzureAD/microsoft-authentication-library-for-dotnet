@@ -25,37 +25,17 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Threading;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal interface IPublicClientApplicationExecutor
+    internal interface IBroker
     {
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenInteractiveParameters interactiveParameters,
-            CancellationToken cancellationToken);
+        bool CanInvokeBroker { get; }
 
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken);
-
-        Task<AuthenticationResult> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByBrokerParameters acquireTokenParameters,
-            CancellationToken cancellationToken);
+        Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload, IServiceBundle serviceBundle);
     }
 }

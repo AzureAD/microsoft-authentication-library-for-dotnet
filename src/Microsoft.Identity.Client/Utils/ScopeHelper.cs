@@ -64,5 +64,16 @@ namespace Microsoft.Identity.Client.Utils
             }
             return new SortedSet<string>(input);
         }
+
+        public static string ConvertSortedSetScopesToString(SortedSet<string> singleString)
+        {
+            string scopesAsString = null;
+            if (singleString != null)
+            {
+                scopesAsString = string.Join(" ", singleString);
+            }
+
+            return scopesAsString;
+        }
     }
 }

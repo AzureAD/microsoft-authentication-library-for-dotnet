@@ -79,8 +79,20 @@ namespace Microsoft.Identity.Client
             requestParameters.Account = silentParameters.Account;
             requestParameters.LoginHint = silentParameters.LoginHint;
 
-            var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            if (requestParameters.IsBrokerEnabled)
+            {
+                AcquireTokenByBrokerParameters brokerParameters = new AcquireTokenByBrokerParameters();
+                var handler = new BrokerSilentRequest(ServiceBundle,
+                    requestParameters,
+                    brokerParameters);
+                return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+
+                var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
+                return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
@@ -97,7 +109,7 @@ namespace Microsoft.Identity.Client
                 };
                 requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }
-
+  
             var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             requestParameters.IsRefreshTokenRequest = true;
 

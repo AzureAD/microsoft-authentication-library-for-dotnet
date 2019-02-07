@@ -76,6 +76,11 @@ namespace Microsoft.Identity.Client
         /// Failed to refresh token.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
+               
+        /// <summary>
+        /// Failed to acquire token silently. Used in broker scenarios.
+        /// </summary>
+        public const string FailedToAcquireTokenSilently = "failed_to_acquire_token_silently";
 
         /// <summary>
         /// RedirectUri validation failed.
@@ -189,5 +194,10 @@ namespace Microsoft.Identity.Client
         /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";
+
+        /// <summary>
+        /// Broker response hash did not match
+        /// </summary>
+        public const string BrokerReponseHashMismatch = "broker_response_hash_mismatch";
     }
 }

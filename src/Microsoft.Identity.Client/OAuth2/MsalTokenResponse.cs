@@ -25,7 +25,10 @@
 // 
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Utils;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Runtime.Serialization;
 
 namespace Microsoft.Identity.Client.OAuth2
@@ -94,5 +97,38 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }
+
+        public string Authority { get; private set; }
+
+        internal MsalTokenResponse CreateFromBrokerResponse(Dictionary<string, string> responseDictionary)
+        {
+            if (responseDictionary.ContainsKey(ErrorDescription))
+            {
+                return new MsalTokenResponse
+                {
+                    Error = responseDictionary[Error],
+                    ErrorDescription = responseDictionary[ErrorDescription]
+                };
+            }
+
+            return new MsalTokenResponse
+            {
+                Authority = responseDictionary.ContainsKey("authority")
+                    ? AppConfig.AuthorityInfo.CanonicalizeAuthorityUri(CoreHelpers.UrlDecode(responseDictionary["authority"]))
+                    : null,
+                AccessToken = responseDictionary["access_token"],
+                RefreshToken = responseDictionary.ContainsKey("refresh_token")
+                    ? responseDictionary["refresh_token"]
+                    : null,
+                IdToken = responseDictionary["id_token"],
+                TokenType = "Bearer",
+                CorrelationId = responseDictionary["correlation_id"],
+                Scope = responseDictionary["scope"],
+                ExpiresIn = long.Parse(responseDictionary["expires_on"].Split('.')[0], CultureInfo.CurrentCulture),
+                ClientInfo = responseDictionary.ContainsKey("client_info")
+                    ? responseDictionary["client_info"]
+                    : null,
+            };
+        }
     }
 }

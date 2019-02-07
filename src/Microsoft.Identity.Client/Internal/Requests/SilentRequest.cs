@@ -42,10 +42,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public SilentRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
-            AcquireTokenSilentParameters silentParameters)
+            IAcquireTokenParameters silentParameters)
             : base(serviceBundle, authenticationRequestParameters, silentParameters)
         {
-            _silentParameters = silentParameters;
+            _silentParameters = silentParameters as AcquireTokenSilentParameters;
         }
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
