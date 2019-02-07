@@ -51,7 +51,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private KeyVaultConfiguration _config;
 
-        private readonly string _keyVaultClientID = "ebe49c8f-61de-4357-9194-7a786f6402b4";
+        private readonly string _keyVaultConfidentialClientID = "ebe49c8f-61de-4357-9194-7a786f6402b4";
+        private readonly string _keyVaultPublicClientID = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
 
         private readonly string _keyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
 
@@ -107,7 +108,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 }
             }
 
-            _config.ClientId = _keyVaultClientID;
+            _config.ClientId =_config.AuthType == KeyVaultAuthenticationType.UserCredential? _keyVaultPublicClientID : _keyVaultConfidentialClientID;
             _config.CertThumbprint = _keyVaultThumbPrint;
             _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
         }
@@ -132,7 +133,8 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             var scopes = new[] { resource + "/.default" };
 
             AuthenticationResult authResult;
-            IConfidentialClientApplication app;
+            IConfidentialClientApplication confidentialApp;
+            IPublicClientApplication publicApp;
             X509Certificate2 cert = null;
             switch (_config.AuthType)
             {
@@ -144,19 +146,37 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                             "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
                     }
 
-                    app = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
+                    confidentialApp = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
                                               .WithAuthority(new Uri(authority), true)
                                               .WithCertificate(cert)
                                               .Build();
 
-                    authResult = await app.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
+                    authResult = await confidentialApp.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
                     break;
                 case KeyVaultAuthenticationType.ClientSecret:
-                    app = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
+                    confidentialApp = ConfidentialClientApplicationBuilder.Create(_config.ClientId)
                                               .WithAuthority(new Uri(authority), true)
                                               .WithClientSecret(_config.KeyVaultSecret)
                                               .Build();
-                    authResult = await app.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
+                    authResult = await confidentialApp.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
+                    break;
+                case KeyVaultAuthenticationType.UserCredential:
+                    publicApp = PublicClientApplicationBuilder.Create(_config.ClientId)
+                                                .WithAuthority(new Uri(authority), true)
+                                                .Build();
+                    try
+                    {
+                        authResult = await publicApp.AcquireTokenByIntegratedWindowsAuthAsync(scopes).ConfigureAwait(false);
+                    }
+                    catch (MsalUiRequiredException ex)
+                    {
+                        publicApp = PublicClientApplicationBuilder.Create(_config.ClientId)
+                                                .WithAuthority(new Uri(authority), true)
+                                                .WithClaims(ex.Claims)
+                                                .Build();
+
+                        authResult = await publicApp.AcquireTokenAsync(scopes).ConfigureAwait(false);
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
