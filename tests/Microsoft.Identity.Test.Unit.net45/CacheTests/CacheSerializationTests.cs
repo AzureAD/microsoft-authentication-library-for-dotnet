@@ -32,6 +32,7 @@ using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -103,7 +104,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            var accessor = new TokenCacheAccessor();
+            var accessor = new InMemoryTokenCacheAccessor();
 
             const int NumAccessTokens = 5;
             const int NumRefreshTokens = 3;
@@ -338,7 +339,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             // TODO(cache): assert json value?  or look at JObject?
 
-            var otherAccessor = new TokenCacheAccessor();
+            var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheDictionarySerializer(otherAccessor);
             s2.Deserialize(bytes);
 
@@ -358,7 +359,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = s1.Serialize();
             string json = new UTF8Encoding().GetString(bytes);
 
-            var otherAccessor = new TokenCacheAccessor();
+            var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes);
 
@@ -372,7 +373,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_python.bin")]
         public void TestPythonCacheSerializationInterop()
         {
-            var accessor = new TokenCacheAccessor();
+            var accessor = new InMemoryTokenCacheAccessor();
             var s = new TokenCacheJsonSerializer(accessor);
             string pythonBinFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_python.bin");
             byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
@@ -388,7 +389,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         [DeploymentItem(@"Resources\cachecompat_dotnet_dictionary.bin")]
         public void TestMsalNet2XCacheSerializationInterop()
         {
-            var accessor = new TokenCacheAccessor();
+            var accessor = new InMemoryTokenCacheAccessor();
             var s = new TokenCacheDictionarySerializer(accessor);
             string binFilePath = ResourceHelper.GetTestResourceRelativePath("cachecompat_dotnet_dictionary.bin");
             byte[] bytes = File.ReadAllBytes(binFilePath);
