@@ -31,7 +31,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.Integration
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class ApplicationGrantIntegrationTest

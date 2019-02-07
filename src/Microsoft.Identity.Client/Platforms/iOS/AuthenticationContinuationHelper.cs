@@ -45,5 +45,26 @@ namespace Microsoft.Identity.Client
         {
             return WebviewBase.ContinueAuthentication(url.AbsoluteString);
         }
+
+        /// <summary>
+        /// Returns if the response is from the broker app
+        /// </summary>
+        /// <param name="sourceApplication">application bundle id of the broker</param>
+        /// <returns>True if the response is from broker, False otherwise.</returns>
+        public static bool IsBrokerResponse(string sourceApplication)
+        {
+            System.Diagnostics.Debug.WriteLine("IsBrokerResponse Called with sourceApplication {0}", sourceApplication);
+            return sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Sets broker response for continuing authentication flow.
+        /// </summary>
+        /// <param name="url"></param>
+        public static void SetBrokerContinuationEventArgs(NSUrl url)
+        {
+            System.Diagnostics.Debug.WriteLine("SetBrokercontinuationEventArgs Called with Url {0}", url);
+            iOSBroker.SetBrokerResponse(url);
+        }
     }
 }

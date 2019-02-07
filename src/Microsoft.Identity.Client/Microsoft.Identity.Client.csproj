@@ -22,6 +22,9 @@
     <DefineConstants>$(DefineConstants);NETSTANDARD_RUNTIME</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Internal\Broker\BrokerResponseConst.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
   </ItemGroup>
   <ItemGroup>

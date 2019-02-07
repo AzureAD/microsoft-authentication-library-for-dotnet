@@ -33,6 +33,10 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore;
 
+#if iOS
+using UIKit;
+#endif
+
 #if ANDROID
 using Android.App;
 #endif
@@ -161,6 +165,11 @@ namespace Microsoft.Identity.Client.ApiConfig
             else
             {
                 throw new InvalidOperationException(CoreErrorMessages.ActivityRequiredForParentObjectAndroid);
+            }
+#elif iOS
+            if(_ownerWindow is UIViewController uiViewController)
+            {
+                Parameters.UiParent.SetUIViewController(uiViewController);
             }
 
 #elif DESKTOP

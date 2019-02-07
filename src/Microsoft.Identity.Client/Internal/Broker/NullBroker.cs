@@ -1,20 +1,20 @@
-﻿//----------------------------------------------------------------------
-//
+﻿// ------------------------------------------------------------------------------
+// 
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-//
+// 
 // This code is licensed under the MIT License.
-//
+// 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-//
+// 
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,47 +22,31 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-//
-//------------------------------------------------------------------------------
+// 
+// ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Utils
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal static class ScopeHelper
+    /// <summary>
+    /// For platforms that do not support a broker (net desktop, net core, UWP, netstandard)
+    /// </summary>
+    internal class NullBroker : IBroker
     {
-        public static bool ScopeContains(SortedSet<string> outerSet, SortedSet<string> possibleContainedSet)
+        public bool CanInvokeBroker(OwnerUiParent uiParent, IServiceBundle serviceBundle)
         {
-            foreach (string key in possibleContainedSet)
-            {
-                if (!outerSet.Contains(key, StringComparer.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return false;
         }
 
-        internal static SortedSet<string> ConvertStringToLowercaseSortedSet(string singleString)
+        public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload, IServiceBundle serviceBundle)
         {
-            if (string.IsNullOrEmpty(singleString))
-            {
-                return new SortedSet<string>();
-            }
-
-            return new SortedSet<string>(singleString.ToLowerInvariant().Split(new[] { " " }, StringSplitOptions.None));
-        }
-
-        internal static SortedSet<string> CreateSortedSetFromEnumerable(IEnumerable<string> input)
-        {
-            if (input == null || !input.Any())
-            {
-                return new SortedSet<string>();
-            }
-            return new SortedSet<string>(input);
+            throw new PlatformNotSupportedException(CoreErrorMessages.BrokerNotSupportedOnThisPlatform);
         }
     }
 }

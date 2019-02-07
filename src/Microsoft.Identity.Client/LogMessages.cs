@@ -54,5 +54,14 @@ namespace Microsoft.Identity.Client
         }
 
         public const string CustomWebUiCallingAcquireAuthorizationCodeNoPii = "Calling CustomWebUi.AcquireAuthorizationCode";
+
+        public const string CheckMsalTokenResponseReturnedFromBroker = "Checking MsalTokenResponse returned from broker. ";
+        public const string BrokerResponseContainsAccessToken = "Broker response contains access token. Count of:  ";
+        public const string UnknownErrorRerturnedInBrokerResponse = "Unknown error returned in broker response. ";    
+
+        public static string ErrorReturnedInBrokerResponse(string error)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "Error {0} returned in broker response. ", error);
+        }
     }
 }

@@ -25,57 +25,30 @@
 // 
 // ------------------------------------------------------------------------------
 
+#if iOS
+using Microsoft.Identity.Client.Platforms.iOS;
+#endif
+using Microsoft.Identity.Client.Core;
 using System;
-using System.Collections.Generic;
-using System.Threading;
-using Microsoft.Identity.Client.UI;
 
-#if iOS
-using UIKit;
-#endif
-
-#if ANDROID
-using Android.App;
-#endif
-
-#if DESKTOP
-using System.Windows.Forms;
-#endif
-
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    /// <summary>
-    /// Owner UI parent for the dialog in which authentication will take place.
-    /// </summary>
-    public class OwnerUiParent
+    internal class BrokerFactory
     {
-        internal CoreUIParent CoreUiParent { get; } = new CoreUIParent();
-
-#if ANDROID
-        internal void SetAndroidActivity(Activity activity)
+        // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
+        public IBroker CreateBrokerFacade(ICoreLogger logger)
         {
-            CoreUiParent.Activity = activity;
-            CoreUiParent.CallerActivity = activity;
-        }
-#endif
-
+            if (logger == null)
+            {
+                throw new ArgumentNullException(nameof(logger));
+            }
 #if iOS
-        internal void SetUIViewController(UIViewController uiViewController)
-        {
-            CoreUiParent.CallerViewController = uiViewController;
-        }
+            return new iOSBroker(logger);
+#elif ANDROID
+            return new NullBroker();
+#else
+            return new NullBroker();
 #endif
-
-#if DESKTOP
-        internal void SetOwnerWindow(IWin32Window ownerWindow)
-        {
-            CoreUiParent.OwnerWindow = ownerWindow;
         }
-
-        internal void SetOwnerWindow(IntPtr ownerWindow)
-        {
-            CoreUiParent.OwnerWindow = ownerWindow;
-        }
-#endif
     }
 }

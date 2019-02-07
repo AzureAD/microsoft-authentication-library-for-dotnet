@@ -25,57 +25,21 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using Microsoft.Identity.Client.UI;
-
-#if iOS
-using UIKit;
-#endif
-
-#if ANDROID
-using Android.App;
-#endif
-
-#if DESKTOP
-using System.Windows.Forms;
-#endif
-
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    /// <summary>
-    /// Owner UI parent for the dialog in which authentication will take place.
-    /// </summary>
-    public class OwnerUiParent
+    internal class BrokerResponseConst
     {
-        internal CoreUIParent CoreUiParent { get; } = new CoreUIParent();
+        public const string ErrorMetadata = "error_metadata";
+        public const string ErrorDomain = "error_domain";
 
-#if ANDROID
-        internal void SetAndroidActivity(Activity activity)
-        {
-            CoreUiParent.Activity = activity;
-            CoreUiParent.CallerActivity = activity;
-        }
-#endif
-
-#if iOS
-        internal void SetUIViewController(UIViewController uiViewController)
-        {
-            CoreUiParent.CallerViewController = uiViewController;
-        }
-#endif
-
-#if DESKTOP
-        internal void SetOwnerWindow(IWin32Window ownerWindow)
-        {
-            CoreUiParent.OwnerWindow = ownerWindow;
-        }
-
-        internal void SetOwnerWindow(IntPtr ownerWindow)
-        {
-            CoreUiParent.OwnerWindow = ownerWindow;
-        }
-#endif
+        public const string Authority = "authority";
+        public const string AccessToken = "access_token";
+        public const string RefreshToken = "refresh_token";
+        public const string IdToken = "id_token";
+        public const string Bearer = "Bearer";
+        public const string CorrelationId = "correlation_id";
+        public const string Scope = "scope";
+        public const string ExpiresOn = "expires_on";
+        public const string ClientInfo = "client_info";
     }
 }
