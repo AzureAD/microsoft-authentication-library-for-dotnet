@@ -38,6 +38,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
         public const string BrokerKey = "broker_key";
         public const string ClientVersion = "client_version";
         public const string MsgProtocolVersion = "msg_protocol_ver";
+        public const string MsgProtocolVersion3 = "3";
+        public const string SkipCache = "YES";
 
         // not required
         public const string CorrelationId = "correlation_id";
@@ -56,7 +58,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public const string Force = "force";
         
-        public const string SilentBrokerFlow = "silent_broker_flow";
         public const string BrokerInstallUrl = "broker_install_url";
+        public const string BrokerV2 = "msauthv2://";
     }
 }

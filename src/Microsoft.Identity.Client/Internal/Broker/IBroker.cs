@@ -35,8 +35,8 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal interface IBroker
     {
-        bool CanInvokeBroker(OwnerUiParent uiParent, IServiceBundle serviceBundle);
+        bool CanInvokeBroker(OwnerUiParent uiParent);
 
-        Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload, IServiceBundle serviceBundle);
+        Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
     }
 }

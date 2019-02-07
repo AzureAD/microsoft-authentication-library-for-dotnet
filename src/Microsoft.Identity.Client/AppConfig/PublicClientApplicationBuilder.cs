@@ -84,10 +84,8 @@ namespace Microsoft.Identity.Client.AppConfig
         {
 #if iOS
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
+#endif // iOS 
             return this;
-#else
-            return this;
-#endif // iOS || NETSTANDARD1_3
         }
 
         /// <summary>
@@ -95,14 +93,12 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         /// <param name="enableBroker"></param>
         /// <returns></returns>
-        public PublicClientApplicationBuilder WithBroker(bool enableBroker)
+        private PublicClientApplicationBuilder WithBroker(bool enableBroker)
         {
 #if iOS
             Config.IsBrokerEnabled = enableBroker;
+#endif // iOS
             return this;
-#else
-            return this;
-#endif // iOS || NETSTANDARD1_3
         }
 #endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 

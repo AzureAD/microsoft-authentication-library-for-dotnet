@@ -61,8 +61,6 @@ namespace XForms.iOS
             // Default system browser
             //App.UIParent = new UIParent();
 
-            //App.MsalPublicClient.iOSKeychainSecurityGroup = "com.microsoft.adalcache";
-
             // To activate embedded webview, remove '//' below
             App.UIParent = new UIParent(true);
 

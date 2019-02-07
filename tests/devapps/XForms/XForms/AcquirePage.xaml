@@ -5,7 +5,7 @@
 
     <ContentPage.Padding>
         <OnPlatform x:TypeArguments="Thickness">
-            <!--<OnPlatform.iOS>0,20,0,0</OnPlatform.iOS>-->
+            <OnPlatform.iOS>0,20,0,0</OnPlatform.iOS>
         </OnPlatform>
     </ContentPage.Padding>
 
@@ -42,8 +42,8 @@
                 </StackLayout>
 
                 <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                      <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken_button"/>
-                      <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>
+                    <Button  Text="Acquire" Clicked="OnAcquireClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireToken_button"/>
+                    <Button  Text="DeviceCode" Clicked="OnAcquireByDeviceCodeClickedAsync" TextColor="Blue" Font="Bold,15" HorizontalOptions="Center" AutomationId="acquireTokenByDeviceCode"/>
                 </StackLayout>
             </StackLayout>
         </Frame>
@@ -69,7 +69,7 @@
         </Frame>
 
         <Label x:Name="acquireResponseTitleLabel" Text="Result:" Font="Bold,15"  AutomationId="testResult"/>
-        
+
         <ScrollView Orientation="Vertical" VerticalOptions="FillAndExpand">
             <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand">
                 <Frame OutlineColor="Black" Padding="10">
@@ -79,5 +79,5 @@
         </ScrollView>
 
     </StackLayout>
-    
+
 </ContentPage>

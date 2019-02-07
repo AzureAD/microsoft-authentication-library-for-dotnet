@@ -25,19 +25,44 @@
 //
 //------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Platforms.iOS
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Microsoft.Identity.Client.Utils
 {
-    internal class BrokerConstants
+    internal static class ScopeHelper
     {
-        public const string ChallengeResponseHeader = "Authorization";
-        public const string ChallengeResponseType = "PKeyAuth";
-        public const string ChallengeResponseToken = "AuthToken";
-        public const string ChallengeResponseContext = "Context";
-        public const string ChallengeResponseVersion = "Version";
-        public const string BrowserExtPrefix = "browser://";
-        public const string BrowserExtInstallPrefix = "msauth://";
-        public const string DeviceAuthChallengeRedirect = "urn:http-auth:PKeyAuth";
-        public const string ChallengeHeaderKey = "x-ms-PKeyAuth";
-        public const string ChallengeHeaderValue = "1.0";
+        public static bool ScopeContains(SortedSet<string> outerSet, SortedSet<string> possibleContainedSet)
+        {
+            foreach (string key in possibleContainedSet)
+            {
+                if (!outerSet.Contains(key, StringComparer.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal static SortedSet<string> ConvertStringToLowercaseSortedSet(string singleString)
+        {
+            if (string.IsNullOrEmpty(singleString))
+            {
+                return new SortedSet<string>();
+            }
+
+            return new SortedSet<string>(singleString.ToLowerInvariant().Split(new[] { " " }, StringSplitOptions.None));
+        }
+
+        internal static SortedSet<string> CreateSortedSetFromEnumerable(IEnumerable<string> input)
+        {
+            if (input == null || !input.Any())
+            {
+                return new SortedSet<string>();
+            }
+            return new SortedSet<string>(input);
+        }
     }
 }

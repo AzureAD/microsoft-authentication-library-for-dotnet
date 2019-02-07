@@ -69,11 +69,7 @@ namespace Microsoft.Identity.Client.TelemetryCore
             AcquireTokenForClientWithScopeRefresh = 727,
             AcquireTokenByRefreshToken = 728,
 
-            AcquireTokenByAuthorizationCodeWithCodeScope = 830,
-
-            // TODO these numbers are made up
-            AcquireTokenWithBroker = 1,
-            AcquireTokenWithBrokerDisabled = 2
+            AcquireTokenByAuthorizationCodeWithCodeScope = 830
         }
 
         private readonly ICryptographyManager _cryptographyManager;

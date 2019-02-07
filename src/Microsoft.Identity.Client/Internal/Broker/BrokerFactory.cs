@@ -36,14 +36,10 @@ namespace Microsoft.Identity.Client.Internal.Broker
     internal class BrokerFactory
     {
         // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
-        public IBroker CreateBrokerFacade(ICoreLogger logger)
+        public IBroker CreateBrokerFacade(IServiceBundle serviceBundle)
         {
-            if (logger == null)
-            {
-                throw new ArgumentNullException(nameof(logger));
-            }
 #if iOS
-            return new iOSBroker(logger);
+            return new iOSBroker(serviceBundle);
 #elif ANDROID
             return new NullBroker();
 #else

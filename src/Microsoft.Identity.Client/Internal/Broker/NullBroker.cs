@@ -39,12 +39,12 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
-        public bool CanInvokeBroker(OwnerUiParent uiParent, IServiceBundle serviceBundle)
+        public bool CanInvokeBroker(OwnerUiParent uiParent)
         {
             return false;
         }
 
-        public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload, IServiceBundle serviceBundle)
+        public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
         {
             throw new PlatformNotSupportedException(CoreErrorMessages.BrokerNotSupportedOnThisPlatform);
         }

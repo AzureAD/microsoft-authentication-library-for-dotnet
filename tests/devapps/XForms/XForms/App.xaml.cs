@@ -49,10 +49,10 @@ namespace XForms
         public static string RedirectUriOnAndroid = Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri; // will not work with system browser
         // For system browser
         //public static string RedirectUriOnAndroid = "msauth-5a434691-ccb2-4fd1-b97b-b64bcfbc03fc://com.microsoft.identity.client.sample";
-        // For broker
-        //public const string BrokerRedirectUriOnIos = "msauth.<>://auth";
+        
+        public const string BrokerRedirectUriOnIos = "msauth.com.yourcompany.XForms://auth";
 
-        public static string RedirectUriOnIos = "msauth.com.yourcompany.XForms://auth"; //Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
+        public static string RedirectUriOnIos =  Microsoft.Identity.Client.Core.Constants.DefaultRedirectUri;
         // For system browser
         //public static string RedirectUriOnIos = "adaliosxformsapp://com.yourcompany.xformsapp";
 
@@ -74,6 +74,7 @@ namespace XForms
         public static string ClientId = DefaultClientId;
 
         public static string[] Scopes = DefaultScopes;
+        public static bool UseBroker;
 
         public App()
         {
@@ -92,23 +93,32 @@ namespace XForms
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
                 },
                 LogLevel.Verbose,
-                true)
-                .WithBroker(true);
+                true);
 
-            // Let Android set its own redirect uri
-            switch (Device.RuntimePlatform)
+            if (UseBroker)
             {
-                case "iOS":
-                    builder.WithRedirectUri(RedirectUriOnIos);
-                    break;
-                case "Android":
-                    builder.WithRedirectUri(RedirectUriOnAndroid);
-                    break;
+                //builder.WithBroker(true);
+                builder.WithIosKeychainSecurityGroup("com.microsoft.adalcache");
+                builder.WithRedirectUri(BrokerRedirectUriOnIos);
             }
 
+            else
+            {
+                 // Let Android set its own redirect uri
+                switch (Device.RuntimePlatform)
+                {
+                    case "iOS":
+                        builder.WithRedirectUri(RedirectUriOnIos);
+                        break;
+                    case "Android":
+                        builder.WithRedirectUri(RedirectUriOnAndroid);
+                        break;
+                }
+
 #if BUILDENV == APPCENTER
-            builder.WithIosKeychainSecurityGroup("*");
+                builder.WithIosKeychainSecurityGroup("*");
 #endif
+            }
 
             MsalPublicClient = builder.BuildConcrete();
         }
