@@ -196,7 +196,7 @@ namespace Microsoft.Identity.Client
             string authority)
         {
             GuardMobileFrameworks();
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(new Uri(authority)).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(authority).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Microsoft.Identity.Client
         {
             GuardMobileFrameworks();
 
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(new Uri(authority)).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(authority).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -249,12 +249,12 @@ namespace Microsoft.Identity.Client
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        /// <seealso cref="AcquireTokenForAuthorizationCode(IEnumerable{string}, string)"/> which is the corresponding V2 API
+        /// <seealso cref="AcquireTokenByAuthorizationCode(IEnumerable{string}, string)"/> which is the corresponding V2 API
         public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scopes)
         {
             GuardMobileFrameworks();
 
-            return await AcquireTokenForAuthorizationCode(scopes, authorizationCode)
+            return await AcquireTokenByAuthorizationCode(scopes, authorizationCode)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 

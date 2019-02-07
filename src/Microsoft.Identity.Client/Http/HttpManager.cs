@@ -63,9 +63,9 @@ namespace Microsoft.Identity.Client.Http
         }
 
         public async Task<HttpResponse> SendPostAsync(
-            Uri endpoint, 
+            Uri endpoint,
             IDictionary<string, string> headers,
-            HttpContent body, 
+            HttpContent body,
             RequestContext requestContext)
         {
             return await ExecuteWithRetryAsync(endpoint, headers, body, HttpMethod.Post, requestContext).ConfigureAwait(false);
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Http
 
         public async Task<HttpResponse> SendGetAsync(
             Uri endpoint,
-            Dictionary<string, string> headers,
+            IDictionary<string, string> headers,
             RequestContext requestContext)
         {
             return await ExecuteWithRetryAsync(endpoint, headers, null, HttpMethod.Get, requestContext).ConfigureAwait(false);
@@ -81,10 +81,10 @@ namespace Microsoft.Identity.Client.Http
 
         /// <summary>
         /// Performs the POST request just like <see cref="SendPostAsync(Uri, IDictionary{string, string}, HttpContent, RequestContext)"/>
-        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="IHttpWebResponse"/> associated
+        /// but does not throw a ServiceUnavailable service exception. Instead, it returns the <see cref="HttpResponse"/> associated
         /// with the request.
         /// </summary>
-        public async Task<IHttpWebResponse> SendPostForceResponseAsync(
+        public async Task<HttpResponse> SendPostForceResponseAsync(
             Uri uri,
             Dictionary<string, string> headers,
             StringContent body,
@@ -149,7 +149,7 @@ namespace Microsoft.Identity.Client.Http
             }
             catch (TaskCanceledException exception)
             {
-                requestContext.Logger.ErrorPii(exception);
+                requestContext.Logger.Error("The HTTP request failed or it was canceled. " + exception.Message);
                 isRetryable = true;
                 timeoutException = exception;
             }
@@ -170,14 +170,14 @@ namespace Microsoft.Identity.Client.Http
                         retry: false).ConfigureAwait(false);
                 }
 
-                requestContext.Logger.Info("Request retry failed.");
+                requestContext.Logger.Error("Request retry failed.");
                 if (timeoutException != null)
                 {
                     throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.RequestTimeout,
                         "Request to the endpoint timed out.",
-                        timeoutException, 
-                        null); // no http response to add more details to this exception
+                        null,
+                        innerException: timeoutException); // no http response to add more details to this exception
                 }
 
                 if (doNotThrow)
@@ -187,8 +187,8 @@ namespace Microsoft.Identity.Client.Http
 
                 throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.ServiceNotAvailable,
-                        "Service is unavailable to process the request",
-                        response);
+                    "Service is unavailable to process the request",
+                    response);
             }
 
             return response;

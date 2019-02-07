@@ -1,49 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
   <Class Name="Microsoft.Identity.Client.AppConfig.ConfidentialClientApplicationBuilder">
-    <Position X="9.25" Y="6.75" Width="7.25" />
+    <Position X="9.25" Y="6.25" Width="7.25" />
     <Members>
       <Method Name="BuildConcrete" Hidden="true" />
-      <Method Name="BuildConfiguration" Hidden="true" />
       <Method Name="ConfidentialClientApplicationBuilder" Hidden="true" />
+      <Method Name="Validate" Hidden="true" />
       <Method Name="WithClientCredential" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAYAEAgBAAAAAAAAAAAAACAgEAAAEAEAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAACgBAgAAAAAAAAAAACAgEAAAEAAAAAAAAA=</HashCode>
       <FileName>AppConfig\ConfidentialClientApplicationBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.AppConfig.AbstractApplicationBuilder&lt;T&gt;">
-    <Position X="5" Y="0.5" Width="8.75" />
+    <Position X="5" Y="0.5" Width="10.5" />
     <Members>
       <Method Name="AbstractApplicationBuilder" Hidden="true" />
       <Method Name="BuildConfiguration" Hidden="true" />
       <Property Name="Config" Hidden="true" />
-      <Method Name="DetermineDefaultAuthorityType" Hidden="true" />
-      <Method Name="GetAadAuthorityAudienceValue" Hidden="true" />
-      <Method Name="GetAuthorityUri" Hidden="true" />
-      <Method Name="GetCloudUrl" Hidden="true" />
       <Method Name="GetDefaultAuthorityAudience" Hidden="true" />
       <Method Name="GetDefaultAuthorityInstance" Hidden="true" />
       <Method Name="GetValueIfNotEmpty" Hidden="true" />
       <Method Name="TryAddDefaultAuthority" Hidden="true" />
+      <Method Name="Validate" Hidden="true" />
       <Method Name="WithHttpManager" Hidden="true" />
       <Method Name="WithOptions" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>gYQDAAAItiQQAAAAAAAAAAABCAAIAhAAAABAJFAgAAA=</HashCode>
+      <HashCode>AAQDAAAIEiCAAgAAAAAAAAACCAAIAhAAAABARAIgAAQ=</HashCode>
       <FileName>AppConfig\AbstractApplicationBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.AppConfig.PublicClientApplicationBuilder">
-    <Position X="2.5" Y="6.75" Width="6.5" />
+    <Position X="2.5" Y="6.25" Width="6.5" />
     <Members>
       <Method Name="BuildConcrete" Hidden="true" />
       <Method Name="PublicClientApplicationBuilder" Hidden="true" />
+      <Method Name="Validate" Hidden="true" />
+      <Method Name="WithBroker" Hidden="true" />
       <Method Name="WithUserTokenLegacyCachePersistenceForTest" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAgAAAAAAAAAAAAGAAAgEAAAEAAAAAAAAA=</HashCode>
+      <HashCode>AQAAAAAAAACgAAAAAAAAAAAAEAAAgEAAAEAAAAAAAAA=</HashCode>
       <FileName>AppConfig\PublicClientApplicationBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>

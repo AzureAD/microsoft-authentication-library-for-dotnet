@@ -145,10 +145,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 "<wsa:messageID>urn:uuid:b052e0d8-349c-4d73-9ddb-0782043a440e</wsa:messageID>" +
                 "<wsa:ReplyTo><wsa:Address>http://www.w3.org/2005/08/addressing/anonymous</wsa:Address>" +
                 "</wsa:ReplyTo><wsa:To s:mustUnderstand=\"1\">https://windowsorusernamepasswordendpointurl/</wsa:To>" +
-                "<wsse:Security s:mustUnderstand=\"1\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">" + 
-                "<wsu:Timestamp wsu:Id=\"MSATimeStamp\"><wsu:Created>2018-10-02T10:15:30.068Z</wsu:Created>" + 
-                "<wsu:Expires>2018-10-02T10:25:30.068Z</wsu:Expires></wsu:Timestamp>" + 
-                "<wsse:UsernameToken wsu:Id=\"UnPwSecTok13-d9d9bd71-1cfd-4dbf-8d9d-0bc5cfdbbe72\">" + 
+                "<wsse:Security s:mustUnderstand=\"1\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">" +
+                "<wsu:Timestamp wsu:Id=\"MSATimeStamp\"><wsu:Created>2018-10-02T10:15:30.068Z</wsu:Created>" +
+                "<wsu:Expires>2018-10-02T10:25:30.068Z</wsu:Expires></wsu:Timestamp>" +
+                "<wsse:UsernameToken wsu:Id=\"UnPwSecTok13-d9d9bd71-1cfd-4dbf-8d9d-0bc5cfdbbe72\">" +
                 "<wsse:Username>the_username</wsse:Username><wsse:Password>the_password</wsse:Password></wsse:UsernameToken></wsse:Security>" +
                 "</s:Header><s:Body><wst:RequestSecurityToken xmlns:wst=\"http://docs.oasis-open.org/ws-sx/ws-trust/200512\">" +
                 "<wsp:AppliesTo xmlns:wsp=\"http://schemas.xmlsoap.org/ws/2004/09/policy\"><wsa:EndpointReference>" +

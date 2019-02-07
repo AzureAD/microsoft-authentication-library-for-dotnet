@@ -85,12 +85,12 @@ namespace XForms
             var builder = PublicClientApplicationBuilder
                 .Create(ClientId)
                 .WithAuthority(new Uri(Authority), ValidateAuthority)
-                .WithLoggingCallback((level, message, pii) =>
+                .WithLogging((level, message, pii) =>
                 {
                     Device.BeginInvokeOnMainThread(() => { LogPage.AddToLog("[" + level + "]" + " - " + message, pii); });
-                })
-                .WithLoggingLevel(LogLevel.Verbose)
-                .WithEnablePiiLogging(true);
+                },
+                LogLevel.Verbose,
+                true);
 
             // Let Android set its own redirect uri
             switch (Device.RuntimePlatform)

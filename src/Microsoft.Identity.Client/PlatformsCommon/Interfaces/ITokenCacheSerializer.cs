@@ -25,17 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.CacheV2.Schema
+using Microsoft.Identity.Client.Cache;
+
+namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
-    internal static class StorageJsonValues
+    /// <summary>
+    /// Provides a high level token cache serialization solution that is similar to the one offered to MSAL customers. 
+    /// Platforms should try to implement <see cref="ITokenCacheAccessor"/> if possible, as it provides more granular 
+    /// access. 
+    /// </summary>
+    internal interface ITokenCacheBlobStorage
     {
-        public const string AuthorityTypeAdfs = "ADFS";
-        public const string AuthorityTypeMsa = "MSA";
-        public const string AuthorityTypeMsSts = "MSSTS";
-        public const string AuthorityTypeOther = "Other";
-        public const string CredentialTypeRefreshToken = "RefreshToken";
-        public const string CredentialTypeAccessToken = "AccessToken";
-        public const string CredentialTypeIdToken = "IdToken";
-        public const string CredentialTypeOther = "Other";
+        void OnAfterAccess(TokenCacheNotificationArgs args);
+        void OnBeforeAccess(TokenCacheNotificationArgs args);
+        void OnBeforeWrite(TokenCacheNotificationArgs args);
     }
 }

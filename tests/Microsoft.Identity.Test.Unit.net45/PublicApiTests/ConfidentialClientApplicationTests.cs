@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void ConstructorsTest()
         {
             var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
+                                                          .WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientSecret(MsalTestConstants.ClientSecret)
                                                           .BuildConcrete();
@@ -285,7 +285,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientCredential(cc)
                                                           .WithHttpManager(httpManager)
-                                                          .WithTelemetryCallback(telemetryCallback)
+                                                          .WithTelemetry(telemetryCallback)
                                                           .BuildConcrete();
 
             httpManager.AddMockHandlerForTenantEndpointDiscovery(app.Authority);
@@ -427,7 +427,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                             File.ReadAllText(
                                 ResourceHelper.GetTestResourceRelativePath(@"OpenidConfiguration-QueryParams-B2C.json")))
@@ -582,8 +582,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 
                 _tokenCacheHelper.PopulateCacheForClientCredential(app.AppTokenCacheInternal.Accessor);
 
-                ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest(app.ServiceBundle));
+                var accessTokens = app.AppTokenCacheInternal.GetAllAccessTokens(true);
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -613,7 +612,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                               .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                               .WithClientSecret(MsalTestConstants.ClientSecret)
                                                               .WithHttpManager(httpManager)
-                                                              .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                              .WithTelemetry(receiver.HandleTelemetryEvents)
                                                               .BuildConcrete();
 
                 _tokenCacheHelper.PopulateCache(app.AppTokenCacheInternal.Accessor);
@@ -625,7 +624,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage =
                             MockHelpers.CreateSuccessfulClientCredentialTokenResponseMessage(TokenRetrievedFromNetCall)
                     });
@@ -634,8 +633,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(TokenRetrievedFromNetCall, result.AccessToken);
 
                 // make sure token in Cache was updated
-                ICollection<MsalAccessTokenCacheItem> accessTokens =
-                    app.AppTokenCacheInternal.GetAllAccessTokensForClient(RequestContext.CreateForTest(app.ServiceBundle));
+                var accessTokens = app.AppTokenCacheInternal.GetAllAccessTokens(true);
                 var accessTokenInCache = accessTokens
                                          .Where(item => ScopeHelper.ScopeContains(item.ScopeSet, MsalTestConstants.Scope))
                                          .ToList().FirstOrDefault();
@@ -735,7 +733,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             // This test is to ensure that the methods we want/need on the IConfidentialClientApplication exist and compile.  This isn't testing functionality, that's done elsewhere.
             // It's solely to ensure we know that the methods we want/need are available where we expect them since we tend to do most testing on the concrete types.
 
-            var authCodeBuilder = app.AcquireTokenForAuthorizationCode(MsalTestConstants.Scope, "authorizationcode");
+            var authCodeBuilder = app.AcquireTokenByAuthorizationCode(MsalTestConstants.Scope, "authorizationcode");
             PublicClientApplicationTests.CheckBuilderCommonMethods(authCodeBuilder);
             
             var clientBuilder = app.AcquireTokenForClient(MsalTestConstants.Scope)

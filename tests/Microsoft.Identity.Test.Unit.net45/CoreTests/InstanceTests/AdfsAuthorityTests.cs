@@ -73,9 +73,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         },
@@ -88,9 +88,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"resource", "https://fs.contoso.com"},
                             {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
@@ -102,8 +102,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage =
                             MockHelpers.CreateSuccessResponseMessage(
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
@@ -148,9 +148,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         },
@@ -161,9 +161,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://enterpriseregistration.windows.net/fabrikam.com/enrollmentserver/contract",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://enterpriseregistration.windows.net/fabrikam.com/enrollmentserver/contract",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         },
@@ -176,9 +176,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"resource", "https://fs.contoso.com"},
                             {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
@@ -190,8 +190,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage =
                             MockHelpers.CreateSuccessResponseMessage(
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
@@ -223,8 +223,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage =
                             MockHelpers.CreateSuccessResponseMessage(
                                 ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-OnPremise.json")))
@@ -255,9 +255,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         },
@@ -270,9 +270,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"resource", "https://fs.contoso.com"},
                             {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
@@ -310,9 +310,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         },
@@ -325,9 +325,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.fabrikam.com/adfs/.well-known/webfinger",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"resource", "https://fs.contoso.com"},
                             {"rel", "http://schemas.microsoft.com/rel/trusted-realm"}
@@ -364,9 +364,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://enterpriseregistration.fabrikam.com/enrollmentserver/contract",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"}
                         },
@@ -404,8 +404,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://fs.contoso.com/adfs/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                             ResourceHelper.GetTestResourceRelativePath(File.ReadAllText("OpenidConfiguration-MissingFields-OnPremise.json")))
                     });

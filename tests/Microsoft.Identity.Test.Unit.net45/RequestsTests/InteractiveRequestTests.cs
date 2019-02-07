@@ -25,29 +25,28 @@
 //
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Mocks;
+using Microsoft.Identity.Test.Common.Mocks;
+using Microsoft.Identity.Test.Unit.PublicApiTests;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
-using Microsoft.Identity.Test.Common.Core.Mocks;
-using Microsoft.Identity.Test.Common.Mocks;
-using Microsoft.Identity.Test.Unit.PublicApiTests;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -62,9 +61,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
-        public void SliceParametersTest()
+        public async Task WithExtraQueryParamsAndClaimsAsync()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+
+            IDictionary<string, string> extraQueryParamsAndClaims =
+                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+
+            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
                 var cache = new TokenCache(harness.ServiceBundle);
 
@@ -73,52 +77,43 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,
                         MsalTestConstants.AuthorityHomeTenant + "?code=some-code"),
-                    QueryParamsToValidate = new Dictionary<string, string>()
-                    {
-                        {"key1", "value1%20with%20encoded%20space"},
-                        {"key2", "value2"}
-                    }
+                    QueryParamsToValidate = MsalTestConstants.ExtraQueryParams
                 };
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        Method = HttpMethod.Post,
-                        QueryParams = new Dictionary<string, string>()
-                        {
-                            {"key1", "value1%20with%20encoded%20space"},
-                            {"key2", "value2"}
-                        },
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
-                    });
-
-                var parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant, MsalTestConstants.Scope, cache, extraQueryParameters: new Dictionary<string, string>
+                var tokenResponseHandler = new MockHttpMessageHandler
                 {
-                    { "extra", "qp" },
-                    // Slice Parameters
-                    { "key1", "value1%20with%20encoded%20space" },
-                    { "key2", "value2" }
-                });
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedQueryParams = extraQueryParamsAndClaims,
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                };
+                harness.HttpManager.AddMockHandler(tokenResponseHandler);
+
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
+                    MsalTestConstants.AuthorityHomeTenant,
+                    MsalTestConstants.Scope,
+                    cache,
+                    extraQueryParameters: MsalTestConstants.ExtraQueryParams,
+                    claims: MsalTestConstants.Claims);
+
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = MsalTestConstants.DisplayableId;
-                var interactiveParameters = new AcquireTokenInteractiveParameters
+
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                var request = new InteractiveRequest(
+                InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
                     interactiveParameters,
                     ui);
 
-                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                task.Wait();
-                var result = task.Result;
+                AuthenticationResult result = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
+
                 Assert.IsNotNull(result);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.RefreshTokenCount);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.AccessTokenCount);
@@ -132,14 +127,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             MyReceiver myReceiver = new MyReceiver();
 
-            using (var harness = new MockHttpAndServiceBundle(telemetryCallback: myReceiver.HandleTelemetryEvents))
+            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle(telemetryCallback: myReceiver.HandleTelemetryEvents))
             {
-                var cache = new TokenCache(harness.ServiceBundle);
+                TokenCache cache = new TokenCache(harness.ServiceBundle);
 
-                var atItem = new MsalAccessTokenCacheItem(
+                MsalAccessTokenCacheItem atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -151,18 +145,18 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 atItem.Secret = atKey;
                 ((ITokenCacheInternal)cache).Accessor.SaveAccessToken(atItem);
 
-                var ui = new MockWebUI()
+                MockWebUI ui = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.Success,
                         MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
                 };
-                                
+
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
                 harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityHomeTenant);
 
-                var parameters = harness.CreateAuthenticationRequestParameters(
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
                     cache,
@@ -172,13 +166,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = MsalTestConstants.DisplayableId;
-                var interactiveParameters = new AcquireTokenInteractiveParameters
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                var request = new InteractiveRequest(
+                InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
                     interactiveParameters,
@@ -186,7 +180,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
                 task.Wait();
-                var result = task.Result;
+                AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
                 Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.RefreshTokenCount);
                 Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.AccessTokenCount);
@@ -216,9 +210,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             try
             {
-                using (var harness = new MockHttpAndServiceBundle())
+                using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
                 {
-                    var parameters = harness.CreateAuthenticationRequestParameters(
+                    AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                         MsalTestConstants.AuthorityHomeTenant,
                         MsalTestConstants.Scope,
                         null,
@@ -228,7 +222,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         });
                     parameters.RedirectUri = new Uri("some://uri#fragment=not-so-good");
                     parameters.LoginHint = MsalTestConstants.DisplayableId;
-                    var interactiveParameters = new AcquireTokenInteractiveParameters
+                    AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                     {
                         Prompt = Prompt.ForceLogin,
                         ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
@@ -253,28 +247,28 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse() // returns a non json response
                     });
 
-                var parameters = harness.CreateAuthenticationRequestParameters(
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
                     null);
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = MsalTestConstants.DisplayableId;
-                var interactiveParameters = new AcquireTokenInteractiveParameters
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                var request = new InteractiveRequest(
+                InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
                     interactiveParameters,
@@ -288,7 +282,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 }
                 catch (Exception exc)
                 {
-                    var serverEx = exc.InnerException as MsalServiceException;
+                    MsalServiceException serverEx = exc.InnerException as MsalServiceException;
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
@@ -302,28 +296,28 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
+                        ExpectedMethod = HttpMethod.Get,
                         ResponseMessage = MockHelpers.CreateTooManyRequestsJsonResponse() // returns a non json response
                     });
 
-                var parameters = harness.CreateAuthenticationRequestParameters(
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
                     null);
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = MsalTestConstants.DisplayableId;
-                var interactiveParameters = new AcquireTokenInteractiveParameters
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.SelectAccount,
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                var request = new InteractiveRequest(
+                InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
                     interactiveParameters,
@@ -336,7 +330,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 }
                 catch (Exception exc)
                 {
-                    var serverEx = exc.InnerException as MsalServiceException;
+                    MsalServiceException serverEx = exc.InnerException as MsalServiceException;
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
@@ -349,33 +343,33 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void VerifyAuthorizationResultTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
-                var authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
+                Authority authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
 
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
-                var webUi = new MockWebUI()
+                MockWebUI webUi = new MockWebUI()
                 {
                     MockResult = new AuthorizationResult(
                         AuthorizationStatus.ErrorHttp,
                         MsalTestConstants.AuthorityHomeTenant + "?error=" + OAuth2Error.LoginRequired)
                 };
 
-                var parameters = harness.CreateAuthenticationRequestParameters(
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
                     null,
-                    extraQueryParameters: new Dictionary<string, string> {{ "extra", "qp" }});
+                    extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = MsalTestConstants.DisplayableId;
-                var interactiveParameters = new AcquireTokenInteractiveParameters
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.ForceLogin,
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                var request = new InteractiveRequest(
+                InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
                     interactiveParameters,
@@ -425,25 +419,25 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void DuplicateQueryParameterErrorTest()
         {
-            using (var harness = new MockHttpAndServiceBundle())
+            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
                 harness.HttpManager.AddInstanceDiscoveryMockHandler();
                 harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
 
-                var parameters = harness.CreateAuthenticationRequestParameters(
+                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
                     MsalTestConstants.AuthorityHomeTenant,
                     MsalTestConstants.Scope,
                     null,
-                    extraQueryParameters: new Dictionary<string, string> {{ "extra", "qp" }, {"prompt", "login"}});
+                    extraQueryParameters: new Dictionary<string, string> { { "extra", "qp" }, { "prompt", "login" } });
                 parameters.RedirectUri = new Uri("some://uri");
                 parameters.LoginHint = MsalTestConstants.DisplayableId;
-                var interactiveParameters = new AcquireTokenInteractiveParameters
+                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
                 {
                     Prompt = Prompt.ForceLogin,
                     ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
                 };
 
-                var request = new InteractiveRequest(
+                InteractiveRequest request = new InteractiveRequest(
                     harness.ServiceBundle,
                     parameters,
                     interactiveParameters,

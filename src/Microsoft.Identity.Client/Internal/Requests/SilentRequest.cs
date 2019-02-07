@@ -30,7 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 
@@ -50,7 +50,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (TokenCache == null)
+            if (!CacheManager.HasCache)
             {
                 throw new MsalUiRequiredException(
                     MsalUiRequiredException.TokenCacheNullError,
@@ -63,20 +63,17 @@ namespace Microsoft.Identity.Client.Internal.Requests
             if (!_silentParameters.ForceRefresh)
             {
                 msalAccessTokenItem =
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                    await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
             }
 
             if (msalAccessTokenItem != null)
             {
-                var msalIdTokenItem = TokenCache.GetIdTokenCacheItem(
-                    msalAccessTokenItem.GetIdTokenItemKey(),
-                    AuthenticationRequestParameters.RequestContext);
+                var msalIdTokenItem = CacheManager.GetIdTokenCacheItem(msalAccessTokenItem.GetIdTokenItemKey());
 
                 return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
             }
 
-            var msalRefreshTokenItem =
-                await TokenCache.FindRefreshTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+            var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
 
             if (msalRefreshTokenItem == null)
             {

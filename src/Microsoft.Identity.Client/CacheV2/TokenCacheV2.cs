@@ -146,6 +146,18 @@ namespace Microsoft.Identity.Client.CacheV2
             }
         }
 
+        /// <inheritdoc />
+        public byte[] SerializeV3()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void DeserializeV3(byte[] bytes)
+        {
+            throw new NotImplementedException();
+        }
+
         private ILegacyCachePersistence LegacyCachePersistence => _storageManager?.AdalLegacyCacheManager?.LegacyCachePersistence;
 
         public CacheData SerializeUnifiedAndAdalCache()

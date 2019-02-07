@@ -18,6 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj" />
+    <ProjectReference Include="..\..\..\Microsoft.Identity.Test.Common\Microsoft.Identity.Test.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="AccountCacheItemDetails.xaml">

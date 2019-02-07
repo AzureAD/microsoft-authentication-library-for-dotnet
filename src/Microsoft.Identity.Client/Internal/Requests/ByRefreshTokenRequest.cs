@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (TokenCache == null)
+            if (!CacheManager.HasCache)
             {
                 throw new MsalUiRequiredException(
                     MsalUiRequiredException.TokenCacheNullError,

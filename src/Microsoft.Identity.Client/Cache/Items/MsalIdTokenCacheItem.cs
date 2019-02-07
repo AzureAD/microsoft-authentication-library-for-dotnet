@@ -26,18 +26,19 @@
 // ------------------------------------------------------------------------------
 
 using System.Globalization;
-using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Items
 {
-    [DataContract]
     internal class MsalIdTokenCacheItem : MsalCredentialCacheItemBase
     {
         internal MsalIdTokenCacheItem()
         {
-            CredentialType = MsalCacheCommon.IdToken;
+            CredentialType = StorageJsonValues.CredentialTypeIdToken;
         }
 
         internal MsalIdTokenCacheItem(
@@ -71,7 +72,6 @@ namespace Microsoft.Identity.Client.Cache
             InitUserIdentifier();
         }
 
-        [DataMember(Name = "realm")]
         internal string TenantId { get; set; }
 
         internal string Authority =>
@@ -82,6 +82,36 @@ namespace Microsoft.Identity.Client.Cache
         internal MsalIdTokenCacheKey GetKey()
         {
             return new MsalIdTokenCacheKey(Environment, TenantId, HomeAccountId, ClientId);
+        }
+
+        internal static MsalIdTokenCacheItem FromJsonString(string json)
+        {
+            return FromJObject(JObject.Parse(json));
+        }
+
+        internal static MsalIdTokenCacheItem FromJObject(JObject j)
+        {
+            var item = new MsalIdTokenCacheItem
+            {
+                TenantId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Realm),
+            };
+
+            item.PopulateFieldsFromJObject(j);
+
+            return item;
+        }
+
+        internal override JObject ToJObject()
+        {
+            var json = base.ToJObject();
+            json[StorageJsonKeys.Realm] = TenantId;
+            return json;
+        }
+
+        internal string ToJsonString()
+        {
+            return ToJObject()
+                .ToString();
         }
     }
 }

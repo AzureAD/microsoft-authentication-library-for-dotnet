@@ -32,6 +32,8 @@ using System.Net.Http.Headers;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -43,7 +45,13 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         private const string ExCode = "exCode";
         private const string ExMessage = "exMessage";
 
-        [TestInitialize]
+        private const string jsonError = @"{ ""error"":""invalid_tenant"", ""suberror"":""suberror"",
+            ""claims"":""some_claims"",
+            ""error_description"":""AADSTS90002: Tenant 'x' not found. "", ""error_codes"":[90002],""timestamp"":""2019-01-28 14:16:04Z"",
+            ""trace_id"":""43f14373-8d7d-466e-a5f1-6e3889291e00"",
+            ""correlation_id"":""6347d33d-941a-4c35-9912-a9cf54fb1b3e""}";
+
+    [TestInitialize]
         public void Init()
         {
         }
@@ -55,10 +63,10 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             AssertException.Throws<ArgumentNullException>(() => MsalExceptionFactory.GetClientException("", ExMessage));
 
             AssertException.Throws<ArgumentNullException>(
-                () => MsalExceptionFactory.GetServiceException(ExCode, "", new ExceptionDetail()));
+                () => MsalExceptionFactory.GetServiceException(ExCode, ""));
 
             AssertException.Throws<ArgumentNullException>(
-                () => MsalExceptionFactory.GetServiceException(ExCode, null, new ExceptionDetail()));
+                () => MsalExceptionFactory.GetServiceException(ExCode, null));
         }
 
         [TestMethod]
@@ -74,7 +82,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.IsNull(msalClientException.InnerException);
 
             // Act
-            string piiMessage = MsalExceptionFactory.GetPiiScrubbedDetails(msalException);
+            string piiMessage = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -86,38 +94,65 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         }
 
         [TestMethod]
-        public void MsalServiceException()
+        public void MsalServiceException_Oauth2Response_Only()
         {
             // Arrange
-            string claims = "claims";
-            string responseBody = "responseBody";
-            int statusCode = 509;
+            HttpResponse httpResponse = new HttpResponse()
+            {
+                Body = jsonError,
+                StatusCode = HttpStatusCode.BadRequest, // 400                
+            };
+
+            OAuth2ResponseBase oAuth2Response =
+              JsonHelper.TryToDeserializeFromJson<OAuth2ResponseBase>(httpResponse?.Body);
+
+            // Act
+            var msalException = MsalExceptionFactory.GetServiceException(ExCode, ExMessage, oAuth2Response);
+
+            // Assert
+            var msalServiceException = msalException as MsalServiceException;
+            Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
+            Assert.AreEqual(ExMessage, msalServiceException.Message);
+            Assert.AreEqual("some_claims", msalServiceException.Claims);
+            Assert.AreEqual("suberror", msalServiceException.SubError);
+            Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
+        }
+
+        [TestMethod]
+        public void MsalServiceException_HttpResponse_OAuthResponse()
+        {
+            // Arrange
+            int statusCode = 400;
             string innerExMsg = "innerExMsg";
             var innerException = new NotImplementedException(innerExMsg);
+
+            HttpResponse httpResponse = new HttpResponse()
+            {
+                Body = jsonError,
+                StatusCode = HttpStatusCode.BadRequest, // 400                
+            };
 
             // Act
             var msalException = MsalExceptionFactory.GetServiceException(
                 ExCode,
                 ExMessage,
-                innerException,
-                new ExceptionDetail
-                {
-                    Claims = claims,
-                    ResponseBody = responseBody,
-                    StatusCode = statusCode
-                });
+                httpResponse,
+                innerException);
 
             // Assert
             var msalServiceException = msalException as MsalServiceException;
             Assert.AreEqual(innerException, msalServiceException.InnerException);
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
-            Assert.AreEqual(claims, msalServiceException.Claims);
-            Assert.AreEqual(responseBody, msalServiceException.ResponseBody);
+            Assert.AreEqual(jsonError, msalServiceException.ResponseBody);
             Assert.AreEqual(ExMessage, msalServiceException.Message);
             Assert.AreEqual(statusCode, msalServiceException.StatusCode);
 
+            Assert.AreEqual("some_claims", msalServiceException.Claims);
+            Assert.AreEqual("suberror", msalServiceException.SubError);
+            Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
+
             // Act
-            string piiMessage = MsalExceptionFactory.GetPiiScrubbedDetails(msalException);
+            string piiMessage = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -128,8 +163,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 piiMessage.Contains(typeof(NotImplementedException).Name),
                 "The pii message should have the inner exception type");
             Assert.IsTrue(piiMessage.Contains(ExCode));
+            Assert.IsTrue(piiMessage.Contains("suberror"));
+            Assert.IsTrue(piiMessage.Contains("6347d33d-941a-4c35-9912-a9cf54fb1b3e")); // Correlation Id
+
             Assert.IsFalse(piiMessage.Contains(ExMessage));
             Assert.IsFalse(piiMessage.Contains(innerExMsg));
+
         }
 
         [TestMethod]
@@ -140,7 +179,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var innerException = new NotImplementedException(innerExMsg);
 
             // Act
-            var msalException = MsalExceptionFactory.GetUiRequiredException(ExCode, ExMessage, innerException, null);
+            var msalException = MsalExceptionFactory.GetServiceException(
+                ExCode, 
+                ExMessage, 
+                null, 
+                innerException: innerException, 
+                true);
 
             // Assert
             var msalServiceException = msalException as MsalUiRequiredException;
@@ -152,7 +196,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(0, msalServiceException.StatusCode);
 
             // Act
-            string piiMessage = MsalExceptionFactory.GetPiiScrubbedDetails(msalException);
+            string piiMessage = MsalExceptionFactory.GetPiiScrubbedExceptionDetails(msalException);
 
             // Assert
             Assert.IsFalse(string.IsNullOrEmpty(piiMessage));
@@ -171,7 +215,7 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         public void MsalServiceException_FromHttpResponse()
         {
             // Arrange
-            string responseBody = "body";
+            string responseBody = jsonError;
             var statusCode = HttpStatusCode.BadRequest;
             var retryAfterSpan = new TimeSpan(3600);
 
@@ -179,11 +223,12 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             {
                 Content = new StringContent(responseBody)
             };
+
             httpResponse.Headers.RetryAfter = new RetryConditionHeaderValue(retryAfterSpan);
-            var coreResponse = HttpManager.CreateResponseAsync(httpResponse).Result;
+            HttpResponse msalhttpResponse = HttpManager.CreateResponseAsync(httpResponse).Result;
 
             // Act
-            var msalException = MsalExceptionFactory.GetServiceException(ExCode, ExMessage, coreResponse);
+            var msalException = MsalExceptionFactory.GetServiceException(ExCode, ExMessage, msalhttpResponse);
 
             // Assert
             var msalServiceException = msalException as MsalServiceException;

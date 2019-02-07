@@ -27,7 +27,7 @@
 
 using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
+namespace Microsoft.Identity.Client.Utils
 {
     internal static class JsonUtils
     {

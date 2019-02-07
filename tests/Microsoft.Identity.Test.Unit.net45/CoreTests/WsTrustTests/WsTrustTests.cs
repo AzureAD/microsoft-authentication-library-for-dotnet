@@ -55,8 +55,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Url = wsTrustAddress,
-                        Method = HttpMethod.Post,
+                        ExpectedUrl = wsTrustAddress,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
                         {
                             Content = new StringContent(

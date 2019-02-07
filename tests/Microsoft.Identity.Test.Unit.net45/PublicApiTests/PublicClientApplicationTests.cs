@@ -37,6 +37,8 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -158,7 +160,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 MockWebUI ui = new MockWebUI()
@@ -253,7 +255,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             "some-scope1 some-scope2",
                             MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
@@ -359,7 +361,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.Scope.ToString(),
                             MockHelpers.CreateIdToken(
@@ -393,7 +395,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 MsalMockHelpers.ConfigureMockWebUI(
@@ -427,7 +429,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.Scope.AsSingleString(),
                             MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
@@ -495,7 +497,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.Scope.AsSingleString(),
                             MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
@@ -538,7 +540,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var atItem = new MsalAccessTokenCacheItem(
                     MsalTestConstants.ProductionPrefNetworkEnvironment,
                     MsalTestConstants.ClientId,
-                    "Bearer",
                     MsalTestConstants.Scope.AsSingleString(),
                     MsalTestConstants.Utid,
                     null,
@@ -623,7 +624,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var receiver = new MyReceiver();
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
-                                                                        .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                        .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                         .BuildConcrete();
 
             try
@@ -682,7 +683,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 Assert.AreEqual(MsalTestConstants.ScopeForAnotherResource.AsSingleString(), result.Scopes.AsSingleString());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokensAsString().Count());
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
             }
         }
 
@@ -744,7 +745,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -771,7 +772,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -825,7 +826,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -868,7 +869,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -896,7 +897,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -924,7 +925,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -951,7 +952,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -996,7 +997,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -1022,7 +1023,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -1050,7 +1051,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler()
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(
                             MsalTestConstants.UniqueId,
                             MsalTestConstants.DisplayableId,
@@ -1094,7 +1095,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
+                        ExpectedMethod = HttpMethod.Post,
                         ResponseMessage = MockHelpers.CreateInvalidGrantTokenResponseMessage()
                     });
                 try
@@ -1230,9 +1231,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
-                                                                            .WithLoggingLevel(LogLevel.Verbose)
-                                                                            .WithDebugLoggingCallback()
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
+                                                                            .WithDebugLoggingCallback(logLevel: LogLevel.Verbose)
                                                                             .BuildConcrete();
 
                 // Interactive call and user cancels authentication
@@ -1279,7 +1279,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetryCallback(receiver.HandleTelemetryEvents)
+                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
 
                 // Interactive call and authentication fails with access denied
@@ -1582,13 +1582,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endif
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            builder.WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
-                .WithAadAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
-                .WithAadAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
-                .WithAadAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
-                .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid(), true)
-                .WithAadAuthority(new Uri(MsalTestConstants.AuthorityCommonTenant), Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
-                .WithAadAuthority(MsalTestConstants.AuthorityGuestTenant, true)
+            builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
+                .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                .WithAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
+                .WithAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
+                .WithAuthority(MsalTestConstants.AuthorityCommonTenant, Guid.NewGuid(), true)
+                .WithAuthority(MsalTestConstants.AuthorityCommonTenant, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
+                .WithAuthority(MsalTestConstants.AuthorityGuestTenant, true)
                 .WithAdfsAuthority(MsalTestConstants.AuthorityGuestTenant, true)
                 .WithB2CAuthority(MsalTestConstants.B2CAuthority)
                 .WithExtraQueryParameters(

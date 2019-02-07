@@ -55,14 +55,14 @@ namespace Microsoft.Identity.Client
                 UserTokenCacheInternal = new TokenCache(ServiceBundle);
             }
 
-            CreateRequestContext().Logger.Info(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-                    ServiceBundle.PlatformProxy.GetProductName(),
-                    MsalIdHelper.GetMsalVersion(),
-                    AssemblyUtils.GetAssemblyFileVersionAttribute(),
-                    AssemblyUtils.GetAssemblyInformationalVersion()));
+            //CreateRequestContext().Logger.Info(
+            //    string.Format(
+            //        CultureInfo.InvariantCulture,
+            //        "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
+            //        ServiceBundle.PlatformProxy.GetProductName(),
+            //        MsalIdHelper.GetMsalVersion(),
+            //        AssemblyUtils.GetAssemblyFileVersionAttribute(),
+            //        AssemblyUtils.GetAssemblyInformationalVersion()));
         }
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
@@ -152,7 +152,7 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(System.Uri, bool)"/> or one of its
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
         /// overrides to request a token for a different authority than the one set at the application construction
         /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
         /// force refreshing the token, as well as

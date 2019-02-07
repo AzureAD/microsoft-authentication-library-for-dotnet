@@ -45,6 +45,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                var cache = parameters.TokenCache;
+                var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
                 Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
@@ -115,6 +116,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     }
                 };
 
+              
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -252,7 +254,13 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             out HashSet<string> expectedScopes)
         {
             var cache = new TokenCache(harness.ServiceBundle);
-            var parameters = harness.CreateAuthenticationRequestParameters(MsalTestConstants.AuthorityHomeTenant, null, cache);
+            var parameters = harness.CreateAuthenticationRequestParameters(
+                MsalTestConstants.AuthorityHomeTenant, 
+                null, 
+                cache, 
+                null, 
+                extraQueryParameters: MsalTestConstants.ExtraQueryParams, 
+                claims: MsalTestConstants.Claims);
 
             TestCommon.MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
@@ -262,17 +270,22 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             expectedScopes.Add(OAuth2Value.ScopeProfile);
             expectedScopes.Add(OAuth2Value.ScopeOpenId);
 
+            IDictionary<string, string> extraQueryParamsAndClaims =
+                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+
             // Mock Handler for device code request
             harness.HttpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Post,
-                    PostData = new Dictionary<string, string>()
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = new Dictionary<string, string>()
                     {
-                        {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
-                        {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}
+                        { OAuth2Parameter.ClientId, MsalTestConstants.ClientId },
+                        { OAuth2Parameter.Scope, expectedScopes.AsSingleString() }
                     },
-                    ResponseMessage = CreateDeviceCodeResponseSuccessMessage()
+                    ResponseMessage = CreateDeviceCodeResponseSuccessMessage(),
+                    ExpectedQueryParams = extraQueryParamsAndClaims
                 });
 
             for (int i = 0; i < numAuthorizationPendingResults; i++)
@@ -280,8 +293,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        Url = "https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedUrl = "https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
@@ -300,8 +313,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        PostData = new Dictionary<string, string>()
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedPostData = new Dictionary<string, string>()
                         {
                             {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
                             {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}

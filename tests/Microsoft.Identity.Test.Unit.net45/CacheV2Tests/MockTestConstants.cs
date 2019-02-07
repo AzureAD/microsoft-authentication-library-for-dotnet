@@ -49,12 +49,8 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 
         public const string Realm = "common";
         public const string Redirect = "http://redirect";
-        public const string Username = "joe@localhost.com";
-        public const string GivenName = "Joe";
-        public const string FamilyName = "Doe";
         public const string MiddleName = "Charles";
         public const string Name = "Joe Charles Doe II";
-        public const string LocalAccountId = "test_local_account_id";
         public const string AlternativeAccountId = "test_alternative_account_id";
         public const string Scopes = "scope1 scope2";
         public const AuthorityType DefaultAuthorityType = AuthorityType.Adfs;
@@ -143,11 +139,11 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 GetHomeAccountId(),
                 Environment,
                 Realm,
-                LocalAccountId,
+                MsalTestConstants.LocalAccountId,
                 DefaultAuthorityType,
-                Username,
-                GivenName,
-                FamilyName,
+                MsalTestConstants.Username,
+                MsalTestConstants.GivenName,
+                MsalTestConstants.FamilyName,
                 MiddleName,
                 Name,
                 AlternativeAccountId,

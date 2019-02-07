@@ -26,29 +26,19 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
-using System.Runtime.Serialization;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Items
 {
-    [DataContract]
     internal abstract class MsalCacheItemBase
     {
-        [DataMember(Name = "home_account_id", IsRequired = true)]
+        internal string AdditionalFieldsJson { get; set; } = "{}";
         internal string HomeAccountId { get; set; }
-
-        [DataMember(Name = "environment", IsRequired = true)]
         internal string Environment { get; set; }
-
         internal string RawClientInfo { get; set; }
-
-        internal ClientInfo ClientInfo {
-            get {
-                return RawClientInfo != null ? 
-                    ClientInfo.CreateFromJson(RawClientInfo) : null;
-            }
-        }
+        internal ClientInfo ClientInfo => RawClientInfo != null ? ClientInfo.CreateFromJson(RawClientInfo) : null;
 
         internal void InitUserIdentifier()
         {
@@ -56,6 +46,27 @@ namespace Microsoft.Identity.Client.Cache
             {
                 HomeAccountId = ClientInfo.ToAccountIdentifier();
             }
+        }
+
+        internal virtual void PopulateFieldsFromJObject(JObject j)
+        {
+            HomeAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
+            Environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
+            RawClientInfo = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientInfo);
+
+            // Important: order matters.  This MUST be the last one called since it will extract the
+            // remaining fields out.
+            AdditionalFieldsJson = j.ToString();
+        }
+
+        internal virtual JObject ToJObject()
+        {
+            var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JObject.Parse(AdditionalFieldsJson);
+            json[StorageJsonKeys.HomeAccountId] = HomeAccountId;
+            json[StorageJsonKeys.Environment] = Environment;
+            json[StorageJsonKeys.ClientInfo] = RawClientInfo;
+
+            return json;
         }
     }
 }

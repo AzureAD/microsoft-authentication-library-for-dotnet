@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.IsNotNull(pca.UserTokenCache);
 
             // Validate Defaults
-            Assert.AreEqual(LogLevel.Warning, pca.AppConfig.LogLevel);
+            Assert.AreEqual(LogLevel.Info, pca.AppConfig.LogLevel);
             Assert.IsNull(pca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, pca.AppConfig.ClientId);
             Assert.IsNull(pca.AppConfig.Component);
@@ -95,46 +95,55 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor_WithDebugLoggingCallback()
         {
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithDebugLoggingCallback()
+                                                    .WithDebugLoggingCallback(LogLevel.Verbose, true, true)
                                                     .Build();
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithDefaultPlatformLoggingEnabledTrue()
-        {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithDefaultPlatformLoggingEnabled(true)
-                                                    .Build();
+            Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
             Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
         [TestMethod]
-        public void TestConstructor_WithDefaultPlatformLoggingEnabledFalse()
+        public void TestConstructor_WithDebugLoggingCallbackAndAppConfig()
         {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithDefaultPlatformLoggingEnabled(false)
-                                                    .Build();
+            // Ensure that values in the options are not reset to defaults when not sent into WithLogging
+            var options = new PublicClientApplicationOptions
+            {
+                ClientId = MsalTestConstants.ClientId,
+                LogLevel = LogLevel.Error,
+                EnablePiiLogging = true,
+                IsDefaultPlatformLoggingEnabled = true
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .WithLogging((level, message, pii) => { }).Build();
+
+            Assert.AreEqual(LogLevel.Error, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
+            Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
+        }
+
+        [TestMethod]
+        public void TestConstructor_WithDebugLoggingCallbackAndAppConfigWithOverride()
+        {
+            // Ensure that values in the options are reset to new values when sent into WithLogging
+            var options = new PublicClientApplicationOptions
+            {
+                ClientId = MsalTestConstants.ClientId,
+                LogLevel = LogLevel.Error,
+                EnablePiiLogging = false,
+                IsDefaultPlatformLoggingEnabled = true
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                .WithLogging((level, message, pii) => { },
+                    LogLevel.Verbose, true, false).Build();
+
+            Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
             Assert.IsFalse(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
-        [TestMethod]
-        public void TestConstructor_WithWithEnablePiiLoggingTrue()
-        {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithEnablePiiLogging(true)
-                                                    .Build();
-            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithWithEnablePiiLoggingFalse()
-        {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithEnablePiiLogging(false)
-                                                    .Build();
-            Assert.IsFalse(pca.AppConfig.EnablePiiLogging);
-        }
 
         [TestMethod]
         public void TestConstructor_WithHttpClientFactory()
@@ -147,23 +156,16 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithLoggingCallback()
+        public void TestConstructor_WithLogging()
         {
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithLoggingCallback((level, message, pii) => { })
+                                                    .WithLogging((level, message, pii) => { }, LogLevel.Verbose, true, true)
                                                     .Build();
 
             Assert.IsNotNull(pca.AppConfig.LoggingCallback);
-        }
-
-        [TestMethod]
-        public void TestConstructor_WithLoggingLevel()
-        {
-            var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithLoggingLevel(LogLevel.Verbose)
-                                                    .Build();
-
             Assert.AreEqual(LogLevel.Verbose, pca.AppConfig.LogLevel);
+            Assert.IsTrue(pca.AppConfig.EnablePiiLogging);
+            Assert.IsTrue(pca.AppConfig.IsDefaultPlatformLoggingEnabled);
         }
 
         [TestMethod]
@@ -229,14 +231,14 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
-        public void TestConstructor_WithTelemetryCallback()
+        public void TestConstructor_WithTelemetry()
         {
             void Callback(List<Dictionary<string, string>> events)
             {
             }
 
             var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithTelemetryCallback(Callback)
+                                                    .WithTelemetry(Callback)
                                                     .Build();
 
             Assert.IsNotNull(pca.AppConfig.TelemetryCallback);
@@ -269,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + AAD Authority Audience
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     AadAuthorityAudience.AzureAdMultipleOrgs)
                                                 .Build();
@@ -277,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + common
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "common")
                                                 .Build();
@@ -285,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + consumers
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "consumers")
                                                 .Build();
@@ -293,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + domain
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "contoso.com")
                                                 .Build();
@@ -302,7 +304,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Azure Cloud Instance + tenantId(GUID)
             Guid tenantId = Guid.NewGuid();
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     tenantId)
                                                 .Build();
@@ -311,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Azure Cloud Instance + tenantId(string)
             tenantId = Guid.NewGuid();
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     tenantId.ToString())
                                                 .Build();
@@ -324,7 +326,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             try
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithAadAuthority(AadAuthorityAudience.AzureAdMyOrg)
+                                                    .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
                                                     .WithTenantId("contoso.com")
                                                     .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
@@ -342,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             try
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .WithAadAuthority("https://login.microsoftonline.fr")
+                                                        .WithAuthority("https://login.microsoftonline.fr")
                                                         .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
             }
