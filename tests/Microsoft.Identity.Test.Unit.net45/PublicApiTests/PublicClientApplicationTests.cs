@@ -1582,13 +1582,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endif
         public static void CheckBuilderCommonMethods<T>(AbstractAcquireTokenParameterBuilder<T> builder) where T : AbstractAcquireTokenParameterBuilder<T>
         {
-            builder.WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
-                .WithAadAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
-                .WithAadAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
-                .WithAadAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
-                .WithAadAuthority(MsalTestConstants.AuthorityCommonTenant, Guid.NewGuid(), true)
-                .WithAadAuthority(MsalTestConstants.AuthorityCommonTenant, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
-                .WithAadAuthority(MsalTestConstants.AuthorityGuestTenant, true)
+            builder.WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
+                .WithAuthority(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, true)
+                .WithAuthority(AzureCloudInstance.AzurePublic, Guid.NewGuid(), true)
+                .WithAuthority(AzureCloudInstance.AzureChina, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
+                .WithAuthority(MsalTestConstants.AuthorityCommonTenant, Guid.NewGuid(), true)
+                .WithAuthority(MsalTestConstants.AuthorityCommonTenant, Guid.NewGuid().ToString("D", CultureInfo.InvariantCulture), true)
+                .WithAuthority(MsalTestConstants.AuthorityGuestTenant, true)
                 .WithAdfsAuthority(MsalTestConstants.AuthorityGuestTenant, true)
                 .WithB2CAuthority(MsalTestConstants.B2CAuthority)
                 .WithExtraQueryParameters(

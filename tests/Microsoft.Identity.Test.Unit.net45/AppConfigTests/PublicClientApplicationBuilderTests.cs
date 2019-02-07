@@ -271,7 +271,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + AAD Authority Audience
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     AadAuthorityAudience.AzureAdMultipleOrgs)
                                                 .Build();
@@ -279,7 +279,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + common
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "common")
                                                 .Build();
@@ -287,7 +287,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + consumers
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "consumers")
                                                 .Build();
@@ -295,7 +295,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Azure Cloud Instance + domain
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     "contoso.com")
                                                 .Build();
@@ -304,7 +304,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Azure Cloud Instance + tenantId(GUID)
             Guid tenantId = Guid.NewGuid();
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     tenantId)
                                                 .Build();
@@ -313,7 +313,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             // Azure Cloud Instance + tenantId(string)
             tenantId = Guid.NewGuid();
             app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                .WithAadAuthority(
+                                                .WithAuthority(
                                                     AzureCloudInstance.AzureChina,
                                                     tenantId.ToString())
                                                 .Build();
@@ -326,7 +326,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             try
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithAadAuthority(AadAuthorityAudience.AzureAdMyOrg)
+                                                    .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
                                                     .WithTenantId("contoso.com")
                                                     .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
@@ -344,7 +344,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             try
             {
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .WithAadAuthority("https://login.microsoftonline.fr")
+                                                        .WithAuthority("https://login.microsoftonline.fr")
                                                         .Build();
                 Assert.Fail("Should not reach here, exception should be thrown");
             }
