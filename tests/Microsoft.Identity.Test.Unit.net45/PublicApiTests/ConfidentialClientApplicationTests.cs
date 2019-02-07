@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public void ConstructorsTest()
         {
             var app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                          .WithAadAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
+                                                          .WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
                                                           .WithRedirectUri(MsalTestConstants.RedirectUri)
                                                           .WithClientSecret(MsalTestConstants.ClientSecret)
                                                           .BuildConcrete();

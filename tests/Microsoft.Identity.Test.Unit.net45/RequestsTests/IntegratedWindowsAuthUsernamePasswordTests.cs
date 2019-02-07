@@ -378,7 +378,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                                                        .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -625,7 +625,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                                                        .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -651,7 +651,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AddMockResponseforManagedAccounts(httpManager);
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                                                        .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
@@ -699,7 +699,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
 
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                        .WithAadAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
+                                                        .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 

@@ -197,7 +197,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// users sign-in. This is classically a GUID or a domain name. See https://aka.ms/msal-net-application-configuration.
         /// Although it is also possible to set <paramref name="tenantId"/> to <c>common</c>,
         /// <c>organizations</c>, and <c>consumers</c>, it's recommended to use one of the
-        /// overrides of <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// overrides of <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="tenantId">tenant ID of the Azure AD tenant
         /// or a domain associated with this Azure AD tenant, in order to sign-in a user of a specific organization only</param>
@@ -308,7 +308,7 @@ namespace Microsoft.Identity.Client.AppConfig
             else
             {
                 // Add the default.
-                WithAadAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
+                WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
             }
         }
 
@@ -361,7 +361,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Adds a known authority to the application from its Uri. See https://aka.ms/msal-net-application-configuration.
         /// This constructor is mainly used for scenarios where the authority is not a standard Azure AD authority,
         /// nor an ADFS authority, nor an Azure AD B2C authority. For Azure AD, even in national and sovereign clouds, prefer
-        /// using other overrides such as <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// using other overrides such as <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="authorityUri">Uri of the authority</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
@@ -380,7 +380,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
+        public T WithAuthority(
             string cloudInstanceUri,
             Guid tenantId,
             bool validateAuthority = true)
@@ -400,11 +400,11 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <remarks>
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
         /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
-        /// it's recommended to use another override (<see cref="WithAadAuthority(AzureCloudInstance, Guid, bool)"/>
-        /// and <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// it's recommended to use another override (<see cref="WithAuthority(AzureCloudInstance, Guid, bool)"/>
+        /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
+        public T WithAuthority(
             string cloudInstanceUri,
             string tenant,
             bool validateAuthority = true)
@@ -423,7 +423,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
+        public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
             bool validateAuthority = true)
@@ -443,7 +443,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// to sign-in users. This can also be a guid</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
+        public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
             bool validateAuthority = true)
@@ -463,7 +463,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// accounts</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
+        public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
             return (T)this;
@@ -478,7 +478,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// accounts</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
+        public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
             return (T)this;
@@ -500,7 +500,7 @@ namespace Microsoft.Identity.Client.AppConfig
         ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
+        public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
             return (T)this;
