@@ -102,20 +102,29 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return continueBtn;
         }
 
-        public static void PerformLogin(this IWebDriver driver, LabUser user)
+        public static void PerformLogin(this IWebDriver driver, LabUser user, bool adfsOnly=false)
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
-            Trace.WriteLine("Logging in ... Entering username");
-            driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
-
-            Trace.WriteLine("Logging in ... Clicking <Next> after username");
-            driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
-
-            if (user.FederationProvider == FederationProvider.AdfsV2)
+            if (adfsOnly)
             {
-                Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
-                driver.FindElement(By.Id(CoreUiTestConstants.AdfsV2WebUsernameInputId)).SendKeys(user.Upn);
+                Trace.WriteLine("Logging in ... Entering username");
+                driver.FindElement(By.Id(CoreUiTestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
+            }
+
+            else
+            {
+                Trace.WriteLine("Logging in ... Entering username");
+                driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
+
+                Trace.WriteLine("Logging in ... Clicking <Next> after username");
+                driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
+
+                if (user.FederationProvider == FederationProvider.AdfsV2)
+                {
+                    Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
+                    driver.FindElement(By.Id(CoreUiTestConstants.AdfsV2WebUsernameInputId)).SendKeys(user.Upn);
+                }
             }
 
             Trace.WriteLine("Logging in ... Entering password");

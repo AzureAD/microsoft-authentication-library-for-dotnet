@@ -256,12 +256,6 @@ namespace Microsoft.Identity.Client.AppConfig
                 throw new InvalidOperationException(CoreErrorMessages.NoClientIdWasSpecified);
             }
 
-            if (!Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
-            {
-                throw new InvalidOperationException(CoreErrorMessages.ClientIdMustBeAGuid);
-            }
-
-
             TryAddDefaultAuthority();
         }
 

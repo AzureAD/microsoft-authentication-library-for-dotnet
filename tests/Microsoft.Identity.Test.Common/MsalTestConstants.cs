@@ -124,4 +124,15 @@ namespace Microsoft.Identity.Test.Unit
         public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
 #endif
     }
+
+    internal static class Adfs2019LabConstants
+    {
+        public const string Authority = "https://fs.msidlab8.com/adfs";
+        public const string AppId = "TestAppIdentifier";
+        public const string PublicClientId = "PublicClientId";
+        public const string ConfidentialClientId = "ConfidentialClientId";
+        public const string ClientSecret = "olCpEkQu8WvmTln1D4cDO1-0DyJWKV5m6gvSBDcM";
+        public const string ClientRedirectUri = "http://localhost:8080";
+        public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] {"openid", "email", "profile" });
+    }
 }

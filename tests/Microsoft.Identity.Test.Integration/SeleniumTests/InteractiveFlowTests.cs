@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Test.Unit;
+using System.Globalization;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
@@ -162,24 +164,52 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
-        private async Task RunTestForUserAsync(LabResponse labResponse)
+        [TestMethod]
+        public async Task Interactive_AdfsV2019_DirectAsync()
+        {
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+            await RunTestForUserAsync(labResponse, true).ConfigureAwait(false);
+        }
+
+        private async Task RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             Action<IWebDriver> seleniumLogic = (driver) =>
             {
                 Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(labResponse.User);
+                driver.PerformLogin(labResponse.User, directToAdfs);
             };
 
             SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
 
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
-                                                                        .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
-                                                                        .BuildConcrete();
+
+            PublicClientApplication pca;
+            if(directToAdfs)
+            {
+                pca = PublicClientApplicationBuilder.Create(Adfs2019LabConstants.PublicClientId)
+                                                    .WithRedirectUri(Adfs2019LabConstants.ClientRedirectUri)
+                                                    .WithAdfsAuthority(Adfs2019LabConstants.Authority)
+                                                    .BuildConcrete();
+            }
+            else
+            {
+                pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
+                                                    .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
+                                                    .BuildConcrete();
+            }
 
             pca.ServiceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
 
             // Act
-            AuthenticationResult result = await pca.AcquireTokenAsync(new[] { "user.read" }).ConfigureAwait(false);
+            AuthenticationResult result = await pca.AcquireTokenAsync(new[] {"user.Read"}).ConfigureAwait(false);
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));

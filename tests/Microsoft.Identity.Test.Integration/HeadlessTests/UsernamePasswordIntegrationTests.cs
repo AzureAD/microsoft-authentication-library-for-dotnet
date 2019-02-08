@@ -25,12 +25,14 @@
 //
 //------------------------------------------------------------------------------
 #if !WINDOWS_APP && !ANDROID && !iOS // U/P not available on UWP, Android and iOS
+using System.Globalization;
 using System.Net;
 using System.Security;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Integration.HeadlessTests
@@ -103,6 +105,34 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
 
+
+        [TestMethod]
+        [TestCategory("UsernamePasswordIntegrationTests")]
+        public async Task AcquireTokenFromAdfsUsernamePasswordAsync()
+        {
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.ADFSv2019,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = true
+            };
+
+            LabResponse labResponse = LabUserHelper.GetLabUserData(query);
+
+
+            var user = labResponse.User;
+
+            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
+
+            PublicClientApplication msalPublicClient = new PublicClientApplication(Adfs2019LabConstants.PublicClientId, Adfs2019LabConstants.Authority);
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.AreEqual(user.Upn, authResult.Account.Username, true, CultureInfo.CurrentCulture);
+        }
+
         [TestMethod]
         [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithManagedUsernameIncorrectPassword()
@@ -134,6 +164,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
                  await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
         }
+
     }
 }
 #endif
