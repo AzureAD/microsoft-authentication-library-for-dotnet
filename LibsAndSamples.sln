@@ -21,8 +21,14 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XForms", "tests\devapps\XForms\XForms\XForms.csproj", "{8D14A8FF-6CB9-44B1-B7C4-3C1D79CE8412}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.Android", "tests\devapps\XForms\XForms.Android\XForms.Android.csproj", "{6120F6A0-59BA-4065-B0F4-92690D9BE1E2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{146ECCB6-C3F1-4E97-BC52-20FEB7785C62} = {146ECCB6-C3F1-4E97-BC52-20FEB7785C62}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.iOS", "tests\devapps\XForms\XForms.iOS\XForms.iOS.csproj", "{146ECCB6-C3F1-4E97-BC52-20FEB7785C62}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0B22271B-163F-429B-A472-4C7BF531CEE9} = {0B22271B-163F-429B-A472-4C7BF531CEE9}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XForms.UWP", "tests\devapps\XForms\XForms.UWP\XForms.UWP.csproj", "{0B22271B-163F-429B-A472-4C7BF531CEE9}"
 EndProject
