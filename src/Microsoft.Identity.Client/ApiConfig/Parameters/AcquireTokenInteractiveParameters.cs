@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
             builder.AppendLine("UseEmbeddedWebView: " + UseEmbeddedWebView);
             builder.AppendLine("ExtraScopesToConsent: " + string.Join(";", ExtraScopesToConsent ?? new List<string>()));
             builder.AppendLine("Prompt: " + Prompt.PromptValue);
-            builder.AppendLine("HasCustomWebUi: " + CustomWebUi == null ? "no" : "yes");
+            builder.AppendLine("HasCustomWebUi: " + (CustomWebUi != null));
 
             logger.Info(builder.ToString());
         }

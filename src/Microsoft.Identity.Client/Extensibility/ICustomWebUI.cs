@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.Extensibility
     public interface ICustomWebUi
     {
         /// <summary>
-        ///     Method called by MSAL.NET to delegate the authentication code Web danse with the STS
+        ///     Method called by MSAL.NET to delegate the authentication code Web with with the STS
         /// </summary>
         /// <param name="authorizationUri">
         ///     URI computed by MSAL.NET that will let the UI extension
@@ -53,6 +53,9 @@ namespace Microsoft.Identity.Client.Extensibility
         /// <remarks>
         ///     The authorizationUri is crafted to leverage PKCE in order to protect the token from a man
         ///     in the middle attack. Only MSAL.NET can redeem the code.
+        ///
+        ///     In the event of cancellation, the implementer should return OperationCanceledException.
+        ///     In the event of failure, the implementer should throw MsalCustomWebUiFailedException.
         /// </remarks>
         Task<Uri> AcquireAuthorizationCodeAsync(Uri authorizationUri, Uri redirectUri);
     }
