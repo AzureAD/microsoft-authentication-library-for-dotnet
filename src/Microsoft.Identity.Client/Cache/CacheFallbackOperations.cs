@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.Utils;
@@ -347,65 +348,6 @@ namespace Microsoft.Identity.Client.Cache
             {
                 return adalRts.FirstOrDefault();
             }
-        }
-
-        public static AdalResultWrapper FindMsalEntryForAdal(
-            ICoreLogger logger,
-            ITokenCacheAccessor tokenCacheAccessor, 
-            string authority,
-            string clientId, 
-            string upn, 
-            RequestContext requestContext)
-        {
-            try
-            {
-                var environment = new Uri(authority).Host;
-
-                List<MsalAccountCacheItem> accounts = new List<MsalAccountCacheItem>();
-                foreach (string accountStr in tokenCacheAccessor.GetAllAccountsAsString())
-                {
-                    var accountItem = JsonHelper.TryToDeserializeFromJson<MsalAccountCacheItem>(accountStr, requestContext);
-                    if (accountItem != null && accountItem.Environment.Equals(environment, StringComparison.OrdinalIgnoreCase))
-                    {
-                        accounts.Add(accountItem);
-                    }
-                }
-                if (accounts.Count > 0)
-                {
-                    foreach (var rtString in tokenCacheAccessor.GetAllRefreshTokensAsString())
-                    {
-                        var rtCacheItem =
-                            JsonHelper.TryToDeserializeFromJson<MsalRefreshTokenCacheItem>(rtString, requestContext);
-
-                        //TODO - authority check needs to be updated for alias check
-                        if (rtCacheItem != null && environment.Equals(rtCacheItem.Environment, StringComparison.OrdinalIgnoreCase)
-                            && rtCacheItem.ClientId.Equals(clientId, StringComparison.OrdinalIgnoreCase))
-                        {
-                            // join refresh token cache item to corresponding account cache item to get upn
-                            foreach (MsalAccountCacheItem accountCacheItem in accounts)
-                            {
-                                if (rtCacheItem.HomeAccountId.Equals(accountCacheItem.HomeAccountId, StringComparison.OrdinalIgnoreCase)
-                                    && accountCacheItem.PreferredUsername.Equals(upn, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return new AdalResultWrapper
-                                    {
-                                        Result = new AdalResult(null, null, DateTimeOffset.MinValue),
-                                        RefreshToken = rtCacheItem.Secret,
-                                        RawClientInfo = rtCacheItem.RawClientInfo
-                                    };
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.WarningPiiWithPrefix(ex, "An error occurred while searching for refresh tokens in MSAL format in the cache for ADAL. " +
-                             "For details please see https://aka.ms/net-cache-persistence-errors. ");
-            }
-
-            return null;
         }
     }
 }

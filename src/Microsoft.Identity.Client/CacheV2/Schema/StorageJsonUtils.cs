@@ -27,7 +27,8 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Client.CacheV2.Impl.Utils;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.CacheV2.Schema
@@ -60,7 +61,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return json;
         }
 
-        private static string CredentialTypeToString(CredentialType credentialType)
+        public static string CredentialTypeToString(CredentialType credentialType)
         {
             switch (credentialType)
             {
@@ -96,7 +97,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return credential;
         }
 
-        private static CredentialType CredentialTypeToEnum(string credentialTypeString)
+        public static CredentialType CredentialTypeToEnum(string credentialTypeString)
         {
             if (string.Compare(
                     credentialTypeString,

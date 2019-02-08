@@ -52,20 +52,25 @@ namespace Microsoft.Identity.Test.Common.Mocks
 
         public bool AddStateInAuthorizationResult { get; set; }
 
-        public RequestContext RequestContext { get; set; }
+        public string ExpectedEnvironment { get; set; }
 
-        public string Environment { get; set; }
+        public Uri ActualAuthorizationUri { get; private set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri, 
+            RequestContext requestContext)
         {
+            ActualAuthorizationUri = authorizationUri;
+
             if (ExceptionToThrow != null)
             {
                 throw ExceptionToThrow;
             }
 
-            if (Environment != null)
+            if (ExpectedEnvironment != null)
             {
-                Assert.AreEqual(Environment, authorizationUri.Host);
+                Assert.AreEqual(ExpectedEnvironment, authorizationUri.Host);
             }
 
             IDictionary<string, string> inputQp = CoreHelpers.ParseKeyValueList(authorizationUri.Query.Substring(1), '&', true, null);

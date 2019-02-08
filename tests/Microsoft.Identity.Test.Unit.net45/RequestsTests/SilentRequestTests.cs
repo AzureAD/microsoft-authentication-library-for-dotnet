@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,9 +39,11 @@ using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -82,16 +85,23 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("SilentRequestTests")]
         public void ExpiredTokenRefreshFlowTest()
         {
+            IDictionary<string, string> extraQueryParamsAndClaims =
+               MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
-                var parameters = harness.CreateRequestParams(harness.Cache, null);
+                var parameters = harness.CreateRequestParams(
+                    harness.Cache, 
+                    null, 
+                    MsalTestConstants.ExtraQueryParams, 
+                    MsalTestConstants.Claims);
                 var silentParameters = new AcquireTokenSilentParameters();
 
                 // set access tokens as expired
-                foreach (string atCacheItemStr in harness.Cache.GetAllAccessTokenCacheItems(RequestContext.CreateForTest(harness.ServiceBundle)))
+                foreach (var accessItem in harness.Cache.GetAllAccessTokens(true))
                 {
-                    var accessItem = JsonHelper.DeserializeFromJson<MsalAccessTokenCacheItem>(atCacheItemStr);
                     accessItem.ExpiresOnUnixTimestamp =
                         ((long)(DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds)
                         .ToString(CultureInfo.InvariantCulture);
@@ -105,7 +115,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler()
                     {
                         ExpectedMethod = HttpMethod.Post,
-                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                        ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(),
+                        ExpectedQueryParams = extraQueryParamsAndClaims
                     });
 
                 var request = new SilentRequest(harness.ServiceBundle, parameters, silentParameters);
@@ -207,11 +218,17 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 _mockHttpAndServiceBundle.Dispose();
             }
 
-            public AuthenticationRequestParameters CreateRequestParams(ITokenCacheInternal cache, SortedSet<string> scopes)
+            public AuthenticationRequestParameters CreateRequestParams(
+                ITokenCacheInternal cache, 
+                SortedSet<string> scopes, 
+                IDictionary<string, string> extraQueryParams = null, 
+                string claims = null)
             {
                 var commonParameters = new AcquireTokenCommonParameters
                 {
                     Scopes = scopes ?? MsalTestConstants.Scope,
+                    ExtraQueryParameters = extraQueryParams,
+                    Claims = claims
                 };
 
                 var parameters = new AuthenticationRequestParameters(
@@ -222,6 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     RequestContext.CreateForTest(ServiceBundle))
                 {
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
+                   
                 };
                 return parameters;
             }

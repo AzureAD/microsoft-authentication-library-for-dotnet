@@ -467,10 +467,10 @@ namespace Microsoft.Identity.Test.SideBySide
             Assert.IsNotNull(account.Environment);
 
             // validate that Adal writes only RT and Account cache entities in Msal format
-            Assert.AreEqual(0, msalCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count);
-            Assert.AreEqual(1, msalCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count);
-            Assert.AreEqual(0, msalCache.TokenCacheAccessor.GetAllIdTokensAsString().Count);
-            Assert.AreEqual(1, msalCache.TokenCacheAccessor.GetAllAccountsAsString().Count);
+            Assert.AreEqual(0, msalCache.TokenCacheAccessor.AccessTokenCount);
+            Assert.AreEqual(1, msalCache.TokenCacheAccessor.RefreshTokenCount);
+            Assert.AreEqual(0, msalCache.TokenCacheAccessor.IdTokenCount);
+            Assert.AreEqual(1, msalCache.TokenCacheAccessor.AccountCount);
 
             // make sure that adal v4 RT is usable by Msal
             msalAuthResult = await msalPublicClient.AcquireTokenSilentAsync(MsalScopes, account).ConfigureAwait(false);
@@ -535,10 +535,10 @@ namespace Microsoft.Identity.Test.SideBySide
                 TokenCache = msalCache
             });
 
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count == 0);
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count == 0);
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllIdTokensAsString().Count == 0);
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllAccountsAsString().Count == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.AccessTokenCount == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.RefreshTokenCount == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.IdTokenCount == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.AccountCount == 0);
         }
 
         private void AssertNoCredentialsInMsalCache()
@@ -548,9 +548,9 @@ namespace Microsoft.Identity.Test.SideBySide
                 TokenCache = msalCache
             });
 
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllAccessTokensAsString().Count == 0);
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllRefreshTokensAsString().Count == 0);
-            Assert.IsTrue(msalCache.TokenCacheAccessor.GetAllIdTokensAsString().Count == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.AccessTokenCount == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.RefreshTokenCount == 0);
+            Assert.IsTrue(msalCache.TokenCacheAccessor.IdTokenCount == 0);
         }
     }
 #endif

@@ -177,25 +177,25 @@ namespace Microsoft.Identity.Test.Unit
         private void ValidateCacheEntitiesEnvironment(ITokenCacheInternal cache, string expectedEnvironment)
         {
             var requestContext = RequestContext.CreateForTest();
-            ICollection<MsalAccessTokenCacheItem> accessTokens = cache.GetAllAccessTokensForClient(requestContext);
+            var accessTokens = cache.GetAllAccessTokens(true);
             foreach (var at in accessTokens)
             {
                 Assert.AreEqual(expectedEnvironment, at.Environment);
             }
 
-            ICollection<MsalRefreshTokenCacheItem> refreshTokens = cache.GetAllRefreshTokensForClient(requestContext);
+            var refreshTokens = cache.GetAllRefreshTokens(true);
             foreach (var rt in refreshTokens)
             {
                 Assert.AreEqual(expectedEnvironment, rt.Environment);
             }
 
-            ICollection<MsalIdTokenCacheItem> idTokens = cache.GetAllIdTokensForClient(requestContext);
+            var idTokens = cache.GetAllIdTokens(true);
             foreach (var id in idTokens)
             {
                 Assert.AreEqual(expectedEnvironment, id.Environment);
             }
 
-            ICollection<MsalAccountCacheItem> accounts = cache.GetAllAccounts(requestContext);
+            var accounts = cache.GetAllAccounts();
             foreach (var account in accounts)
             {
                 Assert.AreEqual(expectedEnvironment, account.Environment);

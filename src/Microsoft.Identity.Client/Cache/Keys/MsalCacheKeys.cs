@@ -25,22 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Keys
 {
-    internal class MsalCacheCommon
+    internal class MsalCacheKeys
     {
-        public const string ScopesDelimiter = " ";
         public const string CacheKeyDelimiter = "-";
 
-        public const string IdToken = "IdToken";
-        public const string AccessToken = "AccessToken";
-        public const string RefreshToken = "RefreshToken";
+        //public const string IdToken = "IdToken";
+        //public const string AccessToken = "AccessToken";
+        //public const string RefreshToken = "RefreshToken";
 
         public static string GetCredentialKey(string homeAccountId, string environment, string keyDescriptor, string clientId, string tenantId, string scopes)
         {
@@ -71,7 +66,7 @@ namespace Microsoft.Identity.Client.Cache
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(environment);
 
@@ -84,13 +79,13 @@ namespace Microsoft.Identity.Client.Cache
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(keyDescriptor);
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(clientId);
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(tenantId ?? "");
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(scopes ?? "");
 
@@ -102,10 +97,10 @@ namespace Microsoft.Identity.Client.Cache
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(keyDescriptor);
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(clientId);
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(tenantId ?? "");
 

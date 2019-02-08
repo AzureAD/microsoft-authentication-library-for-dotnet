@@ -31,12 +31,14 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -48,7 +50,7 @@ namespace DesktopTestApp
         private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private string _b2CClientId = null;
 
-        private readonly PublicClientHandler _publicClientHandler;
+        private PublicClientHandler _publicClientHandler;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
@@ -65,10 +67,15 @@ namespace DesktopTestApp
             tabControl1.Selecting += TabControl1_Selecting;
             logLevel.SelectedIndex = logLevel.Items.Count - 1;
             userPasswordTextBox.PasswordChar = '*';
-
-            LoadSettings();
-            _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
         }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
+            LoadSettings();
+        }
+
 
         public void LogDelegate(LogLevel level, string message, bool containsPii)
         {
@@ -100,7 +107,7 @@ namespace DesktopTestApp
             userList.Refresh();
         }
 
-#region PublicClient UI Controls
+        #region PublicClient UI Controls
 
         private void loginHint_TextChanged(object sender, EventArgs e)
         {
@@ -139,9 +146,9 @@ namespace DesktopTestApp
             tabControl1.SelectedTab = logsTabPage;
         }
 
-#endregion
+        #endregion
 
-#region PublicClientApplication Acquire Token
+        #region PublicClientApplication Acquire Token
         private async void AcquireTokenInteractive_Click(object sender, EventArgs e)
         {
             using (new UIProgressScope(this))
@@ -184,7 +191,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
-                string username = loginHintTextBox.Text; // Can be blank 
+                string username = loginHintTextBox.Text; // Can be blank
 
                 try
                 {
@@ -194,6 +201,7 @@ namespace DesktopTestApp
                             username).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
+                    RefreshUserList();
 
                 }
                 catch (Exception exc)
@@ -210,7 +218,7 @@ namespace DesktopTestApp
                 ClearResultPageInfo();
                 userPasswordTextBox.PasswordChar = '*';
 
-                string username = loginHintTextBox.Text; //Can be blank for U/P 
+                string username = loginHintTextBox.Text; //Can be blank for U/P
                 SecureString securePassword = ConvertToSecureString(userPasswordTextBox);
 
                 await AcquireTokenByUsernamePasswordAsync(username, securePassword).ConfigureAwait(true);
@@ -229,6 +237,7 @@ namespace DesktopTestApp
                     password).ConfigureAwait(true);
 
                 SetResultPageInfo(authResult);
+                RefreshUserList();
             }
             catch (Exception exc)
             {
@@ -306,14 +315,13 @@ namespace DesktopTestApp
                 CreateException(exc);
             }
         }
-#endregion
+        #endregion
 
         private void CreateException(Exception ex)
         {
             string output = string.Empty;
-            MsalException exception = ex as MsalException;
 
-            if (exception != null)
+            if (ex is MsalException exception)
             {
                 output += string.Format(
                     CultureInfo.InvariantCulture,
@@ -364,7 +372,7 @@ namespace DesktopTestApp
             return behavior;
         }
 
-#region App logic
+        #region App logic
 
         public void SetResultPageInfo(AuthenticationResult authenticationResult)
         {
@@ -380,9 +388,9 @@ namespace DesktopTestApp
             callResult.Text = string.Empty;
         }
 
-#endregion
+        #endregion
 
-#region Cache Tab Operations
+        #region Cache Tab Operations
         private void LoadCacheTabPage()
         {
             while (cachePageTableLayout.Controls.Count > 0)
@@ -396,9 +404,9 @@ namespace DesktopTestApp
 
             cachePageTableLayout.RowCount = 0;
             var allRefreshTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
-                .GetAllRefreshTokensForClient(RequestContext.CreateForTest());
+                .GetAllRefreshTokens(true);
             var allAccessTokens = _publicClientHandler.PublicClientApplication.UserTokenCacheInternal
-                    .GetAllAccessTokensForClient(RequestContext.CreateForTest());
+                    .GetAllAccessTokens(true);
 
             foreach (MsalRefreshTokenCacheItem rtItem in allRefreshTokens)
             {
@@ -435,9 +443,9 @@ namespace DesktopTestApp
                 rs.Height = ctl.Height;
             }
         }
-#endregion
+        #endregion
 
-#region Settings Tab Operations
+        #region Settings Tab Operations
         private void TabControl1_Selecting(object sender, TabControlCancelEventArgs e)
         {
             //tab page is not settings tab. Apply values from settings page.
@@ -453,7 +461,7 @@ namespace DesktopTestApp
             Environment.SetEnvironmentVariable("MsalExtraQueryParameter", environmentQP.Text);
         }
 
-#endregion
+        #endregion
 
         private void clearLogsButton_Click(object sender, EventArgs e)
         {
@@ -515,7 +523,7 @@ namespace DesktopTestApp
                 GetB2CClientIdFromLab();
 
                 ClearResultPageInfo();
-                
+
                 _publicClientHandler.InteractiveAuthority = B2CAuthority;
                 _publicClientHandler.ApplicationId = _b2CClientId;
 
@@ -571,7 +579,7 @@ namespace DesktopTestApp
             using (new UIProgressScope(this))
             {
                 ClearResultPageInfo();
-                
+
                 _publicClientHandler.InteractiveAuthority = B2CAuthority;
                 _publicClientHandler.ApplicationId = _b2CClientId;
 

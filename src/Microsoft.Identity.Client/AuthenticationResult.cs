@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client
 {

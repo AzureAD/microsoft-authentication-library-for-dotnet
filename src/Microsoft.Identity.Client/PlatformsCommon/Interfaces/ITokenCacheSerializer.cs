@@ -25,43 +25,19 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Json.Linq;
+using Microsoft.Identity.Client.Cache;
 
-namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
+namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 {
-    internal static class JsonUtils
+    /// <summary>
+    /// Provides a high level token cache serialization solution that is similar to the one offered to MSAL customers. 
+    /// Platforms should try to implement <see cref="ITokenCacheAccessor"/> if possible, as it provides more granular 
+    /// access. 
+    /// </summary>
+    internal interface ITokenCacheBlobStorage
     {
-        public static string GetExistingOrEmptyString(JObject json, string key)
-        {
-            if (json.TryGetValue(key, out var val))
-            {
-                return val.ToObject<string>();
-            }
-
-            return string.Empty;
-        }
-
-        public static string ExtractExistingOrEmptyString(JObject json, string key)
-        {
-            if (json.TryGetValue(key, out var val))
-            {
-                string strVal = val.ToObject<string>();
-                json.Remove(key);
-                return strVal;
-            }
-
-            return string.Empty;
-        }
-
-        public static long ExtractParsedIntOrZero(JObject json, string key)
-        {
-            string strVal = ExtractExistingOrEmptyString(json, key);
-            if (!string.IsNullOrWhiteSpace(strVal) && long.TryParse(strVal, out long result))
-            {
-                return result;
-            }
-
-            return 0;
-        }
+        void OnAfterAccess(TokenCacheNotificationArgs args);
+        void OnBeforeAccess(TokenCacheNotificationArgs args);
+        void OnBeforeWrite(TokenCacheNotificationArgs args);
     }
 }

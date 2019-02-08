@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (addState)
             {
-                _state = Guid.NewGuid().ToString();
+                _state = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
                 requestParameters[OAuth2Parameter.State] = _state;
             }
 
@@ -181,7 +181,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         }
 
         private static void CheckForDuplicateQueryParameters(
-            Dictionary<string, string> queryParamsDictionary, 
+            IDictionary<string, string> queryParamsDictionary, 
             IDictionary<string, string> requestParameters)
         {
             foreach (KeyValuePair<string, string> kvp in queryParamsDictionary)

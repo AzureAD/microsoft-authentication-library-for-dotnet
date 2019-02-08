@@ -25,17 +25,21 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.CacheV2.Schema
+using System;
+using System.Threading.Tasks;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
+using Microsoft.Identity.Client.OAuth2;
+
+namespace Microsoft.Identity.Client.Cache
 {
-    internal static class StorageJsonValues
+    internal interface ICacheSessionManager
     {
-        public const string AuthorityTypeAdfs = "ADFS";
-        public const string AuthorityTypeMsa = "MSA";
-        public const string AuthorityTypeMsSts = "MSSTS";
-        public const string AuthorityTypeOther = "Other";
-        public const string CredentialTypeRefreshToken = "RefreshToken";
-        public const string CredentialTypeAccessToken = "AccessToken";
-        public const string CredentialTypeIdToken = "IdToken";
-        public const string CredentialTypeOther = "Other";
+        ITokenCacheInternal TokenCacheInternal { get; }
+        bool HasCache { get; }
+        Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse tokenResponse);
+        MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey);
+        Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
     }
 }

@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction
         /// </remarks>
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You can also pass optional parameters by calling:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         /// needs to be passed.
         /// You can also chain with
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also pass optional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
@@ -167,6 +167,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
@@ -185,6 +187,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
 
             var handler = new DeviceCodeRequest(
@@ -200,6 +204,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
 
             var handler = new IntegratedWindowsAuthRequest(
@@ -215,6 +221,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
 #if DESKTOP || NET_CORE
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(

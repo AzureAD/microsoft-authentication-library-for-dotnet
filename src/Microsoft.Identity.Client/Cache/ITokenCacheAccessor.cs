@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 
 namespace Microsoft.Identity.Client.Cache
 {
@@ -46,13 +48,13 @@ namespace Microsoft.Identity.Client.Cache
 
         void SaveAccount(MsalAccountCacheItem item);
 
-        string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
+        MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
 
-        string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey);
+        MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey);
 
-        string GetIdToken(MsalIdTokenCacheKey idTokenKey);
+        MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey);
 
-        string GetAccount(MsalAccountCacheKey accountKey);
+        MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey);
 
         void DeleteAccessToken(MsalAccessTokenCacheKey cacheKey);
 
@@ -62,13 +64,13 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        ICollection<string> GetAllAccessTokensAsString();
+        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens();
 
-        ICollection<string> GetAllRefreshTokensAsString();
+        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 
-        ICollection<string> GetAllIdTokensAsString();
+        ICollection<MsalIdTokenCacheItem> GetAllIdTokens();
 
-        ICollection<string> GetAllAccountsAsString();
+        ICollection<MsalAccountCacheItem> GetAllAccounts();
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

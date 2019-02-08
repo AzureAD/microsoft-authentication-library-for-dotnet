@@ -42,11 +42,9 @@ namespace DesktopTestApp
             ApplicationId = clientId;
             PublicClientApplication = PublicClientApplicationBuilder.Create(ApplicationId)
                 .WithComponent(_component)
-                .WithLoggingCallback(logCallback)
-                .WithEnablePiiLogging(true)
-                .WithLoggingLevel(LogLevel.Verbose)
+                .WithLogging(logCallback, LogLevel.Verbose, true)
 #if ARIA_TELEMETRY_ENABLED
-                .WithTelemetryCallback((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
+                .WithTelemetry((new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
                 .BuildConcrete();
 
