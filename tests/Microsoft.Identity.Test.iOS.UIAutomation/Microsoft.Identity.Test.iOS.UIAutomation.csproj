@@ -34,7 +34,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
-      <Version>2.6.2</Version>
+      <Version>2.6.3</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -42,11 +42,11 @@
       <Version>12.0.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.UITest" Version="2.2.7" />
-    <PackageReference Include="Microsoft.Azure.KeyVault" Version="2.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
   </ItemGroup>
   <!-- Set this env variable locally to overcome issue with VS not being able to run Nunit 2.6 tests-->
   <Target Name="NunitHack" BeforeTargets="Build">
@@ -54,7 +54,7 @@
   </Target>
   <ItemGroup Condition="'$(NUNIT_HACK)' != ''">
     <PackageReference Include="NUnit" Version="3.11.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.11.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
   </ItemGroup>
   <!-- This is how it runs in AppCenter -->
   <ItemGroup Condition="'$(NUNIT_HACK)' == ''">
