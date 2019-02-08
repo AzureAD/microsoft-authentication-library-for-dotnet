@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// URL (either because you had it in another way, or the library added it).
         /// <para>Mitigation [App Development]</para> RemoveAccount the duplicate parameter from the token acquisition override.
         /// </summary>
-        /// <seealso cref="ClientApplicationBase.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
+        /// <seealso cref="ConfidentialClientApplication.GetAuthorizationRequestUrlAsync(System.Collections.Generic.IEnumerable{string}, string, string, string, System.Collections.Generic.IEnumerable{string}, string)"/>
         public const string DuplicateQueryParameterError = "duplicate_query_parameter";
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 

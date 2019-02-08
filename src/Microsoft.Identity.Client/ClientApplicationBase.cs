@@ -229,55 +229,5 @@ namespace Microsoft.Identity.Client
                          .ExecuteAsync(CancellationToken.None)
                          .ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// [V2 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
-        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
-        /// This override enables you to specify a login hint and extra query parameter.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <param name="loginHint">Identifier of the user. Generally a UPN. This can be empty</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
-        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
-        /// The parameter can be null.</param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        /// <seealso cref="GetAuthorizationRequestUrl(IEnumerable{string})"/> which is the corresponding V3 API
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string loginHint,
-                                                               string extraQueryParameters)
-        {
-            return await GetAuthorizationRequestUrl(scopes).WithLoginHint(loginHint)
-                                                           .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(CancellationToken.None)
-                                                           .ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// [V2 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
-        /// the user's name. The URL targets the /authorize endpoint of the authority specified as the <paramref name="authority"/> parameter.
-        /// This override enables you to specify a redirectUri, login hint extra query parameters, extra scope to consent (which are not for the
-        /// same resource as the <paramref name="scopes"/>), and an authority.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API (a resource)</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
-        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
-        /// The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Scopes for additional resources (other than the resource for which <paramref name="scopes"/> are requested),
-        /// which a developer can request the user to consent to upfront.</param>
-        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        /// <seealso cref="GetAuthorizationRequestUrl(IEnumerable{string})"/> which is the corresponding V3 API
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string redirectUri, string loginHint,
-            string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
-        {
-            return await GetAuthorizationRequestUrl(scopes)
-                .WithRedirectUri(redirectUri)
-                .WithLoginHint(loginHint)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(authority)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-        }
     }
 }
