@@ -1499,13 +1499,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(MsalTestConstants.Scope, "refreshtoken")
                                   .WithRefreshToken("refreshtoken");
             CheckBuilderCommonMethods(byRefreshTokenBuilder);
-
-            var requestUrlBuilder = app.GetAuthorizationRequestUrl(MsalTestConstants.Scope)
-                                       .WithAccount(MsalTestConstants.User)
-                                       .WithLoginHint("loginhint")
-                                       .WithExtraScopesToConsent(MsalTestConstants.Scope)
-                                       .WithRedirectUri(MsalTestConstants.RedirectUri);
-            CheckBuilderCommonMethods(requestUrlBuilder);
         }
 
 #endif

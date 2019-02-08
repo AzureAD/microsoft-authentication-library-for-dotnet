@@ -54,15 +54,18 @@ namespace Microsoft.Identity.Client
             {
                 UserTokenCacheInternal = new TokenCache(ServiceBundle);
             }
+        }
 
-            //CreateRequestContext().Logger.Info(
-            //    string.Format(
-            //        CultureInfo.InvariantCulture,
-            //        "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-            //        ServiceBundle.PlatformProxy.GetProductName(),
-            //        MsalIdHelper.GetMsalVersion(),
-            //        AssemblyUtils.GetAssemblyFileVersionAttribute(),
-            //        AssemblyUtils.GetAssemblyInformationalVersion()));
+        internal void LogVersionInfo()
+        {
+            CreateRequestContext().Logger.Info(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'",
+                    ServiceBundle.PlatformProxy.GetProductName(),
+                    MsalIdHelper.GetMsalVersion(),
+                    AssemblyUtils.GetAssemblyFileVersionAttribute(),
+                    AssemblyUtils.GetAssemblyInformationalVersion()));
         }
 
         async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
@@ -70,6 +73,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var customAuthority = commonParameters.AuthorityOverride == null
                                       ? GetAuthority(silentParameters.Account)
                                       : Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, commonParameters.AuthorityOverride);
@@ -88,6 +93,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenByRefreshTokenParameters refreshTokenParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestContext = CreateRequestContext();
             if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
             {
@@ -106,32 +113,6 @@ namespace Microsoft.Identity.Client
             var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
             return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
         }
-
-        async Task<Uri> IClientApplicationBaseExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParameters.Account = authorizationRequestUrlParameters.Account;
-            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
-
-            if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
-            {
-                // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?
-                requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
-            }
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParameters,
-                authorizationRequestUrlParameters.ToInteractiveParameters(),
-                null);
-
-            // todo: need to pass through cancellation token here
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
-        }
-
 
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
@@ -167,26 +148,6 @@ namespace Microsoft.Identity.Client
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account = null)
         {
             return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);
-        }
-
-        /// <summary>
-        /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
-        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
-        /// This override enables you to specify a login hint and extra query parameter.
-        /// </summary>
-        /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
-        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
-        /// <remarks>You can also chain the following optional parameters:
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
-        /// </remarks>
-        public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
-            IEnumerable<string> scopes)
-        {
-            return GetAuthorizationRequestUrlParameterBuilder.Create(this, scopes);
         }
     }
 }

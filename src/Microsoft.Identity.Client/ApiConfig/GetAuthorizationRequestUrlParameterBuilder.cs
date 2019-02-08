@@ -34,6 +34,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client.ApiConfig
 {
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+
     /// <summary>
     ///     NOTE:  a few of the methods in AbstractAcquireTokenParameterBuilder (e.g. account) don't make sense here.
     ///     Do we want to create a further base that contains ALL of the common methods, and then have another one including
@@ -41,20 +43,20 @@ namespace Microsoft.Identity.Client.ApiConfig
     ///     that are only used for AcquireToken?
     /// </summary>
     public sealed class GetAuthorizationRequestUrlParameterBuilder :
-        AbstractClientAppBaseAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>
+        AbstractConfidentialClientAcquireTokenParameterBuilder<GetAuthorizationRequestUrlParameterBuilder>
     {
         private GetAuthorizationRequestUrlParameters Parameters { get; } = new GetAuthorizationRequestUrlParameters();
 
-        internal GetAuthorizationRequestUrlParameterBuilder(IClientApplicationBase clientApplicationBase)
-            : base(clientApplicationBase)
+        internal GetAuthorizationRequestUrlParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+            : base(confidentialClientApplication)
         {
         }
 
         internal static GetAuthorizationRequestUrlParameterBuilder Create(
-            IClientApplicationBase clientApplicationBase,
+            IConfidentialClientApplication confidentialClientApplication,
             IEnumerable<string> scopes)
         {
-            return new GetAuthorizationRequestUrlParameterBuilder(clientApplicationBase).WithScopes(scopes);
+            return new GetAuthorizationRequestUrlParameterBuilder(confidentialClientApplication).WithScopes(scopes);
         }
 
         /// <summary>
@@ -99,7 +101,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IClientApplicationBaseExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
         {
             throw new InvalidOperationException("This is a developer BUG.  This should never get executed.");
         }
@@ -114,14 +116,14 @@ namespace Microsoft.Identity.Client.ApiConfig
             // This method is marked "public new" because it only differs in return type from the base class
             // ExecuteAsync() and we need this one to return Uri and not AuthenticationResult.
 
-            if (ClientApplicationBase is IClientApplicationBaseExecutor executor)
+            if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
             {
                 ValidateAndCalculateApiId();
                 return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
             }
 
             throw new InvalidOperationException(
-                "ClientApplicationBase implementation does not implement IClientApplicationBaseExecutor.");
+                "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.");
         }
 
         /// <inheritdoc />
@@ -130,4 +132,5 @@ namespace Microsoft.Identity.Client.ApiConfig
             return ApiEvent.ApiIds.None;
         }
     }
+#endif
 }

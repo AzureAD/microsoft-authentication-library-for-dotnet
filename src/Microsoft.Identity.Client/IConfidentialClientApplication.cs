@@ -150,6 +150,51 @@ namespace Microsoft.Identity.Client
         Task<AuthenticationResult> AcquireTokenForClientAsync(
             IEnumerable<string> scopes,
             bool forceRefresh);
+
+        /// <summary>
+        /// [V3 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
+        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
+        /// This override enables you to specify a login hint and extra query parameter.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
+        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
+        /// <remarks>You can also chain the following optional parameters:
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// </remarks>
+        GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
+
+
+        /// <summary>
+        /// [V2 API] URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scopes">Array of scopes requested for resource</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        Task<Uri> GetAuthorizationRequestUrlAsync(
+            IEnumerable<string> scopes,
+            string loginHint,
+            string extraQueryParameters);
+
+        /// <summary>
+        /// [V2 API] Gets URL of the authorize endpoint including the query parameters.
+        /// </summary>
+        /// <param name="scopes">Array of scopes requested for resource</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
+        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        Task<Uri> GetAuthorizationRequestUrlAsync(
+            IEnumerable<string> scopes,
+            string redirectUri,
+            string loginHint,
+            string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority);
     }
 #endif
 }

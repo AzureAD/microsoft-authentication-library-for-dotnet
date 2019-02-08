@@ -167,6 +167,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
@@ -185,6 +187,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
 
             var handler = new DeviceCodeRequest(
@@ -200,6 +204,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
 
             var handler = new IntegratedWindowsAuthRequest(
@@ -215,6 +221,8 @@ namespace Microsoft.Identity.Client
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
+            LogVersionInfo();
+
 #if DESKTOP || NET_CORE
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(
