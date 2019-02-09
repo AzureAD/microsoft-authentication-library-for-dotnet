@@ -27,10 +27,12 @@
 
 using System;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Azure.KeyVault;
 using Microsoft.Azure.KeyVault.Models;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -45,19 +47,18 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// default cache).</remarks>
         private readonly static TokenCache keyVaultTokenCache = new TokenCache();
 
-        private KeyVaultClient _keyVaultClient;
+        private KeyVaultClient KeyVaultClient;
 
-        private ClientAssertionCertificate _assertionCert;
+        private KeyVaultConfiguration Config;
 
-        private KeyVaultConfiguration _config;
+        private const string KeyVaultConfidentialClientId = "ebe49c8f-61de-4357-9194-7a786f6402b4";
+        private const string KeyVaultPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
 
-        private readonly string _keyVaultClientID = "ebe49c8f-61de-4357-9194-7a786f6402b4";
+        private const string KeyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
 
-        private readonly string _keyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
+        private const string DataFileName = "data.txt";
 
-        private readonly string _dataFileName = "data.txt";
-
-        private AuthenticationResult _authResult;
+        private AuthenticationResult AuthResult;
 
         /// <summary>Initialize the secrets provider with the "keyVault" configuration section.</summary>
         /// <remarks>
@@ -88,7 +89,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         /// </remarks>
         public KeyVaultSecretsProvider()
         {
-            _config = new KeyVaultConfiguration
+            Config = new KeyVaultConfiguration
             {
                 AuthType = KeyVaultAuthenticationType.ClientCertificate
             };
@@ -96,20 +97,19 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             //The data.txt is a place holder for the keyvault secret. It will only be written to during build time when testing appcenter.
             //After the tests are finished in appcenter, the file will be deleted from the appcenter servers.
             //The file will then be deleted locally Via VSTS task.
-            if (File.Exists(_dataFileName))
+            if (File.Exists(DataFileName))
             {
-                var data = File.ReadAllText(_dataFileName);
+                var data = File.ReadAllText(DataFileName);
 
                 if (!string.IsNullOrWhiteSpace(data))
                 {
-                    _config.AuthType = KeyVaultAuthenticationType.ClientSecret;
-                    _config.KeyVaultSecret = data;
+                    Config.AuthType = KeyVaultAuthenticationType.ClientSecret;
+                    Config.KeyVaultSecret = data;
                 }
             }
 
-            _config.ClientId = _keyVaultClientID;
-            _config.CertThumbprint = _keyVaultThumbPrint;
-            _keyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
+            Config.CertThumbprint = KeyVaultThumbPrint;
+            KeyVaultClient = new KeyVaultClient(AuthenticationCallbackAsync);
         }
 
         ~KeyVaultSecretsProvider()
@@ -119,54 +119,78 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public SecretBundle GetSecret(string secretUrl)
         {
-            return _keyVaultClient.GetSecretAsync(secretUrl).GetAwaiter().GetResult();
+            return KeyVaultClient.GetSecretAsync(secretUrl).GetAwaiter().GetResult();
         }
 
         private async Task<string> AuthenticationCallbackAsync(string authority, string resource, string scope)
         {
-            if (_authResult != null)
+            if (AuthResult != null)
             {
-                return _authResult.AccessToken;
+                return AuthResult.AccessToken;
             }
-            var authContext = new AuthenticationContext(authority, keyVaultTokenCache);
+
+            var scopes = new[] { resource + "/.default" };
 
             AuthenticationResult authResult;
-            switch (_config.AuthType)
+            IConfidentialClientApplication confidentialApp;
+            IPublicClientApplication publicApp;
+            X509Certificate2 cert = null;
+            switch (Config.AuthType)
             {
                 case KeyVaultAuthenticationType.ClientCertificate:
-                    if (_assertionCert == null)
+                    cert = CertificateHelper.FindCertificateByThumbprint(Config.CertThumbprint);
+                    if (cert == null)
                     {
-                        var cert = CertificateHelper.FindCertificateByThumbprint(_config.CertThumbprint);
-                        if (cert == null)
-                        {
-                            throw new InvalidOperationException(
-                                "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
-                        }
-                        _assertionCert = new ClientAssertionCertificate(_config.ClientId, cert);
+                        throw new InvalidOperationException(
+                            "Test setup error - cannot find a certificate in the My store for KeyVault. This is available for Microsoft employees only.");
                     }
-                    authResult = await authContext.AcquireTokenAsync(resource, _assertionCert).ConfigureAwait(false);
+
+                    confidentialApp = ConfidentialClientApplicationBuilder.Create(KeyVaultConfidentialClientId)
+                                              .WithAuthority(new Uri(authority), true)
+                                              .WithCertificate(cert)
+                                              .Build();
+
+                    authResult = await confidentialApp.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
                     break;
                 case KeyVaultAuthenticationType.ClientSecret:
-                    ClientCredential cred = new ClientCredential(_config.ClientId, _config.KeyVaultSecret);
-                    authResult = await authContext.AcquireTokenAsync(resource, cred).ConfigureAwait(false);
+                    confidentialApp = ConfidentialClientApplicationBuilder.Create(KeyVaultConfidentialClientId)
+                                              .WithAuthority(new Uri(authority), true)
+                                              .WithClientSecret(Config.KeyVaultSecret)
+                                              .Build();
+                    authResult = await confidentialApp.AcquireTokenForClientAsync(scopes).ConfigureAwait(false);
                     break;
                 case KeyVaultAuthenticationType.UserCredential:
-                    authResult = await authContext.AcquireTokenAsync(resource, _config.ClientId, new UserCredential()).ConfigureAwait(false);
+                    publicApp = PublicClientApplicationBuilder.Create(KeyVaultPublicClientId)
+                                                .WithAuthority(new Uri(authority), true)
+                                                .Build();
+                    try
+                    {
+                        authResult = await publicApp.AcquireTokenByIntegratedWindowsAuthAsync(scopes).ConfigureAwait(false);
+                    }
+                    catch (MsalUiRequiredException ex)
+                    {
+                        publicApp = PublicClientApplicationBuilder.Create(KeyVaultPublicClientId)
+                                                .WithAuthority(new Uri(authority), true)
+                                                .WithClaims(ex.Claims)
+                                                .Build();
+
+                        authResult = await publicApp.AcquireTokenAsync(scopes).ConfigureAwait(false);
+                    }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            _authResult = authResult;
+            AuthResult = authResult;
             return authResult?.AccessToken;
         }
 
         public void Dispose()
         {
-            if (_keyVaultClient != null)
+            if (KeyVaultClient != null)
             {
-                _keyVaultClient.Dispose();
-                _keyVaultClient = null;
+                KeyVaultClient.Dispose();
+                KeyVaultClient = null;
             }
 
             GC.SuppressFinalize(this);

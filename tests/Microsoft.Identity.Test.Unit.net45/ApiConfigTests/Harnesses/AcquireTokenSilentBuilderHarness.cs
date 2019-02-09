@@ -38,11 +38,11 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
     internal class AcquireTokenSilentBuilderHarness : AbstractBuilderHarness
     {
         public AcquireTokenSilentParameters SilentParametersReceived { get; private set; }
-        public IPublicClientApplication ClientApplication { get; private set; }
+        public IClientApplicationBase ClientApplication { get; private set; }
 
         public async Task SetupAsync()
         {
-            ClientApplication = Substitute.For<IPublicClientApplication, IClientApplicationBaseExecutor>();
+            ClientApplication = Substitute.For<IClientApplicationBase, IClientApplicationBaseExecutor>();
 
             await ((IClientApplicationBaseExecutor)ClientApplication).ExecuteAsync(
                 Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),

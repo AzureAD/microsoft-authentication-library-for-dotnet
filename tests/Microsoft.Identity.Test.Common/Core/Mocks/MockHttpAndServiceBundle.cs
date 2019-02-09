@@ -67,12 +67,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             SortedSet<string> scopes, 
             ITokenCacheInternal tokenCache = null, 
             IAccount account = null,
-            Dictionary<string, string> extraQueryParameters = null)
+            IDictionary<string, string> extraQueryParameters = null, 
+            string claims = null)
         {
             var commonParameters = new AcquireTokenCommonParameters
             {
                 Scopes = scopes ?? MsalTestConstants.Scope,
-                ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>()
+                ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>(),
+                Claims = claims
             };
 
             return new AuthenticationRequestParameters(

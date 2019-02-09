@@ -25,27 +25,33 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Cache;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Client.Cache.Items;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
+    /// <summary>
+    /// Base class for all flows. Use by implementing <see cref="ExecuteAsync(CancellationToken)"/>
+    /// and optionally calling protected helper methods such as SendTokenRequestAsync, which knows
+    /// how to use all params when making the request.
+    /// </summary>
     internal abstract class RequestBase
     {
         internal AuthenticationRequestParameters AuthenticationRequestParameters { get; }
-        internal ITokenCacheInternal TokenCache => AuthenticationRequestParameters.TokenCache;
+        internal ICacheSessionManager CacheManager => AuthenticationRequestParameters.CacheSessionManager;
         protected IServiceBundle ServiceBundle { get; }
 
         protected RequestBase(
@@ -74,13 +80,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 authenticationRequestParameters.AuthorityInfo?.CanonicalAuthority,
                 authenticationRequestParameters.Scope.AsSingleString(),
                 authenticationRequestParameters.ClientId,
-                TokenCache != null,
+                CacheManager.HasCache,
                 GetType().Name);
 
             string messageWithoutPii = string.Format(
                 CultureInfo.InvariantCulture,
                 "=== Token Acquisition ({1}) started:\n\tCache Provided: {0}",
-                TokenCache != null,
+                CacheManager.HasCache,
                 GetType().Name);
 
             if (authenticationRequestParameters.AuthorityInfo != null &&
@@ -125,7 +131,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             LogRequestStarted(AuthenticationRequestParameters);
             string accountId = AuthenticationRequestParameters.Account?.HomeAccountId?.Identifier;
-            var apiEvent = InitializeApiEvent(accountId);
+            ApiEvent apiEvent = InitializeApiEvent(accountId);
 
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
                 AuthenticationRequestParameters.RequestContext.TelemetryRequestId,
@@ -135,7 +141,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 try
                 {
-                    var authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
+                    AuthenticationResult authenticationResult = await ExecuteAsync(cancellationToken).ConfigureAwait(false);
                     LogReturnedToken(authenticationResult);
 
                     apiEvent.TenantId = authenticationResult.TenantId;
@@ -165,7 +171,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private ApiEvent InitializeApiEvent(string accountId)
         {
             AuthenticationRequestParameters.RequestContext.TelemetryRequestId = ServiceBundle.TelemetryManager.GenerateNewRequestId();
-            var apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
+            ApiEvent apiEvent = new ApiEvent(AuthenticationRequestParameters.RequestContext.Logger, ServiceBundle.PlatformProxy.CryptographyManager)
             {
                 ApiId = AuthenticationRequestParameters.ApiId,
                 AccountId = accountId ?? "",
@@ -208,11 +214,11 @@ namespace Microsoft.Identity.Client.Internal.Requests
             AuthenticationRequestParameters.TenantUpdatedCanonicalAuthority = GetTenantUpdatedCanonicalAuthority(
                 AuthenticationRequestParameters.AuthorityInfo.CanonicalAuthority, idToken?.TenantId);
 
-            if (TokenCache != null)
+            if (CacheManager.HasCache)
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = TokenCache.SaveAccessAndRefreshToken(AuthenticationRequestParameters, msalTokenResponse);
+                var tuple = CacheManager.SaveAccessAndRefreshToken(msalTokenResponse);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else
@@ -220,20 +226,20 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return new AuthenticationResult(
                     new MsalAccessTokenCacheItem(
                         AuthenticationRequestParameters.AuthorityInfo.Host,
-                        AuthenticationRequestParameters.ClientId, 
+                        AuthenticationRequestParameters.ClientId,
                         msalTokenResponse,
                         idToken?.TenantId),
                     new MsalIdTokenCacheItem(
                         AuthenticationRequestParameters.AuthorityInfo.Host,
-                        AuthenticationRequestParameters.ClientId, 
-                        msalTokenResponse, 
+                        AuthenticationRequestParameters.ClientId,
+                        msalTokenResponse,
                         idToken?.TenantId));
             }
         }
 
         private static string GetTenantUpdatedCanonicalAuthority(string authority, string replacementTenantId)
         {
-            var authUri = new Uri(authority);
+            Uri authUri = new Uri(authority);
             string[] pathSegments = authUri.AbsolutePath.Substring(1).Split(
                 new[]
                 {
@@ -311,7 +317,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         protected async Task<MsalTokenResponse> SendTokenRequestAsync(
             string tokenEndpoint,
-            IDictionary<string, string> additionalBodyParameters, 
+            IDictionary<string, string> additionalBodyParameters,
             CancellationToken cancellationToken)
         {
             OAuth2Client client = new OAuth2Client(ServiceBundle.DefaultLogger, ServiceBundle.HttpManager, ServiceBundle.TelemetryManager);
@@ -323,7 +329,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 #if DESKTOP || NETSTANDARD1_3 || NET_CORE
             if (AuthenticationRequestParameters.ClientCredential != null)
             {
-                var ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
+                Dictionary<string, string> ccBodyParameters = ClientCredentialHelper.CreateClientCredentialBodyParameters(
                     AuthenticationRequestParameters.RequestContext.Logger,
                     ServiceBundle.PlatformProxy.CryptographyManager,
                     AuthenticationRequestParameters.ClientCredential,
@@ -340,6 +346,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             client.AddBodyParameter(OAuth2Parameter.Scope,
                 GetDecoratedScope(AuthenticationRequestParameters.Scope).AsSingleString());
+
+            client.AddQueryParameter(OAuth2Parameter.Claims, AuthenticationRequestParameters.Claims);
 
             foreach (var kvp in additionalBodyParameters)
             {

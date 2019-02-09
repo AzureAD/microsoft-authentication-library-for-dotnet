@@ -73,10 +73,32 @@ namespace Microsoft.Identity.Client.AppConfig
         /// </summary>
         string Component { get; }
 
+        /// <summary>
+        /// </summary>
+        IDictionary<string, string> ExtraQueryParameters { get; }
+
+        /// <summary>
+        /// </summary>
+        string Claims { get; }
+
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>
         ClientCredential ClientCredential { get; }
 #endif
+
+#if WINDOWS_APP
+        /// <summary>
+        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// </summary>
+        bool UseCorporateNetwork { get; }
+#endif // WINDOWS_APP
+
+#if iOS
+        /// <summary>
+        /// </summary>
+        string IosKeychainSecurityGroup { get; }
+#endif // iOS
     }
 }

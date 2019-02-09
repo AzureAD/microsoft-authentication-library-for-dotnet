@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client
     /// </summary>
     public interface ITokenCache
     {
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME 
         /// <summary>
         /// 
         /// </summary>
@@ -74,6 +74,26 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="unifiedState"></param>
         void Deserialize(byte[] unifiedState);
+
+        /// <summary>
+        /// Serializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeV3 and DeserializeV3.
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        byte[] SerializeV3();
+
+        /// <summary>
+        /// Deserializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeV3 and DeserializeV3
+        /// </summary>
+        /// <param name="bytes">Byte stream representation of the cache</param>
+        void DeserializeV3(byte[] bytes);
 
         /// <summary>
         /// 

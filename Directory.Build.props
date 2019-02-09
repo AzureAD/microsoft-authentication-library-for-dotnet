@@ -15,10 +15,7 @@
          For clarity, without PrivateAssets marked here, anyone consuming Microsoft.Identity.Client
          would also be forced to install these dependencies.  PrivateAssets avoids this problem. -->
     <PackageReference Include="AsyncUsageAnalyzers" Version="1.0.0-alpha003" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.2" PrivateAssets="All" />
-    <PackageReference Include="StrongNamer" Version="0.0.8" PrivateAssets="All" Condition="$([MSBuild]::IsOsPlatform('Windows')) " /> 
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" PrivateAssets="All" />
+    <PackageReference Include="StrongNamer" Version="0.0.8" PrivateAssets="All" Condition="$([MSBuild]::IsOsPlatform('Windows')) " />
   </ItemGroup>
-
-
-
 </Project>

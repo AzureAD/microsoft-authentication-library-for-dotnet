@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client
 {
@@ -92,7 +93,7 @@ namespace Microsoft.Identity.Client
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead.  See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         string Component { get; set; }
 
         /// <summary>
@@ -101,7 +102,7 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use ExtraQueryParameters on each call instead.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use ExtraQueryParameters on each call instead.  See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         string SliceParameters { get; set; }
 
         /// <summary>
@@ -110,7 +111,7 @@ namespace Microsoft.Identity.Client
         /// (a list of known B2C authorities cannot be maintained by MSAL.NET)
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed.  See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         bool ValidateAuthority { get; }
 
 #if !DESKTOP && !NET_CORE
@@ -132,7 +133,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally; 
         /// you then need to add the reply URL of the deployed application in the application registration portal.
         /// </remarks>
-        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-3-breaking-changes or https://aka.ms/msal-net-application-configuration", true)]
         string RedirectUri { get; set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
 
@@ -177,7 +178,7 @@ namespace Microsoft.Identity.Client
         /// This will allow for disambiguation between MSAL usage by the app vs MSAL usage by component libraries.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use WithComponent on AbstractApplicationBuilder<T> to configure this instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string Component { get; set; }
 
         /// <summary>
@@ -186,7 +187,7 @@ namespace Microsoft.Identity.Client
         /// Unless requested otherwise, this parameter should not be set by application developers as it may have adverse effect on the application.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use ExtraQueryParameters on each call instead. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Use ExtraQueryParameters on each call instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string SliceParameters { get; set; }
 
         /// <summary>
@@ -196,7 +197,7 @@ namespace Microsoft.Identity.Client
         /// and before an operation acquiring a token or interacting with the STS.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Can be set on AbstractApplicationBuilder<T>.WithAuthority as needed. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public bool ValidateAuthority { get; set; }
 
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved
@@ -215,7 +216,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>This is especially important when you deploy an application that you have initially tested locally;
         /// you then need to add the reply URL of the deployed application in the application registration portal</remarks>
-        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-application-configuration", true)]
+        [Obsolete("Should be set using AbstractApplicationBuilder<T>.WithRedirectUri and can be viewed with ClientApplicationBase.AppConfig.RedirectUri. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string RedirectUri { get; set; }
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     }
@@ -244,12 +245,35 @@ namespace Microsoft.Identity.Client
         public IUser User { get { throw new NotImplementedException(); } }
     }
 
+    public partial interface IPublicClientApplication
+    {
+#if WINDOWS_APP
+        /// <summary>
+        /// Flag to enable authentication with the user currently logeed-in in Windows.
+        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
+        bool UseCorporateNetwork { get; set; }
+#endif // WINDOWS_APP
+    }
+
     /// <Summary>
     /// Abstract class containing common API methods and properties. 
     /// For details see https://aka.ms/msal-net-client-applications
     /// </Summary>
     public partial class PublicClientApplication
     {
+#if WINDOWS_APP
+        /// <summary>
+        /// Flag to enable authentication with the user currently logged-in in Windows.
+        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("PublicClientApplication is now immutable, you can set this property using the PublicClientApplicationBuilder and read it using IAppConfig.  See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
+        public bool UseCorporateNetwork { get; set; }
+#endif
+
 #if DESKTOP || NET_CORE
 #pragma warning disable 1998
         /// <summary>
@@ -264,7 +288,7 @@ namespace Microsoft.Identity.Client
         /// <param name="password">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-up)", true)]
+        [Obsolete("Use overload with SecureString instead (See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-up)", true)]
         public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, string password)
         {
             { throw new NotImplementedException(); }
@@ -282,6 +306,16 @@ namespace Microsoft.Identity.Client
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
         public string KeychainSecurityGroup { get { throw new NotImplementedException(); } }
+
+        /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
+        public string iOSKeychainSecurityGroup
+        {
+            get => throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration");
+            set => throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration");
+        }
 #endif
     }
 
@@ -289,7 +323,7 @@ namespace Microsoft.Identity.Client
     /// Interface defining common API methods and properties. 
     /// For details see https://aka.ms/msal-net-client-applications 
     /// </Summary> 
-    public partial interface IPublicApplicationBase
+    public partial interface IPublicClientApplication
     {
 #if iOS
         /// <summary> 
@@ -302,6 +336,17 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use iOSKeychainSecurityGroup instead (See https://aka.ms/msal-net-ios-keychain-security-group)", true)]
         string KeychainSecurityGroup { get; }
 
+        /// <summary>
+        /// Xamarin iOS specific property enabling the application to share the token cache with other applications sharing the same keychain security group.
+        /// If you use this property, you MUST add the capability to your Application Entitlement.
+        /// In this property, the value should not contain the TeamId prefix, MSAL will resolve the TeamId at runtime.
+        /// For more details, please see https://aka.ms/msal-net-sharing-cache-on-ios
+        /// </summary>
+        /// <remarks>This API may change in future release.</remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes and https://aka.ms/msal-net-application-configuration", true)]
+        string iOSKeychainSecurityGroup { get; set; }
 #endif
     }
 
@@ -314,4 +359,100 @@ namespace Microsoft.Identity.Client
     public struct UIBehavior
     {
     }
+
+    /// <summary>
+    /// </summary>
+    [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+    public sealed class Logger
+    {
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static LogCallback LogCallback
+        {
+            set => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static LogLevel Level
+        {
+            get => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+            set => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static bool PiiLoggingEnabled { get; set; } = false;
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        public static bool DefaultLoggingEnabled { get; set; } = false;
+    }
+
+    /// <summary>
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+    public class Telemetry : ITelemetryReceiver
+    {
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public delegate void Receiver(List<Dictionary<string, string>> events);
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public static Telemetry GetInstance()
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public bool TelemetryOnFailureOnly
+        {
+            get => throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            set => throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public void RegisterReceiver(Receiver r)
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        public bool HasRegisteredReceiver()
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+
+        /// <summary>
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        void ITelemetryReceiver.HandleTelemetryEvents(List<Dictionary<string, string>> events)
+        {
+            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+        }
+   }
 }

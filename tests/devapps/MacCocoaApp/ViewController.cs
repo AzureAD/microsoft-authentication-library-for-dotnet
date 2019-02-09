@@ -1,11 +1,39 @@
-﻿using System;
+﻿// ------------------------------------------------------------------------------
+// 
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+// 
+// This code is licensed under the MIT License.
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+// 
+// ------------------------------------------------------------------------------
+
+using System;
 
 using AppKit;
 using Foundation;
 using Microsoft.Identity.Client;
 using System.Linq;
-using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace MacCocoaApp
 {
@@ -15,46 +43,53 @@ namespace MacCocoaApp
         private const string Authority = "https://login.microsoftonline.com/common";
         private readonly string[] Scopes = new[] { "User.Read" };
         // Consider having a single object for the entire app.
-        PublicClientApplication _pca;
+        private readonly IPublicClientApplication _pca;
 
+        // This is a simple, unencrypted, file based cache
+        public static readonly string CacheFilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "mac_sample_cache.txt";
 
         public ViewController(IntPtr handle) : base(handle)
         {
-            ConfigureMsalLogging();
-
             // use a simple file cache (alternatively, use no cache and the app will lose all tokens if restarted)
-            _pca = new PublicClientApplication(ClientId, Authority, UserTokenCache.GetUserTokenCache());
-        }
+            _pca = PublicClientApplicationBuilder
+                .Create(ClientId)
+                .WithAuthority(new Uri(Authority))
+                .WithLogging((level, message, pii) =>
+                {
+                    Console.WriteLine($"MSAL {level} {pii} {message}");
+                    Console.ResetColor();
+                },
+                LogLevel.Verbose,
+                true)
+                .Build();
 
-        private static void ConfigureMsalLogging()
-        {
-            Logger.LogCallback = (lvl, msg, pii) =>
+            _pca.UserTokenCache.SetBeforeAccess(args =>
             {
-                Console.WriteLine($"MSAL {lvl} {pii} {msg}");
-                Console.ResetColor();
-            };
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
+                args.TokenCache.Deserialize(
+                    File.Exists(CacheFilePath) ? File.ReadAllBytes(CacheFilePath): null);
+            });
+
+            _pca.UserTokenCache.SetAfterAccess(args =>
+            {
+                // if the access operation resulted in a cache update
+                if (args.HasStateChanged)
+                {
+                    // reflect changes in the persistent store
+                    File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
+                }
+            });
         }
 
         public override void ViewDidLoad()
         {
             base.ViewDidLoad();
-
             // Do any additional setup after loading the view.
         }
 
         public override NSObject RepresentedObject
         {
-            get
-            {
-                return base.RepresentedObject;
-            }
-            set
-            {
-                base.RepresentedObject = value;
-                // Update the view, if already loaded.
-            }
+            get => base.RepresentedObject;
+            set => base.RepresentedObject = value;
         }
 
       
@@ -91,7 +126,7 @@ namespace MacCocoaApp
             catch (Exception e)
             {
                 UpdateStatus("Unexpected error: " + 
-                    e.Message + Environment.NewLine + e.StackTrace);               
+                    e.Message + Environment.NewLine + e.StackTrace);
             }
         }
 
@@ -107,7 +142,7 @@ namespace MacCocoaApp
             else
             {
                 UpdateStatus($"There are {existingAccounts.Count()} accounts in the cache." +
-                	$" {Environment.NewLine} {string.Join(Environment.NewLine, existingAccounts)} ");
+                    $" {Environment.NewLine} {string.Join(Environment.NewLine, existingAccounts)} ");
             }
         }
 
@@ -150,8 +185,7 @@ namespace MacCocoaApp
 
         private void UpdateStatus(string message)
         {
-            NSRunLoop.Main.BeginInvokeOnMainThread(() =>
-                    this.OutputLabel.StringValue = message);
+            NSRunLoop.Main.BeginInvokeOnMainThread(() => OutputLabel.StringValue = message);
         }
     }
 }

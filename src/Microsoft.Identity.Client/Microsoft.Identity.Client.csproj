@@ -1,5 +1,6 @@
 ﻿<Project Sdk="MSBuild.Sdk.Extras">
   <Import Project="../MSAL.Frameworks.props" />
+
   <!-- Platform flags, NuGet metadata properties and versioning properties are in Directory.Build.props -->
   <Import Project="../MSAL.Common.props" />
   <PropertyGroup Condition="'$(TargetFramework)' == '$(TargetFrameworkNetCore)' ">
@@ -22,5 +23,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ReferenceAssemblyProjectReference Include="..\Microsoft.Identity.Client.Ref\Microsoft.Identity.Client.Ref.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />
   </ItemGroup>
 </Project>

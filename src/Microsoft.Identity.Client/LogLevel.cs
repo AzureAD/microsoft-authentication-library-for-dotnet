@@ -25,43 +25,32 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Json.Linq;
-
-namespace Microsoft.Identity.Client.CacheV2.Impl.Utils
+namespace Microsoft.Identity.Client
 {
-    internal static class JsonUtils
+    /// <summary>
+    ///     Level of the log messages.
+    ///     For details see https://aka.ms/msal-net-logging
+    /// </summary>
+    public enum LogLevel
     {
-        public static string GetExistingOrEmptyString(JObject json, string key)
-        {
-            if (json.TryGetValue(key, out var val))
-            {
-                return val.ToObject<string>();
-            }
+        /// <summary>
+        ///     Error Log level
+        /// </summary>
+        Error = 0,
 
-            return string.Empty;
-        }
+        /// <summary>
+        ///     Warning Log level
+        /// </summary>
+        Warning = 1,
 
-        public static string ExtractExistingOrEmptyString(JObject json, string key)
-        {
-            if (json.TryGetValue(key, out var val))
-            {
-                string strVal = val.ToObject<string>();
-                json.Remove(key);
-                return strVal;
-            }
+        /// <summary>
+        ///     Information Log level
+        /// </summary>
+        Info = 2,
 
-            return string.Empty;
-        }
-
-        public static long ExtractParsedIntOrZero(JObject json, string key)
-        {
-            string strVal = ExtractExistingOrEmptyString(json, key);
-            if (!string.IsNullOrWhiteSpace(strVal) && long.TryParse(strVal, out long result))
-            {
-                return result;
-            }
-
-            return 0;
-        }
+        /// <summary>
+        ///     Verbose Log level
+        /// </summary>
+        Verbose = 3
     }
 }

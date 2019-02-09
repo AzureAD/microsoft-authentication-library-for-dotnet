@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client
     /// <item><description>.NET Core does not support UI, and therefore this platform does not provide the interactive token acquisition methods</description></item>
     /// </list>
     /// </remarks>
-    public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication
+    public sealed partial class PublicClientApplication : ClientApplicationBase, IPublicClientApplication, IByRefreshToken
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         /// <summary>
@@ -104,32 +104,6 @@ namespace Microsoft.Identity.Client
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
         // however include the signatures at runtime only to prevent MissingMethodExceptions from NetStandard
 #if !NET_CORE_BUILDTIME // include for other platforms and for runtime
-
-#if iOS
-        private string keychainSecurityGroup;
-
-        /// <inheritdoc />
-        public string iOSKeychainSecurityGroup
-        {
-            get
-            {
-                return keychainSecurityGroup;
-            }
-            set
-            {
-                keychainSecurityGroup = value;
-                UserTokenCacheInternal.SetIosKeychainSecurityGroup(value);
-            }
-        }
-#endif
-
-#if WINDOWS_APP
-        /// <summary>
-        /// Flag to enable authentication with the user currently logged-in in Windows.
-        /// When set to true, the application will try to connect to the corporate network using windows integrated authentication.
-        /// </summary>
-        public bool UseCorporateNetwork { get; set; }
-#endif
 
         // Android does not support AcquireToken* without UIParent params, but include it at runtime
         // only to avoid MissingMethodExceptions from NetStandard
@@ -254,7 +228,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -283,7 +257,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 #endif
@@ -432,7 +406,7 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -462,30 +436,9 @@ namespace Microsoft.Identity.Client
                 .WithPrompt(prompt)
                 .WithExtraQueryParameters(extraQueryParameters)
                 .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(new Uri(authority))
+                .WithAuthority(authority)
                 .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        internal IWebUI CreateWebAuthenticationDialog(UIParent parent, Prompt prompt, RequestContext requestContext)
-        {
-            //create instance of UIParent and assign useCorporateNetwork to UIParent
-            if (parent == null)
-            {
-#pragma warning disable CS0618 // Throws a good exception on Android, but ctor cannot be removed for backwards compat reasons
-                parent = new UIParent();
-#pragma warning restore CS0618 // Type or member is obsolete
-            }
-
-#if WINDOWS_APP || DESKTOP
-            //hidden webview can be used in both WinRT and desktop applications.
-            parent.UseHiddenBrowser = prompt.Equals(Prompt.Never);  // todo(migration): what to do here now that Prompt.Never is gone?
-#if WINDOWS_APP
-            parent.UseCorporateNetwork = UseCorporateNetwork;
-#endif
-#endif
-
-            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(parent.CoreUIParent, requestContext);
         }
 
         private void GuardNetCore()
@@ -638,6 +591,33 @@ namespace Microsoft.Identity.Client
         {
             return await AcquireTokenWithDeviceCode(scopes, deviceCodeResultCallback)
                 .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Acquires an access token from an existing refresh token and stores it and the refresh token into
+        /// the application user token cache, where it will be available for further AcquireTokenSilentAsync calls.
+        /// This method can be used in migration to MSAL from ADAL v2 and in various integration
+        /// scenarios where you have a RefreshToken available.
+        /// (see https://aka.ms/msal-net-migration-adal2-msal2)
+        /// </summary>
+        /// <param name="scopes">Scope to request from the token endpoint.
+        /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
+        /// <param name="refreshToken">The refresh token (for example previously obtained from ADAL 2.x)</param>
+        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(refreshToken))
+            {
+                throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
+            }
+
+            return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
+            IEnumerable<string> scopes,
+            string refreshToken)
+        {
+            return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME

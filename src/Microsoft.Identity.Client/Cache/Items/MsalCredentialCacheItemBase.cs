@@ -25,20 +25,36 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Runtime.Serialization;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Items
 {
-    [DataContract]
     internal class MsalCredentialCacheItemBase : MsalCacheItemBase
     {
-        [DataMember(Name = "credential_type", IsRequired = true)]
         internal string CredentialType { get; set; }
-
-        [DataMember(Name = "client_id", IsRequired = true)]
         public string ClientId { get; set; }
-
-        [DataMember(Name = "secret", IsRequired = true)]
         public string Secret { get; set; }
+
+        internal override void PopulateFieldsFromJObject(JObject j)
+        {
+            CredentialType = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.CredentialType);
+            ClientId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.ClientId);
+            Secret = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Secret);
+
+            // Important: this MUST be last, since it will extract the AdditionalFieldsJson
+            // after all other fields are read.
+            base.PopulateFieldsFromJObject(j);
+        }
+
+        internal override JObject ToJObject()
+        {
+            var json = base.ToJObject();
+            json[StorageJsonKeys.ClientId] = ClientId;
+            json[StorageJsonKeys.Secret] = Secret;
+            json[StorageJsonKeys.CredentialType] = CredentialType;
+
+            return json;
+        }
     }
 }

@@ -46,6 +46,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     NumberOfAuthorizationPendingRequestsToInject,
                     out HashSet<string> expectedScopes);
 
-                var cache = parameters.TokenCache;
+                var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
                 Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
@@ -132,6 +133,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     }
                 };
 
+              
                 var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
                 Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
@@ -171,7 +173,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     out HashSet<string> expectedScopes,
                     true);
 
-                var cache = parameters.TokenCache;
+                var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
                 Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
@@ -274,54 +276,47 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     });
             }))
             {
-                try
+                const int NumberOfAuthorizationPendingRequestsToInject = 2;
+                var parameters = CreateAuthenticationParametersAndSetupMocks(
+                    harness,
+                    NumberOfAuthorizationPendingRequestsToInject,
+                    out HashSet<string> expectedScopes);
+
+                var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
                 {
-                    const int NumberOfAuthorizationPendingRequestsToInject = 2;
-                    var parameters = CreateAuthenticationParametersAndSetupMocks(
-                        harness,
-                        NumberOfAuthorizationPendingRequestsToInject,
-                        out HashSet<string> expectedScopes);
+                    DeviceCodeResultCallback = result => Task.FromResult(0)
+                };
 
-                    var deviceCodeParameters = new AcquireTokenWithDeviceCodeParameters
-                    {
-                        DeviceCodeResultCallback = result => Task.FromResult(0)
-                    };
+                var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
 
-                    var request = new DeviceCodeRequest(harness.ServiceBundle, parameters, deviceCodeParameters);
+                Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
+                task.Wait();
 
-                    Task<AuthenticationResult> task = request.RunAsync(CancellationToken.None);
-                    task.Wait();
+                // Ensure we got logs so the log callback is working.
+                Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
 
-                    // Ensure we got logs so the log callback is working.
-                    Assert.IsTrue(logCallbacks.Count > 0, "There should be data in logCallbacks");
+                // Ensure we have authorization_pending data in the logs
+                List<_LogData> authPendingLogs =
+                    logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
+                Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
 
-                    // Ensure we have authorization_pending data in the logs
-                    List<_LogData> authPendingLogs =
-                        logCallbacks.Where(x => x.Message.Contains(OAuth2Error.AuthorizationPending)).ToList();
-                    Assert.AreEqual(2, authPendingLogs.Count, "authorization_pending logs should exist");
+                // Ensure the authorization_pending logs are Info level and not Error
+                Assert.AreEqual(
+                    2,
+                    authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
+                    "authorization_pending logs should be INFO");
 
-                    // Ensure the authorization_pending logs are Info level and not Error
-                    Assert.AreEqual(
-                        2,
-                        authPendingLogs.Where(x => x.Level == LogLevel.Info).ToList().Count,
-                        "authorization_pending logs should be INFO");
+                // Ensure we don't have Error level logs in this scenario.
+                string errorLogs = string.Join(
+                    "--",
+                    logCallbacks
+                        .Where(x => x.Level == LogLevel.Error)
+                        .Select(x => x.Message)
+                        .ToArray());
 
-                    // Ensure we don't have Error level logs in this scenario.
-                    string errorLogs = string.Join(
-                        "--",
-                        logCallbacks
-                            .Where(x => x.Level == LogLevel.Error)
-                            .Select(x => x.Message)
-                            .ToArray());
-
-                    Assert.IsFalse(
-                        logCallbacks.Any(x => x.Level == LogLevel.Error),
-                        "Error level logs should not exist but got: " + errorLogs);
-                }
-                finally
-                {
-                    Logger.LogCallback = null;
-                }
+                Assert.IsFalse(
+                    logCallbacks.Any(x => x.Level == LogLevel.Error),
+                    "Error level logs should not exist but got: " + errorLogs);
             }
         }
 
@@ -332,14 +327,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             bool isAdfs = false)
         {
             var cache = new TokenCache(harness.ServiceBundle);
-            var parameters = isAdfs ? harness.CreateAuthenticationRequestParameters(MsalTestConstants.OnPremiseAuthority, null, cache) :
-                                      harness.CreateAuthenticationRequestParameters(MsalTestConstants.AuthorityHomeTenant, null, cache);
+            var parameters = harness.CreateAuthenticationRequestParameters(
+                isAdfs ? MsalTestConstants.OnPremiseAuthority : MsalTestConstants.AuthorityHomeTenant, 
+                null, 
+                cache, 
+                null, 
+                extraQueryParameters: MsalTestConstants.ExtraQueryParams, 
+                claims: MsalTestConstants.Claims);
 
             if (isAdfs)
             {
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Get,
+                    ExpectedMethod = HttpMethod.Get,
                     ResponseMessage = MockHelpers.CreateAdfsOpenIdConfigurationResponse(MsalTestConstants.OnPremiseAuthority)
                 });
             }
@@ -354,17 +354,22 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             expectedScopes.Add(OAuth2Value.ScopeProfile);
             expectedScopes.Add(OAuth2Value.ScopeOpenId);
 
+            IDictionary<string, string> extraQueryParamsAndClaims =
+                MsalTestConstants.ExtraQueryParams.ToDictionary(e => e.Key, e => e.Value);
+            extraQueryParamsAndClaims.Add(OAuth2Parameter.Claims, MsalTestConstants.Claims);
+
             // Mock Handler for device code request
             harness.HttpManager.AddMockHandler(
                 new MockHttpMessageHandler
                 {
-                    Method = HttpMethod.Post,
-                    PostData = new Dictionary<string, string>()
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = new Dictionary<string, string>()
                     {
-                        {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
-                        {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}
+                        { OAuth2Parameter.ClientId, MsalTestConstants.ClientId },
+                        { OAuth2Parameter.Scope, expectedScopes.AsSingleString() }
                     },
-                    ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage()
+                    ResponseMessage = isAdfs ? CreateAdfsDeviceCodeResponseSuccessMessage() : CreateDeviceCodeResponseSuccessMessage(),
+                    ExpectedQueryParams = extraQueryParamsAndClaims
                 });
 
             for (int i = 0; i < numAuthorizationPendingResults; i++)
@@ -372,8 +377,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        Url = isAdfs ? "https://fs.contoso.com/adfs/oauth2/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedUrl = isAdfs ? "https://fs.contoso.com/adfs/oauth2/token" :"https://login.microsoftonline.com/home/oauth2/v2.0/token",
                         ResponseMessage = MockHelpers.CreateFailureMessage(
                             HttpStatusCode.Forbidden,
                             "{\"error\":\"authorization_pending\"," +
@@ -392,8 +397,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Post,
-                        PostData = new Dictionary<string, string>()
+                        ExpectedMethod = HttpMethod.Post,
+                        ExpectedPostData = new Dictionary<string, string>()
                         {
                             {OAuth2Parameter.ClientId, MsalTestConstants.ClientId},
                             {OAuth2Parameter.Scope, expectedScopes.AsSingleString()}

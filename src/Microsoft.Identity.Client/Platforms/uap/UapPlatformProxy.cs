@@ -43,6 +43,7 @@ using Microsoft.Identity.Client.UI;
 using String = System.String;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
+using Windows.Foundation.Collections;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -207,11 +208,17 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new UapTokenCacheAccessor(CryptographyManager);
+            return new InMemoryTokenCacheAccessor();
+        }
+
+        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
+        {
+            return new UapTokenCacheBlobStorage(CryptographyManager, Logger);
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+
     }
 }

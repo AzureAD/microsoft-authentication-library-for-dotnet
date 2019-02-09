@@ -61,7 +61,7 @@ namespace Microsoft.Identity.Test.Common.Mocks
             {
                 QueryParamsToValidate = queryParamsToValidate,
                 MockResult = authorizationResult,
-                Environment = environment
+                ExpectedEnvironment = environment
             };
 
             ConfigureMockWebUI(platformProxy, webUi);

@@ -28,8 +28,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Foundation;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
@@ -129,7 +132,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             var generic = key.GetiOSGenericKey();
             var type = (int)CredentialAttrType.AccessToken;
 
-            var value = JsonHelper.SerializeToJson(item);
+            var value = item.ToJsonString();
 
             Save(account, service, generic, type, value);
         }
@@ -143,7 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             var type = (int)CredentialAttrType.RefreshToken;
 
-            var value = JsonHelper.SerializeToJson(item);
+            var value = item.ToJsonString();
 
             Save(account, service, generic, type, value);
         }
@@ -157,7 +160,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             var type = (int)CredentialAttrType.IdToken;
 
-            var value = JsonHelper.SerializeToJson(item);
+            var value = item.ToJsonString();
 
             Save(account, service, generic, type, value);
         }
@@ -171,7 +174,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             var type = AuthorityTypeToAttrType[item.AuthorityType];
 
-            var value = JsonHelper.SerializeToJson(item);
+            var value = item.ToJsonString();
 
             Save(account, service, generic, type, value);
         }
@@ -215,24 +218,24 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             Remove(account, service, type);
         }
-        public ICollection<string> GetAllAccessTokensAsString()
+        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
-            return GetValues((int)CredentialAttrType.AccessToken);
+            return GetValues((int)CredentialAttrType.AccessToken).Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllRefreshTokensAsString()
+        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
-            return GetValues((int)CredentialAttrType.RefreshToken);
+            return GetValues((int)CredentialAttrType.RefreshToken).Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllIdTokensAsString()
+        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
         {
-            return GetValues((int)CredentialAttrType.IdToken);
+            return GetValues((int)CredentialAttrType.IdToken).Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<string> GetAllAccountsAsString()
+        public ICollection<MsalAccountCacheItem> GetAllAccounts()
         {
-            return GetValues(AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()]);
+            return GetValues(AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()]).Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
 
         private string GetValue(string account, string service, int type)
@@ -364,17 +367,17 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RemoveAll(AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()]);
         }
 
-        public string GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
+        public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)
         {
             var account = accessTokenKey.GetiOSAccountKey();
             var service = accessTokenKey.GetiOSServiceKey();
 
             var type = (int)CredentialAttrType.AccessToken;
 
-            return GetValue(account, service, type);
+            return MsalAccessTokenCacheItem.FromJsonString(GetValue(account, service, type));
         }
 
-        public string GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
+        public MsalRefreshTokenCacheItem GetRefreshToken(MsalRefreshTokenCacheKey refreshTokenKey)
         {
             var account = refreshTokenKey.GetiOSAccountKey();
             var service = refreshTokenKey.GetiOSServiceKey();
@@ -382,27 +385,27 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             var type = (int)CredentialAttrType.RefreshToken;
 
-            return GetValue(account, service, type);
+            return MsalRefreshTokenCacheItem.FromJsonString(GetValue(account, service, type));
         }
 
-        public string GetIdToken(MsalIdTokenCacheKey idTokenKey)
+        public MsalIdTokenCacheItem GetIdToken(MsalIdTokenCacheKey idTokenKey)
         {
             var account = idTokenKey.GetiOSAccountKey();
             var service = idTokenKey.GetiOSServiceKey();
 
             var type = (int)CredentialAttrType.IdToken;
 
-            return GetValue(account, service, type);
+            return MsalIdTokenCacheItem.FromJsonString(GetValue(account, service, type));
         }
 
-        public string GetAccount(MsalAccountCacheKey accountKey)
+        public MsalAccountCacheItem GetAccount(MsalAccountCacheKey accountKey)
         {
             var account = accountKey.GetiOSAccountKey();
             var service = accountKey.GetiOSServiceKey();
 
             var type = AuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()];
 
-            return GetValue(account, service, type);
+            return MsalAccountCacheItem.FromJsonString(GetValue(account, service, type));
         }
 
         /// <inheritdoc />

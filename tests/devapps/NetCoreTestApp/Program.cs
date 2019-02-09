@@ -28,44 +28,60 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace NetCoreTestApp
 {
     public class Program
     {
-        private readonly static string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
-        private readonly static string ClientIdForConfidentialApp = "<enter id>";
+        private static readonly string ClientIdForPublicApp = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        private static readonly string ClientIdForConfidentialApp = "<enter id>";
 
-        private readonly static string Username = ""; // used for WIA and U/P, cannot be empty on .net core
-        private readonly static string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
-        private readonly static IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
+        private static readonly string Username = ""; // used for WIA and U/P, cannot be empty on .net core
+        private static readonly string Authority = "https://login.microsoftonline.com/organizations/v2.0"; // common will not work for WIA and U/P but it is a good test case
+        private static readonly IEnumerable<string> Scopes = new[] { "user.read" }; // used for WIA and U/P, can be empty
 
         private const string GraphAPIEndpoint = "https://graph.microsoft.com/v1.0/me";
 
+        public static readonly string CacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.bin";
+
         public static void Main(string[] args)
         {
-
-            PublicClientApplication pca = new PublicClientApplication(
-                ClientIdForPublicApp,
-                Authority,
-                TokenCacheHelper.GetUserCache()); // token cache serialization https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/token-cache-serialization
-
-            Logger.LogCallback = Log;
-            Logger.Level = LogLevel.Verbose;
-            Logger.PiiLoggingEnabled = true;
+            IPublicClientApplication pca = PublicClientApplicationBuilder
+                .Create(ClientIdForPublicApp)
+                .WithAuthority(new Uri(Authority))
+                .WithLogging(Log, LogLevel.Verbose, true)
 #if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
+                .WithTelemetry(new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents)
 #endif
+                .Build();
+
+            pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
+            {
+                notificationArgs.TokenCache.Deserialize(File.Exists(CacheFilePath)
+                    ? File.ReadAllBytes(CacheFilePath)
+                    : null);
+            });
+            pca.UserTokenCache.SetAfterAccess(notificationArgs =>
+            {
+                // if the access operation resulted in a cache update
+                if (notificationArgs.HasStateChanged)
+                {
+                    // reflect changes in the persistent store
+                    File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.Serialize());
+                }
+            });
+
             RunConsoleAppLogicAsync(pca).Wait();
         }
 
-        private static async Task RunConsoleAppLogicAsync(PublicClientApplication pca)
+        private static async Task RunConsoleAppLogicAsync(IPublicClientApplication pca)
         {
             while (true)
             {
@@ -153,7 +169,7 @@ namespace NetCoreTestApp
             }
         }
 
-        private static async Task FetchTokenAndCallGraphAsync(PublicClientApplication pca, Task<AuthenticationResult> authTask)
+        private static async Task FetchTokenAndCallGraphAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
             await authTask.ConfigureAwait(false);
 
@@ -200,7 +216,7 @@ namespace NetCoreTestApp
         }
 
 
-        private static async Task DisplayAccountsAsync(PublicClientApplication pca)
+        private static async Task DisplayAccountsAsync(IPublicClientApplication pca)
         {
             IEnumerable<IAccount> accounts = await pca.GetAccountsAsync().ConfigureAwait(false);
 

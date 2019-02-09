@@ -33,11 +33,12 @@ using System.Linq;
 
 namespace Microsoft.Identity.Client.Http
 {
-    internal class HttpResponse : IHttpWebResponse
+    internal class HttpResponse
     {
         public HttpResponseHeaders Headers { get; set; }
 
-        public IDictionary<string, string> HeadersAsDictionary {
+        public IDictionary<string, string> HeadersAsDictionary
+        {
             get
             {
                 var headers = new Dictionary<string, string>();
@@ -49,7 +50,6 @@ namespace Microsoft.Identity.Client.Http
                         headers[kvp.Key] = kvp.Value.First();
                     }
                 }
-
                 return headers;
             }
         }
@@ -59,6 +59,5 @@ namespace Microsoft.Identity.Client.Http
         public string UserAgent { get; set; }
 
         public string Body { get; set; }
-
     }
 }

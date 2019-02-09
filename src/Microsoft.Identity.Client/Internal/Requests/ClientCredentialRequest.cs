@@ -51,10 +51,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!_clientParameters.ForceRefresh && TokenCache != null)
+            if (!_clientParameters.ForceRefresh && CacheManager.HasCache)
             {
                 var msalAccessTokenItem =
-                    await TokenCache.FindAccessTokenAsync(AuthenticationRequestParameters).ConfigureAwait(false);
+                    await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 if (msalAccessTokenItem != null)
                 {
                     return new AuthenticationResult(msalAccessTokenItem, null);

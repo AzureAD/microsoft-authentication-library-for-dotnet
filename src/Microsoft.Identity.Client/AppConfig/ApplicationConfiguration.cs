@@ -36,6 +36,9 @@ namespace Microsoft.Identity.Client.AppConfig
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {
+        public bool UseCorporateNetwork { get; internal set; }
+        public string IosKeychainSecurityGroup { get; internal set; }
+
         public bool IsBrokerEnabled { get; internal set; }
 
         public IHttpManager HttpManager { get; internal set; }
@@ -44,22 +47,25 @@ namespace Microsoft.Identity.Client.AppConfig
         public string TenantId { get; internal set; }
         public string RedirectUri { get; internal set; }
         public bool EnablePiiLogging { get; internal set; }
-        public LogLevel LogLevel { get; internal set; } = LogLevel.Warning;
+        public LogLevel LogLevel { get; internal set; } = LogLevel.Info;
         public bool IsDefaultPlatformLoggingEnabled { get; internal set; }
         public IMsalHttpClientFactory HttpClientFactory { get; internal set; }
         public bool IsExtendedTokenLifetimeEnabled { get; set; }
         public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
         public string Component { get; internal set; }
+        public string Claims { get; internal set; }
+        public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }
         internal ILegacyCachePersistence AppTokenLegacyCachePersistenceForTest { get; set; }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
+
         public ClientCredential ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
         public X509Certificate2 Certificate { get; internal set; }
-#endif
+#endif 
 
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions

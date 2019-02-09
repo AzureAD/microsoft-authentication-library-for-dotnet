@@ -28,12 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.Linq;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -56,6 +51,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// or setting the Agent.
         /// </summary>
         /// <param name="httpClientFactory">HTTP client factory</param>
+        /// <remarks>MSAL does not guarantee that it will not modify the HttpClient, for example by adding new headers.</remarks>
         /// <returns>The builder to chain the .With methods</returns>
         public T WithHttpClientFactory(IMsalHttpClientFactory httpClientFactory)
         {
@@ -72,10 +68,26 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// Sets the logging callback. For details see https://aka.ms/msal-net-logging
         /// </summary>
+        /// <param name="loggingCallback"></param>
+        /// <param name="logLevel">Desired level of logging.  The default is LogLevel.Info</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// </param>
+        /// <param name="enableDefaultPlatformLogging">Flag to enable/disable logging to platform defaults.
+        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In android, logcat is used. The default value is <c>false</c>
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
         /// was already set on the application builder
-        public T WithLoggingCallback(LogCallback loggingCallback)
+        public T WithLogging(
+            LogCallback loggingCallback,
+            LogLevel? logLevel = null,
+            bool? enablePiiLogging = null,
+            bool? enableDefaultPlatformLogging = null)
         {
             if (Config.LoggingCallback != null)
             {
@@ -83,6 +95,22 @@ namespace Microsoft.Identity.Client.AppConfig
             }
 
             Config.LoggingCallback = loggingCallback;
+            Config.LogLevel = logLevel ?? Config.LogLevel;
+            Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
+            Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Use when the tenant admin has enabled conditional access. Acquiring a token, either in your app or in a downstream API, 
+        /// could result in a <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
+        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details.
+        /// </summary>
+        /// <param name="claims">A string with one or multiple claims.</param>
+        /// <returns>The builder to chain .With methods</returns>
+        public T WithClaims(string claims)
+        {
+            Config.Claims = claims;
             return (T)this;
         }
 
@@ -90,19 +118,31 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Sets the Debug logging callback to a default debug method which displays
         /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
         /// </summary>
+        /// <param name="logLevel">Desired level of logging.  The default is LogLevel.Info</param>
+        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
+        /// Personally Identifiable Information (PII).
+        /// PII logs are never written to default outputs like Console, Logcat or NSLog
+        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
+        /// You can set it to <c>true</c> for advanced debugging requiring PII
+        /// </param>
+        /// <param name="withDefaultPlatformLoggingEnabled">Flag to enable/disable logging to platform defaults.
+        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
+        /// In android, logcat is used. The default value is <c>false</c>
+        /// </param>
         /// <returns>The builder to chain the .With methods</returns>
         /// <exception cref="InvalidOperationException"/> is thrown if the loggingCallback
-        /// was already set on the application builder by calling <see cref="WithLoggingCallback(LogCallback)"/>
-        /// <seealso cref="WithLoggingCallback(LogCallback)"/>
-        /// <seealso cref="WithLoggingLevel(LogLevel)"/>
-        public T WithDebugLoggingCallback()
+        /// was already set on the application builder by calling <see cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        /// <seealso cref="WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>
+        public T WithDebugLoggingCallback(
+            LogLevel logLevel = LogLevel.Info,
+            bool enablePiiLogging = false,
+            bool withDefaultPlatformLoggingEnabled = false)
         {
-            if (Config.LoggingCallback != null)
-            {
-                throw new InvalidOperationException(CoreErrorMessages.LoggingCallbackAlreadySet);
-            }
-
-            Config.LoggingCallback = (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); };
+            WithLogging(
+                (level, message, pii) => { Debug.WriteLine($"{level}: {message}"); },
+                logLevel,
+                enablePiiLogging,
+                withDefaultPlatformLoggingEnabled);
             return (T)this;
         }
 
@@ -115,9 +155,9 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <exception cref="InvalidOperationException"/> is thrown if the method was already
         /// called on the application builder.
 
-        public T WithTelemetryCallback(TelemetryCallback telemetryCallback)
+        public T WithTelemetry(TelemetryCallback telemetryCallback)
         {
-            if (Config.TelemetryCallback  != null)
+            if (Config.TelemetryCallback != null)
             {
                 throw new InvalidOperationException(CoreErrorMessages.TelemetryCallbackAlreadySet);
             }
@@ -157,7 +197,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// users sign-in. This is classically a GUID or a domain name. See https://aka.ms/msal-net-application-configuration.
         /// Although it is also possible to set <paramref name="tenantId"/> to <c>common</c>,
         /// <c>organizations</c>, and <c>consumers</c>, it's recommended to use one of the
-        /// overrides of <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// overrides of <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="tenantId">tenant ID of the Azure AD tenant
         /// or a domain associated with this Azure AD tenant, in order to sign-in a user of a specific organization only</param>
@@ -165,49 +205,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithTenantId(string tenantId)
         {
             Config.TenantId = GetValueIfNotEmpty(Config.TenantId, tenantId);
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Enables/disables logging of Personally Identifiable Information. See https://aka.ms/msal-net-logging
-        /// </summary>
-        /// <param name="enablePiiLogging">Boolean used to enable/disable logging of
-        /// Personally Identifiable Information (PII).
-        /// PII logs are never written to default outputs like Console, Logcat or NSLog
-        /// Default is set to <c>false</c>, which ensures that your application is compliant with GDPR.
-        /// You can set it to <c>true</c> for advanced debugging requiring PII</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithEnablePiiLogging(bool enablePiiLogging)
-        {
-            Config.EnablePiiLogging = enablePiiLogging;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Enables you to configure the level of logging you want. See https://aka.ms/msal-net-logging
-        /// The default value is <see cref="LogLevel.Info"/>.
-        /// Setting it to <see cref="LogLevel.Error"/> will only get errors
-        /// Setting it to <see cref="LogLevel.Warning"/> will get errors and warning, etc..
-        /// </summary>
-        /// <param name="logLevel">Desired level of logging</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithLoggingLevel(LogLevel logLevel)
-        {
-            Config.LogLevel = logLevel;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Flag to enable/disable logging to platform defaults. See https://aka.ms/msal-net-logging
-        /// In Desktop/UWP, Event Tracing is used. In iOS, NSLog is used.
-        /// In android, logcat is used. The default value is <c>false</c>
-        /// </summary>
-        /// <param name="enabled">Boolean telling if default logging is
-        /// enabled or not</param>
-        /// <returns>The builder to chain the .With methods</returns>
-        public T WithDefaultPlatformLoggingEnabled(bool enabled)
-        {
-            Config.IsDefaultPlatformLoggingEnabled = enabled;
             return (T)this;
         }
 
@@ -222,10 +219,13 @@ namespace Microsoft.Identity.Client.AppConfig
             WithClientId(applicationOptions.ClientId);
             WithRedirectUri(applicationOptions.RedirectUri);
             WithTenantId(applicationOptions.TenantId);
-            WithLoggingLevel(applicationOptions.LogLevel);
             WithComponent(applicationOptions.Component);
-            WithEnablePiiLogging(applicationOptions.EnablePiiLogging);
-            WithDefaultPlatformLoggingEnabled(applicationOptions.IsDefaultPlatformLoggingEnabled);
+
+            WithLogging(
+                null,
+                applicationOptions.LogLevel,
+                applicationOptions.EnablePiiLogging,
+                applicationOptions.IsDefaultPlatformLoggingEnabled);
 
             Config.Instance = applicationOptions.Instance;
             Config.AadAuthorityAudience = applicationOptions.AadAuthorityAudience;
@@ -245,6 +245,19 @@ namespace Microsoft.Identity.Client.AppConfig
         public T WithComponent(string component)
         {
             Config.Component = GetValueIfNotEmpty(Config.Component, component);
+            return (T)this;
+        }
+
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority
+        /// as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <returns>The builder to chain the .With methods</returns>
+        public T WithExtraQueryParameters(IDictionary<string, string> extraQueryParameters)
+        {
+            Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
             return (T)this;
         }
 
@@ -285,7 +298,7 @@ namespace Microsoft.Identity.Client.AppConfig
             else
             {
                 // Add the default.
-                WithAadAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
+                WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
             }
         }
 
@@ -338,7 +351,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// Adds a known authority to the application from its Uri. See https://aka.ms/msal-net-application-configuration.
         /// This constructor is mainly used for scenarios where the authority is not a standard Azure AD authority,
         /// nor an ADFS authority, nor an Azure AD B2C authority. For Azure AD, even in national and sovereign clouds, prefer
-        /// using other overrides such as <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// using other overrides such as <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </summary>
         /// <param name="authorityUri">Uri of the authority</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
@@ -357,12 +370,12 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenantId">Guid of the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
-            Uri cloudInstanceUri,
+        public T WithAuthority(
+            string cloudInstanceUri,
             Guid tenantId,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenantId, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
             return (T)this;
         }
 
@@ -377,16 +390,16 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <remarks>
         /// <paramref name="tenant"/> can also contain the string representation of a GUID (tenantId),
         /// or even <c>common</c>, <c>organizations</c> or <c>consumers</c> but in this case
-        /// it's recommended to use another override (<see cref="WithAadAuthority(AzureCloudInstance, Guid, bool)"/>
-        /// and <see cref="WithAadAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
+        /// it's recommended to use another override (<see cref="WithAuthority(AzureCloudInstance, Guid, bool)"/>
+        /// and <see cref="WithAuthority(AzureCloudInstance, AadAuthorityAudience, bool)"/>
         /// </remarks>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
-            Uri cloudInstanceUri,
+        public T WithAuthority(
+            string cloudInstanceUri,
             string tenant,
             bool validateAuthority = true)
         {
-            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(cloudInstanceUri, tenant, validateAuthority);
+            Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
             return (T)this;
         }
 
@@ -400,7 +413,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="tenantId">Tenant Id of the tenant from which to sign-in users</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
+        public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             Guid tenantId,
             bool validateAuthority = true)
@@ -420,7 +433,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// to sign-in users. This can also be a guid</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(
+        public T WithAuthority(
             AzureCloudInstance azureCloudInstance,
             string tenant,
             bool validateAuthority = true)
@@ -440,7 +453,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// accounts</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
+        public T WithAuthority(AzureCloudInstance azureCloudInstance, AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(azureCloudInstance, authorityAudience, validateAuthority);
             return (T)this;
@@ -455,7 +468,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// accounts</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
+        public T WithAuthority(AadAuthorityAudience authorityAudience, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityAudience, validateAuthority);
             return (T)this;
@@ -477,7 +490,7 @@ namespace Microsoft.Identity.Client.AppConfig
         ///  Note that this setting needs to be consistent with what is declared in the application registration portal</param>
         /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithAadAuthority(string authorityUri, bool validateAuthority = true)
+        public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
             Config.AuthorityInfo = AuthorityInfo.FromAadAuthority(authorityUri, validateAuthority);
             return (T)this;

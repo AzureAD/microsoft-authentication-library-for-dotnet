@@ -68,7 +68,7 @@ namespace Microsoft.Identity.Client
         /// <see cref="AcquireTokenInteractiveParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/> if you want to let the
         /// user pre-consent to additional scopes (which won't be returned in the access token),
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction
         /// </remarks>
@@ -98,7 +98,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// You can also pass optional parameters by calling:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client
         /// needs to be passed.
         /// You can also chain with
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Client
         /// <returns>A builder enabling you to add optional parameters before executing the token request</returns>
         /// <remarks>You can also pass optional parameters by chaining the builder with:
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to pass 
-        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(Uri, bool)"/>
+        /// additional query parameters to the STS, and one of the overrides of <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/>
         /// in order to override the default authority set at the application construction. Note that the overriding authority needs to be part
         /// of the known authorities added to the application construction.
         /// </remarks>
@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client
                 ServiceBundle,
                 requestParams,
                 interactiveParameters,
-                CreateWebAuthenticationDialogEx(interactiveParameters, requestParams.RequestContext));
+                CreateWebAuthenticationDialog(interactiveParameters, requestParams.RequestContext));
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -225,7 +225,6 @@ namespace Microsoft.Identity.Client
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
 #else
             await Task.Delay(0, cancellationToken).ConfigureAwait(false);  // this is here to keep compiler from complaining that this method is async when it doesn't await...
-            // TODO: need better wording and proper link to aka.ms
             throw new PlatformNotSupportedException(
                 "Username Password is only supported on NetFramework and .NET Core." +
                 "For more details see https://aka.ms/msal-net-iwa");
@@ -234,7 +233,7 @@ namespace Microsoft.Identity.Client
 
         #endregion // ParameterExecutors
 
-        private IWebUI CreateWebAuthenticationDialogEx(
+        private IWebUI CreateWebAuthenticationDialog(
             AcquireTokenInteractiveParameters interactiveParameters,
             RequestContext requestContext)
         {
@@ -246,9 +245,9 @@ namespace Microsoft.Identity.Client
 
 #if WINDOWS_APP || DESKTOP
 // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never); // todo(migration): what do we do here?
+            coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never);
 #if WINDOWS_APP
-            coreUiParent.UseCorporateNetwork = UseCorporateNetwork;
+            coreUiParent.UseCorporateNetwork = AppConfig.UseCorporateNetwork;
 #endif
 #endif
             return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(coreUiParent, requestContext);

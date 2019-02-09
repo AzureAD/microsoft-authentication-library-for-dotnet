@@ -42,7 +42,6 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         private string _acquirePageId;
         private string _cachePageId;
         private string _settingsPageId;
-        private string _logPageId;
 
         public MobileTestHelper(Xamarin.UITest.Platform platform)
         {
@@ -229,7 +228,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="controller">The test framework that will execute the test interaction</param>
         public void B2CLocalAccountAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
-            //acquire token for 1st resource   
+            //acquire token for 1st resource
             B2CLocalAccountAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
@@ -241,7 +240,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="controller">The test framework that will execute the test interaction</param>
         public void B2CFacebookAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
-            //acquire token for 1st resource   
+            //acquire token for 1st resource
             B2CFacebookAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
@@ -253,7 +252,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         /// <param name="controller">The test framework that will execute the test interaction</param>
         public void B2CGoogleAcquireTokenSilentTest(ITestController controller, LabResponse labResponse, bool isB2CLoginAuthority)
         {
-            //acquire token for 1st resource   
+            //acquire token for 1st resource
             B2CGoogleAcquireTokenInteractiveTestHelper(controller, labResponse, isB2CLoginAuthority);
 
             B2CSilentFlowHelper(controller);
@@ -310,11 +309,17 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
 
         public void PerformB2CFacebookProviderSignInFlow(ITestController controller, LabUser user, UserInformationFieldIds userInformationFieldIds)
         {
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.FacebookAccountId);
+
             controller.Tap(CoreUiTestConstants.FacebookAccountId, XamarinSelector.ByHtmlIdAttribute);
+
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.WebUpnB2CFacebookInputId);
 
             controller.EnterText(CoreUiTestConstants.WebUpnB2CFacebookInputId, 20, user.Upn, XamarinSelector.ByHtmlIdAttribute);
 
             controller.EnterText(userInformationFieldIds.PasswordInputId, user.Password, XamarinSelector.ByHtmlIdAttribute);
+
+            controller.WaitForWebElementByCssId(userInformationFieldIds.PasswordSignInButtonId);
 
             controller.Tap(userInformationFieldIds.PasswordSignInButtonId, XamarinSelector.ByHtmlIdAttribute);
         }
@@ -364,7 +369,7 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
         public void PerformB2CSelectProviderOnlyFlow(ITestController controller, LabUser user, B2CIdentityProvider b2CIdentityProvider, bool isB2CLoginAuthority)
         {
             SetB2CAuthority(controller, isB2CLoginAuthority);
-            
+
             controller.Tap(_acquirePageId);
 
             //Acquire token flow
@@ -393,6 +398,8 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
             controller.Tap(CoreUiTestConstants.AcquireTokenButtonId);
 
             controller.Tap(CoreUiTestConstants.B2CEditProfileContinueId, XamarinSelector.ByHtmlIdAttribute);
+
+            controller.WaitForWebElementByCssId(CoreUiTestConstants.B2CEditProfileContinueId);
 
             VerifyResult(controller);
         }
@@ -517,13 +524,11 @@ namespace Microsoft.Identity.Test.UIAutomation.Infrastructure
                     _cachePageId = CoreUiTestConstants.CachePageAndroidID;
                     _acquirePageId = CoreUiTestConstants.AcquirePageAndroidId;
                     _settingsPageId = CoreUiTestConstants.SettingsPageAndroidId;
-                    _logPageId = CoreUiTestConstants.LogPageAndroidId;
                     break;
                 case Xamarin.UITest.Platform.iOS:
                     _cachePageId = CoreUiTestConstants.CachePageID;
                     _acquirePageId = CoreUiTestConstants.AcquirePageId;
                     _settingsPageId = CoreUiTestConstants.SettingsPageId;
-                    _logPageId = CoreUiTestConstants.LogPageId;
                     break;
             }
         }

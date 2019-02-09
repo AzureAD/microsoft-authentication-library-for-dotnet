@@ -81,9 +81,15 @@ namespace Microsoft.Identity.Client
         public string ClientId => AppConfig.ClientId;
 
         /// <Summary>
-        /// Token Cache instance for storing User tokens.
-        /// TODO(migration): this is a new public property, need to document.
+        /// User token cache. This case holds id tokens, access tokens and refresh tokens for accounts. It's used 
+        /// and updated silently if needed when calling <see cref="AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+        /// or one of the overrides of <see cref="AcquireTokenSilentAsync(IEnumerable{string}, IAccount)"/>.
+        /// It is updated by each AcquireTokenXXX method, with the exception of <c>AcquireTokenForClient</c> which only uses the application
+        /// cache (see <c>IConfidentialClientApplication</c>).
         /// </Summary>
+        /// <remarks>On .NET Framework and .NET Core you can also customize the token cache serialization.
+        /// See https://aka.ms/msal-net-token-cache-serialization. This is taken care of by MSAL.NET on other platforms.
+        /// </remarks>
         public ITokenCache UserTokenCache => UserTokenCacheInternal;
 
         internal ITokenCacheInternal UserTokenCacheInternal { get; set; }
@@ -168,7 +174,7 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
+        /// [V2 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, with advanced parameters controlling network call.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
@@ -196,14 +202,14 @@ namespace Microsoft.Identity.Client
                 .WithForceRefresh(forceRefresh);
             if (!string.IsNullOrWhiteSpace(authority))
             {
-                builder.WithAuthority(new Uri(authority));
+                builder.WithAuthority(authority);
             }
 
             return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// [V2 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. <see cref="IAccount"/></param>
@@ -222,6 +228,56 @@ namespace Microsoft.Identity.Client
             return await AcquireTokenSilent(scopes, account)
                          .ExecuteAsync(CancellationToken.None)
                          .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// [V2 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
+        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
+        /// This override enables you to specify a login hint and extra query parameter.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN. This can be empty</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        /// <seealso cref="GetAuthorizationRequestUrl(IEnumerable{string})"/> which is the corresponding V3 API
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string loginHint,
+                                                               string extraQueryParameters)
+        {
+            return await GetAuthorizationRequestUrl(scopes).WithLoginHint(loginHint)
+                                                           .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(CancellationToken.None)
+                                                           .ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// [V2 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
+        /// the user's name. The URL targets the /authorize endpoint of the authority specified as the <paramref name="authority"/> parameter.
+        /// This override enables you to specify a redirectUri, login hint extra query parameters, extra scope to consent (which are not for the
+        /// same resource as the <paramref name="scopes"/>), and an authority.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API (a resource)</param>
+        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
+        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// The parameter can be null.</param>
+        /// <param name="extraScopesToConsent">Scopes for additional resources (other than the resource for which <paramref name="scopes"/> are requested),
+        /// which a developer can request the user to consent to upfront.</param>
+        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
+        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
+        /// <seealso cref="GetAuthorizationRequestUrl(IEnumerable{string})"/> which is the corresponding V3 API
+        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string redirectUri, string loginHint,
+            string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
+        {
+            return await GetAuthorizationRequestUrl(scopes)
+                .WithRedirectUri(redirectUri)
+                .WithLoginHint(loginHint)
+                .WithExtraQueryParameters(extraQueryParameters)
+                .WithExtraScopesToConsent(extraScopesToConsent)
+                .WithAuthority(authority)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
         }
     }
 }

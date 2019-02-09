@@ -26,9 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Text;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Keys
 {
     /// <summary>
     /// An object representing the key of the token cache RT dictionary. The 
@@ -59,10 +58,10 @@ namespace Microsoft.Identity.Client.Cache
 
         public override string ToString()
         {
-            return MsalCacheCommon.GetCredentialKey(
+            return MsalCacheKeys.GetCredentialKey(
                 _homeAccountId,
                 _environment,
-                MsalCacheCommon.RefreshToken,
+                StorageJsonValues.CredentialTypeRefreshToken,
                 _clientId,
                 tenantId: null,
                 scopes: null);
@@ -72,17 +71,17 @@ namespace Microsoft.Identity.Client.Cache
 
         public string GetiOSAccountKey()
         {
-            return MsalCacheCommon.GetiOSAccountKey(_homeAccountId, _environment);
+            return MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
         }
 
         public string GetiOSServiceKey()
         {
-            return MsalCacheCommon.GetiOSServiceKey(MsalCacheCommon.RefreshToken, _clientId, tenantId: null, scopes: null);
+            return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null, scopes: null);
         }
 
         public string GetiOSGenericKey()
         {
-            return MsalCacheCommon.GetiOSGenericKey(MsalCacheCommon.RefreshToken, _clientId, tenantId: null);
+            return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null);
         }
 
         #endregion

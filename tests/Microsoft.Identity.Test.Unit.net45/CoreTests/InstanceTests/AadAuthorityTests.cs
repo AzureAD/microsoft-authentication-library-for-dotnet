@@ -60,9 +60,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.microsoftonline.com/common/discovery/instance",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.1"},
                             {
@@ -78,8 +78,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
@@ -115,8 +115,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                         ResponseMessage = MockHelpers.CreateSuccessResponseMessage(
                            File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration.json")))
                     });
@@ -151,9 +151,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.microsoftonline.com/common/discovery/instance",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.1"},
                             {
@@ -202,9 +202,9 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.windows.net/common/discovery/instance",
-                        QueryParams = new Dictionary<string, string>
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.windows.net/common/discovery/instance",
+                        ExpectedQueryParams = new Dictionary<string, string>
                         {
                             {"api-version", "1.0"},
                             {"authorization_endpoint", "https://login.microsoft0nline.com/mytenant.com/oauth2/v2.0/authorize"},
@@ -242,8 +242,8 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 harness.HttpManager.AddMockHandler(
                     new MockHttpMessageHandler
                     {
-                        Method = HttpMethod.Get,
-                        Url = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
+                        ExpectedMethod = HttpMethod.Get,
+                        ExpectedUrl = "https://login.microsoftonline.in/mytenant.com/v2.0/.well-known/openid-configuration",
                         ResponseMessage =
                             MockHelpers.CreateSuccessResponseMessage(
                                 File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("OpenidConfiguration-MissingFields.json")))

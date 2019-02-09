@@ -48,10 +48,5 @@ namespace Microsoft.Identity.Client.ApiConfig
             AcquireTokenCommonParameters commonParameters,
             AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken);
-
-        Task<Uri> ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken);
     }
 }

@@ -28,7 +28,7 @@
 using System;
 using System.Text;
 
-namespace Microsoft.Identity.Client.Cache
+namespace Microsoft.Identity.Client.Cache.Keys
 {
     /// <summary>
     /// An object representing the key of the token cache Account dictionary. The 
@@ -58,8 +58,8 @@ namespace Microsoft.Identity.Client.Cache
         {
             var stringBuilder = new StringBuilder();
 
-            stringBuilder.Append(_homeAccountId + MsalCacheCommon.CacheKeyDelimiter);
-            stringBuilder.Append(_environment + MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(_homeAccountId + MsalCacheKeys.CacheKeyDelimiter);
+            stringBuilder.Append(_environment + MsalCacheKeys.CacheKeyDelimiter);
             stringBuilder.Append(_tenantId);
 
             return stringBuilder.ToString();
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Cache
             var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(_homeAccountId ?? "");
-            stringBuilder.Append(MsalCacheCommon.CacheKeyDelimiter);
+            stringBuilder.Append(MsalCacheKeys.CacheKeyDelimiter);
 
             stringBuilder.Append(_environment);
 

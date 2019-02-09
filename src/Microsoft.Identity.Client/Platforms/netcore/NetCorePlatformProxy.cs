@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
 
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new TokenCacheAccessor();
+            return new InMemoryTokenCacheAccessor();
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
