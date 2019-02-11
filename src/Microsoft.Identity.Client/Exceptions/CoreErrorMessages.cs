@@ -155,5 +155,9 @@ namespace Microsoft.Identity.Client
         public const string AuthorityDoesNotHaveTwoSegments =
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common";
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant guid.";
+
+        public const string CustomWebUiReturnedNullUri = "ICustomWebUi returned a null uri";
+        public const string CustomWebUiRedirectUriWasNotMatchedToProperUri = "Redirect Uri was not a match to the proper uri.";
+        public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed";
     }
 }

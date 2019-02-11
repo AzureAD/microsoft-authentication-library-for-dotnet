@@ -51,7 +51,7 @@ namespace Microsoft.Identity.Client.UI
             Uri redirectUri,
             RequestContext requestContext)
         {
-            requestContext.Logger.Info("Using CustomWebUi to acquire the authorization code");
+            requestContext.Logger.Info(LogMessages.CustomWebUiAcquiringAuthorizationCode);
 
             try
             {
@@ -59,7 +59,7 @@ namespace Microsoft.Identity.Client.UI
                                             .ConfigureAwait(false);
                 if (uri == null)
                 {
-                    throw new MsalCustomWebUiFailedException("ICustomWebUi returned a null uri");
+                    throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiReturnedNullUri);
                 }
 
                 if (uri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) &&
@@ -71,14 +71,14 @@ namespace Microsoft.Identity.Client.UI
                         true,
                         null);
 
-                    requestContext.Logger.Info("Redirect Uri was matched.  Returning success from CustomWebUiHandler.");
+                    requestContext.Logger.Info(LogMessages.CustomWebUiRedirectUriMatched);
                     return new AuthorizationResult(AuthorizationStatus.Success, uri.OriginalString)
                     {
                         State = inputQp[OAuth2Parameter.State]
                     };
                 }
 
-                throw new MsalCustomWebUiFailedException("Redirect Uri was not a match to the proper uri.");
+                throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiRedirectUriWasNotMatchedToProperUri);
             }
             catch (Exception ex)
             {
@@ -86,12 +86,12 @@ namespace Microsoft.Identity.Client.UI
 
                 if (ex is OperationCanceledException)
                 {
-                    requestContext.Logger.Info("CustomWebUi AcquireAuthorizationCode was canceled: " + ex.Message);
+                    requestContext.Logger.Info(LogMessages.CustomWebUiOperationCancelled);
                     authStatus = AuthorizationStatus.UserCancel;
                 }
                 else
                 {
-                    requestContext.Logger.WarningPiiWithPrefix(ex, "CustomWebUi AcquireAuthorizationCode failed");
+                    requestContext.Logger.WarningPiiWithPrefix(ex, CoreErrorMessages.CustomWebUiAuthorizationCodeFailed);
                 }
 
                 return new AuthorizationResult(authStatus, null);

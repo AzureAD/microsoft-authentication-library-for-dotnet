@@ -32,7 +32,7 @@ namespace Microsoft.Identity.Client.Extensibility
     /// <summary>
     /// 
     /// </summary>
-    public class MsalExtensionException : Exception
+    public class MsalExtensionException : MsalException
     {
         /// <summary>
         /// 
