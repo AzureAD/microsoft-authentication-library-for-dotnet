@@ -148,7 +148,6 @@ namespace Microsoft.Identity.Test.Unit
         public const string AppId = "TestAppIdentifier";
         public const string PublicClientId = "PublicClientId";
         public const string ConfidentialClientId = "ConfidentialClientId";
-        public const string ClientSecret = "olCpEkQu8WvmTln1D4cDO1-0DyJWKV5m6gvSBDcM";
         public const string ClientRedirectUri = "http://localhost:8080";
         public static readonly SortedSet<string> SupportedScopes = new SortedSet<string>(new[] {"openid", "email", "profile" });
     }
