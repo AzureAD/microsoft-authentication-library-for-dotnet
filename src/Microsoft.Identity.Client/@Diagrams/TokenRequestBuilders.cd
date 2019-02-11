@@ -16,7 +16,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AbstractConfidentialClientAcquireTokenParameterBuilder&lt;T&gt;" Collapsed="true">
-    <Position X="24.75" Y="5.5" Width="2.75" />
+    <Position X="22.25" Y="5.5" Width="2.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
       <FileName>ApiConfig\AbstractConfidentialClientAcquireTokenParameterBuilder.cs</FileName>
@@ -30,14 +30,14 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AbstractPublicClientAcquireTokenParameterBuilder&lt;T&gt;" Collapsed="true">
-    <Position X="13.25" Y="5.5" Width="3.75" />
+    <Position X="11" Y="5.5" Width="3.75" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAEA=</HashCode>
       <FileName>ApiConfig\AbstractPublicClientAcquireTokenParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByAuthorizationCodeParameterBuilder">
-    <Position X="22" Y="7" Width="3.5" />
+    <Position X="19.5" Y="7" Width="3.5" />
     <Members>
       <Method Name="AcquireTokenByAuthorizationCodeParameterBuilder" Hidden="true" />
       <Method Name="CalculateApiEventId" Hidden="true" />
@@ -53,7 +53,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenForClientParameterBuilder">
-    <Position X="23.5" Y="8.75" Width="5" />
+    <Position X="21" Y="8.75" Width="5" />
     <Members>
       <Method Name="AcquireTokenForClientParameterBuilder" Hidden="true" />
       <Method Name="CalculateApiEventId" Hidden="true" />
@@ -67,7 +67,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenOnBehalfOfParameterBuilder">
-    <Position X="26.25" Y="7" Width="4.5" />
+    <Position X="23.75" Y="7" Width="4.5" />
     <Members>
       <Method Name="AcquireTokenOnBehalfOfParameterBuilder" Hidden="true" />
       <Method Name="CalculateApiEventId" Hidden="true" />
@@ -82,7 +82,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.GetAuthorizationRequestUrlParameterBuilder">
-    <Position X="4.5" Y="7" Width="5.5" />
+    <Position X="26.5" Y="8.5" Width="5.5" />
     <Members>
       <Method Name="CalculateApiEventId" Hidden="true" />
       <Method Name="Create" Hidden="true" />
@@ -111,7 +111,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenSilentParameterBuilder">
-    <Position X="1.75" Y="9.25" Width="5.25" />
+    <Position X="2" Y="8.25" Width="5.25" />
     <Members>
       <Method Name="AcquireTokenSilentParameterBuilder" Hidden="true" />
       <Method Name="CalculateApiEventId" Hidden="true" />
@@ -124,8 +124,8 @@
       <Path>
         <Point X="4" Y="6.191" />
         <Point X="4" Y="6.625" />
-        <Point X="4.188" Y="6.625" />
-        <Point X="4.188" Y="9.25" />
+        <Point X="4.438" Y="6.625" />
+        <Point X="4.438" Y="8.25" />
       </Path>
     </InheritanceLine>
     <TypeIdentifier>
@@ -134,7 +134,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenInteractiveParameterBuilder">
-    <Position X="10.5" Y="7" Width="4" />
+    <Position X="8.25" Y="7" Width="4" />
     <Members>
       <Field Name="_ownerWindow" Hidden="true" />
       <Method Name="AcquireTokenInteractiveParameterBuilder" Hidden="true" />
@@ -151,7 +151,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenWithDeviceCodeParameterBuilder">
-    <Position X="12" Y="9.25" Width="5.75" />
+    <Position X="9.75" Y="9.5" Width="5.75" />
     <Members>
       <Method Name="AcquireTokenWithDeviceCodeParameterBuilder" Hidden="true" />
       <Method Name="CalculateApiEventId" Hidden="true" />
@@ -160,13 +160,19 @@
       <Property Name="Parameters" Hidden="true" />
       <Method Name="Validate" Hidden="true" />
     </Members>
+    <InheritanceLine Type="Microsoft.Identity.Client.ApiConfig.AbstractPublicClientAcquireTokenParameterBuilder&lt;T&gt;" FixedToPoint="true">
+      <Path>
+        <Point X="12.875" Y="6.191" />
+        <Point X="12.875" Y="9.5" />
+      </Path>
+    </InheritanceLine>
     <TypeIdentifier>
       <HashCode>AAAAAAAgAACAAAAAAAAAAAAAAAAAAEAAAIAAIAAAAEA=</HashCode>
       <FileName>ApiConfig\AcquireTokenWithDeviceCodeParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByIntegratedWindowsAuthParameterBuilder">
-    <Position X="17.25" Y="8" Width="4" />
+    <Position X="15" Y="8" Width="4" />
     <Members>
       <Method Name="AcquireTokenByIntegratedWindowsAuthParameterBuilder" Hidden="true" />
       <Method Name="CalculateApiEventId" Hidden="true" />
@@ -180,7 +186,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Microsoft.Identity.Client.ApiConfig.AcquireTokenByUsernamePasswordParameterBuilder" Collapsed="true">
-    <Position X="15.5" Y="7" Width="3.5" />
+    <Position X="13.25" Y="7" Width="3.5" />
     <TypeIdentifier>
       <HashCode>AAIAABAAAAAAAAAAAAAAAAAAAAAAAEAAAIAAIAAAAEA=</HashCode>
       <FileName>ApiConfig\AcquireTokenByUsernamePasswordParameterBuilder.cs</FileName>
