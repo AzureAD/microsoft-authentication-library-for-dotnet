@@ -143,7 +143,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 "https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/b2c_1_b2c_signup_signin_policy/",
                 app.Authority);
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
-            //Assert.IsTrue(app.ValidateAuthority);
             Assert.AreEqual(Constants.DefaultRedirectUri, app.AppConfig.RedirectUri);
 
             app = new PublicClientApplication(MsalTestConstants.ClientId, MsalTestConstants.OnPremiseAuthority);
@@ -152,7 +151,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             Assert.AreEqual(MsalTestConstants.ClientId, app.ClientId);
             Assert.AreEqual("urn:ietf:wg:oauth:2.0:oob", app.AppConfig.RedirectUri);
             
-            //Assert.IsTrue(app.ValidateAuthority);
         }
 
         [TestMethod]

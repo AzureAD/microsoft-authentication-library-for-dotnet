@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AdfsOpenIdConfigurationEndpointManager : IOpenIdConfigurationEndpointManager
     {
-        private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly IServiceBundle _serviceBundle;
 
         public AdfsOpenIdConfigurationEndpointManager(IServiceBundle serviceBundle)
@@ -73,7 +72,7 @@ namespace Microsoft.Identity.Client.Instance
                 AdfsWebFingerResponse wfr = OAuth2Client.CreateResponse<AdfsWebFingerResponse>(httpResponse, requestContext, false);
                 if (wfr.Links.FirstOrDefault(
                         a => a.Rel.Equals(Constants.DefaultRealm, StringComparison.OrdinalIgnoreCase) &&
-                             a.Href.Equals("https://" + authorityInfo.Host, StringComparison.OrdinalIgnoreCase)) == null)
+                             a.Href.Equals(resource)) == null)
                 {
                     throw MsalExceptionFactory.GetClientException(
                         CoreErrorCodes.InvalidAuthority,

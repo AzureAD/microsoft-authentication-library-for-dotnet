@@ -269,6 +269,12 @@ namespace Microsoft.Identity.Client.AppConfig
                 throw new InvalidOperationException(CoreErrorMessages.NoClientIdWasSpecified);
             }
 
+            //Adfs does not require client id to be in the form of a Guid
+            if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
+            {
+                throw new InvalidOperationException(CoreErrorMessages.ClientIdMustBeAGuid);
+            }
+
             TryAddDefaultAuthority();
         }
 

@@ -74,6 +74,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             Secret = secret;
             RawClientInfo = rawClientInfo;
 
+            //Adfs does not send back client info, so HomeAccountId must be explicitly set
             HomeAccountId = userId;
             InitUserIdentifier();
         }

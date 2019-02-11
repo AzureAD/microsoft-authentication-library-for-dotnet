@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Instance
 {
     internal class AdfsAuthority : Authority
     {
-        private const string DefaultRealm = "http://schemas.microsoft.com/rel/trusted-realm";
         private readonly HashSet<string> _validForDomainsList = new HashSet<string>();
 
         public AdfsAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
