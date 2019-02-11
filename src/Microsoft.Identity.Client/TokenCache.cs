@@ -231,11 +231,13 @@ namespace Microsoft.Identity.Client
             var preferredEnvironmentHost = GetPreferredEnvironmentHost(requestParams.AuthorityInfo.Host,
                 instanceDiscoveryMetadataEntry);
 
+            bool isAdfsAuthority = requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs;
+
             var msalAccessTokenCacheItem =
                 new MsalAccessTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
                 {
                     UserAssertionHash = requestParams.UserAssertion?.AssertionHash,
-                    IsAdfs = requestParams.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs
+                    IsAdfs = isAdfsAuthority
                 };
 
             MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = null;
@@ -245,7 +247,7 @@ namespace Microsoft.Identity.Client
             {
                 msalIdTokenCacheItem = new MsalIdTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, tenantId, subject)
                 {
-                    IsAdfs = msalAccessTokenCacheItem.IsAdfs
+                    IsAdfs = isAdfsAuthority
                 };
             }
 
@@ -255,7 +257,7 @@ namespace Microsoft.Identity.Client
                 {
 
                     Account account = null;
-                    string username = msalAccessTokenCacheItem.IsAdfs ? idToken?.Upn : preferredUsername;
+                    string username = isAdfsAuthority ? idToken?.Upn : preferredUsername;
                     if (msalAccessTokenCacheItem.HomeAccountId != null)
                     {
                         account = new Account(
