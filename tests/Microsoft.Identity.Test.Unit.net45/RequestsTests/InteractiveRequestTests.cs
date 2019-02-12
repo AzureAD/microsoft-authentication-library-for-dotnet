@@ -345,8 +345,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
-                Authority authority = Authority.CreateAuthority(harness.ServiceBundle, MsalTestConstants.AuthorityHomeTenant);
-
                 MockInstanceDiscoveryAndOpenIdRequest(harness.HttpManager);
 
                 MockWebUI webUi = new MockWebUI()

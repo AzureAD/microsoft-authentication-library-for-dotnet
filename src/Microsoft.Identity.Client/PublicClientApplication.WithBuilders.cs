@@ -245,6 +245,11 @@ namespace Microsoft.Identity.Client
             AcquireTokenInteractiveParameters interactiveParameters,
             RequestContext requestContext)
         {
+            if (interactiveParameters.CustomWebUi != null)
+            {
+                return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
+            }
+
             var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
 
 #if ANDROID || iOS

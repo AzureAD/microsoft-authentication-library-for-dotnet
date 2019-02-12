@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -118,6 +119,19 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests
                 expectedExtraQueryParameters: new Dictionary<string, string> { { "domain_hint", "mydomain.com" }});
             _harness.ValidateInteractiveParameters(
                 expectedLoginHint: MsalTestConstants.DisplayableId);
+        }
+
+        [TestMethod]
+        public async Task TestAcquireTokenInteractiveBuilderWithCustomWebUiAsync()
+        {
+            var customWebUi = Substitute.For<ICustomWebUi>();
+
+            await AcquireTokenInteractiveParameterBuilder.Create(_harness.ClientApplication, MsalTestConstants.Scope, null)
+                                                         .WithCustomWebUi(customWebUi)
+                                                         .ExecuteAsync()
+                                                         .ConfigureAwait(false);
+            _harness.ValidateCommonParameters(ApiEvent.ApiIds.AcquireTokenWithScope);
+            _harness.ValidateInteractiveParameters(expectedCustomWebUi: customWebUi);
         }
     }
 }

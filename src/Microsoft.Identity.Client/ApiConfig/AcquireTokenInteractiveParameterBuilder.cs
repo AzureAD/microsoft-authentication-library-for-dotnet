@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore;
 
 #if ANDROID
@@ -55,6 +56,12 @@ namespace Microsoft.Identity.Client.ApiConfig
         internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplication publicClientApplication)
             : base(publicClientApplication)
         {
+        }
+
+        // This is internal so that we can configure this from the extension methods for ICustomWebUi
+        internal void SetCustomWebUi(ICustomWebUi customWebUi)
+        {
+            Parameters.CustomWebUi = customWebUi;
         }
 
         /// <summary>

@@ -25,22 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
+using System;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Extensibility
 {
-    internal static class LogMessages
+    /// <summary>
+    /// Exception thrown from ICustomWebUi contract when a failure occurs during the processing of a custom web flow.
+    /// </summary>
+    public class MsalCustomWebUiFailedException : MsalExtensionException
     {
-        public const string BeginningAcquireByRefreshToken = "Begin acquire token by refresh token...";
-        public const string NoScopesProvidedForRefreshTokenRequest = "No scopes provided for acquire token by refresh token request. Using default scope instead.";
-
-        public static string UsingXScopesForRefreshTokenRequest(int numScopes)
+        /// <summary>
+        /// Constructs a MsalCustomWebUiFailedException.
+        /// </summary>
+        /// <param name="message">Message containing description of failure.</param>
+        public MsalCustomWebUiFailedException(string message)
+            : base(message)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", numScopes);
         }
-
-        public const string CustomWebUiAcquiringAuthorizationCode = "Using CustomWebUi to acquire the authorization code";
-        public const string CustomWebUiRedirectUriMatched = "Redirect Uri was matched.  Returning success from CustomWebUiHandler.";
-        public const string CustomWebUiOperationCancelled = "CustomWebUi AcquireAuthorizationCode was canceled";
     }
 }

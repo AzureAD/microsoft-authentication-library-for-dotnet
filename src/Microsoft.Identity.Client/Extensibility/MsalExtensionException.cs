@@ -25,22 +25,22 @@
 //
 //------------------------------------------------------------------------------
 
-using System.Globalization;
+using System;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Extensibility
 {
-    internal static class LogMessages
+    /// <summary>
+    /// 
+    /// </summary>
+    public class MsalExtensionException : MsalException
     {
-        public const string BeginningAcquireByRefreshToken = "Begin acquire token by refresh token...";
-        public const string NoScopesProvidedForRefreshTokenRequest = "No scopes provided for acquire token by refresh token request. Using default scope instead.";
-
-        public static string UsingXScopesForRefreshTokenRequest(int numScopes)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        public MsalExtensionException(string message)
+            : base(message)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Using {0} scopes for acquire token by refresh token request", numScopes);
         }
-
-        public const string CustomWebUiAcquiringAuthorizationCode = "Using CustomWebUi to acquire the authorization code";
-        public const string CustomWebUiRedirectUriMatched = "Redirect Uri was matched.  Returning success from CustomWebUiHandler.";
-        public const string CustomWebUiOperationCancelled = "CustomWebUi AcquireAuthorizationCode was canceled";
     }
 }
