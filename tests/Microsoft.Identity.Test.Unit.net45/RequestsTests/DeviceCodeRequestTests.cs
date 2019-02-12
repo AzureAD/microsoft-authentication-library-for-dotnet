@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
-        public void TestDeviceCodeAuthSuccessWithAdfs()
+        /*public void TestDeviceCodeAuthSuccessWithAdfs()
         {
             const int NumberOfAuthorizationPendingRequestsToInject = 1;
 
@@ -212,7 +212,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 Assert.AreEqual(1, cache.Accessor.IdTokenCount);
                 Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
             }
-        }
+        }*/
 
         [TestMethod]
         [TestCategory("DeviceCodeRequestTests")]
