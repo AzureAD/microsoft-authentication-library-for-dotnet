@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class ClientSecretIntegrationTests
     {
-        public string FileName = "data.txt";
+        public string FileName = @"C:/data/data.txt";
         public string[] AdfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
 
         [ClassInitialize]
@@ -62,9 +62,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetStateAndInitMsal();
         }
 
-        [TestMethod]
-        [TestCategory("ClientSecretIntegrationTests")]
-        public async Task AcquireTokenWithClientSecretFromAdfsAsync()
+        string GetClientSecret()
         {
             string secretUrl = null;
             if (File.Exists(FileName))
@@ -80,7 +78,17 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             {
                 throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, "{0} not found when trying to read client secret url", FileName));
             }
+            return secretUrl;
+        }
 
+        [TestMethod]
+        [TestCategory("ClientSecretIntegrationTests")]
+        public async Task AcquireTokenWithClientSecretFromAdfsAsync()
+        {
+            //To run this test locally, get the "Secret Identifier" Url for a secret called ADFS2019ClientCredSecret and use it to initialize 
+            //secretUrl. Comment out the line below as well
+            var secretUrl = GetClientSecret();
+            //var secretUrl = "ADFS2019ClientCredSecret Url";
 
             KeyVaultSecretsProvider secretProvider = new KeyVaultSecretsProvider();
             SecretBundle secret = secretProvider.GetSecret(secretUrl);
