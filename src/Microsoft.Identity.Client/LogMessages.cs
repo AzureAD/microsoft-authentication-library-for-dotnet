@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Globalization;
 
 namespace Microsoft.Identity.Client
@@ -42,5 +43,16 @@ namespace Microsoft.Identity.Client
         public const string CustomWebUiAcquiringAuthorizationCode = "Using CustomWebUi to acquire the authorization code";
         public const string CustomWebUiRedirectUriMatched = "Redirect Uri was matched.  Returning success from CustomWebUiHandler.";
         public const string CustomWebUiOperationCancelled = "CustomWebUi AcquireAuthorizationCode was canceled";
+
+        public static string CustomWebUiCallingAcquireAuthorizationCodePii(Uri authorizationUri, Uri redirectUri)
+        {
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "calling CustomWebUi.AcquireAuthorizationCode authUri({0}) redirectUri({1})",
+                authorizationUri,
+                redirectUri);
+        }
+
+        public const string CustomWebUiCallingAcquireAuthorizationCodeNoPii = "Calling CustomWebUi.AcquireAuthorizationCode";
     }
 }

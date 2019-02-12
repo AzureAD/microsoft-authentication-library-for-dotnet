@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
 using System.Globalization;
 using Microsoft.Identity.Client.AppConfig;
 
@@ -143,7 +144,7 @@ namespace Microsoft.Identity.Client
 
         public static string InvalidRedirectUriReceived(string invalidRedirectUri)
         {
-            return $"Invalid RedirectURI was received ({invalidRedirectUri})  Not parseable into System.Uri class.";
+            return string.Format(CultureInfo.InvariantCulture, "Invalid RedirectURI was received ({0})  Not parseable into System.Uri class.", invalidRedirectUri);
         }
 
         public const string TelemetryClassIsObsolete =
@@ -157,7 +158,12 @@ namespace Microsoft.Identity.Client
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant guid.";
 
         public const string CustomWebUiReturnedNullUri = "ICustomWebUi returned a null uri";
-        public const string CustomWebUiRedirectUriWasNotMatchedToProperUri = "Redirect Uri was not a match to the proper uri.";
+
+        public static string CustomWebUiRedirectUriWasNotMatchedToProperUri(string expectedUri, string actualUri)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "Redirect Uri was not a match to the proper uri.  Expected ({0}) Actual ({1})", expectedUri, actualUri;
+        }
+
         public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed";
     }
 }
