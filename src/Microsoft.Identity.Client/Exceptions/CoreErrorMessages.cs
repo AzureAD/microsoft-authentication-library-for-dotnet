@@ -161,7 +161,7 @@ namespace Microsoft.Identity.Client
 
         public static string CustomWebUiRedirectUriWasNotMatchedToProperUri(string expectedUri, string actualUri)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Redirect Uri was not a match to the proper uri.  Expected ({0}) Actual ({1})", expectedUri, actualUri;
+            return string.Format(CultureInfo.InvariantCulture, "Redirect Uri was not a match to the proper uri.  Expected ({0}) Actual ({1})", expectedUri, actualUri);
         }
 
         public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed";
