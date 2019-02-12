@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -55,6 +56,8 @@ namespace Microsoft.Identity.Client.UI
 
             try
             {
+                requestContext.Logger.InfoPii(LogMessages.CustomWebUiCallingAcquireAuthorizationCodePii(authorizationUri, redirectUri),
+                                              LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
                 var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri)
                                             .ConfigureAwait(false);
                 if (uri == null)
@@ -78,7 +81,7 @@ namespace Microsoft.Identity.Client.UI
                     };
                 }
 
-                throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiRedirectUriWasNotMatchedToProperUri);
+                throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiRedirectUriWasNotMatchedToProperUri(uri.AbsolutePath, redirectUri.AbsolutePath));
             }
             catch (Exception ex)
             {
