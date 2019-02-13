@@ -156,6 +156,6 @@ namespace Microsoft.Identity.Client
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common";
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant guid.";
 
-        public const string AdfsDeviceFlowNotSupported = "MSAL does not currently support device code flow in Adfs at this time.";
+        public const string AdfsDeviceFlowNotSupported = "Device Code Flow is not currently supported for ADFS.";
     }
 }

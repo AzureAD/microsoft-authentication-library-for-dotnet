@@ -100,7 +100,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
 
-        /*[TestMethod]
+        [TestMethod]
+        [Ignore("Adfs does not currently support device code flow")]
         [Timeout(1 * 60 * 1000)] // 1 min timeout
         public async Task DeviceCodeFlowAdfsTestAsync()
         {
@@ -130,7 +131,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Assert.IsNotNull(result);
             Assert.IsTrue(!string.IsNullOrEmpty(result.AccessToken));
-        }*/
+        }
 
         private void RunAutomatedDeviceCodeFlow(DeviceCodeResult deviceCodeResult, LabUser user, bool isAdfs = false)
         {
