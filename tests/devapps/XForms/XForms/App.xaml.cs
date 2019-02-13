@@ -71,8 +71,6 @@ namespace XForms
 
         public static string[] Scopes = DefaultScopes;
 
-        public static event EventHandler MsalApplicationUpdated;
-
         public App()
         {
             MainPage = new NavigationPage(new XForms.MainPage());
@@ -103,12 +101,11 @@ namespace XForms
                     break;
             }
 
-#if iOS
+#if BUILDENV == APPCENTER
             builder.WithIosKeychainSecurityGroup("*");
 #endif
 
             MsalPublicClient = builder.BuildConcrete();
-            MsalApplicationUpdated?.Invoke(null, null);
         }
 
         protected override void OnStart()
