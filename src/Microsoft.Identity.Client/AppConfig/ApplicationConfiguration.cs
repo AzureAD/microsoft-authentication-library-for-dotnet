@@ -54,7 +54,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public TelemetryCallback TelemetryCallback { get; internal set; }
         public LogCallback LoggingCallback { get; internal set; }
         public string Component { get; internal set; }
-        public string Claims { get; internal set; }
         public IDictionary<string, string> ExtraQueryParameters { get; internal set; } = new Dictionary<string, string>();
 
         internal ILegacyCachePersistence UserTokenLegacyCachePersistenceForTest { get; set; }

@@ -26,7 +26,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-#if BUILDENV != APPCENTER
+#if !IS_APPCENTER_BUILD
 using AuthenticationServices;
 #endif
 using Foundation;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         protected SFAuthenticationSession sfAuthenticationSession;
         /* For app center builds, this will need to build on a hosted mac agent. The mac agent does not have the latest SDK's required to build 'ASWebAuthenticationSession'
         * Until the agents are updated, appcenter build will need to ignore the use of 'ASWebAuthenticationSession' for iOS 12.*/
-#if BUILDENV != APPCENTER
+#if !IS_APPCENTER_BUILD
         protected ASWebAuthenticationSession asWebAuthenticationSession;
 #endif
         protected nint taskId = UIApplication.BackgroundTaskInvalid;
@@ -59,8 +59,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             willEnterForegroundNotification = NSNotificationCenter.DefaultCenter.AddObserver(UIApplication.WillEnterForegroundNotification, OnMoveToForeground);
         }
 
-        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext);
+        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri,
+            Uri redirectUri,
+            RequestContext requestContext,
+            CancellationToken cancellationToken);
 
         public static bool ContinueAuthentication(string url)
         {

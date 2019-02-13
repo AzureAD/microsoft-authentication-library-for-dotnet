@@ -1,18 +1,21 @@
-﻿using Microsoft.Identity.Client.Core;
+﻿using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using OpenQA.Selenium;
 using System;
 using System.Diagnostics;
+using System.Globalization;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
-    internal class SeleniumWebUI : IWebUI
+    internal class SeleniumWebUI : ICustomWebUi
     {
         private readonly Action<IWebDriver> _seleniumAutomationLogic;
-        private readonly TimeSpan _timeout;
 
         private const string CloseWindowSuccessHtml = @"<html>
   <head><title>Authentication Complete</title></head>
@@ -25,28 +28,31 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
   <head><title>Authentication Failed</title></head>
   <body>
     Authentication failed. You can return to the application. Feel free to close this browser tab.
+</br></br></br></br>
+    Error details: error {0} error_description: {1}
   </body>
 </html>";
 
-        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic, TimeSpan timeout)
+        public SeleniumWebUI(Action<IWebDriver> seleniumAutomationLogic)
         {
             _seleniumAutomationLogic = seleniumAutomationLogic;
-            _timeout = timeout;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(
+
+        public async Task<Uri> AcquireAuthorizationCodeAsync(
             Uri authorizationUri,
-            Uri redirectUri,
-            RequestContext requestContext)
+            Uri redirectUri, 
+            CancellationToken cancellationToken)
         {
             if (redirectUri.IsDefaultPort)
             {
                 throw new InvalidOperationException("Cannot listen to localhost (no port), please call UpdateRedirectUri to get a free localhost:port address");
             }
 
-            AuthorizationResult result = await SeleniumAcquireAuthAsync(
+            Uri result = await SeleniumAcquireAuthAsync(
                 authorizationUri,
-                redirectUri)
+                redirectUri,
+                cancellationToken)
                 .ConfigureAwait(true);
 
             return result;
@@ -63,6 +69,15 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             {
                 throw new ArgumentException("Port required");
             }
+        }
+
+        public static string FindFreeLocalhostRedirectUri()
+        {
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            return "http://localhost:" + port;
         }
 
         private IWebDriver InitDriverAndGoToUrl(string url)
@@ -82,75 +97,62 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             }
         }
 
-        private async Task<AuthorizationResult> SeleniumAcquireAuthAsync(
+        private async Task<Uri> SeleniumAcquireAuthAsync(
             Uri authorizationUri,
-            Uri redirectUri)
+            Uri redirectUri, 
+            CancellationToken cancellationToken)
         {
             using (var driver = InitDriverAndGoToUrl(authorizationUri.OriginalString))
             using (var listener = new SingleMessageTcpListener(redirectUri.Port)) // starts listening
             {
-                AuthorizationResult authResult = null;
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(_timeout);
-
+                Uri authCodeUri = null;
                 var listenForAuthCodeTask = listener.ListenToSingleRequestAndRespondAsync(
                     (uri) =>
                     {
                         Trace.WriteLine("Intercepted an auth code url: " + uri.ToString());
-                        authResult = new AuthorizationResult(AuthorizationStatus.Success, uri.ToString());
-                        switch (authResult.Status)
-                        {
-                            case AuthorizationStatus.Success:
-                                return CloseWindowSuccessHtml;
-                            default:
-                                return CloseWindowFailureHtml;
-                        }
+                        authCodeUri = uri;
+
+                        return GetMessageToShowInBroswerAfterAuth(uri);
                     },
-                    cancellationTokenSource.Token);
+                    cancellationToken);
 
                 try
                 {
 
                     // Run the tcp listener and the selenium automation in parallel
-                    Task seleniumAutomationTask = Task.Run(() =>
+                    var seleniumAutomationTask = Task.Run(() =>
                     {
                         _seleniumAutomationLogic(driver);
                     });
 
                     await Task.WhenAll(seleniumAutomationTask, listenForAuthCodeTask).ConfigureAwait(false);
-                    return authResult;
+                    return authCodeUri;
 
-                }
-                catch (Exception ex) when (ex is TaskCanceledException || ex is OperationCanceledException)
-                {
-                    var result = new AuthorizationResult(AuthorizationStatus.UserCancel)
-                    {
-                        ErrorDescription = "Listening for an auth code was cancelled or has timed out.",
-                        Error = "system_browser_cancel_or_timeout_exception"
-                    };
-
-                    return await Task.FromResult(result).ConfigureAwait(false);
                 }
                 catch (SocketException ex)
                 {
-                    var result = new AuthorizationResult(AuthorizationStatus.UnknownError)
-                    {
-                        ErrorDescription = ex.Message + " socket error code: " + ex.SocketErrorCode,
-                        Error = "system_browser_socket_exception"
-                    };
-
-                    return await Task.FromResult(result).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    var result = new AuthorizationResult(AuthorizationStatus.UnknownError)
-                    {
-                        ErrorDescription = ex.Message,
-                        Error = "system_browser_waiting_exception"
-                    };
-
-                    return await Task.FromResult(result).ConfigureAwait(false);
+                    throw new MsalClientException(
+                        "selenium_ui_socket_error",
+                        "A socket exception occured " + ex.Message + " socket error code " + ex.SocketErrorCode);
                 }
             }
+        }
+
+        private static string GetMessageToShowInBroswerAfterAuth(Uri uri)
+        {
+            // Parse the uri to understand if an error was returned. This is done just to show the user a nice error message in the browser.
+            var authCodeQueryKeyValue = HttpUtility.ParseQueryString(uri.Query);
+            string errorString = authCodeQueryKeyValue.Get("error");
+            if (!string.IsNullOrEmpty(errorString))
+            {
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    CloseWindowFailureHtml,
+                    errorString,
+                    authCodeQueryKeyValue.Get("error_description"));
+            }
+
+            return CloseWindowSuccessHtml;
         }
     }
 }

@@ -84,7 +84,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsTrue(adalCacheDictionary.Count == 1);
 
                 var requestContext = RequestContext.CreateForTest(app.ServiceBundle);
-                var accounts = app.UserTokenCacheInternal.GetAccounts(MsalTestConstants.AuthorityCommonTenant, requestContext);
+                var accounts = app.UserTokenCacheInternal.GetAccounts(MsalTestConstants.AuthorityCommonTenant);
                 foreach (IAccount account in accounts)
                 {
                     app.UserTokenCacheInternal.RemoveMsalAccount(account, requestContext);
@@ -131,11 +131,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 app.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
                 {
-                    args.TokenCache.Deserialize(data);
+                    args.TokenCache.DeserializeMsalV3(data);
                 });
                 app.UserTokenCache.SetAfterAccess((TokenCacheNotificationArgs args) =>
                 {
-                    data = args.TokenCache.Serialize();
+                    data = args.TokenCache.SerializeMsalV3();
                 });
 
                 httpManager.AddInstanceDiscoveryMockHandler();
@@ -169,11 +169,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 app1.UserTokenCache.SetBeforeAccess((TokenCacheNotificationArgs args) =>
                 {
-                    args.TokenCache.Deserialize(data);
+                    args.TokenCache.DeserializeMsalV3(data);
                 });
                 app1.UserTokenCache.SetAfterAccess((TokenCacheNotificationArgs args) =>
                 {
-                    data = args.TokenCache.Serialize();
+                    data = args.TokenCache.SerializeMsalV3();
                 });
                 
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(ClientApplicationBase.DefaultAuthority);

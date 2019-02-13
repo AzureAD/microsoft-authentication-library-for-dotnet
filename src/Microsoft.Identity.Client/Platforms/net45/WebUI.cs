@@ -44,8 +44,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
         public RequestContext RequestContext { get; set; }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri,
+            RequestContext requestContext,
+            CancellationToken cancellationToken)
         {
             AuthorizationResult authorizationResult = null;
 
@@ -60,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 {
                     try
                     {
-                        Task.Factory.StartNew(sendAuthorizeRequest, CancellationToken.None, TaskCreationOptions.None,
+                        Task.Factory.StartNew(sendAuthorizeRequest, cancellationToken, TaskCreationOptions.None,
                             staTaskScheduler).Wait();
                     }
                     catch (AggregateException ae)

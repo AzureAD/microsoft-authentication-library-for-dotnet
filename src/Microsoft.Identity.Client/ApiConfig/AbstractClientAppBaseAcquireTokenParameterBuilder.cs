@@ -32,37 +32,27 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Base class for parameter builders common to public client application and confidential
+    /// client application token acquisition operations
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractClientAppBaseAcquireTokenParameterBuilder<T> : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        /// <summary>
-        /// </summary>
-        /// <param name="clientApplicationBase"></param>
-        protected AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
+        internal AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
         {
-            ClientApplicationBase = clientApplicationBase;
+            ClientApplicationBaseExecutor = clientApplicationBaseExecutor;
         }
 
-        /// <summary>
-        /// </summary>
-        protected IClientApplicationBase ClientApplicationBase { get; }
+        internal IClientApplicationBaseExecutor ClientApplicationBaseExecutor { get; }
 
-        internal abstract Task<AuthenticationResult> ExecuteAsync(
-            IClientApplicationBaseExecutor executor,
-            CancellationToken cancellationToken);
+        internal abstract Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (ClientApplicationBase is IClientApplicationBaseExecutor executor)
-            {
-                ValidateAndCalculateApiId();
-                return ExecuteAsync(executor, cancellationToken);
-            }
-
-            throw new InvalidOperationException(CoreErrorMessages.ClientApplicationBaseExecutorNotImplemented);
+            ValidateAndCalculateApiId();
+            return ExecuteInternalAsync(cancellationToken);
         }
     }
 }

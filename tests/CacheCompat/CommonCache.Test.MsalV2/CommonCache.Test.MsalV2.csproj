@@ -41,8 +41,11 @@
     <PackageReference Include="CommandLineParser">
       <Version>2.4.3</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Identity.Client">
+      <Version>2.7.1</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory">
-      <Version>4.5.0</Version>
+      <Version>4.5.1</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.1</Version>
@@ -68,10 +71,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
-      <Project>{60117a9b-4bb8-472e-bfff-52cbf67ca95a}</Project>
-      <Name>Microsoft.Identity.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{e22918a8-8fe6-47d2-b65e-34436918c5d7}</Project>
       <Name>Microsoft.Identity.Test.LabInfrastructure</Name>

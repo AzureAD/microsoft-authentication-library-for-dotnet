@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Instance
 
             default:
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.InvalidAuthorityType,
+                    MsalError.InvalidAuthorityType,
                     "Unsupported authority type");
             }
         }

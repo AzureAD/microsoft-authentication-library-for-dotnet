@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.UI;
+using System.Threading;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -51,8 +52,11 @@ namespace Microsoft.Identity.Client.Platforms.uap
             silentMode = parent.UseHiddenBrowser;
         }
 
-        public async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext)
+        public async Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri,
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
         {
             bool ssoMode = string.Equals(redirectUri.OriginalString, Constants.UapWEBRedirectUri, StringComparison.OrdinalIgnoreCase);
 

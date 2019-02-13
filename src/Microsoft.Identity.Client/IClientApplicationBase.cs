@@ -150,52 +150,33 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
         /// </remarks>
-        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account = null);
+        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account);
 
         /// <summary>
-        /// [V3 API] Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
-        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
-        /// This override enables you to specify a login hint and extra query parameter.
+        /// Attempts to acquire an access token for the <paramref name="loginHint"/> from the user token cache, 
+        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
-        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
-        /// <remarks>You can also chain the following optional parameters:
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// <param name="loginHint">Typically the username, in UPN format, e.g. johnd@contoso.com </param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or the user needs to perform two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
         /// </remarks>
-        GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
-
-
-        /// <summary>
-        /// [V2 API] URL of the authorize endpoint including the query parameters.
-        /// </summary>
-        /// <param name="scopes">Array of scopes requested for resource</param>
-        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        Task<Uri> GetAuthorizationRequestUrlAsync(
-            IEnumerable<string> scopes,
-            string loginHint,
-            string extraQueryParameters);
-
-        /// <summary>
-        /// [V2 API] Gets URL of the authorize endpoint including the query parameters.
-        /// </summary>
-        /// <param name="scopes">Array of scopes requested for resource</param>
-        /// <param name="redirectUri">Address to return to upon receiving a response from the authority.</param>
-        /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
-        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
-        /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
-        /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
-        /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        Task<Uri> GetAuthorizationRequestUrlAsync(
-            IEnumerable<string> scopes,
-            string redirectUri,
-            string loginHint,
-            string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority);
+        AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
 
         /// <summary>
         /// Removes all tokens in the cache for the specified account.

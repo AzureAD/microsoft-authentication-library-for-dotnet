@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.Common
 {
     public interface IProcessUtils
     {

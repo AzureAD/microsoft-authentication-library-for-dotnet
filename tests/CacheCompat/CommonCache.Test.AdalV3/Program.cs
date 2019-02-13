@@ -47,6 +47,11 @@ namespace CommonCache.Test.AdalV3
                 var app = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
 
+                LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>
+                {
+                    Console.WriteLine("{0}: {1}", level, message);
+                };
+
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
                 var tokenCache = new FileBasedAdalV3TokenCache(CommonCacheTestUtils.AdalV3CacheFilePath);
                 var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);

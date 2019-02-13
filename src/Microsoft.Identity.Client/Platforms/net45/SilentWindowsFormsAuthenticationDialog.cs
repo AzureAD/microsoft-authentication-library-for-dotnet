@@ -38,8 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("This type should not be used and will be made internal.")]
-    public class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
+    internal class SilentWindowsFormsAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
         private bool doneSignaled;
         private DateTime navigationExpiry = DateTime.MaxValue;

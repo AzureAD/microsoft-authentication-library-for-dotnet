@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
 
             }
 
-            [Obsolete]
+            [Obsolete] // because parent is obsolete
             public override bool ShouldOverrideUrlLoading(WebView view, string url)
             {
                 Uri uri = new Uri(url);
@@ -165,8 +165,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
                         Query = string.Format(
                             CultureInfo.InvariantCulture,
                             "error={0}&error_description={1}",
-                            CoreErrorCodes.NonHttpsRedirectNotSupported,
-                            CoreErrorMessages.NonHttpsRedirectNotSupported)
+                            MsalError.NonHttpsRedirectNotSupported,
+                            MsalErrorMessage.NonHttpsRedirectNotSupported)
                     };
                     Finish(Activity, errorUri.ToString());
                     return true;

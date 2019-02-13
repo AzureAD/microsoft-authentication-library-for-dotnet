@@ -33,19 +33,17 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -62,7 +60,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("SilentRequestTests")]
         public void ConstructorTests()
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
@@ -82,7 +79,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("SilentRequestTests")]
         public void ExpiredTokenRefreshFlowTest()
         {
             IDictionary<string, string> extraQueryParamsAndClaims =
@@ -93,9 +89,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             {
                 _tokenCacheHelper.PopulateCache(harness.Cache.Accessor);
                 var parameters = harness.CreateRequestParams(
-                    harness.Cache, 
-                    null, 
-                    MsalTestConstants.ExtraQueryParams, 
+                    harness.Cache,
+                    null,
+                    MsalTestConstants.ExtraQueryParams,
                     MsalTestConstants.Claims);
                 var silentParameters = new AcquireTokenSilentParameters();
 
@@ -130,7 +126,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("SilentRequestTests")]
         public void SilentRefreshFailedNullCacheTest()
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
@@ -163,7 +158,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
         [TestMethod]
-        [TestCategory("SilentRequestTests")]
         public void SilentRefreshFailedNoCacheItemFoundTest()
         {
             using (var harness = new MockHttpTestHarness(MsalTestConstants.AuthorityHomeTenant))
@@ -219,9 +213,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
 
             public AuthenticationRequestParameters CreateRequestParams(
-                ITokenCacheInternal cache, 
-                SortedSet<string> scopes, 
-                IDictionary<string, string> extraQueryParams = null, 
+                ITokenCacheInternal cache,
+                SortedSet<string> scopes,
+                IDictionary<string, string> extraQueryParams = null,
                 string claims = null)
             {
                 var commonParameters = new AcquireTokenCommonParameters
@@ -239,7 +233,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     RequestContext.CreateForTest(ServiceBundle))
                 {
                     Account = new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                   
+
                 };
                 return parameters;
             }

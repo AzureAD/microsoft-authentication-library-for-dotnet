@@ -41,13 +41,13 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
     internal class GetAuthorizationRequestUrlBuilderHarness : AbstractBuilderHarness
     {
         public GetAuthorizationRequestUrlParameters AuthorizationRequestUrlParametersReceived { get; private set; }
-        public IClientApplicationBase ClientApplication { get; private set; }
+        public IConfidentialClientApplication ClientApplication { get; private set; }
 
         public async Task SetupAsync()
         {
             ClientApplication = Substitute.For<IConfidentialClientApplication, IConfidentialClientApplicationExecutor>();
 
-            await ((IClientApplicationBaseExecutor)ClientApplication).ExecuteAsync(
+            await ((IConfidentialClientApplicationExecutor)ClientApplication).ExecuteAsync(
                 Arg.Do<AcquireTokenCommonParameters>(parameters => CommonParametersReceived = parameters),
                 Arg.Do<GetAuthorizationRequestUrlParameters>(parameters => AuthorizationRequestUrlParametersReceived = parameters),
                 CancellationToken.None).ConfigureAwait(false);

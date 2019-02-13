@@ -32,6 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 
@@ -56,7 +57,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             //Adfs device code flow not currently supported
             if(ServiceBundle.Config.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.Adfs)
             {
-                throw new InvalidOperationException(CoreErrorMessages.AdfsDeviceFlowNotSupported);
+                throw new InvalidOperationException(MsalErrorMessage.AdfsDeviceFlowNotSupported);
             }
 
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);

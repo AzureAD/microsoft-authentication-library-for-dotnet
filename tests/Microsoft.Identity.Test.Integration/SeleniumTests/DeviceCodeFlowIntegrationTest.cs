@@ -34,6 +34,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
+using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 
@@ -137,15 +138,21 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             try
             {
+                var fields = new UserInformationFieldIds(user);
+
                 Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
 
                 string codeId = isAdfs ? "userCodeInput" : "code";
                 string continueId = isAdfs ? "confirmationButton" : "continueBtn";
 
                 _seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
-                _seleniumDriver.FindElement(By.Id(codeId)).SendKeys(deviceCodeResult.UserCode);
+                _seleniumDriver
+                    // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
+                    .FindElement(SeleniumExtensions.ByIds("otc", codeId)) 
+                    .SendKeys(deviceCodeResult.UserCode);
 
-                IWebElement continueBtn = _seleniumDriver.WaitForElementToBeVisibleAndEnabled(By.Id(continueId));
+                IWebElement continueBtn = _seleniumDriver.WaitForElementToBeVisibleAndEnabled(
+                    SeleniumExtensions.ByIds(fields.AADSignInButtonId, continueId));
                 continueBtn?.Click();
 
                 _seleniumDriver.PerformLogin(user, isAdfs);

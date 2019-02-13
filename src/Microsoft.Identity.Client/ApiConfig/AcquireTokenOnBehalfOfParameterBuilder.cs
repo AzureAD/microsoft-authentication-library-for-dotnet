@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 
     /// <summary>
     /// Builder for AcquireTokenOnBehalfOf (OBO flow)
+    /// See https://aka.ms/msal-net-on-behalf-of
     /// </summary>
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
@@ -44,23 +45,17 @@ namespace Microsoft.Identity.Client.ApiConfig
         private AcquireTokenOnBehalfOfParameters Parameters { get; } = new AcquireTokenOnBehalfOfParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
-            : base(confidentialClientApplication)
+        internal AcquireTokenOnBehalfOfParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
+            : base(confidentialClientApplicationExecutor)
         {
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="confidentialClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <param name="userAssertion"></param>
-        /// <returns></returns>
         internal static AcquireTokenOnBehalfOfParameterBuilder Create(
-            IConfidentialClientApplication confidentialClientApplication,
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes, 
             UserAssertion userAssertion)
         {
-            return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplication)
+            return new AcquireTokenOnBehalfOfParameterBuilder(confidentialClientApplicationExecutor)
                    .WithScopes(scopes)
                    .WithUserAssertion(userAssertion);
         }
@@ -89,9 +84,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />

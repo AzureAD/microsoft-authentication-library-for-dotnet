@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.TelemetryCore;
 
 namespace Microsoft.Identity.Client
@@ -362,97 +363,97 @@ namespace Microsoft.Identity.Client
 
     /// <summary>
     /// </summary>
-    [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+    [Obsolete(MsalErrorMessage.LoggingClassIsObsolete, true)]
     public sealed class Logger
     {
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.LoggingClassIsObsolete, true)]
         public static LogCallback LogCallback
         {
-            set => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+            set => throw new NotImplementedException(MsalErrorMessage.LoggingClassIsObsolete);
         }
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.LoggingClassIsObsolete, true)]
         public static LogLevel Level
         {
-            get => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
-            set => throw new NotImplementedException(CoreErrorMessages.LoggingClassIsObsolete);
+            get => throw new NotImplementedException(MsalErrorMessage.LoggingClassIsObsolete);
+            set => throw new NotImplementedException(MsalErrorMessage.LoggingClassIsObsolete);
         }
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.LoggingClassIsObsolete, true)]
         public static bool PiiLoggingEnabled { get; set; } = false;
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.LoggingClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.LoggingClassIsObsolete, true)]
         public static bool DefaultLoggingEnabled { get; set; } = false;
     }
 
     /// <summary>
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+    [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
     public class Telemetry : ITelemetryReceiver
     {
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
         public delegate void Receiver(List<Dictionary<string, string>> events);
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
         public static Telemetry GetInstance()
         {
-            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            throw new NotImplementedException(MsalErrorMessage.TelemetryClassIsObsolete);
         }
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
         public bool TelemetryOnFailureOnly
         {
-            get => throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
-            set => throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            get => throw new NotImplementedException(MsalErrorMessage.TelemetryClassIsObsolete);
+            set => throw new NotImplementedException(MsalErrorMessage.TelemetryClassIsObsolete);
         }
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
         public void RegisterReceiver(Receiver r)
         {
-            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            throw new NotImplementedException(MsalErrorMessage.TelemetryClassIsObsolete);
         }
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
         public bool HasRegisteredReceiver()
         {
-            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            throw new NotImplementedException(MsalErrorMessage.TelemetryClassIsObsolete);
         }
 
         /// <summary>
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete(CoreErrorMessages.TelemetryClassIsObsolete, true)]
+        [Obsolete(MsalErrorMessage.TelemetryClassIsObsolete, true)]
         void ITelemetryReceiver.HandleTelemetryEvents(List<Dictionary<string, string>> events)
         {
-            throw new NotImplementedException(CoreErrorMessages.TelemetryClassIsObsolete);
+            throw new NotImplementedException(MsalErrorMessage.TelemetryClassIsObsolete);
         }
    }
 }

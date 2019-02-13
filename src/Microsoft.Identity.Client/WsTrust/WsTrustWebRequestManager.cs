@@ -56,11 +56,11 @@ namespace Microsoft.Identity.Client.WsTrust
             if (httpResponse.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 string message = string.Format(CultureInfo.CurrentCulture,
-                        CoreErrorMessages.HttpRequestUnsuccessful,
+                        MsalErrorMessage.HttpRequestUnsuccessful,
                         (int)httpResponse.StatusCode, httpResponse.StatusCode);
 
                 throw MsalExceptionFactory.GetServiceException(
-                    CoreErrorCodes.AccessingWsMetadataExchangeFailed,
+                    MsalError.AccessingWsMetadataExchangeFailed,
                     message,
                     httpResponse,
                     innerException: null);
@@ -107,12 +107,12 @@ namespace Microsoft.Identity.Client.WsTrust
 
                 string message = string.Format(
                         CultureInfo.CurrentCulture,
-                        CoreErrorMessages.FederatedServiceReturnedErrorTemplate,
+                        MsalErrorMessage.FederatedServiceReturnedErrorTemplate,
                         wsTrustEndpoint.Uri,
                         errorMessage);
 
                 throw MsalExceptionFactory.GetServiceException(
-                    CoreErrorCodes.FederatedServiceReturnedError,
+                    MsalError.FederatedServiceReturnedError,
                     message,
                     resp,
                     innerException: null);
@@ -125,7 +125,7 @@ namespace Microsoft.Identity.Client.WsTrust
             catch (System.Xml.XmlException ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.ParsingWsTrustResponseFailed, CoreErrorCodes.ParsingWsTrustResponseFailed, ex);
+                    MsalError.ParsingWsTrustResponseFailed, MsalError.ParsingWsTrustResponseFailed, ex);
             }
         }
 

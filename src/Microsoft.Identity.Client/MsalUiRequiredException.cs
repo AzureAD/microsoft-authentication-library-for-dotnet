@@ -66,6 +66,18 @@ namespace Microsoft.Identity.Client
         public const string UserNullError = "user_null";
 
         /// <summary>
+        /// This error code denotes that no account was found having the given login hint.
+        /// </summary>
+        public const string NoAccountForLoginHint = "no_account_for_login_hint";
+
+        /// <summary>
+        /// This error code denotes that multiple accounts were found having the same login hint and MSAL 
+        /// cannot chose one. Please use the overload of AcquireTokenSilent where you pass an account.
+        /// </summary>
+        public const string MultipleAccountsForLoginHint = "multiple_accounts_for_login_hint";
+
+
+        /// <summary>
         /// This error code comes back from <see cref="ClientApplicationBase.AcquireTokenSilentAsync(System.Collections.Generic.IEnumerable{string}, IAccount)"/> calls when 
         /// the user cache had not been set in the application constructor.
         /// </summary>

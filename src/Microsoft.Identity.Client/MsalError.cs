@@ -76,6 +76,11 @@ namespace Microsoft.Identity.Client
         /// Failed to refresh token.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
+               
+        /// <summary>
+        /// Failed to acquire token silently. Used in broker scenarios.
+        /// </summary>
+        public const string FailedToAcquireTokenSilentlyFromBroker = "failed_to_acquire_token_silently_from_broker";
 
         /// <summary>
         /// RedirectUri validation failed.
@@ -189,5 +194,160 @@ namespace Microsoft.Identity.Client
         /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";
+
+        /// <summary>
+        /// Broker response hash did not match
+        /// </summary>
+        public const string BrokerResponseHashMismatch = "broker_response_hash_mismatch";
+
+        /// <summary>
+        /// Broker response returned an error
+        /// </summary>
+        public const string BrokerResponseReturnedError = "broker_response_returned_error";
+
+        /// <summary>
+        /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device, 
+        /// or there were issues with the UiParent or CallerViewController being null. See https://aka.ms/msal-brokers
+        /// </summary>
+        public const string CannotInvokeBroker = "cannot_invoke_broker";
+
+        /// <summary>
+        /// Error code used when the http response returns HttpStatusCode.NotFound
+        /// </summary>
+        public const string HttpStatusNotFound = "not_found";
+
+        /// <summary>
+        /// ErrorCode used when the http response returns something different from 200 (OK)
+        /// </summary>
+        /// <remarks>
+        /// HttpStatusCode.NotFound have a specific error code. <see cref="MsalError.HttpStatusNotFound"/>
+        /// </remarks>
+        public const string HttpStatusCodeNotOk = "http_status_not_200";
+
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it is invalid - it is either null or has no code.
+        /// Consider throwing an exception if you are unable to intercept the uri containing the code. 
+        /// </summary>
+        public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";
+
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of 
+        /// the configured redirect uri.
+        /// </summary>
+        public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
+
+        /// <summary>
+        /// Access denied.
+        /// </summary>
+        public const string AccessDenied = "access_denied";
+
+        /// <summary>
+        /// JSON Parse error.
+        /// </summary>
+        public const string JsonParseError = "json_parse_failed";
+
+        /// <summary>
+        /// Request Timeout.
+        /// </summary>
+        public const string RequestTimeout = "request_timeout";
+
+        /// <summary>
+        /// Service not available.
+        /// </summary>
+        public const string ServiceNotAvailable = "service_not_available";
+
+        /// <summary>
+        /// Invalid JWT.
+        /// </summary>
+        public const string InvalidJwtError = "invalid_jwt";
+
+        /// <summary>
+        /// Tenant Discovery Failed.
+        /// </summary>
+        public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
+
+        /// <summary>
+        /// Authentication UI Failed.
+        /// </summary>
+        public const string AuthenticationUiFailedError = "authentication_ui_failed";
+
+        /// <summary>
+        /// Invalid Grant.
+        /// </summary>
+        public const string InvalidGrantError = "invalid_grant";
+
+        /// <summary>
+        /// Unknown Error.
+        /// </summary>
+        public const string UnknownError = "unknown_error";
+
+        /// <summary>
+        /// Authentication Canceled.
+        /// </summary>
+        public const string AuthenticationCanceledError = "authentication_canceled";
+
+        /// <summary>
+        /// UPN Required.
+        /// </summary>
+        public const string UpnRequired = "upn_required";
+
+        /// <summary>
+        /// Missing Passive Auth Endpoint.
+        /// </summary>
+        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
+
+        /// <summary>
+        /// Invalid Authority.
+        /// </summary>
+        public const string InvalidAuthority = "invalid_authority";
+
+        /// <summary>
+        /// Platform is Not Supported.
+        /// </summary>
+        public const string PlatformNotSupported = "platform_not_supported";
+
+        /// <summary>
+        /// Cannot Access User Information or User is Not Domain Joined.
+        /// </summary>
+        public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
+
+        /// <summary>
+        /// RedirectUri validation failed.
+        /// </summary>
+        public const string DefaultRedirectUriIsInvalid = "redirect_uri_validation_failed";
+
+        /// <summary>
+        /// No Redirect URI.
+        /// </summary>
+        public const string NoRedirectUri = "no_redirect_uri";
+
+#if iOS
+        /// <summary>
+        /// Cannot Access Publisher KeyChain.
+        /// </summary>
+        public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
+
+        /// <summary>
+        /// Missing Entitlements.
+        /// </summary>
+        public const string MissingEntitlements = "missing_entitlements";
+#endif
+
+#if ANDROID
+        /// <summary>
+        /// Failed To Create Shared Preference.
+        /// </summary>
+        public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
+
+        /// <summary>
+        /// Android Activity Not Found.
+        /// </summary>
+        public const string AndroidActivityNotFound = "android_activity_not_found";
+
+        /// <summary>
+        /// Unresolvable Intent.
+        /// </summary>
+        public const string UnresolvableIntentError = "unresolvable_intent";
+#endif
     }
 }

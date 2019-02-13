@@ -79,7 +79,9 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        ///
+        /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
+        /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
+        /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
         public TokenCache()
         {
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Client
         /// used in particular to provide a custom token cache serialization
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
-        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead.", true)]
+        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead. See https://aka.msa/msal-net-3x-cache-breaking-change", true)]
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
         internal readonly object LockObject = new object();
@@ -131,8 +133,6 @@ namespace Microsoft.Identity.Client
         private volatile bool _hasStateChanged;
 
         internal string ClientId => ServiceBundle.Config.ClientId;
-
-
 
         /// <summary>
         /// Notification method called before any library method accesses the cache.
@@ -278,44 +278,50 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0618 // Type or member is obsolete
 
                     OnBeforeAccess(args);
-                    OnBeforeWrite(args);
-
-                    DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
-                        msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
-
-                    _accessor.SaveAccessToken(msalAccessTokenCacheItem);
-
-                    if (idToken != null)
+                    try
                     {
-                        _accessor.SaveIdToken(msalIdTokenCacheItem);
+                        OnBeforeWrite(args);
 
-                        var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
+                        DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
+                            msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
 
-                        _accessor.SaveAccount(msalAccountCacheItem);
+                        _accessor.SaveAccessToken(msalAccessTokenCacheItem);
+
+                        if (idToken != null)
+                        {
+                            _accessor.SaveIdToken(msalIdTokenCacheItem);
+
+                            var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
+
+                            _accessor.SaveAccount(msalAccountCacheItem);
+                        }
+
+                        // if server returns the refresh token back, save it in the cache.
+                        if (response.RefreshToken != null)
+                        {
+                            msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
+                            requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                            _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                        }
+
+                        // save RT in ADAL cache for public clients
+                        // do not save RT in ADAL cache for MSAL B2C scenarios
+                        if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
+                        {
+                            CacheFallbackOperations.WriteAdalRefreshToken(
+                                _logger,
+                                LegacyCachePersistence,
+                                msalRefreshTokenCacheItem,
+                                msalIdTokenCacheItem,
+                                Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
+                                msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
+                        }
+
                     }
-
-                    // if server returns the refresh token back, save it in the cache.
-                    if (response.RefreshToken != null)
+                    finally
                     {
-                        msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response, subject);
-                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
-                        _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                        OnAfterAccess(args);
                     }
-
-                    // save RT in ADAL cache for public clients
-                    // do not save RT in ADAL cache for MSAL B2C scenarios
-                    if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
-                    {
-                        CacheFallbackOperations.WriteAdalRefreshToken(
-                            _logger,
-                            LegacyCachePersistence,
-                            msalRefreshTokenCacheItem,
-                            msalIdTokenCacheItem,
-                            Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
-                            msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
-                    }
-
-                    OnAfterAccess(args);
 
                     return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
                 }
@@ -410,10 +416,18 @@ namespace Microsoft.Identity.Client
                     Account = requestParams.Account
                 };
 
+                List<MsalAccessTokenCacheItem> tokenCacheItems;
+
                 OnBeforeAccess(args);
-                // filtered by client id.
-                var tokenCacheItems = ((ITokenCacheInternal)this).GetAllAccessTokens(true).ToList();
-                OnAfterAccess(args);
+                try
+                {
+                    // filtered by client id.
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllAccessTokens(true).ToList();
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
 
                 // this is OBO flow. match the cache entry with assertion hash,
                 // Authority, ScopeSet and client Id.
@@ -665,10 +679,15 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
-                OnAfterAccess(args);
-
-                return idToken;
+                try
+                {
+                    var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
+                    return idToken;
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
             }
         }
 
@@ -736,7 +755,7 @@ namespace Microsoft.Identity.Client
             return preferredEnvironmentHost;
         }
 
-        IEnumerable<IAccount> ITokenCacheInternal.GetAccounts(string authority, RequestContext requestContext)
+        IEnumerable<IAccount> ITokenCacheInternal.GetAccounts(string authority)
         {
             var environment = new Uri(authority).Host;
             lock (LockObject)
@@ -748,12 +767,21 @@ namespace Microsoft.Identity.Client
                     Account = null
                 };
 
-                OnBeforeAccess(args);
-                IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
-                IEnumerable<MsalAccountCacheItem> accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
+                IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems;
+                IEnumerable<MsalAccountCacheItem> accountCacheItems;
+                AdalUsersForMsalResult adalUsersResult;
 
-                var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
-                OnAfterAccess(args);
+                OnBeforeAccess(args);
+                try
+                {
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
+                    accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
+                    adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
                 foreach (MsalRefreshTokenCacheItem rtItem in tokenCacheItems)
@@ -857,12 +885,17 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args);
-                    OnBeforeWrite(args);
+                    try
+                    {
+                        OnBeforeWrite(args);
 
-                    ((ITokenCacheInternal)this).RemoveMsalAccount(account, requestContext);
-                    RemoveAdalUser(account);
-
-                    OnAfterAccess(args);
+                        ((ITokenCacheInternal)this).RemoveMsalAccount(account, requestContext);
+                        RemoveAdalUser(account);
+                    }
+                    finally
+                    {
+                        OnAfterAccess(args);
+                    }
                 }
                 finally
                 {
@@ -933,9 +966,9 @@ namespace Microsoft.Identity.Client
                     HasStateChanged = true
                 };
 
+                OnBeforeAccess(args);
                 try
                 {
-                    OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
                     ((ITokenCacheInternal)this).ClearMsalCache();
@@ -1013,89 +1046,14 @@ namespace Microsoft.Identity.Client
             BeforeWrite = beforeWrite;
         }
 
-
-        /// <summary>
-        /// Deserializes the token cache from a serialization blob in the unified cache format
-        /// </summary>
-        /// <param name="unifiedState">Array of bytes containing serialized Msal cache data</param>
-        /// <remarks>
-        /// <paramref name="unifiedState"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
-        /// </remarks>
-        public void Deserialize(byte[] unifiedState)
-        {
-            GuardOnMobilePlatforms();
-
-            lock (LockObject)
-            {
-                new TokenCacheDictionarySerializer(_accessor).Deserialize(unifiedState);
-            }
-        }
-
-        /// <summary>
-        /// Deserializes the token cache from a serialization blob in both format (ADAL V3 format, and unified cache format)
-        /// </summary>
-        /// <param name="cacheData">Array of bytes containing serialicache data</param>
-        public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
-        {
-            GuardOnMobilePlatforms();
-            lock (LockObject)
-            {
-                Deserialize(cacheData.UnifiedState);
-                LegacyCachePersistence.WriteCache(cacheData.AdalV3State);
-            }
-        }
-
-        /// <summary>
-        /// Serializes the entire token cache, in the unified cache format only
-        /// </summary>
-        /// <returns>array of bytes containing the serialized unified cache</returns>
-        public byte[] Serialize()
-        {
-            GuardOnMobilePlatforms();
-            // reads the underlying in-memory dictionary and dumps out the content as a JSON
-            lock (LockObject)
-            {
-                return new TokenCacheDictionarySerializer(_accessor).Serialize();
-            }
-        }
-
-        /// <summary>
-        /// Serializes to the V3 unified cache format.
-        /// </summary>
-        /// <returns>Byte stream representation of the cache</returns>
-        public byte[] SerializeV3()
-        {
-            GuardOnMobilePlatforms();
-
-            lock (LockObject)
-            {
-                return new TokenCacheJsonSerializer(_accessor).Serialize();
-            }
-        }
-
-        /// <summary>
-        /// De-serializes from the V3 unified cache format.
-        /// </summary>
-        /// <param name="bytes">Byte stream representation of the cache</param>
-        public void DeserializeV3(byte[] bytes)
-        {
-            GuardOnMobilePlatforms();
-
-            if (bytes == null || bytes.Length == 0)
-            {
-                return;
-            }
-
-            lock (LockObject)
-            {
-                new TokenCacheJsonSerializer(_accessor).Deserialize(bytes);
-            }
-        }
-
         /// <summary>
         /// Serializes the entire token cache in both the ADAL V3 and unified cache formats.
         /// </summary>
         /// <returns>Serialized token cache <see cref="CacheData"/></returns>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         public CacheData SerializeUnifiedAndAdalCache()
         {
             GuardOnMobilePlatforms();
@@ -1112,6 +1070,196 @@ namespace Microsoft.Identity.Client
                 };
             }
         }
+
+        /// <summary>
+        /// Deserializes the token cache from a serialization blob in both format (ADAL V3 format, and unified cache format)
+        /// </summary>
+        /// <param name="cacheData">Array of bytes containing serialize cache data</param>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        public void DeserializeUnifiedAndAdalCache(CacheData cacheData)
+        {
+            GuardOnMobilePlatforms();
+            lock (LockObject)
+            {
+                Deserialize(cacheData.UnifiedState);
+                LegacyCachePersistence.WriteCache(cacheData.AdalV3State);
+            }
+        }
+
+        /// <summary>
+        /// Serializes using the <see cref="SerializeMsalV2"/> serializer.
+        /// Obsolete: Please use specialized Serialization methods.
+        /// <see cref="SerializeMsalV2"/> replaces <see cref="Serialize"/>. 
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
+        /// <see cref="SerializeAdalV3"/> For interoperability with ADAL.NET v3.
+        /// </summary>
+        /// <returns>array of bytes, <see cref="SerializeMsalV2"/></returns>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        public byte[] Serialize()
+        {
+            return SerializeMsalV2();
+        }
+
+        /// <summary>
+        /// Deserializes the token cache from a serialization blob in the unified cache format
+        /// Obsolete: Please use specialized Deserialization methods.
+        /// <see cref="DeserializeMsalV2"/> replaces <see cref="Deserialize"/> 
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> Is our recommended way of serializing/deserializing.
+        /// <see cref="DeserializeAdalV3"/> For interoperability with ADAL.NET v3
+        /// </summary>
+        /// <param name="msalV2State">Array of bytes containing serialized MSAL.NET V2 cache data</param>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// <paramref name="msalV2State"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
+        /// </remarks>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
+        public void Deserialize(byte[] msalV2State)
+        {
+            DeserializeMsalV2(msalV2State);
+        }
+
+        /// <summary>
+        /// Serializes the token cache to the ADAL.NET 3.x cache format.
+        /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// </summary>
+        /// <returns>array of bytes containing the serialized ADAL.NET V3 cache data</returns>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        public byte[] SerializeAdalV3()
+        {
+            GuardOnMobilePlatforms();
+
+            lock (LockObject)
+            {
+                return LegacyCachePersistence.LoadCache();
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the token cache to the ADAL.NET 3.x cache format.
+        /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// </summary>
+        /// <param name="adalV3State">Array of bytes containing serialized Adal.NET V3 cache data</param>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        public void DeserializeAdalV3(byte[] adalV3State)
+        {
+            GuardOnMobilePlatforms();
+
+            lock (LockObject)
+            {
+                LegacyCachePersistence.WriteCache(adalV3State);
+            }
+        }
+
+        /// <summary>
+        /// Serializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.
+        /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// </summary>
+        /// <returns>array of bytes containing the serialized MsalV2 cache</returns>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        public byte[] SerializeMsalV2()
+        {
+            GuardOnMobilePlatforms();
+            // reads the underlying in-memory dictionary and dumps out the content as a JSON
+            lock (LockObject)
+            {
+                return new TokenCacheDictionarySerializer(_accessor).Serialize();
+            }
+        }
+
+        /// <summary>
+        /// Deserializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.
+        /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// </summary>
+        /// <param name="msalV2State">Array of bytes containing serialized MsalV2 cache data</param>
+        /// <remarks>
+        /// <paramref name="msalV2State"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
+        /// </remarks>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        public void DeserializeMsalV2(byte[] msalV2State)
+        {
+            GuardOnMobilePlatforms();
+
+            if (msalV2State == null || msalV2State.Length == 0)
+            {
+                return;
+            }
+
+            lock (LockObject)
+            {
+                new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+            }
+        }
+
+        /// <summary>
+        /// Serializes the token cache, in the MSAL.NET V3 cache format.
+        /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        public byte[] SerializeMsalV3()
+        {
+            GuardOnMobilePlatforms();
+
+            lock (LockObject)
+            {
+                return new TokenCacheJsonSerializer(_accessor).Serialize();
+            }
+        }
+
+        /// <summary>
+        /// De-serializes from the MSAL.NET V3 cache format.
+        /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// </summary>
+        /// <param name="msalV3State">Byte stream representation of the cache</param>
+        /// <remarks>
+        /// This format is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        /// <remarks>
+        /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// </remarks>
+        public void DeserializeMsalV3(byte[] msalV3State)
+        {
+            GuardOnMobilePlatforms();
+
+            if (msalV3State == null || msalV3State.Length == 0)
+            {
+                return;
+            }
+
+            lock (LockObject)
+            {
+                new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+            }
+        }
+
 
 
         private static void GuardOnMobilePlatforms()

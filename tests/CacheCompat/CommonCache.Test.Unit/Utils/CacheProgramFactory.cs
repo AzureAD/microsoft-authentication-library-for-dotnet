@@ -36,7 +36,7 @@ namespace CommonCache.Test.Unit.Utils
     {
         private static string BaseExecutablePath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        public static CacheProgram CreateCacheProgram(CacheProgramType cacheProgramType)
+        public static CacheProgram CreateCacheProgram(CacheProgramType cacheProgramType, CacheStorageType cacheStorageType)
         {
             string executablePath;
             string resultsFilePath;
@@ -51,15 +51,31 @@ namespace CommonCache.Test.Unit.Utils
                 executablePath = Path.Combine(BaseExecutablePath, "AdalV4", "CommonCache.Test.AdalV4.exe");
                 resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "adalv4results.json");
                 break;
+            case CacheProgramType.AdalV5:
+                executablePath = Path.Combine(BaseExecutablePath, "AdalV5", "CommonCache.Test.AdalV5.exe");
+                resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "adalv5results.json");
+                break;
             case CacheProgramType.MsalV2:
                 executablePath = Path.Combine(BaseExecutablePath, "MsalV2", "CommonCache.Test.MsalV2.exe");
                 resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msalv2results.json");
+                break;
+            case CacheProgramType.MsalV3:
+                executablePath = Path.Combine(BaseExecutablePath, "MsalV3", "CommonCache.Test.MsalV3.exe");
+                resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msalv3results.json");
+                break;
+            case CacheProgramType.MsalPython:
+                executablePath = Path.Combine(BaseExecutablePath, "MsalPython", "CommonCache.Test.MsalPython.exe");
+                resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msal_python_results.json");
+                break;
+            case CacheProgramType.MsalJava:
+                executablePath = Path.Combine(BaseExecutablePath, "MsalJava", "CommonCache.Test.MsalJava.exe");
+                resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msal_java_results.json");
                 break;
             default:
                 throw new ArgumentException("Unknown cacheProgramType", nameof(cacheProgramType));
             }
 
-            return new CacheProgram(executablePath, resultsFilePath);
+            return new CacheProgram(executablePath, resultsFilePath, cacheStorageType);
         }
     }
 }

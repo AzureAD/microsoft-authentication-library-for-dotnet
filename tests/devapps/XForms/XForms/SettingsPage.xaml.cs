@@ -50,10 +50,10 @@ namespace XForms
             authority.Text = App.Authority;
             clientIdEntry.Text = App.ClientId;
 
-            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccessTokenCount.ToString(CultureInfo.InvariantCulture);
-            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.RefreshTokenCount.ToString(CultureInfo.InvariantCulture);
-            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.IdTokenCount.ToString(CultureInfo.InvariantCulture);
-            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccountCount.ToString(CultureInfo.InvariantCulture);
+            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count.ToString(CultureInfo.InvariantCulture);
+            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count.ToString(CultureInfo.InvariantCulture);
+            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count.ToString(CultureInfo.InvariantCulture);
+            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccounts().Count.ToString(CultureInfo.InvariantCulture);
 
             validateAuthoritySwitch.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.AppConfig.RedirectUri;
@@ -132,6 +132,12 @@ namespace XForms
             App.ClientId = App.B2cClientId;
             App.RedirectUriOnAndroid = App.RedirectUriB2C;
             App.RedirectUriOnIos = App.RedirectUriB2C;
+        }
+
+        private void OnAcquireTokenWithBrokerToggled(object sender, ToggledEventArgs args)
+        {
+            App.UseBroker = args.Value;
+            App.InitPublicClient();
         }
     }
 }

@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -260,6 +261,84 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         }
 
         [TestMethod]
+        public void TestCreateWithOptionsAuthorityAudience()
+        {
+            var options = new PublicClientApplicationOptions
+            {
+                AzureCloudInstance = AzureCloudInstance.AzurePublic,
+                AadAuthorityAudience = AadAuthorityAudience.AzureAdMultipleOrgs,
+                ClientId = MsalTestConstants.ClientId
+            };
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                                                    .Build();
+            Assert.AreEqual(MsalTestConstants.AuthorityOrganizationsTenant, pca.Authority);
+        }
+
+        [TestMethod]
+        public void EnsureCreatePublicClientWithAzureAdMyOrgAndNoTenantThrowsException()
+        {
+            var options = new PublicClientApplicationOptions
+            {
+                AzureCloudInstance = AzureCloudInstance.AzurePublic,
+                AadAuthorityAudience = AadAuthorityAudience.AzureAdMyOrg,
+                ClientId = MsalTestConstants.ClientId
+            };
+
+            try
+            {
+                var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                                                        .Build();
+                Assert.Fail("Should have thrown exception here due to missing TenantId");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(ex is InvalidOperationException);
+            }
+        }
+
+        [TestMethod]
+        public void EnsureCreatePublicClientWithAzureAdMyOrgAndValidTenantSucceeds()
+        {
+            const string tenantId = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
+
+            var options = new PublicClientApplicationOptions
+            {
+                AzureCloudInstance = AzureCloudInstance.AzurePublic,
+                AadAuthorityAudience = AadAuthorityAudience.AzureAdMyOrg,
+                TenantId = tenantId,
+                ClientId = MsalTestConstants.ClientId
+            };
+
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                                                    .Build();
+
+            Assert.AreEqual($"https://login.microsoftonline.com/{tenantId}/", pca.Authority);
+        }
+
+        [DataTestMethod]
+        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdMultipleOrgs, MsalTestConstants.AuthorityOrganizationsTenant, DisplayName = "AzurePublic + AzureAdMultipleOrgs")]
+        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, MsalTestConstants.AuthorityCommonTenant, DisplayName = "AzurePublic + AzureAdAndPersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzurePublic, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.microsoftonline.com/consumers/", DisplayName = "AzurePublic + PersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdMultipleOrgs, "https://login.chinacloudapi.cn/organizations/", DisplayName = "AzureChina + AzureAdMultipleOrgs")]
+        [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, "https://login.chinacloudapi.cn/common/", DisplayName = "AzureChina + AzureAdAndPersonalMicrosoftAccount")]
+        [DataRow(AzureCloudInstance.AzureChina, AadAuthorityAudience.PersonalMicrosoftAccount, "https://login.chinacloudapi.cn/consumers/", DisplayName = "AzureChina + PersonalMicrosoftAccount")]
+        public void TestAuthorityPermutations(
+            AzureCloudInstance cloudInstance,
+            AadAuthorityAudience audience,
+            string expectedAuthority)
+        {
+            var options = new PublicClientApplicationOptions
+            {
+                AzureCloudInstance = cloudInstance,
+                AadAuthorityAudience = audience,
+                ClientId = MsalTestConstants.ClientId
+            };
+            var pca = PublicClientApplicationBuilder.CreateWithApplicationOptions(options)
+                                                    .Build();
+            Assert.AreEqual(expectedAuthority, pca.Authority);
+        }
+
+        [TestMethod]
         public void TestAuthorities()
         {
             IPublicClientApplication app;
@@ -334,7 +413,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             catch (Exception ex)
             {
                 Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(CoreErrorMessages.AzureAdMyOrgRequiresSpecifyingATenant, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.AzureAdMyOrgRequiresSpecifyingATenant, ex.Message);
             }
         }
 
@@ -351,7 +430,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             catch (Exception ex)
             {
                 Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments, ex.Message);
             }
         }
     }

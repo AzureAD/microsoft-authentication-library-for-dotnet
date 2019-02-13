@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.AppConfig
@@ -74,21 +75,7 @@ namespace Microsoft.Identity.Client.AppConfig
             return this;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="enableBroker"></param>
-        /// <returns></returns>
-        internal PublicClientApplicationBuilder WithBroker(bool enableBroker)
-        {
-            // TODO: * This should become public only on mobile platforms that support using a broker
-            Config.IsBrokerEnabled = enableBroker;
-            return this;
-        }
-
-#if !NET_CORE_BUILDTIME // include for other platforms and for runtime
-#if iOS
-
+#if !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
         /// <summary>
         /// 
         /// </summary>
@@ -96,11 +83,25 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns></returns>
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
+#if iOS
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
+#endif // iOS 
             return this;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="enableBroker"></param>
+        /// <returns></returns>
+        private PublicClientApplicationBuilder WithBroker(bool enableBroker)
+        {
+#if iOS
+            Config.IsBrokerEnabled = enableBroker;
 #endif // iOS
-#endif // !NET_CORE_BUILDTIME
+            return this;
+        }
+#endif // !ANDROID_BUILDTIME && !WINDOWS_APP_BUILDTIME && !NET_CORE_BUILDTIME && !DESKTOP_BUILDTIME && !MAC_BUILDTIME
 
 #if WINDOWS_APP
         /// <summary>
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
-                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
+                throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
         }
     }

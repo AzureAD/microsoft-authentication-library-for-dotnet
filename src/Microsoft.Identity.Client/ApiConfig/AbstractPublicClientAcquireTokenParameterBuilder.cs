@@ -39,34 +39,22 @@ namespace Microsoft.Identity.Client.ApiConfig
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="publicClientApplication"></param>
-        protected AbstractPublicClientAcquireTokenParameterBuilder(IPublicClientApplication publicClientApplication)
+        internal AbstractPublicClientAcquireTokenParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
         {
-            PublicClientApplication = publicClientApplication;
+            PublicClientApplicationExecutor = publicClientApplicationExecutor;
         }
 
-        internal abstract Task<AuthenticationResult> ExecuteAsync(
-            IPublicClientApplicationExecutor executor,
-            CancellationToken cancellationToken);
+        internal abstract Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (PublicClientApplication is IPublicClientApplicationExecutor executor)
-            {
-                ValidateAndCalculateApiId();
-                return ExecuteAsync(executor, cancellationToken);
-            }
-
-            throw new InvalidOperationException(
-                "PublicClientApplication implementation does not implement IPublicClientApplicationExecutor.");
+            ValidateAndCalculateApiId();
+            return ExecuteInternalAsync(cancellationToken);
         }
 
         /// <summary>
         /// </summary>
-        protected IPublicClientApplication PublicClientApplication { get; }
+        internal IPublicClientApplicationExecutor PublicClientApplicationExecutor { get; }
     }
 }

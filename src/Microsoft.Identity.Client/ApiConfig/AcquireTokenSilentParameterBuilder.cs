@@ -36,30 +36,48 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <inheritdoc />
     /// <summary>
+    /// Parameter builder for the <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+    /// operation. See https://aka.ms/msal-net-acquiretokensilent
     /// </summary>
     public sealed class AcquireTokenSilentParameterBuilder :
         AbstractClientAppBaseAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>
     {
         private AcquireTokenSilentParameters Parameters { get; } = new AcquireTokenSilentParameters();
 
-        /// <inheritdoc />
-        internal AcquireTokenSilentParameterBuilder(IClientApplicationBase clientApplicationBase)
-            : base(clientApplicationBase)
+        internal AcquireTokenSilentParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
+            : base(clientApplicationBaseExecutor)
         {
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="clientApplicationBase"></param>
-        /// <param name="scopes"></param>
-        /// <param name="account"></param>
-        /// <returns></returns>
         internal static AcquireTokenSilentParameterBuilder Create(
-            IClientApplicationBase clientApplicationBase,
-            IEnumerable<string> scopes, IAccount account)
+            IClientApplicationBaseExecutor clientApplicationBaseExecutor,
+            IEnumerable<string> scopes,
+            IAccount account)
         {
-            return new AcquireTokenSilentParameterBuilder(clientApplicationBase).WithScopes(scopes).WithAccount(account);
+            return new AcquireTokenSilentParameterBuilder(clientApplicationBaseExecutor).WithScopes(scopes).WithAccount(account);
         }
+
+        internal static AcquireTokenSilentParameterBuilder Create(
+            IClientApplicationBaseExecutor clientApplicationBaseExecutor,
+            IEnumerable<string> scopes,
+            string loginHint)
+        {
+            return new AcquireTokenSilentParameterBuilder(clientApplicationBaseExecutor).WithScopes(scopes).WithLoginHint(loginHint);
+        }
+
+
+        private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
+        {
+            Parameters.Account = account;
+            return this;
+        }
+
+        private AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
+        {
+            Parameters.LoginHint = loginHint;
+            return this;
+        }
+
 
         /// <summary>
         /// Specifies if the client application should force refreshing the
@@ -80,30 +98,10 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
-        {
-            Parameters.LoginHint = loginHint;
-            return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
-        {
-            Parameters.Account = account;
-            return this;
-        }
-
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IClientApplicationBaseExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return ClientApplicationBaseExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />
@@ -120,7 +118,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         protected override void Validate()
         {
             base.Validate();
-            if (Parameters.Account == null)
+            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint) )
             {
                 throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
             }

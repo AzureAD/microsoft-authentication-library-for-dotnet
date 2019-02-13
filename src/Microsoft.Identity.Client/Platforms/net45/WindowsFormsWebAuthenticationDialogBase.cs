@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -33,6 +33,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 
@@ -42,8 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("This type should not be used and will be made internal.")]
-    public abstract class WindowsFormsWebAuthenticationDialogBase : Form
+    internal abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
         internal RequestContext RequestContext { get; set; }
 
@@ -231,7 +231,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 Result = new AuthorizationResult(AuthorizationStatus.ErrorHttp)
                 {
                     Error = MsalClientException.NonHttpsRedirectNotSupported,
-                    ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported
+                    ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported
                 };
                 readyToClose = true;
             }

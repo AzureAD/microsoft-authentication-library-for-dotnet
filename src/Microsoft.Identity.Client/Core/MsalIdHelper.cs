@@ -95,8 +95,8 @@ namespace Microsoft.Identity.Client.Core
             if (platformProxy == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.PlatformNotSupported,
-                    CoreErrorMessages.PlatformNotSupported);
+                    MsalError.PlatformNotSupported,
+                    MsalErrorMessage.PlatformNotSupported);
             }
 
             var parameters = new Dictionary<string, string>

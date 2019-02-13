@@ -25,10 +25,20 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using CommandLine;
 
 namespace CommonCache.Test.Common
 {
+    [Flags]
+    public enum CacheStorageType
+    {
+        None = 0,
+        Adal = 1,
+        MsalV2 = 2,
+        MsalV3 = 4
+    }
+
     // ReSharper disable once ClassNeverInstantiated.Global
     public class CommandLineOptions
     {
@@ -41,5 +51,9 @@ namespace CommonCache.Test.Common
         [Option("userPassword", Required = true, HelpText = "Password to login with.")]
         public string UserPassword { get; set; }
 
+        [Option("cacheStorageType", Required = true, HelpText = "Cache storage type(s) supported.")]
+        public int CacheStorageTypeInt {get; set;}
+
+        public CacheStorageType CacheStorageType => (CacheStorageType)CacheStorageTypeInt;
     }
 }

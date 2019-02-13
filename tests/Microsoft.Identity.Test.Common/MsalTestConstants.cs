@@ -53,6 +53,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityUtidTenant = "https://" + ProductionPrefNetworkEnvironment + "/" + Utid + "/";
         public const string AuthorityGuestTenant = "https://" + ProductionPrefNetworkEnvironment + "/guest/";
         public const string AuthorityCommonTenant = "https://" + ProductionPrefNetworkEnvironment + "/common/";
+        public const string AuthorityCommonTenantNotPrefAlias = "https://" + ProductionNotPrefEnvironmentAlias + "/common/";
+
         public const string PrefCacheAuthorityCommonTenant = "https://" + ProductionPrefCacheEnvironment + "/common/";
         public const string AuthorityOrganizationsTenant = "https://" + ProductionPrefNetworkEnvironment + "/organizations/";
         public const string AuthorityGuidTenant = "https://" + ProductionPrefNetworkEnvironment + "/12345679/";
@@ -61,6 +63,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
         public const string B2CRandomHost = "https://sometenantid.randomhost.com/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public static readonly string ClientId_1 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
         public const string UniqueId = "unique_id";
@@ -86,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string FamilyName = "Doe";
         public const string Username = "joe@localhost.com";
 
-        public static readonly IDictionary<string, string> ExtraQueryParams 
+        public static readonly IDictionary<string, string> ExtraQueryParams
             = new Dictionary<string, string>()
             {
                 {"extra", "qp" },
@@ -135,6 +140,9 @@ namespace Microsoft.Identity.Test.Unit
 
         public static readonly Account OnPremiseUser = new Account(
             string.Format(CultureInfo.InvariantCulture, "{0}.{1}", OnPremiseUid, OnPremiseUtid), OnPremiseDisplayableId, null);
+
+        public const string BrokerExtraQueryParameters = "extra=qp&key1=value1%20with%20encoded%20space&key2=value2";
+        public const string BrokerClaims = "testClaims";
 
 #if !ANDROID && !iOS && !WINDOWS_APP
         public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);

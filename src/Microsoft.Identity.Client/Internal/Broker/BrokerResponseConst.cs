@@ -25,45 +25,21 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-
-namespace CommonCache.Test.Unit.Utils
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    public class ProcessRunException : Exception
+    internal class BrokerResponseConst
     {
-        public ProcessRunException()
-        {
-        }
+        public const string ErrorMetadata = "error_metadata";
+        public const string ErrorDomain = "error_domain";
 
-        public ProcessRunException(
-            string fileName,
-            string arguments,
-            int processExitCode,
-            string processStandardOutput,
-            string processStandardError)
-            : base($"Process {fileName} has exited with code {processExitCode}")
-        {
-            FileName = fileName;
-            Arguments = arguments;
-            ProcessExitCode = processExitCode;
-            ProcessStandardOutput = processStandardOutput;
-            ProcessStandardError = processStandardError;
-        }
-
-        public ProcessRunException(string message)
-            : base(message)
-        {
-        }
-
-        public ProcessRunException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-
-        public string FileName { get; }
-        public string Arguments { get; }
-        public int ProcessExitCode { get; }
-        public string ProcessStandardOutput { get; }
-        public string ProcessStandardError { get; }
+        public const string Authority = "authority";
+        public const string AccessToken = "access_token";
+        public const string RefreshToken = "refresh_token";
+        public const string IdToken = "id_token";
+        public const string Bearer = "Bearer";
+        public const string CorrelationId = "correlation_id";
+        public const string Scope = "scope";
+        public const string ExpiresOn = "expires_on";
+        public const string ClientInfo = "client_info";
     }
 }

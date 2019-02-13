@@ -28,7 +28,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -91,26 +93,13 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.LoggingCallback != null)
             {
-                throw new InvalidOperationException(CoreErrorMessages.LoggingCallbackAlreadySet);
+                throw new InvalidOperationException(MsalErrorMessage.LoggingCallbackAlreadySet);
             }
 
             Config.LoggingCallback = loggingCallback;
             Config.LogLevel = logLevel ?? Config.LogLevel;
             Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
             Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Use when the tenant admin has enabled conditional access. Acquiring a token, either in your app or in a downstream API, 
-        /// could result in a <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
-        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details.
-        /// </summary>
-        /// <param name="claims">A string with one or multiple claims.</param>
-        /// <returns>The builder to chain .With methods</returns>
-        public T WithClaims(string claims)
-        {
-            Config.Claims = claims;
             return (T)this;
         }
 
@@ -159,7 +148,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.TelemetryCallback != null)
             {
-                throw new InvalidOperationException(CoreErrorMessages.TelemetryCallbackAlreadySet);
+                throw new InvalidOperationException(MsalErrorMessage.TelemetryCallbackAlreadySet);
             }
 
             Config.TelemetryCallback = telemetryCallback;
@@ -261,18 +250,35 @@ namespace Microsoft.Identity.Client.AppConfig
             return (T)this;
         }
 
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// The string needs to be properly URL-encdoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// </param>
+        /// <returns></returns>
+        public T WithExtraQueryParameters(string extraQueryParameters)
+        {
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
+            }
+            return (T)this;
+        }
+
+
         internal virtual void Validate()
         {
             // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
-                throw new InvalidOperationException(CoreErrorMessages.NoClientIdWasSpecified);
+                throw new InvalidOperationException(MsalErrorMessage.NoClientIdWasSpecified);
             }
 
             //Adfs does not require client id to be in the form of a Guid
             if (Config.AuthorityInfo?.AuthorityType != AuthorityType.Adfs && !Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
             {
-                throw new InvalidOperationException(CoreErrorMessages.ClientIdMustBeAGuid);
+                throw new InvalidOperationException(MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
             TryAddDefaultAuthority();
@@ -291,21 +297,13 @@ namespace Microsoft.Identity.Client.AppConfig
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(Config.Instance) || !string.IsNullOrWhiteSpace(Config.TenantId))
-            {
-                string defaultAuthorityInstance = GetDefaultAuthorityInstance();
-                string defaultAuthorityAudience = GetDefaultAuthorityAudience();
+            string defaultAuthorityInstance = GetDefaultAuthorityInstance();
+            string defaultAuthorityAudience = GetDefaultAuthorityAudience();
 
-                Config.AuthorityInfo = new AuthorityInfo(
-                        AuthorityType.Aad,
-                        new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
-                        true);
-            }
-            else
-            {
-                // Add the default.
-                WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
-            }
+            Config.AuthorityInfo = new AuthorityInfo(
+                    AuthorityType.Aad,
+                    new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
+                    true);
         }
 
         private string GetDefaultAuthorityAudience()
@@ -315,7 +313,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdMyOrg)
             {
                 // Conflict, user has specified a string tenantId and the enum audience value for AAD, which is also the tenant.
-                throw new InvalidOperationException(CoreErrorMessages.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
+                throw new InvalidOperationException(MsalErrorMessage.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
             }
 
             if (Config.AadAuthorityAudience != AadAuthorityAudience.None)
@@ -328,7 +326,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 return Config.TenantId;
             }
 
-            return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdMultipleOrgs, string.Empty);
+            return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, string.Empty);
         }
 
         private string GetDefaultAuthorityInstance()
@@ -337,7 +335,7 @@ namespace Microsoft.Identity.Client.AppConfig
             if (!string.IsNullOrWhiteSpace(Config.Instance) && Config.AzureCloudInstance != AzureCloudInstance.None)
             {
                 // Conflict, user has specified a string instance and the enum instance value.
-                throw new InvalidOperationException(CoreErrorMessages.InstanceAndAzureCloudInstanceAreMutuallyExclusive);
+                throw new InvalidOperationException(MsalErrorMessage.InstanceAndAzureCloudInstanceAreMutuallyExclusive);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.Instance))

@@ -31,7 +31,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Microsoft.Identity.Test.Unit.Integration
+namespace Microsoft.Identity.Test.Unit
 {
     [TestClass]
     public class ApplicationGrantIntegrationTest
@@ -88,8 +88,8 @@ namespace Microsoft.Identity.Test.Unit.Integration
             confidentialClient = ConfidentialClientApplicationBuilder
                                  .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
                                  .WithClientSecret("wrong_password").BuildConcrete();
-            confidentialClient.AppTokenCacheInternal.Deserialize(appCache.Serialize());
-            confidentialClient.UserTokenCacheInternal.Deserialize(userCache.Serialize());
+            confidentialClient.AppTokenCacheInternal.DeserializeMsalV3(appCache.SerializeMsalV3());
+            confidentialClient.UserTokenCacheInternal.DeserializeMsalV3(userCache.SerializeMsalV3());
 
             res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
 

@@ -34,11 +34,15 @@ using OpenQA.Selenium.Support.UI;
 using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public static class SeleniumExtensions
     {
+        private const int ImplicitTimeoutSeconds = 10;
+        private const int ExplicitTimeoutSeconds = 15;
+
         public static IWebDriver CreateDefaultWebDriver()
         {
             ChromeOptions options = new ChromeOptions();
@@ -48,7 +52,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             options.AddArguments("headless");
 
             var driver = new ChromeDriver(options);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
 
             return driver;
         }
@@ -78,7 +82,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebElement WaitForElementToBeVisibleAndEnabled(this IWebDriver driver, By by)
         {
-            WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
             IWebElement continueBtn = webDriverWait.Until(dr =>
             {
                 try
@@ -102,7 +106,20 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return continueBtn;
         }
 
-        public static void PerformLogin(this IWebDriver driver, LabUser user, bool adfsOnly=false)
+        /// <summary>
+        /// Creates a filter for selecting elements from multiple IDs. Uses XPath, e.g.
+        /// .//*[@id='otc' or @id='code']
+        /// </summary>
+        public static By ByIds(params string[] ids)
+        {
+            string xPathSelector = string.Join(
+                " or ",
+                ids.Select(id => $"@id='{id}'"));
+
+            return By.XPath($".//*[{xPathSelector}]");
+        }
+
+        public static void PerformLogin(this IWebDriver driver, LabUser user, bool withLoginHint = false, bool adfsOnly = false)
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
@@ -111,14 +128,16 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 Trace.WriteLine("Logging in ... Entering username");
                 driver.FindElement(By.Id(CoreUiTestConstants.AdfsV4UsernameInputdId)).SendKeys(user.Upn);
             }
-
             else
             {
-                Trace.WriteLine("Logging in ... Entering username");
-                driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
+                if (!withLoginHint)
+                {
+                    Trace.WriteLine("Logging in ... Entering username");
+                    driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
 
-                Trace.WriteLine("Logging in ... Clicking <Next> after username");
-                driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
+                    Trace.WriteLine("Logging in ... Clicking <Next> after username");
+                    driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
+                }
 
                 if (user.FederationProvider == FederationProvider.AdfsV2)
                 {

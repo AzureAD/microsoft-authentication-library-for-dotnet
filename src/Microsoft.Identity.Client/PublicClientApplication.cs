@@ -41,6 +41,8 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.WsTrust;
+using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.Exceptions;
 
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
@@ -134,7 +136,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
-            
+
             return await AcquireTokenInteractive(scopes, null).WithLoginHint(loginHint)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -283,15 +285,17 @@ namespace Microsoft.Identity.Client
 
         private static object GetParentObjectFromUiParent(UIParent parent)
         {
-            #if DESKTOP
-                return parent.CoreUIParent.OwnerWindow;
-            #elif ANDROID
-                return parent.CoreUIParent.Activity;
-            #elif MAC
-                return parent.CoreUIParent.CallerWindow;
-            #else
-                return null;
-            #endif
+#if DESKTOP
+            return parent.CoreUIParent.OwnerWindow;
+#elif ANDROID
+            return parent.CoreUIParent.Activity;
+#elif MAC
+            return parent.CoreUIParent.CallerWindow;
+#elif iOS
+            return parent.CoreUIParent.CallerViewController;
+#else
+            return null;
+#endif
         }
 
         /// <summary>
@@ -607,7 +611,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
+                throw new ArgumentNullException(nameof(refreshToken), MsalErrorMessage.NoRefreshTokenProvided);
             }
 
             return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
@@ -617,7 +621,10 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string refreshToken)
         {
-            return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
+            return AcquireTokenByRefreshTokenParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                refreshToken);
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
@@ -672,16 +679,16 @@ namespace Microsoft.Identity.Client
         private static void GuardIWANetCore()
         {
 #if NET_CORE
-            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not suppored on .net core because " +
+            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not supported on .net core because " +
                 "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
                 "For more details see https://aka.ms/msal-net-iwa");
 #endif
         }
 #endif
 
-    //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
-    // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
-    // as we plan to expose the whole thing
+        //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
+        // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
+        // as we plan to expose the whole thing
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME
         /// <summary>
         /// Constructor to create application instance. This constructor is only available for Desktop and NetCore apps

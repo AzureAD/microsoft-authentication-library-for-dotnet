@@ -25,24 +25,15 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.OAuth2;
-using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
-    public partial class ConfidentialClientApplication : IConfidentialClientApplicationExecutor
+    public partial class ConfidentialClientApplication
     {
         internal ConfidentialClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
@@ -72,7 +63,7 @@ namespace Microsoft.Identity.Client
             string authorizationCode)
         {
             return AcquireTokenByAuthorizationCodeParameterBuilder.Create(
-                this,
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes,
                 authorizationCode);
         }
@@ -93,7 +84,9 @@ namespace Microsoft.Identity.Client
         public AcquireTokenForClientParameterBuilder AcquireTokenForClient(
             IEnumerable<string> scopes)
         {
-            return AcquireTokenForClientParameterBuilder.Create(this, scopes);
+            return AcquireTokenForClientParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes);
         }
 
         /// <summary>
@@ -114,54 +107,32 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             UserAssertion userAssertion)
         {
-            return AcquireTokenOnBehalfOfParameterBuilder.Create(this, scopes, userAssertion);
+            return AcquireTokenOnBehalfOfParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes,
+                userAssertion);
         }
 
-        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
+        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
+        /// This override enables you to specify a login hint and extra query parameter.
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
+        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
+        /// <remarks>You can also chain the following optional parameters:
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
+        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// </remarks>
+        public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
+            IEnumerable<string> scopes)
         {
-            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            var handler = new AuthorizationCodeRequest(
-                ServiceBundle,
-                requestParams,
-                authorizationCodeParameters); 
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenForClientParameters clientParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestParams = CreateRequestParameters(commonParameters, AppTokenCacheInternal);
-            requestParams.SendX5C = clientParameters.SendX5C;
-            requestParams.IsClientCredentialRequest = true;
-
-            var handler = new ClientCredentialRequest(
-                ServiceBundle,
-                requestParams,
-                clientParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IConfidentialClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParams.SendX5C = onBehalfOfParameters.SendX5C;
-            requestParams.UserAssertion = onBehalfOfParameters.UserAssertion;
-
-            var handler = new OnBehalfOfRequest(
-                ServiceBundle,
-                requestParams,
-                onBehalfOfParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+            return GetAuthorizationRequestUrlParameterBuilder.Create(
+                ClientExecutorFactory.CreateConfidentialClientExecutor(this),
+                scopes);
         }
     }
 #endif

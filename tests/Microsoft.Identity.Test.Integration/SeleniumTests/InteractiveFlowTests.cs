@@ -1,14 +1,42 @@
-﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+﻿//------------------------------------------------------------------------------
+//
+// Copyright (c) Microsoft Corporation.
+// All rights reserved.
+//
+// This code is licensed under the MIT License.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files(the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions :
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+//
+//------------------------------------------------------------------------------
+
+using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Test.Unit;
@@ -19,7 +47,8 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     [TestClass]
     public class InteractiveFlowTests
     {
-        private readonly TimeSpan _seleniumTimeout = TimeSpan.FromMinutes(2);
+        private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
+        private static readonly string[] _scopes = new[] { "user.read" };
 
         #region MSTest Hooks
         /// <summary>
@@ -42,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         [TestMethod]
-        public async Task InteractiveAuth_DefaultUserAsync()
+        public async Task Interactive_AADAsync()
         {
             // Arrange
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
@@ -60,7 +89,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsMfaUser = false,
                 IsFederatedUser = false
             };
-
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
@@ -181,15 +209,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
-            Action<IWebDriver> seleniumLogic = (driver) =>
-            {
-                Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(labResponse.User, directToAdfs);
-            };
-
-            SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
-
-
             PublicClientApplication pca;
             if(directToAdfs)
             {
@@ -201,18 +220,43 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             else
             {
                 pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
-                                                    .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
+                                                    .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                                                     .BuildConcrete();
             }
 
-            pca.ServiceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
+            Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
+            AuthenticationResult result = await pca
+                .AcquireTokenInteractive(_scopes, null)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
+            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
-            // Act
-            AuthenticationResult result = await pca.AcquireTokenAsync(new[] {"user.Read"}).ConfigureAwait(false);
+            Trace.WriteLine("Part 2 - Clear the cache");
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+            Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
 
-            // Assert
-            Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
+            Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
+            result = await pca
+                .AcquireTokenInteractive(_scopes, null)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
+                .WithLoginHint(labResponse.User.HomeUPN)
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
+            account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+
+            Trace.WriteLine("Part 4 - Acquire a token silently");
+            result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
+            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
-    }
 
+        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, bool withLoginHint)
+        {
+            return new SeleniumWebUI((driver) =>
+            {
+                Trace.WriteLine("Starting Selenium automation");
+                driver.PerformLogin(user, withLoginHint);
+            });
+        }    
+    }
 }

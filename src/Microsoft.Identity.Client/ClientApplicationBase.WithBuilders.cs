@@ -27,115 +27,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client
 {
-    public abstract partial class ClientApplicationBase : IClientApplicationBaseExecutor
+    public abstract partial class ClientApplicationBase
     {
-        internal ClientApplicationBase(ApplicationConfiguration config)
-        {
-            ServiceBundle = Core.ServiceBundle.Create(config);
-
-            if (config.UserTokenLegacyCachePersistenceForTest != null)
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
-            }
-            else
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle);
-            }
-
-            //CreateRequestContext().Logger.Info(
-            //    string.Format(
-            //        CultureInfo.InvariantCulture,
-            //        "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}' is running...",
-            //        ServiceBundle.PlatformProxy.GetProductName(),
-            //        MsalIdHelper.GetMsalVersion(),
-            //        AssemblyUtils.GetAssemblyFileVersionAttribute(),
-            //        AssemblyUtils.GetAssemblyInformationalVersion()));
-        }
-
-        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken)
-        {
-            var customAuthority = commonParameters.AuthorityOverride == null
-                                      ? GetAuthority(silentParameters.Account)
-                                      : Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, commonParameters.AuthorityOverride);
-
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal, customAuthority);
-
-            requestParameters.Account = silentParameters.Account;
-            requestParameters.LoginHint = silentParameters.LoginHint;
-
-            var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByRefreshTokenParameters refreshTokenParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestContext = CreateRequestContext();
-            if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
-            {
-                commonParameters.Scopes = new SortedSet<string>
-                {
-                    ClientId + "/.default"
-                };
-                requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
-            }
-
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParameters.IsRefreshTokenRequest = true;
-
-            requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
-
-            var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        async Task<Uri> IClientApplicationBaseExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
-            CancellationToken cancellationToken)
-        {
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParameters.Account = authorizationRequestUrlParameters.Account;
-            requestParameters.LoginHint = authorizationRequestUrlParameters.LoginHint;
-
-            if (!string.IsNullOrWhiteSpace(authorizationRequestUrlParameters.RedirectUri))
-            {
-                // TODO(migration): should we wire up redirect uri override across the board and put this in the CreateRequestParameters method?
-                requestParameters.RedirectUri = new Uri(authorizationRequestUrlParameters.RedirectUri);
-            }
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParameters,
-                authorizationRequestUrlParameters.ToInteractiveParameters(),
-                null);
-
-            // todo: need to pass through cancellation token here
-            return await handler.CreateAuthorizationUriAsync().ConfigureAwait(false);
-        }
-
-
         /// <summary>
-        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
-        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. This parameter is optional.
@@ -148,7 +50,7 @@ namespace Microsoft.Identity.Client
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
-        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window - 
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
@@ -159,34 +61,68 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
         /// 
-        /// You can also use null for <paramref name="account"/> and then use one of the following:
-        /// <see cref="AcquireTokenSilentParameterBuilder.WithAccount(IAccount)"/> or 
-        /// <see cref="AcquireTokenSilentParameterBuilder.WithLoginHint(string)"/> to specify the account in the
-        /// case where your application manages several accounts.
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account = null)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
-            return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);
+            return AcquireTokenSilentParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                account);
         }
 
         /// <summary>
-        /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
-        /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
-        /// This override enables you to specify a login hint and extra query parameter.
+        /// [V3 API] Attempts to acquire an access token for the <see cref="IAccount"/> 
+        /// having the <see cref="IAccount.Username" /> match the given <paramref name="loginHint"/>, from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
-        /// <returns>A builder enabling you to add optional parameters before executing the token request to get the
-        /// URL of the STS authorization endpoint parametrized with the parameters</returns>
-        /// <remarks>You can also chain the following optional parameters:
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithRedirectUri(string)"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithLoginHint(string)"/>
-        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
-        /// <see cref="GetAuthorizationRequestUrlParameterBuilder.WithExtraScopesToConsent(IEnumerable{string})"/>
+        /// <param name="loginHint">Typically the username, in UPN format, e.g. johnd@contoso.com </param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or the user needs to perform two factor authentication</exception>
+        /// <remarks>
+        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if none do, an exception is thrown. 
+        /// 
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        /// 
         /// </remarks>
-        public GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(
-            IEnumerable<string> scopes)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
         {
-            return GetAuthorizationRequestUrlParameterBuilder.Create(this, scopes);
+            if (string.IsNullOrWhiteSpace(loginHint))
+            {
+                throw new ArgumentNullException(nameof(loginHint));
+            }
+
+            return AcquireTokenSilentParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                loginHint);
+        }
+
+        internal ClientApplicationBase(ApplicationConfiguration config)
+        {
+            ServiceBundle = Core.ServiceBundle.Create(config);
+
+            if (config.UserTokenLegacyCachePersistenceForTest != null)
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
+            }
+            else
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle);
+            }
         }
     }
 }

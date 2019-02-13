@@ -50,13 +50,17 @@ namespace Microsoft.Identity.Client.UI
         {
             if (Status == AuthorizationStatus.UserCancel)
             {
-                Error = CoreErrorCodes.AuthenticationCanceledError;
-                ErrorDescription = CoreErrorMessages.AuthenticationCanceled;
+                Error = MsalError.AuthenticationCanceledError;
+                #if ANDROID
+                ErrorDescription = MsalErrorMessage.AuthenticationCanceledAndroid;
+                #else
+                ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
+                #endif
             }
             else if (Status == AuthorizationStatus.UnknownError)
             {
-                Error = CoreErrorCodes.UnknownError;
-                ErrorDescription = CoreErrorMessages.Unknown;
+                Error = MsalError.UnknownError;
+                ErrorDescription = MsalErrorMessage.Unknown;
             }
             else
             {
@@ -83,6 +87,14 @@ namespace Microsoft.Identity.Client.UI
         [DataMember]
         public string CloudInstanceHost { get; set; }
 
+        /// <summary>
+        /// A string that is added to each Authroization Request and is expected to be sent back along with the 
+        /// authorization code. MSAL is responsible for validating that the state sent is identical to the state received.
+        /// </summary>
+        /// <remarks>
+        /// This is in addition to PKCE, which is validated by the server to ensure that the system redeeming the auth code
+        /// is the same as the system who asked for it. It protects against XSRF https://openid.net/specs/openid-connect-core-1_0.html
+        /// </remarks>
         public string State { get; set; }
 
         public void ParseAuthorizeResponse(string webAuthenticationResult)
@@ -121,8 +133,8 @@ namespace Microsoft.Identity.Client.UI
                 }
                 else
                 {
-                    Error = CoreErrorCodes.AuthenticationFailed;
-                    ErrorDescription = CoreErrorMessages.AuthorizationServerInvalidResponse;
+                    Error = MsalError.AuthenticationFailed;
+                    ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                     Status = AuthorizationStatus.UnknownError;
                 }
 
@@ -133,8 +145,8 @@ namespace Microsoft.Identity.Client.UI
             }
             else
             {
-                Error = CoreErrorCodes.AuthenticationFailed;
-                ErrorDescription = CoreErrorMessages.AuthorizationServerInvalidResponse;
+                Error = MsalError.AuthenticationFailed;
+                ErrorDescription = MsalErrorMessage.AuthorizationServerInvalidResponse;
                 Status = AuthorizationStatus.UnknownError;
             }
         }

@@ -25,59 +25,43 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using CommonCache.Test.Common;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.MsalPython
 {
-    public sealed class ProcessRunningInfo : IProcessRunningInfo
+    public static class Program
     {
-        private readonly Process _process;
-        private bool _isDisposed;
-
-        public ProcessRunningInfo(Process process, bool shouldTerminateProcessOnDispose)
+        public static void Main(string[] args)
         {
-            _process = process;
-            _process.Exited += (_, args) => RaiseHasExited(args);
-            _isDisposed = false;
-            ShouldTerminateProcessOnDispose = shouldTerminateProcessOnDispose;
+            new MsalPythonCacheExecutor().Execute(args);
         }
 
-        public bool ShouldTerminateProcessOnDispose { get; }
-        public int ExitCode => _process.ExitCode;
-        public bool HasExited => _process.HasExited;
-        public int Id => _process.Id;
-        public event EventHandler Exited;
-
-        public void Dispose()
+        private class MsalPythonCacheExecutor : AbstractCacheExecutor
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~ProcessRunningInfo()
-        {
-            Dispose(false);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (_isDisposed)
+            protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
             {
-                return;
+                var v1App = PreRegisteredApps.CommonCacheTestV1;
+                string resource = PreRegisteredApps.MsGraph;
+                string scope = resource + "/user.read";
+
+                CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
+
+                string scriptFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestMsalPython.py");
+
+                return await LanguageRunner.ExecuteAsync(
+                    new PythonLanguageExecutor(scriptFilePath),
+                    v1App.ClientId,
+                        v1App.Authority,
+                        scope,
+                        options.Username,
+                        options.UserPassword,
+                        CommonCacheTestUtils.MsalV3CacheFilePath,
+                        CancellationToken.None).ConfigureAwait(false);
             }
-
-            if (disposing && ShouldTerminateProcessOnDispose)
-            {
-                _process.Dispose();
-            }
-
-            _isDisposed = true;
-        }
-
-        private void RaiseHasExited(EventArgs args)
-        {
-            Exited?.Invoke(this, args);
         }
     }
 }

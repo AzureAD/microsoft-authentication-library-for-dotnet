@@ -139,7 +139,7 @@ namespace Microsoft.Identity.Client.Http
                 }
 
                 requestContext.Logger.Info(string.Format(CultureInfo.InvariantCulture,
-                    CoreErrorMessages.HttpRequestUnsuccessful,
+                    MsalErrorMessage.HttpRequestUnsuccessful,
                     (int)response.StatusCode, response.StatusCode));
 
                 if ((int)response.StatusCode >= 500 && (int)response.StatusCode < 600)
@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Client.Http
                 if (timeoutException != null)
                 {
                     throw MsalExceptionFactory.GetServiceException(
-                        CoreErrorCodes.RequestTimeout,
+                        MsalError.RequestTimeout,
                         "Request to the endpoint timed out.",
                         null,
                         innerException: timeoutException); // no http response to add more details to this exception
@@ -186,7 +186,7 @@ namespace Microsoft.Identity.Client.Http
                 }
 
                 throw MsalExceptionFactory.GetServiceException(
-                        CoreErrorCodes.ServiceNotAvailable,
+                        MsalError.ServiceNotAvailable,
                     "Service is unavailable to process the request",
                     response);
             }
@@ -219,10 +219,13 @@ namespace Microsoft.Identity.Client.Http
 
         internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
+            var body = response.Content == null
+                           ? null
+                           : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return new HttpResponse
             {
                 Headers = response.Headers,
-                Body = await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+                Body = body,
                 StatusCode = response.StatusCode
             };
         }

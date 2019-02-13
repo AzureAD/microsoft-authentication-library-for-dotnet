@@ -64,8 +64,8 @@ namespace Microsoft.Identity.Client.Instance
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
                     throw MsalExceptionFactory.GetServiceException(
-                        CoreErrorCodes.InvalidAuthority,
-                        CoreErrorMessages.AuthorityValidationFailed,
+                        MsalError.InvalidAuthority,
+                        MsalErrorMessage.AuthorityValidationFailed,
                         httpResponse);
                 }
 
@@ -75,8 +75,8 @@ namespace Microsoft.Identity.Client.Instance
                              a.Href.Equals(resource)) == null)
                 {
                     throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.InvalidAuthority,
-                        CoreErrorMessages.InvalidAuthorityOpenId);
+                        MsalError.InvalidAuthority,
+                        MsalErrorMessage.InvalidAuthorityOpenId);
                 }
             }
 

@@ -31,6 +31,7 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -42,6 +43,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
     {
         public AcquireTokenInteractiveParameters InteractiveParametersReceived { get; private set; }
         public IPublicClientApplication ClientApplication { get; private set; }
+
+        public IPublicClientApplicationExecutor Executor => (IPublicClientApplicationExecutor)ClientApplication;
 
         public async Task SetupAsync()
         {
@@ -62,7 +65,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             IEnumerable<string> expectedExtraScopesToConsent = null,
             string expectedLoginHint = null,
             string expectedPromptValue = null,
-            bool expectedEmbeddedWebView = false)
+            bool expectedEmbeddedWebView = false,
+            ICustomWebUi expectedCustomWebUi = null)
         {
             Assert.IsNotNull(InteractiveParametersReceived);
 
@@ -74,6 +78,7 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
             Assert.AreEqual(expectedPromptValue ?? Prompt.SelectAccount.PromptValue, InteractiveParametersReceived.Prompt.PromptValue);
             Assert.IsNotNull(InteractiveParametersReceived.UiParent);
             Assert.AreEqual(expectedEmbeddedWebView, InteractiveParametersReceived.UseEmbeddedWebView);
+            Assert.AreEqual(expectedCustomWebUi, InteractiveParametersReceived.CustomWebUi);
         }
     }
 }

@@ -41,11 +41,15 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
         public RequestContext RequestContext { get; internal set; }
         public CoreUIParent CoreUIParent { get; set; }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri, 
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
         {
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
-            await returnedUriReady.WaitAsync().ConfigureAwait(false);
+            await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             return authorizationResult;
         }
@@ -83,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailed, 
+                    MsalError.AuthenticationUiFailed, 
                     "See inner exception for details", 
                     ex);
             }

@@ -53,6 +53,20 @@ namespace Microsoft.Identity.Client.Exceptions
             return new MsalClientException(errorCode, errorMessage, innerException);
         }
 
+        public static Exception GetUiRequiredException(
+            string errorCode,
+            string errorMessage,
+            HttpResponse httpResponse = null,
+            Exception innerException = null)
+        {
+            return GetServiceException(
+                errorCode,
+                errorMessage,
+                httpResponse,
+                innerException,
+                true);
+        }
+
         /// <summary>
         ///     Throw an <see cref="MsalServiceException" /> exception. 
         ///     All details should be passed in if available.
@@ -109,18 +123,18 @@ namespace Microsoft.Identity.Client.Exceptions
             var sb = new StringBuilder();
             if (ex != null)
             {
-                sb.AppendLine(string.Format(CultureInfo.CurrentCulture, "Exception type: {0}", ex.GetType()));
+                sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "Exception type: {0}", ex.GetType()));
 
                 if (ex is MsalException msalException)
                 {
-                    sb.AppendLine(string.Format(CultureInfo.CurrentCulture, ", ErrorCode: {0}", msalException.ErrorCode));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, ", ErrorCode: {0}", msalException.ErrorCode));
                 }
 
                 if (ex is MsalServiceException msalServiceException)
                 {
-                    sb.AppendLine($"HTTP StatusCode {msalServiceException.StatusCode}");
-                    sb.AppendLine($"SubError {msalServiceException.SubError}");
-                    sb.AppendLine($"CorrelationId {msalServiceException.CorrelationId}");
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "SubError {0}", msalServiceException.SubError));
+                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
                 }
 
                 if (ex.InnerException != null)
@@ -138,7 +152,6 @@ namespace Microsoft.Identity.Client.Exceptions
 
             return sb.ToString();
         }
-
 
         private static void ValidateRequiredArgs(string errorCode, string errorMessage)
         {

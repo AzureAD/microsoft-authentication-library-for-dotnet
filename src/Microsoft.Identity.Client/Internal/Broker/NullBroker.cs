@@ -25,17 +25,29 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace CommonCache.Test.Unit.Utils
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    public sealed class ProcessRunResults
+    /// <summary>
+    /// For platforms that do not support a broker (net desktop, net core, UWP, netstandard)
+    /// </summary>
+    internal class NullBroker : IBroker
     {
-        public ProcessRunResults(string standardOut, string standardError)
+        public bool CanInvokeBroker(OwnerUiParent uiParent)
         {
-            StandardOut = standardOut;
-            StandardError = standardError;
+            return false;
         }
 
-        public string StandardOut { get; }
-        public string StandardError { get; }
+        public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
+        {
+            throw new PlatformNotSupportedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
+        }
     }
 }

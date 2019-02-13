@@ -92,7 +92,6 @@ namespace Microsoft.Identity.Client.ApiConfig
             return (T)this;
         }
 
-
         /// <summary>
         /// Sets claims in the query. Use when the AAD admin has enabled conditional access. Acquiring the token normally will result in a
         /// <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
@@ -106,10 +105,20 @@ namespace Microsoft.Identity.Client.ApiConfig
             return (T)this;
         }
 
-        // This exists for back compat with old-style API.  Once we deprecate it, we can remove this.
-        internal T WithExtraQueryParameters(string extraQueryParameters)
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// The string needs to be properly URL-encdoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// </param>
+        /// <returns></returns>
+        public T WithExtraQueryParameters(string extraQueryParameters)
         {
-            return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
+            }
+            return (T)this;
         }
 
         /// <summary>
@@ -269,7 +278,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        ///
+        /// Validates the parameters of the AcquireToken operation.
         /// </summary>
         protected virtual void Validate()
         {

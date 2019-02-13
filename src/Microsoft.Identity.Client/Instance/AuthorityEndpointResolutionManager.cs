@@ -87,21 +87,21 @@ namespace Microsoft.Identity.Client.Instance
             if (string.IsNullOrEmpty(edr.AuthorizationEndpoint))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.TenantDiscoveryFailedError,
+                    MsalError.TenantDiscoveryFailedError,
                     "Authorize endpoint was not found in the openid configuration");
             }
 
             if (string.IsNullOrEmpty(edr.TokenEndpoint))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.TenantDiscoveryFailedError,
+                    MsalError.TenantDiscoveryFailedError,
                     "Token endpoint was not found in the openid configuration");
             }
 
             if (string.IsNullOrEmpty(edr.Issuer))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.TenantDiscoveryFailedError,
+                    MsalError.TenantDiscoveryFailedError,
                     "Issuer was not found in the openid configuration");
             }
 

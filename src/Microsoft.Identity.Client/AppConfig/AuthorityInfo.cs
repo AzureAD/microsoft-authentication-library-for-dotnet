@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Client.AppConfig
                     StringSplitOptions.RemoveEmptyEntries);
                 if (pathSegments.Length < 3)
                 {
-                    throw new ArgumentException(CoreErrorMessages.B2cAuthorityUriInvalidPath);
+                    throw new ArgumentException(MsalErrorMessage.B2cAuthorityUriInvalidPath);
                 }
 
                 CanonicalAuthority = string.Format(
@@ -214,7 +215,7 @@ namespace Microsoft.Identity.Client.AppConfig
             case AadAuthorityAudience.AzureAdMyOrg:
                 if (string.IsNullOrWhiteSpace(tenantId))
                 {
-                    throw new InvalidOperationException(CoreErrorMessages.AzureAdMyOrgRequiresSpecifyingATenant);
+                    throw new InvalidOperationException(MsalErrorMessage.AzureAdMyOrgRequiresSpecifyingATenant);
                 }
 
                 return tenantId;
@@ -234,10 +235,10 @@ namespace Microsoft.Identity.Client.AppConfig
                                          .TrimEnd('/');
             }
 
-            throw new InvalidOperationException(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments);
+            throw new InvalidOperationException(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments);
         }
 
-        private static string CanonicalizeAuthorityUri(string uri)
+        internal static string CanonicalizeAuthorityUri(string uri)
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {
@@ -256,25 +257,25 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (!Uri.IsWellFormedUriString(authority, UriKind.Absolute))
             {
-                throw new ArgumentException(CoreErrorMessages.AuthorityInvalidUriFormat, nameof(authority));
+                throw new ArgumentException(MsalErrorMessage.AuthorityInvalidUriFormat, nameof(authority));
             }
 
             var authorityUri = new Uri(authority);
             if (authorityUri.Scheme != "https")
             {
-                throw new ArgumentException(CoreErrorMessages.AuthorityUriInsecure, nameof(authority));
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInsecure, nameof(authority));
             }
 
             string path = authorityUri.AbsolutePath.Substring(1);
             if (string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException(CoreErrorMessages.AuthorityUriInvalidPath, nameof(authority));
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath, nameof(authority));
             }
 
             string[] pathSegments = authorityUri.AbsolutePath.Substring(1).Split('/');
             if (pathSegments == null || pathSegments.Length == 0)
             {
-                throw new ArgumentException(CoreErrorMessages.AuthorityUriInvalidPath);
+                throw new ArgumentException(MsalErrorMessage.AuthorityUriInvalidPath);
             }
         }
     }

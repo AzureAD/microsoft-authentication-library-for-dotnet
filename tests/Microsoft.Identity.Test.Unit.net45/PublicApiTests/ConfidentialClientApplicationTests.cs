@@ -820,10 +820,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                        .WithSendX5C(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
 
-            var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
-               .WithAccount(MsalTestConstants.User)
-               .WithForceRefresh(true)
-               .WithLoginHint("loginhint");
+            var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, "user@contoso.com")
+                .WithForceRefresh(false);
+
+            PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
+
+            silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
+               .WithForceRefresh(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
 
             var requestUrlBuilder = app.GetAuthorizationRequestUrl(MsalTestConstants.Scope)
@@ -840,12 +843,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)
         {
-            args.TokenCache.Deserialize(_serializedCache);
+            args.TokenCache.DeserializeMsalV3(_serializedCache);
         }
 
         private void AfterCacheAccess(TokenCacheNotificationArgs args)
         {
-            _serializedCache = args.TokenCache.Serialize();
+            _serializedCache = args.TokenCache.SerializeMsalV3();
         }
     }
 }

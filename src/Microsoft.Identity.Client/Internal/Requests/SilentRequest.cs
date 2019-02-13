@@ -33,12 +33,14 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : RequestBase
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
+
         public SilentRequest(
             IServiceBundle serviceBundle,
             AuthenticationRequestParameters authenticationRequestParameters,
@@ -86,8 +88,9 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
+
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(msalRefreshTokenItem.Secret), cancellationToken)
-                                        .ConfigureAwait(false);
+                                    .ConfigureAwait(false);
 
             if (msalTokenResponse.RefreshToken == null)
             {

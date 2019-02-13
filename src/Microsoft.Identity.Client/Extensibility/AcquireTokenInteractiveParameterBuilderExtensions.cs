@@ -25,33 +25,28 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
+using Microsoft.Identity.Client.ApiConfig;
 
-namespace CommonCache.Test.Unit.Utils
+namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
-    ///     Represents information about a running process.
     /// </summary>
-    public interface IProcessRunningInfo : IDisposable
+    public static class AcquireTokenInteractiveParameterBuilderExtensions
     {
         /// <summary>
-        ///     Gets a value indicating the process exit code.
+        ///     Extension method enabling MSAL.NET extenders for public client applications to set a custom web ui
+        ///     that will let the user sign-in with Azure AD, present consent if needed, and get back the authorization
+        ///     code
         /// </summary>
-        int ExitCode { get; }
-
-        /// <summary>
-        ///     Gets a value indicating whether the process has exited.
-        /// </summary>
-        bool HasExited { get; }
-
-        /// <summary>
-        ///     Gets the process id.
-        /// </summary>
-        int Id { get; }
-
-        /// <summary>
-        ///     Event that is risen when a process exits.
-        /// </summary>
-        event EventHandler Exited;
+        /// <param name="builder">Builder for an AcquireTokenInteractive</param>
+        /// <param name="customWebUi">Customer implementation for the Web UI</param>
+        /// <returns>the builder to be able to chain .With methods</returns>
+        public static AcquireTokenInteractiveParameterBuilder WithCustomWebUi(
+            this AcquireTokenInteractiveParameterBuilder builder,
+            ICustomWebUi customWebUi)
+        {
+            builder.SetCustomWebUi(customWebUi);
+            return builder;
+        }
     }
 }

@@ -48,39 +48,13 @@ namespace XForms.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
             LoadApplication(new App());
 
+            App.AndroidActivity = this;
+
 #if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
 #endif
 
-            // To activate system webview, remove '//' from line 51 below, and comment out line 57 ;
-            //App.UIParent = new UIParent(this);
-
-            #region Web browsers for MSAL.NET Android
-            // To activate embedded webview, remove '//' from line 57 below, 
-            // and comment out line 51 above -> App.UIParent = new UIParent(Xamarin.Forms.Forms.Context as Activity);
-
-            App.UIParent = new UIParent(this, true);
-
-            // Use helper method to determine first if Chrome or Chrome Custom Tabs
-            // are installed on the device. 
-            // Remove /* */ below, and
-            // make sure lines 50 and 56 above are commented out.
-            // Return false, launch with embedded webview -> or developer could include a custom
-            // error message here for the user
-            // Return true, launch with system browser
-            /*bool useEmbeddedWebview = UIParent.IsSystemWebviewAvailable();
-            if (useEmbeddedWebview)
-            {
-                // Chrome present on device, use system browser
-                App.UIParent = new UIParent(this);
-            }
-            else
-            {
-                // Chrome not present on device, use embedded webview
-                App.UIParent = new UIParent(this, true);
-            }*/
-            #endregion
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)

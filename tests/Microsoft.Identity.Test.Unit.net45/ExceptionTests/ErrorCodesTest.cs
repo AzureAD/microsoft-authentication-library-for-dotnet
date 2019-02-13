@@ -27,8 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -49,20 +51,28 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         };
 
         [TestMethod]
-        [Description("CoreErrorCodes are internal. Msal and Adal should expose equivalent public constants.")]
+        [Description("MsalError are internal. Msal and Adal should expose equivalent public constants.")]
         public void CheckErrorCodesArePublicMsalConstants()
         {
             // Act
             List<string> msalErrorCodes = msalTypesWithConstants.SelectMany(GetConstants).ToList();
-            IEnumerable<string> coreErrorCodes = GetConstants(typeof(CoreErrorCodes));
+            IEnumerable<string> MsalError = GetConstants(typeof(MsalError));
 
             // Assert
-            foreach (string coreErrorCode in coreErrorCodes)
+            bool missingErrorCode = false;
+            StringBuilder errorsFound = new StringBuilder();
+            foreach (string coreErrorCode in MsalError)
             {
-                Assert.IsTrue(
-                    msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture),
-                    "Could not find a core error code in msal error codes: " + coreErrorCode);
+                var isFound = msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture);
+                if (!isFound)
+                {
+                    missingErrorCode = true;
+                    errorsFound.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                                                         "Could not find a core error code in type MsalError: {0}", coreErrorCode));
+                }
             }
+
+            Assert.IsFalse(missingErrorCode, errorsFound.ToString());
         }
 
         [TestMethod]

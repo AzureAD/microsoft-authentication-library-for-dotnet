@@ -27,6 +27,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using CommonCache.Test.Common;
 using CommonCache.Test.Unit.Utils;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -34,86 +35,141 @@ namespace CommonCache.Test.Unit
 {
     [TestClass]
     public class CacheExecutionTests
-    {
-        [TestMethod]
-        public async Task AdalV3ToV4Async()
+    { 
+        [DataTestMethod]
+        [DataRow(CacheProgramType.AdalV3, CacheProgramType.AdalV3, CacheStorageType.Adal, DisplayName = "AdalV3->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV3, CacheProgramType.AdalV4, CacheStorageType.Adal, DisplayName = "AdalV3->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV3, CacheProgramType.AdalV5, CacheStorageType.Adal, DisplayName = "AdalV3->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV3, CacheProgramType.MsalV2, CacheStorageType.Adal, DisplayName = "AdalV3->MsalV2 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV3, CacheProgramType.MsalV3, CacheStorageType.Adal, DisplayName = "AdalV3->MsalV3 adal v3 cache")]
+        public async Task TestAdalV3CacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
         {
-            // Sign in with adal v3, Token written to old Adal V3 cache format (expected size 5014 bytes)
-            // Run Common Cache Adal V4.  token is read from the cache via old adal v3 format.
             var executor = new CacheTestExecutor(
-                CacheProgramType.AdalV3,
-                CacheProgramType.AdalV4,
-                4434,
+                interactiveType,
+                silentType,
+                cacheStorageType,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task AdalV3ToMsalV2Async()
+        [DataTestMethod]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV3, CacheStorageType.Adal,   DisplayName = "AdalV4->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV4, CacheStorageType.Adal,   DisplayName = "AdalV4->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV5, CacheStorageType.Adal,   DisplayName = "AdalV4->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "AdalV4->AdalV4 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV5, CacheStorageType.MsalV2, DisplayName = "AdalV4->AdalV5 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.MsalV2, CacheStorageType.Adal,   DisplayName = "AdalV4->MsalV2 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.MsalV2, CacheStorageType.MsalV2, DisplayName = "AdalV4->MsalV2 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.MsalV3, CacheStorageType.Adal,   DisplayName = "AdalV4->MsalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV4, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "AdalV4->MsalV3 msal v2 cache")]
+        public async Task TestAdalV4CacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
         {
-            // Sign in with adal v3, token written to old adal v3 cache format (expected size 5014 bytes)
-            // Run msal V2.  this should FAIL since MSAL does not understand the ADALV3 token cache format and throws exception
             var executor = new CacheTestExecutor(
-                CacheProgramType.AdalV3,
-                CacheProgramType.MsalV2,
-                6250,
+                interactiveType,
+                silentType,
+                cacheStorageType,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task AdalV4ToAdalV3Async()
+        [DataTestMethod]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV3, CacheStorageType.Adal, DisplayName = "AdalV5->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV4, CacheStorageType.Adal, DisplayName = "AdalV5->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.Adal, DisplayName = "AdalV5->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "AdalV5->AdalV4 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.MsalV2, DisplayName = "AdalV5->AdalV5 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "AdalV5->AdalV5 msal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV2, CacheStorageType.Adal, DisplayName = "AdalV5->MsalV2 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV2, CacheStorageType.MsalV2, DisplayName = "AdalV5->MsalV2 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.Adal, DisplayName = "AdalV5->MsalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "AdalV5->MsalV3 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalV3 msal v3 cache")]
+        public async Task TestAdalV5CacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
         {
-            // Sign in via adal v4, token is written in cache with old adal v3 cache format (expected size 5156 bytes)
-            // Run adal v3, token comes from cache as adalv3 should understand cache format.
             var executor = new CacheTestExecutor(
-                CacheProgramType.AdalV4,
-                CacheProgramType.AdalV3,
-                5156,
+                interactiveType,
+                silentType,
+                cacheStorageType,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task AdalV4ToMsalV2Async()
+        [DataTestMethod]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.AdalV3, CacheStorageType.Adal,   DisplayName = "MsalV2->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.AdalV4, CacheStorageType.Adal,   DisplayName = "MsalV2->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "MsalV2->AdalV4 msal v2 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.AdalV5, CacheStorageType.Adal,   DisplayName = "MsalV2->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.AdalV5, CacheStorageType.MsalV2, DisplayName = "MsalV2->AdalV5 msal v2 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV2, CacheStorageType.Adal,   DisplayName = "MsalV2->MsalV2 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV2, CacheStorageType.MsalV2, DisplayName = "MsalV2->MsalV2 msal v2 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV3, CacheStorageType.Adal,   DisplayName = "MsalV2->MsalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV2, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV2->MsalV3 msal v2 cache")]
+        public async Task TestMsalV2CacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
         {
-            // Sign in via adal v4, token is written in cache with old adal v3 cache format (expected size 5156 bytes)
-            // Run msal V2.  this should FAIL since MSAL does not understand the ADALV3 token cache format and throws exception
             var executor = new CacheTestExecutor(
-                CacheProgramType.AdalV4,
-                CacheProgramType.MsalV2,
-                5156,
+                interactiveType,
+                silentType,
+                cacheStorageType,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task MsalV2ToAdalV3Async()
+        [DataTestMethod]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV3, CacheStorageType.Adal,   DisplayName = "MsalV3->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV4, CacheStorageType.Adal,   DisplayName = "MsalV3->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "MsalV3->AdalV4 msal v2 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.Adal,   DisplayName = "MsalV3->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.MsalV2, DisplayName = "MsalV3->AdalV5 msal v2 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalV3->AdalV5 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.Adal,   DisplayName = "MsalV3->MsalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV3->MsalV3 msal v2 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalV3 msal v3 cache")]
+        public async Task TestMsalV3CacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
         {
-            // Sign in via msal v2, token written to cache with new cache format (expected msal token cache size 6997 bytes)
-            // run adal v3.  This fails as adal v3 does not recognize the new cache format.
             var executor = new CacheTestExecutor(
-                CacheProgramType.MsalV2,
-                CacheProgramType.AdalV3,
-                expectedMsalCacheSizeBytes: 6997,
+                interactiveType,
+                silentType,
+                cacheStorageType,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        [TestMethod]
-        public async Task MsalV2ToAdalV4Async()
+        // This test is ignored and can be run manually.  Build server infra isn't yet configured for having python and msal python installed.
+        [Ignore]
+        [DataTestMethod]
+        [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalV3 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalPython, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalPython->AdalV5 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalPython msal v3 cache")] // this one will fail because we're missing authority aliasing in python
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalPython msal v3 cache")] // this one will fail because we're missing authority aliasing in python
+        public async Task TestMsalPythonCacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
         {
-            // Sign in via msal v2, token written to cache with new cache format (expected msal token cache size 6997 bytes)
-            // run adal v4.  This fails as adal v4 does not recognize the new cache format.
             var executor = new CacheTestExecutor(
-                CacheProgramType.MsalV2,
-                CacheProgramType.AdalV4,
-                expectedMsalCacheSizeBytes: 6997,
+                interactiveType,
+                silentType,
+                cacheStorageType,
                 expectSecondTokenFromCache: true);
 
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

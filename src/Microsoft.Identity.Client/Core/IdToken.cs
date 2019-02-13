@@ -99,8 +99,8 @@ namespace Microsoft.Identity.Client.Core
             if (idTokenSegments.Length < 2)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.InvalidJwtError,
-                    CoreErrorMessages.IDTokenMustHaveTwoParts);
+                    MsalError.InvalidJwtError,
+                    MsalErrorMessage.IDTokenMustHaveTwoParts);
             }
 
             try
@@ -115,8 +115,8 @@ namespace Microsoft.Identity.Client.Core
             catch (Exception exc)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.JsonParseError,
-                    CoreErrorMessages.FailedToParseIDToken, 
+                    MsalError.JsonParseError,
+                    MsalErrorMessage.FailedToParseIDToken, 
                     exc);
             }
 

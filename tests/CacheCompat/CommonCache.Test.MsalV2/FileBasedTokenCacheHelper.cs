@@ -27,6 +27,7 @@
 
 using System.IO;
 using System.Security.Cryptography;
+using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
 
@@ -38,36 +39,16 @@ namespace CommonCache.Test.MsalV2
     /// </summary>
     public static class FileBasedTokenCacheHelper
     {
-        private static readonly object FileLock = new object();
-
-        /// <summary>
-        ///     File path where the token cache is serialized with the unified cache format (ADAL.NET V4, MSAL.NET V3)
-        /// </summary>
+        private static readonly object s_fileLock = new object();
+        private static CacheStorageType s_cacheStorage = CacheStorageType.None;
+        public static string AdalV3CacheFileName { get; private set; }
         public static string UnifiedCacheFileName { get; private set; }
 
-        /// <summary>
-        ///     File path where the token cache is serialized with the legacy ADAL V3 format
-        /// </summary>
-        public static string AdalV3CacheFileName { get; private set; }
-
-        /// <summary>
-        ///     Get the user token cache
-        /// </summary>
-        /// <param name="adalV3CacheFileName">
-        ///     File name where the cache is serialized with the ADAL V3 token cache format. Can
-        ///     be <c>null</c> if you don't want to implement the legacy ADAL V3 token cache serialization in your MSAL 2.x+
-        ///     application
-        /// </param>
-        /// <param name="tokenCache"></param>
-        /// <param name="unifiedCacheFileName">
-        ///     File name where the cache is serialized with the Unified cache format, common to
-        ///     ADAL V4 and MSAL V2 and above, and also across ADAL/MSAL on the same platform. Should not be <c>null</c>
-        /// </param>
-        /// <returns></returns>
-        public static void ConfigureUserCache(ITokenCache tokenCache, string unifiedCacheFileName, string adalV3CacheFileName)
+        public static void ConfigureUserCache(CacheStorageType cacheStorageType, TokenCache tokenCache, string adalV3CacheFileName, string unifiedCacheFileName)
         {
-            UnifiedCacheFileName = unifiedCacheFileName;
+            s_cacheStorage = cacheStorageType;
             AdalV3CacheFileName = adalV3CacheFileName;
+            UnifiedCacheFileName = unifiedCacheFileName;
             if (tokenCache != null)
             {
                 tokenCache.SetBeforeAccess(BeforeAccessNotification);
@@ -77,14 +58,12 @@ namespace CommonCache.Test.MsalV2
 
         public static void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (FileLock)
+            lock (s_fileLock)
             {
-                var cacheData = new CacheData
-                {
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFileName),
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFileName)
-                };
-                args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+                var adalv3State = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFileName);
+                var unifiedState = CacheFileUtils.ReadFromFileIfExists(UnifiedCacheFileName);
+
+                args.TokenCache.DeserializeUnifiedAndAdalCache(new CacheData { AdalV3State = adalv3State, UnifiedState = unifiedState });
             }
         }
 
@@ -93,49 +72,24 @@ namespace CommonCache.Test.MsalV2
             // if the access operation resulted in a cache update
             if (args.HasStateChanged)
             {
-                lock (FileLock)
+                lock (s_fileLock)
                 {
                     var cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
 
                     // reflect changes in the persistent store
-                    WriteToFileIfNotNull(UnifiedCacheFileName, cacheData.UnifiedState);
-                    if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
+                    if ((s_cacheStorage & CacheStorageType.Adal) == CacheStorageType.Adal)
                     {
-                        WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
+                        if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
+                        {
+                            CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
+                        }
+                    }
+
+                    if ((s_cacheStorage & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
+                    {
+                        CacheFileUtils.WriteToFileIfNotNull(UnifiedCacheFileName, cacheData.UnifiedState);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        ///     Read the content of a file if it exists
-        /// </summary>
-        /// <param name="path">File path</param>
-        /// <returns>Content of the file (in bytes)</returns>
-        private static byte[] ReadFromFileIfExists(string path)
-        {
-            byte[] protectedBytes = !string.IsNullOrEmpty(path) && File.Exists(path) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = protectedBytes != null
-                                          ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser)
-                                          : null;
-            return unprotectedBytes;
-        }
-
-        /// <summary>
-        ///     Writes a blob of bytes to a file. If the blob is <c>null</c>, deletes the file
-        /// </summary>
-        /// <param name="path">path to the file to write</param>
-        /// <param name="blob">Blob of bytes to write</param>
-        private static void WriteToFileIfNotNull(string path, byte[] blob)
-        {
-            if (blob != null)
-            {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
-                File.WriteAllBytes(path, protectedBytes);
-            }
-            else
-            {
-                File.Delete(path);
             }
         }
     }

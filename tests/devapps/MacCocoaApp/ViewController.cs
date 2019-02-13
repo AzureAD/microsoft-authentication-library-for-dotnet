@@ -65,7 +65,7 @@ namespace MacCocoaApp
 
             _pca.UserTokenCache.SetBeforeAccess(args =>
             {
-                args.TokenCache.Deserialize(
+                args.TokenCache.DeserializeMsalV3(
                     File.Exists(CacheFilePath) ? File.ReadAllBytes(CacheFilePath): null);
             });
 
@@ -75,7 +75,7 @@ namespace MacCocoaApp
                 if (args.HasStateChanged)
                 {
                     // reflect changes in the persistent store
-                    File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
+                    File.WriteAllBytes(CacheFilePath, args.TokenCache.SerializeMsalV3());
                 }
             });
         }

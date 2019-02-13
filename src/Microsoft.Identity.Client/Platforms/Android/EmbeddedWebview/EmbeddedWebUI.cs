@@ -46,7 +46,11 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             _coreUIParent = coreUIParent;
         }
 
-        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext)
+        public async override Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri, 
+            RequestContext requestContext,
+            CancellationToken cancellationToken)
         {
             returnedUriReady = new SemaphoreSlim(0);
 
@@ -60,12 +64,12 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailedError, 
+                    MsalError.AuthenticationUiFailedError, 
                     "AuthenticationActivity failed to start", 
                     ex);
             }
 
-            await returnedUriReady.WaitAsync().ConfigureAwait(false);
+            await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
             return authorizationResult;
         }
 
