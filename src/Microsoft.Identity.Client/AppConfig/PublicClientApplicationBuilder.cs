@@ -94,7 +94,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns></returns>
         public PublicClientApplicationBuilder WithIosKeychainSecurityGroup(string keychainSecurityGroup)
         {
-#if iOS || NETSTANDARD1_3
+#if iOS
             Config.IosKeychainSecurityGroup = keychainSecurityGroup;
             return this;
 #else
