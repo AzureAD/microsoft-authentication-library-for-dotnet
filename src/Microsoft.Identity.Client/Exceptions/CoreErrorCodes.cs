@@ -75,6 +75,7 @@ namespace Microsoft.Identity.Client.Exceptions
 
         public const string GetUserNameFailed = "get_user_name_failed";
         public const string NonParsableOAuthError = "non_parsable_oauth_error";
+        public const string NotFoundHttpException = "not_found";
 
         /// <summary>
         /// RedirectUri validation failed.

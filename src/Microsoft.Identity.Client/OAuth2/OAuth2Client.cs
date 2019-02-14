@@ -132,16 +132,37 @@ namespace Microsoft.Identity.Client.OAuth2
 
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
+                    bool throwException = true;
                     try
                     {
-                        httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
+                        var serializedResponseBody = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+                        if (serializedResponseBody != null)
+                        {
+                            httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
+                            throwException = false;
+                        }
                     }
                     catch (SerializationException) // in the rare case we get an error response we cannot deserialize
                     {
-                        throw MsalExceptionFactory.GetServiceException(
-                            CoreErrorCodes.NonParsableOAuthError,
-                            CoreErrorMessages.NonParsableOAuthError,
-                            response);
+                        throwException = true;
+                    }
+
+                    if (throwException)
+                    {
+                        if (response.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            throw MsalExceptionFactory.GetServiceException(
+                                CoreErrorCodes.NotFoundHttpException,
+                                CoreErrorMessages.NonParsableAndNotFoundOAuthError,
+                                response);
+                        }
+                        else
+                        {
+                            throw MsalExceptionFactory.GetServiceException(
+                                CoreErrorCodes.NonParsableOAuthError,
+                                CoreErrorMessages.NonParsableOAuthError,
+                                response);
+                        }
                     }
                 }
             }
