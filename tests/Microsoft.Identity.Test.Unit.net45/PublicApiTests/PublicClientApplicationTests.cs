@@ -1463,6 +1463,31 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public void B2CLoginMooncakeAcquireTokenTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+
+                PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CMooncakeAuthority), true)
+                                                                            .WithHttpManager(httpManager)
+                                                                            .BuildConcrete();
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    app.ServiceBundle.PlatformProxy,
+                    new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CMooncakeAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CMooncakeAuthority);
+
+                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
