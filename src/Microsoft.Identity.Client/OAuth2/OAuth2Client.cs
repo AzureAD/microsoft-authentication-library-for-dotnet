@@ -138,15 +138,27 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     try
                     {
-                        httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
+                        var httpErrorCodeMessage = string.Format(CultureInfo.InvariantCulture, "HttpStatusCode: " + response.StatusCode.ToString());
+                        httpEvent.OauthErrorCode = httpErrorCodeMessage;
+                        requestContext.Logger.Info(httpErrorCodeMessage);
+                        
+                        // When the end-point wasn't found we get exceptions as the serialized data is empty
+                        // Letting the CreateResponse method handle the OauthError
+                        // See more: https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/883
+                        if (!string.IsNullOrWhiteSpace(response.Body))
+                        {
+                            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+                            if (msalTokenResponse != null)
+                            {
+                                httpEvent.OauthErrorCode = msalTokenResponse.Error;
+                            }
+                        }
                     }
-                    catch (SerializationException e) // in the rare case we get an error response we cannot deserialize
+                    catch (SerializationException) // in the rare case we get an error response we cannot deserialize
                     {
-                        throw MsalExceptionFactory.GetServiceException(
-                            CoreErrorCodes.NonParsableOAuthError,
-                            CoreErrorMessages.NonParsableOAuthError,
-                            response,
-                            e);
+                        requestContext.Logger.InfoPii(
+                            CoreErrorCodes.NonParsableOAuthError + ": " + response.Body, 
+                            CoreErrorMessages.NonParsableOAuthError);
                     }
                 }
             }
@@ -179,6 +191,7 @@ namespace Microsoft.Identity.Client.OAuth2
             {
                 MsalTokenResponse msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
 
+
                 if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
                 {
                     throw MsalExceptionFactory.GetServiceException(
@@ -204,9 +217,17 @@ namespace Microsoft.Identity.Client.OAuth2
                 }
 
             }
-            catch (SerializationException ex)
+            catch (SerializationException e) // in the rare case we get an error response we cannot deserialize
             {
-                serviceEx = MsalExceptionFactory.GetClientException(CoreErrorCodes.UnknownError, response.Body, ex);
+                serviceEx = MsalExceptionFactory.GetServiceException(
+                    CoreErrorCodes.NonParsableOAuthError,
+                    CoreErrorMessages.NonParsableOAuthError,
+                    response,
+                    e);
+            }
+            catch (Exception ex)
+            {
+                serviceEx = MsalExceptionFactory.GetServiceException(CoreErrorCodes.UnknownError, response.Body, response, ex);
             }
 
             if (shouldLogAsError)
