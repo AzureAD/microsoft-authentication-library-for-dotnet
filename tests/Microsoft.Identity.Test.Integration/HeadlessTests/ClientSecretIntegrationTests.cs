@@ -47,7 +47,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class ClientSecretIntegrationTests
     {
-        public string FileName = @"C:/data/data.txt";
+        string data = Microsoft.Identity.Test.Integration.Properties.Resources.data;
         public string[] AdfsScopes = { string.Format(CultureInfo.CurrentCulture, "{0}/email openid", Adfs2019LabConstants.AppId) };
 
         [ClassInitialize]
@@ -65,18 +65,13 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         string GetClientSecret()
         {
             string secretUrl = null;
-            if (File.Exists(FileName))
+            if (!string.IsNullOrEmpty(data))
             {
-                var data = File.ReadAllText(FileName);
-
-                if (!string.IsNullOrWhiteSpace(data))
-                {
-                    secretUrl = data;
-                }
+                secretUrl = data;
             }
             else
             {
-                throw new FileNotFoundException(string.Format(CultureInfo.CurrentCulture, "{0} not found when trying to read client secret url", FileName));
+                throw new FileNotFoundException("An error occured when when trying to read the client secret url from data.txt");
             }
             return secretUrl;
         }
