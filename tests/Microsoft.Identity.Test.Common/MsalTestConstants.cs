@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string AuthorityWindowsNet = "https://" + ProductionPrefCacheEnvironment + "/" + Utid + "/";
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
+        public const string B2CMooncakeAuthority = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
         public const string B2CRandomHost = "https://sometenantid.randomhost.com/tfp/sometenantid/policy/";
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public static readonly string ClientId_1 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
