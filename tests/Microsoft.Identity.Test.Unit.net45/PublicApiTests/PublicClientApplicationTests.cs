@@ -1648,6 +1648,37 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.IsNotNull(result.Account);
             }
         }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void B2CMooncakeAcquireTokenTest()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
+                PublicClientApplication app = new PublicClientApplication(
+                    serviceBundle,
+                    CoreTestConstants.ClientId,
+                     CoreTestConstants.B2CMooncakeAuthority);
+
+                MockWebUI ui = new MockWebUI()
+                {
+                    MockResult = new AuthorizationResult(
+                        AuthorizationStatus.Success,
+                        CoreTestConstants.B2CMooncakeAuthority + "?code=some-code")
+                };
+
+                MsalMockHelpers.ConfigureMockWebUI(
+                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CMooncakeAuthority);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+            }
+        }
 #endif
 
 #if NET_CORE
