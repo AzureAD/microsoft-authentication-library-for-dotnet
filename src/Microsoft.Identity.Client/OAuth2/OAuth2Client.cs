@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.OAuth2
     internal class OAuth2Client
     {
         private readonly Dictionary<string, string> _bodyParameters = new Dictionary<string, string>();
-        private readonly Dictionary<string, string> _headers;
+        private readonly Dictionary<string, string> _headers = new Dictionary<string, string>(MsalIdHelper.GetMsalIdParameters());
         private readonly Dictionary<string, string> _queryParameters = new Dictionary<string, string>();
         private readonly IHttpManager _httpManager;
         private readonly ITelemetryManager _telemetryManager;
@@ -90,7 +90,7 @@ namespace Microsoft.Identity.Client.OAuth2
             }
 
             HttpResponse response = null;
-            Uri endpointUri = CreateFullEndpointUri(endPoint);
+            var endpointUri = CreateFullEndpointUri(endPoint);
             var httpEvent = new HttpEvent()
             {
                 HttpPath = endpointUri,
@@ -137,6 +137,7 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     try
                     {
+                        httpEvent.OauthErrorCode = CoreErrorCodes.UnknownError;
                         // In cases where the end-point is not found (404) response.body will be empty.
                         // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
                         if (!string.IsNullOrWhiteSpace(response.Body))
@@ -182,7 +183,7 @@ namespace Microsoft.Identity.Client.OAuth2
 
             Exception serviceEx = response.StatusCode != HttpStatusCode.NotFound ?
                         MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
-                        MsalExceptionFactory.GetServiceException(CoreErrorCodes.NotFoundHttpException, httpErrorCodeMessage, response);
+                        MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusNotFound, httpErrorCodeMessage, response);
 
             try
             {
