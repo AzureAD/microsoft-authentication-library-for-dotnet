@@ -1581,36 +1581,42 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public void B2CAcquireTokenWithValidateAuthorityTrueTest()
+        public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
             using (var httpManager = new MockHttpManager())
             {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                var app = new PublicClientApplication(
-                    serviceBundle,
-                   CoreTestConstants.ClientId,
-                   CoreTestConstants.B2CLoginAuthority)
-                {
-                    ValidateAuthority = true
-                };
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, null);
 
-                var ui = new MockWebUI()
-                {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        CoreTestConstants.B2CLoginAuthority + "?code=some-code")
-                };
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CLoginAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
-
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
+                ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthority);
+                ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthorityBlackforest);
+                ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthorityMoonCake);
+                ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthorityUsGov);
             }
+        }
+
+        private static void ValidateB2CLoginAuthority(ServiceBundle serviceBundle, MockHttpManager httpManager, string authority)
+        {
+            var app = new PublicClientApplication(serviceBundle, CoreTestConstants.ClientId, authority)
+            {
+                ValidateAuthority = true
+            };
+
+            var ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(
+                    AuthorizationStatus.Success,
+                    authority + "?code=some-code")
+            };
+
+            MsalMockHelpers.ConfigureMockWebUI(
+                new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
+
+            httpManager.AddMockHandlerForTenantEndpointDiscovery(authority);
+            httpManager.AddSuccessTokenResponseMockHandlerForPost();
+
+            var result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
         }
 
         [TestMethod]
@@ -1641,37 +1647,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
 
                 httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CRandomHost);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
-
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
-        public void B2CMooncakeAcquireTokenTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    CoreTestConstants.ClientId,
-                     CoreTestConstants.B2CMooncakeAuthority);
-
-                MockWebUI ui = new MockWebUI()
-                {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        CoreTestConstants.B2CMooncakeAuthority + "?code=some-code")
-                };
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CMooncakeAuthority);
                 httpManager.AddSuccessTokenResponseMockHandlerForPost();
 
                 AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;

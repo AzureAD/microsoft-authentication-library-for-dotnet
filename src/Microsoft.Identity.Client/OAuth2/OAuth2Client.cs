@@ -181,66 +181,87 @@ namespace Microsoft.Identity.Client.OAuth2
             var httpErrorCodeMessage = string.Format(CultureInfo.InvariantCulture, "HttpStatusCode: {0}: {1}", (int)response.StatusCode, response.StatusCode.ToString());
             requestContext.Logger.Info(httpErrorCodeMessage);
 
-            Exception serviceEx = response.StatusCode != HttpStatusCode.NotFound ?
-                        MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
-                        MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusNotFound, httpErrorCodeMessage, response);
+            Exception exceptionToThrow = null;
 
             try
             {
-                // In cases where the end-point is not found (404) response.body will be empty.
-                if (!string.IsNullOrWhiteSpace(response.Body))
-                {
-                    MsalTokenResponse msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
-
-                    if (msalTokenResponse != null && msalTokenResponse.Error != null)
-                    {
-                        if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
-                        {
-                            throw MsalExceptionFactory.GetUiRequiredException(
-                                CoreErrorCodes.InvalidGrantError,
-                                msalTokenResponse.ErrorDescription,
-                                null,
-                                ExceptionDetail.FromHttpResponse(response));
-                        }
-
-                        serviceEx = MsalExceptionFactory.GetServiceException(
-                            msalTokenResponse.Error,
-                            msalTokenResponse.ErrorDescription,
-                            response);
-
-                        // For device code flow, AuthorizationPending can occur a lot while waiting
-                        // for the user to auth via browser and this causes a lot of error noise in the logs.
-                        // So suppress this particular case to an Info so we still see the data but don't 
-                        // log it as an error since it's expected behavior while waiting for the user.
-                        if (string.Compare(msalTokenResponse.Error, OAuth2Error.AuthorizationPending, StringComparison.OrdinalIgnoreCase) == 0)
-                        {
-                            shouldLogAsError = false;
-                        }
-                    }
-                }
+                exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
             }
             catch (SerializationException) // in the rare case we get an error response we cannot deserialize
             {
-                serviceEx = MsalExceptionFactory.GetServiceException(
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(
                     CoreErrorCodes.NonParsableOAuthError,
                     CoreErrorMessages.NonParsableOAuthError,
                     response);
             }
             catch (Exception ex)
             {
-                serviceEx = MsalExceptionFactory.GetServiceException(CoreErrorCodes.UnknownError, response.Body, response, ex);
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(CoreErrorCodes.UnknownError, response.Body, ex, response);
+            }
+
+            if (exceptionToThrow == null)
+            {
+                exceptionToThrow = response.StatusCode != HttpStatusCode.NotFound ?
+                    MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
+                    MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusNotFound, httpErrorCodeMessage, response);
             }
 
             if (shouldLogAsError)
             {
-                requestContext.Logger.ErrorPii(serviceEx);
+                requestContext.Logger.ErrorPii(exceptionToThrow);
             }
             else
             {
-                requestContext.Logger.InfoPii(serviceEx);
+                requestContext.Logger.InfoPii(exceptionToThrow);
             }
 
-            throw serviceEx;
+            throw exceptionToThrow;
+        }
+
+        private static Exception ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError)
+        {
+            Exception exceptionToThrow = null;
+
+            // In cases where the end-point is not found (404) response.body will be empty.
+            if (string.IsNullOrWhiteSpace(response.Body))
+            {
+                return null;
+            }
+
+            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+
+            if (msalTokenResponse?.Error == null)
+            {
+                return null;
+            }
+            
+            if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
+            {
+                exceptionToThrow = MsalExceptionFactory.GetUiRequiredException(
+                    CoreErrorCodes.InvalidGrantError,
+                    msalTokenResponse.ErrorDescription,
+                    null,
+                    ExceptionDetail.FromHttpResponse(response));
+            }
+            else
+            {
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                    msalTokenResponse.Error,
+                    msalTokenResponse.ErrorDescription,
+                    response);
+            }
+
+            // For device code flow, AuthorizationPending can occur a lot while waiting
+            // for the user to auth via browser and this causes a lot of error noise in the logs.
+            // So suppress this particular case to an Info so we still see the data but don't 
+            // log it as an error since it's expected behavior while waiting for the user.
+            if (string.Compare(msalTokenResponse.Error, OAuth2Error.AuthorizationPending,
+                    StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                shouldLogAsError = false;
+            }
+
+            return exceptionToThrow;
         }
 
         private Uri CreateFullEndpointUri(Uri endPoint)

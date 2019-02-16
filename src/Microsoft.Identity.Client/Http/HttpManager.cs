@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Http
                         CoreErrorCodes.RequestTimeout,
                         "Request to the endpoint timed out.",
                         timeoutException, 
-                        null); // no http response to add more details to this exception
+                        (ExceptionDetail)null);
                 }
 
                 if (doNotThrow)
@@ -218,10 +218,13 @@ namespace Microsoft.Identity.Client.Http
 
         internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
+            var body = response.Content == null
+                ? null
+                : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return new HttpResponse
             {
                 Headers = response.Headers,
-                Body = await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+                Body = body,
                 StatusCode = response.StatusCode
             };
         }
