@@ -1463,6 +1463,44 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
+        public void B2CAcquireTokenWithB2CLoginAuthorityTest()
+        {
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityBlackforest);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityMoonCake);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityUsGov);
+            }
+        }
+
+        private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)
+        {
+            var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                                    .WithB2CAuthority(authority)
+                                                    .WithHttpManager(harness.HttpManager)
+                                                    .BuildConcrete();
+            var ui = new MockWebUI()
+            {
+                MockResult = new AuthorizationResult(
+                    AuthorizationStatus.Success,
+                    authority + "?code=some-code")
+            };
+
+            MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+            harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(authority);
+            harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(authority);
+
+            var result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Account);
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
         public void EnsurePublicApiSurfaceExistsOnInterface()
         {
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
