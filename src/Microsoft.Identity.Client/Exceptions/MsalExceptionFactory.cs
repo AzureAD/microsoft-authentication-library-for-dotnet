@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Exceptions
     internal static class MsalExceptionFactory
     {
         /// <summary>
-        ///     Throws an MsalClient exception
+        /// Throws an <see cref="MsalClientException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throws an <see cref="MsalClientException" /> exception
+        /// Throws an <see cref="MsalServiceException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -64,7 +64,20 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throws an <see cref="MsalClientException" /> exception
+        /// Throws an <see cref="MsalServiceException" /> exception
+        /// </summary>
+        /// <param name="errorCode">The error code</param>
+        /// <param name="errorMessage">A user friendly message</param>
+        /// <param name="innerException">The inner exception (often the original exception)</param>
+        /// <param name="httpResponse">The HttpResponse serving as additional error values returned to the app developer</param>
+        public static Exception GetServiceException(string errorCode, string errorMessage, Exception innerException, IHttpWebResponse httpResponse)
+        {
+            ValidateRequiredArgs(errorCode, errorMessage);
+            return GetServiceException(errorCode, errorMessage, innerException, ExceptionDetail.FromHttpResponse(httpResponse));
+        }
+
+        /// <summary>
+        /// Throws an <see cref="MsalServiceException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -76,7 +89,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throw an <see cref="MsalServiceException" /> exception
+        /// Throw an <see cref="MsalServiceException" /> exception
         /// </summary>
         public static Exception GetServiceException(
             string errorCode,
@@ -96,7 +109,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throw an <see cref="MsalUiRequiredException" />
+        /// Throw an <see cref="MsalUiRequiredException" />
         /// </summary>
         public static Exception GetUiRequiredException(
             string errorCode,

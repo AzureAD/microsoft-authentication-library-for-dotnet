@@ -142,8 +142,8 @@ namespace Microsoft.Identity.Client.Instance
             if (instanceDiscoveryResponse.TenantDiscoveryEndpoint == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    instanceDiscoveryResponse.Error,
-                    instanceDiscoveryResponse.ErrorDescription);
+                    instanceDiscoveryResponse.Error ?? CoreErrorCodes.InstanceDiscoveryEndpointNotFound,
+                    instanceDiscoveryResponse.ErrorDescription ?? CoreErrorCodes.InstanceDiscoveryEndpointNotFound);
             }
         }
 

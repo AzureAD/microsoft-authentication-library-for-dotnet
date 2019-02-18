@@ -36,8 +36,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Common.Core.Mocks
 {
-    internal sealed class MockHttpManager : HttpManager,
-                                            IDisposable
+    internal sealed class MockHttpManager : HttpManager, IDisposable
     {
         private Queue<HttpMessageHandler> _httpMessageHandlerQueue
         {
