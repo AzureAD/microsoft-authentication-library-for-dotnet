@@ -175,8 +175,8 @@ namespace Microsoft.Identity.Client.Http
                     throw MsalExceptionFactory.GetServiceException(
                         CoreErrorCodes.RequestTimeout,
                         "Request to the endpoint timed out.",
-                        timeoutException, 
-                        (ExceptionDetail)null);
+                        timeoutException,
+                        (ExceptionDetail) null);
                 }
 
                 if (doNotThrow)

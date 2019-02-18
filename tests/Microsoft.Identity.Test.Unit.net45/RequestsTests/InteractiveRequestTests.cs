@@ -318,6 +318,60 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
+        {
+            using (var httpManager = new MockHttpManager())
+            {
+                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
+
+                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
+                httpManager.AddMockHandler(
+                    new MockHttpMessageHandler
+                    {
+                        Method = HttpMethod.Get,
+                        ResponseMessage = MockHelpers.CreateTooManyRequestsJsonResponse() // returns a non json response
+                    });
+
+                var parameters = new AuthenticationRequestParameters
+                {
+                    Authority = authority,
+                    ClientId = MsalTestConstants.ClientId,
+                    Scope = MsalTestConstants.Scope,
+                    TokenCache = null,
+                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
+                    RedirectUri = new Uri("some://uri"),
+                };
+
+                var ui = new MockWebUI();
+
+                var request = new InteractiveRequest(
+                    serviceBundle,
+                    parameters,
+                    ApiEvent.ApiIds.None,
+                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                    MsalTestConstants.DisplayableId,
+                    UIBehavior.SelectAccount,
+                    ui);
+
+                try
+                {
+                    request.ExecuteAsync(CancellationToken.None).Wait();
+
+                    Assert.Fail("MsalException should have been thrown here");
+                }
+                catch (Exception exc)
+                {
+                    var serverEx = exc.InnerException as MsalServiceException;
+                    Assert.IsNotNull(serverEx);
+                    Assert.AreEqual(429, serverEx.StatusCode);
+                    Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
+                    Assert.AreEqual("Server overload", serverEx.ErrorCode);
+                }
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenEntireResponseIsNull()
         {
             using (var httpManager = new MockHttpManager())
@@ -588,60 +642,6 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual((int)HttpStatusCode.NotFound, serverEx.StatusCode);
                     Assert.IsNotNull(serverEx.ResponseBody);
                     Assert.AreEqual(MsalError.HttpStatusNotFound, serverEx.ErrorCode);
-                }
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
-        public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, _myReceiver);
-
-                var authority = Authority.CreateAuthority(serviceBundle, MsalTestConstants.AuthorityHomeTenant, false);
-                httpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        Method = HttpMethod.Get,
-                        ResponseMessage = MockHelpers.CreateTooManyRequestsJsonResponse() // returns a non json response
-                    });
-
-                var parameters = new AuthenticationRequestParameters
-                {
-                    Authority = authority,
-                    ClientId = MsalTestConstants.ClientId,
-                    Scope = MsalTestConstants.Scope,
-                    TokenCache = null,
-                    RequestContext = new RequestContext(null, new MsalLogger(Guid.NewGuid(), null)),
-                    RedirectUri = new Uri("some://uri"),
-                };
-
-                var ui = new MockWebUI();
-
-                var request = new InteractiveRequest(
-                    serviceBundle,
-                    parameters,
-                    ApiEvent.ApiIds.None,
-                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    MsalTestConstants.DisplayableId,
-                    UIBehavior.SelectAccount,
-                    ui);
-
-                try
-                {
-                    request.ExecuteAsync(CancellationToken.None).Wait();
-
-                    Assert.Fail("MsalException should have been thrown here");
-                }
-                catch (Exception exc)
-                {
-                    var serverEx = exc.InnerException as MsalServiceException;
-                    Assert.IsNotNull(serverEx);
-                    Assert.AreEqual(429, serverEx.StatusCode);
-                    Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
-                    Assert.AreEqual("Server overload", serverEx.ErrorCode);
                 }
             }
         }

@@ -151,7 +151,7 @@ namespace Microsoft.Identity.Client.OAuth2
                     }
                     catch (SerializationException) // in the rare case we get an error response we cannot deserialize
                     {
-                        // CreateErrrorResponse does the same validation. Will be logging the error there.
+                        // CreateErrorResponse does the same validation. Will be logging the error there.
                     }
                 }
             }

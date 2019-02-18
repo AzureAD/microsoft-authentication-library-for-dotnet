@@ -1548,45 +1548,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
-        public void B2CAcquireTokenTest()
-        {
-            using (var httpManager = new MockHttpManager())
-            {
-                var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager);
-                httpManager.AddInstanceDiscoveryMockHandler();
-
-                PublicClientApplication app = new PublicClientApplication(
-                    serviceBundle,
-                    CoreTestConstants.ClientId,
-                    CoreTestConstants.B2CAuthority);
-
-                MockWebUI ui = new MockWebUI()
-                {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        CoreTestConstants.B2CAuthority + "?code=some-code")
-                };
-
-                MsalMockHelpers.ConfigureMockWebUI(
-                    new AuthorizationResult(AuthorizationStatus.Success, app.RedirectUri + "?code=some-code"));
-
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(CoreTestConstants.B2CAuthority);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost();
-
-                AuthenticationResult result = app.AcquireTokenAsync(CoreTestConstants.Scope).Result;
-                Assert.IsNotNull(result);
-                Assert.IsNotNull(result.Account);
-            }
-        }
-
-        [TestMethod]
-        [TestCategory("PublicClientApplicationTests")]
         public void B2CAcquireTokenWithB2CLoginAuthorityTest()
         {
             using (var httpManager = new MockHttpManager())
             {
                 var serviceBundle = ServiceBundle.CreateWithCustomHttpManager(httpManager, null);
+                httpManager.AddInstanceDiscoveryMockHandler();
 
+                ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CAuthority);
                 ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthority);
                 ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthorityBlackforest);
                 ValidateB2CLoginAuthority(serviceBundle, httpManager, CoreTestConstants.B2CLoginAuthorityMoonCake);

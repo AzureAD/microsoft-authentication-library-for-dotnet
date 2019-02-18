@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Exceptions
     internal static class MsalExceptionFactory
     {
         /// <summary>
-        /// Throws an MsalClient exception
+        /// Throws an <see cref="MsalClientException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -52,7 +52,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throws an <see cref="MsalClientException" /> exception
+        /// Throws an <see cref="MsalServiceException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        /// Throws an <see cref="MsalClientException" /> exception
+        /// Throws an <see cref="MsalServiceException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        /// Throws an <see cref="MsalClientException" /> exception
+        /// Throws an <see cref="MsalServiceException" /> exception
         /// </summary>
         /// <param name="errorCode">The error code</param>
         /// <param name="errorMessage">A user friendly message</param>
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.Exceptions
         }
 
         /// <summary>
-        ///     Throw an <see cref="MsalUiRequiredException" />
+        /// Throw an <see cref="MsalUiRequiredException" />
         /// </summary>
         public static Exception GetUiRequiredException(
             string errorCode,
