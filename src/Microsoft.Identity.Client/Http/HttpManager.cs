@@ -219,10 +219,13 @@ namespace Microsoft.Identity.Client.Http
 
         internal /* internal for test only */ static async Task<HttpResponse> CreateResponseAsync(HttpResponseMessage response)
         {
+            var body = response.Content == null
+                           ? null
+                           : await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             return new HttpResponse
             {
                 Headers = response.Headers,
-                Body = await response.Content.ReadAsStringAsync().ConfigureAwait(false),
+                Body = body,
                 StatusCode = response.StatusCode
             };
         }

@@ -189,5 +189,18 @@ namespace Microsoft.Identity.Client
         /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";
+
+        /// <summary>
+        /// Error code used when the http response returns HttpStatusCode.NotFound
+        /// </summary>
+        public const string HttpStatusNotFound = "not_found";
+
+        /// <summary>
+        /// ErrorCode used when the http response returns something different from 200 (OK)
+        /// </summary>
+        /// <remarks>
+        /// HttpStatusCode.NotFound have a specific error code. <see cref="MsalError.HttpStatusNotFound"/>
+        /// </remarks>
+        public const string HttpStatusCodeNotOk = "http_status_not_200";
     }
 }

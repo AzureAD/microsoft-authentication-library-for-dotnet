@@ -107,6 +107,13 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             return responseMessage;
         }
 
+        internal static HttpResponseMessage CreateNullMessage(HttpStatusCode code)
+        {
+            HttpResponseMessage responseMessage = new HttpResponseMessage(code);
+            responseMessage.Content = null;
+            return responseMessage;
+        }
+
         public static HttpResponseMessage CreateSuccessTokenResponseMessage(string scopes, string idToken, string clientInfo)
         {
             return CreateSuccessResponseMessage(string.Format(CultureInfo.InvariantCulture,
@@ -146,6 +153,40 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
                 "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
                 "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+        }
+
+        public static HttpResponseMessage CreateNoErrorFieldResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.BadRequest,
+                                        "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
+                                        "This is an error message which doesn't contain the error field. " +
+                                        "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
+                                        "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
+                                        "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
+                                        "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
+                                        "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+        }
+        
+        public static HttpResponseMessage CreateHttpStatusNotFoundResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.NotFound,
+                                        "{\"the-error-is-not-here\":\"erorwithouterrorfield\",\"error_description\":\"AADSTS991: " +
+                                        "This is an error message which doesn't contain the error field. " +
+                                        "Trace ID: dd25f4fb-3e8d-458e-90e7-179524ce0000Correlation ID: " +
+                                        "f11508ab-067f-40d4-83cb-ccc67bf57e45Timestamp: 2018-09-22 00:50:11Z\"," +
+                                        "\"error_codes\":[90010],\"timestamp\":\"2018-09-22 00:50:11Z\"," +
+                                        "\"trace_id\":\"dd25f4fb-3e8d-458e-90e7-179524ce0000\",\"correlation_id\":" +
+                                        "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
+        }
+
+        public static HttpResponseMessage CreateNullResponseMessage()
+        {
+            return CreateNullMessage(HttpStatusCode.BadRequest);
+        }
+
+        public static HttpResponseMessage CreateEmptyResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.BadRequest, string.Empty);
         }
 
         public static HttpResponseMessage CreateSuccessfulClientCredentialTokenResponseMessage()
