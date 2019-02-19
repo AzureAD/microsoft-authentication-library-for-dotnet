@@ -53,6 +53,20 @@ namespace Microsoft.Identity.Client.Exceptions
             return new MsalClientException(errorCode, errorMessage, innerException);
         }
 
+        public static Exception GetUiRequiredException(
+            string errorCode,
+            string errorMessage,
+            HttpResponse httpResponse = null,
+            Exception innerException = null)
+        {
+            return GetServiceException(
+                errorCode,
+                errorMessage,
+                httpResponse,
+                innerException,
+                true);
+        }
+
         /// <summary>
         ///     Throw an <see cref="MsalServiceException" /> exception. 
         ///     All details should be passed in if available.

@@ -61,6 +61,9 @@ namespace Microsoft.Identity.Test.Unit
         public const string B2CAuthority = "https://login.microsoftonline.in/tfp/tenant/policy/";
         public const string B2CLoginAuthority = "https://sometenantid.b2clogin.com/tfp/sometenantid/policy/";
         public const string B2CRandomHost = "https://sometenantid.randomhost.com/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityUsGov = "https://sometenantid.b2clogin.us/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityMoonCake = "https://sometenantid.b2clogin.cn/tfp/sometenantid/policy/";
+        public const string B2CLoginAuthorityBlackforest = "https://sometenantid.b2clogin.de/tfp/sometenantid/policy/";
         public const string ClientId = "d3adb33f-c0de-ed0c-c0de-deadb33fc0d3";
         public static readonly string ClientId_1 = "d3adb33f-c1de-ed1c-c1de-deadb33fc1d3";
         public const string UniqueId = "unique_id";
