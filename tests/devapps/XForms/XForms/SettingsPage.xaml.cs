@@ -50,13 +50,25 @@ namespace XForms
             authority.Text = App.Authority;
             clientIdEntry.Text = App.ClientId;
 
-            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccessTokenCount.ToString(CultureInfo.InvariantCulture);
-            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.RefreshTokenCount.ToString(CultureInfo.InvariantCulture);
-            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.IdTokenCount.ToString(CultureInfo.InvariantCulture);
-            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccountCount.ToString(CultureInfo.InvariantCulture);
+            CheckTokenCount();
 
             validateAuthoritySwitch.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.AppConfig.RedirectUri;
+        }
+
+        private void CheckTokenCount()
+        {
+            try
+            {
+                numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccessTokenCount.ToString(CultureInfo.InvariantCulture);
+                numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.RefreshTokenCount.ToString(CultureInfo.InvariantCulture);
+                numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.IdTokenCount.ToString(CultureInfo.InvariantCulture);
+                numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.AccountCount.ToString(CultureInfo.InvariantCulture);
+            }
+            catch (Exception ex)
+            {
+                numOfAccountItems.Text = "No accounts or tokens yet";
+            }
         }
 
         private void OnSaveClicked(object sender, EventArgs e)
