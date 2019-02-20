@@ -25,6 +25,12 @@
 //
 // ------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.Utils;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -32,12 +38,6 @@ using System.Net;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Http;
-using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.OAuth2
 {
@@ -57,7 +57,10 @@ namespace Microsoft.Identity.Client.OAuth2
 
         public void AddQueryParameter(string key, string value)
         {
-            _queryParameters[key] = value;
+            if (!string.IsNullOrWhiteSpace(key) && !string.IsNullOrWhiteSpace(value))
+            {
+                _queryParameters[key] = value;
+            }
         }
 
         public void AddBodyParameter(string key, string value)
@@ -111,13 +114,13 @@ namespace Microsoft.Identity.Client.OAuth2
                 httpEvent.HttpMethod = method.Method;
 
                 IDictionary<string, string> headersAsDictionary = response.HeadersAsDictionary;
-                if(headersAsDictionary.ContainsKey("x-ms-request-id") &&
+                if (headersAsDictionary.ContainsKey("x-ms-request-id") &&
                     headersAsDictionary["x-ms-request-id"] != null)
                 {
                     httpEvent.RequestIdHeader = headersAsDictionary["x-ms-request-id"];
                 }
 
-                if(headersAsDictionary.ContainsKey("x-ms-clitelem") && 
+                if (headersAsDictionary.ContainsKey("x-ms-clitelem") &&
                     headersAsDictionary["x-ms-clitelem"] != null)
                 {
                     XmsCliTelemInfo xmsCliTeleminfo = new XmsCliTelemInfoParser().ParseXMsTelemHeader(headersAsDictionary["x-ms-clitelem"], requestContext);
@@ -134,14 +137,21 @@ namespace Microsoft.Identity.Client.OAuth2
                 {
                     try
                     {
-                        httpEvent.OauthErrorCode = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body).Error;
+                        httpEvent.OauthErrorCode = CoreErrorCodes.UnknownError;
+                        // In cases where the end-point is not found (404) response.body will be empty.
+                        // CreateResponse handles throwing errors - in the case of HttpStatusCode <> and ErrorResponse will be created.
+                        if (!string.IsNullOrWhiteSpace(response.Body))
+                        {
+                            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+                            if (msalTokenResponse != null)
+                            {
+                                httpEvent.OauthErrorCode = msalTokenResponse.Error;
+                            }
+                        }
                     }
                     catch (SerializationException) // in the rare case we get an error response we cannot deserialize
                     {
-                        throw MsalExceptionFactory.GetServiceException(
-                            CoreErrorCodes.NonParsableOAuthError,
-                            CoreErrorMessages.NonParsableOAuthError,
-                            response);
+                        // CreateErrorResponse does the same validation. Will be logging the error there.
                     }
                 }
             }
@@ -168,52 +178,90 @@ namespace Microsoft.Identity.Client.OAuth2
         {
             bool shouldLogAsError = true;
 
-            Exception serviceEx;
+            var httpErrorCodeMessage = string.Format(CultureInfo.InvariantCulture, "HttpStatusCode: {0}: {1}", (int)response.StatusCode, response.StatusCode.ToString());
+            requestContext.Logger.Info(httpErrorCodeMessage);
+
+            Exception exceptionToThrow = null;
 
             try
             {
-                var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
-
-                if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw MsalExceptionFactory.GetUiRequiredException(
-                        CoreErrorCodes.InvalidGrantError,
-                        msalTokenResponse.ErrorDescription,
-                        null,
-                        ExceptionDetail.FromHttpResponse(response));
-                }
-
-                serviceEx = MsalExceptionFactory.GetServiceException(
-                    msalTokenResponse.Error,
-                    msalTokenResponse.ErrorDescription,
-                    response);
-
-                // For device code flow, AuthorizationPending can occur a lot while waiting
-                // for the user to auth via browser and this causes a lot of error noise in the logs.
-                // So suppress this particular case to an Info so we still see the data but don't 
-                // log it as an error since it's expected behavior while waiting for the user.
-                if (string.Compare(msalTokenResponse.Error, OAuth2Error.AuthorizationPending,
-                        StringComparison.OrdinalIgnoreCase) == 0)
-                {
-                    shouldLogAsError = false;
-                }
-
+                exceptionToThrow = ExtractErrorsFromTheResponse(response, ref shouldLogAsError);
             }
-            catch (SerializationException ex)
+            catch (SerializationException) // in the rare case we get an error response we cannot deserialize
             {
-                serviceEx = MsalExceptionFactory.GetClientException(CoreErrorCodes.UnknownError, response.Body, ex);
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                    CoreErrorCodes.NonParsableOAuthError,
+                    CoreErrorMessages.NonParsableOAuthError,
+                    response);
+            }
+            catch (Exception ex)
+            {
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(CoreErrorCodes.UnknownError, response.Body, ex, response);
+            }
+
+            if (exceptionToThrow == null)
+            {
+                exceptionToThrow = response.StatusCode != HttpStatusCode.NotFound ?
+                    MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusCodeNotOk, httpErrorCodeMessage, response) :
+                    MsalExceptionFactory.GetServiceException(CoreErrorCodes.HttpStatusNotFound, httpErrorCodeMessage, response);
             }
 
             if (shouldLogAsError)
             {
-                requestContext.Logger.ErrorPii(serviceEx);
+                requestContext.Logger.ErrorPii(exceptionToThrow);
             }
             else
             {
-                requestContext.Logger.InfoPii(serviceEx);
+                requestContext.Logger.InfoPii(exceptionToThrow);
             }
 
-            throw serviceEx;
+            throw exceptionToThrow;
+        }
+
+        private static Exception ExtractErrorsFromTheResponse(HttpResponse response, ref bool shouldLogAsError)
+        {
+            Exception exceptionToThrow = null;
+
+            // In cases where the end-point is not found (404) response.body will be empty.
+            if (string.IsNullOrWhiteSpace(response.Body))
+            {
+                return null;
+            }
+
+            var msalTokenResponse = JsonHelper.DeserializeFromJson<MsalTokenResponse>(response.Body);
+
+            if (msalTokenResponse?.Error == null)
+            {
+                return null;
+            }
+            
+            if (CoreErrorCodes.InvalidGrantError.Equals(msalTokenResponse.Error, StringComparison.OrdinalIgnoreCase))
+            {
+                exceptionToThrow = MsalExceptionFactory.GetUiRequiredException(
+                    CoreErrorCodes.InvalidGrantError,
+                    msalTokenResponse.ErrorDescription,
+                    null,
+                    ExceptionDetail.FromHttpResponse(response));
+            }
+            else
+            {
+                exceptionToThrow = MsalExceptionFactory.GetServiceException(
+                    msalTokenResponse.Error,
+                    msalTokenResponse.ErrorDescription,
+                    response);
+            }
+
+            // For device code flow, AuthorizationPending can occur a lot while waiting
+            // for the user to auth via browser and this causes a lot of error noise in the logs.
+            // So suppress this particular case to an Info so we still see the data but don't 
+            // log it as an error since it's expected behavior while waiting for the user.
+            if (string.Compare(msalTokenResponse.Error, OAuth2Error.AuthorizationPending,
+                    StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                shouldLogAsError = false;
+            }
+
+            return exceptionToThrow;
         }
 
         private Uri CreateFullEndpointUri(Uri endPoint)
