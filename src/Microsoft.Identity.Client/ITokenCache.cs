@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Cache;
 
 namespace Microsoft.Identity.Client
@@ -64,47 +65,103 @@ namespace Microsoft.Identity.Client
         void SetBeforeWrite(TokenCacheCallback beforeWrite);
 
         /// <summary>
-        /// Unified Only
-        /// </summary>
-        /// <returns></returns>
-        byte[] Serialize();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="unifiedState"></param>
-        void Deserialize(byte[] unifiedState);
-
-        /// <summary>
         /// Serializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
         /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
         /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
         /// you might also want to serialize with Serialize and Deserialize, otherwise just use
-        /// SerializeV3 and DeserializeV3.
+        /// SerializeMsalV3 and DeserializeMsalV3.
         /// </summary>
         /// <returns>Byte stream representation of the cache</returns>
-        byte[] SerializeV3();
+        byte[] SerializeMsalV3();
 
         /// <summary>
         /// Deserializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
         /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
         /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
         /// you might also want to serialize with Serialize and Deserialize, otherwise just use
-        /// SerializeV3 and DeserializeV3
+        /// SerializeMsalV3 and DeserializeMsalV3
         /// </summary>
         /// <param name="bytes">Byte stream representation of the cache</param>
-        void DeserializeV3(byte[] bytes);
+        /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
+        /// <remarks>
+        /// Merge is not yet available.
+        /// </remarks>
+        void DeserializeMsalV3(byte[] bytes, bool merge = false);
+
+        /// <summary>
+        /// Serializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeMsalV3 and DeserializeMsalV3.
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        byte[] SerializeMsalV2();
+
+        /// <summary>
+        /// Deserializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeMsalV3 and DeserializeMsalV3
+        /// </summary>
+        /// <param name="bytes">Byte stream representation of the cache</param>
+        /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
+        /// <remarks>
+        /// Merge is not yet available.
+        /// </remarks>
+        void DeserializeMsalV2(byte[] bytes, bool merge = false);
+
+        /// <summary>
+        /// Serializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeMsalV3 and DeserializeMsalV3.
+        /// </summary>
+        /// <returns>Byte stream representation of the cache</returns>
+        byte[] SerializeAdalV3();
+
+        /// <summary>
+        /// Deserializes the token cache to the MSAL.NET 3.x unified cache format, which is compatible with other
+        /// MSAL desktop versions (MSAL.Python and MSAL.Java for instance).
+        /// If you need to maintain SSO between an application using MSAL 2.x and this application using MSAL 3.x,
+        /// you might also want to serialize with Serialize and Deserialize, otherwise just use
+        /// SerializeMsalV3 and DeserializeMsalV3
+        /// </summary>
+        /// <param name="bytes">Byte stream representation of the cache</param>
+        /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
+        /// <remarks>
+        /// Merge is not yet available.
+        /// </remarks>
+        void DeserializeAdalV3(byte[] bytes, bool merge = false);
+
+        /// <summary>
+        /// Unified Only
+        /// </summary>
+        /// <returns></returns>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. Please use specific deserializers and serializers.", false)]
+        byte[] Serialize();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="unifiedState"></param>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. Please use specific deserializers and serializers.", false)]
+        void Deserialize(byte[] unifiedState);
 
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. Please use specific deserializers and serializers.", false)]
         CacheData SerializeUnifiedAndAdalCache();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="cacheData"></param>
+        [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. Please use specific deserializers and serializers.", false)]
         void DeserializeUnifiedAndAdalCache(CacheData cacheData);
 #endif
     }

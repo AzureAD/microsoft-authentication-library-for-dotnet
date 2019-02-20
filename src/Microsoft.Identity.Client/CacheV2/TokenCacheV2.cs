@@ -147,13 +147,39 @@ namespace Microsoft.Identity.Client.CacheV2
         }
 
         /// <inheritdoc />
-        public byte[] SerializeV3()
+        public byte[] SerializeMsalV3()
         {
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public void DeserializeV3(byte[] bytes)
+        public void DeserializeMsalV3(byte[] bytes, bool merge = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public byte[] SerializeMsalV2()
+        {
+            // Note: This is effectively current Serialize
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void DeserializeMsalV2(byte[] bytes, bool merge = false)
+        {
+            // Note: This is effectively current Deserialize
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public byte[] SerializeAdalV3()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public void DeserializeAdalV3(byte[] bytes, bool merge = false)
         {
             throw new NotImplementedException();
         }

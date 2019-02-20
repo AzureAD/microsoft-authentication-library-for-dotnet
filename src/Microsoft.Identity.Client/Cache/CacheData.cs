@@ -25,14 +25,17 @@
 //
 //------------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.Identity.Client.Cache
 {
     /// <summary>
-    /// Data class, common to ADAL.NET and MSAL.NET used for the token cache serialization 
+    /// Data class, common to ADAL.NET and MSAL.NET V2 used for the token cache serialization 
     /// in a dual format: the ADAL V3 cache format, and the new unified cache format, common
     /// to ADAL.NET 4.x, MSAL.NET 2.x and other libraries in the same Operating System
     /// (for instance ADAL and MSAL for objective C in iOS)
     /// </summary>
+    [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. Please use specific deserializers and serializers.", false)]
     public class CacheData
     {
         /// <summary>
@@ -41,7 +44,7 @@ namespace Microsoft.Identity.Client.Cache
         public byte[] AdalV3State { get; set; }
 
         /// <summary>
-        /// Array of bytes containing the serialized Unified cache
+        /// Array of bytes containing the serialized MSAL.NET V2 cache
         /// </summary>
         public byte[] UnifiedState { get; set; }
     }
