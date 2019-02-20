@@ -27,8 +27,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -57,12 +59,20 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             IEnumerable<string> coreErrorCodes = GetConstants(typeof(CoreErrorCodes));
 
             // Assert
+            bool missingErrorCode = false;
+            StringBuilder errorsFound = new StringBuilder();
             foreach (string coreErrorCode in coreErrorCodes)
             {
-                Assert.IsTrue(
-                    msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture),
-                    "Could not find a core error code in msal error codes: " + coreErrorCode);
+                var isFound = msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture);
+                if (!isFound)
+                {
+                    missingErrorCode = true;
+                    errorsFound.AppendLine(string.Format(CultureInfo.InvariantCulture,
+                                                         "Could not find a core error code in type MsalError: {0}", coreErrorCode));
+                }
             }
+
+            Assert.IsFalse(missingErrorCode, errorsFound.ToString());
         }
 
         [TestMethod]

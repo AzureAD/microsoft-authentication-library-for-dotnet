@@ -46,6 +46,22 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             httpManager.AddMockHandler(MockHelpers.CreateInstanceDiscoveryMockHandler(MsalTestConstants.GetDiscoveryEndpoint(url)));
         }
 
+        public static void AddResponseMockHandlerForPost(
+            this MockHttpManager httpManager,
+            HttpResponseMessage responseMessage,
+            IDictionary<string, string> bodyParameters = null,
+            IDictionary<string, string> queryParameters = null)
+        {
+            httpManager.AddMockHandler(
+                new MockHttpMessageHandler()
+                {
+                    ExpectedMethod = HttpMethod.Post,
+                    ExpectedPostData = bodyParameters,
+                    ExpectedQueryParams = queryParameters,
+                    ResponseMessage = responseMessage
+                });
+        }
+
         public static void AddSuccessTokenResponseMockHandlerForPost(
             this MockHttpManager httpManager,
             string authority,

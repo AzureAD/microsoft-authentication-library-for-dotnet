@@ -43,10 +43,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -247,54 +250,115 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
-            using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
-            {
-                harness.HttpManager.AddMockHandler(
-                    new MockHttpMessageHandler
-                    {
-                        ExpectedMethod = HttpMethod.Get,
-                        ResponseMessage = MockHelpers.CreateTooManyRequestsNonJsonResponse() // returns a non json response
-                    });
-
-                AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
-                    MsalTestConstants.AuthorityHomeTenant,
-                    MsalTestConstants.Scope,
-                    null);
-                parameters.RedirectUri = new Uri("some://uri");
-                parameters.LoginHint = MsalTestConstants.DisplayableId;
-                AcquireTokenInteractiveParameters interactiveParameters = new AcquireTokenInteractiveParameters
+            ValidateOathClient(
+                MockHelpers.CreateTooManyRequestsNonJsonResponse(),
+                exception =>
                 {
-                    Prompt = Prompt.SelectAccount,
-                    ExtraScopesToConsent = MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                };
-
-                InteractiveRequest request = new InteractiveRequest(
-                    harness.ServiceBundle,
-                    parameters,
-                    interactiveParameters,
-                    new MockWebUI());
-
-                try
-                {
-                    request.ExecuteAsync(CancellationToken.None).Wait();
-
-                    Assert.Fail("MsalException should have been thrown here");
-                }
-                catch (Exception exc)
-                {
-                    MsalServiceException serverEx = exc.InnerException as MsalServiceException;
+                    MsalServiceException serverEx = exception.InnerException as MsalServiceException;
                     Assert.IsNotNull(serverEx);
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
                     Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
                     Assert.AreEqual(CoreErrorCodes.NonParsableOAuthError, serverEx.ErrorCode);
-                }
-            }
+                });
         }
 
         [TestMethod]
         [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
+        {
+            ValidateOathClient(
+                MockHelpers.CreateTooManyRequestsJsonResponse(),
+                exception =>
+                {
+                    MsalServiceException serverEx = exception.InnerException as MsalServiceException;
+                    Assert.IsNotNull(serverEx);
+                    Assert.AreEqual(429, serverEx.StatusCode);
+                    Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
+                    Assert.AreEqual("Server overload", serverEx.ErrorCode);
+                });
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenEntireResponseIsNull()
+        {
+            ValidateOathClient(
+                null,
+                exception =>
+                {
+                    var innerException = exception.InnerException as InvalidOperationException;
+                    Assert.IsNotNull(innerException);
+                });
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenResponseIsEmpty()
+        {
+            ValidateOathClient(
+                MockHelpers.CreateEmptyResponseMessage(),
+                exception =>
+                {
+                    var serverEx = exception.InnerException as MsalServiceException;
+                    Assert.IsNotNull(serverEx);
+                    Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
+                    Assert.IsNotNull(serverEx.ResponseBody);
+                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
+                });
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenResponseIsNull()
+        {
+            ValidateOathClient(
+                MockHelpers.CreateNullResponseMessage(),
+                exception =>
+                {
+                    var serverEx = exception.InnerException as MsalServiceException;
+                    Assert.IsNotNull(serverEx);
+                    Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
+                    Assert.IsNull(serverEx.ResponseBody);
+                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
+                });
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenResponseDoesNotContainAnErrorField()
+        {
+            ValidateOathClient(
+                MockHelpers.CreateNoErrorFieldResponseMessage(),
+                exception =>
+                {
+                    var serverEx = exception.InnerException as MsalServiceException;
+                    Assert.IsNotNull(serverEx);
+                    Assert.AreEqual((int)HttpStatusCode.BadRequest, serverEx.StatusCode);
+                    Assert.IsNotNull(serverEx.ResponseBody);
+                    Assert.AreEqual(MsalError.HttpStatusCodeNotOk, serverEx.ErrorCode);
+                });
+        }
+
+        [TestMethod]
+        [TestCategory("InteractiveRequestTests")]
+        public void OAuthClient_FailsWithServiceExceptionWhenResponseIsHttpNotFound()
+        {
+            ValidateOathClient(
+                MockHelpers.CreateHttpStatusNotFoundResponseMessage(),
+                exception =>
+                {
+                    var serverEx = exception.InnerException as MsalServiceException;
+                    Assert.IsNotNull(serverEx);
+                    Assert.AreEqual((int)HttpStatusCode.NotFound, serverEx.StatusCode);
+                    Assert.IsNotNull(serverEx.ResponseBody);
+                    Assert.AreEqual(MsalError.HttpStatusNotFound, serverEx.ErrorCode);
+                });
+        }
+
+        private delegate void OAuthClientValidationHandler(Exception ex);
+
+        private static void ValidateOathClient(HttpResponseMessage httpResponseMessage, OAuthClientValidationHandler validationHandler)
         {
             using (MockHttpAndServiceBundle harness = new MockHttpAndServiceBundle())
             {
@@ -302,7 +366,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     new MockHttpMessageHandler
                     {
                         ExpectedMethod = HttpMethod.Get,
-                        ResponseMessage = MockHelpers.CreateTooManyRequestsJsonResponse() // returns a non json response
+                        ResponseMessage = httpResponseMessage
                     });
 
                 AuthenticationRequestParameters parameters = harness.CreateAuthenticationRequestParameters(
@@ -330,11 +394,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 }
                 catch (Exception exc)
                 {
-                    MsalServiceException serverEx = exc.InnerException as MsalServiceException;
-                    Assert.IsNotNull(serverEx);
-                    Assert.AreEqual(429, serverEx.StatusCode);
-                    Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
-                    Assert.AreEqual("Server overload", serverEx.ErrorCode);
+                    validationHandler(exc);
                 }
             }
         }
