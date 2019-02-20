@@ -1,3 +1,8 @@
+2.7.1
+=============
+- **MSAL now handles B2C domains from sovereign clouds, including US Government, Blackforest, and Mooncake**. B2C domains with *.b2clogin.us, *.b2clogin.cn, and *.b2clogin.de are now included in the MSAL allowed domain list for B2C authorities. [MSAL issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/897)
+- **Improved error message handling to detect issues faster and not hit null reference exceptions**. Sometimes, for example, when the instance discovery endpoint is not found, the Oauth2Client in MSAL would hit a null reference exception. MSAL now detects such issues faster and returns a more meaningful error message (e.g. the http response code).
+
 2.7.0
 =============
 - **MSAL integrates SourceLink https://github.com/dotnet/sourcelink.** This allows MSAL to embed pdb files and source code in the NuGet package, allowing users to debug into MSAL without replacing their package reference with a project reference. [MSAL PR](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/750)
