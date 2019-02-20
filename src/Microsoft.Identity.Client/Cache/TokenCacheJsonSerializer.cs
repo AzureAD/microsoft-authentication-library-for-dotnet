@@ -72,8 +72,10 @@ namespace Microsoft.Identity.Client.Cache
 
         public void Deserialize(byte[] bytes)
         {
+            // TODO: Potentially remove for allowing merging of cache files. Additional parameter to be added to the deserialize method.
             _accessor.Clear();
 
+            // TODO: Try/Catch for meaningful App Developer handling of merge/upgrade scenarios
             var cache = CacheSerializationContract.FromJsonString(CoreHelpers.ByteArrayToString(bytes));
 
             if (cache.AccessTokens != null)

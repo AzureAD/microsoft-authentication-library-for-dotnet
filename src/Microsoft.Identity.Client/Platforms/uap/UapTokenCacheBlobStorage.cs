@@ -77,7 +77,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                     CacheFileName,
                     CreationCollisionOption.ReplaceExisting).AsTask().GetAwaiter().GetResult();
 
-                byte[] blob = args.TokenCache.SerializeV3();
+                byte[] blob = args.TokenCache.SerializeMsalV3();
                 byte[] encryptedBlob = _cryptographyManager.Encrypt(blob);
 
                 FileIO.WriteBytesAsync(cacheFile, encryptedBlob).GetAwaiter().GetResult();
@@ -97,7 +97,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
                 {
                     byte[] encryptedblob = buffer.ToArray();
                     byte[] decryptedBlob = _cryptographyManager.Decrypt(encryptedblob);
-                    args.TokenCache.DeserializeV3(decryptedBlob);
+                    args.TokenCache.DeserializeMsalV3(decryptedBlob);
                 }
             }
         }
