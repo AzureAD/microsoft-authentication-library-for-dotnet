@@ -71,9 +71,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private string CreateLabQuery(UserQuery query)
         {
+            bool queryRequiresBetaEndpoint = false;
             HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
-            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.BetaEndpoint);
 
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
@@ -82,6 +82,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             //Building user query
             if (query.FederationProvider != null)
             {
+                if (query.FederationProvider == FederationProvider.ADFSv2019)
+                {
+                    queryRequiresBetaEndpoint = true;
+                }
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
             }
 
@@ -117,9 +121,22 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
+            if (!string.IsNullOrEmpty(query.UserSearch))
+            {
+                queryDict.Add(LabApiConstants.UserSearchQuery, query.UserSearch);
+                queryRequiresBetaEndpoint = true;
+            }
+
+            if (!string.IsNullOrEmpty(query.AppName))
+            {
+                queryDict.Add(LabApiConstants.AppName, query.AppName);
+                queryRequiresBetaEndpoint = true;
+            }
+
+            UriBuilder uriBuilder = queryRequiresBetaEndpoint? new UriBuilder(LabApiConstants.BetaEndpoint) : new UriBuilder(LabApiConstants.LabEndpoint);
+
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-            string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
-            return result;
+            return webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
         }
 
         /// <summary>

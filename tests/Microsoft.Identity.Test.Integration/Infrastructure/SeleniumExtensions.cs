@@ -133,13 +133,13 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 if (!withLoginHint)
                 {
                     Trace.WriteLine("Logging in ... Entering username");
-                    driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
+                    driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn.Contains("EXT")? user.HomeUPN : user.Upn);
 
                     Trace.WriteLine("Logging in ... Clicking <Next> after username");
                     driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
                 }
 
-                if (user.FederationProvider == FederationProvider.AdfsV2)
+                if (user.FederationProvider == FederationProvider.AdfsV2 && user.IsFederated)
                 {
                     Trace.WriteLine("Logging in ... AFDSv2 - Entering the username again, this time in the ADFSv2 form");
                     driver.FindElement(By.Id(CoreUiTestConstants.AdfsV2WebUsernameInputId)).SendKeys(user.Upn);
@@ -154,3 +154,16 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         }
     }
 }
+=======
+            Trace.WriteLine("Logging in ... Clicking next after password");
+            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordSignInButtonId)).Click();
+
+            if (user.HomeUPN.Contains("outlook.com"))
+            {
+                Trace.WriteLine("Loggin in ... clicking accept promps for outlook.com MSA user");
+                driver.WaitForElementToBeVisibleAndEnabled(By.Id(CoreUiTestConstants.ConsentAcceptId)).Click();
+            }
+        }
+    }
+}
+>>>>>>> 0042520d... Adding integration test for different account types
