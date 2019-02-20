@@ -89,6 +89,7 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// This is the recommended format for maintaining SSO state betweeen applications.
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
+        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
         void DeserializeMsalV3(byte[] msalV3State, bool merge = false);
 
@@ -101,7 +102,6 @@ namespace Microsoft.Identity.Client
         /// <returns>Byte stream representation of the cache</returns>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge is not yet available.
         /// </remarks>
         byte[] SerializeMsalV2();
 
@@ -115,7 +115,7 @@ namespace Microsoft.Identity.Client
         /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge is not yet available.
+        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
         void DeserializeMsalV2(byte[] msalV2State, bool merge = false);
 
@@ -141,7 +141,7 @@ namespace Microsoft.Identity.Client
         /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge is not yet available.
+        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
         void DeserializeAdalV3(byte[] adalV3State, bool merge = false);
 

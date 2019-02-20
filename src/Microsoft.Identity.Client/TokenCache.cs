@@ -1090,7 +1090,7 @@ namespace Microsoft.Identity.Client
         /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge is not yet available.
+        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
         public void DeserializeAdalV3(byte[] adalV3State, bool merge = false)
         {
@@ -1135,7 +1135,7 @@ namespace Microsoft.Identity.Client
         /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge is not yet available.
+        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
         public void DeserializeMsalV2(byte[] msalV2State, bool merge = false)
         {
@@ -1185,7 +1185,7 @@ namespace Microsoft.Identity.Client
         /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge is not yet available.
+        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
         public void DeserializeMsalV3(byte[] msalV3State, bool merge = false)
         {
