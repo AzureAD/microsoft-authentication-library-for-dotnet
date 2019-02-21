@@ -672,7 +672,7 @@ namespace Microsoft.Identity.Client
         private static void GuardIWANetCore()
         {
 #if NET_CORE
-            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not suppored on .net core because " +
+            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not supported on .net core because " +
                 "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
                 "For more details see https://aka.ms/msal-net-iwa");
 #endif
