@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
@@ -59,7 +60,8 @@ namespace Microsoft.Identity.Test.Common.Mocks
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri, 
             Uri redirectUri, 
-            RequestContext requestContext)
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
         {
             ActualAuthorizationUri = authorizationUri;
 

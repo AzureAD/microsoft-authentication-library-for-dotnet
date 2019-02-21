@@ -48,11 +48,12 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri, 
             Uri redirectUri, 
-            RequestContext requestContext)
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
         {
             _returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
-            await _returnedUriReady.WaitAsync().ConfigureAwait(false);
+            await _returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             return _authorizationResult;
         }

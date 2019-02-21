@@ -35,11 +35,21 @@ namespace Microsoft.Identity.Client.Extensibility
     public class MsalCustomWebUiFailedException : MsalExtensionException
     {
         /// <summary>
-        /// Constructs a MsalCustomWebUiFailedException.
+        /// Constructs a <see cref="MsalCustomWebUiFailedException"/>
         /// </summary>
         /// <param name="message">Message containing description of failure.</param>
         public MsalCustomWebUiFailedException(string message)
             : base(message)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a <see cref="MsalCustomWebUiFailedException"/>
+        /// </summary>
+        /// <param name="message">Message containing description of failure.</param>
+        /// <param name="innerException">Root cause exception</param>
+        public MsalCustomWebUiFailedException(string message, Exception innerException)
+            : base(message, innerException)
         {
         }
     }

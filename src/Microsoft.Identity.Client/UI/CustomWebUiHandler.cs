@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
@@ -50,7 +51,8 @@ namespace Microsoft.Identity.Client.UI
         public async Task<AuthorizationResult> AcquireAuthorizationAsync(
             Uri authorizationUri,
             Uri redirectUri,
-            RequestContext requestContext)
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
         {
             requestContext.Logger.Info(LogMessages.CustomWebUiAcquiringAuthorizationCode);
 
@@ -58,7 +60,7 @@ namespace Microsoft.Identity.Client.UI
             {
                 requestContext.Logger.InfoPii(LogMessages.CustomWebUiCallingAcquireAuthorizationCodePii(authorizationUri, redirectUri),
                                               LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
-                var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri)
+                var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri, cancellationToken)
                                             .ConfigureAwait(false);
                 if (uri == null)
                 {
@@ -81,25 +83,29 @@ namespace Microsoft.Identity.Client.UI
                     };
                 }
 
-                throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiRedirectUriWasNotMatchedToProperUri(uri.AbsolutePath, redirectUri.AbsolutePath));
+                throw new MsalCustomWebUiFailedException(
+                    CoreErrorMessages.CustomWebUiRedirectUriWasNotMatchedToProperUri(
+                        uri.AbsolutePath,
+                        redirectUri.AbsolutePath));
+            }
+            catch (OperationCanceledException)
+            {
+
+                requestContext.Logger.Info(LogMessages.CustomWebUiOperationCancelled);
+                return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
             }
             catch (Exception ex)
             {
-                var authStatus = AuthorizationStatus.UnknownError;
-
-                if (ex is OperationCanceledException)
+                if (ex is MsalCustomWebUiFailedException)
                 {
-                    requestContext.Logger.Info(LogMessages.CustomWebUiOperationCancelled);
-                    authStatus = AuthorizationStatus.UserCancel;
-                }
-                else
-                {
-                    requestContext.Logger.WarningPiiWithPrefix(ex, CoreErrorMessages.CustomWebUiAuthorizationCodeFailed);
+                    throw;
                 }
 
-                return new AuthorizationResult(authStatus, null);
+                requestContext.Logger.WarningPiiWithPrefix(ex, CoreErrorMessages.CustomWebUiAuthorizationCodeFailed);
+                throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiAuthorizationCodeFailed, ex);
             }
         }
+
 
         /// <inheritdoc />
         public void ValidateRedirectUri(Uri redirectUri)

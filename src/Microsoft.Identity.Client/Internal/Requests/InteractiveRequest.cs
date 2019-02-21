@@ -87,13 +87,13 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            await AcquireAuthorizationAsync().ConfigureAwait(false);
+            await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
             VerifyAuthorizationResult();
             var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
             return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
-        private async Task AcquireAuthorizationAsync()
+        private async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)
         {
             var authorizationUri = CreateAuthorizationUri(true, true);
 
@@ -106,7 +106,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _authorizationResult = await _webUi.AcquireAuthorizationAsync(
                                            authorizationUri,
                                            AuthenticationRequestParameters.RedirectUri,
-                                           AuthenticationRequestParameters.RequestContext).ConfigureAwait(false);
+                                           AuthenticationRequestParameters.RequestContext,
+                                           cancellationToken).ConfigureAwait(false);
                 uiEvent.UserCancelled = _authorizationResult.Status == AuthorizationStatus.UserCancel;
                 uiEvent.AccessDenied = _authorizationResult.Status == AuthorizationStatus.ProtocolError;
             }

@@ -107,20 +107,19 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         {
             ExecuteTest(
                 false,
-                ui => ui.AcquireAuthorizationCodeAsync(null, null)
+                ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri("http://blech"))),
                 request =>
                 {
                     try
                     {
                         request.ExecuteAsync(CancellationToken.None)
-                               .Wait();
+                               .GetAwaiter().GetResult();
                         Assert.Fail("MsalException should have been thrown here");
                     }
                     catch (Exception exc)
                     {
-                        Assert.IsTrue(exc.InnerException is MsalServiceException);
-                        Assert.AreEqual(CoreErrorCodes.UnknownError, ((MsalServiceException)exc.InnerException).ErrorCode);
+                        Assert.IsTrue(exc is MsalCustomWebUiFailedException);
                     }
                 });
         }
@@ -131,7 +130,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
             ExecuteTest(
                 false,
-                ui => ui.AcquireAuthorizationCodeAsync(null, null)
+                ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri))),
                 request =>
                 {
@@ -155,7 +154,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
             ExecuteTest(
                 true,
-                ui => ui.AcquireAuthorizationCodeAsync(null, null)
+                ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
                         .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code"))),
                 request =>
                 {

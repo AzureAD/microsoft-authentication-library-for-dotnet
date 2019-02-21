@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Client.Extensibility
@@ -45,7 +46,14 @@ namespace Microsoft.Identity.Client.Extensibility
         ///     URI computed by MSAL.NET that will let the UI extension
         ///     navigate to the STS authorization endpoint in order to sign-in the user and have them consent
         /// </param>
-        /// <param name="redirectUri"></param>
+        /// <param name="redirectUri">
+        ///     The redirect Uri that was configured. The auth code will be appended to this redirect uri and the browser
+        ///     will redirect to it. 
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     The cancellation token to which you should respond to. See https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation
+        ///     for details.
+        /// </param>
         /// <returns>
         ///     The URI returned back from the STS authorization endpoint. This URI contains a code=CODE
         ///     parameters that MSAL.NET will extract
@@ -57,6 +65,6 @@ namespace Microsoft.Identity.Client.Extensibility
         ///     In the event of cancellation, the implementer should return OperationCanceledException.
         ///     In the event of failure, the implementer should throw MsalCustomWebUiFailedException.
         /// </remarks>
-        Task<Uri> AcquireAuthorizationCodeAsync(Uri authorizationUri, Uri redirectUri);
+        Task<Uri> AcquireAuthorizationCodeAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
     }
 }
