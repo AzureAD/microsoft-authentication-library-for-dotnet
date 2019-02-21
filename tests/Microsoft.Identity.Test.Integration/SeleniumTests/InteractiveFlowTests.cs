@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
@@ -18,6 +19,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public class InteractiveFlowTests
     {
         private readonly TimeSpan _seleniumTimeout = TimeSpan.FromMinutes(2);
+        private static readonly string[] _scopes = new[] { "user.read" };
 
         #region MSTest Hooks
         /// <summary>
@@ -131,25 +133,56 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
-            Action<IWebDriver> seleniumLogic = (driver) =>
-            {
-                Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(labResponse.User);
-            };
-
-            SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
-
+            InitTestInfra(labResponse);
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
                                                                         .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
                                                                         .BuildConcrete();
 
             pca.ServiceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
+            // tests need to use http://localhost:port so that we can capture the AT
+            pca.RedirectUri = SeleniumWebUIFactory.FindFreeLocalhostRedirectUri();
 
-            // Act
-            AuthenticationResult result = await pca.AcquireTokenAsync(new[] { "user.read" }).ConfigureAwait(false);
+            Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
+            AuthenticationResult result = await pca.AcquireTokenAsync(_scopes).ConfigureAwait(false);
+            IAccount account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
-            // Assert
+            Trace.WriteLine("Part 2 - Clear the cache");
+            await pca.RemoveAsync(account).ConfigureAwait(false);
+            Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
+
+            Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
+            InitTestInfra(labResponse, withLoginHint: true);
+            result = await pca.AcquireTokenAsync(_scopes, labResponse.User.HomeUPN).ConfigureAwait(false);
+            account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+
+            Trace.WriteLine("Part 4 - Acquire a token silently");
+            result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
+            account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+        }
+
+        private static async Task<IAccount> AssertSingleAccountAsync(
+            LabResponse labResponse, 
+            PublicClientApplication pca, 
+            AuthenticationResult result)
+        {
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
+            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
+            Assert.AreEqual(labResponse.User.HomeUPN, account.Username);
+
+            return account;
+        }
+
+        private void InitTestInfra(LabResponse labResponse, bool withLoginHint = false)
+        {
+            Action<IWebDriver> seleniumLogic = (driver) =>
+            {
+                Trace.WriteLine("Starting Selenium automation");
+                driver.PerformLogin(labResponse.User, withLoginHint);
+            };
+
+            SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
+            PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(webUIFactory);
         }
     }
 
