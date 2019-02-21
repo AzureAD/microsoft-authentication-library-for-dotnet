@@ -1,24 +1,23 @@
 ﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
+using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Integration.SeleniumTests
 {
     [TestClass]
     public class InteractiveFlowTests
     {
-        private readonly TimeSpan _seleniumTimeout = TimeSpan.FromMinutes(2);
+        private readonly TimeSpan _seleniumTimeout = TimeSpan.FromMinutes(1);
         private static readonly string[] _scopes = new[] { "user.read" };
 
         #region MSTest Hooks
@@ -133,17 +132,16 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
-            InitTestInfra(labResponse);
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
-                                                                        .WithRedirectUri(SeleniumWebUIFactory.FindFreeLocalhostRedirectUri())
+                                                                        .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                                                                         .BuildConcrete();
 
-            pca.ServiceBundle.PlatformProxy.SetWebUiFactory(webUIFactory);
-            // tests need to use http://localhost:port so that we can capture the AT
-            pca.RedirectUri = SeleniumWebUIFactory.FindFreeLocalhostRedirectUri();
-
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
-            AuthenticationResult result = await pca.AcquireTokenAsync(_scopes).ConfigureAwait(false);
+            AuthenticationResult result = await pca
+                .AcquireTokenInteractive(_scopes, null)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
             IAccount account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
             Trace.WriteLine("Part 2 - Clear the cache");
@@ -151,19 +149,31 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
 
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
-            InitTestInfra(labResponse, withLoginHint: true);
-            result = await pca.AcquireTokenAsync(_scopes, labResponse.User.HomeUPN).ConfigureAwait(false);
+            result = await pca
+                .AcquireTokenInteractive(_scopes, null)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
+                .WithLoginHint(labResponse.User.HomeUPN)
+                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
+                .ConfigureAwait(false);
             account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
-            account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
             await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 
+        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, bool withLoginHint)
+        {
+            return new SeleniumWebUI((driver) =>
+            {
+                Trace.WriteLine("Starting Selenium automation");
+                driver.PerformLogin(user, withLoginHint);
+            });
+        }
+
         private static async Task<IAccount> AssertSingleAccountAsync(
-            LabResponse labResponse, 
-            PublicClientApplication pca, 
+            LabResponse labResponse,
+            PublicClientApplication pca,
             AuthenticationResult result)
         {
             Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
@@ -172,18 +182,5 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             return account;
         }
-
-        private void InitTestInfra(LabResponse labResponse, bool withLoginHint = false)
-        {
-            Action<IWebDriver> seleniumLogic = (driver) =>
-            {
-                Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(labResponse.User, withLoginHint);
-            };
-
-            SeleniumWebUIFactory webUIFactory = new SeleniumWebUIFactory(seleniumLogic, _seleniumTimeout);
-            PlatformProxyFactory.GetPlatformProxy().SetWebUiFactory(webUIFactory);
-        }
     }
-
 }
