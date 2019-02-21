@@ -42,8 +42,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
     {
         public RequestContext RequestContext { get; set; }
 
-        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri,
-            RequestContext requestContext)
+        public override async Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri,
+            RequestContext requestContext, 
+            CancellationToken cancellationToken)
         {
             viewController = null;
             InvokeOnMainThread(() =>
@@ -54,7 +57,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.SystemWebview
 
             returnedUriReady = new SemaphoreSlim(0);
             Authenticate(authorizationUri, redirectUri, requestContext);
-            await returnedUriReady.WaitAsync().ConfigureAwait(false);
+            await returnedUriReady.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             //dismiss safariviewcontroller
             viewController.InvokeOnMainThread(() =>

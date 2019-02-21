@@ -55,7 +55,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
             returnedUriReady.Release();
         }
 
-        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(Uri authorizationUri, Uri redirectUri, RequestContext requestContext);
+        public abstract Task<AuthorizationResult> AcquireAuthorizationAsync(
+            Uri authorizationUri, 
+            Uri redirectUri, 
+            RequestContext requestContext, 
+            CancellationToken cancellationToken);
 
         public abstract void ValidateRedirectUri(Uri redirectUri);
     }

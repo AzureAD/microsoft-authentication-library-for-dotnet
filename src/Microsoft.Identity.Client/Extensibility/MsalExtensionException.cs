@@ -42,5 +42,15 @@ namespace Microsoft.Identity.Client.Extensibility
             : base(message)
         {
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
+        public MsalExtensionException(string message, Exception innerException)
+            : base(message, string.Empty, innerException)
+        {
+        }
     }
 }
