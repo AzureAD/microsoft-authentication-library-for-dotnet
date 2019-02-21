@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {
-        public const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        //public const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         public const string Authority = "https://login.microsoftonline.com/organizations/";
         public string[] Scopes = { "User.Read" };
 
@@ -60,11 +60,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()
         {
-            var user = LabUserHelper.GetDefaultUser().User;
+            var labResponse = LabUserHelper.GetDefaultUser();
+            var user = labResponse.User;
 
             SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
 
             AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
             Assert.IsNotNull(authResult);
@@ -84,16 +85,28 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithFederatedUsernamePasswordAsync()
         {
-            var user = LabUserHelper.GetDefaultUser().User;
+            // Arrange
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV4,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = false
+            };
 
-            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
+            var labResponse = LabUserHelper.GetLabUserData(query);
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            SecureString securePassword = new NetworkCredential("", labResponse.User.Password).SecurePassword;
+
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(
+                Scopes, 
+                labResponse.User.Upn, 
+                securePassword).ConfigureAwait(false);
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
-            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
             // If test fails with "user needs to consent to the application, do an interactive request" error,
             // Do the following: 
             // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
@@ -107,13 +120,14 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
-            var user = LabUserHelper.GetDefaultUser().User;
+            var labResponse = LabUserHelper.GetDefaultUser();
+            var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
 
             try
             {
@@ -138,13 +152,22 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithFederatedUsernameIncorrectPassword()
         {
-            var user = LabUserHelper.GetDefaultUser().User;
+            UserQuery query = new UserQuery
+            {
+                FederationProvider = FederationProvider.AdfsV4,
+                IsMamUser = false,
+                IsMfaUser = false,
+                IsFederatedUser = false
+            };
+
+            var labResponse = LabUserHelper.GetLabUserData(query);
+            var user = labResponse.User;
 
             SecureString incorrectSecurePassword = new SecureString();
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(ClientId, Authority);
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
                  await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
