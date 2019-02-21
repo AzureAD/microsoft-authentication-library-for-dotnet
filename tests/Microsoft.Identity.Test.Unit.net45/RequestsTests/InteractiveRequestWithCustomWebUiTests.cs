@@ -124,6 +124,32 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
         }
 
+
+        [TestMethod]
+        public void TestInteractiveWithCustomWebUi_UnhandledException()
+        {
+            // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
+            ExecuteTest(
+                false,
+                 ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
+                        .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); } ),
+                request =>
+                {
+                    try
+                    {
+                        request.ExecuteAsync(CancellationToken.None)
+                               .GetAwaiter().GetResult();
+                        Assert.Fail("MsalException should have been thrown here");
+                    }
+                    catch (Exception exc)
+                    {
+                        Assert.IsTrue(exc is MsalCustomWebUiFailedException);
+                        Assert.IsTrue(exc.InnerException is InvalidOperationException);
+
+                    }
+                });
+        }
+
         [TestMethod]
         public void TestInteractiveWithCustomWebUi_CorrectRedirectUri_NoQueryDataForCode()
         {
