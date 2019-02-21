@@ -39,16 +39,19 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
     public static class SeleniumExtensions
     {
+        private const int ImplicitTimeoutSeconds = 10;
+        private const int ExplicitTimeoutSeconds = 15;
+
         public static IWebDriver CreateDefaultWebDriver()
         {
             ChromeOptions options = new ChromeOptions();
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var driver = new ChromeDriver(options);
-            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
 
             return driver;
         }
@@ -78,7 +81,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
         public static IWebElement WaitForElementToBeVisibleAndEnabled(this IWebDriver driver, By by)
         {
-            WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            WebDriverWait webDriverWait = new WebDriverWait(driver, TimeSpan.FromSeconds(ExplicitTimeoutSeconds));
             IWebElement continueBtn = webDriverWait.Until(dr =>
             {
                 try
@@ -102,15 +105,18 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             return continueBtn;
         }
 
-        public static void PerformLogin(this IWebDriver driver, LabUser user)
+        public static void PerformLogin(this IWebDriver driver, LabUser user, bool withLoginHint = false)
         {
             UserInformationFieldIds fields = new UserInformationFieldIds(user);
 
-            Trace.WriteLine("Logging in ... Entering username");
-            driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
+            if (!withLoginHint)
+            {
+                Trace.WriteLine("Logging in ... Entering username");
+                driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
 
-            Trace.WriteLine("Logging in ... Clicking <Next> after username");
-            driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
+                Trace.WriteLine("Logging in ... Clicking <Next> after username");
+                driver.FindElement(By.Id(fields.AADSignInButtonId)).Click();
+            }
 
             if (user.FederationProvider == FederationProvider.AdfsV2)
             {
