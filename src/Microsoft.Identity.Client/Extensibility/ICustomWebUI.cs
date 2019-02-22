@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// </param>
         /// <returns>
         ///     The URI returned back from the STS authorization endpoint. This URI contains a code=CODE
-        ///     parameters that MSAL.NET will extract
+        ///     parameters that MSAL.NET will extract and redeem.
         /// </returns>
         /// <remarks>
         ///     The authorizationUri is crafted to leverage PKCE in order to protect the token from a man
