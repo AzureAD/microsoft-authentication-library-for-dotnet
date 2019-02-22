@@ -67,8 +67,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion
 
+
+
         [TestMethod]
-        public async Task InteractiveAuth_DefaultUserAsync()
+        public async Task Interactive_AADAsync()
         {
             // Arrange
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
@@ -86,7 +88,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 IsMfaUser = false,
                 IsFederatedUser = false
             };
-
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
             await RunTestForUserAsync(labResponse).ConfigureAwait(false);
