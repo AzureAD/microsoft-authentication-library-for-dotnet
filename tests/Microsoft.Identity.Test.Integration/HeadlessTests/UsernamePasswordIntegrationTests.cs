@@ -57,16 +57,44 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #region Happy Path Tests
         [TestMethod]
-        public async Task AcquireTokenWithManagedUsernamePasswordAsync()
+        public async Task ROPC_AAD_Async()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
-        public async Task AcquireTokenWithFederatedUsernamePasswordAsync()
+        public async Task ROPC_ADFSv4Federated_Async()
         {
             var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, true);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_ADFSv4Managed_Async()
+        {
+            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, false);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_ADFSv3Federated_Async()
+        {
+            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, true);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_ADFSv3Managed_Async()
+        {
+            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, false);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
+        }
+
+        [TestMethod]
+        public async Task ROPC_ADFSv2Fderated_Async()
+        {
+            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV2, true);
             await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
