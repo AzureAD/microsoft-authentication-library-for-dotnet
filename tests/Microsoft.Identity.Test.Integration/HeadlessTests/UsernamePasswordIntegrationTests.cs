@@ -40,7 +40,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {
-        //public const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         public const string Authority = "https://login.microsoftonline.com/organizations/";
         public string[] Scopes = { "User.Read" };
 
@@ -56,68 +55,24 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             TestCommon.ResetStateAndInitMsal();
         }
 
+        #region Happy Path Tests
         [TestMethod]
-        [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernamePasswordAsync()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
-            var user = labResponse.User;
-
-            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
-
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
-
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-            Assert.AreEqual(user.Upn, authResult.Account.Username);
-            // If test fails with "user needs to consent to the application, do an interactive request" error,
-            // Do the following: 
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
-            // string password = ((LabUser)user).GetPassword();
-            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
-            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
-            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithFederatedUsernamePasswordAsync()
         {
-            // Arrange
-            UserQuery query = new UserQuery
-            {
-                FederationProvider = FederationProvider.AdfsV4,
-                IsMamUser = false,
-                IsMfaUser = false,
-                IsFederatedUser = false
-            };
-
-            var labResponse = LabUserHelper.GetLabUserData(query);
-
-            SecureString securePassword = new NetworkCredential("", labResponse.User.Password).SecurePassword;
-
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(
-                Scopes, 
-                labResponse.User.Upn, 
-                securePassword).ConfigureAwait(false);
-            Assert.IsNotNull(authResult);
-            Assert.IsNotNull(authResult.AccessToken);
-            Assert.IsNotNull(authResult.IdToken);
-            Assert.AreEqual(labResponse.User.Upn, authResult.Account.Username);
-            // If test fails with "user needs to consent to the application, do an interactive request" error,
-            // Do the following: 
-            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
-            // string password = ((LabUser)user).GetPassword();
-            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
-            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
-            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
+            var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV4, true);
+            await RunHappyPathTestAsync(labResponse).ConfigureAwait(false);
         }
 
+        #endregion
+
         [TestMethod]
-        [TestCategory("UsernamePasswordIntegrationTests")]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
@@ -149,7 +104,6 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
-        [TestCategory("UsernamePasswordIntegrationTests")]
         public void AcquireTokenWithFederatedUsernameIncorrectPassword()
         {
             UserQuery query = new UserQuery
@@ -171,6 +125,28 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
                  await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
+        }
+
+        private async Task RunHappyPathTestAsync(LabResponse labResponse)
+        {
+            var user = labResponse.User;
+
+            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
+
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
+
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            Assert.IsNotNull(authResult);
+            Assert.IsNotNull(authResult.AccessToken);
+            Assert.IsNotNull(authResult.IdToken);
+            Assert.AreEqual(user.Upn, authResult.Account.Username);
+            // If test fails with "user needs to consent to the application, do an interactive request" error,
+            // Do the following: 
+            // 1) Add in code to pull the user's password before creating the SecureString, and put a breakpoint there.
+            // string password = ((LabUser)user).GetPassword();
+            // 2) Using the MSAL Desktop app, make sure the ClientId matches the one used in integration testing.
+            // 3) Do the interactive sign-in with the MSAL Desktop app with the username and password from step 1.
+            // 4) After successful log-in, remove the password line you added in with step 1, and run the integration test again.
         }
     }
 }
