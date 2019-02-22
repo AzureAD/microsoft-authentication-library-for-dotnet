@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             Trace.WriteLine("Acquire a token using a not so common authority alias");
 
             AuthenticationResult authResult = await pca.AcquireTokenByUsernamePassword(
-                new[] { "User.Read" }, 
-                user.Upn, 
+               _scopes,
+                user.Upn,
                 new NetworkCredential("", user.Password).SecurePassword)
                 .WithAuthority("https://sts.windows.net/" + user.CurrentTenantId + "/")
                 .ExecuteAsync()
@@ -71,7 +71,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             Trace.WriteLine("Acquire a token silently using the common authority alias");
 
-            authResult = await pca.AcquireTokenSilent(new[] { "User.Read" }, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
+            authResult = await pca.AcquireTokenSilent(_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
                 .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
                 .ExecuteAsync()
                 .ConfigureAwait(false);
