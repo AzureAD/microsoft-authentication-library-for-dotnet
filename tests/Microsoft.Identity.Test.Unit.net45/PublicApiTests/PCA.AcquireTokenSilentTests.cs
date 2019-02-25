@@ -27,9 +27,7 @@
 
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
@@ -66,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                        .Build();
 
             var ex = AssertException.TaskThrows<MsalUiRequiredException>(
-                () => app.AcquireTokenSilentAsync(MsalTestConstants.Scope.ToArray(), (IAccount)null));
+                () => app.AcquireTokenSilentAsync(MsalTestConstants.Scope.ToArray(), null));
             Assert.AreEqual(MsalUiRequiredException.UserNullError, ex.ErrorCode);
 
             AssertException.TaskThrows<ArgumentNullException>(
@@ -271,7 +269,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .WithHttpManager(httpManager)
                                                                             .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
-                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);             
+                _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
