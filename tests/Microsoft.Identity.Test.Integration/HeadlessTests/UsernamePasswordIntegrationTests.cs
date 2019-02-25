@@ -40,8 +40,8 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class UsernamePasswordIntegrationTests
     {
-        public const string Authority = "https://login.microsoftonline.com/organizations/";
-        public string[] Scopes = { "User.Read" };
+        private const string _authority = "https://login.microsoftonline.com/organizations/";
+        private static readonly string[] _scopes = { "User.Read" };
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -110,12 +110,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
 
             try
             {
                 var result =
-                     await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword)
+                     await msalPublicClient.AcquireTokenByUsernamePasswordAsync(_scopes, user.Upn, incorrectSecurePassword)
                      .ConfigureAwait(false);
             }
             catch (MsalServiceException ex)
@@ -149,10 +149,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             incorrectSecurePassword.AppendChar('x');
             incorrectSecurePassword.MakeReadOnly();
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
 
             var result = Assert.ThrowsExceptionAsync<MsalException>(async () =>
-                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
+                 await msalPublicClient.AcquireTokenByUsernamePasswordAsync(_scopes, user.Upn, incorrectSecurePassword).ConfigureAwait(false));
         }
 
         private async Task RunHappyPathTestAsync(LabResponse labResponse)
@@ -161,9 +161,11 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
             SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
 
-            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, Authority);
+            PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
 
-            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            //AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(Scopes, user.Upn, securePassword).ConfigureAwait(false);
+            AuthenticationResult authResult = await msalPublicClient.AcquireTokenByUsernamePasswordAsync(_scopes, user.Upn, securePassword).ConfigureAwait(false);
+
             Assert.IsNotNull(authResult);
             Assert.IsNotNull(authResult.AccessToken);
             Assert.IsNotNull(authResult.IdToken);
