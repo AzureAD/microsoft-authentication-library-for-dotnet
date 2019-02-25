@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
-                var exception = AssertException.Throws<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = AssertException.TaskThrows<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     MsalTestConstants.Scope.ToArray(),
                     "other_login_hint@contoso.com")
                     .WithAuthority(app.Authority, false)
@@ -324,7 +324,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid1", "utid");
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, "uid2", "utid");
 
-                var exception = AssertException.Throws<MsalUiRequiredException>(() => app.AcquireTokenSilent(
+                var exception = AssertException.TaskThrows<MsalUiRequiredException>(() => app.AcquireTokenSilent(
                     MsalTestConstants.Scope.ToArray(),
                     MsalTestConstants.DisplayableId)
                     .WithAuthority(app.Authority, false)

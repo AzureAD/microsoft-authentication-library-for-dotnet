@@ -43,77 +43,6 @@ namespace Microsoft.Identity.Client
 {
     public abstract partial class ClientApplicationBase : IClientApplicationBaseExecutor
     {
-        internal ClientApplicationBase(ApplicationConfiguration config)
-        {
-            ServiceBundle = Core.ServiceBundle.Create(config);
-
-            if (config.UserTokenLegacyCachePersistenceForTest != null)
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
-            }
-            else
-            {
-                UserTokenCacheInternal = new TokenCache(ServiceBundle);
-            }
-        }
-
-        internal void LogVersionInfo()
-        {
-            CreateRequestContext().Logger.Info(
-                string.Format(
-                    CultureInfo.InvariantCulture,
-                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'",
-                    ServiceBundle.PlatformProxy.GetProductName(),
-                    MsalIdHelper.GetMsalVersion(),
-                    AssemblyUtils.GetAssemblyFileVersionAttribute(),
-                    AssemblyUtils.GetAssemblyInformationalVersion()));
-        }
-
-        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenSilentParameters silentParameters,
-            CancellationToken cancellationToken)
-        {
-            LogVersionInfo();
-
-            var customAuthority = commonParameters.AuthorityOverride == null
-                                      ? GetAuthority(silentParameters.Account)
-                                      : Instance.Authority.CreateAuthorityWithOverride(ServiceBundle, commonParameters.AuthorityOverride);
-
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal, customAuthority);
-
-            requestParameters.Account = silentParameters.Account;
-
-            var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByRefreshTokenParameters refreshTokenParameters,
-            CancellationToken cancellationToken)
-        {
-            LogVersionInfo();
-
-            var requestContext = CreateRequestContext();
-            if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
-            {
-                commonParameters.Scopes = new SortedSet<string>
-                {
-                    ClientId + "/.default"
-                };
-                requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
-            }
-
-            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParameters.IsRefreshTokenRequest = true;
-
-            requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
-
-            var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
-            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
         /// <summary>
         /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
         /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
@@ -178,6 +107,87 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(loginHint));
             }
 
+            return AcquireTokenSilentParameterBuilder.Create(this, scopes, loginHint);
+        }
+
+        internal ClientApplicationBase(ApplicationConfiguration config)
+        {
+            ServiceBundle = Core.ServiceBundle.Create(config);
+
+            if (config.UserTokenLegacyCachePersistenceForTest != null)
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle, config.UserTokenLegacyCachePersistenceForTest);
+            }
+            else
+            {
+                UserTokenCacheInternal = new TokenCache(ServiceBundle);
+            }
+        }
+
+        internal void LogVersionInfo()
+        {
+            CreateRequestContext().Logger.Info(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'",
+                    ServiceBundle.PlatformProxy.GetProductName(),
+                    MsalIdHelper.GetMsalVersion(),
+                    AssemblyUtils.GetAssemblyFileVersionAttribute(),
+                    AssemblyUtils.GetAssemblyInformationalVersion()));
+        }
+
+        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenSilentParameters silentParameters,
+            CancellationToken cancellationToken)
+        {
+            LogVersionInfo();
+
+            IAccount account = GetAccountFromParamsOrLoginHint(silentParameters);
+
+            var customAuthority = commonParameters.AuthorityOverride == null
+                                      ? GetAuthority(account)
+                                      : Instance.Authority.CreateAuthorityWithOverride(
+                                          ServiceBundle, 
+                                          commonParameters.AuthorityOverride);
+
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal, customAuthority);
+            requestParameters.Account = account;
+
+            var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
+            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<AuthenticationResult> IClientApplicationBaseExecutor.ExecuteAsync(
+            AcquireTokenCommonParameters commonParameters,
+            AcquireTokenByRefreshTokenParameters refreshTokenParameters,
+            CancellationToken cancellationToken)
+        {
+            LogVersionInfo();
+
+            var requestContext = CreateRequestContext();
+            if (commonParameters.Scopes == null || !commonParameters.Scopes.Any())
+            {
+                commonParameters.Scopes = new SortedSet<string>
+                {
+                    ClientId + "/.default"
+                };
+                requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
+            }
+
+            var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
+            requestParameters.IsRefreshTokenRequest = true;
+
+            requestContext.Logger.Info(LogMessages.UsingXScopesForRefreshTokenRequest(commonParameters.Scopes.Count()));
+
+            var handler = new ByRefreshTokenRequest(ServiceBundle, requestParameters, refreshTokenParameters);
+            return await handler.RunAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        
+
+        private IAccount GetSingleAccountForLoginHint(string loginHint)
+        {
             var accounts = UserTokenCacheInternal.GetAccounts(Authority)
                 .Where(
                     a => !string.IsNullOrWhiteSpace(a.Username) &&
@@ -198,7 +208,19 @@ namespace Microsoft.Identity.Client
                     MsalErrorMessage.MultipleAccountsForLoginHint);
             }
 
-            return AcquireTokenSilentParameterBuilder.Create(this, scopes, accounts.First());
+            return accounts.First();
         }
+
+
+        private IAccount GetAccountFromParamsOrLoginHint(AcquireTokenSilentParameters silentParameters)
+        {
+            if (silentParameters.Account != null)
+            {
+                return silentParameters.Account;
+            }
+
+            return GetSingleAccountForLoginHint(silentParameters.LoginHint);
+        }
+
     }
 }

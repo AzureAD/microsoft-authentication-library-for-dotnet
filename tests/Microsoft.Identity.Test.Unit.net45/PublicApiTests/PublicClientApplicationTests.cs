@@ -1030,10 +1030,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                .WithForceRefresh(true);
             CheckBuilderCommonMethods(silentBuilder);
 
-            silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, "upn@live.com")
-                .WithForceRefresh(true);
+            silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, "upn@live.co.uk")
+              .WithForceRefresh(true);
             CheckBuilderCommonMethods(silentBuilder);
-
 
             var byRefreshTokenBuilder = ((IByRefreshToken)app).AcquireTokenByRefreshToken(MsalTestConstants.Scope, "refreshtoken")
                                   .WithRefreshToken("refreshtoken");
