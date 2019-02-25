@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 MsalTestConstants.ProductionPrefCacheEnvironment,
                 MsalTestConstants.ClientId,
                 MsalTestConstants.Scope.AsSingleString(),
-                uid,
+                utid,
                 "",
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExpiresIn)),
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
