@@ -748,10 +748,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             PublicClientApplicationTests.CheckBuilderCommonMethods(onBehalfOfBuilder);
 
             var silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, MsalTestConstants.User)
-               .WithAccount(MsalTestConstants.User)
-               .WithForceRefresh(true)
-               .WithLoginHint("loginhint");
+               .WithForceRefresh(true);
             PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
+
+            silentBuilder = app.AcquireTokenSilent(MsalTestConstants.Scope, "user@contoso.com")
+                .WithForceRefresh(true);
+            PublicClientApplicationTests.CheckBuilderCommonMethods(silentBuilder);
+
 
             var requestUrlBuilder = app.GetAuthorizationRequestUrl(MsalTestConstants.Scope)
                                        .WithAccount(MsalTestConstants.User)

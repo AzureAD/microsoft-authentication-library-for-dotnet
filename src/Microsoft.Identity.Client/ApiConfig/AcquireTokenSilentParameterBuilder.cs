@@ -56,10 +56,19 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns></returns>
         internal static AcquireTokenSilentParameterBuilder Create(
             IClientApplicationBase clientApplicationBase,
-            IEnumerable<string> scopes, IAccount account)
+            IEnumerable<string> scopes,
+            IAccount account)
         {
             return new AcquireTokenSilentParameterBuilder(clientApplicationBase).WithScopes(scopes).WithAccount(account);
         }
+
+      
+        private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
+        {
+            Parameters.Account = account;
+            return this;
+        }
+     
 
         /// <summary>
         /// Specifies if the client application should force refreshing the
@@ -77,26 +86,6 @@ namespace Microsoft.Identity.Client.ApiConfig
         public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
             Parameters.ForceRefresh = forceRefresh;
-            return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
-        {
-            Parameters.LoginHint = loginHint;
-            return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
-        {
-            Parameters.Account = account;
             return this;
         }
 

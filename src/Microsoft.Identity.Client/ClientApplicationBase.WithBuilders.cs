@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Utils;
 
@@ -82,7 +83,6 @@ namespace Microsoft.Identity.Client
             var requestParameters = CreateRequestParameters(commonParameters, UserTokenCacheInternal, customAuthority);
 
             requestParameters.Account = silentParameters.Account;
-            requestParameters.LoginHint = silentParameters.LoginHint;
 
             var handler = new SilentRequest(ServiceBundle, requestParameters, silentParameters);
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
@@ -140,14 +140,65 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
         /// specify extra query parameters
         /// 
-        /// You can also use null for <paramref name="account"/> and then use one of the following:
-        /// <see cref="AcquireTokenSilentParameterBuilder.WithAccount(IAccount)"/> or 
-        /// <see cref="AcquireTokenSilentParameterBuilder.WithLoginHint(string)"/> to specify the account in the
-        /// case where your application manages several accounts.
         /// </remarks>
-        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account = null)
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
             return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);
+        }
+
+        /// <summary>
+        /// [V3 API] Attempts to acquire an access token for the <paramref name="loginHint"/> from the user token cache, 
+        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// </summary>
+        /// <param name="scopes">Scopes requested to access a protected API</param>
+        /// <param name="loginHint">Typically the username, in UPN format, e.g. johnd@contoso.com </param>
+        /// <returns>An <see cref="AcquireTokenSilentParameterBuilder"/> used to build the token request, adding optional
+        /// parameters</returns>
+        /// <exception cref="MsalUiRequiredException">will be thrown in the case where an interaction is required with the end user of the application,
+        /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
+        /// or the user needs to perform two factor authentication</exception>
+        /// <remarks>
+        /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
+        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
+        ///
+        /// See also the additional parameters that you can set chain:
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithAuthority(string, bool)"/> or one of its
+        /// overrides to request a token for a different authority than the one set at the application construction
+        /// <see cref="AcquireTokenSilentParameterBuilder.WithForceRefresh(bool)"/> to bypass the user token cache and
+        /// force refreshing the token, as well as
+        /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/> to
+        /// specify extra query parameters
+        /// 
+        /// </remarks>
+        public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint)
+        {
+            if (string.IsNullOrWhiteSpace(loginHint))
+            {
+                throw new ArgumentNullException(nameof(loginHint));
+            }
+
+            var accounts = UserTokenCacheInternal.GetAccounts(Authority)
+                .Where(
+                    a => !string.IsNullOrWhiteSpace(a.Username) &&
+                    a.Username.Equals(loginHint, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (!accounts.Any())
+            {
+                throw new MsalUiRequiredException(
+                    MsalUiRequiredException.NoAccountForLoginHint,
+                    MsalErrorMessage.NoAccountForLoginHint);
+            }
+
+            if (accounts.Count() > 1)
+            {
+                throw new MsalUiRequiredException(
+                    MsalUiRequiredException.MultipleAccountsForLoginHint,
+                    MsalErrorMessage.MultipleAccountsForLoginHint);
+            }
+
+            return AcquireTokenSilentParameterBuilder.Create(this, scopes, accounts.First());
         }
     }
 }

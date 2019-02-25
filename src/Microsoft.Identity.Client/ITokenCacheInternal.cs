@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Client
         object LockObject { get; }
 
         void RemoveAccount(IAccount account, RequestContext requestContext);
-        IEnumerable<IAccount> GetAccounts(string authority, RequestContext requestContext);
+        IEnumerable<IAccount> GetAccounts(string authority);
 
         Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(
             AuthenticationRequestParameters authenticationRequestParameters,

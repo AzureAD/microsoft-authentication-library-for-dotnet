@@ -705,7 +705,7 @@ namespace Microsoft.Identity.Client
             return preferredEnvironmentHost;
         }
 
-        IEnumerable<IAccount> ITokenCacheInternal.GetAccounts(string authority, RequestContext requestContext)
+        IEnumerable<IAccount> ITokenCacheInternal.GetAccounts(string authority)
         {
             var environment = new Uri(authority).Host;
             lock (LockObject)

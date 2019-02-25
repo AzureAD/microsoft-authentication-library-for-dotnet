@@ -107,7 +107,7 @@ namespace Microsoft.Identity.Client
             }
             else
             {
-                accounts = UserTokenCacheInternal.GetAccounts(Authority, requestContext);
+                accounts = UserTokenCacheInternal.GetAccounts(Authority);
             }
 
             return Task.FromResult(accounts);

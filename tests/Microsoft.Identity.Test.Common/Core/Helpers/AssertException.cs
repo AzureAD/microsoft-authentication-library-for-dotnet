@@ -103,30 +103,37 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         }
 
         [DebuggerStepThrough]
-        public static T TaskThrows<T>(Func<Task> testCode)
+        public static T TaskThrows<T>(Func<Task> testCode, bool allowDerived = false)
             where T : Exception
         {
-            var exception = Recorder.Exception<AggregateException>(() => testCode().Wait());
+            var exception = Recorder.Exception(() => testCode().Wait());
 
             if (exception == null)
             {
                 throw new AssertFailedException("AssertExtensions.Throws failed. No exception occurred.");
             }
 
-            var exceptionsMatching = exception.InnerExceptions.OfType<T>().ToList();
-
-            if (!exceptionsMatching.Any())
+            if (exception is AggregateException aggEx)
             {
-                throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+                var exceptionsMatching = aggEx.InnerExceptions.OfType<T>().ToList();
+
+                if (!exceptionsMatching.Any())
+                {
+                    throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
+                }
+
+                return exceptionsMatching.First();
             }
 
-            return exceptionsMatching.First();
+            CheckExceptionType<T>(exception, allowDerived);
+
+            return (exception as T);
         }
 
         [DebuggerStepThrough]
         public static void TaskDoesNotThrow(Func<Task> testCode)
         {
-            var exception = Recorder.Exception<AggregateException>(() => testCode().Wait());
+            var exception = Recorder.Exception(() => testCode().Wait());
 
             if (exception == null)
             {
@@ -189,6 +196,20 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
         private static class Recorder
         {
             [DebuggerStepThrough]
+            public static Exception Exception(Action code)
+            {
+                try
+                {
+                    code();
+                    return null;
+                }
+                catch (Exception e)
+                {
+                    return e;
+                }
+            }
+
+            [DebuggerStepThrough]
             public static TException Exception<TException>(Action code)
                 where TException : Exception
             {
@@ -200,6 +221,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 catch (TException ex)
                 {
                     return ex;
+                }
+                catch (Exception e)
+                {
+                    throw new AssertFailedException($"Expected to capture a {typeof(TException)} exception but got {e.GetType()}");
                 }
             }
 
@@ -215,6 +240,10 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 catch (TException ex)
                 {
                     return ex;
+                }
+                catch (Exception e)
+                {
+                    throw new AssertFailedException($"Expected to capture a {typeof(TException)} exception but got {e.GetType()}");
                 }
             }
         }
