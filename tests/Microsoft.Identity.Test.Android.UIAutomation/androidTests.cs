@@ -91,14 +91,16 @@ namespace Microsoft.Identity.Test.UIAutomation
                 AcquireTokenADFSV4InteractiveFederatedTest,
                 AcquireTokenADFSV4InteractiveNonFederatedTest,
 
-                B2CFacebookB2CLoginAuthorityAcquireTokenTest,
-                B2CFacebookMicrosoftAuthorityAcquireTokenTest,
                 B2CLocalAccountAcquireTokenTest,
                 // Google Auth does not support embedded webview from b2clogin.com authority.
                 // App Center cannot run system browser tests yet, so this test can only be run in system browser locally.
                 //B2CGoogleB2CLoginAuthorityAcquireTokenTest,
+
+                // Ignored tests
                 //B2CGoogleMicrosoftAuthorityAcquireTokenTest,
                 //B2CFacebookEditPolicyAcquireTokenTest,
+                //B2CFacebookMicrosoftAuthorityAcquireTokenTest
+                //B2CFacebookB2CLoginAuthorityAcquireTokenTest
             };
 
             var hasFailed = false;
