@@ -95,9 +95,10 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await AcquireAuthorizationAsync().ConfigureAwait(false);
             VerifyAuthorizationResult();
 
-            if (AuthenticationRequestParameters.IsBrokerEnabled || BrokerInvocationRequired())
+            if (AuthenticationRequestParameters.IsBrokerEnabled)
             {
                 _msalTokenResponse = await SendTokenRequestWithBrokerAsync(cancellationToken).ConfigureAwait(false);
+                ValidateResponseFromBroker(_msalTokenResponse);
             }
             else
             {
@@ -115,7 +116,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             Broker = brokerFactory.CreateBrokerFacade(ServiceBundle);
 
-            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent))
+            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent) || BrokerInvocationRequired())
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
 
@@ -125,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
             else
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Error(LogMessages.BrokerAuthenticationDidNotSucceed);
+                AuthenticationRequestParameters.RequestContext.Logger.Error(LogMessages.AuthenticationWithBrokerDidNotSucceed);
                 throw new MsalServiceException(MsalError.CannotInvokeBroker, MsalErrorMessage.CannotInvokeBroker);
             }
         }
@@ -141,9 +142,30 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 _brokerPayload[BrokerParameter.BrokerInstallUrl] = _authorizationResult.Code;
                 return true;
             }
-
-            AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationNotRequired);
             return false;
+        }
+
+        internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
+        {
+            AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
+            if (msalTokenResponse.AccessToken != null)
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    LogMessages.BrokerResponseContainsAccessToken +
+                    msalTokenResponse.AccessToken.Count());
+                return;
+            }
+            else if (msalTokenResponse.Error != null)
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(
+                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
+                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
+            }
+            else
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
+                throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
+            }
         }
 
         private async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)

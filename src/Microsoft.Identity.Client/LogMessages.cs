@@ -56,12 +56,11 @@ namespace Microsoft.Identity.Client
         public const string CustomWebUiCallingAcquireAuthorizationCodeNoPii = "Calling CustomWebUi.AcquireAuthorizationCode";
 
         public const string CheckMsalTokenResponseReturnedFromBroker = "Checking MsalTokenResponse returned from broker. ";
-        public const string BrokerResponseContainsAccessToken = "B";
+        public const string BrokerResponseContainsAccessToken = "Broker response contains access token. Access token count: ";
         public const string UnknownErrorReturnedInBrokerResponse = "Unknown error returned in broker response. ";
         public const string BrokerInvocationRequired = "Broker invocation required. Adding BrokerInstallUrl to broker payload. ";
-        public const string BrokerInvocationNotRequired = "Broker invocation not required. Using regular auth flow. ";
         public const string CanInvokeBrokerAcquireTokenWithBroker = "Can invoke broker. Will attempt to acquire token with broker. ";
-        public const string BrokerAuthenticationDidNotSucceed = "Broker authentication did not succeed, or the broker install failed. " +
+        public const string AuthenticationWithBrokerDidNotSucceed = "Broker authentication did not succeed, or the broker install failed. " +
             "See https://aka.ms/msal-net-brokers for more information. ";
 
 
