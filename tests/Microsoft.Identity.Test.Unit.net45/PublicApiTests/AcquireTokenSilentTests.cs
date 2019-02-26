@@ -58,10 +58,9 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void NullAccount_EmptyLoginHint()
         {
-            var receiver = new MyReceiver();
-            IPublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                       .WithTelemetry(receiver.HandleTelemetryEvents)
-                                                                       .Build();
+            IPublicClientApplication app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .Build();
 
             var ex = AssertException.TaskThrows<MsalUiRequiredException>(
                 () => app.AcquireTokenSilentAsync(MsalTestConstants.Scope.ToArray(), null));
@@ -261,13 +260,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public async Task AcquireTokenSilent_LoginHintAsync()
         {
-            var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 
@@ -289,13 +286,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         [TestMethod]
         public void AcquireTokenSilent_LoginHint_NoAccount()
         {
-            var receiver = new MyReceiver();
             using (var httpManager = new MockHttpManager())
             {
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(MsalTestConstants.AuthorityTestTenant), true)
                                                                             .WithHttpManager(httpManager)
-                                                                            .WithTelemetry(receiver.HandleTelemetryEvents)
                                                                             .BuildConcrete();
                 _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor);
 

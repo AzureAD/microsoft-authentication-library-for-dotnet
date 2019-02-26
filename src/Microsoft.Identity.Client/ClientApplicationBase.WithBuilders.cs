@@ -44,8 +44,8 @@ namespace Microsoft.Identity.Client
     public abstract partial class ClientApplicationBase : IClientApplicationBaseExecutor
     {
         /// <summary>
-        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache, 
-        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// [V3 API] Attempts to acquire an access token for the <paramref name="account"/> from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account for which the token is requested. This parameter is optional.
@@ -58,7 +58,7 @@ namespace Microsoft.Identity.Client
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
-        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window - 
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
@@ -76,8 +76,9 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
-        /// [V3 API] Attempts to acquire an access token for the <paramref name="loginHint"/> from the user token cache, 
-        /// with advanced parameters controlling the network call. See https://aka.ms/msal-net-acquiretokensilent for more details
+        /// [V3 API] Attempts to acquire an access token for the <see cref="IAccount"/> 
+        /// having the <see cref="IAccount.Username" /> match the given <paramref name="loginHint"/>, from the user token cache.
+        /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </summary>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Typically the username, in UPN format, e.g. johnd@contoso.com </param>
@@ -87,8 +88,10 @@ namespace Microsoft.Identity.Client
         /// for instance, if no refresh token was in the cache,a or the user needs to consent, or re-sign-in (for instance if the password expired),
         /// or the user needs to perform two factor authentication</exception>
         /// <remarks>
+        /// If multiple <see cref="IAccount"/> match the <paramref name="loginHint"/>, or if none do, an exception is thrown. 
+        /// 
         /// The access token is considered a match if it contains <b>at least</b> all the requested scopes. This means that an access token with more scopes than
-        /// requested could be returned as well. If the access token is expired or close to expiration (within a 5 minute window),
+        /// requested could be returned. If the access token is expired or close to expiration - within a 5 minute window -
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         ///
         /// See also the additional parameters that you can set chain:
