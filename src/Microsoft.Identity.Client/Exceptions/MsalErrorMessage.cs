@@ -129,11 +129,13 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string DuplicateQueryParameterTemplate = "Duplicate query parameter '{0}' in extraQueryParameters";
         public const string DeviceCertificateNotFoundTemplate = "Device Certificate was not found for {0}";
         public const string MsalUiRequiredMessage =
-            "Null account was passed in AcquiretokenSilent API. Pass in an account object or call acquireToken to authenticate.";
+            "No account or login hint was passed to the AcquireTokenSilent call.";
 
         public const string UserMismatchSaveToken = "Returned user identifier does not match the sent user identifier when saving the token to the cache.";
         public const string IwaNotSupportedForManagedUser = "Integrated Windows Auth is not supported for managed users. See https://aka.ms/msal-net-iwa for details.";
         public const string ActivityRequired = "On the Android platform, you have to pass the Activity to the UIParent object. See https://aka.ms/msal-interactive-android for details.";
+        public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint.";
+        public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently.";
     }
 
 }

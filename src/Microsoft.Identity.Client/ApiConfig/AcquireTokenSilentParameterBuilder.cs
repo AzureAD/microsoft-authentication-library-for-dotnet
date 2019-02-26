@@ -56,10 +56,39 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns></returns>
         internal static AcquireTokenSilentParameterBuilder Create(
             IClientApplicationBase clientApplicationBase,
-            IEnumerable<string> scopes, IAccount account)
+            IEnumerable<string> scopes,
+            IAccount account)
         {
             return new AcquireTokenSilentParameterBuilder(clientApplicationBase).WithScopes(scopes).WithAccount(account);
         }
+
+        /// <summary>
+        /// </summary>
+        /// <param name="clientApplicationBase"></param>
+        /// <param name="scopes"></param>
+        /// <param name="loginHint"></param>
+        /// <returns></returns>
+        internal static AcquireTokenSilentParameterBuilder Create(
+            IClientApplicationBase clientApplicationBase,
+            IEnumerable<string> scopes,
+            string loginHint)
+        {
+            return new AcquireTokenSilentParameterBuilder(clientApplicationBase).WithScopes(scopes).WithLoginHint(loginHint);
+        }
+
+
+        private AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
+        {
+            Parameters.Account = account;
+            return this;
+        }
+
+        private AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
+        {
+            Parameters.LoginHint = loginHint;
+            return this;
+        }
+
 
         /// <summary>
         /// Specifies if the client application should force refreshing the
@@ -77,26 +106,6 @@ namespace Microsoft.Identity.Client.ApiConfig
         public AcquireTokenSilentParameterBuilder WithForceRefresh(bool forceRefresh)
         {
             Parameters.ForceRefresh = forceRefresh;
-            return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="loginHint"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithLoginHint(string loginHint)
-        {
-            Parameters.LoginHint = loginHint;
-            return this;
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="account"></param>
-        /// <returns></returns>
-        public AcquireTokenSilentParameterBuilder WithAccount(IAccount account)
-        {
-            Parameters.Account = account;
             return this;
         }
 
@@ -120,7 +129,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         protected override void Validate()
         {
             base.Validate();
-            if (Parameters.Account == null)
+            if (Parameters.Account == null && string.IsNullOrWhiteSpace(Parameters.LoginHint) )
             {
                 throw new MsalUiRequiredException(MsalUiRequiredException.UserNullError, MsalErrorMessage.MsalUiRequiredMessage);
             }
