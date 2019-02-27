@@ -26,9 +26,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Xamarin.Forms;
@@ -38,7 +35,9 @@ namespace XForms
     public partial class App : Application
     {
         public static PublicClientApplication MsalPublicClient;
-        public static UIParent UIParent { get; set; }
+
+        public static object AndroidActivity { get; set; }
+
         public const string DefaultClientId = "4b0db8c2-9f26-4417-8bde-3f0e3656f8e0";
         // For system browser
         //public const string DefaultClientId = "5a434691-ccb2-4fd1-b97b-b64bcfbc03fc";

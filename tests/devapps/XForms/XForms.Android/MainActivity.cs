@@ -62,6 +62,8 @@ namespace XForms.Droid
 
             App.UIParent = new UIParent(this, true);
 
+            App.AndroidActivity = this;
+
             // Use helper method to determine first if Chrome or Chrome Custom Tabs
             // are installed on the device. 
             // Remove /* */ below, and

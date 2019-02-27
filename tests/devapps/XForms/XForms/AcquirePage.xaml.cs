@@ -82,7 +82,7 @@ namespace XForms
             UIBehaviorPicker.SelectedItem = Prompt.ForceLogin.PromptValue;
         }
 
-        private Prompt GetUIBehavior()
+        private Prompt GetPrompt()
         {
             var selectedUIBehavior = UIBehaviorPicker.SelectedItem as string;
 
@@ -109,7 +109,7 @@ namespace XForms
             return ExtraQueryParametersEntry.Text.Trim();
         }
 
-        private string ToString(IAccount user)
+        private static string GetAccountDescription(IAccount user)
         {
             var sb = new StringBuilder();
 
@@ -120,7 +120,7 @@ namespace XForms
             return sb.ToString();
         }
 
-        private string ToString(AuthenticationResult result)
+        private static string GetResultDescription(AuthenticationResult result)
         {
             var sb = new StringBuilder();
 
@@ -130,15 +130,18 @@ namespace XForms
             sb.AppendLine("TenantId : " + result.TenantId);
             sb.AppendLine("Scope : " + string.Join(",", result.Scopes));
             sb.AppendLine("User :");
-            sb.Append(ToString(result.Account));
+            sb.Append(GetAccountDescription(result.Account));
 
             return sb.ToString();
         }
 
-        private IAccount getUserByDisplayableId(string str)
+        private IAccount GetSelectedAccount()
         {
-            return string.IsNullOrWhiteSpace(str) ? null :
-                App.MsalPublicClient.GetAccountsAsync().Result.FirstOrDefault(user => user.Username.Equals(str, StringComparison.OrdinalIgnoreCase));
+            string accountId = GetSelectedUsername();
+            return string.IsNullOrWhiteSpace(accountId) ? null :
+                App.MsalPublicClient
+                .GetAccountsAsync().Result
+                .FirstOrDefault(user => user.Username.Equals(accountId, StringComparison.OrdinalIgnoreCase));
         }
 
         private string[] GetScopes()
@@ -146,7 +149,7 @@ namespace XForms
             return ScopesEntry.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        private string GetSelectedUserId()
+        private string GetSelectedUsername()
         {
             if (usersPicker.SelectedIndex == -1)
             {
@@ -164,7 +167,7 @@ namespace XForms
 
             try
             {
-                var selectedUser = GetSelectedUserId();
+                var selectedUser = GetSelectedUsername();
                 if (selectedUser == null)
                 {
                     acquireResponseLabel.Text = "User was not selected";
@@ -173,12 +176,15 @@ namespace XForms
 
                 var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
 
-                var res = await App.MsalPublicClient.AcquireTokenSilentAsync(GetScopes(),
-                    getUserByDisplayableId(selectedUser), authority, ForceRefreshSwitch.IsToggled).ConfigureAwait(true);
+                var res = await App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount())
+                    .WithAuthority(authority)
+                    .WithForceRefresh(ForceRefreshSwitch.IsToggled)
+                    .ExecuteAsync()
+                    .ConfigureAwait(true);
 
-                var resText = ToString(res);
+                var resText = GetResultDescription(res);
 
-                if (resText.Contains("AccessToken"))
+                if (res.AccessToken != null)
                 {
                     acquireResponseTitleLabel.Text = SuccessfulResult;
                 }
@@ -196,30 +202,19 @@ namespace XForms
             try
             {
                 acquireResponseTitleLabel.Text = EmptyResult;
-                AuthenticationResult res;
-                if (LoginHintSwitch.IsToggled)
-                {
-                    var loginHint = LoginHintEntry.Text.Trim();
-                    res =
-                        await App.MsalPublicClient.AcquireTokenAsync(
-                            GetScopes(),
-                            loginHint,
-                            GetUIBehavior(),
-                            GetExtraQueryParams(),
-                            App.UIParent).ConfigureAwait(true);
-                }
-                else
-                {
-                    var user = getUserByDisplayableId(GetSelectedUserId());
-                    res = await App.MsalPublicClient.AcquireTokenAsync(
-                        GetScopes(),
-                        user,
-                        GetUIBehavior(),
-                        GetExtraQueryParams(),
-                        App.UIParent).ConfigureAwait(true);
-                }
 
-                var resText = ToString(res);
+                var request = App.MsalPublicClient.AcquireTokenInteractive(GetScopes(), App.AndroidActivity)
+                    .WithPrompt(GetPrompt())
+                    .WithUseEmbeddedWebView(true)
+                    .WithExtraQueryParameters(GetExtraQueryParams());
+
+                request = LoginHintSwitch.IsToggled ?
+                    request.WithLoginHint(LoginHintEntry.Text.Trim()) :
+                    request.WithAccount(GetSelectedAccount());
+
+                var result = await request.ExecuteAsync().ConfigureAwait(true);
+
+                var resText = GetResultDescription(result);
 
                 if (resText.Contains("AccessToken"))
                 {
@@ -253,7 +248,7 @@ namespace XForms
                                 return Task.FromResult(0);
                             }).ConfigureAwait(true);
 
-                var resText = ToString(res);
+                var resText = GetResultDescription(res);
 
                 if (resText.Contains("AccessToken"))
                 {
