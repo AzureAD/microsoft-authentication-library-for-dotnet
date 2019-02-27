@@ -67,9 +67,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         #endregion
 
-
-       
-
         [TestMethod]
         public async Task Interactive_AADAsync()
         {
@@ -171,7 +168,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
-            IAccount account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
             Trace.WriteLine("Part 2 - Clear the cache");
             await pca.RemoveAsync(account).ConfigureAwait(false);
@@ -184,11 +181,11 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 .WithLoginHint(labResponse.User.HomeUPN)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
-            account = await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
-            await AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 
         private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, bool withLoginHint)
@@ -198,18 +195,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
                 Trace.WriteLine("Starting Selenium automation");
                 driver.PerformLogin(user, withLoginHint);
             });
-        }
-
-        private static async Task<IAccount> AssertSingleAccountAsync(
-            LabResponse labResponse,
-            PublicClientApplication pca,
-            AuthenticationResult result)
-        {
-            Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
-            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
-            Assert.AreEqual(labResponse.User.HomeUPN, account.Username);
-
-            return account;
-        }
+        }    
     }
 }
