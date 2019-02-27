@@ -10,7 +10,7 @@ Breaking changes in MSAL.NET 3:
 - `TokenCacheExtensions` was removed and its methods moved to `ITokenCache` (this is a binary breaking change, but not a source level breaking change)
 - The `Serialize` and `Deserialize` methods on `TokenCacheExtention` (which were serializing/deserializing the cache to the MSAL v2 format) were moved to `ITokenCache` and renamed `SerializeMsaV2` and `DeserializeV2
 
-Changes related to improving app Creation and configuration
+Changes related to improving app Creation and configuration [MSAL issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/810)
 
 - New class `ApplicationOptions` helps you build an application, for instance, from a configuration file
 - New interface `IMsalHttpClientFactory` to pass-in the HttpClient to use by MSAL.NET to communicate with the endpoints of Microsoft identity platform for developers.
@@ -18,7 +18,7 @@ Changes related to improving app Creation and configuration
 - New delegates `TelemetryCallback` and `TokenCacheCallback` can be set at application construction
 - New enumerations `AadAuthorityAudience` and `AzureCloudInstance` help you writing applications for sovereign and national clouds, and help you choose the audience for your application.
 
-Changes related to improving token acquisition:
+Changes related to improving token acquisition, addressing issues [810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/810), [635](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/635), [426](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/426), [799](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/799) :
 
 - `ClientApplicationBase` now implements `IClientApplicationBase` and has new members:
   - `AppConfig` of new type `IAppConfig` contains the configuration of the application
@@ -28,15 +28,19 @@ Changes related to improving token acquisition:
 - `ConfidentialClientApplication` has new members:
   - `AppTokenCache` used by `AcquireTokenForClient`
   - Five new fluent APIs: `AcquireTokenByAuthorizationCode`, `AcquireTokenForClient`, `AcquireTokenOnBehalfOf`, `GetAuthorizationRequestUrl`, `IByRefreshToken.AcquireTokenByRefreshToken`
-- New extensibility mechanism to enable public client applications to provide, in a secure way, their own browsing experience to let the user interact with the Microsoft identity platform endpoint (advanced). For this, applications need to implement the `ICustomWebUi` interface and throw `MsalCustomWebUiFailedException` exceptions in case of failure. This can be useful in the case of platforms which don't have yet a Web browser. For instance, the Visual Studio Feedback tool is an Electron application which uses this mechanism.
+- New extensibility mechanism to enable public client applications to provide, in a secure way, their own browsing experience to let the user interact with the Microsoft identity platform endpoint (advanced). For this, applications need to implement the `ICustomWebUi` interface and throw `MsalCustomWebUiFailedException` exceptions in case of failure. This can be useful in the case of platforms which don't have yet a Web browser. For instance, the Visual Studio Feedback tool is an Electron application which uses this mechanism. [MSAL issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/863)
 - `MsalServiceException` now surfaces two new properties:
   - `CorrelationId` which can be useful when you interact with Microsoft support.
-  - `SubError` which indicates more details about why the error happened, including hints on how to communicate with the end user.
+  - `SubError` which indicates more details about why the error happened, including hints on how to communicate with the end user. [MSAL issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/559)
 
 Changes related to the token cache:
 
 - New interface `ITokenCache` contains primitives to serialize and deserialize the token cache and set the delegates to react to cache changes
 - New methods `SerializeMsalV3` and `DeserializeMsalV3` on `ITokenCache` serialize/deserialize the token cache to a new layout format compatible with other MSAL libraries on Windows/Linux/MacOS.
+
+A few bug fixes:
+- [Update Xamarin dependencies](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/810)
+- [Send client headers to the user realm endpoint](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/820)
 
 2.7.1
 =============
