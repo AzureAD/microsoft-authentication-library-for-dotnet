@@ -1,4 +1,4 @@
-3.0.0
+3.0.0-preview
 =============
 
 - For more info on the release, along with code samples, checkout https://aka.ms/msal-net-3x
