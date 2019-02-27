@@ -1,3 +1,48 @@
+3.0.0
+=============
+
+- For more info on the release, along with code samples, checkout https://aka.ms/msal-net-3x
+
+Breaking changes in MSAL.NET 3:
+
+- `UIBehavior` was renamed to `Prompt` (breaking change)
+- `TokenCacheNotificationArgs` now surfaces an `ITokenCache` instead of a `TokenCache`. This will allow MSAL.NET to provide, in the future, various token cache implementations.
+- `TokenCacheExtensions` was removed and its methods moved to `ITokenCache` (this is a binary breaking change, but not a source level breaking change)
+- The `Serialize` and `Deserialize` methods on `TokenCacheExtention` (which were serializing/deserializing the cache to the MSAL v2 format) were moved to `ITokenCache` and renamed `SerializeMsaV2` and `DeserializeV2
+
+Changes related to improving app Creation and configuration
+
+- New class `ApplicationOptions` helps you build an application, for instance, from a configuration file
+- New interface `IMsalHttpClientFactory` to pass-in the HttpClient to use by MSAL.NET to communicate with the endpoints of Microsoft identity platform for developers.
+- New classes `PublicClientApplicationBuilder` and `ConfidentialClientApplicationBuilder` propose a fluent API to instantiate respectively classes implementing `IPublicClientApplication` and `IConfidentialClientApplication` including from configuration files, setting the targetted cloud and audience, but also setting per application logging and telemetry, and setting the `HttpClient`.
+- New delegates `TelemetryCallback` and `TokenCacheCallback` can be set at application construction
+- New enumerations `AadAuthorityAudience` and `AzureCloudInstance` help you writing applications for sovereign and national clouds, and help you choose the audience for your application.
+
+Changes related to improving token acquisition:
+
+- `ClientApplicationBase` now implements `IClientApplicationBase` and has new members:
+  - `AppConfig` of new type `IAppConfig` contains the configuration of the application
+  - `UserTokenCache` of new type `ITokenCache` contains the user token cache (for both public and confidential client applications for all flows, but `AcquireTokenForClient`)
+    - New fluent API `AcquireTokenSilent`
+- `PublicClientApplication` and `IPublicClientApplication` have four new fluent APIs: `AcquireTokenByIntegratedWindowsAuth`, `AcquireTokenByUsernamePassword`, `AcquireTokenInteractive`, `AcquireTokenWithDeviceCode`.
+- `ConfidentialClientApplication` has new members:
+  - `AppTokenCache` used by `AcquireTokenForClient`
+  - Five new fluent APIs: `AcquireTokenByAuthorizationCode`, `AcquireTokenForClient`, `AcquireTokenOnBehalfOf`, `GetAuthorizationRequestUrl`, `IByRefreshToken.AcquireTokenByRefreshToken`
+- New extensibility mechanism to enable public client applications to provide, in a secure way, their own browsing experience to let the user interact with the Microsoft identity platform endpoint (advanced). For this, applications need to implement the `ICustomWebUi` interface and throw `MsalCustomWebUiFailedException` exceptions in case of failure. This can be useful in the case of platforms which don't have yet a Web browser. For instance, the Visual Studio Feedback tool is an Electron application which uses this mechanism.
+- `MsalServiceException` now surfaces two new properties:
+  - `CorrelationId` which can be useful when you interact with Microsoft support.
+  - `SubError` which indicates more details about why the error happened, including hints on how to communicate with the end user.
+
+Changes related to the token cache:
+
+- New interface `ITokenCache` contains primitives to serialize and deserialize the token cache and set the delegates to react to cache changes
+- New methods `SerializeMsalV3` and `DeserializeMsalV3` on `ITokenCache` serialize/deserialize the token cache to a new layout format compatible with other MSAL libraries on Windows/Linux/MacOS.
+
+2.7.1
+=============
+- **MSAL now handles B2C domains from sovereign clouds, including US Government, Blackforest, and Mooncake**. B2C domains with *.b2clogin.us, *.b2clogin.cn, and *.b2clogin.de are now included in the MSAL allowed domain list for B2C authorities. [MSAL issue](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/897)
+- **Improved error message handling to detect issues faster and not hit null reference exceptions**. Sometimes, for example, when the instance discovery endpoint is not found, the Oauth2Client in MSAL would hit a null reference exception. MSAL now detects such issues faster and returns a more meaningful error message (e.g. the http response code).
+
 2.7.0
 =============
 - **MSAL integrates SourceLink https://github.com/dotnet/sourcelink.** This allows MSAL to embed pdb files and source code in the NuGet package, allowing users to debug into MSAL without replacing their package reference with a project reference. [MSAL PR](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/pull/750)
