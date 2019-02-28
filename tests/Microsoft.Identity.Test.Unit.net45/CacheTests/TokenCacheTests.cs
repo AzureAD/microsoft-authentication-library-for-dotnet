@@ -799,7 +799,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 AfterAccess = args => { Assert.IsFalse(args.HasStateChanged); }
             };
-            tokenCache.Deserialize(null);
+            tokenCache.DeserializeMsalV3(null);
 #pragma warning disable CS0618 // Type or member is obsolete
             Assert.IsFalse(tokenCache.HasStateChanged, "State should not have changed when deserializing nothing.");
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -831,7 +831,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             AddHostToInstanceCache(serviceBundle, MsalTestConstants.ProductionPrefNetworkEnvironment);
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
-            byte[] serializedCache = ((ITokenCache)cache).Serialize();
+            byte[] serializedCache = ((ITokenCache)cache).SerializeMsalV3();
 
             string cacheString = new UTF8Encoding().GetString(serializedCache);
 
@@ -841,13 +841,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
             Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
 
-            ((ITokenCache)cache).Deserialize(serializedCache);
+            ((ITokenCache)cache).DeserializeMsalV3(serializedCache);
 
             Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
             Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
 
-            serializedCache = ((ITokenCache)cache).Serialize();
-            ((ITokenCache)cache).Deserialize(serializedCache);
+            serializedCache = ((ITokenCache)cache).SerializeMsalV3();
+            ((ITokenCache)cache).DeserializeMsalV3(serializedCache);
             // item count should not change because old cache entries should have
             // been overriden
 
@@ -954,7 +954,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         public void TestCacheDeserializeWithoutServiceBundle()
         {
             var tokenCache = new TokenCache();
-            tokenCache.Deserialize(new byte[0]);
+            tokenCache.DeserializeMsalV3(new byte[0]);
         }
 
         /*

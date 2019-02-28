@@ -57,7 +57,7 @@ namespace SampleApp
         {
             lock (FileLock)
             {
-                args.TokenCache.Deserialize(File.Exists(CacheFilePath)
+                args.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
                     ? File.ReadAllBytes(CacheFilePath)
                     : null);
             }
@@ -71,7 +71,7 @@ namespace SampleApp
                 lock (FileLock)
                 {
                     // reflect changesgs in the persistent store
-                    File.WriteAllBytes(CacheFilePath, args.TokenCache.Serialize());
+                    File.WriteAllBytes(CacheFilePath, args.TokenCache.SerializeMsalV3());
                 }
             }
         }
