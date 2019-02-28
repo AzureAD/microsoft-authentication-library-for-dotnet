@@ -30,21 +30,39 @@ In August, we released MSAL.NET 2.0, and since you've been using it, and providi
 
 ##### Providing your own HttpClient, supporting Http proxy and customization of user agent headers
 
-Among the GitHub issues, stack overflow questions or direct contact you made with us, it became clear that we had been missing scenarios which were important for you, like letting you pass an `HttpClient` that MSAL.NET could use. We understand that there are cases where you want fine grain control on the Http proxy for instance, which we had not been able to provide you at all (on .NET core), or in a limited way (.NET framework). Also ASP.NET Core has some very efficient ways of pooling the `HttpClient` instance, and MSAL.NET clearly did not benefit from it (for details see [Use HttpClientFactory to implement resilient HTTP requests](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests))
+We understand that there are cases where you want fine grain control on the Http proxy for instance, which we had not been able to provide you at all (on .NET core), or in a limited way (.NET framework). Also ASP.NET Core has some very efficient ways of pooling the `HttpClient` instance, and MSAL.NET clearly did not benefit from it (for details see [Use HttpClientFactory to implement resilient HTTP requests](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests))
+
+```csharp
+IMsalHttpClientFactory httpClientFactory = new MyHttpClientFactory();
+
+var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId) 
+                                        .WithHttpClientFactory(httpClientFactory)
+                                        .Build();
+
+```
 
 ##### Configuring your app to target national and sovereign clouds was not straightforward
 
 As some of you start working on writing apps that can not only target users in the Azure public cloud, but also in national and sovereign clouds (for instance the US government cloud), you gave us the feedback that you'd need help making this transition easier. There are several ongoing initiatives for this, but MSAL.NET could already make it easier for you to configure the cloud instance you want to target, and the audience of your application. Along the same lines, we also came to the realization that we could help you with the configuration of the application from configuration files, and provide guidance on how to do that better.
 
+```csharp
+var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                        .WithAuthority(
+                                             AzureCloudInstance.AzureGermany, 
+                                             AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
+                                         .Build();
+
+```
+
 ##### Partial summary: Better configuration for apps
 
 It was clear that you needed more configuration options for instantiating applications … therefore more parameters to the constructors, and help to support configuration files.
 
-#### You told us you needed more flexibility in methods acquiring tokens
+#### More flexibility in methods acquiring tokens
 
-MSAL.NET enables you to get access tokens to call protected APIs in different ways, depending on your scenario, itself depending on the kind of app you build, and the platform. See [Scenarios](Scenarios).
+MSAL.NET enables you to get access tokens to call protected APIs in different ways, depending on your scenario, on the kind of app you build, and on the platform. See [Scenarios](Scenarios).
 
-When we implemented the [AcquireTokenByDeviceCodeFlow](https://aka.ms/msal-net-device-code-flow) method in [MSAL.NET 2.2.0-preview](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-2.2.0-released) we provided a parameter so that the method is cancelable, and you quickly asked us to do the same for all the AcquireTokenXX methods, which makes sense. This requires adding another parameter to all methods, but we would not want it to be mandatory, and therefore this meant more overloads (see below).
+All MSAL methods are async, so they should accept a CancellationToken. 
 
 Similarly, the only way to react to conditional access exceptions in MSAL 2.x was, as explained in [Handling Claim challenge exceptions in MSAL.NET](exceptions#handling-claim-challenge-exceptions-in-msalnet), to use the `extraQueryParameter`. Unfortunately, this parameter was available only in two overrides of the `AcquireTokenAsync` (interactive) flow, and it was not working correctly. We needed to fix it, and provide a proper `claims` parameter to `AcquireToken`*XXX*`Async` methods, including `AcquireTokenSilentAsync`.
 
@@ -68,11 +86,9 @@ var result = await app.AcquireTokenAsync(scopesForCustomerApi,
                                          uiParent);
 ```
 
-There are several examples of this pain (extra query parameters being another), and we knew that we had to add more parameters to the `AcquireToken`*XXX*`Async` methods (for instance, the claims to handle conditional access), and therefore it seemed that we had to add more overloads.
+With each new addition, there would be an exposion in the number of `AcquireTokenAsync` methods and method params, making the API unusable. 
 
-But then came a question: would you think that having 56 overloads for `AcquireTokenAsync` would have been reasonable?
-
-Wouldn't you prefer to only set the parameters you need? For instance, use another syntax like the following:
+The standard practice to deal with this is to use builder objects, which is introduced in MSAL 3. 
 
 ```CSharp
 var result = await app.AcquireTokenInteractive(scopesForCustomerApi)
@@ -81,11 +97,20 @@ var result = await app.AcquireTokenInteractive(scopesForCustomerApi)
                      .ExecuteAsync();
 ```
 
-We think that a limit was reached in term of overloads, both on some `AcquireToken`*XXX*`Async` methods, and on the constructors for the applications. We propose another approach, based on fluent APIs.
+#### More extensibility
 
-#### You told us you needed more extensibility
+Another request you made was to allow developers to bring their own UI - [allow public applications to acquire token via authorization code #863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/863). In .NET Core we don't provide interactive authentication because no Web control is available there (yet). But there are cases, like what the Azure CLI team have done, where you want to let the user sign-in and consent into the machine browser on the desktop. This can be done, but at the same time you don't want to sacrifice to security. Therefore you asked us to provide an extensible way to let you do that. Another example of this is our own Visual Studio team who has Electron applications (VS Feedback and Azure Storage explorer) and wanted sign-in to be delegated in their UI, while still benefiting from the rest of MSAL.NET.
 
-Another request you made was to give you more flexibility. For instance, you wanted to [allow public applications to acquire token via authorization code #863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/863). In .NET Core we don't provide interactive authentication because no Web control is available there (yet). But there are cases, like what the Azure CLI team have done, where you want to let the user sign-in and consent into the machine browser on the desktop. This can be done, but at the same time you don't want to sacrifice to security. Therefore you asked us to provide an extensible way to let you do that. Another example of this is our own Visual Studio team who has Electron applications (VS Feedback and Azure Storage explorer) and wanted sign-in to be delegated in their UI, while still benefiting from the rest of MSAL.NET.
+```csharp
+
+  // Here we inject a custom web UI that is controlled by Selenium to test authentication. 
+  // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/dev3x/tests/Microsoft.Identity.Test.Integration/SeleniumTests/InteractiveFlowTests.cs#L171 
+  AuthenticationResult result = await pca
+                .AcquireTokenInteractive(_scopes, null)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+```
 
 #### Naming could be improved
 
