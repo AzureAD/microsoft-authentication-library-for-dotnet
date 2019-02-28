@@ -79,12 +79,17 @@ namespace CommonCache.Test.MsalV2
         {
             lock (FileLock)
             {
-                var cacheData = new CacheData
+                var adalv3State = ReadFromFileIfExists(AdalV3CacheFileName);
+                var unifiedState = ReadFromFileIfExists(UnifiedCacheFileName);
+
+                if (adalv3State != null)
                 {
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFileName),
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFileName)
-                };
-                args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+                    args.TokenCache.DeserializeAdalV3(adalv3State);
+                }
+                if (unifiedState != null)
+                {
+                    args.TokenCache.DeserializeMsalV2(unifiedState);
+                }
             }
         }
 
@@ -95,13 +100,14 @@ namespace CommonCache.Test.MsalV2
             {
                 lock (FileLock)
                 {
-                    var cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
+                    var adalV3State = args.TokenCache.SerializeAdalV3();
+                    var unifiedState = args.TokenCache.SerializeMsalV2();
 
                     // reflect changes in the persistent store
-                    WriteToFileIfNotNull(UnifiedCacheFileName, cacheData.UnifiedState);
+                    WriteToFileIfNotNull(UnifiedCacheFileName, unifiedState);
                     if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
                     {
-                        WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
+                        WriteToFileIfNotNull(AdalV3CacheFileName, adalV3State);
                     }
                 }
             }

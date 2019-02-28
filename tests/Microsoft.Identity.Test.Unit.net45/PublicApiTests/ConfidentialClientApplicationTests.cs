@@ -770,12 +770,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
         private void BeforeCacheAccess(TokenCacheNotificationArgs args)
         {
-            args.TokenCache.Deserialize(_serializedCache);
+            args.TokenCache.DeserializeMsalV3(_serializedCache);
         }
 
         private void AfterCacheAccess(TokenCacheNotificationArgs args)
         {
-            _serializedCache = args.TokenCache.Serialize();
+            _serializedCache = args.TokenCache.SerializeMsalV3();
         }
     }
 }

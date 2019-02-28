@@ -105,24 +105,16 @@ namespace Microsoft.Identity.Test.SideBySide
 
         private void MsalDoBefore(msal::Microsoft.Identity.Client.TokenCacheNotificationArgs args)
         {
-            msal::Microsoft.Identity.Client.Cache.CacheData cacheData = new msal::Microsoft.Identity.Client.Cache.CacheData()
-            {
-                AdalV3State = AdalV3StateStorage,
-                UnifiedState = UnifiedStateStorage
-            };
-
-            args.TokenCache.DeserializeUnifiedAndAdalCache(cacheData);
+            args.TokenCache.DeserializeAdalV3(AdalV3StateStorage);
+            args.TokenCache.DeserializeMsalV2(UnifiedStateStorage);
         }
 
         private void MsalDoAfter(msal::Microsoft.Identity.Client.TokenCacheNotificationArgs args)
         {
             if (args.HasStateChanged)
             {
-                msal::Microsoft.Identity.Client.Cache.CacheData cacheData =
-                    args.TokenCache.SerializeUnifiedAndAdalCache();
-
-                AdalV3StateStorage = cacheData.AdalV3State;
-                UnifiedStateStorage = cacheData.UnifiedState;
+                AdalV3StateStorage = args.TokenCache.SerializeAdalV3();
+                UnifiedStateStorage = args.TokenCache.SerializeMsalV2();
             }
         }
 
