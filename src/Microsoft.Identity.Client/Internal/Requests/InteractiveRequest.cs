@@ -92,7 +92,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         internal override async Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
-            await AcquireAuthorizationAsync().ConfigureAwait(false);
+            await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
             VerifyAuthorizationResult();
 
             if (AuthenticationRequestParameters.IsBrokerEnabled)
@@ -106,10 +106,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return CacheTokenResponseAndCreateAuthenticationResult(_msalTokenResponse);
-            await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
-            VerifyAuthorizationResult();
-            var msalTokenResponse = await SendTokenRequestAsync(GetBodyParameters(), cancellationToken).ConfigureAwait(false);
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
         }
 
         private async Task<MsalTokenResponse> SendTokenRequestWithBrokerAsync(CancellationToken cancellationToken)
