@@ -100,7 +100,7 @@ namespace XForms
                     break;
             }
 
-#if BUILDENV == APPCENTER
+#if IS_APPCENTER_BUILD
             builder.WithIosKeychainSecurityGroup("*");
 #endif
 
