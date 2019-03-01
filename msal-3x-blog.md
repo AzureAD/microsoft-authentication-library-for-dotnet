@@ -4,9 +4,6 @@
 
 We are excited to announce the release of MSAL.NET 3.0-preview, which has a number of changes, which, we hope, you'll love. In this article, you'll learn about:
 
-- [Why MSAL.NET moved from MSAL 2.x to MSAL 3.x](#why-did-msal-move-from-2x-to-3x)
-  - [Reacting to your feedback](#reacting-to-your-feedback)
-  - [Unified cache layout format change](#unified-cache-layout-format-change)
 - [Changes in MSAL 3.x](#changes-in-msalnet-3x)
   - [Reference - list of all changes in MSAL.NET 3](#reference---list-of-changes-in-msalnet-3)
   - [Plans for deprecation in MSAL.NET 3.x, MSAL 4.x](#plans-for-deprecation-in-msalnet-3x-and-msalnet-4x)
@@ -15,100 +12,11 @@ We are excited to announce the release of MSAL.NET 3.0-preview, which has a numb
   - [Advanced: You can provide your own web view](#you-can-provide-your-own-web-view)
   - [Breaking changes in MSAL.NET 3.x](#breaking-changes-in-msalnet-3x)
   - [How to maintain SSO with apps written with ADAL v3, ADAL v4, MSAL.NET v2](#how-to-maintain-sso-with-apps-written-with-adal-v3-adal-v4-msalnet-v2)
+- [Why MSAL.NET moved from MSAL 2.x to MSAL 3.x](#why-did-msal-move-from-2x-to-3x)
+  - [Reacting to your feedback](#reacting-to-your-feedback)
+  - [Unified cache layout format change](#unified-cache-layout-format-change)
 
 Contrary to the previous versions for which the NuGet package had lost its -preview, the NuGet package for this version is 3.0.0-preview as we'd want to have your feedback about our changes, the new API, and the [Plans for deprecation in MSAL.NET 3.x and MSAL.NET 4.x](#plans-for-deprecation-in-msalnet-3x-and-msalnet-4x)
-
-## Why MSAL.NET moved from MSAL 2.x to MSAL 3.x
-
-This paragraph explains why MSAL.NET's major version number was bumped-up from 2 to 3. If you are new to MSAL.NET or are not interested in the reasons for changing the API, you might want to skip to [changes in MSAL.NET 3.x](#changes-in-msalnet-3x).
-
-### Reacting to your feedback
-
-In August, we released MSAL.NET 2.0, and since you've been using it, and providing feedback. Since August we've [released](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap) fourteen incremental updates of MSAL.NET, improving both the API and the behavior of the library. You've been awesome helping us move MSAL.NET to a great authentication library. But you also told us that things could still be improved, and that you needed more flexibility. If you are interested in the analysis of your feedback with links to issues your raised, see the following GitHub issue [[New API] Improved 3.x API leveraging builders #810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/810)). We wanted to bring you these improvements, but that we had reached a limit in term of API complexity. Here are the details of this journey to come to the realization that we had to change the paradigm of the API.
-
-#### You told us you needed more configuration for applications
-
-##### Providing your own HttpClient, supporting Http proxy and customization of user agent headers
-
-Among the GitHub issues, stack overflow questions or direct contact you made with us, it became clear that we had been missing scenarios which were important for you, like letting you pass an `HttpClient` that MSAL.NET could use. We understand that there are cases where you want fine grain control on the Http proxy for instance, which we had not been able to provide you at all (on .NET core), or in a limited way (.NET framework). Also ASP.NET Core has some very efficient ways of pooling the `HttpClient` instance, and MSAL.NET clearly did not benefit from it (for details see [Use HttpClientFactory to implement resilient HTTP requests](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests))
-
-##### Configuring your app to target national and sovereign clouds was not straightforward
-
-As some of you start working on writing apps that can not only target users in the Azure public cloud, but also in national and sovereign clouds (for instance the US government cloud), you gave us the feedback that you'd need help making this transition easier. There are several ongoing initiatives for this, but MSAL.NET could already make it easier for you to configure the cloud instance you want to target, and the audience of your application. Along the same lines, we also came to the realization that we could help you with the configuration of the application from configuration files, and provide guidance on how to do that better.
-
-##### Partial summary: Better configuration for apps
-
-It was clear that you needed more configuration options for instantiating applications … therefore more parameters to the constructors, and help to support configuration files.
-
-#### You told us you needed more flexibility in methods acquiring tokens
-
-MSAL.NET enables you to get access tokens to call protected APIs in different ways, depending on your scenario, itself depending on the kind of app you build, and the platform. See [Scenarios](Scenarios).
-
-When we implemented the [AcquireTokenByDeviceCodeFlow](https://aka.ms/msal-net-device-code-flow) method in [MSAL.NET 2.2.0-preview](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/MSAL.NET-2.2.0-released) we provided a parameter so that the method is cancelable, and you quickly asked us to do the same for all the AcquireTokenXX methods, which makes sense. This requires adding another parameter to all methods, but we would not want it to be mandatory, and therefore this meant more overloads (see below).
-
-Similarly, the only way to react to conditional access exceptions in MSAL 2.x was, as explained in [Handling Claim challenge exceptions in MSAL.NET](exceptions#handling-claim-challenge-exceptions-in-msalnet), to use the `extraQueryParameter`. Unfortunately, this parameter was available only in two overrides of the `AcquireTokenAsync` (interactive) flow, and it was not working correctly. We needed to fix it, and provide a proper `claims` parameter to `AcquireToken`*XXX*`Async` methods, including `AcquireTokenSilentAsync`.
-
-Finally, some advanced end-user scenarios, like letting the user pre-consent ahead of time were really hard to achieve, as you'll see in the next paragraph.
-
-#### A limit was reached in term of method overloads
-
-Let's take one of the scenarios where the developer experience was not good: acquiring a token interactively in a desktop or mobile application (The same reasoning can be extended to other scenarios). In that case you had to call `AcquireTokenAsync`, but the issue is that this method had 14 overloads (for details of all the parameters see [Acquiring tokens interactively](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-interactively)).
-
-![image](https://user-images.githubusercontent.com/13203188/37063988-40e52368-2193-11e8-887e-e86b97c54d19.png)
-
-But the worse is that to achieve one goal (for instance, letting the end user pre-consent to specific scopes ahead of time), you had to use one specific overload with 7 parameters, and, just to pass `extraScopesToConsent`, you had to fill-in all the other parameters, and as a result, you had to study the documentation in detail to understand what could be good values for these parameters. This pain is illustrated in this article [How to get consent for several resources](Acquiring-tokens-interactively#how-to-get-consent-for-several-resources), where you see that you had to write code like this just to be able to pass-in `scopesForVendorApi` (and some of you had no idea what to use for `uiBehavior`, or `authority`)
-
-```CSharp
-var result = await app.AcquireTokenAsync(scopesForCustomerApi,
-                                         accounts.FirstOrDefault(),
-                                         uiBehavior,
-                                         string.Empty,
-                                         scopesForVendorApi,
-                                         app.Authority,
-                                         uiParent);
-```
-
-There are several examples of this pain (extra query parameters being another), and we knew that we had to add more parameters to the `AcquireToken`*XXX*`Async` methods (for instance, the claims to handle conditional access), and therefore it seemed that we had to add more overloads.
-
-But then came a question: would you think that having 56 overloads for `AcquireTokenAsync` would have been reasonable?
-
-Wouldn't you prefer to only set the parameters you need? For instance, use another syntax like the following:
-
-```CSharp
-var result = await app.AcquireTokenInteractive(scopesForCustomerApi)
-                     .WithAccount(accounts.FirstOrDefault())
-                     .WithExtraScopesToConsent(scopesForVendorApi)
-                     .ExecuteAsync();
-```
-
-We think that a limit was reached in term of overloads, both on some `AcquireToken`*XXX*`Async` methods, and on the constructors for the applications. We propose another approach, based on fluent APIs.
-
-#### You told us you needed more extensibility
-
-Another request you made was to give you more flexibility. For instance, you wanted to [allow public applications to acquire token via authorization code #863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/863). In .NET Core we don't provide interactive authentication because no Web control is available there (yet). But there are cases, like what the Azure CLI team have done, where you want to let the user sign-in and consent into the machine browser on the desktop. This can be done, but at the same time you don't want to sacrifice to security. Therefore you asked us to provide an extensible way to let you do that. Another example of this is our own Visual Studio team who has Electron applications (VS Feedback and Azure Storage explorer) and wanted sign-in to be delegated in their UI, while still benefiting from the rest of MSAL.NET.
-
-#### Naming could be improved
-
-Finally we heard that we could improve the naming of things a bit. Here is an example `UIBehavior` was the mechanism, in MSAL 2.x by which you could customize the user experience and direct the Microsoft identity platform to present a particular prompt experience. We got the feedback that the name `UIBehavior` did not speak much, and everybody in the industry is naming it `Prompt` therefore we've decided to rename `UIBehavior` to `Prompt` in all MSAL libraries, starting with MSAL 3.x
-
-#### Testability of your app could be improved
-
-In the past to help you test your app (for instance in [MSAL 2.5.0-preview](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/releases/tag/MSAL-v2.5.0)), it was still not easy to test the cache, and the applications by a lack of interfaces (for instance `ITokenCache`), and the mutability of application configuration (for example it was possible to set the `RedirectUri` of an app after constructing it)
-
-### Unified cache layout format change
-
-MSAL 2.0 already enabled [common token cache scenarios](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/adalnet4-0-preview#common-token-cache-scenarios) between ADAL and MSAL on the platforms supported by ADAL, and also between MSAL libraries on different platforms. However as we were recently working on initiatives to enable SSO between tools written in different languages, we discovered that, on Windows/Linux/MacOS, MSAL.NET and MSAL.Python (for instance), although using the same cache schema, did not share the same layout for the blob that is serialized when you implement your own [custom cache serialization](https://aka.ms/msal-net-token-cache-serialization). Therefore, we slightly changed the layout format of the token cache blob to harmonize the format between MSAL.NET, MSAL Python and MSAL.Java. This is a breaking change, but we also provided a migration path. See [how to maintain SSO with apps written with ADAL v3, ADAL v4, MSAL.NET v2](#how-to-maintain-sso-with-apps-written-with-adal-v3-adal-v4-msalnet-v2) if you are interested in one of these.
-
-### Summarizing the feedback
-
-To summarize what we learned, you needed:
-
-- More flexibility in configuring your apps,
-- More options to acquire tokens
-- An API which enables your apps to be more testable
-- Customization of the Web view should be possible (on .NET Core)
-
-We had to change the API to enable this flexibility without making it overly complex. Therefore we've decided that MSAL.NET 3 would bring a lot of changes, but would also have to take a few breaking changes.
 
 ## Changes in MSAL.NET 3.x
 
@@ -150,17 +58,6 @@ Changes related to the token cache:
 
 - New interface `ITokenCache` contains primitives to serialize and deserialize the token cache and set the delegates to react to cache changes
 - New methods `SerializeMsalV3` and `DeserializeMsalV3` on `ITokenCache` serialize/deserialize the token cache to a new layout format compatible with other MSAL libraries on Windows/Linux/MacOS.
-
-### Plans for deprecation in MSAL.NET 3.x and MSAL.NET 4.x
-
-As seen above, we are proposing a new MSAL.NET V3.0 API based on builders. For the moment (MSAL 3.0), proposes this new API side by side with the previous V2.0 APIs (still having `AcquireToken`*XXX*`Async`, and many overrides of these), in order to leave you time to migrate to the new API.
-
-Here is the current proposal, on which we'd like to get your feedback:
-
-- In 3 months, supposing that, like us, you love the new APIs, we'd want to deprecate the old V2.0 API. At that point, if you still use the old-style API, you'll see warnings encouraging you to move to the new API.
-- Then in the next major version of MSAL.NET, the old V2.0 style APIs would disappear, leaving a very simple shape for the API. In the class diagram below, we've hidden the V2.0 style APIs, and that gives you an idea of what the public API could be in the next major release.
-
-![image](https://user-images.githubusercontent.com/13203188/51684356-28471200-1fec-11e9-937a-009f02268aae.png)
 
 ### Configuring an app got simpler
 
@@ -382,9 +279,9 @@ In future versions of MSAL (and ADAL), we'd want to start obsoleting some of the
 
 **Supported**: means available and Supported
 
-*: We plan on removing v3 support after sometime to make sure our codebase stays as simple as possible (however it may challenge the migration path if we remove it), timelines should be the driving factor or we can decide to leave as is. As we ship MSAL 3.0 we should mark MSAL v2 and as not supported (same with MSAL v1). we would monitor adoption to understand when the right moment is, to remove support for the v3 cache. Again your feedback would be valuable.
+*: We plan on removing v3 support after sometime to make sure our codebase stays as simple as possible. As we ship MSAL 3.0 we mark MSAL v2 and as not supported (same with MSAL v1). We would monitor adoption to understand when the right moment is, to remove support for the v3 cache. Again your feedback would be valuable.
 
-** : Leaving for now but we could consider removing that to ensure even if you are sticking to ADAL, your'd be using the new format.
+** : Leaving for now but we could consider removing that to ensure even if you are sticking to ADAL, you'd be using the new format.
 
 ##### Example of code showing how to migrate from MSAL.NET v2 to MSAL.NET v3
 
@@ -489,7 +386,7 @@ There are two scenarios depending on the type of app: one time migration and sid
 
 ### Example code demonstrating how it will be possible (in MSAL 3.1+) to share SSO across all versions
 
-For the moment, the versions of the API exposing a `merge` parameter are not implemented in MSAL 3.0.0-preview. But we thought we'd share our plans to help you updating the SSO state in all the possible ways leveraging this parameter in the future (soon after 3.0.0-preview)
+For the moment, the versions of the API exposing a `merge` parameter are not implemented in MSAL 3.0.0-preview. Here are our plans to help you with updating the SSO state in all the possible ways leveraging this parameter in the future (soon after 3.0.0-preview)
 
 ```CSharp
 // Assigning a token cache to the public client (it's similar for Confidential client, though there a cache for the Application is also avaialble):
@@ -560,17 +457,143 @@ If you need to provide your own Web UI:
 1. Implement the `ICustomWebUi`  interface (See [here](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/053a98d16596be7e9ca1ab916924e5736e341fe8/src/Microsoft.Identity.Client/Extensibility/ICustomWebUI.cs#L32-L70). You'll basically need to implement one method `AcquireAuthorizationCodeAsync` accepting the authorization code URL (computed by MSAL.NET), letting the user go through the interaction with the identity provider, and then returning back the URL by which the identity provider would have called your implemetnation back (including the authorization code). In case of issues, your implementation should throw a `MsalExtensionException` exception in order to nicely cooperate with MSAL.
 2. In your `AcquireTokenInteractiveCall`, you can use the `.WithCustomUI()` modifier passing the instance of your custom web UI
 
-#### Security is respected
-
-Note that, in public client applications, MSAL.NET leverages the PKCE standard ([RFC 7636 - Proof Key for Code Exchange by OAuth Public Clients](https://tools.ietf.org/html/rfc7636)) to ensure that security is respected: Only MSAL.NET can redeem the code.
-
 #### MSAL.NET UI tests also use this mechanism
 
 We have rewritten our UI tests to leverage this extensibility mechanism. In case you are interested you can have a look at the [SeleniumWebUI](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/053a98d16596be7e9ca1ab916924e5736e341fe8/tests/Microsoft.Identity.Test.Integration/Infrastructure/SeleniumWebUI.cs#L15-L160) class in the MSAL.NET source code
 
+#### Security is respected
+
+Note that, in public client applications, MSAL.NET leverages the PKCE standard ([RFC 7636 - Proof Key for Code Exchange by OAuth Public Clients](https://tools.ietf.org/html/rfc7636)) to ensure that security is respected: Only MSAL.NET can redeem the code.
+
+### Plans for deprecation in MSAL.NET 3.x and MSAL.NET 4.x
+
+As seen above, we are proposing a new MSAL.NET V3.0 API based on builders. For the moment (MSAL 3.0), proposes this new API side by side with the previous V2.0 APIs (still having `AcquireToken`*XXX*`Async`, and many overrides of these), in order to leave you time to migrate to the new API.
+
+Here is the current proposal, on which we'd like to get your feedback:
+
+- In 3 months, supposing that, like us, you love the new APIs, we'd want to deprecate the old V2.0 API. At that point, if you still use the old-style API, you'll see warnings encouraging you to move to the new API.
+- Then in the next major version of MSAL.NET, the old V2.0 style APIs would disappear, leaving a very simple shape for the API. In the class diagram below, we've hidden the V2.0 style APIs, and that gives you an idea of what the public API could be in the next major release.
+
+![image](https://user-images.githubusercontent.com/13203188/51684356-28471200-1fec-11e9-937a-009f02268aae.png)
+
+## Why MSAL.NET moved from MSAL 2.x to MSAL 3.x
+
+This paragraph explains why MSAL.NET's major version number was bumped-up from 2 to 3. 
+
+### Reacting to your feedback
+
+In August, we released MSAL.NET 2.0, and since you've been using it, and providing feedback. Since then we've [released](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki#roadmap) fourteen incremental updates of MSAL.NET, improving both the API and the behavior of the library. You've been awesome helping us move MSAL.NET to a great authentication library. But you also told us that things could be improved upon, and that you needed more flexibility. If you are interested in the analysis of your feedback with links to issues you raised, see the following GitHub issue [[New API] Improved 3.x API leveraging builders #810](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/810)). We wanted to bring you these improvements, but that we had reached a limit in term of API complexity. Here are the details of this journey.
+
+#### You told us you needed more configuration for applications
+
+##### Providing your own HttpClient, supporting Http proxy and customization of user agent headers
+
+We understand that there are cases where you want fine grain control on the Http proxy for instance, which we had not been able to provide you at all (on .NET core), or in a limited way (.NET framework). Also ASP.NET Core has some very efficient ways of pooling the `HttpClient` instance, and MSAL.NET clearly did not benefit from it (for details see [Use HttpClientFactory to implement resilient HTTP requests](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests))
+
+```csharp
+IMsalHttpClientFactory httpClientFactory = new MyHttpClientFactory();
+
+var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId) 
+                                        .WithHttpClientFactory(httpClientFactory)
+                                        .Build();
+
+```
+
+##### Configuring your app to target national and sovereign clouds was not straightforward
+
+As some of you start working on writing apps that can not only target users in the Azure public cloud, but also in national and sovereign clouds (for instance the US government cloud), you gave us the feedback that you'd need help making this transition easier. There are several ongoing initiatives for this, but MSAL.NET could already make it easier for you to configure the cloud instance you want to target, and the audience of your application. Along the same lines, we also came to the realization that we could help you with the configuration of the application from configuration files, and provide guidance on how to do that better.
+
+```csharp
+var pca = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                                        .WithAuthority(
+                                             AzureCloudInstance.AzureGermany, 
+                                             AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount)
+                                         .Build();
+
+```
+
+##### Partial summary: Better configuration for apps
+
+It was clear that you needed more configuration options for instantiating applications … therefore more parameters to the constructors, and help to support configuration files.
+
+#### More flexibility in methods acquiring tokens
+
+MSAL.NET enables you to get access tokens to call protected APIs in different ways, depending on your scenario, on the kind of app you build, and on the platform. See [Scenarios](Scenarios).
+
+All MSAL methods are async, so they should accept a CancellationToken. 
+
+Similarly, the only way to react to conditional access exceptions in MSAL 2.x was, as explained in [Handling Claim challenge exceptions in MSAL.NET](exceptions#handling-claim-challenge-exceptions-in-msalnet), to use the `extraQueryParameter`. Unfortunately, this parameter was available only in two overrides of the `AcquireTokenAsync` (interactive) flow, and it was not working correctly. We needed to fix it, and provide a proper `claims` parameter to `AcquireToken`*XXX*`Async` methods, including `AcquireTokenSilentAsync`.
+
+Finally, some advanced end-user scenarios, like letting the user pre-consent ahead of time were really hard to achieve, as you'll see in the next paragraph.
+
+#### A limit was reached in term of method overloads
+
+Let's take one of the scenarios where the developer experience was not good: acquiring a token interactively in a desktop or mobile application (The same reasoning can be extended to other scenarios). In that case you had to call `AcquireTokenAsync`, but the issue is that this method had 14 overloads (for details of all the parameters see [Acquiring tokens interactively](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/wiki/Acquiring-tokens-interactively)).
+
+![image](https://user-images.githubusercontent.com/13203188/37063988-40e52368-2193-11e8-887e-e86b97c54d19.png)
+
+But what's worse is that to achieve one goal (for instance, letting the end user pre-consent to specific scopes ahead of time), you had to use one specific overload with 7 parameters, and, just to pass `extraScopesToConsent`, you had to fill-in all the other parameters, and as a result, you had to study the documentation in detail to understand what could be good values for these parameters. This pain is illustrated in this article [How to get consent for several resources](Acquiring-tokens-interactively#how-to-get-consent-for-several-resources), where you see that you had to write code like this just to be able to pass-in `scopesForVendorApi` (and some of you had no idea what to use for `uiBehavior`, or `authority`)
+
+```CSharp
+var result = await app.AcquireTokenAsync(scopesForCustomerApi,
+                                         accounts.FirstOrDefault(),
+                                         uiBehavior,
+                                         string.Empty,
+                                         scopesForVendorApi,
+                                         app.Authority,
+                                         uiParent);
+```
+
+With each new addition, there would be an exposion in the number of `AcquireTokenAsync` methods and method params, making the API unusable. 
+
+The standard practice to deal with this is to use builder objects, which is introduced in MSAL 3. 
+
+```CSharp
+var result = await app.AcquireTokenInteractive(scopesForCustomerApi)
+                     .WithAccount(accounts.FirstOrDefault())
+                     .WithExtraScopesToConsent(scopesForVendorApi)
+                     .ExecuteAsync();
+```
+
+#### More extensibility
+
+Another request you made was to allow developers to bring their own UI - [allow public applications to acquire token via authorization code #863](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/863). In .NET Core we don't provide interactive authentication because no Web control is available there (yet). But there are cases, like what the Azure CLI team have done, where you want to let the user sign-in and consent into the machine browser on the desktop. This can be done, but at the same time you don't want to sacrifice to security. Therefore you asked us to provide an extensible way to let you do that. Another example of this is our own Visual Studio team who has Electron applications (VS Feedback and Azure Storage explorer) and wanted sign-in to be delegated in their UI, while still benefiting from the rest of MSAL.NET.
+
+```csharp
+
+  // Here we inject a custom web UI that is controlled by Selenium to test authentication. 
+  // See https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/blob/dev3x/tests/Microsoft.Identity.Test.Integration/SeleniumTests/InteractiveFlowTests.cs#L171 
+  AuthenticationResult result = await pca
+                .AcquireTokenInteractive(_scopes, null)
+                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+```
+
+#### Naming could be improved
+
+Finally we heard that we could improve the naming of things a bit. Here is an example `UIBehavior` was the mechanism, in MSAL 2.x by which you could customize the user experience and direct the Microsoft identity platform to present a particular prompt experience. We got the feedback that the name `UIBehavior` did not speak much, and everybody in the industry is naming it `Prompt` therefore we've decided to rename `UIBehavior` to `Prompt` in all MSAL libraries, starting with MSAL 3.x
+
+#### Testability of your app could be improved
+
+In the past to help you test your app (for instance in [MSAL 2.5.0-preview](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/releases/tag/MSAL-v2.5.0)), it was still not easy to test the cache, and the applications by a lack of interfaces (for instance `ITokenCache`), and the mutability of application configuration (for example it was possible to set the `RedirectUri` of an app after constructing it)
+
+### Unified cache layout format change
+
+MSAL 2.0 already enabled [common token cache scenarios](https://github.com/AzureAD/azure-activedirectory-library-for-dotnet/wiki/adalnet4-0-preview#common-token-cache-scenarios) between ADAL and MSAL on the platforms supported by ADAL, and also between MSAL libraries on different platforms. However as we were recently working on initiatives to enable SSO between tools written in different languages, we discovered that, on Windows/Linux/MacOS, MSAL.NET and MSAL.Python (for instance), although using the same cache schema, did not share the same layout for the blob that is serialized when you implement your own [custom cache serialization](https://aka.ms/msal-net-token-cache-serialization). Therefore, we slightly changed the layout format of the token cache blob to harmonize the format between MSAL.NET, MSAL Python and MSAL.Java. This is a breaking change, but we also provided a migration path. See [how to maintain SSO with apps written with ADAL v3, ADAL v4, MSAL.NET v2](#how-to-maintain-sso-with-apps-written-with-adal-v3-adal-v4-msalnet-v2) if you are interested in one of these.
+
+### Summarizing the feedback
+
+To summarize what we learned, you needed:
+
+- More flexibility in configuring your apps,
+- More options to acquire tokens
+- An API which enables your apps to be more testable
+- Customization of the Web view should be possible (on .NET Core)
+
+We had to change the API to enable this flexibility without making it overly complex. Therefore we've decided that MSAL.NET 3 would bring a lot of changes, including a few breaking changes.
+
 #### Future plans
 
-Note that we also have plans to provide ourselves in the future:
-
 - `AcquireTokenInteractive` for .NET Core 3+ on Windows
-- leveraging the desktop default browser on MacOS and Linux
+- Leveraging the desktop default browser on MacOS and Linux
