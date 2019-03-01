@@ -34,6 +34,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Parameter builder for the <see cref="IByRefreshToken.AcquireTokenByRefreshToken(IEnumerable{string}, string)"/>
+    /// method. See https://aka.ms/msal-net-migration-adal2-msal2
     /// </summary>
     public sealed class AcquireTokenByRefreshTokenParameterBuilder :
         AbstractClientAppBaseAcquireTokenParameterBuilder<AcquireTokenByRefreshTokenParameterBuilder>

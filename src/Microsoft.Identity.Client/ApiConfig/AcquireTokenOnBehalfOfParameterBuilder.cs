@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 
     /// <summary>
     /// Builder for AcquireTokenOnBehalfOf (OBO flow)
+    /// See https://aka.ms/msal-net-on-behalf-of
     /// </summary>
     public sealed class AcquireTokenOnBehalfOfParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenOnBehalfOfParameterBuilder>
