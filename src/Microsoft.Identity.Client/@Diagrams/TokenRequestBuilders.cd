@@ -146,7 +146,7 @@
       <Method Name="WithParent" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>IAQAAAIAAACAAAgAAAAAAAAAEIAAAEAAAIAAIgAAAEA=</HashCode>
+      <HashCode>IAQAAAIAAACAAAgAAAAAAACAEIAAAEAAAIAAIgAAAEA=</HashCode>
       <FileName>ApiConfig\AcquireTokenInteractiveParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -192,5 +192,20 @@
       <FileName>ApiConfig\AcquireTokenByUsernamePasswordParameterBuilder.cs</FileName>
     </TypeIdentifier>
   </Class>
+  <Struct Name="Microsoft.Identity.Client.Prompt">
+    <Position X="3" Y="11" Width="2" />
+    <Members>
+      <Method Name="Equals" Hidden="true" />
+      <Method Name="GetHashCode" Hidden="true" />
+      <Method Name="operator !=" Hidden="true" />
+      <Method Name="operator ==" Hidden="true" />
+      <Method Name="Prompt" Hidden="true" />
+      <Property Name="PromptValue" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAEAEAAgAEAAAAAAAAAQIAAABAAAAAAAiA=</HashCode>
+      <FileName>Prompt.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>
