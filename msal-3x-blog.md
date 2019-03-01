@@ -12,7 +12,7 @@ We are excited to announce the release of MSAL.NET 3.0-preview, which has a numb
   - [Advanced: You can provide your own web view](#you-can-provide-your-own-web-view)
   - [Breaking changes in MSAL.NET 3.x](#breaking-changes-in-msalnet-3x)
   - [How to maintain SSO with apps written with ADAL v3, ADAL v4, MSAL.NET v2](#how-to-maintain-sso-with-apps-written-with-adal-v3-adal-v4-msalnet-v2)
-- [Why MSAL.NET moved from MSAL 2.x to MSAL 3.x](#why-did-msal-move-from-2x-to-3x)
+- [Why MSAL.NET moved from MSAL 2.x to MSAL 3.x](#why-msalnet-moved-from-msal-2x-to-msal-3x)
   - [Reacting to your feedback](#reacting-to-your-feedback)
   - [Unified cache layout format change](#unified-cache-layout-format-change)
 
