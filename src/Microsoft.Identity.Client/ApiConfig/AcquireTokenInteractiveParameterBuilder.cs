@@ -44,7 +44,7 @@ using System.Windows.Forms;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
-    /// Builder for an Interactive token request
+    /// Builder for an Interactive token request. See https://aka.ms/msal-net-acquire-token-interactively
     /// </summary>
     public sealed class AcquireTokenInteractiveParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>

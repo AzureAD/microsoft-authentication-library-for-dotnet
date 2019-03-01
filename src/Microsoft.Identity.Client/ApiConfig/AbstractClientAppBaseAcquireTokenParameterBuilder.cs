@@ -32,12 +32,16 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Base class for parameter builders common to public client application and confidential
+    /// client application token acquisition operations
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class AbstractClientAppBaseAcquireTokenParameterBuilder<T> : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
         /// <summary>
+        /// Constructor of base class for parameter builders common to public client application and confidential
+        /// client application token acquisition operations
         /// </summary>
         /// <param name="clientApplicationBase"></param>
         protected AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
@@ -46,6 +50,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
+        /// Affected application
         /// </summary>
         protected IClientApplicationBase ClientApplicationBase { get; }
 

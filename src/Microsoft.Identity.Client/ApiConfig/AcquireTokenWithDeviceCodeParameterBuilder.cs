@@ -35,6 +35,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Parameters builder for the <see cref="IPublicClientApplication.AcquireTokenWithDeviceCode(IEnumerable{string}, Func{DeviceCodeResult, Task})"/>
+    /// operation. See https://aka.ms/msal-net-device-code-flow
     /// </summary>
     public sealed class AcquireTokenWithDeviceCodeParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenWithDeviceCodeParameterBuilder>

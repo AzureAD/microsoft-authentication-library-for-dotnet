@@ -25,6 +25,7 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -32,7 +33,12 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains UI properties for interactive flows, such as the parent window (on Windows), or the parent activity (on Xamarin.Android), and 
-    /// which browser to use (on Xamarin.Android and Xamarin.iOS)
+    /// which browser to use (on Xamarin.Android and Xamarin.iOS). 
+    /// Note that <c>UIParent</c> is only used in the overrides of 
+    /// <see cref="IPublicClientApplication.AcquireTokenAsync(System.Collections.Generic.IEnumerable{string})"/>, not in the
+    /// fluent API (<see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string}, object)"/>
+    /// where the parent window is passed explicity and the <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>
+    /// can be used to set kind of web view to use.
     /// </summary>
     public sealed class UIParent
     {

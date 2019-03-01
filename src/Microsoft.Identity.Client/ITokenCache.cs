@@ -32,7 +32,8 @@ namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Notification for certain token cache interactions during token acquisition. This delegate is
-    /// used in particular to provide a custom token cache serialization
+    /// used in particular to provide a custom token cache serialization.
+    /// See https://aka.ms/aka.ms/msal-net-token-cache-serialization
     /// </summary>
     /// <param name="args">Arguments related to the cache item impacted</param>
     public delegate void TokenCacheCallback(TokenCacheNotificationArgs args);
@@ -42,6 +43,7 @@ namespace Microsoft.Identity.Client
     /// With CacheV2, this should only be necessary if the caller is persisting
     /// the cache in their own store, since this will provide the serialize/deserialize
     /// and before/after notifications used in that scenario.
+    /// See https://aka.ms/aka.ms/msal-net-token-cache-serialization
     /// </summary>
     public interface ITokenCache
     {
@@ -68,7 +70,7 @@ namespace Microsoft.Identity.Client
         /// Serializes the token cache to the MSAL.NET 3.x cache format, which is compatible with other MSAL desktop libraries, e.g. MSAL for Python and MSAL for Java.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
         /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <returns>Byte stream representation of the cache</returns>
         /// <remarks>
@@ -97,7 +99,7 @@ namespace Microsoft.Identity.Client
         /// Serializes the token cache to the MSAL.NET 2.x unified cache format, which is compatible with ADAL.NET v4 and other MSAL.NET v2 applications.
         /// If you need to maintain SSO between an application using ADAL 3.x or MSAL 2.x and this application using MSAL 3.x,
         /// you might also want to serialize and deserialize with <see cref="SerializeAdalV3"/>/<see cref="DeserializeAdalV3"/> or <see cref="SerializeMsalV2"/>/<see cref="DeserializeMsalV2"/>, 
-        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
+        /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>.
         /// </summary>
         /// <returns>Byte stream representation of the cache</returns>
         /// <remarks>
@@ -146,14 +148,14 @@ namespace Microsoft.Identity.Client
         void DeserializeAdalV3(byte[] adalV3State, bool merge = false);
 
         /// <summary>
-        /// Functionality replaced by <see cref="SerializeMsalV2"/>
+        /// Functionality replaced by <see cref="SerializeMsalV2"/>. See https://aka.ms/msal-net-3x-cache-breaking-change
         /// </summary>
         /// <returns></returns>
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
         byte[] Serialize();
 
         /// <summary>
-        /// Functionality replaced by <see cref="DeserializeMsalV2"/>
+        /// Functionality replaced by <see cref="DeserializeMsalV2"/>.  See https://aka.ms/msal-net-3x-cache-breaking-change
         /// </summary>
         /// <param name="msalV2State"></param>
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
@@ -161,6 +163,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Functionality replaced by <see cref="SerializeMsalV2"/> and <see cref="SerializeAdalV3"/>
+        /// See https://aka.ms/msal-net-3x-cache-breaking-change
         /// </summary>
         /// <returns></returns>
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
@@ -168,6 +171,7 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Functionality replaced by <see cref="DeserializeMsalV2"/> and <see cref="DeserializeAdalV3"/>
+        /// See https://aka.ms/msal-net-3x-cache-breaking-change
         /// </summary>
         /// <param name="cacheData"></param>
         [Obsolete("This is expected to be removed in MSAL.NET v3 and ADAL.NET v5. We recommend using SerializeMsalV3/DeserializeMsalV3. Read more: https://aka.ms/msal-net-3x-cache-breaking-change", false)]
