@@ -56,7 +56,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync(new CancellationTokenSource().Token)
                 .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, user);
-            var expiration1 = authResult.ExpiresOn;
+            var at1 = authResult.AccessToken;
             // If test fails with "user needs to consent to the application, do an interactive request" error - see UsernamePassword tests
 
             Trace.WriteLine("Part 2 - Acquire a token silently, with forceRefresh = true");
@@ -67,10 +67,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                 .ExecuteAsync()
                 .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, user);
-            var expiration2 = authResult.ExpiresOn;
-
-            // MSAL computes expiration at second granularity, so pause for 1 sec to observe the difference
-            await Task.Delay(1000).ConfigureAwait(false);
+            var at2 = authResult.AccessToken;
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
             authResult = await pca.AcquireTokenSilent(_scopes, user.Upn)
@@ -78,10 +75,12 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ExecuteAsync()
                .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, user);
-            var expiration3 = authResult.ExpiresOn;
+            var at3 = authResult.AccessToken;
 
-            Assert.IsTrue(expiration2 > expiration1, "The AT doesn't seem to have been refreshed");
-            Assert.IsTrue(expiration3 > expiration2, "The AT doesn't seem to have been refreshed");
+            Assert.IsFalse(at1.Equals(at2, System.StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsFalse(at1.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
+            Assert.IsFalse(at2.Equals(at3, System.StringComparison.InvariantCultureIgnoreCase));
+
         }
     }
 }
