@@ -30,7 +30,7 @@ using System.Collections.Generic;
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
-    /// Sets of configuration parameters that were applied to build the application
+    /// Configuration properties used to build a public or confidential client application
     /// </summary>
     public interface IAppConfig
     {
