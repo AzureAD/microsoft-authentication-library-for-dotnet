@@ -26,18 +26,11 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,7 +70,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
             var expiration2 = authResult.ExpiresOn;
 
             // MSAL computes expiration at second granularity, so pause for 1 sec to observe the difference
-            Thread.Sleep(1000); 
+            await Task.Delay(1000).ConfigureAwait(false);
 
             Trace.WriteLine("Part 3 - Acquire a token silently with a login hint, with forceRefresh = true");
             authResult = await pca.AcquireTokenSilent(_scopes, user.Upn)
@@ -86,7 +79,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
                .ConfigureAwait(false);
             MsalAssert.AssertAuthResult(authResult, user);
             var expiration3 = authResult.ExpiresOn;
-            
+
             Assert.IsTrue(expiration2 > expiration1, "The AT doesn't seem to have been refreshed");
             Assert.IsTrue(expiration3 > expiration2, "The AT doesn't seem to have been refreshed");
         }
