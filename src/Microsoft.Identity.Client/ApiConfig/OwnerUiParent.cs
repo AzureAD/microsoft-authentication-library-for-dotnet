@@ -30,6 +30,10 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Identity.Client.UI;
 
+#if iOS
+using UIKit;
+#endif
+
 #if ANDROID
 using Android.App;
 #endif
@@ -52,6 +56,13 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             CoreUiParent.Activity = activity;
             CoreUiParent.CallerActivity = activity;
+        }
+#endif
+
+#if iOS
+        internal void SetUIViewController(UIViewController uiViewController)
+        {
+            CoreUiParent.CallerViewController = uiViewController;
         }
 #endif
 

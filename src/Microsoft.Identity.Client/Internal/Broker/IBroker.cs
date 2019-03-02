@@ -25,10 +25,18 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Platforms.iOS
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal static class MsalErrorMessageIOSEx
+    internal interface IBroker
     {
-        public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
+        bool CanInvokeBroker(OwnerUiParent uiParent);
+
+        Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
     }
 }

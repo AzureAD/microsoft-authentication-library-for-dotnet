@@ -237,7 +237,7 @@ namespace Microsoft.Identity.Client.AppConfig
             throw new InvalidOperationException(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments);
         }
 
-        private static string CanonicalizeAuthorityUri(string uri)
+        internal static string CanonicalizeAuthorityUri(string uri)
         {
             if (!string.IsNullOrWhiteSpace(uri) && !uri.EndsWith("/", StringComparison.OrdinalIgnoreCase))
             {

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using Foundation;
 using Microsoft.Identity.Client.Platforms.iOS;
 
@@ -44,6 +45,27 @@ namespace Microsoft.Identity.Client
         public static bool SetAuthenticationContinuationEventArgs(NSUrl url)
         {
             return WebviewBase.ContinueAuthentication(url.AbsoluteString);
+        }
+
+        /// <summary>
+        /// Returns if the response is from the broker app
+        /// </summary>
+        /// <param name="sourceApplication">application bundle id of the broker</param>
+        /// <returns>True if the response is from broker, False otherwise.</returns>
+        public static bool IsBrokerResponse(string sourceApplication)
+        {
+            Debug.WriteLine("IsBrokerResponse Called with sourceApplication {0}", sourceApplication);
+            return sourceApplication != null && sourceApplication.Equals("com.microsoft.azureauthenticator", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Sets broker response for continuing authentication flow.
+        /// </summary>
+        /// <param name="url"></param>
+        public static void SetBrokerContinuationEventArgs(NSUrl url)
+        {
+            Debug.WriteLine("SetBrokercontinuationEventArgs Called with Url {0}", url);
+            iOSBroker.SetBrokerResponse(url);
         }
     }
 }

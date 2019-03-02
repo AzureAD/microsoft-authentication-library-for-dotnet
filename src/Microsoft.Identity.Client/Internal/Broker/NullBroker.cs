@@ -25,10 +25,28 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.Platforms.iOS
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    internal static class MsalErrorMessageIOSEx
+    /// <summary>
+    /// For platforms that do not support a broker (net desktop, net core, UWP, netstandard)
+    /// </summary>
+    internal class NullBroker : IBroker
     {
-        public const string BrokerApplicationRequired = "Installation of broker failed. The broker application must be installed to continue authentication";
+        public bool CanInvokeBroker(OwnerUiParent uiParent)
+        {
+            return false;
+        }
+
+        public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
+        {
+            throw new PlatformNotSupportedException(CoreErrorMessages.BrokerNotSupportedOnThisPlatform);
+        }
     }
 }

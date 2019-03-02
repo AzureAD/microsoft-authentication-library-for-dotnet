@@ -21,6 +21,10 @@
       <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>msauthv2</string>
+    </array>
 
     <key>CFBundleURLTypes</key>
     <array>
@@ -28,10 +32,10 @@
         <key>CFBundleTypeRole</key>
         <string>Editor</string>
         <key>CFBundleURLName</key>
-        <string>com.yourcompany.XForms</string>
+        <string>com.yourcompany.xforms</string>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>adaliosxformsapp</string>
+          <string>msauth.com.yourcompany.xforms</string>
         </array>
       </dict>
     </array>

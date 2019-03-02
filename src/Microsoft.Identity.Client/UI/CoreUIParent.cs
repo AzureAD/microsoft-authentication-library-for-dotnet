@@ -64,6 +64,15 @@ namespace Microsoft.Identity.Client.UI
 
 #if iOS
         /// <summary>
+        /// Initializes an instance for a provided caller window.
+        /// </summary>
+        /// <param name="callerWindow">Caller window. OPTIONAL.</param>
+        public CoreUIParent(UIViewController callerWindow)
+        {
+            CallerViewController = callerWindow;
+        }
+
+        /// <summary>
         /// Caller UIViewController
         /// </summary>
         public UIViewController CallerViewController { get; set; }
