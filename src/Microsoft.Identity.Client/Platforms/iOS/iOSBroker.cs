@@ -57,11 +57,6 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public bool CanInvokeBroker(OwnerUiParent uiParent)
         {
-            if (!_serviceBundle.Config.IsBrokerEnabled)
-            {
-                return false;
-            }
-
             if (uiParent == null)
             {
                 _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.UiParentIsNullCannotInvokeBroker);

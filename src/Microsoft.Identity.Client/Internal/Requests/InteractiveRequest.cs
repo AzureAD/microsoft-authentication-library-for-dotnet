@@ -52,9 +52,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
         private string _state;
         private readonly AcquireTokenInteractiveParameters _interactiveParameters;
         private MsalTokenResponse _msalTokenResponse;
-        private Dictionary<string, string> _brokerPayload = new Dictionary<string, string>();
-        BrokerFactory brokerFactory = new BrokerFactory();
-        private IBroker Broker;
 
         public InteractiveRequest(
             IServiceBundle serviceBundle,
@@ -95,10 +92,15 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
             VerifyAuthorizationResult();
 
-            if (AuthenticationRequestParameters.IsBrokerEnabled)
+            BrokerInteractiveRequest brokerInteractiveRequest = new BrokerInteractiveRequest(
+                AuthenticationRequestParameters,
+                _interactiveParameters,
+                ServiceBundle,
+                _authorizationResult);
+
+            if (AuthenticationRequestParameters.IsBrokerEnabled || brokerInteractiveRequest.IsBrokerInvocationRequired())
             {
-                _msalTokenResponse = await SendTokenRequestWithBrokerAsync(cancellationToken).ConfigureAwait(false);
-                ValidateResponseFromBroker(_msalTokenResponse);
+                _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
             }
             else
             {
@@ -106,62 +108,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             }
 
             return CacheTokenResponseAndCreateAuthenticationResult(_msalTokenResponse);
-        }
-
-        private async Task<MsalTokenResponse> SendTokenRequestWithBrokerAsync(CancellationToken cancellationToken)
-        {
-            Broker = brokerFactory.CreateBrokerFacade(ServiceBundle);
-
-            if (Broker.CanInvokeBroker(_interactiveParameters.UiParent) || BrokerInvocationRequired())
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CanInvokeBrokerAcquireTokenWithBroker);
-
-                _brokerPayload = AuthenticationRequestParameters.CreateRequestParametersForBroker();
-
-                return await Broker.AcquireTokenUsingBrokerAsync(_brokerPayload).ConfigureAwait(false);
-            }
-            else
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Error(LogMessages.AuthenticationWithBrokerDidNotSucceed);
-                throw new MsalServiceException(MsalError.CannotInvokeBroker, MsalErrorMessage.CannotInvokeBroker);
-            }
-        }
-
-        internal bool BrokerInvocationRequired()
-        {
-            if (_authorizationResult.Code != null &&
-                !string.IsNullOrEmpty(_authorizationResult.Code) &&
-                _authorizationResult.Code.StartsWith(BrokerParameter.BrokerV2, StringComparison.Ordinal))
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.BrokerInvocationRequired);
-
-                _brokerPayload[BrokerParameter.BrokerInstallUrl] = _authorizationResult.Code;
-                return true;
-            }
-            return false;
-        }
-
-        internal void ValidateResponseFromBroker(MsalTokenResponse msalTokenResponse)
-        {
-            AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.CheckMsalTokenResponseReturnedFromBroker);
-            if (msalTokenResponse.AccessToken != null)
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    LogMessages.BrokerResponseContainsAccessToken +
-                    msalTokenResponse.AccessToken.Count());
-                return;
-            }
-            else if (msalTokenResponse.Error != null)
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(
-                    LogMessages.ErrorReturnedInBrokerResponse(msalTokenResponse.Error));
-                throw new MsalServiceException(msalTokenResponse.Error, MsalErrorMessage.BrokerResponseError + msalTokenResponse.ErrorDescription);
-            }
-            else
-            {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(LogMessages.UnknownErrorReturnedInBrokerResponse);
-                throw new MsalServiceException(MsalError.BrokerResponseReturnedError, MsalErrorMessage.BrokerResponseReturnedError, null);
-            }
         }
 
         private async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)

@@ -34,7 +34,6 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Instance;
-using Microsoft.Identity.Client.Internal.Broker;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
 
@@ -134,29 +133,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
             builder.AppendLine("Scopes - " + Scope?.AsSingleString());
             builder.AppendLine("Extra Query Params Keys (space separated) - " + ExtraQueryParameters.Keys.AsSingleString());
             logger.InfoPii(messageWithPii, builder.ToString());
-        }
-
-        public Dictionary<string, string> CreateRequestParametersForBroker()
-        {
-            Dictionary<string, string> brokerPayload = new Dictionary<string, string>();
-
-            brokerPayload.Add(BrokerParameter.Authority, Authority.AuthorityInfo.CanonicalAuthority);
-            string scopes = EnumerableExtensions.AsSingleString(Scope);
-
-            brokerPayload.Add(BrokerParameter.RequestScopes, scopes);
-            brokerPayload.Add(BrokerParameter.ClientId, ClientId);
-            brokerPayload.Add(BrokerParameter.CorrelationId, RequestContext.Logger.CorrelationId.ToString());
-            brokerPayload.Add(BrokerParameter.ClientVersion, MsalIdHelper.GetMsalVersion());
-            brokerPayload.Add(BrokerParameter.Force, "NO");
-            brokerPayload.Add(BrokerParameter.RedirectUri, RedirectUri.AbsoluteUri);
-
-            string extraQP = string.Join("&", ExtraQueryParameters.Select(x => x.Key + "=" + x.Value));
-            brokerPayload.Add(BrokerParameter.ExtraQp, extraQP);
-
-            brokerPayload.Add(BrokerParameter.Username, Account?.Username ?? string.Empty);
-            brokerPayload.Add(BrokerParameter.ExtraOidcScopes, BrokerParameter.OidcScopesValue);
-
-            return brokerPayload;
         }
     }
 }
