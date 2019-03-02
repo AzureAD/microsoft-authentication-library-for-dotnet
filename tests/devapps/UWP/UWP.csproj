@@ -163,6 +163,10 @@
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.1.7</Version>
     </PackageReference>
+    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
+      <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
+      <Name>Microsoft.Identity.Client</Name>
+    </ProjectReference>
     <ProjectReference Condition="'$(ARIA_TELEMETRY_ENABLED)' != ''" Include="..\AriaTelemetryProvider\AriaTelemetryProvider.csproj">
       <Project>{2ae44538-8e72-4d43-9cd1-b26c3a657814}</Project>
       <Name>AriaTelemetryProvider</Name>

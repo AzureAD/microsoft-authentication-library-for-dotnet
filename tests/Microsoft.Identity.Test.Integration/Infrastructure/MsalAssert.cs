@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,43 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
-using Android.App;
-using Android.Content.PM;
-using Android.OS;
-using Android.Content;
+using OpenQA.Selenium;
+using System;
+using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System.Diagnostics;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.UIAutomation.Infrastructure;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Platforms.Android;
+using System.Threading.Tasks;
+using System.Linq;
 
-namespace XForms.Droid
+namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
-    [Activity(Label = "XForms", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true,
-        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
-    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public static class MsalAssert
     {
-        protected override void OnCreate(Bundle bundle)
+        public static async Task<IAccount> AssertSingleAccountAsync(
+            LabResponse labResponse,
+            PublicClientApplication pca,
+            AuthenticationResult result)
         {
-            TabLayoutResource = Resource.Layout.Tabbar;
-            ToolbarResource = Resource.Layout.Toolbar;
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
+            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
+            Assert.AreEqual(labResponse.User.HomeUPN, account.Username);
 
-            base.OnCreate(bundle);
-
-            global::Xamarin.Forms.Forms.Init(this, bundle);
-            LoadApplication(new App());
-
-            App.AndroidActivity = this;
-
-#if ARIA_TELEMETRY_ENABLED
-            Telemetry.GetInstance().RegisterReceiver(
-                (new Microsoft.Identity.Client.AriaTelemetryProvider.ClientTelemetryHandler()).OnEvents);
-#endif
-
+            return account;
         }
 
-        protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+        public static void AssertAuthResult(AuthenticationResult result, LabUser user)
         {
-            base.OnActivityResult(requestCode, resultCode, data);
-            AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(requestCode, resultCode, data);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(user.Upn, result.Account.Username);
         }
     }
 }
-

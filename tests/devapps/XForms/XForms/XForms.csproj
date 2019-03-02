@@ -28,4 +28,7 @@
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
   </ItemGroup>
+  <PropertyGroup Condition="'$(APPCENTER_BUILD)' != ''">
+    <DefineConstants>$(DefineConstants);IS_APPCENTER_BUILD</DefineConstants>
+  </PropertyGroup>
 </Project>

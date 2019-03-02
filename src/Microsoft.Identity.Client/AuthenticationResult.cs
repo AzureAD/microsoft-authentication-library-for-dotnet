@@ -46,8 +46,18 @@ namespace Microsoft.Identity.Client
 
         /// <summary>
         /// Constructor meant to help application developers test their apps. Allows mocking of authentication flows. 
-        /// App developers should never new-up <see cref="AuthenticationResult"/> in product code.
+        /// App developers should <b>never</b> new-up <see cref="AuthenticationResult"/> in product code.
         /// </summary>
+        /// <param name="accessToken">Access Token that can be used as a bearer token to access protected web APIs</param>
+        /// <param name="account">Account information</param>
+        /// <param name="expiresOn">Expiracy date-time for the access token</param>
+        /// <param name="extendedExpiresOn">See <see cref="ExtendedExpiresOn"/></param>
+        /// <param name="idToken">ID token</param>
+        /// <param name="isExtendedLifeTimeToken">See <see cref="IsExtendedLifeTimeToken"/></param>
+        /// <param name="scopes">granted scope values as returned by the service</param>
+        /// <param name="tenantId">identifier for the Azure AD tenant from which the token was acquired. Can be <c>null</c></param>
+        /// <param name="uniqueId">Unique Id of the account. It can be null. When the <see cref="IdToken"/> is not <c>null</c>, this is its ID, that
+        /// is its ObjectId claim, or if that claim is <c>null</c>, the Subject claim.</param>
         public AuthenticationResult(
             string accessToken, 
             bool isExtendedLifeTimeToken, 

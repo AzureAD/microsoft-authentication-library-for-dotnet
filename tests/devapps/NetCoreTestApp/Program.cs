@@ -64,7 +64,7 @@ namespace NetCoreTestApp
 
             pca.UserTokenCache.SetBeforeAccess(notificationArgs =>
             {
-                notificationArgs.TokenCache.Deserialize(File.Exists(CacheFilePath)
+                notificationArgs.TokenCache.DeserializeMsalV3(File.Exists(CacheFilePath)
                     ? File.ReadAllBytes(CacheFilePath)
                     : null);
             });
@@ -74,7 +74,7 @@ namespace NetCoreTestApp
                 if (notificationArgs.HasStateChanged)
                 {
                     // reflect changes in the persistent store
-                    File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.Serialize());
+                    File.WriteAllBytes(CacheFilePath, notificationArgs.TokenCache.SerializeMsalV3());
                 }
             });
 

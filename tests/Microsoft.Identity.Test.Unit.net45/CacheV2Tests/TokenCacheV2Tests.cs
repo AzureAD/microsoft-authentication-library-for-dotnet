@@ -49,22 +49,17 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         private FileSystemCredentialPathManager _credentialPathManager;
         private StorageManager _storageManager;
         private PathStorageWorker _storageWorker;
-        private TokenCacheV2 _tokenCache;
 
         private const string TheSecret = "the_secret";
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _tokenCache = new TokenCacheV2();
-
             var serviceBundle = TestCommon.CreateDefaultServiceBundle();
             _cachePathStorage = new InMemoryCachePathStorage();
             _credentialPathManager = new FileSystemCredentialPathManager(serviceBundle.PlatformProxy.CryptographyManager);
             _storageWorker = new PathStorageWorker(_cachePathStorage, _credentialPathManager);
             _storageManager = new StorageManager(serviceBundle.PlatformProxy, _storageWorker);
-
-            _tokenCache.BindToStorageManager(_storageManager);
         }
 
         [TestMethod]
