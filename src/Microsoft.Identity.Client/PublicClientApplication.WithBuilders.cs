@@ -223,7 +223,6 @@ namespace Microsoft.Identity.Client
         {
             LogVersionInfo();
 
-#if DESKTOP || NET_CORE
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
@@ -231,12 +230,6 @@ namespace Microsoft.Identity.Client
                 usernamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-#else
-            await Task.Delay(0, cancellationToken).ConfigureAwait(false);  // this is here to keep compiler from complaining that this method is async when it doesn't await...
-            throw new PlatformNotSupportedException(
-                "Username Password is only supported on NetFramework and .NET Core." +
-                "For more details see https://aka.ms/msal-net-iwa");
-#endif
         }
 
         #endregion // ParameterExecutors
