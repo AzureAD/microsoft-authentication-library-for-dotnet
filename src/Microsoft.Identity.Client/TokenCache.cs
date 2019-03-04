@@ -79,7 +79,9 @@ namespace Microsoft.Identity.Client
 
 
         /// <summary>
-        ///
+        /// Constructor of a token cache. This constructor is left for compatibility with MSAL 2.x.
+        /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
+        /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
         public TokenCache()
         {
@@ -121,7 +123,7 @@ namespace Microsoft.Identity.Client
         /// used in particular to provide a custom token cache serialization
         /// </summary>
         /// <param name="args">Arguments related to the cache item impacted</param>
-        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead.", true)]
+        [Obsolete("Use Microsoft.Identity.Client.TokenCacheCallback instead. See https://aka.msa/msal-net-3x-cache-breaking-change", true)]
         public delegate void TokenCacheNotification(TokenCacheNotificationArgs args);
 
         internal readonly object LockObject = new object();

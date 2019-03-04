@@ -76,6 +76,11 @@ namespace Microsoft.Identity.Client
         /// Failed to refresh token.
         /// </summary>
         public const string FailedToRefreshToken = "failed_to_refresh_token";
+               
+        /// <summary>
+        /// Failed to acquire token silently. Used in broker scenarios.
+        /// </summary>
+        public const string FailedToAcquireTokenSilentlyFromBroker = "failed_to_acquire_token_silently_from_broker";
 
         /// <summary>
         /// RedirectUri validation failed.
@@ -189,6 +194,22 @@ namespace Microsoft.Identity.Client
         /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";
+
+        /// <summary>
+        /// Broker response hash did not match
+        /// </summary>
+        public const string BrokerResponseHashMismatch = "broker_response_hash_mismatch";
+
+        /// <summary>
+        /// Broker response returned an error
+        /// </summary>
+        public const string BrokerResponseReturnedError = "broker_response_returned_error";
+
+        /// <summary>
+        /// MSAL is not able to invoke the broker. Possible reasons are the broker is not installed on the user's device, 
+        /// or there were issues with the UiParent or CallerViewController being null. See https://aka.ms/msal-brokers
+        /// </summary>
+        public const string CannotInvokeBroker = "cannot_invoke_broker";
 
         /// <summary>
         /// Error code used when the http response returns HttpStatusCode.NotFound

@@ -32,10 +32,10 @@ using System.Threading.Tasks;
 namespace Microsoft.Identity.Client.Extensibility
 {
     /// <summary>
-    ///     Interface that MSAL.NET extender can implement to provide their own Web UI in public client applications
-    ///     to sign-in user and have them consented part of the Authorization code flow.
-    ///     MSAL.NET provides an embedded web view for Windows and Mac, but there are other scenarios not yet supported.
-    ///     This extensibility point enables them to provide such UI in a secure way
+    ///  Interface that MSAL.NET extender can implement to provide their own Web UI in public client applications
+    ///  to sign-in user and have them consented part of the Authorization code flow.
+    ///  MSAL.NET provides an embedded web view for Windows and Mac, but there are other scenarios not yet supported.
+    ///  This extensibility point enables them to provide such UI in a secure way
     /// </summary>
     public interface ICustomWebUi
     {
@@ -59,11 +59,12 @@ namespace Microsoft.Identity.Client.Extensibility
         ///     parameters that MSAL.NET will extract and redeem.
         /// </returns>
         /// <remarks>
-        ///     The authorizationUri is crafted to leverage PKCE in order to protect the token from a man
-        ///     in the middle attack. Only MSAL.NET can redeem the code.
+        /// The <paramref name="authorizationUri">authorizationUri</paramref>"/> is crafted to 
+        /// leverage PKCE in order to protect the token from a man in the middle attack. 
+        /// Only MSAL.NET can redeem the code.
         ///
-        ///     In the event of cancellation, the implementer should return OperationCanceledException.
-        ///     In the event of failure, the implementer should throw MsalCustomWebUiFailedException.
+        /// In the event of cancellation, the implementer should return <see cref="OperationCanceledException"/>.
+        /// In the event of failure, the implementer should throw <see cref="MsalCustomWebUiFailedException"/>.
         /// </remarks>
         Task<Uri> AcquireAuthorizationCodeAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
     }

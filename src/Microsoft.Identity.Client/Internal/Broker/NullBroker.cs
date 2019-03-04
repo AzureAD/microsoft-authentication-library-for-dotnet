@@ -25,21 +25,28 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Net.Http;
+using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.OAuth2;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.Internal.Broker
 {
     /// <summary>
-    /// Http Client Factory
+    /// For platforms that do not support a broker (net desktop, net core, UWP, netstandard)
     /// </summary>
-    public interface IMsalHttpClientFactory
+    internal class NullBroker : IBroker
     {
-        /// <summary>
-        /// Method returning an Http client that will be used to
-        /// communicate with Azure AD. This enables advanced scenarios. 
-        /// See https://aka.ms/msal-net-application-configuration
-        /// </summary>
-        /// <returns>An Http client</returns>
-        HttpClient GetHttpClient();
+        public bool CanInvokeBroker(OwnerUiParent uiParent)
+        {
+            return false;
+        }
+
+        public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
+        {
+            throw new PlatformNotSupportedException(CoreErrorMessages.BrokerNotSupportedOnThisPlatform);
+        }
     }
 }

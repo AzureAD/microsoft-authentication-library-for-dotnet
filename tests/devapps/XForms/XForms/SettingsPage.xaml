@@ -47,6 +47,8 @@
             <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand">
                 <Label Text="Validate Authority" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
                 <Switch x:Name="validateAuthoritySwitch" Toggled="OnValidateAuthorityToggled"/>
+                <Label Text="Acquire token with broker" HorizontalTextAlignment="Center"  Margin="5" Font="Bold,13"/>
+                <Switch x:Name="brokerSwitch" Toggled="OnAcquireTokenWithBrokerToggled"/>
             </StackLayout>
 
             <Frame OutlineColor="Black" Padding="10">

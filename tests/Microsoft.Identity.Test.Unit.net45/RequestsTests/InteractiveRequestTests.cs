@@ -27,9 +27,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -48,14 +46,13 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Internal.Broker;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
     [TestClass]
     public class InteractiveRequestTests
-    {
+    { 
         [TestInitialize]
         public void TestInitialize()
         {
@@ -356,7 +353,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 });
         }
 
-        private delegate void OAuthClientValidationHandler(Exception ex);
+        internal delegate void OAuthClientValidationHandler(Exception ex);
 
         private static void ValidateOathClient(HttpResponseMessage httpResponseMessage, OAuthClientValidationHandler validationHandler)
         {

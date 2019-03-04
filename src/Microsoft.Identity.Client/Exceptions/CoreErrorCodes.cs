@@ -78,6 +78,8 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string HttpStatusNotFound = "not_found";
         public const string HttpStatusCodeNotOk = "http_status_not_200";
 
+        public const string CannotInvokeBroker = "cannot_invoke_broker";
+
         /// <summary>
         /// RedirectUri validation failed.
         /// </summary>

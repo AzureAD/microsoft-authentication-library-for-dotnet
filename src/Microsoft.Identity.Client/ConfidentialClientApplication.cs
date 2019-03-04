@@ -175,7 +175,7 @@ namespace Microsoft.Identity.Client
         public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
             GuardMobileFrameworks();
-            
+
             return await AcquireTokenOnBehalfOf(scopes, userAssertion).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -414,6 +414,7 @@ namespace Microsoft.Identity.Client
         // - Why isn't this method public?  -- it can't be public, it's an explicit interface implementation.
         // https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/interfaces/explicit-interface-implementation
         // - should it move to ClientApplicationBase to help PCA moving from ADAL V2 to MSAL V2+?
+        /// <inheritdoc />
         AcquireTokenByRefreshTokenParameterBuilder IByRefreshToken.AcquireTokenByRefreshToken(
             IEnumerable<string> scopes,
             string refreshToken)

@@ -36,6 +36,8 @@ namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <inheritdoc />
     /// <summary>
+    /// Parameter builder for the <see cref="IClientApplicationBase.AcquireTokenSilent(IEnumerable{string}, IAccount)"/>
+    /// operation. See https://aka.ms/msal-net-acquiretokensilent
     /// </summary>
     public sealed class AcquireTokenSilentParameterBuilder :
         AbstractClientAppBaseAcquireTokenParameterBuilder<AcquireTokenSilentParameterBuilder>

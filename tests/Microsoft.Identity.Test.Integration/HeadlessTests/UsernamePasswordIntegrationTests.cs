@@ -159,7 +159,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         {
             var user = labResponse.User;
 
-            SecureString securePassword = new NetworkCredential("", LabUserHelper.GetUserPassword(user)).SecurePassword;
+            SecureString securePassword = new NetworkCredential("", user.Password).SecurePassword;
 
             PublicClientApplication msalPublicClient = new PublicClientApplication(labResponse.AppId, _authority);
 

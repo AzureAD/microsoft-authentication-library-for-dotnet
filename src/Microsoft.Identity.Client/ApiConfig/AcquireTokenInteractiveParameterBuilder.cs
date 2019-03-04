@@ -33,6 +33,10 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore;
 
+#if iOS
+using UIKit;
+#endif
+
 #if ANDROID
 using Android.App;
 #endif
@@ -44,7 +48,7 @@ using System.Windows.Forms;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
-    /// Builder for an Interactive token request
+    /// Builder for an Interactive token request. See https://aka.ms/msal-net-acquire-token-interactively
     /// </summary>
     public sealed class AcquireTokenInteractiveParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenInteractiveParameterBuilder>
@@ -161,6 +165,11 @@ namespace Microsoft.Identity.Client.ApiConfig
             else
             {
                 throw new InvalidOperationException(CoreErrorMessages.ActivityRequiredForParentObjectAndroid);
+            }
+#elif iOS
+            if(_ownerWindow is UIViewController uiViewController)
+            {
+                Parameters.UiParent.SetUIViewController(uiViewController);
             }
 
 #elif DESKTOP

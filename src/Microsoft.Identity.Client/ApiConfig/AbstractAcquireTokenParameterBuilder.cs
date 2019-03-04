@@ -269,7 +269,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <summary>
-        ///
+        /// Validates the parameters of the AcquireToken operation.
         /// </summary>
         protected virtual void Validate()
         {

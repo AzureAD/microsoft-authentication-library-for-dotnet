@@ -25,21 +25,26 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.Net.Http;
+#if iOS
+using Microsoft.Identity.Client.Platforms.iOS;
+#endif
+using Microsoft.Identity.Client.Core;
+using System;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client.Internal.Broker
 {
-    /// <summary>
-    /// Http Client Factory
-    /// </summary>
-    public interface IMsalHttpClientFactory
+    internal class BrokerFactory
     {
-        /// <summary>
-        /// Method returning an Http client that will be used to
-        /// communicate with Azure AD. This enables advanced scenarios. 
-        /// See https://aka.ms/msal-net-application-configuration
-        /// </summary>
-        /// <returns>An Http client</returns>
-        HttpClient GetHttpClient();
+        // thread safety ensured by implicit LazyThreadSafetyMode.ExecutionAndPublication
+        public IBroker CreateBrokerFacade(IServiceBundle serviceBundle)
+        {
+#if iOS
+            return new iOSBroker(serviceBundle);
+#elif ANDROID
+            return new NullBroker();
+#else
+            return new NullBroker();
+#endif
+        }
     }
 }

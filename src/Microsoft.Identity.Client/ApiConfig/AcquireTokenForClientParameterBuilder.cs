@@ -37,6 +37,7 @@ namespace Microsoft.Identity.Client.ApiConfig
 
     /// <summary>
     /// Builder for AcquireTokenForClient (used in client credential flows, in daemon applications).
+    /// See https://aka.ms/msal-net-client-credentials
     /// </summary>
     public sealed class AcquireTokenForClientParameterBuilder :
         AbstractConfidentialClientAcquireTokenParameterBuilder<AcquireTokenForClientParameterBuilder>

@@ -134,7 +134,7 @@ namespace Microsoft.Identity.Client
         {
             GuardNetCore();
             GuardUIParentAndroid();
-            
+
             return await AcquireTokenInteractive(scopes, null).WithLoginHint(loginHint)
                 .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
@@ -283,15 +283,17 @@ namespace Microsoft.Identity.Client
 
         private static object GetParentObjectFromUiParent(UIParent parent)
         {
-            #if DESKTOP
-                return parent.CoreUIParent.OwnerWindow;
-            #elif ANDROID
-                return parent.CoreUIParent.Activity;
-            #elif MAC
-                return parent.CoreUIParent.CallerWindow;
-            #else
-                return null;
-            #endif
+#if DESKTOP
+            return parent.CoreUIParent.OwnerWindow;
+#elif ANDROID
+            return parent.CoreUIParent.Activity;
+#elif MAC
+            return parent.CoreUIParent.CallerWindow;
+#elif iOS
+            return parent.CoreUIParent.CallerViewController;
+#else
+            return null;
+#endif
         }
 
         /// <summary>
@@ -679,9 +681,9 @@ namespace Microsoft.Identity.Client
         }
 #endif
 
-    //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
-    // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
-    // as we plan to expose the whole thing
+        //TODO: minor bug - we accidentally exposed this ctor to UWP without exposing
+        // the TokenCacheExtensions. Not worth removing and breaking backwards compat for it now, 
+        // as we plan to expose the whole thing
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME
         /// <summary>
         /// Constructor to create application instance. This constructor is only available for Desktop and NetCore apps

@@ -168,5 +168,6 @@ namespace Microsoft.Identity.Client
 
         public const string TokenCacheJsonSerializerFailedParse = "MSAL V3 Deserialization failed to parse the cache contents.  Is this possibly an earlier format needed for DeserializeMsalV2?";
         public const string TokenCacheDictionarySerializerFailedParse = "MSAL V2 Deserialization failed to parse the cache contents.  Is this possibly an earlier format needed for DeserializeMsalV3?";
+        public const string BrokerNotSupportedOnThisPlatform = "Broker is only supported on mobile platforms (Android and iOS). See https://aka.ms/msal-brokers for details";
     }
 }

@@ -1,4 +1,4 @@
-﻿//----------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,44 +25,40 @@
 //
 //------------------------------------------------------------------------------
 
+using OpenQA.Selenium;
 using System;
-using System.Collections.Generic;
+using System.IO;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.UI;
+using System.Diagnostics;
+using Microsoft.Identity.Test.LabInfrastructure;
+using Microsoft.Identity.Test.UIAutomation.Infrastructure;
+using Microsoft.Identity.Client;
+using System.Threading.Tasks;
 using System.Linq;
 
-namespace Microsoft.Identity.Client.Utils
+namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
-    internal static class ScopeHelper
+    public static class MsalAssert
     {
-        public static bool ScopeContains(SortedSet<string> outerSet, SortedSet<string> possibleContainedSet)
+        public static async Task<IAccount> AssertSingleAccountAsync(
+            LabResponse labResponse,
+            PublicClientApplication pca,
+            AuthenticationResult result)
         {
-            foreach (string key in possibleContainedSet)
-            {
-                if (!outerSet.Contains(key, StringComparer.OrdinalIgnoreCase))
-                {
-                    return false;
-                }
-            }
+            Assert.IsFalse(string.IsNullOrWhiteSpace(result.AccessToken));
+            var account = (await pca.GetAccountsAsync().ConfigureAwait(false)).Single();
+            Assert.AreEqual(labResponse.User.HomeUPN, account.Username);
 
-            return true;
+            return account;
         }
 
-        internal static SortedSet<string> ConvertStringToLowercaseSortedSet(string singleString)
+        public static void AssertAuthResult(AuthenticationResult result, LabUser user)
         {
-            if (string.IsNullOrEmpty(singleString))
-            {
-                return new SortedSet<string>();
-            }
-
-            return new SortedSet<string>(singleString.ToLowerInvariant().Split(new[] { " " }, StringSplitOptions.None));
-        }
-
-        internal static SortedSet<string> CreateSortedSetFromEnumerable(IEnumerable<string> input)
-        {
-            if (input == null || !input.Any())
-            {
-                return new SortedSet<string>();
-            }
-            return new SortedSet<string>(input);
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.AccessToken);
+            Assert.AreEqual(user.Upn, result.Account.Username);
         }
     }
 }

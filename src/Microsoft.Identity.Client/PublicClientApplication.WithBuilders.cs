@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         [CLSCompliant(false)]
         public AcquireTokenInteractiveParameterBuilder AcquireTokenInteractive(
-            IEnumerable<string> scopes, 
+            IEnumerable<string> scopes,
             object parent)
         {
             return AcquireTokenInteractiveParameterBuilder.Create(this, scopes, parent);
@@ -157,7 +157,6 @@ namespace Microsoft.Identity.Client
         {
             return AcquireTokenByUsernamePasswordParameterBuilder.Create(this, scopes, username, password);
         }
-
         #endregion // ParameterBuilders
 
         #region ParameterExecutors
@@ -180,6 +179,7 @@ namespace Microsoft.Identity.Client
                 CreateWebAuthenticationDialog(interactiveParameters, requestParams.RequestContext));
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
+
         }
 
         async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
@@ -223,7 +223,6 @@ namespace Microsoft.Identity.Client
         {
             LogVersionInfo();
 
-#if DESKTOP || NET_CORE
             var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
@@ -231,12 +230,6 @@ namespace Microsoft.Identity.Client
                 usernamePasswordParameters);
 
             return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-#else
-            await Task.Delay(0, cancellationToken).ConfigureAwait(false);  // this is here to keep compiler from complaining that this method is async when it doesn't await...
-            throw new PlatformNotSupportedException(
-                "Username Password is only supported on NetFramework and .NET Core." +
-                "For more details see https://aka.ms/msal-net-iwa");
-#endif
         }
 
         #endregion // ParameterExecutors
@@ -257,7 +250,7 @@ namespace Microsoft.Identity.Client
 #endif
 
 #if WINDOWS_APP || DESKTOP
-// hidden web view can be used in both WinRT and desktop applications.
+            // hidden web view can be used in both WinRT and desktop applications.
             coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never);
 #if WINDOWS_APP
             coreUiParent.UseCorporateNetwork = AppConfig.UseCorporateNetwork;

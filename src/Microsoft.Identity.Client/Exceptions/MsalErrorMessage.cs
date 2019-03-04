@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string LoginHintNullForUiOption = "Null login_hint is not allowed for Prompt.ActAsCurrentUser";
         public const string ServiceReturnedError = "Service returned error. Check InnerException for more details";
 
-        public const string BrokerReponseHashMismatch =
+        public const string BrokerResponseHashMismatch =
             "Unencrypted broker response hash did not match the expected hash";
 
         public const string StsMetadataRequestFailed =
@@ -134,8 +134,11 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string UserMismatchSaveToken = "Returned user identifier does not match the sent user identifier when saving the token to the cache.";
         public const string IwaNotSupportedForManagedUser = "Integrated Windows Auth is not supported for managed users. See https://aka.ms/msal-net-iwa for details.";
         public const string ActivityRequired = "On the Android platform, you have to pass the Activity to the UIParent object. See https://aka.ms/msal-interactive-android for details.";
+        public const string BrokerResponseReturnedError = "Broker response returned an error which does not contain an error or error description. See https://aka.ms/msal-brokers for details. ";
+        public const string BrokerResponseError = "Broker response returned error: ";
+        public const string CannotInvokeBroker = "MSAL cannot invoke the broker. The Authenticator App (Broker) may not be installed on the user's device or there was an error invoking the broker. " +
+            "Check logs for more details and see https://aka.ms/msal-brokers. ";
         public const string NoAccountForLoginHint = "You are trying to acquire a token silently using a login hint. No account was found in the token cache having this login hint.";
         public const string MultipleAccountsForLoginHint = "You are trying to acquire a token silently using a login hint. Multiple accounts were found in the token cache having this login hint. Please choose an account manually an pass it in to AcquireTokenSilently.";
     }
-
 }

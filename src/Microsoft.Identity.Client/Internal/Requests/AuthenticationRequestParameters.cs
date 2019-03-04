@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
@@ -43,8 +44,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthenticationRequestParameters(
             IServiceBundle serviceBundle,
             Authority customAuthority,
-            ITokenCacheInternal tokenCache, 
-            AcquireTokenCommonParameters commonParameters, 
+            ITokenCacheInternal tokenCache,
+            AcquireTokenCommonParameters commonParameters,
             RequestContext requestContext)
         {
             Authority authorityInstance = customAuthority ?? (commonParameters.AuthorityOverride == null
@@ -60,6 +61,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             RedirectUri = new Uri(serviceBundle.Config.RedirectUri);
             RequestContext = requestContext;
             ApiId = commonParameters.ApiId;
+            IsBrokerEnabled = serviceBundle.Config.IsBrokerEnabled;
 
             // Set application wide query parameters.
             ExtraQueryParameters = serviceBundle.Config.ExtraQueryParameters ?? new Dictionary<string, string>();
@@ -75,7 +77,6 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             // Prefer the call-specific claims, otherwise use the app config
             Claims = commonParameters.Claims ?? serviceBundle.Config.Claims;
-
         }
 
         public ApiEvent.ApiIds ApiId { get; }
@@ -85,14 +86,16 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public AuthorityInfo AuthorityInfo => Authority.AuthorityInfo;
         public AuthorityEndpoints Endpoints { get; set; }
         public string TenantUpdatedCanonicalAuthority { get; set; }
-        public ICacheSessionManager CacheSessionManager{ get; set; }
+        public ICacheSessionManager CacheSessionManager { get; set; }
         public SortedSet<string> Scope { get; set; }
         public string ClientId { get; set; }
         public Uri RedirectUri { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; }
         public string Claims { get; }
 
-        #region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
+        internal bool IsBrokerEnabled { get; set; }
+
+#region TODO REMOVE FROM HERE AND USE FROM SPECIFIC REQUEST PARAMETERS
         // TODO: ideally, these can come from the particular request instance and not be in RequestBase since it's not valid for all requests.
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
@@ -108,7 +111,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public bool IsRefreshTokenRequest { get; set; }
         public UserAssertion UserAssertion { get; set; }
 
-        #endregion
+#endregion
 
         public void LogParameters(ICoreLogger logger)
         {

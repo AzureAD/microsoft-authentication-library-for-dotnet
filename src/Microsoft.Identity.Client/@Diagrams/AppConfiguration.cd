@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="Microsoft.Identity.Client.AppConfig.AbstractApplicationBuilder&lt;T&gt;">
+    <Position X="1.5" Y="6.5" Width="9.25" />
+    <Members>
+      <Method Name="AbstractApplicationBuilder" Hidden="true" />
+      <Method Name="BuildConfiguration" Hidden="true" />
+      <Property Name="Config" Hidden="true" />
+      <Method Name="GetDefaultAuthorityAudience" Hidden="true" />
+      <Method Name="GetDefaultAuthorityInstance" Hidden="true" />
+      <Method Name="GetValueIfNotEmpty" Hidden="true" />
+      <Method Name="TryAddDefaultAuthority" Hidden="true" />
+      <Method Name="Validate" Hidden="true" />
+      <Method Name="WithHttpManager" Hidden="true" />
+      <Method Name="WithOptions" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAQDAAAIEiCAAgAAAAAAAAACCAAIAhAAAABARAIgAAQ=</HashCode>
+      <FileName>AppConfig\AbstractApplicationBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.AppConfig.PublicClientApplicationBuilder">
+    <Position X="0.5" Y="12" Width="7" />
+    <Members>
+      <Method Name="BuildConcrete" Hidden="true" />
+      <Method Name="PublicClientApplicationBuilder" Hidden="true" />
+      <Method Name="Validate" Hidden="true" />
+      <Method Name="WithBroker" Hidden="true" />
+      <Method Name="WithUserTokenLegacyCachePersistenceForTest" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAACgAAAAAAAAAEAAEAAAgEAAAEAAAAAAAAA=</HashCode>
+      <FileName>AppConfig\PublicClientApplicationBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.AppConfig.ConfidentialClientApplicationBuilder">
+    <Position X="8" Y="12" Width="3.75" />
+    <Members>
+      <Method Name="BuildConcrete" Hidden="true" />
+      <Method Name="ConfidentialClientApplicationBuilder" Hidden="true" />
+      <Method Name="Validate" Hidden="true" />
+      <Method Name="WithClientCredential" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACgBAgAAAAAAAAAAACAgEAAAEAAAAAAAAA=</HashCode>
+      <FileName>AppConfig\ConfidentialClientApplicationBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.AppConfig.ApplicationOptions">
+    <Position X="4" Y="14.75" Width="4" />
+    <AssociationLine Name="AadAuthorityAudience" Type="Microsoft.Identity.Client.AppConfig.AadAuthorityAudience" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8" Y="16.316" />
+        <Point X="8.375" Y="16.316" />
+        <Point X="8.375" Y="17.081" />
+        <Point X="9.75" Y="17.081" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.131" Y="-0.259" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQAAAAAgAAAAAAEAABAAAKEQABgAAAAAAA=</HashCode>
+      <FileName>AppConfig\ApplicationOptions.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AadAuthorityAudience" />
+      <Property Name="AzureCloudInstance" />
+      <Property Name="LogLevel" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.AppConfig.ConfidentialClientApplicationOptions">
+    <Position X="5.75" Y="17.75" Width="3" />
+    <InheritanceLine Type="Microsoft.Identity.Client.AppConfig.ApplicationOptions" ManuallyRouted="true" FixedToPoint="true">
+      <Path>
+        <Point X="6" Y="17.007" />
+        <Point X="6" Y="17.375" />
+        <Point X="7.375" Y="17.375" />
+        <Point X="7.375" Y="17.75" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AppConfig\ConfidentialClientApplicationOptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.Identity.Client.AppConfig.PublicClientApplicationOptions" Collapsed="true">
+    <Position X="3" Y="17.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AppConfig\PublicClientApplicationOptions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="Microsoft.Identity.Client.IClientApplicationBase">
+    <Position X="3.25" Y="0.5" Width="7.5" />
+    <Members>
+      <Method Name="AcquireTokenSilentAsync" Hidden="true" />
+      <Property Name="Component" Hidden="true" />
+      <Method Name="GetUser" Hidden="true" />
+      <Property Name="RedirectUri" Hidden="true" />
+      <Method Name="Remove" Hidden="true" />
+      <Property Name="SliceParameters" Hidden="true" />
+      <Property Name="Users" Hidden="true" />
+      <Property Name="ValidateAuthority" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAIAhAgQBAEAABBAAAAAECJAAEAAAEA=</HashCode>
+      <FileName>MigrationAid\MigrationAid.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AppConfig" />
+      <Property Name="UserTokenCache" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Microsoft.Identity.Client.IConfidentialClientApplication">
+    <Position X="8" Y="3.75" Width="5.75" />
+    <Members>
+      <Method Name="AcquireTokenByAuthorizationCodeAsync" Hidden="true" />
+      <Method Name="AcquireTokenForClientAsync" Hidden="true" />
+      <Method Name="AcquireTokenOnBehalfOfAsync" Hidden="true" />
+      <Method Name="GetAuthorizationRequestUrlAsync" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAEAQDAAACAAACAAAAAAAAACAAAAAAAAABAA=</HashCode>
+      <FileName>IConfidentialClientApplication.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AppTokenCache" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Microsoft.Identity.Client.IPublicClientApplication">
+    <Position X="1" Y="3.75" Width="6.75" />
+    <Members>
+      <Method Name="AcquireTokenAsync" Hidden="true" />
+      <Method Name="AcquireTokenByIntegratedWindowsAuthAsync" Hidden="true" />
+      <Method Name="AcquireTokenByUsernamePasswordAsync" Hidden="true" />
+      <Method Name="AcquireTokenWithDeviceCodeAsync" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAAAAAAAAQASAAACAAAAAAgAAAgAAEAAAA=</HashCode>
+      <FileName>MigrationAid\MigrationAid.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Microsoft.Identity.Client.ITokenCache" Collapsed="true">
+    <Position X="12.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAABABAAAAGFAAAABBCAAiAAAAAA=</HashCode>
+      <FileName>ITokenCache.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Microsoft.Identity.Client.AppConfig.IAppConfig" Collapsed="true">
+    <Position X="12.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAgAAAQAAAIAgAAAgAAAAABAAAKAAABgAAAAAAA=</HashCode>
+      <FileName>AppConfig\IAppConfig.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="Microsoft.Identity.Client.AppConfig.AadAuthorityAudience">
+    <Position X="9.75" Y="16.75" Width="2.5" />
+    <Members>
+      <Field Name="None" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAACAAAAAAAAAAAACAAAAAAAAEAQAA=</HashCode>
+      <FileName>AppConfig\AadAuthorityAudience.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Microsoft.Identity.Client.AppConfig.AzureCloudInstance">
+    <Position X="9.75" Y="14.75" Width="1.75" />
+    <Members>
+      <Field Name="None" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAQAAAQAAAAAAQAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>AppConfig\AzureCloud.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Microsoft.Identity.Client.LogLevel">
+    <Position X="1.5" Y="15" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAQAAAAAAABAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>LogLevel.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

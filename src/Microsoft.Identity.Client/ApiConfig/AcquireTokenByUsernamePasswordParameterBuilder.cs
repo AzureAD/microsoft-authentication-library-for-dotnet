@@ -35,6 +35,8 @@ using Microsoft.Identity.Client.TelemetryCore;
 namespace Microsoft.Identity.Client.ApiConfig
 {
     /// <summary>
+    /// Parameter builder for the <see cref="IPublicClientApplication.AcquireTokenByUsernamePassword(IEnumerable{string}, string, SecureString)"/>
+    /// operation. See https://aka.ms/msal-net-up
     /// </summary>
     public sealed class AcquireTokenByUsernamePasswordParameterBuilder :
         AbstractPublicClientAcquireTokenParameterBuilder<AcquireTokenByUsernamePasswordParameterBuilder>

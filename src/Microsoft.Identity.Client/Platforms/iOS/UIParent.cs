@@ -25,14 +25,21 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
+using UIKit;
 
 namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Contains UI properties for interactive flows, such as the parent window (on Windows), or the parent activity (on Xamarin.Android), and 
-    /// which browser to use (on Xamarin.Android and Xamarin.iOS)
+    /// which browser to use (on Xamarin.Android and Xamarin.iOS). 
+    /// Note that <c>UIParent</c> is only used in the overrides of 
+    /// <see cref="IPublicClientApplication.AcquireTokenAsync(System.Collections.Generic.IEnumerable{string})"/>, not in the
+    /// fluent API (<see cref="IPublicClientApplication.AcquireTokenInteractive(System.Collections.Generic.IEnumerable{string}, object)"/>
+    /// where the parent window is passed explicity and the <see cref="AcquireTokenInteractiveParameterBuilder.WithUseEmbeddedWebView(bool)"/>
+    /// can be used to set kind of web view to use.
     /// </summary>
     public sealed class UIParent
     {
@@ -44,8 +51,13 @@ namespace Microsoft.Identity.Client
         public UIParent()
         {
             CoreUIParent = new CoreUIParent();
-        }
 
+            if (CoreUIParent.CallerViewController == null)
+            {
+                CoreUIParent.CallerViewController = new UIViewController();
+            }            
+        }
+        
         /// <summary>
         /// Constructor for iOS for directing the application to use the embedded webview instead of the
         /// system browser. See https://aka.ms/msal-net-uses-web-browser
@@ -58,7 +70,7 @@ namespace Microsoft.Identity.Client
 
 #if iOS_RUNTIME
         /// <summary>
-        /// Platform agnostic constructor that allows building an UIParent from a NetStandard assembly.
+        /// Platform agnostic constructor that allows building a UIParent from a NetStandard assembly.
         /// On iOS, the parent is ignored, you can pass null.
         /// </summary>
         /// <remarks>This constructor is only avaiable at runtime, to provide support for NetStandard</remarks>
@@ -67,6 +79,7 @@ namespace Microsoft.Identity.Client
         public UIParent(object parent, bool useEmbeddedWebview) :
             this(useEmbeddedWebview)
         {
+
         }
 #endif
 
