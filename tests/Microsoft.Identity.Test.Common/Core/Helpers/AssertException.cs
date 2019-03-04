@@ -36,7 +36,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 {
     public static class AssertException
     {
-        [DebuggerStepThrough]
+        
         public static void DoesNotThrow(Action testCode)
         {
             var ex = Recorder.Exception<Exception>(testCode);
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
-        [DebuggerStepThrough]
+        
         public static void DoesNotThrow(Func<object> testCode)
         {
             var ex = Recorder.Exception<Exception>(testCode);
@@ -56,14 +56,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
         }
 
-        [DebuggerStepThrough]
+        
         public static TException Throws<TException>(Action testCode)
              where TException : Exception
         {
             return Throws<TException>(testCode, false);
         }
 
-        [DebuggerStepThrough]
+        
         public static TException Throws<TException>(Action testCode, bool allowDerived)
              where TException : Exception
         {
@@ -79,14 +79,14 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return exception;
         }
 
-        [DebuggerStepThrough]
+        
         public static TException Throws<TException>(Func<object> testCode)
             where TException : Exception
         {
             return Throws<TException>(testCode, false);
         }
 
-        [DebuggerStepThrough]
+        
         public static TException Throws<TException>(Func<object> testCode, bool allowDerived)
             where TException : Exception
         {
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return exception;
         }
 
-        [DebuggerStepThrough]
+        
         public static T TaskThrows<T>(Func<Task> testCode, bool allowDerived = false)
             where T : Exception
         {
@@ -130,7 +130,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             return (exception as T);
         }
 
-        [DebuggerStepThrough]
+        
         public static void TaskDoesNotThrow(Func<Task> testCode)
         {
             var exception = Recorder.Exception(() => testCode().Wait());
@@ -143,7 +143,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.TaskDoesNotThrow failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
         }
 
-        [DebuggerStepThrough]
+        
         public static void TaskDoesNotThrow<T>(Func<Task> testCode) where T : Exception
         {
             var exception = Recorder.Exception<AggregateException>(() => testCode().Wait());
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             throw new AssertFailedException(string.Format(CultureInfo.CurrentCulture, "AssertExtensions.Throws failed. Incorrect exception {0} occurred.", exception.GetType().Name), exception);
         }
 
-        [DebuggerStepThrough]
+        
         private static void CheckExceptionType<TException>(Exception actualException, bool allowDerived)
         {
             Type expectedType = typeof(TException);
@@ -195,7 +195,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
         private static class Recorder
         {
-            [DebuggerStepThrough]
+            
             public static Exception Exception(Action code)
             {
                 try
@@ -209,7 +209,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
             }
 
-            [DebuggerStepThrough]
+            
             public static TException Exception<TException>(Action code)
                 where TException : Exception
             {
@@ -228,7 +228,7 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
                 }
             }
 
-            [DebuggerStepThrough]
+            
             public static TException Exception<TException>(Func<object> code)
                 where TException : Exception
             {
