@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Client.Extensibility;
+﻿using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.UI;
 using OpenQA.Selenium;
 using System;
@@ -128,15 +129,11 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                     return authCodeUri;
 
                 }
-               
                 catch (SocketException ex)
                 {
-                    throw new MsalCustomWebUiFailedException(
+                    throw new MsalClientException(
+                        "selenium_ui_socket_error",
                         "A socket exception occured " + ex.Message + " socket error code " + ex.SocketErrorCode);
-                }
-                catch (Exception ex)
-                {
-                    throw new MsalCustomWebUiFailedException("Unkown error: " + ex.Message);
                 }
             }
         }

@@ -223,5 +223,17 @@ namespace Microsoft.Identity.Client
         /// HttpStatusCode.NotFound have a specific error code. <see cref="MsalError.HttpStatusNotFound"/>
         /// </remarks>
         public const string HttpStatusCodeNotOk = "http_status_not_200";
+
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it is invalid - it is either null or has no code.
+        /// Consider throwing an exception if you are unable to intercept the uri containing the code. 
+        /// </summary>
+        public const string CustomWebUiReturnedInvalidUri = "custom_webui_returned_invalid_uri";
+
+        /// <summary>
+        /// Error code used when the CustomWebUI has returned an uri, but it does not match the Authroity and AbsolutePath of 
+        /// the configured redirect uri.
+        /// </summary>
+        public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
     }
 }
