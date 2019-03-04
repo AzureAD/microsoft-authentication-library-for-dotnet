@@ -112,7 +112,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private async Task AcquireAuthorizationAsync(CancellationToken cancellationToken)
         {
-            var authorizationUri = CreateAuthorizationUri(true, true);
+            var authorizationUri = CreateAuthorizationUri(true);
 
             var uiEvent = new UiEvent();
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(
@@ -149,21 +149,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             return dict;
         }
 
-        private Uri CreateAuthorizationUri(bool addVerifier = false, bool addState = false)
+        private Uri CreateAuthorizationUri(bool addPkceAndState = false)
         {
             IDictionary<string, string> requestParameters = CreateAuthorizationRequestParameters();
 
-            if (addVerifier)
+            if (addPkceAndState)
             {
                 _codeVerifier = ServiceBundle.PlatformProxy.CryptographyManager.GenerateCodeVerifier();
                 string codeVerifierHash = ServiceBundle.PlatformProxy.CryptographyManager.CreateBase64UrlEncodedSha256Hash(_codeVerifier);
 
                 requestParameters[OAuth2Parameter.CodeChallenge] = codeVerifierHash;
                 requestParameters[OAuth2Parameter.CodeChallengeMethod] = OAuth2Value.CodeChallengeMethodValue;
-            }
 
-            if (addState)
-            {
                 _state = Guid.NewGuid().ToString() + Guid.NewGuid().ToString();
                 requestParameters[OAuth2Parameter.State] = _state;
             }
@@ -258,8 +255,8 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void VerifyAuthorizationResult()
         {
-            if (_authorizationResult.Status == AuthorizationStatus.Success && !_state.Equals(
-                    _authorizationResult.State,
+            if (_authorizationResult.Status == AuthorizationStatus.Success && 
+                !_state.Equals(_authorizationResult.State,
                     StringComparison.OrdinalIgnoreCase))
             {
                 throw new MsalClientException(

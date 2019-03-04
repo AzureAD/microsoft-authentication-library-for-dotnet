@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -62,7 +63,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             mockHttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.AuthorityHomeTenant);
         }
 
-        private static void ExecuteTest(bool withTokenRequest, Action<ICustomWebUi> customizeWebUiBehavior, Action<InteractiveRequest> executionBehavior)
+        private static void ExecuteTest(
+            bool withTokenRequest, 
+            Action<ICustomWebUi> customizeWebUiBehavior, 
+            Action<InteractiveRequest> executionBehavior)
         {
             var customWebUi = Substitute.For<ICustomWebUi>();
             customizeWebUiBehavior(customWebUi);
@@ -101,6 +105,32 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 executionBehavior(request);
             }
+        }
+
+        [TestMethod]
+        public void TestInteractiveWithCustomWebUi_HappyPath_CorrectRedirectUri_CorrectQueryDataForCode()
+        {
+            // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
+            ExecuteTest(
+                true,
+                ui =>
+                {
+                    ui.AcquireAuthorizationCodeAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), CancellationToken.None)
+                     .Returns(x =>
+                     {
+                         // Capture the state from the authorizationUri and add it to the result uri
+                         var authorizationUri = x[0] as Uri;
+                         var state = CoreHelpers.ParseKeyValueList(authorizationUri.Query, '&', true, false, null)["state"];
+                         Assert.IsTrue(!String.IsNullOrEmpty(state));
+
+                         return Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=" + state));
+                     });
+                },
+                request =>
+                {
+                    request.ExecuteAsync(CancellationToken.None)
+                           .Wait();
+                });
         }
 
         [TestMethod]
@@ -147,22 +177,27 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     var ex = AssertException.TaskThrows<MsalClientException>(
                         () => request.ExecuteAsync(CancellationToken.None));
                     Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
-                }
-                );
+                });
         }
 
+      
+
         [TestMethod]
-        public void TestInteractiveWithCustomWebUi_CorrectRedirectUri_CorrectQueryDataForCode()
+        public void TestInteractiveWithCustomWebUi_IncorrectState()
         {
             // The CustomWebUi is only going to return the Uri value here with no additional data to parse to get the code, so we'll expect to fail.
             ExecuteTest(
-                true,
-                ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
-                        .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code"))),
+                false,
+                ui =>
+                {
+                    ui.AcquireAuthorizationCodeAsync(Arg.Any<Uri>(), Arg.Any<Uri>(), CancellationToken.None)
+                     .Returns(Task.FromResult(new Uri(ExpectedRedirectUri + "?code=some-code&state=bad_state")));
+                },
                 request =>
                 {
-                    request.ExecuteAsync(CancellationToken.None)
-                           .Wait();
+                    var ex = AssertException.TaskThrows<MsalClientException>(
+                      () => request.ExecuteAsync(CancellationToken.None));
+                    Assert.AreEqual(MsalClientException.StateMismatchError, ex.ErrorCode);
                 });
         }
     }
