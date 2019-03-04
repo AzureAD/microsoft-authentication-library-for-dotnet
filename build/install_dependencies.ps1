@@ -1,5 +1,5 @@
 #requires -version 4.0
-#requires –runasadministrator
+#requires ï¿½runasadministrator
 
 function Test-ChocolateyPackageInstalled {
   Param (
@@ -7,10 +7,10 @@ function Test-ChocolateyPackageInstalled {
     [string]
     $Package
   )
-  
+
   Process {
     $pkgResult = choco list --local-only --id-only --limit-output --exact $Package
-    
+
     return (-Not ([string]::IsNullOrEmpty($pkgResult)))
   }
 }
@@ -20,7 +20,7 @@ function Test-IsChocolateyInstalled {
   if (Get-Command choco.exe -ErrorAction SilentlyContinue) {
       $ChocoInstalled = $true
   }
-  
+
   return $ChocoInstalled
 }
 
@@ -43,3 +43,5 @@ ForEach ($PackageName in $ChocoPackages) {
 }
 
 choco upgrade all -y --limit-output
+
+dotnet tool install -g dotnet-format
