@@ -38,6 +38,7 @@ using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -111,16 +112,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs(Task.FromResult(new Uri("http://blech"))),
                 request =>
                 {
-                    try
-                    {
-                        request.ExecuteAsync(CancellationToken.None)
-                               .GetAwaiter().GetResult();
-                        Assert.Fail("MsalException should have been thrown here");
-                    }
-                    catch (Exception exc)
-                    {
-                        Assert.IsTrue(exc is MsalCustomWebUiFailedException);
-                    }
+
+                    var ex = AssertException.TaskThrows<MsalClientException>(() => request.ExecuteAsync(CancellationToken.None));
+                    Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
+
                 });
         }
 
@@ -132,21 +127,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             ExecuteTest(
                 false,
                  ui => ui.AcquireAuthorizationCodeAsync(null, null, CancellationToken.None)
-                        .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); } ),
+                        .ReturnsForAnyArgs<Uri>(x => { throw new InvalidOperationException(); }),
                 request =>
                 {
-                    try
-                    {
-                        request.ExecuteAsync(CancellationToken.None)
-                               .GetAwaiter().GetResult();
-                        Assert.Fail("MsalException should have been thrown here");
-                    }
-                    catch (Exception exc)
-                    {
-                        Assert.IsTrue(exc is MsalCustomWebUiFailedException);
-                        Assert.IsTrue(exc.InnerException is InvalidOperationException);
-
-                    }
+                    AssertException.TaskThrows<InvalidOperationException>(() => request.ExecuteAsync(CancellationToken.None));
                 });
         }
 
@@ -160,18 +144,11 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         .ReturnsForAnyArgs(Task.FromResult(new Uri(ExpectedRedirectUri))),
                 request =>
                 {
-                    try
-                    {
-                        request.ExecuteAsync(CancellationToken.None)
-                               .Wait();
-                        Assert.Fail("MsalException should have been thrown here");
-                    }
-                    catch (Exception exc)
-                    {
-                        Assert.IsTrue(exc.InnerException is MsalServiceException);
-                        Assert.AreEqual(CoreErrorCodes.AuthenticationFailed, ((MsalServiceException)exc.InnerException).ErrorCode);
-                    }
-                });
+                    var ex = AssertException.TaskThrows<MsalClientException>(
+                        () => request.ExecuteAsync(CancellationToken.None));
+                    Assert.AreEqual(MsalError.CustomWebUiReturnedInvalidUri, ex.ErrorCode);
+                }
+                );
         }
 
         [TestMethod]

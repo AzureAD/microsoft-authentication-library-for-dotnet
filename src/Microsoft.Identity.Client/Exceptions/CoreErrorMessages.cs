@@ -157,11 +157,11 @@ namespace Microsoft.Identity.Client
             "Authority should be in the form <host>/<audience>, for example https://login.microsoftonline.com/common";
         public const string AzureAdMyOrgRequiresSpecifyingATenant = "When specifying AadAuthorityAudience.AzureAdMyOrg, you must also specify a tenant domain or tenant guid.";
 
-        public const string CustomWebUiReturnedNullUri = "ICustomWebUi returned a null uri";
+        public const string CustomWebUiReturnedInvalidUri = "ICustomWebUi returned an invalid uri - it is empty or has no query.";
 
-        public static string CustomWebUiRedirectUriWasNotMatchedToProperUri(string expectedUri, string actualUri)
+        public static string CustomWebUiRedirectUriMismatch(string expectedUri, string actualUri)
         {
-            return string.Format(CultureInfo.InvariantCulture, "Redirect Uri was not a match to the proper uri.  Expected ({0}) Actual ({1})", expectedUri, actualUri);
+            return string.Format(CultureInfo.InvariantCulture, "Redirect Uri mismatch.  Expected ({0}) Actual ({1})", expectedUri, actualUri);
         }
 
         public const string CustomWebUiAuthorizationCodeFailed = "CustomWebUi AcquireAuthorizationCode failed";

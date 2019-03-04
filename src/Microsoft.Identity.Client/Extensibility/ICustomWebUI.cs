@@ -63,8 +63,7 @@ namespace Microsoft.Identity.Client.Extensibility
         /// leverage PKCE in order to protect the token from a man in the middle attack. 
         /// Only MSAL.NET can redeem the code.
         ///
-        /// In the event of cancellation, the implementer should return <see cref="OperationCanceledException"/>.
-        /// In the event of failure, the implementer should throw <see cref="MsalCustomWebUiFailedException"/>.
+        /// In the event of cancellation, the implementer should return OperationCanceledException.
         /// </remarks>
         Task<Uri> AcquireAuthorizationCodeAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken);
     }

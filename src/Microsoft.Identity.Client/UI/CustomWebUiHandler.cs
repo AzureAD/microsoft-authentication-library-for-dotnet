@@ -62,9 +62,11 @@ namespace Microsoft.Identity.Client.UI
                                               LogMessages.CustomWebUiCallingAcquireAuthorizationCodeNoPii);
                 var uri = await _customWebUi.AcquireAuthorizationCodeAsync(authorizationUri, redirectUri, cancellationToken)
                                             .ConfigureAwait(false);
-                if (uri == null)
+                if (uri == null || String.IsNullOrWhiteSpace(uri.Query))
                 {
-                    throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiReturnedNullUri);
+                    throw new MsalClientException(
+                        MsalError.CustomWebUiReturnedInvalidUri,
+                        CoreErrorMessages.CustomWebUiReturnedInvalidUri);
                 }
 
                 if (uri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) &&
@@ -83,26 +85,21 @@ namespace Microsoft.Identity.Client.UI
                     };
                 }
 
-                throw new MsalCustomWebUiFailedException(
-                    CoreErrorMessages.CustomWebUiRedirectUriWasNotMatchedToProperUri(
+                throw new MsalClientException(
+                    MsalError.CustomWebUiRedirectUriMismatch,
+                    CoreErrorMessages.CustomWebUiRedirectUriMismatch(
                         uri.AbsolutePath,
                         redirectUri.AbsolutePath));
             }
             catch (OperationCanceledException)
             {
-
                 requestContext.Logger.Info(LogMessages.CustomWebUiOperationCancelled);
                 return new AuthorizationResult(AuthorizationStatus.UserCancel, null);
             }
             catch (Exception ex)
             {
-                if (ex is MsalCustomWebUiFailedException)
-                {
-                    throw;
-                }
-
                 requestContext.Logger.WarningPiiWithPrefix(ex, CoreErrorMessages.CustomWebUiAuthorizationCodeFailed);
-                throw new MsalCustomWebUiFailedException(CoreErrorMessages.CustomWebUiAuthorizationCodeFailed, ex);
+                throw;
             }
         }
 
