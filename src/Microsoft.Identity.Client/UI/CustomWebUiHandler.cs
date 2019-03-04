@@ -79,10 +79,7 @@ namespace Microsoft.Identity.Client.UI
                         null);
 
                     requestContext.Logger.Info(LogMessages.CustomWebUiRedirectUriMatched);
-                    return new AuthorizationResult(AuthorizationStatus.Success, uri.OriginalString)
-                    {
-                        State = inputQp[OAuth2Parameter.State]
-                    };
+                    return new AuthorizationResult(AuthorizationStatus.Success, uri.OriginalString);
                 }
 
                 throw new MsalClientException(
