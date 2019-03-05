@@ -28,7 +28,6 @@
 using System.IO;
 using System.Security.Cryptography;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Core.Cache;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace CommonCache.Test.AdalV4
@@ -43,35 +42,39 @@ namespace CommonCache.Test.AdalV4
 
         // Initializes the cache against a local file.
         // If the file is already present, it loads its content in the ADAL cache
-        public FileBasedTokenCache(CacheStorageType cacheStorageType, string adalV3FilePath, string unifiedCacheFilePath)
+        public FileBasedTokenCache(CacheStorageType cacheStorageType, string adalV3FilePath, string msalV2FilePath, string msalV3FilePath)
         {
             _cacheStorageType = cacheStorageType;
             AdalV3CacheFilePath = adalV3FilePath;
-            UnifiedCacheFilePath = unifiedCacheFilePath;
+            MsalV2CacheFilePath = msalV2FilePath;
+            MsalV3CacheFilePath = msalV3FilePath;
 
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
 
             lock (s_fileLock)
             {
-                var cacheData = new CacheData
-                {
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath),
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath)
-                };
-                DeserializeAdalAndUnifiedCache(cacheData);
+                var adalV3Bytes = ReadFromFileIfExists(AdalV3CacheFilePath);
+                var msalV2Bytes = ReadFromFileIfExists(MsalV2CacheFilePath);
+                var msalV3Bytes = ReadFromFileIfExists(MsalV3CacheFilePath);
+
+                DeserializeAdalV3(adalV3Bytes);
+                DeserializeMsalV2(msalV2Bytes);
+                DeserializeMsalV3(msalV3Bytes);
             }
         }
 
         public string AdalV3CacheFilePath { get; }
-        public string UnifiedCacheFilePath { get; }
+        public string MsalV2CacheFilePath { get; }
+        public string MsalV3CacheFilePath { get; }
 
         // Empties the persistent store.
         public override void Clear()
         {
             base.Clear();
             File.Delete(AdalV3CacheFilePath);
-            File.Delete(UnifiedCacheFilePath);
+            File.Delete(MsalV2CacheFilePath);
+            File.Delete(MsalV3CacheFilePath);
         }
 
         // Triggered right before ADAL needs to access the cache.
@@ -80,12 +83,13 @@ namespace CommonCache.Test.AdalV4
         {
             lock (s_fileLock)
             {
-                var cacheData = new CacheData
-                {
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath),
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath)
-                };
-                DeserializeAdalAndUnifiedCache(cacheData);
+                var adalV3Bytes = ReadFromFileIfExists(AdalV3CacheFilePath);
+                var msalV2Bytes = ReadFromFileIfExists(MsalV2CacheFilePath);
+                var msalV3Bytes = ReadFromFileIfExists(MsalV3CacheFilePath);
+
+                DeserializeAdalV3(adalV3Bytes);
+                DeserializeMsalV2(msalV2Bytes);
+                DeserializeMsalV3(msalV3Bytes);
             }
         }
 
@@ -97,17 +101,22 @@ namespace CommonCache.Test.AdalV4
             {
                 lock (s_fileLock)
                 {
-                    // reflect changes in the persistent store
-                    var cacheData = SerializeAdalAndUnifiedCache();
+                    var adalV3Bytes = SerializeAdalV3();
+                    var msalV2Bytes = SerializeMsalV2();
+                    var msalV3Bytes = SerializeMsalV3();
 
+                    // reflect changes in the persistent store
                     if ((_cacheStorageType & CacheStorageType.Adal) == CacheStorageType.Adal)
                     {
-                        WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
+                        WriteToFileIfNotNull(AdalV3CacheFilePath, adalV3Bytes);
                     }
-
                     if ((_cacheStorageType & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
                     {
-                        WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
+                        WriteToFileIfNotNull(MsalV2CacheFilePath, msalV2Bytes);
+                    }
+                    if ((_cacheStorageType & CacheStorageType.MsalV3) == CacheStorageType.MsalV3)
+                    {
+                        WriteToFileIfNotNull(MsalV3CacheFilePath, msalV3Bytes);
                     }
 
                     // once the write operation took place, restore the HasStateChanged bit to false

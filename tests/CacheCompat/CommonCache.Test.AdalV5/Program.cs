@@ -36,10 +36,10 @@ namespace CommonCache.Test.AdalV4
     {
         public static void Main(string[] args)
         {
-            new AdalV4CacheExecutor().Execute(args);
+            new AdalV5CacheExecutor().Execute(args);
         }
 
-        private class AdalV4CacheExecutor : AbstractCacheExecutor
+        private class AdalV5CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
             protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
@@ -51,7 +51,9 @@ namespace CommonCache.Test.AdalV4
                 var tokenCache = new FileBasedTokenCache(
                     options.CacheStorageType,
                     CommonCacheTestUtils.AdalV3CacheFilePath,
-                    CommonCacheTestUtils.MsalV2CacheFilePath);
+                    CommonCacheTestUtils.MsalV2CacheFilePath,
+                    CommonCacheTestUtils.MsalV3CacheFilePath);
+                
                 var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
 
                 try

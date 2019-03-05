@@ -34,6 +34,7 @@ namespace CommonCache.Test.Common
         public static string CacheFileDirectory => Path.Combine(Path.GetTempPath(), "adalcachecompattestdata");
         public static string AdalV3CacheFilePath => Path.Combine(CacheFileDirectory, "cacheAdalV3.bin");
         public static string MsalV2CacheFilePath => Path.Combine(CacheFileDirectory, "msalCacheV2.bin");
+        public static string MsalV3CacheFilePath => Path.Combine(CacheFileDirectory, "msalCacheV3.bin");
 
         public static void EnsureCacheFileDirectoryExists()
         {
@@ -50,6 +51,11 @@ namespace CommonCache.Test.Common
             if (File.Exists(MsalV2CacheFilePath))
             {
                 File.Delete(MsalV2CacheFilePath);
+            }
+
+            if (File.Exists(MsalV3CacheFilePath))
+            {
+                File.Delete(MsalV3CacheFilePath);
             }
         }
     }

@@ -60,6 +60,7 @@ namespace CommonCache.Test.MsalV2
                 var app = PublicClientApplicationBuilder.Create(v1App.ClientId).WithAuthority(new Uri(v1App.Authority), true).Build();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(
+                    options.CacheStorageType,
                     app.UserTokenCache,
                     CommonCacheTestUtils.MsalV2CacheFilePath,
                     CommonCacheTestUtils.AdalV3CacheFilePath);
