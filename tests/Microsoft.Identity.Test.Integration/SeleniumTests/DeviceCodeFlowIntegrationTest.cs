@@ -102,15 +102,18 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         {
             try
             {
-                UserInformationFieldIds fields = new UserInformationFieldIds(user);
+                var fields = new UserInformationFieldIds(user);
 
                 Trace.WriteLine("Browser is open. Navigating to the Device Code url and entering the code");
 
                 _seleniumDriver.Navigate().GoToUrl(deviceCodeResult.VerificationUrl);
-                _seleniumDriver.FindElement(By.Id("otc")).SendKeys(deviceCodeResult.UserCode);
+                _seleniumDriver
+                    // Device Code Flow web ui is undergoing A/B testing and is sometimes different - use 2 IDs
+                    .FindElement(SeleniumExtensions.ByIds("otc", "code")) 
+                    .SendKeys(deviceCodeResult.UserCode);
 
                 IWebElement continueBtn = _seleniumDriver.WaitForElementToBeVisibleAndEnabled(
-                    By.Id(fields.AADSignInButtonId));
+                    SeleniumExtensions.ByIds(fields.AADSignInButtonId, "continueBtn"));
                 continueBtn?.Click();
 
                 _seleniumDriver.PerformLogin(user);
