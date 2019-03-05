@@ -61,6 +61,8 @@ namespace Microsoft.Identity.Test.SideBySide
         [TestInitialize]
         public void TestInitialize()
         {
+            AdalV3StateStorage = null;
+            UnifiedStateStorage = null;
             if (_user == null)
             {
                 _user = LabUserHelper.GetDefaultUser().User;
@@ -342,6 +344,8 @@ namespace Microsoft.Identity.Test.SideBySide
                 TokenCache = adalCache
             });
 
+            ((ITokenCacheInternal)msalCache).Clear();
+
             adalCache.ClearMsalCache();
             adalCache.HasStateChanged = true;
 
@@ -488,6 +492,7 @@ namespace Microsoft.Identity.Test.SideBySide
             Assert.IsTrue(accounts.Any());
 
             adalCache.Clear();
+            ((ITokenCacheInternal)msalCache).Clear();
 
             AssertAdalCacheIsEmpty();
             AssertMsalCacheIsEmpty();

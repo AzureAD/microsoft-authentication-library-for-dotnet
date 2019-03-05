@@ -1089,12 +1089,10 @@ namespace Microsoft.Identity.Client
         /// otherwise just use <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/>. 
         /// </summary>
         /// <param name="adalV3State">Array of bytes containing serialized Adal.NET V3 cache data</param>
-        /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
-        public void DeserializeAdalV3(byte[] adalV3State, bool merge = false)
+        public void DeserializeAdalV3(byte[] adalV3State)
         {
             GuardOnMobilePlatforms();
 
@@ -1134,12 +1132,10 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// <paramref name="msalV2State"/>Is a Json blob containing access tokens, refresh tokens, id tokens and accounts information.
         /// </remarks>
-        /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
-        public void DeserializeMsalV2(byte[] msalV2State, bool merge = false)
+        public void DeserializeMsalV2(byte[] msalV2State)
         {
             GuardOnMobilePlatforms();
 
@@ -1184,12 +1180,10 @@ namespace Microsoft.Identity.Client
         /// <remarks>
         /// This format is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
         /// </remarks>
-        /// <param name="merge">Future: Boolean enabling merging the cache into the existing cache.</param>
         /// <remarks>
         /// <see cref="SerializeMsalV3"/>/<see cref="DeserializeMsalV3"/> is compatible with other MSAL libraries such as MSAL for Python and MSAL for Java.
-        /// Merge = true is not yet available. This will be available in a later version of MSAL.NET.
         /// </remarks>
-        public void DeserializeMsalV3(byte[] msalV3State, bool merge = false)
+        public void DeserializeMsalV3(byte[] msalV3State)
         {
             GuardOnMobilePlatforms();
 

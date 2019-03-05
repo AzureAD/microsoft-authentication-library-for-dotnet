@@ -25,7 +25,9 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using Microsoft.Identity.Client.Cache.Items;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.Cache
@@ -72,11 +74,16 @@ namespace Microsoft.Identity.Client.Cache
 
         public void Deserialize(byte[] bytes)
         {
-            // TODO: Potentially remove for allowing merging of cache files. Additional parameter to be added to the deserialize method.
-            _accessor.Clear();
+            CacheSerializationContract cache;
 
-            // TODO: Try/Catch for meaningful App Developer handling of merge/upgrade scenarios
-            var cache = CacheSerializationContract.FromJsonString(CoreHelpers.ByteArrayToString(bytes));
+            try
+            {
+                cache = CacheSerializationContract.FromJsonString(CoreHelpers.ByteArrayToString(bytes));
+            }
+            catch (Exception ex)
+            {
+                throw MsalExceptionFactory.GetClientException(CoreErrorCodes.JsonParseError, CoreErrorMessages.TokenCacheJsonSerializerFailedParse, ex);
+            }
 
             if (cache.AccessTokens != null)
             {
