@@ -174,7 +174,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                                                 .Build();
 
                     authResult = await publicApp.AcquireTokenInteractive(scopes, null)
-                                            .WithClaims(ex.Claims).ExecuteAsync().ConfigureAwait(false;
+                                            .WithClaims(ex.Claims).ExecuteAsync().ConfigureAwait(false);
                     }
                     break;
                 default:
