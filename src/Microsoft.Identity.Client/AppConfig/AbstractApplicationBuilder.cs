@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -247,6 +248,23 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
             return (T)this;
         }
+
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// The string needs to be properly URL-encdoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// </param>
+        /// <returns></returns>
+        public T WithExtraQueryParameters(string extraQueryParameters)
+        {
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
+            }
+            return (T)this;
+        }
+
 
         internal virtual void Validate()
         {
