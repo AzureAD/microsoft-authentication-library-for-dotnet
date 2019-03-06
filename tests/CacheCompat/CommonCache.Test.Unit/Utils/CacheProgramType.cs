@@ -33,6 +33,8 @@ namespace CommonCache.Test.Unit.Utils
         AdalV4,
         AdalV5,
         MsalV2,
-        MsalV3
+        MsalV3,
+        MsalPython,
+        MsalJava
     }
 }

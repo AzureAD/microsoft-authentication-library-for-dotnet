@@ -56,7 +56,6 @@ namespace CommonCache.Test.Unit
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-
         [DataTestMethod]
         [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV3, CacheStorageType.Adal,   DisplayName = "AdalV4->AdalV3 adal v3 cache")]
         [DataRow(CacheProgramType.AdalV4, CacheProgramType.AdalV4, CacheStorageType.Adal,   DisplayName = "AdalV4->AdalV4 adal v3 cache")]
@@ -142,6 +141,23 @@ namespace CommonCache.Test.Unit
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "MsalV3->MsalV3 msal v2 cache")]
         [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalV3 msal v3 cache")]
         public async Task TestMsalV3CacheCompatibilityAsync(
+            CacheProgramType interactiveType,
+            CacheProgramType silentType,
+            CacheStorageType cacheStorageType)
+        {
+            var executor = new CacheTestExecutor(
+                interactiveType,
+                silentType,
+                cacheStorageType,
+                expectSecondTokenFromCache: true);
+
+            await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        [Ignore]
+        [DataTestMethod]
+        [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalV3 msal v3 cache")]
+        public async Task TestMsalPythonCacheCompatibilityAsync(
             CacheProgramType interactiveType,
             CacheProgramType silentType,
             CacheStorageType cacheStorageType)

@@ -27,43 +27,31 @@
 
 using System;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.Common
 {
-    public class ProcessRunException : Exception
+    /// <summary>
+    ///     Represents information about a running process.
+    /// </summary>
+    public interface IProcessRunningInfo : IDisposable
     {
-        public ProcessRunException()
-        {
-        }
+        /// <summary>
+        ///     Gets a value indicating the process exit code.
+        /// </summary>
+        int ExitCode { get; }
 
-        public ProcessRunException(
-            string fileName,
-            string arguments,
-            int processExitCode,
-            string processStandardOutput,
-            string processStandardError)
-            : base($"Process {fileName} has exited with code {processExitCode}")
-        {
-            FileName = fileName;
-            Arguments = arguments;
-            ProcessExitCode = processExitCode;
-            ProcessStandardOutput = processStandardOutput;
-            ProcessStandardError = processStandardError;
-        }
+        /// <summary>
+        ///     Gets a value indicating whether the process has exited.
+        /// </summary>
+        bool HasExited { get; }
 
-        public ProcessRunException(string message)
-            : base(message)
-        {
-        }
+        /// <summary>
+        ///     Gets the process id.
+        /// </summary>
+        int Id { get; }
 
-        public ProcessRunException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-
-        public string FileName { get; }
-        public string Arguments { get; }
-        public int ProcessExitCode { get; }
-        public string ProcessStandardOutput { get; }
-        public string ProcessStandardError { get; }
+        /// <summary>
+        ///     Event that is risen when a process exits.
+        /// </summary>
+        event EventHandler Exited;
     }
 }

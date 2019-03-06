@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2EAA7878-3E2A-4355-9841-430BF45EA8BD}</ProjectGuid>
+    <ProjectGuid>{CA3F8F2E-7DF2-45A6-BC81-5DA5692FCC11}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>CommonCache.Test.MsalV3</RootNamespace>
-    <AssemblyName>CommonCache.Test.MsalV3</AssemblyName>
+    <RootNamespace>CommonCache.Test.MsalPython</RootNamespace>
+    <AssemblyName>CommonCache.Test.MsalPython</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
@@ -56,19 +56,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileBasedTokenCacheHelper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PythonRunner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Microsoft.Identity.Client\Microsoft.Identity.Client.csproj">
-      <Project>{60117a9b-4bb8-472e-bfff-52cbf67ca95a}</Project>
-      <Name>Microsoft.Identity.Client</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
       <Project>{e22918a8-8fe6-47d2-b65e-34436918c5d7}</Project>
       <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
@@ -77,6 +73,11 @@
       <Project>{408dcc1c-e810-4f9f-94ee-8421715a3661}</Project>
       <Name>CommonCache.Test.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TestMsalPython.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

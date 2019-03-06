@@ -35,6 +35,12 @@
       <MsalV3Files Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalV3\bin\$(Configuration)\**\*.*">
         <InProject>false</InProject>
       </MsalV3Files>
+      <MsalPythonFiles Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalPython\bin\$(Configuration)\**\*.*">
+        <InProject>false</InProject>
+      </MsalPythonFiles>
+      <MsalJavaFiles Include="$(SolutionDir)\tests\CacheCompat\CommonCache.Test.MsalJava\bin\$(Configuration)\**\*.*">
+        <InProject>false</InProject>
+      </MsalJavaFiles>
     </ItemGroup>
 
     <Message Text="COPYING CACHECOMPAT DEPENDENCY FILES $(OutputPath)" Importance="high"/>
@@ -43,5 +49,7 @@
     <Copy SourceFiles="@(AdalV5Files)" DestinationFolder="$(OutputPath)\AdalV5" />
     <Copy SourceFiles="@(MsalV2Files)" DestinationFolder="$(OutputPath)\MsalV2" />
     <Copy SourceFiles="@(MsalV3Files)" DestinationFolder="$(OutputPath)\MsalV3" />
+    <Copy SourceFiles="@(MsalPythonFiles)" DestinationFolder="$(OutputPath)\MsalPython" />
+    <Copy SourceFiles="@(MsalJavaFiles)" DestinationFolder="$(OutputPath)\MsalJava" />
   </Target>  
 </Project>

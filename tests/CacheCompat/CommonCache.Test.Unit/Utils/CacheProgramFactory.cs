@@ -63,6 +63,14 @@ namespace CommonCache.Test.Unit.Utils
                 executablePath = Path.Combine(BaseExecutablePath, "MsalV3", "CommonCache.Test.MsalV3.exe");
                 resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msalv3results.json");
                 break;
+            case CacheProgramType.MsalPython:
+                executablePath = Path.Combine(BaseExecutablePath, "MsalPython", "CommonCache.Test.MsalPython.exe");
+                resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msal_python_results.json");
+                break;
+            case CacheProgramType.MsalJava:
+                executablePath = Path.Combine(BaseExecutablePath, "MsalJava", "CommonCache.Test.MsalJava.exe");
+                resultsFilePath = Path.Combine(CommonCacheTestUtils.CacheFileDirectory, "msal_java_results.json");
+                break;
             default:
                 throw new ArgumentException("Unknown cacheProgramType", nameof(cacheProgramType));
             }
