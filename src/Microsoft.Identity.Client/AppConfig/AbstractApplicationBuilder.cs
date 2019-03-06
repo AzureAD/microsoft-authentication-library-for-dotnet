@@ -102,19 +102,6 @@ namespace Microsoft.Identity.Client.AppConfig
         }
 
         /// <summary>
-        /// Use when the tenant admin has enabled conditional access. Acquiring a token, either in your app or in a downstream API, 
-        /// could result in a <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
-        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details.
-        /// </summary>
-        /// <param name="claims">A string with one or multiple claims.</param>
-        /// <returns>The builder to chain .With methods</returns>
-        public T WithClaims(string claims)
-        {
-            Config.Claims = claims;
-            return (T)this;
-        }
-
-        /// <summary>
         /// Sets the Debug logging callback to a default debug method which displays
         /// the level of the message and the message itself. For details see https://aka.ms/msal-net-logging
         /// </summary>
