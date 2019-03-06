@@ -47,6 +47,11 @@ namespace CommonCache.Test.AdalV4
                 var app = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
 
+                LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>
+                {
+                    Console.WriteLine("{0}: {1}", level, message);
+                };
+
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
                 var tokenCache = new FileBasedTokenCache(
                     options.CacheStorageType,

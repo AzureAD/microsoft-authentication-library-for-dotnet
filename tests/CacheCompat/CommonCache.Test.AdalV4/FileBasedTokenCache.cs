@@ -56,8 +56,8 @@ namespace CommonCache.Test.AdalV4
             {
                 var cacheData = new CacheData
                 {
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath),
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath)
+                    AdalV3State = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFilePath),
+                    UnifiedState = CacheFileUtils.ReadFromFileIfExists(UnifiedCacheFilePath)
                 };
                 DeserializeAdalAndUnifiedCache(cacheData);
             }
@@ -82,8 +82,8 @@ namespace CommonCache.Test.AdalV4
             {
                 var cacheData = new CacheData
                 {
-                    AdalV3State = ReadFromFileIfExists(AdalV3CacheFilePath),
-                    UnifiedState = ReadFromFileIfExists(UnifiedCacheFilePath)
+                    AdalV3State = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFilePath),
+                    UnifiedState = CacheFileUtils.ReadFromFileIfExists(UnifiedCacheFilePath)
                 };
                 DeserializeAdalAndUnifiedCache(cacheData);
             }
@@ -102,49 +102,17 @@ namespace CommonCache.Test.AdalV4
 
                     if ((_cacheStorageType & CacheStorageType.Adal) == CacheStorageType.Adal)
                     {
-                        WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
+                        CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFilePath, cacheData.AdalV3State);
                     }
 
                     if ((_cacheStorageType & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
                     {
-                        WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
+                        CacheFileUtils.WriteToFileIfNotNull(UnifiedCacheFilePath, cacheData.UnifiedState);
                     }
 
                     // once the write operation took place, restore the HasStateChanged bit to false
                     HasStateChanged = false;
                 }
-            }
-        }
-
-        /// <summary>
-        ///     Read the content of a file if it exists
-        /// </summary>
-        /// <param name="path">File path</param>
-        /// <returns>Content of the file (in bytes)</returns>
-        private byte[] ReadFromFileIfExists(string path)
-        {
-            byte[] protectedBytes = !string.IsNullOrEmpty(path) && File.Exists(path) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = protectedBytes != null
-                                          ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser)
-                                          : null;
-            return unprotectedBytes;
-        }
-
-        /// <summary>
-        ///     Writes a blob of bytes to a file. If the blob is <c>null</c>, deletes the file
-        /// </summary>
-        /// <param name="path">path to the file to write</param>
-        /// <param name="blob">Blob of bytes to write</param>
-        private static void WriteToFileIfNotNull(string path, byte[] blob)
-        {
-            if (blob != null)
-            {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
-                File.WriteAllBytes(path, protectedBytes);
-            }
-            else
-            {
-                File.Delete(path);
             }
         }
     }

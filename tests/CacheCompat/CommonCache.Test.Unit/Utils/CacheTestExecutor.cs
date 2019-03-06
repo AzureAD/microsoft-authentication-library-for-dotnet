@@ -82,13 +82,22 @@ namespace CommonCache.Test.Unit.Utils
             var firstResults = await cacheProgramFirst.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
             var secondResults = await cacheProgramSecond.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
 
+            Console.WriteLine();
+            Console.WriteLine("------------------------------------");
             Console.WriteLine($"FirstResults: {_firstProgram}");
-            Console.WriteLine($"stdout: {firstResults.StdOut}");
-            Console.WriteLine($"stderr: {firstResults.StdErr}");
-
+            Console.WriteLine("stdout:");
+            Console.WriteLine(firstResults.StdOut);
+            Console.WriteLine();
+            Console.WriteLine("stderr:");
+            Console.WriteLine(firstResults.StdErr);
+            Console.WriteLine("------------------------------------");
             Console.WriteLine($"SecondResults: {_secondProgram}");
-            Console.WriteLine($"stdout: {secondResults.StdOut}");
-            Console.WriteLine($"stderr: {secondResults.StdErr}");
+            Console.WriteLine("stdout:");
+            Console.WriteLine(secondResults.StdOut);
+            Console.WriteLine("stderr:");
+            Console.WriteLine(secondResults.StdErr);
+            Console.WriteLine("------------------------------------");
+            Console.WriteLine();
 
             Assert.IsFalse(firstResults.ProcessExecutionFailed, $"{cacheProgramFirst.ExecutablePath} should not fail");
             Assert.IsFalse(secondResults.ProcessExecutionFailed, $"{cacheProgramSecond.ExecutablePath} should not fail");

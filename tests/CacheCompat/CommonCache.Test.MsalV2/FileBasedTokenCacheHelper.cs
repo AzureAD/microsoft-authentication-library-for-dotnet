@@ -83,8 +83,8 @@ namespace CommonCache.Test.MsalV2
         {
             lock (s_fileLock)
             {
-                var adalv3State = ReadFromFileIfExists(AdalV3CacheFileName);
-                var unifiedState = ReadFromFileIfExists(UnifiedCacheFileName);
+                var adalv3State = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFileName);
+                var unifiedState = CacheFileUtils.ReadFromFileIfExists(UnifiedCacheFileName);
 
                 if (adalv3State != null)
                 {
@@ -113,47 +113,15 @@ namespace CommonCache.Test.MsalV2
                     {
                         if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
                         {
-                            WriteToFileIfNotNull(AdalV3CacheFileName, adalV3State);
+                            CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFileName, adalV3State);
                         }
                     }
 
                     if ((s_cacheStorage & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
                     {
-                        WriteToFileIfNotNull(UnifiedCacheFileName, unifiedState);
+                        CacheFileUtils.WriteToFileIfNotNull(UnifiedCacheFileName, unifiedState);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        ///     Read the content of a file if it exists
-        /// </summary>
-        /// <param name="path">File path</param>
-        /// <returns>Content of the file (in bytes)</returns>
-        private static byte[] ReadFromFileIfExists(string path)
-        {
-            byte[] protectedBytes = !string.IsNullOrEmpty(path) && File.Exists(path) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = protectedBytes != null
-                                          ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser)
-                                          : null;
-            return unprotectedBytes;
-        }
-
-        /// <summary>
-        ///     Writes a blob of bytes to a file. If the blob is <c>null</c>, deletes the file
-        /// </summary>
-        /// <param name="path">path to the file to write</param>
-        /// <param name="blob">Blob of bytes to write</param>
-        private static void WriteToFileIfNotNull(string path, byte[] blob)
-        {
-            if (blob != null)
-            {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
-                File.WriteAllBytes(path, protectedBytes);
-            }
-            else
-            {
-                File.Delete(path);
             }
         }
     }

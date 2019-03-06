@@ -26,11 +26,12 @@
 // ------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace CommonCache.Test.AdalV4
+namespace CommonCache.Test.AdalV5
 {
     public static class Program
     {
@@ -47,6 +48,11 @@ namespace CommonCache.Test.AdalV4
                 var app = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
 
+                LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>
+                {
+                    Console.WriteLine("{0}: {1}", level, message);
+                };
+
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
                 var tokenCache = new FileBasedTokenCache(
                     options.CacheStorageType,
@@ -55,6 +61,16 @@ namespace CommonCache.Test.AdalV4
                     CommonCacheTestUtils.MsalV3CacheFilePath);
                 
                 var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
+
+                var items = authenticationContext.TokenCache.ReadItems().ToList();
+                Console.WriteLine("here come the cache items!: {0}", tokenCache.Count);
+                foreach (var item in items)
+                {
+                    Console.WriteLine("here's a cache item!");
+                    Console.WriteLine(item.DisplayableId);
+                }
+
+                Console.WriteLine("Calling ATS with username: {0}", options.Username);
 
                 try
                 {

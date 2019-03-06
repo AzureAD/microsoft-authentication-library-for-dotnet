@@ -57,7 +57,14 @@ namespace CommonCache.Test.MsalV2
 
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-                var app = PublicClientApplicationBuilder.Create(v1App.ClientId).WithAuthority(new Uri(v1App.Authority), true).Build();
+                var app = PublicClientApplicationBuilder
+                    .Create(v1App.ClientId)
+                    .WithAuthority(new Uri(v1App.Authority), true)
+                    .WithLogging((LogLevel level, string message, bool containsPii) =>
+                    {
+                        Console.WriteLine("{0}: {1}", level, message);
+                    })
+                    .Build();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(
                     options.CacheStorageType,

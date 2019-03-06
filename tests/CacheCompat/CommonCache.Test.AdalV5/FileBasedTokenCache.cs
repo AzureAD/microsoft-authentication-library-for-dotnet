@@ -25,16 +25,14 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace CommonCache.Test.AdalV4
+namespace CommonCache.Test.AdalV5
 {
-    /// <summary>
-    ///     Simple file based persistent cache implementation for a desktop application (from ADAL 4.x)
-    /// </summary>
     public class FileBasedTokenCache : TokenCache
     {
         private static readonly object s_fileLock = new object();
@@ -52,11 +50,16 @@ namespace CommonCache.Test.AdalV4
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
 
+            LoadCache();
+        }
+
+        private void LoadCache()
+        {
             lock (s_fileLock)
             {
-                var adalV3Bytes = ReadFromFileIfExists(AdalV3CacheFilePath);
-                var msalV2Bytes = ReadFromFileIfExists(MsalV2CacheFilePath);
-                var msalV3Bytes = ReadFromFileIfExists(MsalV3CacheFilePath);
+                var adalV3Bytes = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFilePath);
+                var msalV2Bytes = CacheFileUtils.ReadFromFileIfExists(MsalV2CacheFilePath);
+                var msalV3Bytes = CacheFileUtils.ReadFromFileIfExists(MsalV3CacheFilePath);
 
                 DeserializeAdalV3(adalV3Bytes);
                 DeserializeMsalV2(msalV2Bytes);
@@ -81,16 +84,7 @@ namespace CommonCache.Test.AdalV4
         // Reload the cache from the persistent store in case it changed since the last access.
         private void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (s_fileLock)
-            {
-                var adalV3Bytes = ReadFromFileIfExists(AdalV3CacheFilePath);
-                var msalV2Bytes = ReadFromFileIfExists(MsalV2CacheFilePath);
-                var msalV3Bytes = ReadFromFileIfExists(MsalV3CacheFilePath);
-
-                DeserializeAdalV3(adalV3Bytes);
-                DeserializeMsalV2(msalV2Bytes);
-                DeserializeMsalV3(msalV3Bytes);
-            }
+            LoadCache();
         }
 
         // Triggered right after ADAL accessed the cache.
@@ -108,52 +102,20 @@ namespace CommonCache.Test.AdalV4
                     // reflect changes in the persistent store
                     if ((_cacheStorageType & CacheStorageType.Adal) == CacheStorageType.Adal)
                     {
-                        WriteToFileIfNotNull(AdalV3CacheFilePath, adalV3Bytes);
+                        CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFilePath, adalV3Bytes);
                     }
                     if ((_cacheStorageType & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
                     {
-                        WriteToFileIfNotNull(MsalV2CacheFilePath, msalV2Bytes);
+                        CacheFileUtils.WriteToFileIfNotNull(MsalV2CacheFilePath, msalV2Bytes);
                     }
                     if ((_cacheStorageType & CacheStorageType.MsalV3) == CacheStorageType.MsalV3)
                     {
-                        WriteToFileIfNotNull(MsalV3CacheFilePath, msalV3Bytes);
+                        CacheFileUtils.WriteToFileIfNotNull(MsalV3CacheFilePath, msalV3Bytes);
                     }
 
                     // once the write operation took place, restore the HasStateChanged bit to false
                     HasStateChanged = false;
                 }
-            }
-        }
-
-        /// <summary>
-        ///     Read the content of a file if it exists
-        /// </summary>
-        /// <param name="path">File path</param>
-        /// <returns>Content of the file (in bytes)</returns>
-        private byte[] ReadFromFileIfExists(string path)
-        {
-            byte[] protectedBytes = !string.IsNullOrEmpty(path) && File.Exists(path) ? File.ReadAllBytes(path) : null;
-            byte[] unprotectedBytes = protectedBytes != null
-                                          ? ProtectedData.Unprotect(protectedBytes, null, DataProtectionScope.CurrentUser)
-                                          : null;
-            return unprotectedBytes;
-        }
-
-        /// <summary>
-        ///     Writes a blob of bytes to a file. If the blob is <c>null</c>, deletes the file
-        /// </summary>
-        /// <param name="path">path to the file to write</param>
-        /// <param name="blob">Blob of bytes to write</param>
-        private static void WriteToFileIfNotNull(string path, byte[] blob)
-        {
-            if (blob != null)
-            {
-                byte[] protectedBytes = ProtectedData.Protect(blob, null, DataProtectionScope.CurrentUser);
-                File.WriteAllBytes(path, protectedBytes);
-            }
-            else
-            {
-                File.Delete(path);
             }
         }
     }
