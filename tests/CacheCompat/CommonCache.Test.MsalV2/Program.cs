@@ -31,8 +31,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace CommonCache.Test.MsalV2
 {
@@ -55,22 +53,25 @@ namespace CommonCache.Test.MsalV2
                     resource + "/user.read"
                 };
 
+                Logger.LogCallback = (LogLevel level, string message, bool containsPii) =>
+                {
+                    Console.WriteLine("{0}: {1}", level, message);
+                };
+
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-                var app = PublicClientApplicationBuilder
-                    .Create(v1App.ClientId)
-                    .WithAuthority(new Uri(v1App.Authority), true)
-                    .WithLogging((LogLevel level, string message, bool containsPii) =>
-                    {
-                        Console.WriteLine("{0}: {1}", level, message);
-                    })
-                    .Build();
+                var tokenCache = new TokenCache();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(
                     options.CacheStorageType,
-                    app.UserTokenCache,
-                    CommonCacheTestUtils.MsalV2CacheFilePath,
-                    CommonCacheTestUtils.AdalV3CacheFilePath);
+                    tokenCache,
+                    CommonCacheTestUtils.AdalV3CacheFilePath,
+                    CommonCacheTestUtils.MsalV2CacheFilePath);
+
+                var app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache)
+                {
+                    ValidateAuthority = true
+                };
 
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 try

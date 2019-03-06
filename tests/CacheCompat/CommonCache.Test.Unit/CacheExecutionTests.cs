@@ -82,17 +82,17 @@ namespace CommonCache.Test.Unit
         }
 
         [DataTestMethod]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV3, CacheStorageType.Adal,   DisplayName = "AdalV5->AdalV3 adal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV4, CacheStorageType.Adal,   DisplayName = "AdalV5->AdalV4 adal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.Adal,   DisplayName = "AdalV5->AdalV5 adal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "AdalV5->AdalV4 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV3, CacheStorageType.Adal, DisplayName = "AdalV5->AdalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV4, CacheStorageType.Adal, DisplayName = "AdalV5->AdalV4 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.Adal, DisplayName = "AdalV5->AdalV5 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV4, CacheStorageType.MsalV2, DisplayName = "AdalV5->AdalV4 msal v2 cache")]
         [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.MsalV2, DisplayName = "AdalV5->AdalV5 msal v2 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "AdalV5->AdalV5 msal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV2, CacheStorageType.Adal,   DisplayName = "AdalV5->MsalV2 adal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV2, CacheStorageType.MsalV2, DisplayName = "AdalV5->MsalV2 msal v2 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.Adal,   DisplayName = "AdalV5->MsalV3 adal v3 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "AdalV5->MsalV3 msal v2 cache")]
-        //[DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalV3 msal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "AdalV5->AdalV5 msal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV2, CacheStorageType.Adal, DisplayName = "AdalV5->MsalV2 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV2, CacheStorageType.MsalV2, DisplayName = "AdalV5->MsalV2 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.Adal, DisplayName = "AdalV5->MsalV3 adal v3 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.MsalV2, DisplayName = "AdalV5->MsalV3 msal v2 cache")]
+        [DataRow(CacheProgramType.AdalV5, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "AdalV5->MsalV3 msal v3 cache")]
         public async Task TestAdalV5CacheCompatibilityAsync(
             CacheProgramType interactiveType,
             CacheProgramType silentType,
