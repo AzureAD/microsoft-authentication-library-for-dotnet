@@ -1,10 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal class ActionPropertyBag : PropertyBag
@@ -16,7 +12,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
 
         public ActionPropertyBag(IErrorStore errorStore) : base(EventType.Action, errorStore)
         {
-        }       
+        }
 
         public bool IsAggregable
         {

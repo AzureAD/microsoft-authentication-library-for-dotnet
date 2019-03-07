@@ -28,6 +28,7 @@
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
+using Microsoft.Identity.Client.Mats;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.WsTrust;
@@ -44,5 +45,6 @@ namespace Microsoft.Identity.Client.Core
         IPlatformProxy PlatformProxy { get; }
         IWsTrustWebRequestManager WsTrustWebRequestManager { get; }
         IAuthorityEndpointResolutionManager AuthorityEndpointResolutionManager { get; }
+        IMats Mats { get; }
     }
 }

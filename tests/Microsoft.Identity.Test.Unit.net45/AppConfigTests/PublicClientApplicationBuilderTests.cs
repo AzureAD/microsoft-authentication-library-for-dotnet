@@ -60,6 +60,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             Assert.AreEqual(PlatformProxyFactory.CreatePlatformProxy(null).GetDefaultRedirectUri(MsalTestConstants.ClientId), pca.AppConfig.RedirectUri);
             Assert.IsNull(pca.AppConfig.TelemetryCallback);
             Assert.IsNull(pca.AppConfig.TenantId);
+            Assert.IsNull(pca.AppConfig.MatsConfig);
         }
 
         [TestMethod]
@@ -353,6 +354,45 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
                 Assert.IsTrue(ex is InvalidOperationException);
                 Assert.AreEqual(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments, ex.Message);
             }
+        }
+
+        [TestMethod]
+        public void MatsAndTelemetryCallbackCannotBothBeConfiguredAtTheSameTime()
+        {
+            try
+            {
+                var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                    .WithTelemetry((List<Dictionary<string, string>> events) => {})
+                    .WithMatsTelemetry(new MatsConfig())
+                    .Build();
+                Assert.Fail("Should not reach here, exception should be thrown");
+            }
+            catch (Exception ex)
+            {
+                Assert.IsTrue(ex is InvalidOperationException);
+                Assert.AreEqual(CoreErrorMessages.MatsAndTelemetryCallbackCannotBeConfiguredSimultaneously, ex.Message);
+            }
+        }
+
+        [TestMethod]
+        public void MatsCanBeProperlyConfigured()
+        {
+            var matsConfig = new MatsConfig
+            {
+                AppName = "some app name",
+                AppVer = "some app version",
+                SessionId = "some session id"
+            };
+
+            var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
+                .WithMatsTelemetry(matsConfig)
+                .Build();
+
+            Assert.IsNotNull(app.AppConfig.MatsConfig);
+
+            Assert.AreEqual<string>(matsConfig.AppName, app.AppConfig.MatsConfig.AppName);
+            Assert.AreEqual<string>(matsConfig.AppVer, app.AppConfig.MatsConfig.AppVer);
+            Assert.AreEqual<string>(matsConfig.SessionId, app.AppConfig.MatsConfig.SessionId);
         }
     }
 }

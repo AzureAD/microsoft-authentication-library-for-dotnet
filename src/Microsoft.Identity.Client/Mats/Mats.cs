@@ -58,6 +58,7 @@ namespace Microsoft.Identity.Client.Mats
             IEnumerable<string> telemetryAllowedScopes,
             IEnumerable<string> telemetryAllowedResources)
         {
+            // TODO: replace with MSAL's existing PlatformProxyFactory...
             var proxy = PlatformProxyFactory.CreatePlatformProxy();
             string dpti = proxy.GetDpti();
             string deviceNetworkState = proxy.GetDeviceNetworkState();
@@ -291,6 +292,5 @@ namespace Microsoft.Identity.Client.Mats
         {
             _actionStore.ProcessAdalTelemetryBlob(blob);
         }
-
     }
 }

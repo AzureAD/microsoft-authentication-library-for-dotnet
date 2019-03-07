@@ -30,6 +30,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Internal;
+using Microsoft.Identity.Client.Mats;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -59,6 +60,21 @@ namespace Microsoft.Identity.Client.Core
             AadInstanceDiscovery = new AadInstanceDiscovery(DefaultLogger, HttpManager, TelemetryManager, shouldClearCaches);
             WsTrustWebRequestManager = new WsTrustWebRequestManager(HttpManager);
             AuthorityEndpointResolutionManager = new AuthorityEndpointResolutionManager(this, shouldClearCaches);
+
+            if (config.MatsConfig != null)
+            {
+                // TODO(mats): have CreateMats take an IMatsConfig
+                // Also need to wire up AudienceType to be public (rename to MatsAudienceType?)
+                // Also need to wire up public type for MatsTelemetryBatch callback into MatsConfig
+                // Do we need the "IsTelemetryDisabled" flag here?  Isn't the presence of creating this enough?
+                Mats = Client.Mats.Mats.CreateMats(
+                    false,
+                    AudienceType.PreProduction,
+                    config.MatsConfig.AppName,
+                    config.MatsConfig.AppVer,
+                    config.MatsConfig.SessionId,
+                    null);
+            }
         }
 
         public ICoreLogger DefaultLogger { get; }
@@ -83,6 +99,9 @@ namespace Microsoft.Identity.Client.Core
 
         /// <inheritdoc />
         public IApplicationConfiguration Config { get; }
+
+        /// <inheritdoc />
+        public IMats Mats { get; }
 
         public static ServiceBundle Create(ApplicationConfiguration config)
         {

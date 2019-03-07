@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
@@ -29,7 +28,6 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
 
             return true;
-
         }
 
         private static bool IsPropertyEquivalent(string propertyName, Dictionary<string, string> propertyMap1, Dictionary<string, string> propertyMap2)

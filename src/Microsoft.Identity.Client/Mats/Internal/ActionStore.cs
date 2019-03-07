@@ -19,7 +19,6 @@ namespace Microsoft.Identity.Client.Mats.Internal
         private readonly HashSet<string> _telemetryAllowedScopes = new HashSet<string>();
         private readonly HashSet<string> _telemetryAllowedResources = new HashSet<string>();
 
-
         public ActionStore(
             int maxActionDurationMillis,
             int maxAggregationDurationMillis,
@@ -269,7 +268,6 @@ namespace Microsoft.Identity.Client.Mats.Internal
             {
                 propertyBag.ReadyForUpload = true;
             }
-
         }
 
         private void EndAggregatedAction(string actionId, ActionPropertyBag propertyBag)

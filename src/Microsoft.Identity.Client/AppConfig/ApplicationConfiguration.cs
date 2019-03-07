@@ -41,6 +41,8 @@ namespace Microsoft.Identity.Client.AppConfig
 
         public bool IsBrokerEnabled { get; internal set; }
 
+        public IMatsConfig MatsConfig { get; internal set; }
+
         public IHttpManager HttpManager { get; internal set; }
         public AuthorityInfo AuthorityInfo { get; internal set; }
         public string ClientId { get; internal set; }
@@ -65,7 +67,6 @@ namespace Microsoft.Identity.Client.AppConfig
         public string ClientSecret { get; internal set; }
         public X509Certificate2 Certificate { get; internal set; }
 #endif 
-
         /// <summary>
         /// Should _not_ go in the interface, only for builder usage while determining authorities with ApplicationOptions
         /// </summary>
