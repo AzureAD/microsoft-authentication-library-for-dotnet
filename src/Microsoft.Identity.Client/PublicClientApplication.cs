@@ -41,6 +41,7 @@ using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.WsTrust;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
@@ -619,7 +620,10 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string refreshToken)
         {
-            return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
+            return AcquireTokenByRefreshTokenParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                refreshToken);
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME

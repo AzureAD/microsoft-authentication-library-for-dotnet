@@ -39,6 +39,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
 namespace Microsoft.Identity.Client
 {
@@ -419,7 +420,10 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             string refreshToken)
         {
-            return AcquireTokenByRefreshTokenParameterBuilder.Create(this, scopes, refreshToken);
+            return AcquireTokenByRefreshTokenParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                refreshToken);
         }
 
         internal ClientCredential ClientCredential => ServiceBundle.Config.ClientCredential;

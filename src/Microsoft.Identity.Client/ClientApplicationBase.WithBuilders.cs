@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
@@ -63,7 +64,10 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         public AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, IAccount account)
         {
-            return AcquireTokenSilentParameterBuilder.Create(this, scopes, account);
+            return AcquireTokenSilentParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                account);
         }
 
         /// <summary>
@@ -101,7 +105,10 @@ namespace Microsoft.Identity.Client
                 throw new ArgumentNullException(nameof(loginHint));
             }
 
-            return AcquireTokenSilentParameterBuilder.Create(this, scopes, loginHint);
+            return AcquireTokenSilentParameterBuilder.Create(
+                ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
+                scopes,
+                loginHint);
         }
 
         internal ClientApplicationBase(ApplicationConfiguration config)
