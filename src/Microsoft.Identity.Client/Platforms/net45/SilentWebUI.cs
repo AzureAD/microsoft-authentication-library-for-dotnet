@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// This is how long all redirect navigations are allowed to run for before a graceful
         /// termination of the entire browser based authentication process is attempted.
         /// </summary>
-        private const int NavigationOverallTimeout = 2000;
+        private const int NavigationOverallTimeout = 10000;
 
 #pragma warning disable 618 // WindowsFormsWebAuthenticationDialog is marked obsolete
         private SilentWindowsFormsAuthenticationDialog dialog;
