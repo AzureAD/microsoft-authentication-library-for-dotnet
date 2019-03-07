@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Authority = "";
         public const string ClientId = "";
         public const string RedirectUri = "http://localhost";
-        public string[] MsalScopes = { "https://graph.microsoft.com/.default" };
+        private readonly string[] _msalScopes = { "https://graph.microsoft.com/.default" };
         private readonly string _password = "";
 
         static ApplicationGrantIntegrationTest()
@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Test.Unit
                                      .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
                                      .WithClientSecret(_password).BuildConcrete();
 
-            var res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
+            var res = await confidentialClient.AcquireTokenForClientAsync(_msalScopes).ConfigureAwait(false);
 
             ITokenCacheInternal userCache = confidentialClient.UserTokenCacheInternal;
             ITokenCacheInternal appCache = confidentialClient.AppTokenCacheInternal;
@@ -91,7 +91,7 @@ namespace Microsoft.Identity.Test.Unit
             confidentialClient.AppTokenCacheInternal.DeserializeMsalV3(appCache.SerializeMsalV3());
             confidentialClient.UserTokenCacheInternal.DeserializeMsalV3(userCache.SerializeMsalV3());
 
-            res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
+            res = await confidentialClient.AcquireTokenForClientAsync(_msalScopes).ConfigureAwait(false);
 
             Assert.IsNotNull(res);
             Assert.IsNotNull(res.AccessToken);
