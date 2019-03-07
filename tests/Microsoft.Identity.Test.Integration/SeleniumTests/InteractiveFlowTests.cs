@@ -29,6 +29,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Configuration;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -159,6 +160,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
+                                                                        .WithAuthority(CloudConfigurationProvider.Authority)
                                                                         .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                                                                         .BuildConcrete();
 

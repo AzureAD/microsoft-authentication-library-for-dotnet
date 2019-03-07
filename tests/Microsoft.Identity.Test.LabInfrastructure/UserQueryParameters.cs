@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Test.Configuration;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
@@ -40,6 +41,12 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         public UserType? UserType { get; set; }
         public bool? IsExternalUser { get; set; }
         public B2CIdentityProvider? B2CIdentityProvider { get; set; }
+        public CloudType CloudType { get; set; }
+
+        public UserQuery()
+        {
+            CloudType = CloudConfigurationProvider.CloudType;
+        }
 
         public static UserQuery DefaultUserQuery => new UserQuery
         {

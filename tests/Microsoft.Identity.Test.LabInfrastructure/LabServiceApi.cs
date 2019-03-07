@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using Microsoft.Identity.Test.Configuration;
 using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -47,7 +48,23 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         private LabResponse GetLabResponseFromApi(UserQuery query)
         {
+            LabResponse response;
+            LabUser user;
+
             //Fetch user
+            if (query.CloudType == CloudType.AzureUSGovernmentArlington)
+            {
+                response = new LabResponse();
+                response.AppId = "cb7faed4-b8c0-49ee-b421-f5ed16894c83";
+                user = new LabUser();
+                user.Upn = "idlab@arlmsidlab1.onmicrosoft.us";
+                user.IsExternal = false;
+                user.IsFederated = false;
+                user.CredentialUrl = "https://msidlabs.vault.azure.net:443/secrets/arlmsidlab1";
+                user.ObjectId = new Guid("7290cce3-0b93-470b-a224-c51cd2b135b2");
+                return response;
+            }
+
             string result = CreateLabQuery(query);
 
             if (string.IsNullOrWhiteSpace(result))
@@ -55,9 +72,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new LabUserNotFoundException(query, "No lab user with specified parameters exists");
             }
 
-            LabResponse response = JsonConvert.DeserializeObject<LabResponse>(result);
+            response = JsonConvert.DeserializeObject<LabResponse>(result);
 
-            LabUser user = response.User;
+            user = response.User;
 
             user = JsonConvert.DeserializeObject<LabUser>(result);
 
@@ -80,6 +97,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
 
             //Building user query
+            if (query.CloudType != CloudType.AzureCloud)
+            {
+                queryDict.Add("AzureEnvironment", query.CloudType.ToString());
+            }
+
             if (query.FederationProvider != null)
             {
                 queryDict.Add(LabApiConstants.FederationProvider, query.FederationProvider.ToString());
