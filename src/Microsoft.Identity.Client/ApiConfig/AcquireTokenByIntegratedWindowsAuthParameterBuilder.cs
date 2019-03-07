@@ -42,21 +42,15 @@ namespace Microsoft.Identity.Client.ApiConfig
         private AcquireTokenByIntegratedWindowsAuthParameters Parameters { get; } = new AcquireTokenByIntegratedWindowsAuthParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenByIntegratedWindowsAuthParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        internal AcquireTokenByIntegratedWindowsAuthParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
+            : base(publicClientApplicationExecutor)
         {
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="publicClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <returns></returns>
         internal static AcquireTokenByIntegratedWindowsAuthParameterBuilder Create(
-            IPublicClientApplication publicClientApplication, IEnumerable<string> scopes)
+            IPublicClientApplicationExecutor publicClientApplicationExecutor, IEnumerable<string> scopes)
         {
-            return new AcquireTokenByIntegratedWindowsAuthParameterBuilder(publicClientApplication).WithScopes(scopes);
+            return new AcquireTokenByIntegratedWindowsAuthParameterBuilder(publicClientApplicationExecutor).WithScopes(scopes);
         }
 
         /// <summary>
@@ -72,10 +66,9 @@ namespace Microsoft.Identity.Client.ApiConfig
             return this;
         }
 
-        /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />

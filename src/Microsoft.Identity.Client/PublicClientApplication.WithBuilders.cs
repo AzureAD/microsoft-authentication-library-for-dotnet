@@ -28,27 +28,20 @@
 using System;
 using System.Collections.Generic;
 using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.ApiConfig.Parameters;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.TelemetryCore;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
-    public partial class PublicClientApplication : IPublicClientApplicationExecutor
+    public partial class PublicClientApplication
     {
         internal PublicClientApplication(ApplicationConfiguration configuration)
             : base(configuration)
         {
         }
 
-        #region ParameterBuilders
         /// <summary>
         /// Interactive request to acquire token for the specified scopes. The interactive window will be parented to the specified
         /// window. The user will be required to select an account
@@ -77,7 +70,10 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             object parent)
         {
-            return AcquireTokenInteractiveParameterBuilder.Create(this, scopes, parent);
+            return AcquireTokenInteractiveParameterBuilder.Create(
+                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                scopes,
+                parent);
         }
 
         /// <summary>
@@ -106,7 +102,10 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            return AcquireTokenWithDeviceCodeParameterBuilder.Create(this, scopes, deviceCodeResultCallback);
+            return AcquireTokenWithDeviceCodeParameterBuilder.Create(
+                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                scopes,
+                deviceCodeResultCallback);
         }
 
         /// <summary>
@@ -132,7 +131,9 @@ namespace Microsoft.Identity.Client
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes)
         {
-            return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(this, scopes);
+            return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
+                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                scopes);
         }
 
         /// <summary>
@@ -155,108 +156,11 @@ namespace Microsoft.Identity.Client
             string username,
             SecureString password)
         {
-            return AcquireTokenByUsernamePasswordParameterBuilder.Create(this, scopes, username, password);
-        }
-        #endregion // ParameterBuilders
-
-        #region ParameterExecutors
-
-        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenInteractiveParameters interactiveParameters,
-            CancellationToken cancellationToken)
-        {
-            LogVersionInfo();
-
-            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            requestParams.LoginHint = interactiveParameters.LoginHint;
-            requestParams.Account = interactiveParameters.Account;
-
-            var handler = new InteractiveRequest(
-                ServiceBundle,
-                requestParams,
-                interactiveParameters,
-                CreateWebAuthenticationDialog(interactiveParameters, requestParams.RequestContext));
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-
-        }
-
-        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
-            CancellationToken cancellationToken)
-        {
-            LogVersionInfo();
-
-            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-
-            var handler = new DeviceCodeRequest(
-                ServiceBundle,
-                requestParams,
-                deviceCodeParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
-            CancellationToken cancellationToken)
-        {
-            LogVersionInfo();
-
-            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-
-            var handler = new IntegratedWindowsAuthRequest(
-                ServiceBundle,
-                requestParams,
-                integratedWindowsAuthParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<AuthenticationResult> IPublicClientApplicationExecutor.ExecuteAsync(
-            AcquireTokenCommonParameters commonParameters,
-            AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
-            CancellationToken cancellationToken)
-        {
-            LogVersionInfo();
-
-            var requestParams = CreateRequestParameters(commonParameters, UserTokenCacheInternal);
-            var handler = new UsernamePasswordRequest(
-                ServiceBundle,
-                requestParams,
-                usernamePasswordParameters);
-
-            return await handler.RunAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        #endregion // ParameterExecutors
-
-        private IWebUI CreateWebAuthenticationDialog(
-            AcquireTokenInteractiveParameters interactiveParameters,
-            RequestContext requestContext)
-        {
-            if (interactiveParameters.CustomWebUi != null)
-            {
-                return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
-            }
-
-            var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
-
-#if ANDROID || iOS
-            coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView;
-#endif
-
-#if WINDOWS_APP || DESKTOP
-            // hidden web view can be used in both WinRT and desktop applications.
-            coreUiParent.UseHiddenBrowser = interactiveParameters.Prompt.Equals(Prompt.Never);
-#if WINDOWS_APP
-            coreUiParent.UseCorporateNetwork = AppConfig.UseCorporateNetwork;
-#endif
-#endif
-            return ServiceBundle.PlatformProxy.GetWebUiFactory().CreateAuthenticationDialog(coreUiParent, requestContext);
+            return AcquireTokenByUsernamePasswordParameterBuilder.Create(
+                ClientExecutorFactory.CreatePublicClientExecutor(this),
+                scopes,
+                username,
+                password);
         }
     }
 }

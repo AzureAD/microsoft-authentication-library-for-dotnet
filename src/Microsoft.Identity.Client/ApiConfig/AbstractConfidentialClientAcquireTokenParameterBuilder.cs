@@ -41,35 +41,21 @@ namespace Microsoft.Identity.Client.ApiConfig
         : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        /// <summary>
-        /// Constructor from an interface on a confidential client application
-        /// </summary>
-        /// <param name="confidentialClientApplication"></param>
-        protected AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
+        internal AbstractConfidentialClientAcquireTokenParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
         {
-            ConfidentialClientApplication = confidentialClientApplication;
+            ConfidentialClientApplicationExecutor = confidentialClientApplicationExecutor;
         }
 
-        internal abstract Task<AuthenticationResult> ExecuteAsync(
-            IConfidentialClientApplicationExecutor executor,
-            CancellationToken cancellationToken);
+        internal abstract Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
-            {
-                ValidateAndCalculateApiId();
-                return ExecuteAsync(executor, cancellationToken);
-            }
-
-            throw new InvalidOperationException(
-                CoreErrorMessages.ConfidentialClientDoesntImplementIConfidentialClientApplicationExecutor);
+            ValidateAndCalculateApiId();
+            return ExecuteInternalAsync(cancellationToken);
         }
 
-        /// <summary>
-        /// </summary>
-        protected IConfidentialClientApplication ConfidentialClientApplication { get; }
+        internal IConfidentialClientApplicationExecutor ConfidentialClientApplicationExecutor { get; }
     }
 #endif
 }

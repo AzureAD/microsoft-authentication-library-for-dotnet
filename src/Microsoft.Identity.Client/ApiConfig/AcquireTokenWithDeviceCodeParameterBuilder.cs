@@ -44,23 +44,17 @@ namespace Microsoft.Identity.Client.ApiConfig
         private AcquireTokenWithDeviceCodeParameters Parameters { get; } = new AcquireTokenWithDeviceCodeParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenWithDeviceCodeParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        internal AcquireTokenWithDeviceCodeParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
+            : base(publicClientApplicationExecutor)
         {
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="publicClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <param name="deviceCodeResultCallback"></param>
-        /// <returns></returns>
         internal static AcquireTokenWithDeviceCodeParameterBuilder Create(
-            IPublicClientApplication publicClientApplication,
+            IPublicClientApplicationExecutor publicClientApplicationExecutor,
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            return new AcquireTokenWithDeviceCodeParameterBuilder(publicClientApplication)
+            return new AcquireTokenWithDeviceCodeParameterBuilder(publicClientApplicationExecutor)
                    .WithScopes(scopes).WithDeviceCodeResultCallback(deviceCodeResultCallback);
         }
 
@@ -79,9 +73,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />

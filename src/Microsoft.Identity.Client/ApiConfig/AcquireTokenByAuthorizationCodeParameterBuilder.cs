@@ -44,25 +44,18 @@ namespace Microsoft.Identity.Client.ApiConfig
     {
         private AcquireTokenByAuthorizationCodeParameters Parameters { get; } = new AcquireTokenByAuthorizationCodeParameters();
 
-        /// <inheritdoc />
-        internal AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
-            : base(confidentialClientApplication)
+        internal AcquireTokenByAuthorizationCodeParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
+            : base(confidentialClientApplicationExecutor)
         {
             // TODO: where do we pass the authorization code? 
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="confidentialClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <param name="authorizationCode"></param>
-        /// <returns></returns>
         internal static AcquireTokenByAuthorizationCodeParameterBuilder Create(
-            IConfidentialClientApplication confidentialClientApplication,
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes, 
             string authorizationCode)
         {
-            return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplication)
+            return new AcquireTokenByAuthorizationCodeParameterBuilder(confidentialClientApplicationExecutor)
                    .WithScopes(scopes).WithAuthorizationCode(authorizationCode);
         }
 
@@ -90,9 +83,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
     }
 #endif
