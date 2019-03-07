@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
-using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace CommonCache.Test.MsalV2
 {
@@ -40,10 +39,10 @@ namespace CommonCache.Test.MsalV2
     {
         public static void Main(string[] args)
         {
-            new MsalV2CacheExecutor().Execute(args);
+            new MsalV3CacheExecutor().Execute(args);
         }
 
-        private class MsalV2CacheExecutor : AbstractCacheExecutor
+        private class MsalV3CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
             protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)

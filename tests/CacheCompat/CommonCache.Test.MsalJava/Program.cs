@@ -25,9 +25,9 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 
@@ -37,54 +37,33 @@ namespace CommonCache.Test.MsalJava
     {
         public static void Main(string[] args)
         {
-            new MsalV2CacheExecutor().Execute(args);
+            new MsalJavaCacheExecutor().Execute(args);
         }
 
-        private class MsalV2CacheExecutor : AbstractCacheExecutor
+        private class MsalJavaCacheExecutor : AbstractCacheExecutor
         {
-            /// <inheritdoc />
-            protected override Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
+            protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
             {
                 var v1App = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
-                string[] scopes = new[]
-                {
-                    resource + "/user.read"
-                };
+                string scope = resource + "/user.read";
 
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-                throw new NotImplementedException();
+                // TODO: figure out how we setup the public main program, compile it from .java to .class, and execute it
+                // May need to have the JavaLanguageExecutor take a .java file and then have a separate compile
+                // step on that class to build the java code and run it.
+                string javaClassFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "SomeJavaClass.class");
 
-                //var app = PublicClientApplicationBuilder
-                //    .Create(v1App.ClientId)
-                //    .WithAuthority(new Uri(v1App.Authority), true)
-                //    .WithLogging((LogLevel level, string message, bool containsPii) =>
-                //    {
-                //        Console.WriteLine("{0}: {1}", level, message);
-                //    })
-                //    .Build();
-
-                //FileBasedTokenCacheHelper.ConfigureUserCache(
-                //    options.CacheStorageType,
-                //    app.UserTokenCache,
-                //    CommonCacheTestUtils.AdalV3CacheFilePath,
-                //    CommonCacheTestUtils.MsalV2CacheFilePath,
-                //    CommonCacheTestUtils.MsalV3CacheFilePath);
-
-                //IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
-                //try
-                //{
-                //    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false).ConfigureAwait(false);
-                //    Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
-                //    return new CacheExecutorResults(result.Account.Username, true);
-                //}
-                //catch (MsalUiRequiredException)
-                //{
-                //    var result = await app.AcquireTokenByUsernamePasswordAsync(scopes, options.Username, options.UserPassword.ToSecureString()).ConfigureAwait(false);
-                //    Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
-                //    return new CacheExecutorResults(result.Account.Username, false);
-                //}
+                return await LanguageRunner.ExecuteAsync(
+                    new JavaLanguageExecutor(javaClassFilePath),
+                    v1App.ClientId,
+                        v1App.Authority,
+                        scope,
+                        options.Username,
+                        options.UserPassword,
+                        CommonCacheTestUtils.MsalV3CacheFilePath,
+                        CancellationToken.None).ConfigureAwait(false);
             }
         }
     }

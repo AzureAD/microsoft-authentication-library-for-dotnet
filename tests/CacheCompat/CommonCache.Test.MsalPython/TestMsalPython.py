@@ -66,7 +66,7 @@ if result:
 else:
     result = app.acquire_token_by_username_password(config["username"], config["password"], scopes=the_scopes)
     if result:
-        print("**TOKEN NOT RECEIVED FROM CACHE**")
+        print("**TOKEN RECEIVED, BUT _NOT_ FROM CACHE**")
     else:
         print("**TOKEN ACQUIRE FAILURE**")
         print(result.get("error"))

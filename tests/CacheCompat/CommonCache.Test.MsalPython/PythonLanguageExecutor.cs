@@ -25,43 +25,52 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System.IO;
-using System.Reflection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 
 namespace CommonCache.Test.MsalPython
 {
-    public static class Program
+    public class PythonLanguageExecutor : ILanguageExecutor
     {
-        public static void Main(string[] args)
+        public PythonLanguageExecutor(string pythonScriptPath)
         {
-            new MsalPythonCacheExecutor().Execute(args);
+            PythonScriptPath = pythonScriptPath;
         }
 
-        private class MsalPythonCacheExecutor : AbstractCacheExecutor
+        public string PythonScriptPath { get; }
+
+        public async Task<ProcessRunResults> ExecuteAsync(
+            string clientId,
+            string authority,
+            string scope,
+            string username,
+            string password,
+            string cacheFilePath,
+            CancellationToken cancellationToken)
         {
-            protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
-            {
-                var v1App = PreRegisteredApps.CommonCacheTestV1;
-                string resource = PreRegisteredApps.MsGraph;
-                string scope = resource + "/user.read";
+            var sb = new StringBuilder();
+            sb.Append($"{PythonScriptPath.EncloseQuotes()} ");
+            sb.Append($"{clientId} ");
+            sb.Append($"{authority} ");
+            sb.Append($"{scope} ");
+            sb.Append($"{username} ");
+            sb.Append($"{password} ");
+            sb.Append($"{cacheFilePath.EncloseQuotes()} ");
+            string arguments = sb.ToString();
 
-                CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
+            string executablePath = "python.exe";
 
-                string scriptFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestMsalPython.py");
+            Console.WriteLine($"Calling:  {executablePath} {arguments}");
 
-                return await LanguageRunner.ExecuteAsync(
-                    new PythonLanguageExecutor(scriptFilePath),
-                    v1App.ClientId,
-                        v1App.Authority,
-                        scope,
-                        options.Username,
-                        options.UserPassword,
-                        CommonCacheTestUtils.MsalV3CacheFilePath,
-                        CancellationToken.None).ConfigureAwait(false);
-            }
+            var processUtils = new ProcessUtils();
+
+            var processRunResults = await processUtils.RunProcessAsync(executablePath, arguments, cancellationToken).ConfigureAwait(false);
+            return processRunResults;
         }
     }
 }
