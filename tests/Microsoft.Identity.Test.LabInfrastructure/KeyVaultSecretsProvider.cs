@@ -171,10 +171,10 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                     {
                         publicApp = PublicClientApplicationBuilder.Create(KeyVaultPublicClientId)
                                                 .WithAuthority(new Uri(authority), true)
-                                                .WithClaims(ex.Claims)
                                                 .Build();
 
-                        authResult = await publicApp.AcquireTokenAsync(scopes).ConfigureAwait(false);
+                    authResult = await publicApp.AcquireTokenInteractive(scopes, null)
+                                            .WithClaims(ex.Claims).ExecuteAsync().ConfigureAwait(false);
                     }
                     break;
                 default:

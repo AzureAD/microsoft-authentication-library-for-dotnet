@@ -75,8 +75,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 }
             }
 
-            // Prefer the call-specific claims, otherwise use the app config
-            Claims = commonParameters.Claims ?? serviceBundle.Config.Claims;
+            Claims = commonParameters.Claims;
         }
 
         public ApiEvent.ApiIds ApiId { get; }

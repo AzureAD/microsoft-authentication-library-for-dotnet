@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Identity.Client.Http;
+using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -98,19 +99,6 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.LogLevel = logLevel ?? Config.LogLevel;
             Config.EnablePiiLogging = enablePiiLogging ?? Config.EnablePiiLogging;
             Config.IsDefaultPlatformLoggingEnabled = enableDefaultPlatformLogging ?? Config.IsDefaultPlatformLoggingEnabled;
-            return (T)this;
-        }
-
-        /// <summary>
-        /// Use when the tenant admin has enabled conditional access. Acquiring a token, either in your app or in a downstream API, 
-        /// could result in a <see cref="MsalServiceException"/> with the <see cref="MsalServiceException.Claims"/> property set. Retry the 
-        /// token acquisition, and use this value in the <see cref="WithClaims(string)"/> method. See https://aka.ms/msal-exceptions for details.
-        /// </summary>
-        /// <param name="claims">A string with one or multiple claims.</param>
-        /// <returns>The builder to chain .With methods</returns>
-        public T WithClaims(string claims)
-        {
-            Config.Claims = claims;
             return (T)this;
         }
 
@@ -260,6 +248,23 @@ namespace Microsoft.Identity.Client.AppConfig
             Config.ExtraQueryParameters = extraQueryParameters ?? new Dictionary<string, string>();
             return (T)this;
         }
+
+        /// <summary>
+        /// Sets Extra Query Parameters for the query string in the HTTP authentication request
+        /// </summary>
+        /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority.
+        /// The string needs to be properly URL-encdoded and ready to send as a string of segments of the form <c>key=value</c> separated by an ampersand character.
+        /// </param>
+        /// <returns></returns>
+        public T WithExtraQueryParameters(string extraQueryParameters)
+        {
+            if (!string.IsNullOrWhiteSpace(extraQueryParameters))
+            {
+                return WithExtraQueryParameters(CoreHelpers.ParseKeyValueList(extraQueryParameters, '&', true, null));
+            }
+            return (T)this;
+        }
+
 
         internal virtual void Validate()
         {

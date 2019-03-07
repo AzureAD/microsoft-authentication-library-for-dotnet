@@ -294,13 +294,14 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                         .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                         .WithHttpManager(httpManager)
-                                                        .WithClaims(MsalTestConstants.Claims)
                                                         .WithExtraQueryParameters(MsalTestConstants.ExtraQueryParams)
                                                         .BuildConcrete();
 
                 var result = await app
-                    .AcquireTokenByIntegratedWindowsAuthAsync(MsalTestConstants.Scope, MsalTestConstants.User.Username)
-                    .ConfigureAwait(false);
+                    .AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
+                                                        .WithClaims(MsalTestConstants.Claims)
+                                                        .WithUsername(MsalTestConstants.User.Username)
+                                                        .ExecuteAsync().ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);

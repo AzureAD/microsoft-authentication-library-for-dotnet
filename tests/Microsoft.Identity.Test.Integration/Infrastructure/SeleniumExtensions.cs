@@ -34,6 +34,7 @@ using OpenQA.Selenium.Support.UI;
 using System.Diagnostics;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.UIAutomation.Infrastructure;
+using System.Linq;
 
 namespace Microsoft.Identity.Test.Integration.Infrastructure
 {
@@ -103,6 +104,19 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
                 }
             });
             return continueBtn;
+        }
+
+        /// <summary>
+        /// Creates a filter for selecting elements from multiple IDs. Uses XPath, e.g.
+        /// .//*[@id='otc' or @id='code']
+        /// </summary>
+        public static By ByIds(params string[] ids)
+        {
+            string xPathSelector = string.Join(
+                " or ",
+                ids.Select(id => $"@id='{id}'"));
+
+            return By.XPath($".//*[{xPathSelector}]");
         }
 
         public static void PerformLogin(this IWebDriver driver, LabUser user, bool withLoginHint = false)
