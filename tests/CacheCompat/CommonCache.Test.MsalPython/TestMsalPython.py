@@ -26,14 +26,9 @@
 # ------------------------------------------------------------------------------
 
 import sys
-import json
-import logging
+import os
 import atexit
-
 import msal
-
-# Optional logging
-logging.basicConfig(level=logging.DEBUG)
 
 config = {}
 
@@ -44,15 +39,16 @@ config["username"] = sys.argv[4]
 config["password"] = sys.argv[5]
 config["cache_path"] = sys.argv[6]
 
-cache = SerializableTokenCache()
-cache.deserialize(open(config["cache_path"], "rb").read())
+cache = msal.SerializableTokenCache()
+
+if os.path.exists(config["cache_path"]):
+    cache.deserialize(open(config["cache_path"], "r").read())
+
 atexit.register(lambda:
-    open(config["cache_path"], "wb").write(cache.serialize())
-    # Hint: The following optional line persists only when state changed
-    if cache.has_state_changed else None
+    open(config["cache_path"], "w").write(cache.serialize())
 )
 
-app = ClientApplication(..., token_cache=cache)
+the_scopes = [ config["scope"] ]
 
 # Create a preferably long-lived app instance which maintains a token cache.
 app = msal.PublicClientApplication(config["client_id"], authority=config["authority"], token_cache=cache)
@@ -63,13 +59,12 @@ result = None
 # Firstly, check the cache to see if this end user has signed in before
 accounts = app.get_accounts(username=config["username"])
 if accounts:
-    logging.info("Account(s) exists in cache, probably with token too. Let's try.")
-    result = app.acquire_token_silent(config["scope"], account=accounts[0])
+    result = app.acquire_token_silent(the_scopes, account=accounts[0])
 
 if result:
     print("**TOKEN RECEIVED FROM CACHE**")
 else:
-    result = app.acquire_token_by_username_password(config["username"], config["password"], scopes=config["scope"])
+    result = app.acquire_token_by_username_password(config["username"], config["password"], scopes=the_scopes)
     if result:
         print("**TOKEN NOT RECEIVED FROM CACHE**")
     else:

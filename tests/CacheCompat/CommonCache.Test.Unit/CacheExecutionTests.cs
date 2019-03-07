@@ -157,6 +157,7 @@ namespace CommonCache.Test.Unit
         [Ignore]
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalV3 msal v3 cache")]
+        [DataRow(CacheProgramType.MsalV3, CacheProgramType.MsalPython, CacheStorageType.MsalV3, DisplayName = "MsalV3->MsalPython msal v3 cache")] // this one will fail because we're missing authority aliasing in python
         public async Task TestMsalPythonCacheCompatibilityAsync(
             CacheProgramType interactiveType,
             CacheProgramType silentType,
