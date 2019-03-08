@@ -29,7 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.Identity.Test.Configuration;
+using Microsoft.Identity.Test.ConfigurationProvider;
 using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -139,7 +139,9 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
+#pragma warning disable CA1305 // Specify IFormatProvider
             uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
+#pragma warning restore CA1305 // Specify IFormatProvider
             string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
             return result;
         }

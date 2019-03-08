@@ -29,7 +29,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.Configuration;
+using Microsoft.Identity.Test.ConfigurationProvider;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public class InteractiveFlowTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
-        private static readonly string[] _scopes = new[] { "user.read" };
+        private static readonly string[] _scopes = new[] { "https://microsoftgraph.chinacloudapi.cn/.default" };
 
         #region MSTest Hooks
         /// <summary>

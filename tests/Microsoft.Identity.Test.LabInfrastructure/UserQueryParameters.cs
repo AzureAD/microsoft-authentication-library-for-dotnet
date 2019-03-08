@@ -27,7 +27,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Identity.Test.Configuration;
+using Microsoft.Identity.Test.ConfigurationProvider;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
 {
