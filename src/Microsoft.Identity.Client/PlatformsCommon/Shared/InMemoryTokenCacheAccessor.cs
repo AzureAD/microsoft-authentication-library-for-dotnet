@@ -54,18 +54,6 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             new ConcurrentDictionary<string, MsalAccountCacheItem>();
 
         /// <inheritdoc />
-        public int RefreshTokenCount => RefreshTokenCacheDictionary.Count;
-
-        /// <inheritdoc />
-        public int AccessTokenCount => AccessTokenCacheDictionary.Count;
-
-        /// <inheritdoc />
-        public int AccountCount => AccountCacheDictionary.Count;
-
-        /// <inheritdoc />
-        public int IdTokenCount => IdTokenCacheDictionary.Count;
-
-        /// <inheritdoc />
         public void ClearRefreshTokens()
         {
             RefreshTokenCacheDictionary.Clear();
@@ -156,22 +144,22 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             AccountCacheDictionary.Remove(cacheKey.ToString());
         }
         
-        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
             return new ReadOnlyCollection<MsalAccessTokenCacheItem>(AccessTokenCacheDictionary.Values.ToList());
         }
 
-        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
             return new ReadOnlyCollection<MsalRefreshTokenCacheItem>(RefreshTokenCacheDictionary.Values.ToList());
         }
 
-        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
             return new ReadOnlyCollection<MsalIdTokenCacheItem>(IdTokenCacheDictionary.Values.ToList());
         }
 
-        public ICollection<MsalAccountCacheItem> GetAllAccounts()
+        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
             return new ReadOnlyCollection<MsalAccountCacheItem>(AccountCacheDictionary.Values.ToList());
         }

@@ -33,13 +33,6 @@ namespace Microsoft.Identity.Client.Cache
 {
     internal interface ITokenCacheAccessor
     {
-        int RefreshTokenCount { get; }
-        int AccessTokenCount { get; }
-        int AccountCount { get; }
-        int IdTokenCount { get; }
-        void ClearRefreshTokens();
-        void ClearAccessTokens();
-
         void SaveAccessToken(MsalAccessTokenCacheItem item);
 
         void SaveRefreshToken(MsalRefreshTokenCacheItem item);
@@ -64,13 +57,13 @@ namespace Microsoft.Identity.Client.Cache
 
         void DeleteAccount(MsalAccountCacheKey cacheKey);
 
-        ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens();
+        IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens();
 
-        ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
+        IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens();
 
-        ICollection<MsalIdTokenCacheItem> GetAllIdTokens();
+        IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens();
 
-        ICollection<MsalAccountCacheItem> GetAllAccounts();
+        IEnumerable<MsalAccountCacheItem> GetAllAccounts();
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.Core;
 
@@ -106,6 +107,22 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
             }
 
             return null;
+        }
+
+        public static void ClearAccessTokens(this ITokenCacheAccessor accessor)
+        {
+            foreach (var item in accessor.GetAllAccessTokens())
+            {
+                accessor.DeleteAccessToken(item.GetKey());
+            }
+        }
+
+        public static void ClearRefreshTokens(this ITokenCacheAccessor accessor)
+        {
+            foreach (var item in accessor.GetAllRefreshTokens())
+            {
+                accessor.DeleteRefreshToken(item.GetKey());
+            }
         }
     }
 }

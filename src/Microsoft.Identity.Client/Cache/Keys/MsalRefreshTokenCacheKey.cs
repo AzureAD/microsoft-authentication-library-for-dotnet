@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Cache.Keys
     /// An object representing the key of the token cache RT dictionary. The 
     /// format of the key is not important for this library, as long as it is unique.
     /// </summary>
-    internal class MsalRefreshTokenCacheKey
+    internal class MsalRefreshTokenCacheKey : IiOSKey
     {
         private readonly string _environment;
         private readonly string _homeAccountId;
@@ -69,20 +69,14 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         #region iOS
 
-        public string GetiOSAccountKey()
-        {
-            return MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
-        }
 
-        public string GetiOSServiceKey()
-        {
-            return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null, scopes: null);
-        }
+        public string iOSAccount => MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
 
-        public string GetiOSGenericKey()
-        {
-            return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null);
-        }
+        public string iOSGeneric => MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null);
+
+        public string iOSService => MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null, scopes: null);
+
+        public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken;
 
         #endregion
     }

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -68,19 +69,19 @@ namespace Microsoft.Identity.Test.Unit
             Assert.IsNull(res.Account);
 
             // make sure user cache is empty
-            Assert.AreEqual(0, userCache.Accessor.AccessTokenCount);
-            Assert.AreEqual(0, userCache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(0, userCache.Accessor.IdTokenCount);
-            Assert.AreEqual(0, userCache.Accessor.AccountCount);
+            Assert.AreEqual(0, userCache.Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, userCache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, userCache.Accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(0, userCache.Accessor.GetAllAccounts().Count());
 
             // make sure nothing was written to legacy cache
             Assert.IsNull(userCache.LegacyPersistence.LoadCache());
 
             // make sure only AT entity was stored in the App msal cache
-            Assert.AreEqual(1, appCache.Accessor.AccessTokenCount);
-            Assert.AreEqual(0, appCache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(0, appCache.Accessor.IdTokenCount);
-            Assert.AreEqual(0, appCache.Accessor.AccountCount);
+            Assert.AreEqual(1, userCache.Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, appCache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, appCache.Accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(0, appCache.Accessor.GetAllAccounts().Count());
 
             Assert.IsNull(appCache.LegacyPersistence.LoadCache());
 

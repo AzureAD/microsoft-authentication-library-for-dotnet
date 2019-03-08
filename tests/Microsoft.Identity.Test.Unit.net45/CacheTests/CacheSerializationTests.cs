@@ -379,10 +379,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
             s.Deserialize(bytes);
 
-            Assert.AreEqual(0, accessor.AccessTokenCount, nameof(accessor.AccessTokenCount));
-            Assert.AreEqual(0, accessor.RefreshTokenCount, nameof(accessor.RefreshTokenCount));
-            Assert.AreEqual(0, accessor.IdTokenCount, nameof(accessor.IdTokenCount));
-            Assert.AreEqual(0, accessor.AccountCount, nameof(accessor.AccountCount));
+            Assert.AreEqual(0, accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(0, accessor.GetAllAccounts().Count());
         }
 
         [TestMethod]
@@ -395,10 +395,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = File.ReadAllBytes(binFilePath);
             s.Deserialize(bytes);
 
-            Assert.AreEqual(1, accessor.AccessTokenCount, nameof(accessor.AccessTokenCount));
-            Assert.AreEqual(1, accessor.RefreshTokenCount, nameof(accessor.RefreshTokenCount));
-            Assert.AreEqual(1, accessor.IdTokenCount, nameof(accessor.IdTokenCount));
-            Assert.AreEqual(1, accessor.AccountCount, nameof(accessor.AccountCount));
+            Assert.AreEqual(1, accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(1, accessor.GetAllAccounts().Count());
 
             var expectedAccessTokenItem = new MsalAccessTokenCacheItem
             {
@@ -452,10 +452,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         private void AssertAccessorsAreEqual(ITokenCacheAccessor expected, ITokenCacheAccessor actual)
         {
-            Assert.AreEqual(expected.AccessTokenCount, actual.AccessTokenCount);
-            Assert.AreEqual(expected.RefreshTokenCount, actual.RefreshTokenCount);
-            Assert.AreEqual(expected.IdTokenCount, actual.IdTokenCount);
-            Assert.AreEqual(expected.AccountCount, actual.AccountCount);
+            Assert.AreEqual(expected.GetAllAccessTokens().Count(), actual.GetAllAccessTokens().Count());
+            Assert.AreEqual(expected.GetAllRefreshTokens().Count(), actual.GetAllRefreshTokens().Count());
+            Assert.AreEqual(expected.GetAllIdTokens().Count(), actual.GetAllIdTokens().Count());
+            Assert.AreEqual(expected.GetAllAccounts().Count(), actual.GetAllAccounts().Count());
         }
 
         private void AssertContainsKey(JObject j, string key)

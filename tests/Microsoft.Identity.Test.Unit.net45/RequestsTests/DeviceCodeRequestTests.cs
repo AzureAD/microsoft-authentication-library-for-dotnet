@@ -100,10 +100,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 var cache = parameters.CacheSessionManager.TokenCacheInternal;
 
                 // Check that cache is empty
-                Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, cache.Accessor.AccountCount);
-                Assert.AreEqual(0, cache.Accessor.IdTokenCount);
-                Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
+                Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(0, cache.Accessor.GetAllAccounts().Count());
 
                 DeviceCodeResult actualDeviceCodeResult = null;
 
@@ -135,10 +135,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 CoreAssert.AreScopesEqual(expectedScopes.AsSingleString(), actualDeviceCodeResult.Scopes.AsSingleString());
 
                 // Validate that entries were added to cache
-                Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
-                Assert.AreEqual(1, cache.Accessor.AccountCount);
-                Assert.AreEqual(1, cache.Accessor.IdTokenCount);
-                Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
+                Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(1, cache.Accessor.GetAllAccounts().Count());
             }
         }
 

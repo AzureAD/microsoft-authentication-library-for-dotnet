@@ -33,9 +33,8 @@ using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.UI;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
@@ -65,35 +64,35 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                     MsalTestConstants.GetDiscoveryEndpoint(MsalTestConstants.AuthorityCommonTenant)));
         }
 
-        private string ClientId;
-        private string RequestAuthority;
+        private string _clientId;
+        private string _requestAuthority;
 
-        private string TokenResponse;
-        private string IdTokenResponse;
+        private string _tokenResponse;
+        private string _idTokenResponse;
 
-        private string ExpectedAtCacheKey;
-        private string ExpectedAtCacheKeyIosService;
-        private string ExpectedAtCacheKeyIosAccount;
-        private string ExpectedAtCacheKeyIosGeneric;
-        private string ExpectedAtCacheValue;
+        private string _expectedAtCacheKey;
+        private string _expectedAtCacheKeyIosService;
+        private string _expectedAtCacheKeyIosAccount;
+        private string _expectedAtCacheKeyIosGeneric;
+        private string _expectedAtCacheValue;
 
-        private string ExpectedIdTokenCacheKey;
-        private string ExpectedIdTokenCacheKeyIosService;
-        private string ExpectedIdTokenCacheKeyIosAccount;
-        private string ExpectedIdTokenCacheKeyIosGeneric;
-        private string ExpectedIdTokenCacheValue;
+        private string _expectedIdTokenCacheKey;
+        private string _expectedIdTokenCacheKeyIosService;
+        private string _expectedIdTokenCacheKeyIosAccount;
+        private string _expectedIdTokenCacheKeyIosGeneric;
+        private string _expectedIdTokenCacheValue;
 
-        private string ExpectedRtCacheKey;
-        private string ExpectedRtCacheKeyIosService;
-        private string ExpectedRtCacheKeyIosAccount;
-        private string ExpectedRtCacheKeyIosGeneric;
-        private string ExpectedRtCacheValue;
+        private string _expectedRtCacheKey;
+        private string _expectedRtCacheKeyIosService;
+        private string _expectedRtCacheKeyIosAccount;
+        private string _expectedRtCacheKeyIosGeneric;
 
-        private string ExpectedAccountCacheKey;
-        private string ExpectedAccountCacheKeyIosService;
-        private string ExpectedAccountCacheKeyIosAccount;
-        private string ExpectedAccountCacheKeyIosGeneric;
-        private string ExpectedAccountCacheValue;
+        private string _expectedAccountCacheKey;
+        private string _expectedAccountCacheKeyIosService;
+        private string _expectedAccountCacheKeyIosAccount;
+        private string _expectedAccountCacheKeyIosGeneric;
+        private string _expectedAccountCacheValue;
+        private string _expectedRtCacheValue;
 
         private readonly RequestContext requestContext = RequestContext.CreateForTest();
 
@@ -104,45 +103,45 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 string json = r.ReadToEnd();
                 var configJson = JsonConvert.DeserializeObject<JObject>(json);
 
-                ClientId = configJson.GetValue("client_id").ToString();
-                RequestAuthority = configJson.GetValue("authority").ToString();
+                _clientId = configJson.GetValue("client_id").ToString();
+                _requestAuthority = configJson.GetValue("authority").ToString();
 
-                TokenResponse = configJson.GetValue("token_response").ToString();
-                IdTokenResponse = configJson.GetValue("id_token_response").ToString();
+                _tokenResponse = configJson.GetValue("token_response").ToString();
+                _idTokenResponse = configJson.GetValue("id_token_response").ToString();
 
-                ExpectedAtCacheKey = configJson.GetValue("at_cache_key").ToString();
-                ExpectedAtCacheKeyIosService = configJson.GetValue("at_cache_key_ios_service").ToString();
-                ExpectedAtCacheKeyIosAccount = configJson.GetValue("at_cache_key_ios_account").ToString();
-                ExpectedAtCacheKeyIosGeneric = configJson.GetValue("at_cache_key_ios_generic").ToString();
-                ExpectedAtCacheKey = configJson.GetValue("at_cache_key").ToString();
+                _expectedAtCacheKey = configJson.GetValue("at_cache_key").ToString();
+                _expectedAtCacheKeyIosService = configJson.GetValue("at_cache_key_ios_service").ToString();
+                _expectedAtCacheKeyIosAccount = configJson.GetValue("at_cache_key_ios_account").ToString();
+                _expectedAtCacheKeyIosGeneric = configJson.GetValue("at_cache_key_ios_generic").ToString();
+                _expectedAtCacheKey = configJson.GetValue("at_cache_key").ToString();
 
-                ExpectedAtCacheValue = configJson.GetValue("at_cache_value").ToString();
+                _expectedAtCacheValue = configJson.GetValue("at_cache_value").ToString();
 
-                ExpectedIdTokenCacheKey = configJson.GetValue("id_token_cache_key").ToString();
-                ExpectedIdTokenCacheKeyIosService = configJson.GetValue("id_token_cache_key_ios_service").ToString();
-                ExpectedIdTokenCacheKeyIosAccount = configJson.GetValue("id_token_cache_key_ios_account").ToString();
-                ExpectedIdTokenCacheKeyIosGeneric = configJson.GetValue("id_token_cache_key_ios_generic").ToString();
-                ExpectedIdTokenCacheValue = configJson.GetValue("id_token_cache_value").ToString();
+                _expectedIdTokenCacheKey = configJson.GetValue("id_token_cache_key").ToString();
+                _expectedIdTokenCacheKeyIosService = configJson.GetValue("id_token_cache_key_ios_service").ToString();
+                _expectedIdTokenCacheKeyIosAccount = configJson.GetValue("id_token_cache_key_ios_account").ToString();
+                _expectedIdTokenCacheKeyIosGeneric = configJson.GetValue("id_token_cache_key_ios_generic").ToString();
+                _expectedIdTokenCacheValue = configJson.GetValue("id_token_cache_value").ToString();
 
-                ExpectedRtCacheKey = configJson.GetValue("rt_cache_key").ToString();
-                ExpectedRtCacheKeyIosService = configJson.GetValue("rt_cache_key_ios_service").ToString();
-                ExpectedRtCacheKeyIosAccount = configJson.GetValue("rt_cache_key_ios_account").ToString();
-                ExpectedRtCacheKeyIosGeneric = configJson.GetValue("rt_cache_key_ios_generic").ToString();
-                ExpectedRtCacheValue = configJson.GetValue("rt_cache_value").ToString();
+                _expectedRtCacheKey = configJson.GetValue("rt_cache_key").ToString();
+                _expectedRtCacheKeyIosService = configJson.GetValue("rt_cache_key_ios_service").ToString();
+                _expectedRtCacheKeyIosAccount = configJson.GetValue("rt_cache_key_ios_account").ToString();
+                _expectedRtCacheKeyIosGeneric = configJson.GetValue("rt_cache_key_ios_generic").ToString();
+                _expectedRtCacheValue = configJson.GetValue("rt_cache_value").ToString();
 
-                ExpectedAccountCacheKey = configJson.GetValue("account_cache_key").ToString();
-                ExpectedAccountCacheKeyIosService = configJson.GetValue("account_cache_key_ios_service").ToString();
-                ExpectedAccountCacheKeyIosAccount = configJson.GetValue("account_cache_key_ios_account").ToString();
-                ExpectedAccountCacheKeyIosGeneric = configJson.GetValue("account_cache_key_ios_generic").ToString();
-                ExpectedAccountCacheValue = configJson.GetValue("account_cache_value").ToString();
+                _expectedAccountCacheKey = configJson.GetValue("account_cache_key").ToString();
+                _expectedAccountCacheKeyIosService = configJson.GetValue("account_cache_key_ios_service").ToString();
+                _expectedAccountCacheKeyIosAccount = configJson.GetValue("account_cache_key_ios_account").ToString();
+                _expectedAccountCacheKeyIosGeneric = configJson.GetValue("account_cache_key_ios_generic").ToString();
+                _expectedAccountCacheValue = configJson.GetValue("account_cache_value").ToString();
 
-                var idTokenSecret = CreateIdToken(IdTokenResponse);
+                var idTokenSecret = CreateIdToken(_idTokenResponse);
 
-                TokenResponse = string.Format
-                    (CultureInfo.InvariantCulture, "{" + TokenResponse + "}", idTokenSecret);
+                _tokenResponse = string.Format
+                    (CultureInfo.InvariantCulture, "{" + _tokenResponse + "}", idTokenSecret);
 
-                ExpectedIdTokenCacheValue = string.Format
-                    (CultureInfo.InvariantCulture, "{" + ExpectedIdTokenCacheValue + "}", idTokenSecret);
+                _expectedIdTokenCacheValue = string.Format
+                    (CultureInfo.InvariantCulture, "{" + _expectedIdTokenCacheValue + "}", idTokenSecret);
             }
         }
 
@@ -194,8 +193,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 TestInitialize(harness.HttpManager);
 
                 PublicClientApplication app = PublicClientApplicationBuilder
-                                              .Create(ClientId)
-                                              .WithAuthority(new Uri(RequestAuthority), true)
+                                              .Create(_clientId)
+                                              .WithAuthority(new Uri(_requestAuthority), true)
                                               .WithHttpManager(harness.HttpManager)
                                               .BuildConcrete();
 
@@ -213,7 +212,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 harness.HttpManager.AddMockHandler(new MockHttpMessageHandler
                 {
                     ExpectedMethod = HttpMethod.Post,
-                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(TokenResponse)
+                    ResponseMessage = MockHelpers.CreateSuccessResponseMessage(_tokenResponse)
                 });
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
@@ -232,7 +231,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, atList.Count);
 
             var actualPayload = JsonConvert.DeserializeObject<JObject>(atList.First().ToJsonString());
-            var expectedPayload = JsonConvert.DeserializeObject<JObject>(ExpectedAtCacheValue);
+            var expectedPayload = JsonConvert.DeserializeObject<JObject>(_expectedAtCacheValue);
 
             foreach (KeyValuePair<string, JToken> prop in expectedPayload)
             {
@@ -256,11 +255,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var atCacheItem = cache.GetAllAccessTokens(true).First();
             var key = atCacheItem.GetKey();
 
-            Assert.AreEqual(ExpectedAtCacheKey, key.ToString());
+            Assert.AreEqual(_expectedAtCacheKey, key.ToString());
 
-            Assert.AreEqual(ExpectedAtCacheKeyIosService, key.GetiOSServiceKey());
-            Assert.AreEqual(ExpectedAtCacheKeyIosAccount, key.GetiOSAccountKey());
-            Assert.AreEqual(ExpectedAtCacheKeyIosGeneric, key.GetiOSGenericKey());
+            Assert.AreEqual(_expectedAtCacheKeyIosService, key.iOSService);
+            Assert.AreEqual(_expectedAtCacheKeyIosAccount, key.iOSAccount);
+            Assert.AreEqual(_expectedAtCacheKeyIosGeneric, key.iOSGeneric);
+            Assert.AreEqual(_expectedAtCacheKeyIosGeneric, key.iOSGeneric);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, key.iOSType);
         }
 
         private void ValidateRt(ITokenCacheInternal cache)
@@ -272,11 +273,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var rtCacheItem = cache.GetAllRefreshTokens(true).First();
             var key = rtCacheItem.GetKey();
 
-            Assert.AreEqual(ExpectedRtCacheKey, key.ToString());
+            Assert.AreEqual(_expectedRtCacheKey, key.ToString());
 
-            Assert.AreEqual(ExpectedRtCacheKeyIosService, key.GetiOSServiceKey());
-            Assert.AreEqual(ExpectedRtCacheKeyIosAccount, key.GetiOSAccountKey());
-            Assert.AreEqual(ExpectedRtCacheKeyIosGeneric, key.GetiOSGenericKey());
+            Assert.AreEqual(_expectedRtCacheKeyIosService, key.iOSService);
+            Assert.AreEqual(_expectedRtCacheKeyIosAccount, key.iOSAccount);
+            Assert.AreEqual(_expectedRtCacheKeyIosGeneric, key.iOSGeneric);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
+
         }
 
         private void ValidateIdToken(ITokenCacheInternal cache)
@@ -288,11 +291,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var idTokenCacheItem = cache.GetAllIdTokens(true).First();
             var key = idTokenCacheItem.GetKey();
 
-            Assert.AreEqual(ExpectedIdTokenCacheKey, key.ToString());
+            Assert.AreEqual(_expectedIdTokenCacheKey, key.ToString());
 
-            Assert.AreEqual(ExpectedIdTokenCacheKeyIosService, key.GetiOSServiceKey());
-            Assert.AreEqual(ExpectedIdTokenCacheKeyIosAccount, key.GetiOSAccountKey());
-            Assert.AreEqual(ExpectedIdTokenCacheKeyIosGeneric, key.GetiOSGenericKey());
+            Assert.AreEqual(_expectedIdTokenCacheKeyIosService, key.iOSService);
+            Assert.AreEqual(_expectedIdTokenCacheKeyIosAccount, key.iOSAccount);
+            Assert.AreEqual(_expectedIdTokenCacheKeyIosGeneric, key.iOSGeneric);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.IdToken, key.iOSType);
+
         }
 
         private void ValidateAccount(ITokenCacheInternal cache)
@@ -304,11 +309,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var accountCacheItem = cache.GetAllAccounts().First();
             var key = accountCacheItem.GetKey();
 
-            Assert.AreEqual(ExpectedAccountCacheKey, key.ToString());
+            Assert.AreEqual(_expectedAccountCacheKey, key.ToString());
 
-            Assert.AreEqual(ExpectedAccountCacheKeyIosService, key.GetiOSServiceKey());
-            Assert.AreEqual(ExpectedAccountCacheKeyIosAccount, key.GetiOSAccountKey());
-            Assert.AreEqual(ExpectedAccountCacheKeyIosGeneric, key.GetiOSGenericKey());
+            Assert.AreEqual(_expectedAccountCacheKeyIosService, key.iOSService);
+            Assert.AreEqual(_expectedAccountCacheKeyIosAccount, key.iOSAccount);
+            Assert.AreEqual(_expectedAccountCacheKeyIosGeneric, key.iOSGeneric);
+            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["MSSTS"], key.iOSType);
+
         }
 
         private void ValidateCacheEntityValue(string expectedEntityValue, ICollection<string> entities)
