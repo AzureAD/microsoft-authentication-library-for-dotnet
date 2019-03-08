@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -115,8 +115,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 AuthenticationResult result = await request.RunAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.RefreshTokenCount);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.AccessTokenCount);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }
         }
@@ -182,8 +182,8 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                 task.Wait();
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.RefreshTokenCount);
-                Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.AccessTokenCount);
+                Assert.AreEqual(1, ((ITokenCacheInternal)cache).Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(2, ((ITokenCacheInternal)cache).Accessor.GetAllAccessTokens().Count());
                 Assert.AreEqual(result.AccessToken, "some-access-token");
 
                 Assert.IsNotNull(

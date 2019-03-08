@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -44,6 +44,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -411,8 +412,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
             IDictionary<AdalTokenCacheKey, AdalResultWrapper> dictionary =
                 AdalCacheOperations.Deserialize(serviceBundle.DefaultLogger, cache.LegacyPersistence.LoadCache());
@@ -570,8 +571,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
         }
 
         [TestMethod]
@@ -600,8 +601,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
             response = new MsalTokenResponse
             {
@@ -617,8 +618,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
             Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
             Assert.AreEqual("access-token-2", cache.GetAllAccessTokens(true).First().Secret);
@@ -664,8 +665,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
             Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
             Assert.AreEqual("access-token-2", cache.GetAllAccessTokens(true).First().Secret);
         }
@@ -710,8 +711,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
             Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
             Assert.AreEqual("access-token-2", cache.GetAllAccessTokens(true).First().Secret);
@@ -784,8 +785,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.IsFalse(((TokenCache)cache).HasStateChanged);
 #pragma warning restore CS0618 // Type or member is obsolete
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(2, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(2, cache.Accessor.GetAllAccessTokens().Count());
 
             Assert.AreEqual("refresh-token-2", cache.GetAllRefreshTokens(true).First().Secret);
         }
@@ -838,21 +839,21 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             cache.Accessor.ClearAccessTokens();
             cache.Accessor.ClearRefreshTokens();
 
-            Assert.AreEqual(0, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(0, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(0, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, cache.Accessor.GetAllAccessTokens().Count());
 
             ((ITokenCache)cache).DeserializeMsalV3(serializedCache);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
             serializedCache = ((ITokenCache)cache).SerializeMsalV3();
             ((ITokenCache)cache).DeserializeMsalV3(serializedCache);
             // item count should not change because old cache entries should have
             // been overriden
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
 
             var atItem = cache.GetAllAccessTokens(true).First();
             Assert.AreEqual(response.AccessToken, atItem.Secret);
@@ -925,8 +926,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.SaveAccessAndRefreshToken(requestParams, response);
 
-            Assert.AreEqual(1, cache.Accessor.RefreshTokenCount);
-            Assert.AreEqual(1, cache.Accessor.AccessTokenCount);
+            Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
         }
 
         private AuthenticationRequestParameters CreateAuthenticationRequestParameters(

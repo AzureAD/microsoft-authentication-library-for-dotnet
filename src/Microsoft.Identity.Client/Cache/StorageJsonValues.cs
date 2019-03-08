@@ -38,5 +38,7 @@ namespace Microsoft.Identity.Client.Cache
         public const string CredentialTypeIdToken = "IdToken";
         public const string AccountRootKey = "Account";
         public const string CredentialTypeOther = "Other";
+
+        public const string AppMetadata = "appmetadata";
     }
 }

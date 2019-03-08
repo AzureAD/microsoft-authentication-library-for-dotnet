@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal string TenantId { get; set; }
-        public string PreferredUsername { get; internal set; }
+        internal string PreferredUsername { get; set; }
         internal string Name { get; set; }
         internal string GivenName { get; set; }
         internal string FamilyName { get; set; }
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalAccountCacheKey GetKey()
         {
-            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername, AuthorityType);
         }
 
         internal static MsalAccountCacheItem FromJsonString(string json)

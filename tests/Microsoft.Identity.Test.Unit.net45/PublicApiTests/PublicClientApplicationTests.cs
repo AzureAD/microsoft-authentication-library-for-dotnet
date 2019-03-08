@@ -454,7 +454,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(1, users.Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
 
@@ -511,7 +511,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
 
@@ -578,7 +578,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.SaveAccount(accountCacheItem);
 
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 users = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(users);
                 Assert.AreEqual(2, users.Count());
@@ -591,7 +591,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockHelpers.CreateClientInfo(MsalTestConstants.Uid + "more1", MsalTestConstants.Utid));
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
-                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 users = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(users);
                 Assert.AreEqual(2, users.Count());
@@ -610,8 +610,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.RemoveAsync(user).Wait();
             }
 
-            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
-            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
         }
 
 
