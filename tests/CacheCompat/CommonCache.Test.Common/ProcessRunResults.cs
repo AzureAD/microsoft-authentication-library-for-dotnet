@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.Common
 {
     public sealed class ProcessRunResults
     {

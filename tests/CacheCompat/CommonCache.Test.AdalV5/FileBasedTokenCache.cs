@@ -31,43 +31,60 @@ using System.Security.Cryptography;
 using CommonCache.Test.Common;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace CommonCache.Test.AdalV3
+namespace CommonCache.Test.AdalV5
 {
-    // This is a simple persistent cache implementation for an ADAL V3 desktop application
-    public class FileBasedAdalV3TokenCache : TokenCache
+    public class FileBasedTokenCache : TokenCache
     {
         private static readonly object s_fileLock = new object();
+        private readonly CacheStorageType _cacheStorageType;
 
         // Initializes the cache against a local file.
         // If the file is already present, it loads its content in the ADAL cache
-        public FileBasedAdalV3TokenCache(string filePath)
+        public FileBasedTokenCache(CacheStorageType cacheStorageType, string adalV3FilePath, string msalV2FilePath, string msalV3FilePath)
         {
-            CacheFilePath = filePath;
+            _cacheStorageType = cacheStorageType;
+            AdalV3CacheFilePath = adalV3FilePath;
+            MsalV2CacheFilePath = msalV2FilePath;
+            MsalV3CacheFilePath = msalV3FilePath;
+
             AfterAccess = AfterAccessNotification;
             BeforeAccess = BeforeAccessNotification;
+
+            LoadCache();
+        }
+
+        private void LoadCache()
+        {
             lock (s_fileLock)
             {
-                Deserialize(CacheFileUtils.ReadFromFileIfExists(CacheFilePath));
+                var adalV3Bytes = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFilePath);
+                var msalV2Bytes = CacheFileUtils.ReadFromFileIfExists(MsalV2CacheFilePath);
+                var msalV3Bytes = CacheFileUtils.ReadFromFileIfExists(MsalV3CacheFilePath);
+
+                DeserializeAdalV3(adalV3Bytes);
+                DeserializeMsalV2(msalV2Bytes);
+                DeserializeMsalV3(msalV3Bytes);
             }
         }
 
-        public string CacheFilePath { get; }
+        public string AdalV3CacheFilePath { get; }
+        public string MsalV2CacheFilePath { get; }
+        public string MsalV3CacheFilePath { get; }
 
         // Empties the persistent store.
         public override void Clear()
         {
             base.Clear();
-            File.Delete(CacheFilePath);
+            File.Delete(AdalV3CacheFilePath);
+            File.Delete(MsalV2CacheFilePath);
+            File.Delete(MsalV3CacheFilePath);
         }
 
         // Triggered right before ADAL needs to access the cache.
         // Reload the cache from the persistent store in case it changed since the last access.
         private void BeforeAccessNotification(TokenCacheNotificationArgs args)
         {
-            lock (s_fileLock)
-            {
-                Deserialize(CacheFileUtils.ReadFromFileIfExists(CacheFilePath));
-            }
+            LoadCache();
         }
 
         // Triggered right after ADAL accessed the cache.
@@ -78,8 +95,24 @@ namespace CommonCache.Test.AdalV3
             {
                 lock (s_fileLock)
                 {
+                    var adalV3Bytes = SerializeAdalV3();
+                    var msalV2Bytes = SerializeMsalV2();
+                    var msalV3Bytes = SerializeMsalV3();
+
                     // reflect changes in the persistent store
-                    CacheFileUtils.WriteToFileIfNotNull(CacheFilePath, Serialize());
+                    if ((_cacheStorageType & CacheStorageType.Adal) == CacheStorageType.Adal)
+                    {
+                        CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFilePath, adalV3Bytes);
+                    }
+                    if ((_cacheStorageType & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
+                    {
+                        CacheFileUtils.WriteToFileIfNotNull(MsalV2CacheFilePath, msalV2Bytes);
+                    }
+                    if ((_cacheStorageType & CacheStorageType.MsalV3) == CacheStorageType.MsalV3)
+                    {
+                        CacheFileUtils.WriteToFileIfNotNull(MsalV3CacheFilePath, msalV3Bytes);
+                    }
+
                     // once the write operation took place, restore the HasStateChanged bit to false
                     HasStateChanged = false;
                 }

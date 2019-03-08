@@ -40,24 +40,21 @@ namespace CommonCache.Test.Unit.Utils
         private readonly CacheProgramType _firstProgram;
         private readonly CacheProgramType _secondProgram;
 
-        private readonly int _expectedAdalCacheSizeBytes;
-        private readonly int _expectedMsalCacheSizeBytes;
         private readonly bool _expectSecondTokenFromCache;
         private readonly bool _expectSecondTokenException;
+        private readonly CacheStorageType _cacheStorageType;
 
         public CacheTestExecutor(
             CacheProgramType firstProgram,
             CacheProgramType secondProgram,
-            int expectedAdalCacheSizeBytes = 0,
-            int expectedMsalCacheSizeBytes = 0,
-            bool expectSecondTokenFromCache = false,
+            CacheStorageType cacheStorageType,
+            bool expectSecondTokenFromCache = true,
             bool expectSecondTokenException = false)
         {
             _firstProgram = firstProgram;
             _secondProgram = secondProgram;
+            _cacheStorageType = cacheStorageType;
 
-            _expectedAdalCacheSizeBytes = expectedAdalCacheSizeBytes;
-            _expectedMsalCacheSizeBytes = expectedMsalCacheSizeBytes;
             _expectSecondTokenFromCache = expectSecondTokenFromCache;
             _expectSecondTokenException = expectSecondTokenException;
         }
@@ -79,19 +76,28 @@ namespace CommonCache.Test.Unit.Utils
 
             Console.WriteLine($"Received LabUser: {labUser.Upn} from LabServiceApi.");
 
-            var cacheProgramFirst = CacheProgramFactory.CreateCacheProgram(_firstProgram);
-            var cacheProgramSecond = CacheProgramFactory.CreateCacheProgram(_secondProgram);
+            var cacheProgramFirst = CacheProgramFactory.CreateCacheProgram(_firstProgram, _cacheStorageType);
+            var cacheProgramSecond = CacheProgramFactory.CreateCacheProgram(_secondProgram, _cacheStorageType);
 
             var firstResults = await cacheProgramFirst.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
             var secondResults = await cacheProgramSecond.ExecuteAsync(labUser.Upn, labUser.Password, cancellationToken).ConfigureAwait(false);
 
+            Console.WriteLine();
+            Console.WriteLine("------------------------------------");
             Console.WriteLine($"FirstResults: {_firstProgram}");
-            Console.WriteLine($"stdout: {firstResults.StdOut}");
-            Console.WriteLine($"stderr: {firstResults.StdErr}");
-
+            Console.WriteLine("stdout:");
+            Console.WriteLine(firstResults.StdOut);
+            Console.WriteLine();
+            Console.WriteLine("stderr:");
+            Console.WriteLine(firstResults.StdErr);
+            Console.WriteLine("------------------------------------");
             Console.WriteLine($"SecondResults: {_secondProgram}");
-            Console.WriteLine($"stdout: {secondResults.StdOut}");
-            Console.WriteLine($"stderr: {secondResults.StdErr}");
+            Console.WriteLine("stdout:");
+            Console.WriteLine(secondResults.StdOut);
+            Console.WriteLine("stderr:");
+            Console.WriteLine(secondResults.StdErr);
+            Console.WriteLine("------------------------------------");
+            Console.WriteLine();
 
             Assert.IsFalse(firstResults.ProcessExecutionFailed, $"{cacheProgramFirst.ExecutablePath} should not fail");
             Assert.IsFalse(secondResults.ProcessExecutionFailed, $"{cacheProgramSecond.ExecutablePath} should not fail");
@@ -110,23 +116,23 @@ namespace CommonCache.Test.Unit.Utils
 
             if (File.Exists(CommonCacheTestUtils.MsalV2CacheFilePath))
             {
-                Console.WriteLine($"MSAL Cache Exists at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
-                Console.WriteLine("MSAL Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length));
+                Console.WriteLine($"MSAL V2 Cache Exists at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
+                Console.WriteLine("MSAL V2 Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length));
             }
             else
             {
-                Console.WriteLine($"MSAL Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
+                Console.WriteLine($"MSAL V2 Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV2CacheFilePath}");
             }
 
-            // TODO: cache size seems to be variant/inconsistent.  Need to validate if it should be the same every time.
-            //if (_expectedAdalCacheSizeBytes > 0)
-            //{
-            //    Assert.AreEqual(_expectedAdalCacheSizeBytes, Convert.ToInt32(new FileInfo(CommonCacheTestUtils.AdalV3CacheFilePath).Length), "Expected Adal Cache Size");
-            //}
-            //if (_expectedMsalCacheSizeBytes > 0)
-            //{
-            //    Assert.AreEqual(_expectedMsalCacheSizeBytes, Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV2CacheFilePath).Length), "Expected Msal Cache Size");
-            //}
+            if (File.Exists(CommonCacheTestUtils.MsalV3CacheFilePath))
+            {
+                Console.WriteLine($"MSAL V3 Cache Exists at: {CommonCacheTestUtils.MsalV3CacheFilePath}");
+                Console.WriteLine("MSAL V3 Cache Size: " + Convert.ToInt32(new FileInfo(CommonCacheTestUtils.MsalV3CacheFilePath).Length));
+            }
+            else
+            {
+                Console.WriteLine($"MSAL V3 Cache DOES NOT EXIST at: {CommonCacheTestUtils.MsalV3CacheFilePath}");
+            }
 
             if (_expectSecondTokenFromCache)
             {

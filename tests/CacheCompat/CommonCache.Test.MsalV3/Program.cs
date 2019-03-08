@@ -31,6 +31,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace CommonCache.Test.MsalV2
 {
@@ -38,10 +39,10 @@ namespace CommonCache.Test.MsalV2
     {
         public static void Main(string[] args)
         {
-            new MsalV2CacheExecutor().Execute(args);
+            new MsalV3CacheExecutor().Execute(args);
         }
 
-        private class MsalV2CacheExecutor : AbstractCacheExecutor
+        private class MsalV3CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
             protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
@@ -53,25 +54,23 @@ namespace CommonCache.Test.MsalV2
                     resource + "/user.read"
                 };
 
-                Logger.LogCallback = (LogLevel level, string message, bool containsPii) =>
-                {
-                    Console.WriteLine("{0}: {1}", level, message);
-                };
-
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-                var tokenCache = new TokenCache();
+                var app = PublicClientApplicationBuilder
+                    .Create(v1App.ClientId)
+                    .WithAuthority(new Uri(v1App.Authority), true)
+                    .WithLogging((LogLevel level, string message, bool containsPii) =>
+                    {
+                        Console.WriteLine("{0}: {1}", level, message);
+                    })
+                    .Build();
 
                 FileBasedTokenCacheHelper.ConfigureUserCache(
                     options.CacheStorageType,
-                    tokenCache,
+                    app.UserTokenCache,
                     CommonCacheTestUtils.AdalV3CacheFilePath,
-                    CommonCacheTestUtils.MsalV2CacheFilePath);
-
-                var app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache)
-                {
-                    ValidateAuthority = true
-                };
+                    CommonCacheTestUtils.MsalV2CacheFilePath,
+                    CommonCacheTestUtils.MsalV3CacheFilePath);
 
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 try

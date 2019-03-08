@@ -26,34 +26,44 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using CommandLine;
 
 namespace CommonCache.Test.Common
 {
-    [Flags]
-    public enum CacheStorageType
+    public class ProcessRunException : Exception
     {
-        None = 0,
-        Adal = 1,
-        MsalV2 = 2,
-        MsalV3 = 4
-    }
+        public ProcessRunException()
+        {
+        }
 
-    // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandLineOptions
-    {
-        [Option("resultsFilePath", Required = true, HelpText = "Path to write output results file.")]
-        public string ResultsFilePath { get; set; }
+        public ProcessRunException(
+            string fileName,
+            string arguments,
+            int processExitCode,
+            string processStandardOutput,
+            string processStandardError)
+            : base($"Process {fileName} has exited with code {processExitCode}")
+        {
+            FileName = fileName;
+            Arguments = arguments;
+            ProcessExitCode = processExitCode;
+            ProcessStandardOutput = processStandardOutput;
+            ProcessStandardError = processStandardError;
+        }
 
-        [Option("userName", Required = true, HelpText = "Username to login with.")]
-        public string Username{ get; set; }
+        public ProcessRunException(string message)
+            : base(message)
+        {
+        }
 
-        [Option("userPassword", Required = true, HelpText = "Password to login with.")]
-        public string UserPassword { get; set; }
+        public ProcessRunException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
 
-        [Option("cacheStorageType", Required = true, HelpText = "Cache storage type(s) supported.")]
-        public int CacheStorageTypeInt {get; set;}
-
-        public CacheStorageType CacheStorageType => (CacheStorageType)CacheStorageTypeInt;
+        public string FileName { get; }
+        public string Arguments { get; }
+        public int ProcessExitCode { get; }
+        public string ProcessStandardOutput { get; }
+        public string ProcessStandardError { get; }
     }
 }
