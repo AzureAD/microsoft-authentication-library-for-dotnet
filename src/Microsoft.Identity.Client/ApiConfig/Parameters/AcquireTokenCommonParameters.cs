@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.TelemetryCore;
@@ -34,6 +35,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Parameters
     internal class AcquireTokenCommonParameters
     {
         public ApiEvent.ApiIds ApiId { get; set; } = ApiEvent.ApiIds.None;
+        public Guid TelemetryCorrelationId { get; set; }
         public IEnumerable<string> Scopes { get; set; }
         public IDictionary<string, string> ExtraQueryParameters { get; set; }
         public string Claims { get; set; }

@@ -288,6 +288,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         {
             Validate();
             CommonParameters.ApiId = CalculateApiEventId();
+            CommonParameters.TelemetryCorrelationId = Guid.NewGuid();
         }
     }
 }

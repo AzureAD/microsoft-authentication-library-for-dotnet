@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             return _executor.ExecuteAsync(commonParameters, interactiveParameters, cancellationToken);
 
             // TODO(mats): Wrap calls with MATS MsalAction calls to generate the appropriate telemetry
-            //var actionHandle = _mats.StartAction(null, null);
+            //var actionHandle = _mats.StartAction(null, commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
 
             //try
             //{

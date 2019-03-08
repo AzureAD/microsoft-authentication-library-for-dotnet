@@ -25,9 +25,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         protected IServiceBundle ServiceBundle { get; }
 
-        protected void LogVersionInfo()
+        protected RequestContext CreateRequestContextAndLogVersionInfo(Guid telemetryCorrelationId)
         {
-            CreateRequestContext().Logger.Info(
+            var requestContext = new RequestContext(
+                _clientApplicationBase.ClientId,
+                MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config));
+
+            requestContext.Logger.Info(
                 string.Format(
                     CultureInfo.InvariantCulture,
                     "MSAL {0} with assembly version '{1}', file version '{2}' and informational version '{3}'",
@@ -35,11 +39,8 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                     MsalIdHelper.GetMsalVersion(),
                     AssemblyUtils.GetAssemblyFileVersionAttribute(),
                     AssemblyUtils.GetAssemblyInformationalVersion()));
-        }
 
-        protected RequestContext CreateRequestContext()
-        {
-            return new RequestContext(_clientApplicationBase.ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
+            return requestContext;
         }
     }
 }

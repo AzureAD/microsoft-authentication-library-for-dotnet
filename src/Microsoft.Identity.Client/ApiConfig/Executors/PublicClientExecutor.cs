@@ -25,9 +25,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(commonParameters, _publicClientApplication.UserTokenCacheInternal);
+            var requestParams = _publicClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _publicClientApplication.UserTokenCacheInternal);
+
             requestParams.LoginHint = interactiveParameters.LoginHint;
             requestParams.Account = interactiveParameters.Account;
 
@@ -46,9 +50,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenWithDeviceCodeParameters deviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(commonParameters, _publicClientApplication.UserTokenCacheInternal);
+            var requestParams = _publicClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _publicClientApplication.UserTokenCacheInternal);
 
             var handler = new DeviceCodeRequest(
                 ServiceBundle,
@@ -63,9 +70,12 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(commonParameters, _publicClientApplication.UserTokenCacheInternal);
+            var requestParams = _publicClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _publicClientApplication.UserTokenCacheInternal);
 
             var handler = new IntegratedWindowsAuthRequest(
                 ServiceBundle,
@@ -80,9 +90,13 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            LogVersionInfo();
+            var requestContext = CreateRequestContextAndLogVersionInfo(commonParameters.TelemetryCorrelationId);
 
-            var requestParams = _publicClientApplication.CreateRequestParameters(commonParameters, _publicClientApplication.UserTokenCacheInternal);
+            var requestParams = _publicClientApplication.CreateRequestParameters(
+                commonParameters,
+                requestContext,
+                _publicClientApplication.UserTokenCacheInternal);
+
             var handler = new UsernamePasswordRequest(
                 ServiceBundle,
                 requestParams,

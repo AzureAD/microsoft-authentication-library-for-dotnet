@@ -99,7 +99,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public Task<IEnumerable<IAccount>> GetAccountsAsync()
         {
-            RequestContext requestContext = CreateRequestContext();
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             IEnumerable<IAccount> accounts = Enumerable.Empty<IAccount>();
             if (UserTokenCache == null)
             {
@@ -132,7 +132,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Instance of the account that needs to be removed</param>
         public Task RemoveAsync(IAccount account)
         {
-            RequestContext requestContext = CreateRequestContext();
+            RequestContext requestContext = CreateRequestContext(Guid.NewGuid());
             if (account != null)
             {
                 UserTokenCacheInternal?.RemoveAccount(account, requestContext);
@@ -157,6 +157,7 @@ namespace Microsoft.Identity.Client
 
         internal virtual AuthenticationRequestParameters CreateRequestParameters(
             AcquireTokenCommonParameters commonParameters,
+            RequestContext requestContext,
             ITokenCacheInternal cache,
             Authority customAuthority = null)
         {
@@ -165,12 +166,15 @@ namespace Microsoft.Identity.Client
                 customAuthority,
                 cache,
                 commonParameters,
-                CreateRequestContext());
+                requestContext);
         }
 
-        private RequestContext CreateRequestContext()
+        // This implementation should ONLY be called for cases where we aren't participating in
+        // MATS telemetry but still need a requestcontext/logger, such as "GetAccounts()".
+        // For service calls, the request context should be created in the **Executor classes as part of request execution.
+        private RequestContext CreateRequestContext(Guid telemetryCorrelationId)
         {
-            return new RequestContext(ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
+            return new RequestContext(ClientId, MsalLogger.Create(telemetryCorrelationId, ServiceBundle.Config));
         }
 
         /// <summary>
