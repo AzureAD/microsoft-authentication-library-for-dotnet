@@ -56,9 +56,8 @@ namespace Microsoft.Identity.Client.ApiConfig
         private object _ownerWindow;
         private AcquireTokenInteractiveParameters Parameters { get; } = new AcquireTokenInteractiveParameters();
 
-        /// <inheritdoc />
-        internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        internal AcquireTokenInteractiveParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
+            : base(publicClientApplicationExecutor)
         {
         }
 
@@ -68,18 +67,12 @@ namespace Microsoft.Identity.Client.ApiConfig
             Parameters.CustomWebUi = customWebUi;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="publicClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <param name="parent"></param>
-        /// <returns></returns>
         internal static AcquireTokenInteractiveParameterBuilder Create(
-            IPublicClientApplication publicClientApplication,
+            IPublicClientApplicationExecutor publicClientApplicationExecutor,
             IEnumerable<string> scopes,
             object parent)
         {
-            return new AcquireTokenInteractiveParameterBuilder(publicClientApplication)
+            return new AcquireTokenInteractiveParameterBuilder(publicClientApplicationExecutor)
                 .WithScopes(scopes)
                 .WithParent(parent);
         }
@@ -195,9 +188,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         internal override ApiEvent.ApiIds CalculateApiEventId()

@@ -39,35 +39,20 @@ namespace Microsoft.Identity.Client.ApiConfig
     public abstract class AbstractClientAppBaseAcquireTokenParameterBuilder<T> : AbstractAcquireTokenParameterBuilder<T>
         where T : AbstractAcquireTokenParameterBuilder<T>
     {
-        /// <summary>
-        /// Constructor of base class for parameter builders common to public client application and confidential
-        /// client application token acquisition operations
-        /// </summary>
-        /// <param name="clientApplicationBase"></param>
-        protected AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
+        internal AbstractClientAppBaseAcquireTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
         {
-            ClientApplicationBase = clientApplicationBase;
+            ClientApplicationBaseExecutor = clientApplicationBaseExecutor;
         }
 
-        /// <summary>
-        /// Affected application
-        /// </summary>
-        protected IClientApplicationBase ClientApplicationBase { get; }
+        internal IClientApplicationBaseExecutor ClientApplicationBaseExecutor { get; }
 
-        internal abstract Task<AuthenticationResult> ExecuteAsync(
-            IClientApplicationBaseExecutor executor,
-            CancellationToken cancellationToken);
+        internal abstract Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public override Task<AuthenticationResult> ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (ClientApplicationBase is IClientApplicationBaseExecutor executor)
-            {
-                ValidateAndCalculateApiId();
-                return ExecuteAsync(executor, cancellationToken);
-            }
-
-            throw new InvalidOperationException(CoreErrorMessages.ClientApplicationBaseExecutorNotImplemented);
+            ValidateAndCalculateApiId();
+            return ExecuteInternalAsync(cancellationToken);
         }
     }
 }
