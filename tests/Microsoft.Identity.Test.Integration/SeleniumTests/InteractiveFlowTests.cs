@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public class InteractiveFlowTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
-        private static readonly string[] _scopes = new[] { "https://microsoftgraph.chinacloudapi.cn/.default" };
+        private static readonly string[] _scopes = new[] { CloudConfigurationProvider.Scopes };
 
         #region MSTest Hooks
         /// <summary>

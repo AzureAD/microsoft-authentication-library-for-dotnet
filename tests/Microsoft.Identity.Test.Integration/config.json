@@ -1,0 +1,9 @@
+{
+  "CloudType": "ChinaCloud",
+
+  "ChinaCloud": {
+    "CloudType": "AzureChinaCloud",
+    "Authority": "https://login.chinacloudapi.cn/common",
+    "Scopes": "https://microsoftgraph.chinacloudapi.cn/.default"
+  }
+}
