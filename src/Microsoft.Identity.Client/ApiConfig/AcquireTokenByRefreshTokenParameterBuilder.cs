@@ -43,23 +43,17 @@ namespace Microsoft.Identity.Client.ApiConfig
         private AcquireTokenByRefreshTokenParameters Parameters { get; } = new AcquireTokenByRefreshTokenParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBase clientApplicationBase)
-            : base(clientApplicationBase)
+        internal AcquireTokenByRefreshTokenParameterBuilder(IClientApplicationBaseExecutor clientApplicationBaseExecutor)
+            : base(clientApplicationBaseExecutor)
         {
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="clientApplicationBase"></param>
-        /// <param name="scopes"></param>
-        /// <param name="refreshToken"></param>
-        /// <returns></returns>
         internal static AcquireTokenByRefreshTokenParameterBuilder Create(
-            IClientApplicationBase clientApplicationBase,
+            IClientApplicationBaseExecutor clientApplicationBaseExecutor,
             IEnumerable<string> scopes,
             string refreshToken)
         {
-            return new AcquireTokenByRefreshTokenParameterBuilder(clientApplicationBase)
+            return new AcquireTokenByRefreshTokenParameterBuilder(clientApplicationBaseExecutor)
                    .WithScopes(scopes).WithRefreshToken(refreshToken);
         }
 
@@ -70,11 +64,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(
-            IClientApplicationBaseExecutor executor,
-            CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return ClientApplicationBaseExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />

@@ -47,16 +47,16 @@ namespace Microsoft.Identity.Client.ApiConfig
     {
         private GetAuthorizationRequestUrlParameters Parameters { get; } = new GetAuthorizationRequestUrlParameters();
 
-        internal GetAuthorizationRequestUrlParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
-            : base(confidentialClientApplication)
+        internal GetAuthorizationRequestUrlParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationexecutor)
+            : base(confidentialClientApplicationexecutor)
         {
         }
 
         internal static GetAuthorizationRequestUrlParameterBuilder Create(
-            IConfidentialClientApplication confidentialClientApplication,
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes)
         {
-            return new GetAuthorizationRequestUrlParameterBuilder(confidentialClientApplication).WithScopes(scopes);
+            return new GetAuthorizationRequestUrlParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
             throw new InvalidOperationException("This is a developer BUG.  This should never get executed.");
         }
@@ -116,14 +116,8 @@ namespace Microsoft.Identity.Client.ApiConfig
             // This method is marked "public new" because it only differs in return type from the base class
             // ExecuteAsync() and we need this one to return Uri and not AuthenticationResult.
 
-            if (ConfidentialClientApplication is IConfidentialClientApplicationExecutor executor)
-            {
-                ValidateAndCalculateApiId();
-                return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
-            }
-
-            throw new InvalidOperationException(
-                "ConfidentialClientApplication implementation does not implement IConfidentialClientApplicationExecutor.");
+            ValidateAndCalculateApiId();
+            return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />

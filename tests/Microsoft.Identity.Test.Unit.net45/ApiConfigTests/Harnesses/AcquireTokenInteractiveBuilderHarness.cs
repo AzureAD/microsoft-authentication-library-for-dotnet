@@ -44,6 +44,8 @@ namespace Microsoft.Identity.Test.Unit.ApiConfigTests.Harnesses
         public AcquireTokenInteractiveParameters InteractiveParametersReceived { get; private set; }
         public IPublicClientApplication ClientApplication { get; private set; }
 
+        public IPublicClientApplicationExecutor Executor => (IPublicClientApplicationExecutor)ClientApplication;
+
         public async Task SetupAsync()
         {
             ClientApplication = Substitute.For<IPublicClientApplication, IPublicClientApplicationExecutor>();

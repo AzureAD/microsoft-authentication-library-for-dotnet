@@ -45,21 +45,16 @@ namespace Microsoft.Identity.Client.ApiConfig
         private AcquireTokenForClientParameters Parameters { get; } = new AcquireTokenForClientParameters();
 
         /// <inheritdoc />
-        internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplication confidentialClientApplication)
-            : base(confidentialClientApplication)
+        internal AcquireTokenForClientParameterBuilder(IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor)
+            : base(confidentialClientApplicationExecutor)
         {
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="confidentialClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <returns></returns>
         internal static AcquireTokenForClientParameterBuilder Create(
-            IConfidentialClientApplication confidentialClientApplication,
+            IConfidentialClientApplicationExecutor confidentialClientApplicationExecutor,
             IEnumerable<string> scopes)
         {
-            return new AcquireTokenForClientParameterBuilder(confidentialClientApplication).WithScopes(scopes);
+            return new AcquireTokenForClientParameterBuilder(confidentialClientApplicationExecutor).WithScopes(scopes);
         }
 
         /// <summary>
@@ -94,9 +89,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IConfidentialClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return ConfidentialClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />

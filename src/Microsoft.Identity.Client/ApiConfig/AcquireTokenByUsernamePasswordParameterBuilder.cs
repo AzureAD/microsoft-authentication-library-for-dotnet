@@ -43,26 +43,18 @@ namespace Microsoft.Identity.Client.ApiConfig
     {
         private AcquireTokenByUsernamePasswordParameters Parameters { get; } = new AcquireTokenByUsernamePasswordParameters();
 
-        /// <inheritdoc />
-        internal AcquireTokenByUsernamePasswordParameterBuilder(IPublicClientApplication publicClientApplication)
-            : base(publicClientApplication)
+        internal AcquireTokenByUsernamePasswordParameterBuilder(IPublicClientApplicationExecutor publicClientApplicationExecutor)
+            : base(publicClientApplicationExecutor)
         {
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="publicClientApplication"></param>
-        /// <param name="scopes"></param>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
-        /// <returns></returns>
         internal static AcquireTokenByUsernamePasswordParameterBuilder Create(
-            IPublicClientApplication publicClientApplication,
+            IPublicClientApplicationExecutor publicClientApplicationExecutor,
             IEnumerable<string> scopes,
             string username,
             SecureString password)
         {
-            return new AcquireTokenByUsernamePasswordParameterBuilder(publicClientApplication)
+            return new AcquireTokenByUsernamePasswordParameterBuilder(publicClientApplicationExecutor)
                    .WithScopes(scopes).WithUsername(username).WithPassword(password);
         }
 
@@ -79,9 +71,9 @@ namespace Microsoft.Identity.Client.ApiConfig
         }
 
         /// <inheritdoc />
-        internal override Task<AuthenticationResult> ExecuteAsync(IPublicClientApplicationExecutor executor, CancellationToken cancellationToken)
+        internal override Task<AuthenticationResult> ExecuteInternalAsync(CancellationToken cancellationToken)
         {
-            return executor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
+            return PublicClientApplicationExecutor.ExecuteAsync(CommonParameters, Parameters, cancellationToken);
         }
 
         /// <inheritdoc />
