@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8672FC71-00DE-491D-BCEB-101A2A7887E6}</ProjectGuid>
+    <ProjectGuid>{4DDB6B3A-F95A-4F34-B0AE-E3C909D68A11}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>CommonCache.Test.MsalV2</RootNamespace>
-    <AssemblyName>CommonCache.Test.MsalV2</AssemblyName>
+    <RootNamespace>CommonCache.Test.AdalV5</RootNamespace>
+    <AssemblyName>CommonCache.Test.AdalV5</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>../../../build/MSAL.snk</AssemblyOriginatorKeyFile>
@@ -41,11 +41,8 @@
     <PackageReference Include="CommandLineParser">
       <Version>2.4.3</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Identity.Client">
-      <Version>2.7.1</Version>
-    </PackageReference>
     <PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory">
-      <Version>4.5.1</Version>
+      <Version>5.0.0-preview</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.1</Version>
@@ -53,7 +50,10 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,7 +62,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FileBasedTokenCacheHelper.cs" />
+    <Compile Include="FileBasedTokenCache.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -71,10 +71,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Microsoft.Identity.Test.LabInfrastructure\Microsoft.Identity.Test.LabInfrastructure.csproj">
-      <Project>{e22918a8-8fe6-47d2-b65e-34436918c5d7}</Project>
-      <Name>Microsoft.Identity.Test.LabInfrastructure</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CommonCache.Test.Common\CommonCache.Test.Common.csproj">
       <Project>{408dcc1c-e810-4f9f-94ee-8421715a3661}</Project>
       <Name>CommonCache.Test.Common</Name>

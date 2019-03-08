@@ -35,7 +35,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.Common
 {
     /// <summary>
     ///     A collection of Process-based utility functions.

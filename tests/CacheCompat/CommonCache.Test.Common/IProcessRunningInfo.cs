@@ -26,58 +26,32 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.Common
 {
-    public sealed class ProcessRunningInfo : IProcessRunningInfo
+    /// <summary>
+    ///     Represents information about a running process.
+    /// </summary>
+    public interface IProcessRunningInfo : IDisposable
     {
-        private readonly Process _process;
-        private bool _isDisposed;
+        /// <summary>
+        ///     Gets a value indicating the process exit code.
+        /// </summary>
+        int ExitCode { get; }
 
-        public ProcessRunningInfo(Process process, bool shouldTerminateProcessOnDispose)
-        {
-            _process = process;
-            _process.Exited += (_, args) => RaiseHasExited(args);
-            _isDisposed = false;
-            ShouldTerminateProcessOnDispose = shouldTerminateProcessOnDispose;
-        }
+        /// <summary>
+        ///     Gets a value indicating whether the process has exited.
+        /// </summary>
+        bool HasExited { get; }
 
-        public bool ShouldTerminateProcessOnDispose { get; }
-        public int ExitCode => _process.ExitCode;
-        public bool HasExited => _process.HasExited;
-        public int Id => _process.Id;
-        public event EventHandler Exited;
+        /// <summary>
+        ///     Gets the process id.
+        /// </summary>
+        int Id { get; }
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        ~ProcessRunningInfo()
-        {
-            Dispose(false);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            if (disposing && ShouldTerminateProcessOnDispose)
-            {
-                _process.Dispose();
-            }
-
-            _isDisposed = true;
-        }
-
-        private void RaiseHasExited(EventArgs args)
-        {
-            Exited?.Invoke(this, args);
-        }
+        /// <summary>
+        ///     Event that is risen when a process exits.
+        /// </summary>
+        event EventHandler Exited;
     }
 }

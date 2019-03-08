@@ -40,15 +40,24 @@ namespace CommonCache.Test.MsalV2
     public static class FileBasedTokenCacheHelper
     {
         private static readonly object s_fileLock = new object();
-        private static CacheStorageType s_cacheStorage = CacheStorageType.None;
-        public static string AdalV3CacheFileName { get; private set; }
-        public static string UnifiedCacheFileName { get; private set; }
+        private static CacheStorageType s_cacheStorageType = CacheStorageType.None;
 
-        public static void ConfigureUserCache(CacheStorageType cacheStorageType, TokenCache tokenCache, string adalV3CacheFileName, string unifiedCacheFileName)
+        public static string MsalV2CacheFileName { get; private set; }
+        public static string MsalV3CacheFileName { get; private set; }
+        public static string AdalV3CacheFileName { get; private set; }
+
+        public static void ConfigureUserCache(
+            CacheStorageType cacheStorageType,
+            ITokenCache tokenCache,
+            string adalV3CacheFileName,
+            string msalV2CacheFileName,
+            string msalV3CacheFileName)
         {
-            s_cacheStorage = cacheStorageType;
+            s_cacheStorageType = cacheStorageType;
+            MsalV2CacheFileName = msalV2CacheFileName;
+            MsalV3CacheFileName = msalV3CacheFileName;
             AdalV3CacheFileName = adalV3CacheFileName;
-            UnifiedCacheFileName = unifiedCacheFileName;
+
             if (tokenCache != null)
             {
                 tokenCache.SetBeforeAccess(BeforeAccessNotification);
@@ -61,9 +70,21 @@ namespace CommonCache.Test.MsalV2
             lock (s_fileLock)
             {
                 var adalv3State = CacheFileUtils.ReadFromFileIfExists(AdalV3CacheFileName);
-                var unifiedState = CacheFileUtils.ReadFromFileIfExists(UnifiedCacheFileName);
+                var msalv2State = CacheFileUtils.ReadFromFileIfExists(MsalV2CacheFileName);
+                var msalv3State = CacheFileUtils.ReadFromFileIfExists(MsalV3CacheFileName);
 
-                args.TokenCache.DeserializeUnifiedAndAdalCache(new CacheData { AdalV3State = adalv3State, UnifiedState = unifiedState });
+                if (adalv3State != null)
+                {
+                    args.TokenCache.DeserializeAdalV3(adalv3State);
+                }
+                if (msalv2State != null)
+                {
+                    args.TokenCache.DeserializeMsalV2(msalv2State);
+                }
+                if (msalv3State != null)
+                {
+                    args.TokenCache.DeserializeMsalV3(msalv3State);
+                }
             }
         }
 
@@ -74,20 +95,27 @@ namespace CommonCache.Test.MsalV2
             {
                 lock (s_fileLock)
                 {
-                    var cacheData = args.TokenCache.SerializeUnifiedAndAdalCache();
+                    var adalV3State = args.TokenCache.SerializeAdalV3();
+                    var msalV2State = args.TokenCache.SerializeMsalV2();
+                    var msalV3State = args.TokenCache.SerializeMsalV3();
 
                     // reflect changes in the persistent store
-                    if ((s_cacheStorage & CacheStorageType.Adal) == CacheStorageType.Adal)
+                    if ((s_cacheStorageType & CacheStorageType.Adal) == CacheStorageType.Adal)
                     {
                         if (!string.IsNullOrWhiteSpace(AdalV3CacheFileName))
                         {
-                            CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFileName, cacheData.AdalV3State);
+                            CacheFileUtils.WriteToFileIfNotNull(AdalV3CacheFileName, adalV3State);
                         }
                     }
 
-                    if ((s_cacheStorage & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
+                    if ((s_cacheStorageType & CacheStorageType.MsalV2) == CacheStorageType.MsalV2)
                     {
-                        CacheFileUtils.WriteToFileIfNotNull(UnifiedCacheFileName, cacheData.UnifiedState);
+                        CacheFileUtils.WriteToFileIfNotNull(MsalV2CacheFileName, msalV2State);
+                    }
+
+                    if ((s_cacheStorageType & CacheStorageType.MsalV3) == CacheStorageType.MsalV3)
+                    {
+                        CacheFileUtils.WriteToFileIfNotNull(MsalV3CacheFileName, msalV3State);
                     }
                 }
             }

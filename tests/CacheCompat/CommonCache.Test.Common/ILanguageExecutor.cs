@@ -25,33 +25,20 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.Common
 {
-    /// <summary>
-    ///     Represents information about a running process.
-    /// </summary>
-    public interface IProcessRunningInfo : IDisposable
+    public interface ILanguageExecutor
     {
-        /// <summary>
-        ///     Gets a value indicating the process exit code.
-        /// </summary>
-        int ExitCode { get; }
-
-        /// <summary>
-        ///     Gets a value indicating whether the process has exited.
-        /// </summary>
-        bool HasExited { get; }
-
-        /// <summary>
-        ///     Gets the process id.
-        /// </summary>
-        int Id { get; }
-
-        /// <summary>
-        ///     Event that is risen when a process exits.
-        /// </summary>
-        event EventHandler Exited;
+        Task<ProcessRunResults> ExecuteAsync(
+            string clientId,
+            string authority,
+            string scope,
+            string username,
+            string password,
+            string cacheFilePath,
+            CancellationToken cancellationToken);
     }
 }

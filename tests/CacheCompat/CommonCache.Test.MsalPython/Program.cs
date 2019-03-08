@@ -25,45 +25,43 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using CommonCache.Test.Common;
 
-namespace CommonCache.Test.Unit.Utils
+namespace CommonCache.Test.MsalPython
 {
-    public class ProcessRunException : Exception
+    public static class Program
     {
-        public ProcessRunException()
+        public static void Main(string[] args)
         {
+            new MsalPythonCacheExecutor().Execute(args);
         }
 
-        public ProcessRunException(
-            string fileName,
-            string arguments,
-            int processExitCode,
-            string processStandardOutput,
-            string processStandardError)
-            : base($"Process {fileName} has exited with code {processExitCode}")
+        private class MsalPythonCacheExecutor : AbstractCacheExecutor
         {
-            FileName = fileName;
-            Arguments = arguments;
-            ProcessExitCode = processExitCode;
-            ProcessStandardOutput = processStandardOutput;
-            ProcessStandardError = processStandardError;
-        }
+            protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
+            {
+                var v1App = PreRegisteredApps.CommonCacheTestV1;
+                string resource = PreRegisteredApps.MsGraph;
+                string scope = resource + "/user.read";
 
-        public ProcessRunException(string message)
-            : base(message)
-        {
-        }
+                CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
 
-        public ProcessRunException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
+                string scriptFilePath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "TestMsalPython.py");
 
-        public string FileName { get; }
-        public string Arguments { get; }
-        public int ProcessExitCode { get; }
-        public string ProcessStandardOutput { get; }
-        public string ProcessStandardError { get; }
+                return await LanguageRunner.ExecuteAsync(
+                    new PythonLanguageExecutor(scriptFilePath),
+                    v1App.ClientId,
+                        v1App.Authority,
+                        scope,
+                        options.Username,
+                        options.UserPassword,
+                        CommonCacheTestUtils.MsalV3CacheFilePath,
+                        CancellationToken.None).ConfigureAwait(false);
+            }
+        }
     }
 }

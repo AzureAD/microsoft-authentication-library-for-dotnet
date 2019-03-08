@@ -26,34 +26,58 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using CommandLine;
+using System.Diagnostics;
 
 namespace CommonCache.Test.Common
 {
-    [Flags]
-    public enum CacheStorageType
+    public sealed class ProcessRunningInfo : IProcessRunningInfo
     {
-        None = 0,
-        Adal = 1,
-        MsalV2 = 2,
-        MsalV3 = 4
-    }
+        private readonly Process _process;
+        private bool _isDisposed;
 
-    // ReSharper disable once ClassNeverInstantiated.Global
-    public class CommandLineOptions
-    {
-        [Option("resultsFilePath", Required = true, HelpText = "Path to write output results file.")]
-        public string ResultsFilePath { get; set; }
+        public ProcessRunningInfo(Process process, bool shouldTerminateProcessOnDispose)
+        {
+            _process = process;
+            _process.Exited += (_, args) => RaiseHasExited(args);
+            _isDisposed = false;
+            ShouldTerminateProcessOnDispose = shouldTerminateProcessOnDispose;
+        }
 
-        [Option("userName", Required = true, HelpText = "Username to login with.")]
-        public string Username{ get; set; }
+        public bool ShouldTerminateProcessOnDispose { get; }
+        public int ExitCode => _process.ExitCode;
+        public bool HasExited => _process.HasExited;
+        public int Id => _process.Id;
+        public event EventHandler Exited;
 
-        [Option("userPassword", Required = true, HelpText = "Password to login with.")]
-        public string UserPassword { get; set; }
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-        [Option("cacheStorageType", Required = true, HelpText = "Cache storage type(s) supported.")]
-        public int CacheStorageTypeInt {get; set;}
+        ~ProcessRunningInfo()
+        {
+            Dispose(false);
+        }
 
-        public CacheStorageType CacheStorageType => (CacheStorageType)CacheStorageTypeInt;
+        private void Dispose(bool disposing)
+        {
+            if (_isDisposed)
+            {
+                return;
+            }
+
+            if (disposing && ShouldTerminateProcessOnDispose)
+            {
+                _process.Dispose();
+            }
+
+            _isDisposed = true;
+        }
+
+        private void RaiseHasExited(EventArgs args)
+        {
+            Exited?.Invoke(this, args);
+        }
     }
 }

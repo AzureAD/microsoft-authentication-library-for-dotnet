@@ -26,65 +26,71 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
-using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
-namespace CommonCache.Test.MsalV2
+namespace CommonCache.Test.AdalV5
 {
     public static class Program
     {
         public static void Main(string[] args)
         {
-            new MsalV2CacheExecutor().Execute(args);
+            new AdalV5CacheExecutor().Execute(args);
         }
 
-        private class MsalV2CacheExecutor : AbstractCacheExecutor
+        private class AdalV5CacheExecutor : AbstractCacheExecutor
         {
             /// <inheritdoc />
             protected override async Task<CacheExecutorResults> InternalExecuteAsync(CommandLineOptions options)
             {
-                var v1App = PreRegisteredApps.CommonCacheTestV1;
+                var app = PreRegisteredApps.CommonCacheTestV1;
                 string resource = PreRegisteredApps.MsGraph;
-                string[] scopes = new[]
-                {
-                    resource + "/user.read"
-                };
 
-                Logger.LogCallback = (LogLevel level, string message, bool containsPii) =>
+                LoggerCallbackHandler.LogCallback = (LogLevel level, string message, bool containsPii) =>
                 {
                     Console.WriteLine("{0}: {1}", level, message);
                 };
 
                 CommonCacheTestUtils.EnsureCacheFileDirectoryExists();
-
-                var tokenCache = new TokenCache();
-
-                FileBasedTokenCacheHelper.ConfigureUserCache(
+                var tokenCache = new FileBasedTokenCache(
                     options.CacheStorageType,
-                    tokenCache,
                     CommonCacheTestUtils.AdalV3CacheFilePath,
-                    CommonCacheTestUtils.MsalV2CacheFilePath);
+                    CommonCacheTestUtils.MsalV2CacheFilePath,
+                    CommonCacheTestUtils.MsalV3CacheFilePath);
+                
+                var authenticationContext = new AuthenticationContext(app.Authority, tokenCache);
 
-                var app = new PublicClientApplication(v1App.ClientId, v1App.Authority, tokenCache)
+                var items = authenticationContext.TokenCache.ReadItems().ToList();
+                Console.WriteLine("here come the cache items!: {0}", tokenCache.Count);
+                foreach (var item in items)
                 {
-                    ValidateAuthority = true
-                };
+                    Console.WriteLine("here's a cache item!");
+                    Console.WriteLine(item.DisplayableId);
+                }
 
-                IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+                Console.WriteLine("Calling ATS with username: {0}", options.Username);
+
                 try
                 {
-                    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false).ConfigureAwait(false);
-                    Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
-                    return new CacheExecutorResults(result.Account.Username, true);
+                    var result = await authenticationContext.AcquireTokenSilentAsync(
+                        resource, 
+                        app.ClientId, 
+                        new UserIdentifier(options.Username, UserIdentifierType.RequiredDisplayableId)).ConfigureAwait(false);
+
+                    Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' from the cache");
+                    return new CacheExecutorResults(result.UserInfo.DisplayableId, true);
                 }
-                catch (MsalUiRequiredException)
+                catch (AdalSilentTokenAcquisitionException)
                 {
-                    var result = await app.AcquireTokenByUsernamePasswordAsync(scopes, options.Username, options.UserPassword.ToSecureString()).ConfigureAwait(false);
-                    Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
-                    return new CacheExecutorResults(result.Account.Username, false);
+                    var result = await authenticationContext.AcquireTokenAsync(
+                                     resource,
+                                     app.ClientId,
+                                     new UserPasswordCredential(options.Username, options.UserPassword)).ConfigureAwait(false);
+
+                    Console.WriteLine($"got token for '{result.UserInfo.DisplayableId}' without the cache");
+                    return new CacheExecutorResults(result.UserInfo.DisplayableId, false);
                 }
             }
         }

@@ -10,6 +10,7 @@ indent_style = space
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+indent_size = 4
 
 # Code files
 [*.{cs,csx}]
@@ -22,6 +23,10 @@ indent_size = 2
 
 # XML config files
 [*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
+indent_size = 2
+
+# XML files
+[*.xml]
 indent_size = 2
 
 # JSON files
@@ -78,9 +83,6 @@ dotnet_style_prefer_conditional_expression_over_return = true:silent
 ###############################
 # Naming Conventions          #
 ###############################
-
-# Style Definitions
-dotnet_naming_style.pascal_case_style.capitalization             = pascal_case
 
 # Non-private static fields are PascalCase
 dotnet_naming_rule.non_private_static_fields_should_be_pascal_case.severity = suggestion
