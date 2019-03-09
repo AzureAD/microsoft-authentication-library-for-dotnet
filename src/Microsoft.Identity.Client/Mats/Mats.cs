@@ -138,6 +138,17 @@ namespace Microsoft.Identity.Client.Mats
             return _actionStore.StartAdalAction((Scenario)scenario, correlationId, resource ?? string.Empty);
         }
 
+        public void EndAction(IActionHandle action, AuthenticationResult authenticationResult)
+        {
+            // todo(mats): map contents of authentication result to appropriate telemetry values.
+            AuthOutcome outcome = AuthOutcome.Succeeded;
+            ErrorSource errorSource = ErrorSource.Service;
+            string error = string.Empty;
+            string errorDescription = string.Empty;
+
+            EndAction(action, outcome, errorSource, error, errorDescription);
+        }
+
         public void EndAction(IActionHandle action, AuthOutcome outcome, ErrorSource errorSource, string error, string errorDescription)
         {
             _actionStore.EndAdalAction((AdalAction)action, outcome, errorSource, error, errorDescription);

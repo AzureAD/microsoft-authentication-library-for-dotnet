@@ -9,15 +9,14 @@ using Microsoft.Identity.Client.Mats;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal class MatsPublicClientExecutor : IPublicClientApplicationExecutor
+    internal class MatsPublicClientExecutor : AbstractMatsExecutor, IPublicClientApplicationExecutor
     {
         private readonly IPublicClientApplicationExecutor _executor;
-        private readonly IMats _mats;
 
         public MatsPublicClientExecutor(IPublicClientApplicationExecutor executor, IMats mats)
+            : base(mats)
         {
             _executor = executor;
-            _mats = mats;
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -25,22 +24,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenInteractiveParameters interactiveParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, interactiveParameters, cancellationToken);
-
-            // TODO(mats): Wrap calls with MATS MsalAction calls to generate the appropriate telemetry
-            //var actionHandle = _mats.StartAction(null, commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
-
-            //try
-            //{
-            //    var result = await _executor.ExecuteAsync(commonParameters, interactiveParameters, cancellationToken).ConfigureAwait(false);
-            //    _mats.EndAction(actionHandle, AuthOutcome.Succeeded, ErrorSource.None, null, null);
-            //    return result;
-            //}
-            //catch (Exception ex)
-            //{
-            //    _mats.EndAction(actionHandle, AuthOutcome.Failed, ErrorSource.Client, ex.Message, ex.Message);
-            //    throw;
-            //}
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, interactiveParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -48,7 +34,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenWithDeviceCodeParameters withDeviceCodeParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, withDeviceCodeParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, withDeviceCodeParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -56,7 +44,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, integratedWindowsAuthParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, integratedWindowsAuthParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -64,7 +54,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByUsernamePasswordParameters usernamePasswordParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, usernamePasswordParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, usernamePasswordParameters, cancellationToken).ConfigureAwait(false));
         }
     }
 }

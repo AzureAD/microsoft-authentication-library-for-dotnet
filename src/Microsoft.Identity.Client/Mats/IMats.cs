@@ -58,6 +58,10 @@ namespace Microsoft.Identity.Client.Mats
             string resource);
 
         void EndAction(
+            IActionHandle action,
+            AuthenticationResult authenticationResult);
+
+        void EndAction(
             IActionHandle action, 
             AuthOutcome outcome, 
             ErrorSource errorSource, 

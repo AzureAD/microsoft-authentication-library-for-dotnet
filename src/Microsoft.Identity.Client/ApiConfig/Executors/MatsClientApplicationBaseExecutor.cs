@@ -9,15 +9,14 @@ using Microsoft.Identity.Client.Mats;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal class MatsClientApplicationBaseExecutor : IClientApplicationBaseExecutor
+    internal class MatsClientApplicationBaseExecutor : AbstractMatsExecutor, IClientApplicationBaseExecutor
     {
         private readonly IClientApplicationBaseExecutor _executor;
-        private readonly IMats _mats;
 
         public MatsClientApplicationBaseExecutor(IClientApplicationBaseExecutor executor, IMats mats)
+            : base(mats)
         {
             _executor = executor;
-            _mats = mats;
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -25,7 +24,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenSilentParameters silentParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, silentParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, silentParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -33,7 +34,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByRefreshTokenParameters byRefreshTokenParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, byRefreshTokenParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, byRefreshTokenParameters, cancellationToken).ConfigureAwait(false));
         }
     }
 }

@@ -9,15 +9,14 @@ using Microsoft.Identity.Client.Mats;
 
 namespace Microsoft.Identity.Client.ApiConfig.Executors
 {
-    internal class MatsConfidentialClientExecutor : IConfidentialClientApplicationExecutor
+    internal class MatsConfidentialClientExecutor : AbstractMatsExecutor, IConfidentialClientApplicationExecutor
     {
         private readonly IConfidentialClientApplicationExecutor _executor;
-        private readonly IMats _mats;
 
         public MatsConfidentialClientExecutor(IConfidentialClientApplicationExecutor executor, IMats mats)
+            : base(mats)
         {
             _executor = executor;
-            _mats = mats;
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -25,7 +24,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByAuthorizationCodeParameters authorizationCodeParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, authorizationCodeParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, authorizationCodeParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -33,7 +34,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenForClientParameters clientParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, clientParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, clientParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<AuthenticationResult> ExecuteAsync(
@@ -41,7 +44,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenOnBehalfOfParameters onBehalfOfParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, onBehalfOfParameters, cancellationToken);
+            return ExecuteMatsAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, onBehalfOfParameters, cancellationToken).ConfigureAwait(false));
         }
 
         public Task<Uri> ExecuteAsync(
@@ -49,7 +54,9 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             GetAuthorizationRequestUrlParameters authorizationRequestUrlParameters,
             CancellationToken cancellationToken)
         {
-            return _executor.ExecuteAsync(commonParameters, authorizationRequestUrlParameters, cancellationToken);
+            return ExecuteMatsToUriAsync(
+                commonParameters,
+                async () => await _executor.ExecuteAsync(commonParameters, authorizationRequestUrlParameters, cancellationToken).ConfigureAwait(false));
         }
     }
 }
