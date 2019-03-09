@@ -32,9 +32,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             }
             catch (Exception ex)
             {
-                // todo(mats):  add an EndAction(actionHandle, ex) method so we can do switch logic on the exception type, error codes, etc to properly
-                // fill in the end action data?  this would be nice for unit testing as well.
-                _mats.EndAction(actionHandle, AuthOutcome.Failed, ErrorSource.Client, ex.Message, ex.Message);
+                _mats.EndAction(actionHandle, ex);
                 throw;
             }
         }
@@ -53,7 +51,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             }
             catch (Exception ex)
             {
-                _mats.EndAction(actionHandle, AuthOutcome.Failed, ErrorSource.Client, ex.Message, ex.Message);
+                _mats.EndAction(actionHandle, ex);
                 throw;
             }
         }

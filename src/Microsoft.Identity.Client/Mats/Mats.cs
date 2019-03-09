@@ -28,7 +28,7 @@ namespace Microsoft.Identity.Client.Mats
             string dpti = platformProxy.GetDpti();
             string deviceNetworkState = platformProxy.GetDeviceNetworkState();
             int osPlatformCode = platformProxy.GetMatsOsPlatformCode();
-            
+
             bool enableAggregation = true;
             IEventFilter eventFilter = new EventFilter(enableAggregation);
             var errorStore = new ErrorStore();
@@ -52,20 +52,20 @@ namespace Microsoft.Identity.Client.Mats
             }
 
             var actionStore = new ActionStore(
-                TimeConstants.ActionTimeoutMilliseconds, 
-                TimeConstants.AggregationWindowMilliseconds, 
+                TimeConstants.ActionTimeoutMilliseconds,
+                TimeConstants.AggregationWindowMilliseconds,
                 errorStore,
                 eventFilter,
-                allowedScopes ,
+                allowedScopes,
                 allowedResources);
 
             var contextStore = ContextStore.CreateContextStore(
-                matsConfig.AudienceType, 
-                matsConfig.AppName, 
-                matsConfig.AppVer, 
-                dpti, 
-                deviceNetworkState, 
-                matsConfig.SessionId, 
+                matsConfig.AudienceType,
+                matsConfig.AppName,
+                matsConfig.AppVer,
+                dpti,
+                deviceNetworkState,
+                matsConfig.SessionId,
                 osPlatformCode);
 
             var dispatcher = new TelemetryDispatcher(matsConfig.DispatchAction);
@@ -155,6 +155,39 @@ namespace Microsoft.Identity.Client.Mats
             _uploader.Upload(GetEventsForUpload());
         }
 
+        public void EndAction(IActionHandle action, Exception ex)
+        {
+            AuthOutcome outcome = AuthOutcome.Failed;
+            ErrorSource errorSource = ErrorSource.AuthSdk;
+            string error = ex.Message;
+            string errorDescription = ex.Message;
+
+            switch (ex)
+            {
+            case MsalUiRequiredException uiEx:
+                errorSource = ErrorSource.Service;
+                error = uiEx.ErrorCode;
+                break;
+            case MsalServiceException svcEx:
+                errorSource = ErrorSource.Service;
+                error = svcEx.ErrorCode;
+                break;
+            case MsalClientException cliEx:
+                errorSource = ErrorSource.Client;
+                error = cliEx.ErrorCode;
+                break;
+            case MsalException msalEx:
+                errorSource = ErrorSource.AuthSdk;
+                error = msalEx.ErrorCode;
+                break;
+            default:
+                errorSource = ErrorSource.AuthSdk;
+                break;
+            }
+
+            EndAction(action, outcome, errorSource, error, errorDescription);
+        }
+
         #region IDisposable Support
         private bool _disposedValue = false; // To detect redundant calls
 
@@ -189,7 +222,7 @@ namespace Microsoft.Identity.Client.Mats
 
             _uploader.Upload(errorPropertyBagContents);
         }
-        
+
         private void UploadCompletedEvents()
         {
             _uploader.Upload(GetEventsForUpload());
@@ -234,7 +267,7 @@ namespace Microsoft.Identity.Client.Mats
                     {
                         retval.Add(scenarioEvent.GetContents());
                     }
-                    }
+                }
             }
 
             return retval;

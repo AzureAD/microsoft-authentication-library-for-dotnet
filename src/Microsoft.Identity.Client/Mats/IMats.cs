@@ -62,6 +62,10 @@ namespace Microsoft.Identity.Client.Mats
             AuthenticationResult authenticationResult);
 
         void EndAction(
+            IActionHandle action,
+            Exception ex);
+
+        void EndAction(
             IActionHandle action, 
             AuthOutcome outcome, 
             ErrorSource errorSource, 
