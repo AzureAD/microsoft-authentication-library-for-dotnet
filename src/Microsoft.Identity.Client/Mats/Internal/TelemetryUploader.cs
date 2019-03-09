@@ -3,17 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal class TelemetryUploader : IUploader
     {
         private readonly ITelemetryDispatcher _telemetryDispatcher;
+        private readonly IPlatformProxy _platformProxy;
 
-        public TelemetryUploader(ITelemetryDispatcher dispatcher, string appName)
+        public TelemetryUploader(ITelemetryDispatcher dispatcher, IPlatformProxy platformProxy, string appName)
         {
             _telemetryDispatcher = dispatcher;
+            _platformProxy = platformProxy;
             AppName = appName;
         }
 
@@ -28,7 +30,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
 
             foreach (var uploadEvent in uploadEvents)
             {
-                string name = UploadEventUtils.GetUploadEventName(uploadEvent.EventType, AppName);
+                string name = UploadEventUtils.GetUploadEventName(_platformProxy, uploadEvent.EventType, AppName);
                 var data = new MatsTelemetryData(name, uploadEvent);
                 _telemetryDispatcher.DispatchEvent(data);
             }

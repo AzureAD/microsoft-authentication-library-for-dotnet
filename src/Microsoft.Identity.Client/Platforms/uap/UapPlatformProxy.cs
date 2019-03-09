@@ -44,6 +44,7 @@ using String = System.String;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Windows.Foundation.Collections;
+using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.uap
 {
@@ -220,5 +221,26 @@ namespace Microsoft.Identity.Client.Platforms.uap
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats): 
+            return string.Empty;
+        }
+
+        public override string GetDpti()
+        {
+            // TODO(mats):  
+            return string.Empty;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            return MatsConverter.AsString(OsPlatform.Win32);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            return MatsConverter.AsInt(OsPlatform.Win32);
+        }
     }
 }

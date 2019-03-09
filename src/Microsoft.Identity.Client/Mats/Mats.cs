@@ -3,18 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Mats.Internal;
-using Microsoft.Identity.Client.Mats.Platform;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Mats
 {
-    internal enum AudienceType
-    {
-        PreProduction,
-        Production
-    }
-
     internal class Mats : IMats
     {
         private readonly bool _isTelemetryDisabled;
@@ -29,60 +23,29 @@ namespace Microsoft.Identity.Client.Mats
         private readonly bool _isScenarioUploadDisabled;
         private readonly object _lockObject = new object();
 
-        public static IMats CreateMats(
-            bool isTelemetryDisabled,
-            AudienceType audienceType, 
-            string appName, 
-            string appVer, 
-            string sessionId,
-            Action<IMatsTelemetryBatch> dispatchAction)
+        public static IMats CreateMats(IPlatformProxy platformProxy, IMatsConfig matsConfig)
         {
-            return CreateMatsWithScopesAndResources(
-                isTelemetryDisabled,
-                audienceType,
-                appName,
-                appVer,
-                sessionId,
-                dispatchAction,
-                null,
-                null);
-        }
-
-        public static IMats CreateMatsWithScopesAndResources(            
-            bool isTelemetryDisabled,
-            AudienceType audienceType,
-            string appName,
-            string appVer,
-            string sessionId,
-            Action<IMatsTelemetryBatch> dispatchAction,
-            IEnumerable<string> telemetryAllowedScopes,
-            IEnumerable<string> telemetryAllowedResources)
-        {
-            // TODO: replace with MSAL's existing PlatformProxyFactory...
-            var proxy = PlatformProxyFactory.CreatePlatformProxy();
-            string dpti = proxy.GetDpti();
-            string deviceNetworkState = proxy.GetDeviceNetworkState();
-            int osPlatformCode = proxy.GetOsPlatformCode();
+            string dpti = platformProxy.GetDpti();
+            string deviceNetworkState = platformProxy.GetDeviceNetworkState();
+            int osPlatformCode = platformProxy.GetMatsOsPlatformCode();
             
             bool enableAggregation = true;
             IEventFilter eventFilter = new EventFilter(enableAggregation);
-
             var errorStore = new ErrorStore();
-
             var scenarioStore = new ScenarioStore(TimeConstants.ScenarioTimeoutMilliseconds, errorStore);
 
             var allowedScopes = new HashSet<string>();
-            if (telemetryAllowedScopes != null)
+            if (matsConfig.AllowedScopes != null)
             {
-                foreach (string s in telemetryAllowedScopes)
+                foreach (string s in matsConfig.AllowedScopes)
                 {
                     allowedScopes.Add(s);
                 }
             }
             var allowedResources = new HashSet<string>();
-            if (telemetryAllowedResources != null)
+            if (matsConfig.AllowedResources != null)
             {
-                foreach (string s in telemetryAllowedResources)
+                foreach (string s in matsConfig.AllowedResources)
                 {
                     allowedResources.Add(s);
                 }
@@ -97,22 +60,22 @@ namespace Microsoft.Identity.Client.Mats
                 allowedResources);
 
             var contextStore = ContextStore.CreateContextStore(
-                audienceType, 
-                appName, 
-                appVer, 
+                matsConfig.AudienceType, 
+                matsConfig.AppName, 
+                matsConfig.AppVer, 
                 dpti, 
                 deviceNetworkState, 
-                sessionId, 
+                matsConfig.SessionId, 
                 osPlatformCode);
 
-            var dispatcher = new TelemetryDispatcher(dispatchAction);
-            IUploader uploader = new TelemetryUploader(dispatcher, appName);
+            var dispatcher = new TelemetryDispatcher(matsConfig.DispatchAction);
+            IUploader uploader = new TelemetryUploader(dispatcher, platformProxy, matsConfig.AppName);
 
             // it's this way in mats c++
             bool isScenarioUploadDisabled = true;
 
             return new Mats(
-                isTelemetryDisabled || !IsDeviceEnabled(audienceType, dpti),
+                !IsDeviceEnabled(matsConfig.AudienceType, dpti),
                 errorStore,
                 uploader,
                 eventFilter,
@@ -148,9 +111,9 @@ namespace Microsoft.Identity.Client.Mats
             _isScenarioUploadDisabled = isScenarioUploadDisabled;
         }
 
-        private static bool IsDeviceEnabled(AudienceType audienceType, string dpti)
+        private static bool IsDeviceEnabled(MatsAudienceType audienceType, string dpti)
         {
-            if (audienceType == AudienceType.PreProduction)
+            if (audienceType == MatsAudienceType.PreProduction)
             {
                 // Pre-production should never be sampled
                 return true;

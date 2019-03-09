@@ -63,17 +63,7 @@ namespace Microsoft.Identity.Client.Core
 
             if (config.MatsConfig != null)
             {
-                // TODO(mats): have CreateMats take an IMatsConfig
-                // Also need to wire up AudienceType to be public (rename to MatsAudienceType?)
-                // Also need to wire up public type for MatsTelemetryBatch callback into MatsConfig
-                // Do we need the "IsTelemetryDisabled" flag here?  Isn't the presence of creating this enough?
-                Mats = Client.Mats.Mats.CreateMats(
-                    false,
-                    AudienceType.PreProduction,
-                    config.MatsConfig.AppName,
-                    config.MatsConfig.AppVer,
-                    config.MatsConfig.SessionId,
-                    null);
+                Mats = Client.Mats.Mats.CreateMats(PlatformProxy, config.MatsConfig);
             }
         }
 

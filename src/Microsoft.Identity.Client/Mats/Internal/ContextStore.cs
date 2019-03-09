@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal class ContextStore
     {
         public static ContextStore CreateContextStore(
-            AudienceType audienceType,
+            MatsAudienceType audienceType,
             string appName,
             string appVersion,
             string dptiInternal,
@@ -25,7 +26,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
         }
 
         private ContextStore(
-            AudienceType audienceType,
+            MatsAudienceType audienceType,
             string appName,
             string appVersion,
             string dptiInternal,
@@ -42,7 +43,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             Platform = platform;
         }
 
-        public AudienceType AudienceType { get; }
+        public MatsAudienceType AudienceType { get; }
         public string AppName { get; }
         public string AppVersion { get; }
         public string DptiInternal { get; }

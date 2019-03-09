@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
@@ -18,6 +20,15 @@ namespace Microsoft.Identity.Client.Mats.Internal
     {
         AAD,
         MSA
+    }
+
+    internal enum OsPlatform
+    {
+        Win32,
+        Android,
+        Ios,
+        Mac,
+        Winrt
     }
 
     internal static class MatsConverter
@@ -139,19 +150,48 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        public static string AsString(AudienceType audience)
+        public static string AsString(MatsAudienceType audience)
         {
             switch (audience)
             {
-            case AudienceType.PreProduction:
+            case MatsAudienceType.PreProduction:
                 return "preproduction";
 
-            case AudienceType.Production:
+            case MatsAudienceType.Production:
                 return "production";
 
             default:
                 return "unknown";
             }
+        }
+
+        public static string AsString(OsPlatform osPlatform)
+        {
+            switch (osPlatform)
+            {
+            case OsPlatform.Win32:
+                return "win32";
+
+            case OsPlatform.Android:
+                return "android";
+
+            case OsPlatform.Ios:
+                return "ios";
+
+            case OsPlatform.Mac:
+                return "mac";
+
+            case OsPlatform.Winrt:
+                return "winrt";
+
+            default:
+                return "unknown";
+            }
+        }
+
+        public static int AsInt(OsPlatform osPlatform)
+        {
+            return Convert.ToInt32(osPlatform, CultureInfo.InvariantCulture);
         }
     }
 }

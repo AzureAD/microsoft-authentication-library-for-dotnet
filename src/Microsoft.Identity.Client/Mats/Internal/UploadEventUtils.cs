@@ -3,18 +3,16 @@
 
 using System;
 using System.Globalization;
-using Microsoft.Identity.Client.Mats.Platform;
+using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal static class UploadEventUtils
     {
-        public static string GetUploadEventName(EventType eventType, string appName)
+        public static string GetUploadEventName(IPlatformProxy platformProxy, EventType eventType, string appName)
         {
             string eventName = MatsConverter.AsString(eventType);
-
-            var proxy = PlatformProxyFactory.CreatePlatformProxy();
-            string osPlatform = proxy.GetOsPlatform();
+            string osPlatform = platformProxy.GetMatsOsPlatform();
 
             return GetUploadEventNameGeneric(
                 eventName.ToUpperInvariant(), 

@@ -162,5 +162,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         {
             return new NullTokenCacheBlobStorage();
         }
+
+        // MATS properties
+        public abstract string GetDpti();
+        public abstract string GetDeviceNetworkState();
+        public abstract int GetMatsOsPlatformCode();
+        public abstract string GetMatsOsPlatform();
     }
 }

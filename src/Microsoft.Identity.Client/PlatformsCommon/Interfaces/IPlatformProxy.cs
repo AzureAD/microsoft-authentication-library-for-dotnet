@@ -106,5 +106,11 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
 
         IWebUIFactory GetWebUiFactory();
         void SetWebUiFactory(IWebUIFactory webUiFactory);
+
+        // MATS related data
+        string GetDpti();
+        string GetDeviceNetworkState();
+        int GetMatsOsPlatformCode();
+        string GetMatsOsPlatform();
     }
 }

@@ -35,6 +35,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.PlatformsCommon.Shared;
 using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.UI;
+using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Client.Platforms.Mac
 {
@@ -161,5 +162,27 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         protected override IWebUIFactory CreateWebUiFactory() => new MacUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new MacCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();
+
+        public override string GetDeviceNetworkState()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetDpti()
+        {
+            // TODO(mats):
+            return string.Empty;
+        }
+
+        public override string GetMatsOsPlatform()
+        {
+            return MatsConverter.AsString(OsPlatform.Mac);
+        }
+
+        public override int GetMatsOsPlatformCode()
+        {
+            return MatsConverter.AsInt(OsPlatform.Mac);
+        }
     }
 }
