@@ -576,6 +576,29 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         }
 
         [TestMethod]
+        public void CreateFrtFromTokenResponse()
+        {
+            
+            var response = new MsalTokenResponse
+            {
+                IdToken = MockHelpers.CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId),
+                AccessToken = "access-token",
+                ClientInfo = MockHelpers.CreateClientInfo(),
+                ExpiresIn = 3599,
+                CorrelationId = "correlation-id",
+                RefreshToken = "refresh-token",
+                Scope = MsalTestConstants.Scope.AsSingleString(),
+                TokenType = "Bearer",
+                FamilyId = "1"
+            };
+
+            var frt = new MsalRefreshTokenCacheItem("env", MsalTestConstants.ClientId, response);
+
+            Assert.AreEqual("1", frt.FamilyId);
+        }
+
+
+        [TestMethod]
         [TestCategory("TokenCacheTests")]
         public void SaveAccessAndRefreshTokenWithMoreScopesTest()
         {
@@ -603,6 +626,8 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             Assert.AreEqual(1, cache.Accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, cache.Accessor.GetAllAccessTokens().Count());
+
+            Assert.IsNull(cache.Accessor.GetAllRefreshTokens().First().FamilyId);
 
             response = new MsalTokenResponse
             {

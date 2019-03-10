@@ -34,7 +34,6 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
-    [DataContract]
     internal class MsalAccountCacheItem : MsalCacheItemBase
     {
         internal MsalAccountCacheItem()

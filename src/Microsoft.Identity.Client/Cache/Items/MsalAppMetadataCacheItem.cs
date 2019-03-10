@@ -41,7 +41,6 @@ namespace Microsoft.Identity.Client.Cache.Items
     /// App metadata is a non-secret entity. It means that it cannot store any secret information, like tokens, nor PII, like username etc.
     /// App metadata can be extended by adding additional fields when required.Absense of any non-required field should translate to default values for those field.
     /// </summary>
-    [DataContract]
     internal class MsalAppMetadataCacheItem : MsalItemWithAdditionalFields, IEquatable<MsalAppMetadataCacheItem>
     {
         public MsalAppMetadataCacheItem(string clientId, string env, string familyId)
