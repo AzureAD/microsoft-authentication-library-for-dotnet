@@ -41,6 +41,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [TestClass]
     public class CacheSerializationTests
     {
+        private static readonly IEnumerable<string> s_appMetadataKeys = new[] {
+            StorageJsonKeys.ClientId ,
+            StorageJsonKeys.Environment,
+            StorageJsonKeys.FamilyId};
+
         private MsalAccessTokenCacheItem CreateAccessTokenItem()
         {
             return new MsalAccessTokenCacheItem
@@ -115,29 +120,33 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateAccessTokenItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.AccessTokenCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveAccessToken(item);
             }
 
             for (int i = 1; i <= NumRefreshTokens; i++)
             {
                 var item = CreateRefreshTokenItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.RefreshTokenCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveRefreshToken(item);
             }
 
             for (int i = 1; i <= NumIdTokens; i++)
             {
                 var item = CreateIdTokenItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.IdTokenCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveIdToken(item);
             }
 
             for (int i = 1; i <= NumAccounts; i++)
             {
                 var item = CreateAccountItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.AccountCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveAccount(item);
             }
+
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_1",  "1"));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_2",  ""));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId2, "env_1", "another_family"));
 
             return accessor;
         }
@@ -326,6 +335,43 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         #endregion // ACCOUNT TESTS
 
+        #region APP METADATA TESTS
+
+        [TestMethod]
+        public void TestAppMetadata_SerializeDeserialize()
+        {
+            var item = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env", "1");
+            string asJson = item.ToJsonString();
+            var item2 = MsalAppMetadataCacheItem.FromJsonString(asJson);
+
+            Assert.AreEqual(item, item2);
+        }
+
+        [TestMethod]
+        public void TestAppMetadata_Supports_AdditionalFields()
+        {
+            var item = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env", "1");
+
+            // Add an unknown field into the json
+            var asJObject = item.ToJObject();
+            AssertContainsKeys(asJObject, s_appMetadataKeys);
+
+            asJObject["unsupported_field_name"] = "this is a value";
+
+            // Ensure unknown field remains in the AdditionalFieldsJson block
+            var item2 = MsalAppMetadataCacheItem.FromJObject(asJObject);
+            Assert.AreEqual("{\r\n  \"unsupported_field_name\": \"this is a value\"\r\n}", item2.AdditionalFieldsJson);
+
+            // Ensure additional fields make the round trip into json
+            asJObject = item2.ToJObject();
+            AssertContainsKeys(asJObject, s_appMetadataKeys);
+            AssertContainsKeys(asJObject, new[] { "unsupported_field_name" });
+        }
+
+       
+        #endregion // APP METADATA TESTS
+      
+
         #region DICTIONARY SERIALIZATION TESTS
 
         [TestMethod]
@@ -399,6 +445,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count());
             Assert.AreEqual(1, accessor.GetAllIdTokens().Count());
             Assert.AreEqual(1, accessor.GetAllAccounts().Count());
+            Assert.AreEqual(0, accessor.GetAllAppMetadata().Count());
 
             var expectedAccessTokenItem = new MsalAccessTokenCacheItem
             {
@@ -414,7 +461,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 NormalizedScopes = "User.Read User.ReadBasic.All profile openid email",
                 UserAssertionHash = string.Empty
             };
-            AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.AccessTokenCacheDictionary.Values.First());
+            AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
 
             var expectedRefreshTokenItem = new MsalRefreshTokenCacheItem
             {
@@ -423,7 +470,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 RawClientInfo = string.Empty,
                 ClientId = "b945c513-3946-4ecd-b179-6499803a2167"
             };
-            AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.RefreshTokenCacheDictionary.Values.First());
+            AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.GetAllRefreshTokens().First());
 
             var expectedIdTokenItem = new MsalIdTokenCacheItem
             {
@@ -433,7 +480,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
                 TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
             };
-            AssertIdTokenCacheItemsAreEqual(expectedIdTokenItem, accessor.IdTokenCacheDictionary.Values.First());
+            AssertIdTokenCacheItemsAreEqual(expectedIdTokenItem, accessor.GetAllIdTokens().First());
 
             var expectedAccountItem = new MsalAccountCacheItem
             {
@@ -447,7 +494,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 LocalAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619",
                 TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
             };
-            AssertAccountCacheItemsAreEqual(expectedAccountItem, accessor.AccountCacheDictionary.Values.First());
+            AssertAccountCacheItemsAreEqual(expectedAccountItem, accessor.GetAllAccounts().First());
         }
 
         private void AssertAccessorsAreEqual(ITokenCacheAccessor expected, ITokenCacheAccessor actual)

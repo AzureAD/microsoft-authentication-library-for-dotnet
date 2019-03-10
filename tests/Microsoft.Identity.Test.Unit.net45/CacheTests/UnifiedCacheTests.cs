@@ -157,7 +157,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
                 // login to app1 with same credentials
 
-                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
+                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId2)
                                                          .WithHttpManager(httpManager)
                                                          .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
