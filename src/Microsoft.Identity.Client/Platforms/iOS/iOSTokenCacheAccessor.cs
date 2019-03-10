@@ -322,5 +322,29 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             return MsalAccountCacheItem.FromJsonString(GetPayload(accountKey));
         }
+
+        #region AppMetatada - not implemented on iOS
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            //return MsalAppMetadataCacheItem.FromJsonString(GetPayload(appMetadataKey));
+            throw new NotImplementedException();
+        }
+
+        public void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata)
+        {
+            //Save(appMetadata.GetKey(), appMetadata.ToJsonString());
+            throw new NotImplementedException();
+        }
+
+        public void SaveAppMetadata(MsalAppMetadataCacheItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

@@ -32,9 +32,8 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
-    internal abstract class MsalCacheItemBase
+    internal abstract class MsalCacheItemBase : MsalItemWithAdditionalFields
     {
-        internal string AdditionalFieldsJson { get; set; } = "{}";
         internal string HomeAccountId { get; set; }
         internal string Environment { get; set; }
         internal string RawClientInfo { get; set; }
@@ -48,7 +47,7 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
         }
 
-        internal virtual void PopulateFieldsFromJObject(JObject j)
+        internal override void PopulateFieldsFromJObject(JObject j)
         {
             HomeAccountId = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.HomeAccountId);
             Environment = JsonUtils.ExtractExistingOrEmptyString(j, StorageJsonKeys.Environment);
@@ -56,12 +55,12 @@ namespace Microsoft.Identity.Client.Cache.Items
 
             // Important: order matters.  This MUST be the last one called since it will extract the
             // remaining fields out.
-            AdditionalFieldsJson = j.ToString();
+            base.PopulateFieldsFromJObject(j);
         }
 
-        internal virtual JObject ToJObject()
+        internal override JObject ToJObject()
         {
-            var json = string.IsNullOrWhiteSpace(AdditionalFieldsJson) ? new JObject() : JObject.Parse(AdditionalFieldsJson);
+            var json = base.ToJObject();
             json[StorageJsonKeys.HomeAccountId] = HomeAccountId;
             json[StorageJsonKeys.Environment] = Environment;
             json[StorageJsonKeys.ClientInfo] = RawClientInfo;

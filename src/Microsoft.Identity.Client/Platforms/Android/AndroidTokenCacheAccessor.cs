@@ -184,5 +184,27 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountKey.ToString(), null));
         }
+
+        #region App Metadata - not used on Android
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveAppMetadata(MsalAppMetadataCacheItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }
