@@ -29,7 +29,6 @@ using System;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Microsoft.Identity.Client.Cache.Keys.MsalCacheKeys;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 {
@@ -68,7 +67,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("accesstoken-clientid-contoso.com-user.read user.write", key.iOSService);
             Assert.AreEqual("accesstoken-clientid-contoso.com", key.iOSGeneric);
-            Assert.AreEqual((int)iOSCredentialAttrType.AccessToken, key.iOSType);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AccessToken, key.iOSType);
         }
 
         [TestMethod]
@@ -81,7 +80,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("refreshtoken-clientid--", key.iOSService);
             Assert.AreEqual("refreshtoken-clientid-", key.iOSGeneric);
-            Assert.AreEqual((int)iOSCredentialAttrType.RefreshToken, key.iOSType);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
         }
 
         [TestMethod]
@@ -94,7 +93,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("idtoken-clientid-contoso.com-", key.iOSService);
             Assert.AreEqual("idtoken-clientid-contoso.com", key.iOSGeneric);
-            Assert.AreEqual((int)iOSCredentialAttrType.IdToken, key.iOSType);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.IdToken, key.iOSType);
         }
 
         [TestMethod]
@@ -112,7 +111,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("contoso.com", key.iOSService);
             Assert.AreEqual("localid", key.iOSGeneric);
-            Assert.AreEqual(iOSAuthorityTypeToAttrType["AAD"], key.iOSType);
+            Assert.AreEqual(MsalCacheKeys.iOSAuthorityTypeToAttrType["AAD"], key.iOSType);
 
         }
 
@@ -124,7 +123,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             Assert.AreEqual("appmetadata-clientid", key.iOSService);
             Assert.AreEqual("login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("1", key.iOSGeneric);
-            Assert.AreEqual((int)iOSCredentialAttrType.AppMetadata, key.iOSType);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.AppMetadata, key.iOSType);
         }
     }
 }

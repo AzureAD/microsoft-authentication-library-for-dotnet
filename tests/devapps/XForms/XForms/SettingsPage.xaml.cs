@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -50,10 +51,10 @@ namespace XForms
             authority.Text = App.Authority;
             clientIdEntry.Text = App.ClientId;
 
-            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count.ToString(CultureInfo.InvariantCulture);
-            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count.ToString(CultureInfo.InvariantCulture);
-            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count.ToString(CultureInfo.InvariantCulture);
-            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccounts().Count.ToString(CultureInfo.InvariantCulture);
+            numOfAtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count().ToString(CultureInfo.InvariantCulture);
+            numOfRtItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count().ToString(CultureInfo.InvariantCulture);
+            numOfIdItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count().ToString(CultureInfo.InvariantCulture);
+            numOfAccountItems.Text = App.MsalPublicClient.UserTokenCacheInternal.Accessor.GetAllAccounts().Count().ToString(CultureInfo.InvariantCulture);
 
             validateAuthoritySwitch.IsToggled = App.ValidateAuthority;
             RedirectUriLabel.Text = App.MsalPublicClient.AppConfig.RedirectUri;

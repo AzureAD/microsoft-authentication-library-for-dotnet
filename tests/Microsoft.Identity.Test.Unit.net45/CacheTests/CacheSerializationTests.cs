@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -207,6 +208,29 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item2 = MsalRefreshTokenCacheItem.FromJsonString(asJson);
 
             AssertRefreshTokenCacheItemsAreEqual(item, item2);
+        }
+
+        [TestMethod]
+        public void Test_FRT_SerializeDeserialize()
+        {
+            var item1 = CreateRefreshTokenItem();
+            item1.FamilyId = null;
+            var item2 = CreateRefreshTokenItem();
+            item2.FamilyId = "";
+            var item3 = CreateRefreshTokenItem();
+            item3.FamilyId = "1";
+
+            var json1 = item1.ToJsonString();
+            var json2 = item2.ToJsonString();
+            var json3 = item3.ToJsonString();
+
+            var reserialized1 = MsalRefreshTokenCacheItem.FromJsonString(json1);
+            var reserialized2 = MsalRefreshTokenCacheItem.FromJsonString(json2);
+            var reserialized3 = MsalRefreshTokenCacheItem.FromJsonString(json3);
+
+            AssertRefreshTokenCacheItemsAreEqual(item1, reserialized1);
+            AssertRefreshTokenCacheItemsAreEqual(item2, reserialized2);
+            AssertRefreshTokenCacheItemsAreEqual(item3, reserialized3);
         }
 
         [TestMethod]
@@ -629,6 +653,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
+            Assert.AreEqual(expected.FamilyId, actual.FamilyId);
         }
 
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)
