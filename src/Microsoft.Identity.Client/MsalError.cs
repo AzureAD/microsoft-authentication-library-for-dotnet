@@ -235,5 +235,119 @@ namespace Microsoft.Identity.Client
         /// the configured redirect uri.
         /// </summary>
         public const string CustomWebUiRedirectUriMismatch = "custom_webui_invalid_mismatch";
+
+        /// <summary>
+        /// Access denied.
+        /// </summary>
+        public const string AccessDenied = "access_denied";
+
+        /// <summary>
+        /// JSON Parse error.
+        /// </summary>
+        public const string JsonParseError = "json_parse_failed";
+
+        /// <summary>
+        /// Request Timeout.
+        /// </summary>
+        public const string RequestTimeout = "request_timeout";
+
+        /// <summary>
+        /// Service not available.
+        /// </summary>
+        public const string ServiceNotAvailable = "service_not_available";
+
+        /// <summary>
+        /// Invalid JWT.
+        /// </summary>
+        public const string InvalidJwtError = "invalid_jwt";
+
+        /// <summary>
+        /// Tenant Discovery Failed.
+        /// </summary>
+        public const string TenantDiscoveryFailedError = "tenant_discovery_failed";
+
+        /// <summary>
+        /// Authentication UI Failed.
+        /// </summary>
+        public const string AuthenticationUiFailedError = "authentication_ui_failed";
+
+        /// <summary>
+        /// Invalid Grant.
+        /// </summary>
+        public const string InvalidGrantError = "invalid_grant";
+
+        /// <summary>
+        /// Unknown Error.
+        /// </summary>
+        public const string UnknownError = "unknown_error";
+
+        /// <summary>
+        /// Authentication Canceled.
+        /// </summary>
+        public const string AuthenticationCanceledError = "authentication_canceled";
+
+        /// <summary>
+        /// UPN Required.
+        /// </summary>
+        public const string UpnRequired = "upn_required";
+
+        /// <summary>
+        /// Missing Passive Auth Endpoint.
+        /// </summary>
+        public const string MissingPassiveAuthEndpoint = "missing_passive_auth_endpoint";
+
+        /// <summary>
+        /// Invalid Authority.
+        /// </summary>
+        public const string InvalidAuthority = "invalid_authority";
+
+        /// <summary>
+        /// Platform is Not Supported.
+        /// </summary>
+        public const string PlatformNotSupported = "platform_not_supported";
+
+        /// <summary>
+        /// Cannot Access User Information or User is Not Domain Joined.
+        /// </summary>
+        public const string CannotAccessUserInformationOrUserNotDomainJoined = "user_information_access_failed";
+
+        /// <summary>
+        /// RedirectUri validation failed.
+        /// </summary>
+        public const string DefaultRedirectUriIsInvalid = "redirect_uri_validation_failed";
+
+        /// <summary>
+        /// No Redirect URI.
+        /// </summary>
+        public const string NoRedirectUri = "no_redirect_uri";
+
+#if iOS
+        /// <summary>
+        /// Cannot Access Publisher KeyChain.
+        /// </summary>
+        public const string CannotAccessPublisherKeyChain = "cannot_access_publisher_keychain";
+
+        /// <summary>
+        /// Missing Entitlements.
+        /// </summary>
+        public const string MissingEntitlements = "missing_entitlements";
+#endif
+
+#if ANDROID
+        /// <summary>
+        /// Failed To Create Shared Preference.
+        /// </summary>
+        public const string FailedToCreateSharedPreference = "shared_preference_creation_failed";
+
+        /// <summary>
+        /// Android Activity Not Found.
+        /// </summary>
+        public const string AndroidActivityNotFound = "android_activity_not_found";
+
+        /// <summary>
+        /// Unresolvable Intent.
+        /// </summary>
+        public const string UnresolvableIntentError = "unresolvable_intent";
+#endif
     }
 }

@@ -86,8 +86,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
             if (userNameSize == 0)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.GetUserNameFailed,
-                    CoreErrorMessages.GetUserNameFailed,
+                    MsalError.GetUserNameFailed,
+                    MsalErrorMessage.GetUserNameFailed,
                     new Win32Exception(Marshal.GetLastWin32Error()));
             }
 
@@ -95,8 +95,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
             if (!WindowsNativeMethods.GetUserNameEx(NameUserPrincipal, sb, ref userNameSize))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.GetUserNameFailed,
-                    CoreErrorMessages.GetUserNameFailed,
+                    MsalError.GetUserNameFailed,
+                    MsalErrorMessage.GetUserNameFailed,
                     new Win32Exception(Marshal.GetLastWin32Error()));
             }
 

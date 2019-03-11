@@ -60,8 +60,8 @@ namespace Microsoft.Identity.Client.Instance
                 if (drsResponse.IdentityProviderService?.PassiveAuthEndpoint == null)
                 {
                     throw MsalExceptionFactory.GetServiceException(
-                        CoreErrorCodes.MissingPassiveAuthEndpoint,
-                        CoreErrorMessages.CannotFindTheAuthEndpont,
+                        MsalError.MissingPassiveAuthEndpoint,
+                        MsalErrorMessage.CannotFindTheAuthEndpont,
                         drsResponse);
                 }
 
@@ -76,8 +76,8 @@ namespace Microsoft.Identity.Client.Instance
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
                     throw MsalExceptionFactory.GetServiceException(
-                        CoreErrorCodes.InvalidAuthority,
-                        CoreErrorMessages.AuthorityValidationFailed,
+                        MsalError.InvalidAuthority,
+                        MsalErrorMessage.AuthorityValidationFailed,
                         httpResponse);
                 }
 
@@ -87,8 +87,8 @@ namespace Microsoft.Identity.Client.Instance
                              a.Href.Equals(resource, StringComparison.OrdinalIgnoreCase)) == null)
                 {
                     throw MsalExceptionFactory.GetClientException(
-                        CoreErrorCodes.InvalidAuthority,
-                        CoreErrorMessages.InvalidAuthorityOpenId);
+                        MsalError.InvalidAuthority,
+                        MsalErrorMessage.InvalidAuthorityOpenId);
                 }
             }
 

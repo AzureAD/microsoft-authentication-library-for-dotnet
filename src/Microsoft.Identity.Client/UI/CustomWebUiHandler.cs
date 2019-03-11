@@ -31,6 +31,7 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.OAuth2;
@@ -66,7 +67,7 @@ namespace Microsoft.Identity.Client.UI
                 {
                     throw new MsalClientException(
                         MsalError.CustomWebUiReturnedInvalidUri,
-                        CoreErrorMessages.CustomWebUiReturnedInvalidUri);
+                        MsalErrorMessage.CustomWebUiReturnedInvalidUri);
                 }
 
                 if (uri.Authority.Equals(redirectUri.Authority, StringComparison.OrdinalIgnoreCase) &&
@@ -84,7 +85,7 @@ namespace Microsoft.Identity.Client.UI
 
                 throw new MsalClientException(
                     MsalError.CustomWebUiRedirectUriMismatch,
-                    CoreErrorMessages.CustomWebUiRedirectUriMismatch(
+                    MsalErrorMessage.CustomWebUiRedirectUriMismatch(
                         uri.AbsolutePath,
                         redirectUri.AbsolutePath));
             }
@@ -95,7 +96,7 @@ namespace Microsoft.Identity.Client.UI
             }
             catch (Exception ex)
             {
-                requestContext.Logger.WarningPiiWithPrefix(ex, CoreErrorMessages.CustomWebUiAuthorizationCodeFailed);
+                requestContext.Logger.WarningPiiWithPrefix(ex, MsalErrorMessage.CustomWebUiAuthorizationCodeFailed);
                 throw;
             }
         }

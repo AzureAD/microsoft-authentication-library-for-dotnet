@@ -27,6 +27,7 @@
 
 using System;
 using System.Globalization;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -49,7 +50,7 @@ namespace Microsoft.Identity.Client
         /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalException()
-            : base(CoreErrorMessages.Unknown)
+            : base(MsalErrorMessage.Unknown)
         {
             ErrorCode = UnknownError;
         }

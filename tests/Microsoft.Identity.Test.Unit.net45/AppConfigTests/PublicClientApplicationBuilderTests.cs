@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -334,7 +335,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             catch (Exception ex)
             {
                 Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(CoreErrorMessages.AzureAdMyOrgRequiresSpecifyingATenant, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.AzureAdMyOrgRequiresSpecifyingATenant, ex.Message);
             }
         }
 
@@ -351,7 +352,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
             catch (Exception ex)
             {
                 Assert.IsTrue(ex is InvalidOperationException);
-                Assert.AreEqual(CoreErrorMessages.AuthorityDoesNotHaveTwoSegments, ex.Message);
+                Assert.AreEqual(MsalErrorMessage.AuthorityDoesNotHaveTwoSegments, ex.Message);
             }
         }
     }

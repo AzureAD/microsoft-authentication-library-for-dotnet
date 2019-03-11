@@ -264,7 +264,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
                 }
                 catch (MsalClientException exc)
                 {
-                    Assert.AreEqual(CoreErrorCodes.TenantDiscoveryFailedError, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.TenantDiscoveryFailedError, exc.ErrorCode);
                 }
             }
         }

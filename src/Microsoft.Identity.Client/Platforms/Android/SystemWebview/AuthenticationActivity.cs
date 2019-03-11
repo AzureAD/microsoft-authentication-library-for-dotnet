@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             if (Intent == null)
             {
                 SendError(
-                    CoreErrorCodes.UnresolvableIntentError,
+                    MsalError.UnresolvableIntentError,
                     "Received null data intent from caller");
                 return;
             }
@@ -88,7 +88,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             _requestId = Intent.GetIntExtra(AndroidConstants.RequestId, 0);
             if (string.IsNullOrEmpty(_requestUrl))
             {
-                SendError(CoreErrorCodes.InvalidRequest, "Request url is not set on the intent");
+                SendError(MsalError.InvalidRequest, "Request url is not set on the intent");
             }
         }
 
@@ -140,8 +140,8 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
                 catch (ActivityNotFoundException ex)
                 {
                     throw MsalExceptionFactory.GetClientException(
-                           CoreErrorCodes.AndroidActivityNotFound,
-                           CoreErrorMessages.AndroidActivityNotFound, ex);
+                           MsalError.AndroidActivityNotFound,
+                           MsalErrorMessage.AndroidActivityNotFound, ex);
                 }
             }
             else

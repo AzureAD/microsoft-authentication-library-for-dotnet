@@ -51,17 +51,17 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
         };
 
         [TestMethod]
-        [Description("CoreErrorCodes are internal. Msal and Adal should expose equivalent public constants.")]
+        [Description("MsalError are internal. Msal and Adal should expose equivalent public constants.")]
         public void CheckErrorCodesArePublicMsalConstants()
         {
             // Act
             List<string> msalErrorCodes = msalTypesWithConstants.SelectMany(GetConstants).ToList();
-            IEnumerable<string> coreErrorCodes = GetConstants(typeof(CoreErrorCodes));
+            IEnumerable<string> MsalError = GetConstants(typeof(MsalError));
 
             // Assert
             bool missingErrorCode = false;
             StringBuilder errorsFound = new StringBuilder();
-            foreach (string coreErrorCode in coreErrorCodes)
+            foreach (string coreErrorCode in MsalError)
             {
                 var isFound = msalErrorCodes.Contains(coreErrorCode, StringComparer.InvariantCulture);
                 if (!isFound)
