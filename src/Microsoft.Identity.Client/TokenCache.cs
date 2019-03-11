@@ -259,44 +259,50 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS0618 // Type or member is obsolete
 
                     OnBeforeAccess(args);
-                    OnBeforeWrite(args);
-
-                    DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
-                        msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
-
-                    _accessor.SaveAccessToken(msalAccessTokenCacheItem);
-
-                    if (idToken != null)
+                    try
                     {
-                        _accessor.SaveIdToken(msalIdTokenCacheItem);
+                        OnBeforeWrite(args);
 
-                        var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
+                        DeleteAccessTokensWithIntersectingScopes(requestParams, environmentAliases, tenantId,
+                            msalAccessTokenCacheItem.ScopeSet, msalAccessTokenCacheItem.HomeAccountId);
 
-                        _accessor.SaveAccount(msalAccountCacheItem);
+                        _accessor.SaveAccessToken(msalAccessTokenCacheItem);
+
+                        if (idToken != null)
+                        {
+                            _accessor.SaveIdToken(msalIdTokenCacheItem);
+
+                            var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
+
+                            _accessor.SaveAccount(msalAccountCacheItem);
+                        }
+
+                        // if server returns the refresh token back, save it in the cache.
+                        if (response.RefreshToken != null)
+                        {
+                            msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
+                            requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                            _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                        }
+
+                        // save RT in ADAL cache for public clients
+                        // do not save RT in ADAL cache for MSAL B2C scenarios
+                        if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
+                        {
+                            CacheFallbackOperations.WriteAdalRefreshToken(
+                                _logger,
+                                LegacyCachePersistence,
+                                msalRefreshTokenCacheItem,
+                                msalIdTokenCacheItem,
+                                Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
+                                msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
+                        }
+
                     }
-
-                    // if server returns the refresh token back, save it in the cache.
-                    if (response.RefreshToken != null)
+                    finally
                     {
-                        msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
-                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
-                        _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                        OnAfterAccess(args);
                     }
-
-                    // save RT in ADAL cache for public clients
-                    // do not save RT in ADAL cache for MSAL B2C scenarios
-                    if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
-                    {
-                        CacheFallbackOperations.WriteAdalRefreshToken(
-                            _logger,
-                            LegacyCachePersistence,
-                            msalRefreshTokenCacheItem,
-                            msalIdTokenCacheItem,
-                            Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
-                            msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
-                    }
-
-                    OnAfterAccess(args);
 
                     return Tuple.Create(msalAccessTokenCacheItem, msalIdTokenCacheItem);
                 }
@@ -386,10 +392,18 @@ namespace Microsoft.Identity.Client
                     Account = requestParams.Account
                 };
 
+                List<MsalAccessTokenCacheItem> tokenCacheItems;
+
                 OnBeforeAccess(args);
-                // filtered by client id.
-                var tokenCacheItems = ((ITokenCacheInternal)this).GetAllAccessTokens(true).ToList();
-                OnAfterAccess(args);
+                try
+                {
+                    // filtered by client id.
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllAccessTokens(true).ToList();
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
 
                 // this is OBO flow. match the cache entry with assertion hash,
                 // Authority, ScopeSet and client Id.
@@ -636,10 +650,15 @@ namespace Microsoft.Identity.Client
                 };
 
                 OnBeforeAccess(args);
-                var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
-                OnAfterAccess(args);
-
-                return idToken;
+                try
+                {
+                    var idToken = _accessor.GetIdToken(msalIdTokenCacheKey);
+                    return idToken;
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
             }
         }
 
@@ -719,12 +738,21 @@ namespace Microsoft.Identity.Client
                     Account = null
                 };
 
-                OnBeforeAccess(args);
-                IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
-                IEnumerable<MsalAccountCacheItem> accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
+                IEnumerable<MsalRefreshTokenCacheItem> tokenCacheItems;
+                IEnumerable<MsalAccountCacheItem> accountCacheItems;
+                AdalUsersForMsalResult adalUsersResult;
 
-                var adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
-                OnAfterAccess(args);
+                OnBeforeAccess(args);
+                try
+                {
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
+                    accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
+                    adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
+                }
+                finally
+                {
+                    OnAfterAccess(args);
+                }
 
                 IDictionary<string, Account> clientInfoToAccountMap = new Dictionary<string, Account>();
                 foreach (MsalRefreshTokenCacheItem rtItem in tokenCacheItems)
@@ -828,12 +856,17 @@ namespace Microsoft.Identity.Client
                     };
 
                     OnBeforeAccess(args);
-                    OnBeforeWrite(args);
+                    try
+                    {
+                        OnBeforeWrite(args);
 
-                    ((ITokenCacheInternal)this).RemoveMsalAccount(account, requestContext);
-                    RemoveAdalUser(account);
-
-                    OnAfterAccess(args);
+                        ((ITokenCacheInternal)this).RemoveMsalAccount(account, requestContext);
+                        RemoveAdalUser(account);
+                    }
+                    finally
+                    {
+                        OnAfterAccess(args);
+                    }
                 }
                 finally
                 {
@@ -904,9 +937,9 @@ namespace Microsoft.Identity.Client
                     HasStateChanged = true
                 };
 
+                OnBeforeAccess(args);
                 try
                 {
-                    OnBeforeAccess(args);
                     OnBeforeWrite(args);
 
                     ((ITokenCacheInternal)this).ClearMsalCache();
