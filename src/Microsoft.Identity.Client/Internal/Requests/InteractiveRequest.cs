@@ -92,15 +92,18 @@ namespace Microsoft.Identity.Client.Internal.Requests
             await AcquireAuthorizationAsync(cancellationToken).ConfigureAwait(false);
             VerifyAuthorizationResult();
 
-            BrokerInteractiveRequest brokerInteractiveRequest = new BrokerInteractiveRequest(
-                AuthenticationRequestParameters,
-                _interactiveParameters,
-                ServiceBundle,
-                _authorizationResult);
-
-            if (AuthenticationRequestParameters.IsBrokerEnabled || brokerInteractiveRequest.IsBrokerInvocationRequired())
+            if (AuthenticationRequestParameters.IsBrokerEnabled)
             {
-                _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+                var brokerInteractiveRequest = new BrokerInteractiveRequest(
+                    AuthenticationRequestParameters,
+                    _interactiveParameters,
+                    ServiceBundle,
+                    _authorizationResult);
+
+                if (brokerInteractiveRequest.IsBrokerInvocationRequired())
+                {
+                    _msalTokenResponse = await brokerInteractiveRequest.SendTokenRequestToBrokerAsync().ConfigureAwait(false);
+                }
             }
             else
             {
@@ -255,7 +258,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
         private void VerifyAuthorizationResult()
         {
-            if (_authorizationResult.Status == AuthorizationStatus.Success && 
+            if (_authorizationResult.Status == AuthorizationStatus.Success &&
                 !_state.Equals(_authorizationResult.State,
                     StringComparison.OrdinalIgnoreCase))
             {

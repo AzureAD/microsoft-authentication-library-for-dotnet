@@ -216,7 +216,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 AuthenticationRequestParameters.RequestContext.Logger.Info("Saving Token Response to cache..");
 
-                var tuple = CacheManager.SaveAccessAndRefreshToken(msalTokenResponse);
+                var tuple = CacheManager.SaveTokenResponse(msalTokenResponse);
                 return new AuthenticationResult(tuple.Item1, tuple.Item2);
             }
             else
