@@ -61,6 +61,8 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         }
 
         protected IWebUIFactory OverloadWebUiFactory { get; set; }
+        protected IFeatureFlags OverloadFeatureFlags { get; set; }
+
         protected ICoreLogger Logger { get; }
 
         /// <inheritdoc />
@@ -148,6 +150,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public IPlatformLogger PlatformLogger => _platformLogger.Value;
 
         protected abstract IWebUIFactory CreateWebUiFactory();
+        protected abstract IFeatureFlags CreateFeatureFlags();
         protected abstract string InternalGetDeviceModel();
         protected abstract string InternalGetOperatingSystem();
         protected abstract string InternalGetProcessorArchitecture();
@@ -161,6 +164,16 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
         public virtual ITokenCacheBlobStorage CreateTokenCacheBlobStorage() 
         {
             return new NullTokenCacheBlobStorage();
+        }
+
+        public virtual IFeatureFlags GetFeatureFlags()
+        {
+            return OverloadFeatureFlags ?? GetFeatureFlags();
+        }
+
+        public void SetFeatureFlags(IFeatureFlags featureFlags)
+        {
+            OverloadFeatureFlags = featureFlags;
         }
     }
 }

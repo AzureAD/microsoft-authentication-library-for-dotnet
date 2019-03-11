@@ -201,24 +201,16 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new EasClientDeviceInformation()?.Id.ToString();
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence()
-        {
-            return new UapLegacyCachePersistence(Logger, CryptographyManager);
-        }
+        public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor();
-        }
+        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor();
 
-        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
-        {
-            return new UapTokenCacheBlobStorage(CryptographyManager, Logger);
-        }
+        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
 
+        protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
     }
 }

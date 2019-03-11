@@ -151,5 +151,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         protected override ICryptographyManager InternalGetCryptographyManager() => new iOSCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new ConsolePlatformLogger();
+
+        protected override IFeatureFlags CreateFeatureFlags() => new iOSFeatureFlags();
     }
 }

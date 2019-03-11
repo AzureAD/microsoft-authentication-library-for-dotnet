@@ -105,6 +105,10 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Interfaces
         IPlatformLogger PlatformLogger { get; }
 
         IWebUIFactory GetWebUiFactory();
-        void SetWebUiFactory(IWebUIFactory webUiFactory);
+        void /* for test */ SetWebUiFactory(IWebUIFactory webUiFactory);
+
+        IFeatureFlags GetFeatureFlags();
+
+        void /* for test */ SetFeatureFlags(IFeatureFlags featureFlags);
     }
 }

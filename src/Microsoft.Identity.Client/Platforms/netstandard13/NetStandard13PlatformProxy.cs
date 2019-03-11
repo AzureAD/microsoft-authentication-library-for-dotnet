@@ -146,5 +146,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetStandard13CryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+
+        protected override IFeatureFlags CreateFeatureFlags() => new NetStandardFeatureFlags();
     }
 }
