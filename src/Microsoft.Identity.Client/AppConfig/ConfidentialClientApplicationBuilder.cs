@@ -28,6 +28,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -126,7 +127,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (countOfCredentialTypesSpecified > 1)
             {
-                throw new InvalidOperationException(CoreErrorMessages.ClientSecretAndCertificateAreMutuallyExclusive);
+                throw new InvalidOperationException(MsalErrorMessage.ClientSecretAndCertificateAreMutuallyExclusive);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
@@ -146,7 +147,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
-                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
+                throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
         }
 

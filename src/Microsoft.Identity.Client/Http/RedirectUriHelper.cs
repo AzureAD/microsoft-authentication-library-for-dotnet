@@ -44,15 +44,15 @@ namespace Microsoft.Identity.Client.Http
             if (redirectUri == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.NoRedirectUri,
-                    CoreErrorMessages.NoRedirectUri);
+                    MsalError.NoRedirectUri,
+                    MsalErrorMessage.NoRedirectUri);
 
             }
 
             if (!string.IsNullOrWhiteSpace(redirectUri.Fragment))
             {
                 throw new ArgumentException(
-                    CoreErrorMessages.RedirectUriContainsFragment,
+                    MsalErrorMessage.RedirectUriContainsFragment,
                     nameof(redirectUri));
             }
 
@@ -60,10 +60,10 @@ namespace Microsoft.Identity.Client.Http
                 Constants.DefaultRedirectUri.Equals(redirectUri.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.DefaultRedirectUriIsInvalid,
+                    MsalError.DefaultRedirectUriIsInvalid,
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        CoreErrorMessages.DefaultRedirectUriIsInvalid,
+                        MsalErrorMessage.DefaultRedirectUriIsInvalid,
                         Constants.DefaultRedirectUri));
             }
         }
