@@ -232,15 +232,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        protected override ICryptographyManager InternalGetCryptographyManager()
-        {
-            return new NetDesktopCryptographyManager();
-        }
+        protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
 
         /// <inheritdoc />
-        protected override IPlatformLogger InternalGetPlatformLogger()
-        {
-            return new EventSourcePlatformLogger();
-        }
+        protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+
+        protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
     }
 }

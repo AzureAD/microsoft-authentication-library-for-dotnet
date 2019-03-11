@@ -147,5 +147,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new NetCoreCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+
+        protected override IFeatureFlags CreateFeatureFlags() => new NetCoreFeatureFlags();
     }
 }

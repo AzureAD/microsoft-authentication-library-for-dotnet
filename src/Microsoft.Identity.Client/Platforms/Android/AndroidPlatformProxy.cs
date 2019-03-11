@@ -165,5 +165,7 @@ namespace Microsoft.Identity.Client.Platforms.Android
 
         protected override ICryptographyManager InternalGetCryptographyManager() => new AndroidCryptographyManager();
         protected override IPlatformLogger InternalGetPlatformLogger() => new AndroidPlatformLogger();
+
+        protected override IFeatureFlags CreateFeatureFlags() => new AndroidFeatureFlags();
     }
 }
