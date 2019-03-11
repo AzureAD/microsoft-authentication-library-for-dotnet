@@ -52,9 +52,9 @@ namespace Microsoft.Identity.Client.Cache
             return TokenCacheInternal.FindAccessTokenAsync(_requestParams);
         }
 
-        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse tokenResponse)
+        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(MsalTokenResponse tokenResponse)
         {
-            return TokenCacheInternal.SaveAccessAndRefreshToken(_requestParams, tokenResponse);
+            return TokenCacheInternal.SaveTokenResponse(_requestParams, tokenResponse);
         }
 
         public MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey)

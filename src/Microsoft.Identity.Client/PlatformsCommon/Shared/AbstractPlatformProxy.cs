@@ -168,7 +168,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
 
         public virtual IFeatureFlags GetFeatureFlags()
         {
-            return OverloadFeatureFlags ?? GetFeatureFlags();
+            return OverloadFeatureFlags ?? CreateFeatureFlags();
         }
 
         public void SetFeatureFlags(IFeatureFlags featureFlags)

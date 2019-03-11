@@ -41,9 +41,6 @@ namespace Microsoft.Identity.Client.Cache
 
         void SaveAccount(MsalAccountCacheItem item);
 
-        /// <remarks>
-        /// MSAL should not rely on this method except for serialization
-        /// </remarks>
         void SaveAppMetadata(MsalAppMetadataCacheItem item);
 
         MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey);
@@ -76,8 +73,6 @@ namespace Microsoft.Identity.Client.Cache
         IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata();
 
         MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey);
-
-        void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata);
 
 #if iOS
         void SetiOSKeychainSecurityGroup(string keychainSecurityGroup);

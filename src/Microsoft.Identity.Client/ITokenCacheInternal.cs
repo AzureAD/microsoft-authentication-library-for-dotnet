@@ -44,7 +44,11 @@ namespace Microsoft.Identity.Client
         void RemoveAccount(IAccount account, RequestContext requestContext);
         IEnumerable<IAccount> GetAccounts(string authority);
 
-        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(
+        /// <summary>
+        /// Persists the AT and RT and updates app metadata (FOCI)
+        /// </summary>
+        /// <returns></returns>
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(
             AuthenticationRequestParameters authenticationRequestParameters,
             MsalTokenResponse msalTokenResponse);
 
