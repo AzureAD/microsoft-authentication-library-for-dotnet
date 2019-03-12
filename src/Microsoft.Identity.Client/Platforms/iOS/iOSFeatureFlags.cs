@@ -33,7 +33,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
     {
         /// <summary>
         /// FOCI has not been tested on iOS
-        /// <summary>
+        /// </summary>
         public bool IsFociEnabled => false;
     }
 }

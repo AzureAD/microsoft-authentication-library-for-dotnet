@@ -41,5 +41,7 @@ namespace Microsoft.Identity.Client.Cache
         Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(MsalTokenResponse tokenResponse);
         MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
+        Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);
+        Task<bool?> IsAppFociMemberAsync(string familyId);
     }
 }

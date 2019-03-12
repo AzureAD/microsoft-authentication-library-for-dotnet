@@ -205,6 +205,11 @@ namespace Microsoft.Identity.Client.Platforms.Android
         {
             throw new NotImplementedException();
         }
+
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }

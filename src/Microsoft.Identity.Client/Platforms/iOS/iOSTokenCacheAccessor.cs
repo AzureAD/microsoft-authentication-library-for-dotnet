@@ -345,6 +345,11 @@ namespace Microsoft.Identity.Client.Platforms.iOS
         {
             throw new NotImplementedException();
         }
+
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            throw new NotImplementedException();
+        }
         #endregion
     }
 }
