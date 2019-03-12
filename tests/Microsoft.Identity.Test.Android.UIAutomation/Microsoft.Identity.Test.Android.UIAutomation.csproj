@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5FF7878D-FEF2-4CAE-8ABA-36C01806D9CE}</ProjectGuid>
+    <ProjectGuid>{47718066-09F9-49E6-94CA-FC14544A0DD4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.Identity.Test.UIAutomation</RootNamespace>
     <AssemblyName>Microsoft.Identity.Test.UIAutomation</AssemblyName>
