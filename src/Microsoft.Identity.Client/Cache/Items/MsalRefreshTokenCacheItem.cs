@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalRefreshTokenCacheKey GetKey()
         {
-            return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId);
+            return new MsalRefreshTokenCacheKey(Environment, ClientId, HomeAccountId, FamilyId);
         }
 
         internal static MsalRefreshTokenCacheItem FromJsonString(string json)

@@ -611,7 +611,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
             cache.Accessor.AssertItemCount(
                 expectedAtCount: 1,
-                expectedRtCount: 1,
+                expectedRtCount: 2, // a normal RT and an FRT
                 expectedAccountCount: 1,
                 expectedIdtCount: 1,
                 expectedAppMetadataCount: 1);
@@ -620,6 +620,9 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             Assert.AreEqual(MsalTestConstants.ClientId, metadata.ClientId);
             Assert.AreEqual(MsalTestConstants.ProductionPrefNetworkEnvironment, metadata.Environment);
             Assert.AreEqual(MsalTestConstants.FamilyId, metadata.FamilyId);
+
+            Assert.IsTrue(cache.Accessor.GetAllRefreshTokens().Any(rt => rt.FamilyId == "1"));
+            Assert.IsTrue(cache.Accessor.GetAllRefreshTokens().Any(rt => string.IsNullOrEmpty(rt.FamilyId)));
         }
 
 

@@ -131,6 +131,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 accessor.SaveRefreshToken(item);
             }
 
+            // Create an FRT
+            var frt = CreateRefreshTokenItem();
+            frt.FamilyId = "1";
+            accessor.SaveRefreshToken(frt);
+
             for (int i = 1; i <= NumIdTokens; i++)
             {
                 var item = CreateIdTokenItem();
@@ -421,20 +426,30 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         #region JSON SERIALIZATION TESTS
 
         [TestMethod]
+        [DeploymentItem(@"Resources\ExpectedTokenCache.json")]
         public void TestJsonSerialization()
         {
+            string expectedJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("ExpectedTokenCache.json"));
             var accessor = CreateTokenCacheAccessor();
 
             var s1 = new TokenCacheJsonSerializer(accessor);
             byte[] bytes = s1.Serialize();
-            string json = new UTF8Encoding().GetString(bytes);
+            string actualJson = new UTF8Encoding().GetString(bytes);
+
+            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes);
 
             AssertAccessorsAreEqual(accessor, otherAccessor);
+
+            // serialize again to detect errors that come from deserialization
+            byte[] bytes2 = s2.Serialize();
+            string actualJson2 = new UTF8Encoding().GetString(bytes2);
+            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
         }
+
 
         #endregion // JSON SERIALIZATION TESTS
 
@@ -653,7 +668,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
-            Assert.AreEqual(expected.FamilyId, actual.FamilyId);
+
+            if (string.IsNullOrEmpty(expected.FamilyId))
+            {
+                Assert.IsTrue(string.IsNullOrEmpty(actual.FamilyId));
+            }
+            else
+            {
+                Assert.AreEqual(expected.FamilyId, actual.FamilyId);
+            }
+
+            
         }
 
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)

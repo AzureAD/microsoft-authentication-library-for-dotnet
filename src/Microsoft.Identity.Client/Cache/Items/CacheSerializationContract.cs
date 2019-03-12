@@ -108,6 +108,20 @@ namespace Microsoft.Identity.Client.Cache.Items
                 }
             }
 
+            // App Metadata
+            if (root.ContainsKey(StorageJsonValues.AppMetadata))
+            {
+                foreach (var token in root[StorageJsonValues.AppMetadata]
+                    .Values())
+                {
+                    if (token is JObject j)
+                    {
+                        var item = MsalAppMetadataCacheItem.FromJObject(j);
+                        contract.AppMetadata[item.GetKey().ToString()] = item;
+                    }
+                }
+            }
+
             return contract;
         }
 
@@ -157,6 +171,9 @@ namespace Microsoft.Identity.Client.Cache.Items
             {
                 appMetadataRoot[kvp.Key] = kvp.Value.ToJObject();
             }
+
+            root[StorageJsonValues.AppMetadata] = appMetadataRoot;
+
 
             return root.ToString();
         }

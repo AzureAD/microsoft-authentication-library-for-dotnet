@@ -62,9 +62,24 @@ namespace Microsoft.Identity.Client.Cache
             return TokenCacheInternal.GetIdTokenCacheItem(idTokenCacheKey, _requestParams.RequestContext);
         }
 
+        public Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
+        {
+            if (String.IsNullOrEmpty(familyId))
+            {
+                throw new ArgumentNullException(nameof(familyId));
+            }
+
+            return TokenCacheInternal.FindRefreshTokenAsync(_requestParams, familyId);
+        }
+
         public Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
             return TokenCacheInternal.FindRefreshTokenAsync(_requestParams);
+        }
+
+        public Task<bool?> IsAppFociMemberAsync(string familyId)
+        {
+            return TokenCacheInternal.CheckAppIsFamilyMemberAsync(_requestParams, familyId);
         }
     }
 }

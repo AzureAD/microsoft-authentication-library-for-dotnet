@@ -49,16 +49,17 @@ namespace Microsoft.Identity.Client.Cache.Keys
         /// <returns></returns>
         public override string ToString()
         {
-            return $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{_environment}{MsalCacheKeys.CacheKeyDelimiter}{_clientId}";
+            return ($"{StorageJsonKeys.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}" +
+                $"{_environment}{MsalCacheKeys.CacheKeyDelimiter}{_clientId}").ToLowerInvariant();
         }
 
         #region iOS
 
-        public string iOSService => $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{_clientId}";
+        public string iOSService => $"{StorageJsonValues.AppMetadata}{MsalCacheKeys.CacheKeyDelimiter}{_clientId}".ToLowerInvariant();
 
         public string iOSGeneric => "1";
 
-        public string iOSAccount => $"{_environment}";
+        public string iOSAccount => $"{_environment}".ToLowerInvariant();
 
         public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.AppMetadata;
 

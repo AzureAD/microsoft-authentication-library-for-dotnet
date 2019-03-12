@@ -50,6 +50,8 @@ namespace Microsoft.Identity.Client.Cache
         public const string ExtendedExpiresOn = "extended_expires_on";
         public const string ClientInfo = "client_info";
         public const string FamilyId = "family_id";
+        public const string AppMetadata = "appmetadata";
+
 
         // todo(cache): this needs to be added to the spec.  needed for OBO flow on .NET.
         public const string UserAssertionHash = "user_assertion_hash";

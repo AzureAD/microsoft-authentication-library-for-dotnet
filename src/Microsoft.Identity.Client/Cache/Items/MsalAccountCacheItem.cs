@@ -41,22 +41,6 @@ namespace Microsoft.Identity.Client.Cache.Items
             AuthorityType = Cache.AuthorityType.MSSTS.ToString();
         }
 
-        internal MsalAccountCacheItem(string environment, MsalTokenResponse response)
-            : this()
-        {
-            var idToken = IdToken.Parse(response.IdToken);
-
-            Init(
-                environment,
-                idToken?.ObjectId,
-                response.ClientInfo,
-                idToken.Name,
-                idToken.PreferredUsername,
-                idToken.TenantId,
-                idToken.GivenName,
-                idToken.FamilyName);
-        }
-
         internal MsalAccountCacheItem(
             string environment,
             MsalTokenResponse response,
@@ -77,7 +61,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 idToken.FamilyName);
         }
 
-        internal MsalAccountCacheItem(
+        internal /* for test */ MsalAccountCacheItem(
             string environment,
             string localAccountId,
             string rawClientInfo,

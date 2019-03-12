@@ -38,10 +38,10 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         [TestMethod]
         public void ArgNull()
         {
-            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey("", "clientId", "uid"));
-            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey(null, "clientId", "uid"));
-            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey(null, "clientId", "uid"));
-            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey("env", null, "uid"));
+            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey("", "clientId", "uid", "1"));
+            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey(null, "clientId", "uid", "1"));
+            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey(null, "clientId", "uid", "1"));
+            AssertException.Throws<ArgumentNullException>(() => new MsalRefreshTokenCacheKey("env", null, "uid", "1"));
 
             AssertException.Throws<ArgumentNullException>(() => new MsalIdTokenCacheKey("", "tid", "uid", "cid"));
             AssertException.Throws<ArgumentNullException>(() => new MsalIdTokenCacheKey(null, "tid", "uid", "cid"));
@@ -73,13 +73,26 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
         [TestMethod]
         public void MsalRefreshTokenCacheKey()
         {
-            var key = new MsalRefreshTokenCacheKey("login.microsoftonline.com", "clientid", "uid.utid");
+            var key = new MsalRefreshTokenCacheKey("login.microsoftonline.com", "clientid", "uid.utid", "");
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com-refreshtoken-clientid--", key.ToString());
 
             Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
             Assert.AreEqual("refreshtoken-clientid--", key.iOSService);
             Assert.AreEqual("refreshtoken-clientid-", key.iOSGeneric);
+            Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
+        }
+
+        [TestMethod]
+        public void MsalFamilyRefreshTokenCacheKey()
+        {
+            var key = new MsalRefreshTokenCacheKey("login.microsoftonline.com", "CLIENT_ID_NOT_USED", "uid.utid", "1");
+
+            Assert.AreEqual("uid.utid-login.microsoftonline.com-refreshtoken-1--", key.ToString());
+
+            Assert.AreEqual("uid.utid-login.microsoftonline.com", key.iOSAccount);
+            Assert.AreEqual("refreshtoken-1--", key.iOSService);
+            Assert.AreEqual("refreshtoken-1-", key.iOSGeneric);
             Assert.AreEqual((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken, key.iOSType);
         }
 
