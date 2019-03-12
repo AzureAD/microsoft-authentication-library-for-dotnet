@@ -179,8 +179,7 @@ namespace Microsoft.Identity.Client
                 return ex;
             }
 
-            throw new MsalException();
-            // todo: throw new MsalClientException(CoreErrorCodes.JsonParseError, CoreErrorMessages.MsalExceptionFailedToParse);
+            throw new MsalClientException(MsalError.JsonParseError,  MsalErrorMessage.MsalExceptionFailedToParse);
         }
 
         #endregion // SERIALIZATION
