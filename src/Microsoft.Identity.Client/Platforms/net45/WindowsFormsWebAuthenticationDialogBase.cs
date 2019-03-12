@@ -43,8 +43,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("This type should not be used and will be made internal.")]
-    public abstract class WindowsFormsWebAuthenticationDialogBase : Form
+    internal abstract class WindowsFormsWebAuthenticationDialogBase : Form
     {
         internal RequestContext RequestContext { get; set; }
 
