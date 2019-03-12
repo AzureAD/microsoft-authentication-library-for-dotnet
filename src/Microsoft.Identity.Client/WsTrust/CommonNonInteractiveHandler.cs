@@ -59,8 +59,8 @@ namespace Microsoft.Identity.Client.WsTrust
                 _requestContext.Logger.Error("Could not find UPN for logged in user.");
 
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.UnknownUser,
-                    CoreErrorMessages.UnknownUser);
+                    MsalError.UnknownUser,
+                    MsalErrorMessage.UnknownUser);
             }
 
             _requestContext.Logger.InfoPii($"Logged in user detected with user name '{platformUsername}'", "Logged in user detected");
@@ -77,8 +77,8 @@ namespace Microsoft.Identity.Client.WsTrust
             if (userRealmResponse == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.UserRealmDiscoveryFailed,
-                    CoreErrorMessages.UserRealmDiscoveryFailed);
+                    MsalError.UserRealmDiscoveryFailed,
+                    MsalErrorMessage.UserRealmDiscoveryFailed);
             }
 
             _requestContext.Logger.InfoPii(
@@ -101,8 +101,8 @@ namespace Microsoft.Identity.Client.WsTrust
             catch (XmlException ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.ParsingWsMetadataExchangeFailed,
-                    CoreErrorMessages.ParsingMetadataDocumentFailed,
+                    MsalError.ParsingWsMetadataExchangeFailed,
+                    MsalErrorMessage.ParsingMetadataDocumentFailed,
                     ex);
             }
 
@@ -113,8 +113,8 @@ namespace Microsoft.Identity.Client.WsTrust
             if (wsTrustEndpoint == null)
             {
                 throw MsalExceptionFactory.GetClientException(
-                  CoreErrorCodes.WsTrustEndpointNotFoundInMetadataDocument,
-                  CoreErrorMessages.WsTrustEndpointNotFoundInMetadataDocument);
+                  MsalError.WsTrustEndpointNotFoundInMetadataDocument,
+                  MsalErrorMessage.WsTrustEndpointNotFoundInMetadataDocument);
             }
 
             _requestContext.Logger.InfoPii(
@@ -158,7 +158,7 @@ namespace Microsoft.Identity.Client.WsTrust
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.ParsingWsTrustResponseFailed,
+                    MsalError.ParsingWsTrustResponseFailed,
                     ex.Message,
                     ex);
             }

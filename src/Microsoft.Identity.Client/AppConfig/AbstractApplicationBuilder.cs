@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Utils;
 
@@ -92,7 +93,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.LoggingCallback != null)
             {
-                throw new InvalidOperationException(CoreErrorMessages.LoggingCallbackAlreadySet);
+                throw new InvalidOperationException(MsalErrorMessage.LoggingCallbackAlreadySet);
             }
 
             Config.LoggingCallback = loggingCallback;
@@ -147,7 +148,7 @@ namespace Microsoft.Identity.Client.AppConfig
         {
             if (Config.TelemetryCallback != null)
             {
-                throw new InvalidOperationException(CoreErrorMessages.TelemetryCallbackAlreadySet);
+                throw new InvalidOperationException(MsalErrorMessage.TelemetryCallbackAlreadySet);
             }
 
             Config.TelemetryCallback = telemetryCallback;
@@ -271,19 +272,19 @@ namespace Microsoft.Identity.Client.AppConfig
             // Validate that we have a client id
             if (string.IsNullOrWhiteSpace(Config.ClientId))
             {
-                throw new InvalidOperationException(CoreErrorMessages.NoClientIdWasSpecified);
+                throw new InvalidOperationException(MsalErrorMessage.NoClientIdWasSpecified);
             }
 
             if (!Guid.TryParse(Config.ClientId, out Guid clientIdGuid))
             {
-                throw new InvalidOperationException(CoreErrorMessages.ClientIdMustBeAGuid);
+                throw new InvalidOperationException(MsalErrorMessage.ClientIdMustBeAGuid);
             }
 
             TryAddDefaultAuthority();
 
             if (Config.AuthorityInfo.AuthorityType == AuthorityType.Adfs)
             {
-                throw new InvalidOperationException(CoreErrorMessages.AdfsNotCurrentlySupportedAuthorityType);
+                throw new InvalidOperationException(MsalErrorMessage.AdfsNotCurrentlySupportedAuthorityType);
             }
         }
 
@@ -324,7 +325,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 Config.AadAuthorityAudience != AadAuthorityAudience.AzureAdMyOrg)
             {
                 // Conflict, user has specified a string tenantId and the enum audience value for AAD, which is also the tenant.
-                throw new InvalidOperationException(CoreErrorMessages.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
+                throw new InvalidOperationException(MsalErrorMessage.TenantIdAndAadAuthorityInstanceAreMutuallyExclusive);
             }
 
             if (Config.AadAuthorityAudience != AadAuthorityAudience.None)
@@ -346,7 +347,7 @@ namespace Microsoft.Identity.Client.AppConfig
             if (!string.IsNullOrWhiteSpace(Config.Instance) && Config.AzureCloudInstance != AzureCloudInstance.None)
             {
                 // Conflict, user has specified a string instance and the enum instance value.
-                throw new InvalidOperationException(CoreErrorMessages.InstanceAndAzureCloudInstanceAreMutuallyExclusive);
+                throw new InvalidOperationException(MsalErrorMessage.InstanceAndAzureCloudInstanceAreMutuallyExclusive);
             }
 
             if (!string.IsNullOrWhiteSpace(Config.Instance))

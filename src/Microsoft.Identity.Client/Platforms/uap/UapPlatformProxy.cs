@@ -71,8 +71,8 @@ namespace Microsoft.Identity.Client.Platforms.uap
             if (users == null || !users.Any())
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
-                    CoreErrorMessages.UapCannotFindDomainUser);
+                    MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
+                    MsalErrorMessage.UapCannotFindDomainUser);
             }
 
             var getUserDetailTasks = users.Select(async u =>
@@ -111,14 +111,14 @@ namespace Microsoft.Identity.Client.Platforms.uap
             if (userDetails.Any(d => !string.IsNullOrWhiteSpace(d.Domain)))
             {
                 throw MsalExceptionFactory.GetClientException(
-                   CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
-                   CoreErrorMessages.UapCannotFindUpn);
+                   MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
+                   MsalErrorMessage.UapCannotFindUpn);
             }
 
             // no domain, no upn -> missing User Info capability
             throw MsalExceptionFactory.GetClientException(
-                CoreErrorCodes.CannotAccessUserInformationOrUserNotDomainJoined,
-                CoreErrorMessages.UapCannotFindDomainUser);
+                MsalError.CannotAccessUserInformationOrUserNotDomainJoined,
+                MsalErrorMessage.UapCannotFindDomainUser);
 
         }
 

@@ -38,6 +38,7 @@ using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
 {
@@ -77,7 +78,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.InstanceTests
             catch (Exception exc)
             {
                 Assert.IsInstanceOfType(exc, typeof(ArgumentException));
-                Assert.AreEqual(CoreErrorMessages.B2cAuthorityUriInvalidPath, exc.Message);
+                Assert.AreEqual(MsalErrorMessage.B2cAuthorityUriInvalidPath, exc.Message);
             }
         }
 

@@ -30,6 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 
 namespace Microsoft.Identity.Client.Internal.Requests
@@ -53,7 +54,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
             {
                 throw new MsalUiRequiredException(
                     MsalUiRequiredException.TokenCacheNullError,
-                    CoreErrorMessages.NullTokenCacheError);
+                    MsalErrorMessage.NullTokenCacheError);
             }
 
             AuthenticationRequestParameters.RequestContext.Logger.Verbose(LogMessages.BeginningAcquireByRefreshToken);
@@ -64,7 +65,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
 
             if (msalTokenResponse.RefreshToken == null)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Info(CoreErrorMessages.NoRefreshTokenInResponse);
+                AuthenticationRequestParameters.RequestContext.Logger.Info(MsalErrorMessage.NoRefreshTokenInResponse);
                 throw new MsalServiceException(msalTokenResponse.Error, msalTokenResponse.ErrorDescription, null);
             }
 

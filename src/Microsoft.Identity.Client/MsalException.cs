@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Client
         /// Initializes a new instance of the exception class.
         /// </summary>
         public MsalException()
-            : base(CoreErrorMessages.Unknown)
+            : base(MsalErrorMessage.Unknown)
         {
             ErrorCode = UnknownError;
         }

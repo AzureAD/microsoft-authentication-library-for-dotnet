@@ -140,7 +140,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(CoreErrorCodes.ServiceNotAvailable, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(CoreErrorCodes.ServiceNotAvailable, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.ServiceNotAvailable, exc.ErrorCode);
                 }
             }
         }
@@ -213,7 +213,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(CoreErrorCodes.RequestTimeout, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                     Assert.IsTrue(exc.InnerException is TaskCanceledException);
                 }
             }
@@ -241,7 +241,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.HttpTests
                 catch (MsalServiceException exc)
                 {
                     Assert.IsNotNull(exc);
-                    Assert.AreEqual(CoreErrorCodes.RequestTimeout, exc.ErrorCode);
+                    Assert.AreEqual(MsalError.RequestTimeout, exc.ErrorCode);
                     Assert.IsTrue(exc.InnerException is TaskCanceledException);
                 }
             }

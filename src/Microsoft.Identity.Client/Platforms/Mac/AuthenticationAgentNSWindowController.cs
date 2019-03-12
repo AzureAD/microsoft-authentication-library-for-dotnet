@@ -251,8 +251,8 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                 !request.Url.Scheme.Equals("https", StringComparison.CurrentCultureIgnoreCase))
             {
                 var result = new AuthorizationResult(AuthorizationStatus.ErrorHttp);
-                result.Error = CoreErrorCodes.NonHttpsRedirectNotSupported;
-                result.ErrorDescription = CoreErrorMessages.NonHttpsRedirectNotSupported;
+                result.Error = MsalError.NonHttpsRedirectNotSupported;
+                result.ErrorDescription = MsalErrorMessage.NonHttpsRedirectNotSupported;
                 _callbackMethod(result);
                 WebView.DecideIgnore(decisionToken);
                 Close();

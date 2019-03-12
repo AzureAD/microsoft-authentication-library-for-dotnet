@@ -109,8 +109,8 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             }
 
             throw MsalExceptionFactory.GetClientException(
-                CoreErrorCodes.CannotAccessPublisherKeyChain,
-                CoreErrorMessages.CannotAccessPublisherKeyChain);
+                MsalError.CannotAccessPublisherKeyChain,
+                MsalErrorMessage.CannotAccessPublisherKeyChain);
         }
 
         public iOSTokenCacheAccessor()
@@ -293,10 +293,10 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             if (secStatusCode == SecStatusCode.MissingEntitlement)
             {
                 throw MsalExceptionFactory.GetClientException(
-                CoreErrorCodes.MissingEntitlements,
+                MsalError.MissingEntitlements,
                 string.Format(
                     CultureInfo.InvariantCulture,
-                    CoreErrorMessages.MissingEntitlements,
+                    MsalErrorMessage.MissingEntitlements,
                     recordToSave.AccessGroup));
             }
 

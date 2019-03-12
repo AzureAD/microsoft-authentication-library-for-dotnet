@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.Core;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
 using System;
 using System.Collections.Generic;
@@ -46,7 +47,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 
         public Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload)
         {
-            throw new PlatformNotSupportedException(CoreErrorMessages.BrokerNotSupportedOnThisPlatform);
+            throw new PlatformNotSupportedException(MsalErrorMessage.BrokerNotSupportedOnThisPlatform);
         }
     }
 }

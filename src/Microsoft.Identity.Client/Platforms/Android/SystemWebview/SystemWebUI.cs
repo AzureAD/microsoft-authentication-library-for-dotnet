@@ -69,7 +69,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.SystemWebview
             {
                 requestContext.Logger.ErrorPii(ex);
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailedError, 
+                    MsalError.AuthenticationUiFailedError, 
                     "AuthenticationActivity failed to start", 
                     ex);
             }

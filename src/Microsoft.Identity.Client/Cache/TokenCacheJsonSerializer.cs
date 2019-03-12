@@ -82,7 +82,7 @@ namespace Microsoft.Identity.Client.Cache
             }
             catch (Exception ex)
             {
-                throw MsalExceptionFactory.GetClientException(CoreErrorCodes.JsonParseError, CoreErrorMessages.TokenCacheJsonSerializerFailedParse, ex);
+                throw MsalExceptionFactory.GetClientException(MsalError.JsonParseError, MsalErrorMessage.TokenCacheJsonSerializerFailedParse, ex);
             }
 
             if (cache.AccessTokens != null)

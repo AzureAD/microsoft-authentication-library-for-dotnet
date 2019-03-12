@@ -95,7 +95,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.WsTrustTests
                 }
                 catch (MsalException ex)
                 {
-                    Assert.AreEqual(CoreErrorCodes.FederatedServiceReturnedError, ex.ErrorCode);
+                    Assert.AreEqual(MsalError.FederatedServiceReturnedError, ex.ErrorCode);
                 }
             }
         }

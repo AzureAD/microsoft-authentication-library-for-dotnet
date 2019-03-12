@@ -42,6 +42,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.WsTrust;
 using Microsoft.Identity.Client.ApiConfig.Executors;
+using Microsoft.Identity.Client.Exceptions;
 
 #if iOS
 using Microsoft.Identity.Client.Platforms.iOS;
@@ -610,7 +611,7 @@ namespace Microsoft.Identity.Client
         {
             if (string.IsNullOrWhiteSpace(refreshToken))
             {
-                throw new ArgumentNullException(nameof(refreshToken), CoreErrorMessages.NoRefreshTokenProvided);
+                throw new ArgumentNullException(nameof(refreshToken), MsalErrorMessage.NoRefreshTokenProvided);
             }
 
             return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);

@@ -428,7 +428,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _secureString).ConfigureAwait(false));
 
                 // Check exception message
-                Assert.AreEqual(CoreErrorCodes.ParsingWsTrustResponseFailed, result.ErrorCode);
+                Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
@@ -501,7 +501,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         str).ConfigureAwait(false));
 
                 // Check inner exception
-                Assert.AreEqual(CoreErrorCodes.ParsingWsTrustResponseFailed, result.ErrorCode);
+                Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
@@ -544,7 +544,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _secureString).ConfigureAwait(false));
 
                 // Check inner exception
-                Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
+                Assert.AreEqual(MsalError.InvalidRequest, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
@@ -596,7 +596,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         _secureString).ConfigureAwait(false));
 
                 // Check inner exception
-                Assert.AreEqual(CoreErrorCodes.InvalidRequest, result.ErrorCode);
+                Assert.AreEqual(MsalError.InvalidRequest, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
@@ -712,7 +712,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                         str).ConfigureAwait(false));
 
                 // Check error code
-                Assert.AreEqual(CoreErrorCodes.InvalidGrantError, result.ErrorCode);
+                Assert.AreEqual(MsalError.InvalidGrantError, result.ErrorCode);
 
                 // There should be no cached entries.
                 Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);

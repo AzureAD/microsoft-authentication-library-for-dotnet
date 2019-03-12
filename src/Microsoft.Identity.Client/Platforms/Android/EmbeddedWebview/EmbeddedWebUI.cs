@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.Platforms.Android.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailedError, 
+                    MsalError.AuthenticationUiFailedError, 
                     "AuthenticationActivity failed to start", 
                     ex);
             }
