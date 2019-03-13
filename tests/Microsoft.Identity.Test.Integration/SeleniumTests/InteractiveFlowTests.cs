@@ -69,6 +69,9 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
+        [TestCategory("AzureGermanyCloud")]
+        [TestCategory("AzureChinaCloud")]
         public async Task Interactive_AADAsync()
         {
             // Arrange
@@ -77,12 +80,15 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
+        [TestCategory("AzureGermanyCloud")]
+        [TestCategory("AzureChinaCloud")]
         public async Task Interactive_AdfsV3_NotFederatedAsync()
         {
             // Arrange
             UserQuery query = new UserQuery
             {
-                FederationProvider = FederationProvider.AdfsV4,
+                FederationProvider = FederationProvider.AdfsV3,
                 IsMamUser = false,
                 IsMfaUser = false,
                 IsFederatedUser = false
@@ -93,12 +99,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         }
 
         [TestMethod]
+        [TestCategory("AzureGermanyCloud")]
+        [TestCategory("AzureChinaCloud")]
         public async Task Interactive_AdfsV3_FederatedAsync()
         {
             // Arrange
             UserQuery query = new UserQuery
             {
-                FederationProvider = FederationProvider.AdfsV4,
+                FederationProvider = FederationProvider.AdfsV3,
                 IsMamUser = false,
                 IsMfaUser = false,
                 IsFederatedUser = true
@@ -160,7 +168,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
-                                                                        .WithAuthority(CloudConfigurationProvider.Authority)
+                                                                        .WithAuthority(CloudConfigurationProvider.Authority, false)
                                                                         .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
                                                                         .BuildConcrete();
 

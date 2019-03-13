@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.Identity.Test.ConfigurationProvider;
@@ -50,20 +51,6 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             LabResponse response;
             LabUser user;
-
-            //Fetch user
-            if (query.CloudType == CloudType.AzureUSGovernmentArlington)
-            {
-                response = new LabResponse();
-                response.AppId = "cb7faed4-b8c0-49ee-b421-f5ed16894c83";
-                user = new LabUser();
-                user.Upn = "idlab@arlmsidlab1.onmicrosoft.us";
-                user.IsExternal = false;
-                user.IsFederated = false;
-                user.CredentialUrl = "https://msidlabs.vault.azure.net:443/secrets/arlmsidlab1";
-                user.ObjectId = new Guid("7290cce3-0b93-470b-a224-c51cd2b135b2");
-                return response;
-            }
 
             string result = CreateLabQuery(query);
 
@@ -90,7 +77,25 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         {
             HttpClient webClient = new HttpClient();
             IDictionary<string, string> queryDict = new Dictionary<string, string>();
-            UriBuilder uriBuilder = new UriBuilder(LabApiConstants.LabEndpoint);
+
+            string endpoint;
+            switch (query.CloudType)
+            {
+                case CloudType.AzureCloud:
+                case CloudType.AzureUSGovernment:
+                    endpoint = LabApiConstants.LabEndpoint;
+                    break;
+                case CloudType.AzureChinaCloud:
+                case CloudType.AzureGermanyCloud:
+                case CloudType.AzureUSGovernmentArlington:
+                    endpoint = LabApiConstants.BetaEndpoint;
+                    break;
+                default:
+                    endpoint = LabApiConstants.LabEndpoint;
+                    break;
+            }
+ 
+            UriBuilder uriBuilder = new UriBuilder(endpoint);
 
             //Disabled for now until there are tests that use it.
             queryDict.Add(LabApiConstants.MobileAppManagementWithConditionalAccess, LabApiConstants.False);
@@ -99,7 +104,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             //Building user query
             if (query.CloudType != CloudType.AzureCloud)
             {
-                queryDict.Add("AzureEnvironment", query.CloudType.ToString());
+                queryDict.Add(LabApiConstants.CloudEnvironment, query.CloudType.ToString());
             }
 
             if (query.FederationProvider != null)
@@ -139,9 +144,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 queryDict.Add(LabApiConstants.B2CProvider, LabApiConstants.B2CGoogle);
             }
 
-#pragma warning disable CA1305 // Specify IFormatProvider
-            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString()));
-#pragma warning restore CA1305 // Specify IFormatProvider
+            uriBuilder.Query = string.Join("&", queryDict.Select(x => x.Key + "=" + x.Value.ToString(CultureInfo.InvariantCulture)));
             string result = webClient.GetStringAsync(uriBuilder.ToString()).GetAwaiter().GetResult();
             return result;
         }

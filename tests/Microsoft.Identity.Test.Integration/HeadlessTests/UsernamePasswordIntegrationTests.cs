@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -57,6 +57,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
         #region Happy Path Tests
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
         public async Task ROPC_AAD_Async()
         {
             var labResponse = LabUserHelper.GetDefaultUser();
@@ -78,6 +79,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
         public async Task ROPC_ADFSv3Federated_Async()
         {
             var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, true);
@@ -85,6 +87,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         }
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
         public async Task ROPC_ADFSv3Managed_Async()
         {
             var labResponse = LabUserHelper.GetAdfsUser(FederationProvider.AdfsV3, false);
@@ -101,6 +104,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
         #endregion
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
         public async Task AcquireTokenWithManagedUsernameIncorrectPasswordAsync()
         {
             var labResponse = LabUserHelper.GetDefaultUser();

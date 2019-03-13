@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
         public async Task AuthorityMigrationAsync()
         {
             var labResponse = LabUserHelper.GetDefaultUser();

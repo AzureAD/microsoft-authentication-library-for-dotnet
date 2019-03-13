@@ -43,6 +43,7 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
 
 
         [TestMethod]
+        [TestCategory("AzureUSGovernment")]
         public async Task SilentAuth_ForceRefresh_Async()
         {
             var labResponse = LabUserHelper.GetDefaultUser();

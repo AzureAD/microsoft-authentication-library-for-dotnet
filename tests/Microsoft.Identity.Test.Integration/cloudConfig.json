@@ -1,0 +1,27 @@
+{
+  "DefaultCloud": {
+    "CloudType": "AzureCloud",
+    "Authority": "https://login.microsoftonline.com/common",
+    "Scopes": "User.Read"
+  },
+  "GermanyCloud": {
+    "CloudType": "AzureGermanyCloud",
+    "Authority": "https://login.microsoftonline.de/common",
+    "Scopes": "https://graph.cloudapi.de/.default"
+  },
+  "ChinaCloud": {
+    "CloudType": "AzureChinaCloud",
+    "Authority": "https://login.chinacloudapi.cn/common",
+    "Scopes": "https://microsoftgraph.chinacloudapi.cn/.default"
+  },
+  "FairFaxCloud": {
+    "CloudType": "AzureUSGovernment",
+    "Authority": "https://login.microsoftonline.us/common",
+    "Scopes": "User.Read"
+  },
+  "ArlingtonCloud": {
+    "CloudType": "AzureUSGovernmentArlington",
+    "Authority": "https://login.microsoftonline.us/common",
+    "Scopes": "User.Read"
+  }
+}

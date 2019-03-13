@@ -9,13 +9,18 @@ namespace Microsoft.Identity.Test.ConfigurationProvider
 {
     public static class CloudConfigurationProvider
     {
+        const string CloudSelectionConfig = "cloudSelection.json";
+        const string CloudConfig = "cloudConfig.json";
         static CloudConfiguration _cloudConfiguration;
 
         static CloudConfigurationProvider()
         {
-            var configBuilder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("config.json");
+            var cloudSelectorConfigBuilder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile(CloudSelectionConfig);
+            var selectionConfig = cloudSelectorConfigBuilder.Build();
+            string cloudType = selectionConfig.GetValue(typeof(string), "CloudType").ToString();
+
+            var configBuilder = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile(CloudConfig);
             var config = configBuilder.Build();
-            string cloudType = config.GetValue(typeof(string), "CloudType").ToString();
             _cloudConfiguration = new CloudConfiguration(config.GetSection(cloudType));
         }
 
@@ -32,7 +37,6 @@ namespace Microsoft.Identity.Test.ConfigurationProvider
             get
             {
                 return _cloudConfiguration.Authority;
-                //return "https://login.chinacloudapi.cn/common";
             }
         }
 
