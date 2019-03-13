@@ -54,7 +54,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private const string KeyVaultConfidentialClientId = "ebe49c8f-61de-4357-9194-7a786f6402b4";
         private const string KeyVaultPublicClientId = "3c1e0e0d-b742-45ba-a35e-01c664e14b16";
 
-        private const string KeyVaultThumbPrint = "440A5BE6C4BE2FF02A0ADBED1AAA43D6CF12E269";
+        private const string KeyVaultThumbPrint = "79FBCBEB5CD28994E50DAFF8035BACF764B14306";
 
         private const string DataFileName = "data.txt";
 
