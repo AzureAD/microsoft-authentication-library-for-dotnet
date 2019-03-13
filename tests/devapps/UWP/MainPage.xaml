@@ -11,8 +11,6 @@
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Button Content="Acquire Token Interactive" HorizontalAlignment="Center" Margin="0,100,0,0" VerticalAlignment="Top" Click="AccessTokenButton_ClickAsync"/>
         <Button Content="Acquire Token Silent" HorizontalAlignment="Center" Margin="0,150,0,0" VerticalAlignment="Top" Click="AccessTokenSilentButton_ClickAsync"/>
-        <Button Content="Acquire Token with ADAL" HorizontalAlignment="Center" Margin="0,257,0,0" VerticalAlignment="Top" Click="ADALButton_ClickAsync"/>
-        <Button Content="Acquire Token Silent with ADAL" HorizontalAlignment="Center" Margin="0,307,0,0" VerticalAlignment="Top" Click="ADALSilentButton_ClickAsync"/>
 
         <Button Content="Clear Cache" HorizontalAlignment="Left" Margin="636,354,0,0" VerticalAlignment="Top" Click="ClearCacheAsync"/>
         <Button Content="Clear First Account" HorizontalAlignment="Left" Margin="750,354,0,0" VerticalAlignment="Top" Click="ClearFirstAccountAsync"/>
