@@ -1,5 +1,4 @@
 ﻿<Project>
-
   <PropertyGroup>
     <!-- The MSAL.snk has both private and public keys -->
     <DelaySign>false</DelaySign>
