@@ -30,7 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.Identity.Test.ConfigurationProvider;
+using Microsoft.Identity.Test.LabInfrastructure.CloudInfrastructure;
 using Newtonsoft.Json;
 
 namespace Microsoft.Identity.Test.LabInfrastructure
@@ -102,7 +102,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
             queryDict.Add(LabApiConstants.MobileDeviceManagementWithConditionalAccess, LabApiConstants.False);
 
             //Building user query
-            if (query.CloudType != CloudType.AzureCloud)
+            if (query.CloudType != CloudType.None)
             {
                 queryDict.Add(LabApiConstants.CloudEnvironment, query.CloudType.ToString());
             }

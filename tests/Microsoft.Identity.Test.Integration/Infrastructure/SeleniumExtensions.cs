@@ -49,7 +49,7 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             // ~2x faster, no visual rendering
             // remove when debugging to see the UI automation
-            options.AddArguments("headless");
+            //options.AddArguments("headless");
 
             var driver = new ChromeDriver(options);
             driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(ImplicitTimeoutSeconds);
@@ -126,7 +126,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
             if (!withLoginHint)
             {
                 Trace.WriteLine("Logging in ... Entering username");
-                var pass = user.Password;
                 driver.FindElement(By.Id(fields.AADUsernameInputId)).SendKeys(user.Upn);
 
                 Trace.WriteLine("Logging in ... Clicking <Next> after username");

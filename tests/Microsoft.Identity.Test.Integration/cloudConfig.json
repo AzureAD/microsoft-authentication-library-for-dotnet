@@ -20,7 +20,7 @@
     "Scopes": "User.Read"
   },
   "ArlingtonCloud": {
-    "CloudType": "AzureUSGovernmentArlington",
+    "CloudType": "AzureCloud",
     "Authority": "https://login.microsoftonline.us/common",
     "Scopes": "User.Read"
   }

@@ -6,6 +6,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -13,16 +19,11 @@
       <Project>{3433eb33-114a-4db7-bc57-14f17f55da3c}</Project>
       <Name>Microsoft.Identity.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Identity.Test.ConfigurationProvider\Microsoft.Identity.Test.ConfigurationProvider.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="data.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />
   </ItemGroup>
 </Project>

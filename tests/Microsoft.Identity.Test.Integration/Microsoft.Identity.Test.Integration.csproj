@@ -9,14 +9,10 @@
 
   <ItemGroup>
     <None Remove="cloudConfig.json" />
-    <None Remove="cloudSelection.json" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="cloudConfig.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="cloudSelection.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>

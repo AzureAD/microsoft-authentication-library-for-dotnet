@@ -38,6 +38,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
         private static readonly IDictionary<UserQuery, LabResponse> _userCache =
             new Dictionary<UserQuery, LabResponse>();
 
+        public static bool UseCache { get; set; } = true;
 
         static LabUserHelper()
         {
@@ -48,7 +49,7 @@ namespace Microsoft.Identity.Test.LabInfrastructure
 
         public static LabResponse GetLabUserData(UserQuery query)
         {
-            if (_userCache.ContainsKey(query))
+            if (UseCache && _userCache.ContainsKey(query))
             {
                 Debug.WriteLine("User cache hit");
                 return _userCache[query];
@@ -60,8 +61,11 @@ namespace Microsoft.Identity.Test.LabInfrastructure
                 throw new LabUserNotFoundException(query, "Found no users for the given query.");
             }
 
-            Debug.WriteLine("User cache miss");
-            _userCache.Add(query, user);
+            if (UseCache)
+            {
+                Debug.WriteLine("User cache miss");
+                _userCache.Add(query, user);
+            }
 
             return user;
         }

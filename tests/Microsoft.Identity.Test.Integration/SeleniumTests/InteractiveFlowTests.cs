@@ -29,7 +29,6 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Test.ConfigurationProvider;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,9 +44,6 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     [TestClass]
     public class InteractiveFlowTests
     {
-        private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
-        private static readonly string[] _scopes = new[] { CloudConfigurationProvider.Scopes };
-
         #region MSTest Hooks
         /// <summary>
         /// Initialized by MSTest (do not make private or readonly)
@@ -69,20 +65,14 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
         #endregion
 
         [TestMethod]
-        [TestCategory("AzureUSGovernment")]
-        [TestCategory("AzureGermanyCloud")]
-        [TestCategory("AzureChinaCloud")]
         public async Task Interactive_AADAsync()
         {
             // Arrange
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await SeleniumTestHelper.RunInteractiveTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [TestCategory("AzureUSGovernment")]
-        [TestCategory("AzureGermanyCloud")]
-        [TestCategory("AzureChinaCloud")]
         public async Task Interactive_AdfsV3_NotFederatedAsync()
         {
             // Arrange
@@ -95,12 +85,10 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await SeleniumTestHelper.RunInteractiveTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
-        [TestCategory("AzureGermanyCloud")]
-        [TestCategory("AzureChinaCloud")]
         public async Task Interactive_AdfsV3_FederatedAsync()
         {
             // Arrange
@@ -113,7 +101,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await SeleniumTestHelper.RunInteractiveTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -130,7 +118,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await SeleniumTestHelper.RunInteractiveTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -146,7 +134,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
+            await SeleniumTestHelper.RunInteractiveTestForUserAsync(labResponse).ConfigureAwait(false);
         }
 
         [TestMethod]
@@ -162,49 +150,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponse = LabUserHelper.GetLabUserData(query);
-            await RunTestForUserAsync(labResponse).ConfigureAwait(false);
-        }
-
-        private async Task RunTestForUserAsync(LabResponse labResponse)
-        {
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
-                                                                        .WithAuthority(CloudConfigurationProvider.Authority, false)
-                                                                        .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                                                                        .BuildConcrete();
-
-            Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
-            AuthenticationResult result = await pca
-                .AcquireTokenInteractive(_scopes, null)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
-                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
-                .ConfigureAwait(false);
-            IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-
-            Trace.WriteLine("Part 2 - Clear the cache");
-            await pca.RemoveAsync(account).ConfigureAwait(false);
-            Assert.IsFalse((await pca.GetAccountsAsync().ConfigureAwait(false)).Any());
-
-            Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
-            result = await pca
-                .AcquireTokenInteractive(_scopes, null)
-                .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
-                .WithLoginHint(labResponse.User.HomeUPN)
-                .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
-                .ConfigureAwait(false);
-            account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-
-            Trace.WriteLine("Part 4 - Acquire a token silently");
-            result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
-            await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
-        }
-
-        private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, bool withLoginHint)
-        {
-            return new SeleniumWebUI((driver) =>
-            {
-                Trace.WriteLine("Starting Selenium automation");
-                driver.PerformLogin(user, withLoginHint);
-            });
-        }    
+            await SeleniumTestHelper.RunInteractiveTestForUserAsync(labResponse).ConfigureAwait(false);
+        } 
     }
 }

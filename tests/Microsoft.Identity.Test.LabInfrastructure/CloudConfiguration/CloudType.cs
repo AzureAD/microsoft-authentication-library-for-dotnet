@@ -1,4 +1,4 @@
-﻿//------------------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,24 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client;
-using Microsoft.Identity.Test.Integration.Infrastructure;
-using Microsoft.Identity.Test.LabInfrastructure;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Diagnostics;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Microsoft.Identity.Test.Integration.HeadlessTests
+namespace Microsoft.Identity.Test.LabInfrastructure.CloudInfrastructure
 {
-    [TestClass]
-    public class SilentAuthTests
+    public enum CloudType
     {
-        [TestMethod]
-        public async Task SilentAuth_ForceRefresh_Async()
-        {
-            await SeleniumTestHelper.SilentAuth_ForceRefresh_Async().ConfigureAwait(false);
-        }
+        None,
+        AzureCloud,
+        AzureGermanyCloud,
+        AzureUSGovernment,
+        AzureChinaCloud,
+        AzureUSGovernmentArlington
     }
 }

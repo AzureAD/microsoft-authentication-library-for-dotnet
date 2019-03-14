@@ -27,6 +27,7 @@
 
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.Identity.Test.Unit;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -44,40 +45,10 @@ namespace Microsoft.Identity.Test.Integration.HeadlessTests
     [TestClass]
     public class AuthorityMigrationTests
     {
-        private static readonly string[] _scopes = { "User.Read" };
-
-
         [TestMethod]
-        [TestCategory("AzureUSGovernment")]
         public async Task AuthorityMigrationAsync()
         {
-            var labResponse = LabUserHelper.GetDefaultUser();
-            var user = labResponse.User;
-
-            IPublicClientApplication pca = PublicClientApplicationBuilder
-                .Create(labResponse.AppId)
-                .Build();
-
-            Trace.WriteLine("Acquire a token using a not so common authority alias");
-
-            AuthenticationResult authResult = await pca.AcquireTokenByUsernamePassword(
-               _scopes,
-                user.Upn,
-                new NetworkCredential("", user.Password).SecurePassword)
-                .WithAuthority("https://sts.windows.net/" + user.CurrentTenantId + "/")
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(authResult.AccessToken);
-
-            Trace.WriteLine("Acquire a token silently using the common authority alias");
-
-            authResult = await pca.AcquireTokenSilent(_scopes, (await pca.GetAccountsAsync().ConfigureAwait(false)).First())
-                .WithAuthority(AadAuthorityAudience.AzureAdMultipleOrgs)
-                .ExecuteAsync()
-                .ConfigureAwait(false);
-
-            Assert.IsNotNull(authResult.AccessToken);
+            await SeleniumTestHelper.AuthorityMigrationTestAsync().ConfigureAwait(false);
         }
     }
 }
