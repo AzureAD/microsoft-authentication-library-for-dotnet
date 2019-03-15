@@ -54,7 +54,13 @@ namespace Microsoft.Identity.Client
 
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
         MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey getIdTokenItemKey, RequestContext requestContext);
-        Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(AuthenticationRequestParameters authenticationRequestParameters);
+
+        /// <summary>
+        /// Returns a RT for the request. If familyId is specified, it tries to return the FRT.
+        /// </summary>
+        Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync(
+            AuthenticationRequestParameters authenticationRequestParameters,
+            string familyId = null);
 
         void SetIosKeychainSecurityGroup(string securityGroup);
 
@@ -67,6 +73,12 @@ namespace Microsoft.Identity.Client
         IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens(bool filterByClientId);
         IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens(bool filterByClientId);
         IEnumerable<MsalAccountCacheItem> GetAllAccounts();
+
+        /// <summary>
+        /// FOCI - check in the app metadata to see if the app is part of the family
+        /// </summary>
+        /// <returns>null if unkown, true or false if app metadata has details</returns>
+        Task<bool?> IsFociMemberAsync(AuthenticationRequestParameters authenticationRequestParameters, string familyId);
 
         void ClearAdalCache();
         void ClearMsalCache();
