@@ -582,12 +582,16 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 // Act
                 cache.SaveTokenResponse(requestParams, response);
 
+                // Assert
                 cache.Accessor.AssertItemCount(
                     expectedAtCount: 1,
                     expectedRtCount: 1,
                     expectedAccountCount: 1,
                     expectedIdtCount: 1,
-                    expectedAppMetadataCount: 0);               
+                    expectedAppMetadataCount: 0);
+
+                // Don't save RT as an FRT if FOCI is disabled
+                Assert.IsTrue(string.IsNullOrEmpty(cache.Accessor.GetAllRefreshTokens().First().FamilyId));
             }
         }
 
@@ -926,6 +930,99 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var tokenCache = new TokenCache();
             tokenCache.DeserializeMsalV3(new byte[0]);
+        }
+
+        [TestMethod]
+        public void TestGetAccounts_AcrossCliendIds()
+        {
+            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
+            ITokenCacheInternal cache = new TokenCache(serviceBundle);
+           
+
+        }
+
+        [TestMethod]
+        public void TestIsFociMember()
+        {
+            // Arrange
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
+                    MsalTestConstants.AuthorityTestTenant,
+                    MsalTestConstants.Scope,
+                    account: MsalTestConstants.User);
+
+                // Act
+                bool? result = cache.IsFociMemberAsync(requestParams, "1").Result;
+
+                // Assert
+                Assert.IsNull(result, "No app metadata, should return null which indicates <uknown>");
+
+                ValidateIsFociMember(cache, requestParams,
+                    metadataFamilyId: "1",
+                    expectedResult: true, // checks for familyId "1"
+                    errMessage: "Valid app metadata, should return true because family Id matches");
+
+
+                ValidateIsFociMember(cache, requestParams,
+                    metadataFamilyId: "2",
+                    expectedResult: false, // checks for familyId "1"
+                    errMessage: "Valid app metadata, should return true because family Id does not match");
+
+
+                ValidateIsFociMember(cache, requestParams,
+                    metadataFamilyId: null,
+                    expectedResult: false, // checks for familyId "1"
+                    errMessage: "Valid app metadata, app is not member of any family");
+            }
+        }
+    
+        [TestMethod]
+        public void TestIsFociMember_EnvAlias()
+        {
+            // Arrange
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+                ITokenCacheInternal cache = new TokenCache(harness.ServiceBundle);
+                AuthenticationRequestParameters requestParams = harness.CreateAuthenticationRequestParameters(
+                    MsalTestConstants.AuthorityTestTenant,
+                    MsalTestConstants.Scope,
+                    account: MsalTestConstants.User);
+
+                cache.Accessor.SaveAppMetadata(
+                    new MsalAppMetadataCacheItem(
+                        MsalTestConstants.ClientId,
+                        MsalTestConstants.ProductionNotPrefEnvironmentAlias,
+                        "1"));
+
+                // Act 
+                bool? result = cache.IsFociMemberAsync(requestParams, "1").Result; //requst params uses ProductionPrefEnvAlias
+
+                // Assert
+                Assert.AreEqual(true, result.Value);
+            }
+        }
+
+        private void ValidateIsFociMember(
+            ITokenCacheInternal cache,
+            AuthenticationRequestParameters requestParams,
+            string metadataFamilyId,
+            bool? expectedResult,
+            string errMessage)
+        {
+            // Arrange
+            var metadata = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, MsalTestConstants.ProductionPrefCacheEnvironment, metadataFamilyId);
+            cache.Accessor.SaveAppMetadata(metadata);
+
+            // Act
+            var result = cache.IsFociMemberAsync(requestParams, "1").Result;
+
+            // Assert
+            Assert.AreEqual(expectedResult, result, errMessage);
+            Assert.AreEqual(1, cache.Accessor.GetAllAppMetadata().Count());
         }
 
         /*

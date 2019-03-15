@@ -599,6 +599,54 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         }
 
         [TestMethod]
+        public async Task TestAccountAcrossMultipleClientIdsAsync()
+        {
+            // Arrange
+          
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+
+            // Populate with tokens tied to ClientId2
+            _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId2);
+
+            app.UserTokenCacheInternal.Accessor.AssertItemCount(
+                expectedAtCount: 2,
+                expectedRtCount: 1,
+                expectedAccountCount: 1,
+                expectedIdtCount: 1,
+                expectedAppMetadataCount: 1);
+
+            // Act
+            var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert - an account is returned even if app is scoped to ClientId1
+            Assert.AreEqual(1, accounts.Count());
+
+            // Arrange
+
+            // Populate for clientid2
+            _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId);
+          
+            app.UserTokenCacheInternal.Accessor.AssertItemCount(
+                expectedAtCount: 4,
+                expectedRtCount: 2,
+                expectedAccountCount: 1, // still 1 account
+                expectedIdtCount: 2,
+                expectedAppMetadataCount: 2);
+
+            // Act
+            await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
+
+            // Assert
+            app.UserTokenCacheInternal.Accessor.AssertItemCount(
+               expectedAtCount: 0,
+               expectedRtCount: 0,
+               expectedAccountCount: 0, 
+               expectedIdtCount: 0,
+               expectedAppMetadataCount: 2); // app metadata is never deleted
+
+        }
+
+        [TestMethod]
         [TestCategory("PublicClientApplicationTests")]
         public void GetUsersAndSignThemOutTest()
         {

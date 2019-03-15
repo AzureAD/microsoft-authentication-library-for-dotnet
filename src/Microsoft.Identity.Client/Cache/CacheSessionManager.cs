@@ -79,7 +79,7 @@ namespace Microsoft.Identity.Client.Cache
 
         public Task<bool?> IsAppFociMemberAsync(string familyId)
         {
-            return TokenCacheInternal.CheckAppIsFamilyMemberAsync(_requestParams, familyId);
+            return TokenCacheInternal.IsFociMemberAsync(_requestParams, familyId);
         }
     }
 }

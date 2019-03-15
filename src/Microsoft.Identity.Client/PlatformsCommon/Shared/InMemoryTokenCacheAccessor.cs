@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             // app metadata isn't removable
         }
 
-        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
         {
             if (_appMetadataDictionary.TryGetValue(appMetadataKey.ToString(), out var cacheItem))
             {
@@ -193,11 +193,5 @@ namespace Microsoft.Identity.Client.PlatformsCommon.Shared
             }
             return null;
         }
-
-        public void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata)
-        {
-            _appMetadataDictionary[appMetadata.GetKey().ToString()] = appMetadata;  
-        }
-
     }
 }
