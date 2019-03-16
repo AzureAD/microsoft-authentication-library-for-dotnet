@@ -930,16 +930,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         {
             var tokenCache = new TokenCache();
             tokenCache.DeserializeMsalV3(new byte[0]);
-        }
-
-        [TestMethod]
-        public void TestGetAccounts_AcrossCliendIds()
-        {
-            var serviceBundle = TestCommon.CreateDefaultServiceBundle();
-            ITokenCacheInternal cache = new TokenCache(serviceBundle);
-           
-
-        }
+        }   
 
         [TestMethod]
         public void TestIsFociMember()
@@ -969,13 +960,13 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ValidateIsFociMember(cache, requestParams,
                     metadataFamilyId: "2",
                     expectedResult: false, // checks for familyId "1"
-                    errMessage: "Valid app metadata, should return true because family Id does not match");
+                    errMessage: "Valid app metadata, should return false because family Id does not match");
 
 
                 ValidateIsFociMember(cache, requestParams,
                     metadataFamilyId: null,
                     expectedResult: false, // checks for familyId "1"
-                    errMessage: "Valid app metadata, app is not member of any family");
+                    errMessage: "Valid app metadata showing that the app is not member of any family");
             }
         }
     
