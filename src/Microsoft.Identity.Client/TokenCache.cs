@@ -626,19 +626,22 @@ namespace Microsoft.Identity.Client
 
                         requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
-                        if (requestParams.Account == null)
+                        // ADAL legacy cache does not store FRTs
+                        if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
                         {
-                            return null;
+                            return CacheFallbackOperations.GetAdalEntryForMsal(
+                                _logger,
+                                LegacyCachePersistence,
+                                preferredEnvironmentHost,
+                                environmentAliases,
+                                requestParams.ClientId,
+                                requestParams.LoginHint,
+                                requestParams.Account.HomeAccountId?.Identifier,
+                                null);
                         }
-                        return CacheFallbackOperations.GetAdalEntryForMsal(
-                            _logger,
-                            LegacyCachePersistence,
-                            preferredEnvironmentHost,
-                            environmentAliases,
-                            requestParams.ClientId,
-                            requestParams.LoginHint,
-                            requestParams.Account.HomeAccountId?.Identifier,
-                            null);
+
+                        return null;
+
                     }
                     finally
                     {

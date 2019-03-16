@@ -283,15 +283,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();
-
-                MockWebUI ui = new MockWebUI()
-                {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
-                };
-
+                                                                            .BuildConcrete();             
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));

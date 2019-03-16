@@ -66,7 +66,8 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             this MockHttpManager httpManager,
             string authority,
             IDictionary<string, string> bodyParameters = null,
-            IDictionary<string, string> queryParameters = null)
+            IDictionary<string, string> queryParameters = null,
+            bool foci = false)
         {
             httpManager.AddMockHandler(
                 new MockHttpMessageHandler()
@@ -75,7 +76,7 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                     ExpectedMethod = HttpMethod.Post,
                     ExpectedPostData = bodyParameters,
                     ExpectedQueryParams = queryParameters,
-                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
+                    ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage(foci)
                 });
         }
 
