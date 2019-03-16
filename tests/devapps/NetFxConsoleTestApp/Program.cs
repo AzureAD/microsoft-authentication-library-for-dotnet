@@ -41,31 +41,42 @@ namespace NetCoreTestApp
     public class Program
     {
         // TODO: replace with FOCI family members IDs
-        private const string FAMILY_MEMBER_1 = ""; 
-        private const string FAMILY_MEMBER_2 = ""; 
+        // DO NOT CHECK THESE IN
+        private const string FAMILY_MEMBER_1 = "";  // Office
+        private const string FAMILY_MEMBER_2 = "";  // Teams
+        private const string NON_FAMILY_MEMBER = "0615b6ca-88d4-4884-8729-b178178f7c27";
+
 
         private static readonly string[] s_scopes = new[] { "https://graph.microsoft.com/.default" };
 
-        private static readonly string s_cacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.bin";
+        private static readonly string s_cacheFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location + ".msalcache.json";
 
         // These 2 apps share the cache
-        private static IPublicClientApplication s_pca1;
-        private static IPublicClientApplication s_pca2;
+        private static IPublicClientApplication s_pcaFam1;
+        private static IPublicClientApplication s_pcaFam2;
+        private static IPublicClientApplication s_pcaNonFam;
 
         public static void Main(string[] args)
         {
-            s_pca1 = PublicClientApplicationBuilder
+            s_pcaFam1 = PublicClientApplicationBuilder
                 .Create(FAMILY_MEMBER_1)
                 .WithLogging(Log, LogLevel.Verbose, true)
                 .Build();
 
-            s_pca2 = PublicClientApplicationBuilder
+            s_pcaFam2 = PublicClientApplicationBuilder
                .Create(FAMILY_MEMBER_2)
                .WithLogging(Log, LogLevel.Verbose, true)
                .Build();
 
+            s_pcaNonFam = PublicClientApplicationBuilder
+             .Create(NON_FAMILY_MEMBER)
+             .WithLogging(Log, LogLevel.Verbose, true)
+             .Build();
 
-            SetCacheSerializationToFile(s_pca1);
+
+            SetCacheSerializationToFile(s_pcaFam1);
+            SetCacheSerializationToFile(s_pcaFam2);
+            SetCacheSerializationToFile(s_pcaNonFam);
 
             RunConsoleAppLogicAsync().Wait();
         }
@@ -95,15 +106,19 @@ namespace NetCoreTestApp
             {
                 Console.Clear();
 
-                await DisplayAccountsAsync(s_pca1).ConfigureAwait(false);
+                await DisplayAccountsAsync(s_pcaFam1).ConfigureAwait(false);
 
                 // display menu
                 Console.WriteLine(@"
-                        1. Acquire Token App1
-                        2. Acquire Token App2
-                        3. Acquire Token Silent App1
-                        4. Acquire Token Silent App2                        
-                        5. Clear cache
+                        1. Acquire Token App1 (family member)
+                        2. Acquire Token App2 (family member)
+                        3. Acquire Token App3 (non-family member)
+                        4. Acquire Token Silent App1 (family member)
+                        5. Acquire Token Silent App2 (family member)
+                        6. Acquire Token Silent App3 (non-family member)
+                        
+
+                        7. Clear cache
                         0. Exit App
                     Enter your Selection: ");
                 int.TryParse(Console.ReadLine(), out var selection);
@@ -114,35 +129,47 @@ namespace NetCoreTestApp
                 {
                     switch (selection)
                     {
-                        case 1:
-                            authTask = GetInteractiveAuthTaskAsync(s_pca1);
-                            FetchTokenAsync(s_pca2, authTask).GetAwaiter().GetResult();
-                            break;
-                        case 2:
-                            authTask = GetInteractiveAuthTaskAsync(s_pca2);
-                            FetchTokenAsync(s_pca2, authTask).GetAwaiter().GetResult();
-                            break;
-                        case 3:
-                            authTask = GetSilentAuthTaskAsync(s_pca1);
-                            FetchTokenAsync(s_pca1, authTask).GetAwaiter().GetResult();
-                            break;
-                        case 4:
-                            authTask = GetSilentAuthTaskAsync(s_pca2);
-                            FetchTokenAsync(s_pca2, authTask).GetAwaiter().GetResult();
-                            break;
+                    case 1:
+                        authTask = GetInteractiveAuthTaskAsync(s_pcaFam1);
+                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        break;
+                    case 2:
+                        authTask = GetInteractiveAuthTaskAsync(s_pcaFam2);
+                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        break;
+                    case 3:
+                        authTask = GetInteractiveAuthTaskAsync(s_pcaNonFam);
+                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        break;
+                    case 4:
+                        authTask = GetSilentAuthTaskAsync(s_pcaFam1);
+                        FetchTokenAsync(s_pcaFam1, authTask).GetAwaiter().GetResult();
+                        break;
+                    case 5:
+                        authTask = GetSilentAuthTaskAsync(s_pcaFam2);
+                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        break;
+                    case 6:
+                        authTask = GetSilentAuthTaskAsync(s_pcaNonFam);
+                        FetchTokenAsync(s_pcaNonFam, authTask).GetAwaiter().GetResult();
+                        break;
 
-                        case 5:
-                            var accounts = await s_pca1.GetAccountsAsync().ConfigureAwait(false);
-                            foreach (var acc in accounts)
-                            {
-                                await s_pca1.RemoveAsync(acc).ConfigureAwait(false);
-                            }
+                    case 7:
+                        var accounts1 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
+                        var accounts2 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
+                        var accounts3 = await s_pcaFam1.GetAccountsAsync().ConfigureAwait(false);
 
-                            break;
-                        case 0:
-                            return;
-                        default:
-                            break;
+
+                        foreach (var acc in accounts1)
+                        {
+                            await s_pcaFam1.RemoveAsync(acc).ConfigureAwait(false);
+                        }
+
+                        break;
+                    case 0:
+                        return;
+                    default:
+                        break;
                     }
 
                 }
@@ -162,9 +189,15 @@ namespace NetCoreTestApp
             return pca.AcquireTokenInteractive(s_scopes, null).ExecuteAsync();
         }
 
-
         private static Task<AuthenticationResult> GetSilentAuthTaskAsync(IPublicClientApplication pca)
         {
+            // get all serialized accounts
+            // get all RTs WHERE rt.client == app.client OR app is part of family or unkown
+            // JOIN acounts and RTs ON homeAccountID
+
+            // A -> interactive auth -> account, RT1
+            // B -> GetAccounts -> NULL
+
             var accounts = pca.GetAccountsAsync().GetAwaiter().GetResult();
             if (accounts.Count() > 1)
             {
@@ -172,10 +205,10 @@ namespace NetCoreTestApp
                 return null;
             }
 
-            return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
+            //return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
+            return pca.AcquireTokenSilent(s_scopes, "bogavril@microsoft.com").ExecuteAsync();
+
         }
-
-
 
         private static async Task FetchTokenAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
         {
@@ -220,17 +253,17 @@ namespace NetCoreTestApp
 
             switch (level)
             {
-                case LogLevel.Error:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    break;
-                case LogLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    break;
-                case LogLevel.Verbose:
-                    Console.ForegroundColor = ConsoleColor.Gray;
-                    break;
-                default:
-                    break;
+            case LogLevel.Error:
+                Console.ForegroundColor = ConsoleColor.Red;
+                break;
+            case LogLevel.Warning:
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                break;
+            case LogLevel.Verbose:
+                Console.ForegroundColor = ConsoleColor.Gray;
+                break;
+            default:
+                break;
             }
 
             Console.WriteLine($"{level} {message}");
