@@ -36,6 +36,7 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal.Requests;
+using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -46,8 +47,13 @@ namespace Microsoft.Identity.Test.Unit
     [TestClass]
     public class OAuthClientTests
     {
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            TestCommon.ResetStateAndInitMsal();
+        }
+
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void RedirectUriContainsFragmentErrorTest()
         {
             try
@@ -81,12 +87,11 @@ namespace Microsoft.Identity.Test.Unit
             }
             catch (ArgumentException ae)
             {
-                Assert.IsTrue(ae.Message.Contains(CoreErrorMessages.RedirectUriContainsFragment));
+                Assert.IsTrue(ae.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
             }
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCannotParseJsonResponse()
         {
             ValidateOathClient(
@@ -98,12 +103,11 @@ namespace Microsoft.Identity.Test.Unit
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
                     Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
-                    Assert.AreEqual(CoreErrorCodes.NonParsableOAuthError, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalError.NonParsableOAuthError, serverEx.ErrorCode);
                 });
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenItCanParseJsonResponse()
         {
             ValidateOathClient(
@@ -119,7 +123,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenEntireResponseIsNull()
         {
             ValidateOathClient(
@@ -132,7 +135,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenResponseIsEmpty()
         {
             ValidateOathClient(
@@ -148,7 +150,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenResponseIsNull()
         {
             ValidateOathClient(
@@ -164,7 +165,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenResponseDoesNotContainAnErrorField()
         {
             ValidateOathClient(
@@ -180,7 +180,6 @@ namespace Microsoft.Identity.Test.Unit
         }
 
         [TestMethod]
-        [TestCategory("InteractiveRequestTests")]
         public void OAuthClient_FailsWithServiceExceptionWhenResponseIsHttpNotFound()
         {
             ValidateOathClient(

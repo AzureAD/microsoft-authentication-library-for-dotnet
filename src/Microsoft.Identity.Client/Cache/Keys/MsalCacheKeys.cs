@@ -30,7 +30,7 @@ using System.Text;
 
 namespace Microsoft.Identity.Client.Cache.Keys
 {
-    internal class MsalCacheKeys
+    internal partial class MsalCacheKeys
     {
         public const string CacheKeyDelimiter = "-";
 
@@ -105,18 +105,9 @@ namespace Microsoft.Identity.Client.Cache.Keys
             return stringBuilder.ToString().ToLowerInvariant();
         }
 
-        #region iOS
+#region iOS
 
-        public enum iOSCredentialAttrType
-        {
-            AccessToken = 2001,
-            RefreshToken = 2002,
-            IdToken = 2003,
-            Password = 2004,
-            AppMetadata = 3001
-        }
-
-        public static readonly Dictionary<string, int> iOSAuthorityTypeToAttrType = new Dictionary<string, int>()
+        internal static readonly Dictionary<string, int> iOSAuthorityTypeToAttrType = new Dictionary<string, int>()
         {
             {AuthorityType.AAD.ToString(), 1001},
             {AuthorityType.MSA.ToString(), 1002},

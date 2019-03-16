@@ -85,18 +85,15 @@ namespace Microsoft.Identity.Client
         /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
         /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
-        public TokenCache() : this(PlatformProxyFactory.CreatePlatformProxy(null))
+        public TokenCache() : this((IServiceBundle)null)
         {
-            ServiceBundle = null;
         }
 
-        internal TokenCache(IServiceBundle serviceBundle) : this(serviceBundle.PlatformProxy)
+        internal TokenCache(IServiceBundle serviceBundle) 
         {
             SetServiceBundle(serviceBundle);
-        }
 
-        private TokenCache(IPlatformProxy proxy)
-        {
+            var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
@@ -117,7 +114,7 @@ namespace Microsoft.Identity.Client
         /// <param name="serviceBundle"></param>
         /// <param name="legacyCachePersistenceForTest"></param>
         internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
-            : this(serviceBundle.PlatformProxy)
+            : this(serviceBundle)
         {
             SetServiceBundle(serviceBundle);
 
@@ -816,7 +813,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 try
                 {
-                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(false);
                     accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
                     adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
                 }
@@ -855,7 +852,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 var accounts = new List<IAccount>(clientInfoToAccountMap.Values);
-                List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
+                var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
                 foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
                 {
