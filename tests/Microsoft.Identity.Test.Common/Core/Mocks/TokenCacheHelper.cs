@@ -154,10 +154,14 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 new DateTimeOffset(DateTime.UtcNow + TimeSpan.FromSeconds(ValidExtendedExpiresIn)),
                 MockHelpers.CreateClientInfo());
 
-            AddRefreshTokenToCache(accessor, MsalTestConstants.Uid, MsalTestConstants.Utid, MsalTestConstants.Name);
+            AddRefreshTokenToCache(accessor, MsalTestConstants.Uid, MsalTestConstants.Utid);
         }
 
-        public static void AddRefreshTokenToCache(ITokenCacheAccessor accessor, string uid, string utid, string clientId = MsalTestConstants.ClientId)
+        public static void AddRefreshTokenToCache(
+            ITokenCacheAccessor accessor,
+            string uid,
+            string utid,
+            string clientId = MsalTestConstants.ClientId)
         {
             var rtItem = new MsalRefreshTokenCacheItem
                 (MsalTestConstants.ProductionPrefCacheEnvironment, clientId, "someRT", MockHelpers.CreateClientInfo(uid, utid));

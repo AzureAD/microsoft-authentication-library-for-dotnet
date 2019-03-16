@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     logger.Verbose("[FOCI] FRT exchanged succeeded");
                     return frtTokenResponse;
                 }
-                catch (MsalServiceException e)
+                catch (MsalServiceException)
                 {
                     logger.Error("[FOCI] FRT exchanged failed " + (familyRefreshToken != null));
                     return null;
