@@ -51,7 +51,11 @@ namespace Microsoft.Identity.Client.UI
             if (Status == AuthorizationStatus.UserCancel)
             {
                 Error = MsalError.AuthenticationCanceledError;
+                #if ANDROID
+                ErrorDescription = MsalErrorMessage.AuthenticationCanceledAndroid;
+                #else
                 ErrorDescription = MsalErrorMessage.AuthenticationCanceled;
+                #endif
             }
             else if (Status == AuthorizationStatus.UnknownError)
             {
