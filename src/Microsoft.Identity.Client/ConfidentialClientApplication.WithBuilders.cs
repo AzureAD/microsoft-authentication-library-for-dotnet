@@ -25,7 +25,10 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
@@ -69,6 +72,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenByAuthorizationCodeParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
         /// using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// </summary>
@@ -87,6 +101,17 @@ namespace Microsoft.Identity.Client
             return AcquireTokenForClientParameterBuilder.Create(
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenForClientParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
         }
 
         /// <summary>
@@ -114,6 +139,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenOnBehalfOfParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Computes the URL of the authorization request letting the user sign-in and consent to the application accessing specific scopes in
         /// the user's name. The URL targets the /authorize endpoint of the authority configured in the application.
         /// This override enables you to specify a login hint and extra query parameter.
@@ -134,6 +170,18 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateConfidentialClientExecutor(this),
                 scopes);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<Uri> ExecuteAsync(GetAuthorizationRequestUrlParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
+        }
+
     }
 #endif
 }

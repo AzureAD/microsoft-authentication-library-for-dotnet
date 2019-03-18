@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
@@ -77,6 +78,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenInteractiveParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Acquires a security token on a device without a Web browser, by letting the user authenticate on
         /// another device. This is done in two steps:
         /// <list type="bullet">
@@ -109,6 +121,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenWithDeviceCodeParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Non-interactive request to acquire a security token for the signed-in user in Windows,
         /// via Integrated Windows Authentication. See https://aka.ms/msal-net-iwa.
         /// The account used in this overrides is pulled from the operating system as the current user principal name
@@ -137,6 +160,17 @@ namespace Microsoft.Identity.Client
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenByIntegratedWindowsAuthParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
+        }
+
+        /// <summary>
         /// Non-interactive request to acquire a security token from the authority, via Username/Password Authentication.
         /// Available only on .net desktop and .net core. See https://aka.ms/msal-net-up for details.
         /// </summary>
@@ -161,6 +195,17 @@ namespace Microsoft.Identity.Client
                 scopes,
                 username,
                 password);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenByUsernamePasswordParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
         }
     }
 }

@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.AppConfig;
@@ -177,6 +178,14 @@ namespace Microsoft.Identity.Client
         /// specify extra query parameters
         /// </remarks>
         AcquireTokenSilentParameterBuilder AcquireTokenSilent(IEnumerable<string> scopes, string loginHint);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> ExecuteAsync(AcquireTokenSilentParameterBuilder builder, CancellationToken cancellationToken);
 
         /// <summary>
         /// Removes all tokens in the cache for the specified account.

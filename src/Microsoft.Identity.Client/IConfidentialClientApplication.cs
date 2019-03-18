@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 
@@ -70,6 +71,14 @@ namespace Microsoft.Identity.Client
             string authorizationCode);
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> ExecuteAsync(AcquireTokenByAuthorizationCodeParameterBuilder builder, CancellationToken cancellationToken);
+
+        /// <summary>
         /// [V3 API] Acquires a token from the authority configured in the app, for the confidential client itself (in the name of no user)
         /// using the client credentials flow. (See https://aka.ms/msal-net-client-credentials)
         /// </summary>
@@ -83,6 +92,14 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
         /// </remarks>
         AcquireTokenForClientParameterBuilder AcquireTokenForClient(IEnumerable<string> scopes);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> ExecuteAsync(AcquireTokenForClientParameterBuilder builder, CancellationToken cancellationToken);
 
         /// <summary>
         /// [V3 API] Acquires an access token for this application (usually a Web API) from the authority configured in the application,
@@ -99,6 +116,14 @@ namespace Microsoft.Identity.Client
         /// <see cref="AbstractAcquireTokenParameterBuilder{T}.WithExtraQueryParameters(Dictionary{string, string})"/>
         /// </remarks>
         AcquireTokenOnBehalfOfParameterBuilder AcquireTokenOnBehalfOf(IEnumerable<string> scopes, UserAssertion userAssertion);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<AuthenticationResult> ExecuteAsync(AcquireTokenOnBehalfOfParameterBuilder builder, CancellationToken cancellationToken);
 
         /// <summary>
         /// [V3 API] Acquires token using On-Behalf-Of flow. (See https://aka.ms/msal-net-on-behalf-of)
@@ -167,6 +192,13 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         GetAuthorizationRequestUrlParameterBuilder GetAuthorizationRequestUrl(IEnumerable<string> scopes);
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Uri> ExecuteAsync(GetAuthorizationRequestUrlParameterBuilder builder, CancellationToken cancellationToken);
 
         /// <summary>
         /// [V2 API] URL of the authorize endpoint including the query parameters.

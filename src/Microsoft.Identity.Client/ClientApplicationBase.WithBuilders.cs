@@ -27,6 +27,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 using Microsoft.Identity.Client.AppConfig;
@@ -68,6 +70,17 @@ namespace Microsoft.Identity.Client
                 ClientExecutorFactory.CreateClientApplicationBaseExecutor(this),
                 scopes,
                 account);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task<AuthenticationResult> ExecuteAsync(AcquireTokenSilentParameterBuilder builder, CancellationToken cancellationToken)
+        {
+            return builder.ExecuteAsync(cancellationToken);
         }
 
         /// <summary>
