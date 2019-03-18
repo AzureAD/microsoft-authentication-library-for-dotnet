@@ -163,7 +163,9 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string UnsupportedAuthorityValidation =
             "Authority validation is not supported for this type of authority. See http://aka.ms/valid-authorities for details";
 
-        public const string AuthenticationCanceled = "User canceled authentication. On an Android device, this could be " +
+        public const string AuthenticationCanceled = "User canceled authentication.";
+
+        public const string AuthenticationCanceledAndroid = "User canceled authentication. On an Android device, this could be " +
             "due to the lack of capabilities, such as custom tabs, for the system browser." +
             " See https://aka.ms/msal-net-system-browsers for more information.";
 
