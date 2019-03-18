@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Client.Exceptions
             exception.Headers = httpResponse?.Headers;
 
             exception.Claims = oAuth2Response?.Claims;
-            exception.SubError = oAuth2Response?.SubError;
             exception.CorrelationId = oAuth2Response?.CorrelationId;
         }
 
@@ -133,7 +132,6 @@ namespace Microsoft.Identity.Client.Exceptions
                 if (ex is MsalServiceException msalServiceException)
                 {
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "HTTP StatusCode {0}", msalServiceException.StatusCode));
-                    sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "SubError {0}", msalServiceException.SubError));
                     sb.AppendLine(string.Format(CultureInfo.InvariantCulture, "CorrelationId {0}", msalServiceException.CorrelationId));
                 }
 
