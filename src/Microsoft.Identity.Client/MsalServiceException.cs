@@ -28,6 +28,8 @@
 using System;
 using System.Globalization;
 using System.Net.Http.Headers;
+using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client
 {
@@ -238,6 +240,31 @@ namespace Microsoft.Identity.Client
                 StatusCode, 
                 ResponseBody, 
                 Headers);
+        }
+
+        private const string ClaimsKey = "claims";
+        private const string ResponseBodyKey = "response_body";
+        private const string SubErrorKey = "sub_error";
+        private const string CorrelationIdKey = "correlation_id";
+
+        internal override void PopulateJson(JObject jobj)
+        {
+            base.PopulateJson(jobj);
+
+            jobj[ClaimsKey] = Claims;
+            jobj[ResponseBodyKey] = ResponseBody;
+            jobj[SubErrorKey] = SubError;
+            jobj[CorrelationIdKey] = CorrelationId;
+        }
+
+        internal override void PopulateObjectFromJson(JObject jobj)
+        {
+            base.PopulateObjectFromJson(jobj);
+
+            Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
+            ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
+            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
+            CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
         }
     }
 }
