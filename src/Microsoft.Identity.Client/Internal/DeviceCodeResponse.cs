@@ -44,6 +44,11 @@ namespace Microsoft.Identity.Client.Internal
         [DataMember(Name = "verification_url", IsRequired = false)]
         public string VerificationUrl { get; internal set; }
 
+        // This is the OAuth2 standards compliant value.
+        // It should be used if it's present, if it's not then fallback to VerificiationUrl
+        [DataMember(Name = "verification_uri", IsRequired = false)]
+        public string VerificationUri { get; internal set; }
+
         [DataMember(Name = "expires_in", IsRequired = false)]
         public long ExpiresIn { get; internal set; }
 
@@ -55,10 +60,13 @@ namespace Microsoft.Identity.Client.Internal
 
         public DeviceCodeResult GetResult(string clientId, ISet<string> scopes)
         {
+            // VerificationUri should be used if it's present, and if not fall back to VerificationUrl
+            string verification = string.IsNullOrWhiteSpace(VerificationUri) ? VerificationUrl : VerificationUri;
+
             return new DeviceCodeResult(
                 UserCode,
                 DeviceCode,
-                VerificationUrl,
+                verification,
                 DateTime.UtcNow.AddSeconds(ExpiresIn),
                 Interval,
                 Message,
