@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Instance
             {
             case AuthorityType.Adfs:
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.InvalidAuthorityType,
+                    MsalError.InvalidAuthorityType,
                     "ADFS is not a supported authority");
 
             case AuthorityType.B2C:
@@ -74,7 +74,7 @@ namespace Microsoft.Identity.Client.Instance
 
             default:
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.InvalidAuthorityType,
+                    MsalError.InvalidAuthorityType,
                     "Unsupported authority type");
             }
         }

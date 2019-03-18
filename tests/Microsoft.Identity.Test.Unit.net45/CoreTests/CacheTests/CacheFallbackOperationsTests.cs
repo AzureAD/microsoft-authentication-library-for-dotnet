@@ -37,6 +37,7 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
 {
@@ -253,7 +254,7 @@ namespace Microsoft.Identity.Test.Unit.CoreTests.CacheTests
             // Assert 
             AssertCacheEntryCount(6);
 
-            _logger.Received().Error(Arg.Is<string>(CoreErrorMessages.InternalErrorCacheEmptyUsername));
+            _logger.Received().Error(Arg.Is<string>(MsalErrorMessage.InternalErrorCacheEmptyUsername));
         }
 
         [TestMethod]

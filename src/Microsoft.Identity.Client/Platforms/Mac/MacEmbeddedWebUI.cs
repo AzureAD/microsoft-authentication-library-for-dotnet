@@ -85,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
             catch (Exception ex)
             {
                 throw new MsalClientException(
-                    CoreErrorCodes.AuthenticationUiFailed,
+                    MsalError.AuthenticationUiFailed,
                     "See inner exception for details",
                     ex);
             }

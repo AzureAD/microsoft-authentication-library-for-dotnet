@@ -27,6 +27,7 @@
 
 using System;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.PlatformsCommon.Factories;
 
 namespace Microsoft.Identity.Client.AppConfig
@@ -145,7 +146,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (!Uri.TryCreate(Config.RedirectUri, UriKind.Absolute, out Uri uriResult))
             {
-                throw new InvalidOperationException(CoreErrorMessages.InvalidRedirectUriReceived(Config.RedirectUri));
+                throw new InvalidOperationException(MsalErrorMessage.InvalidRedirectUriReceived(Config.RedirectUri));
             }
         }
     }

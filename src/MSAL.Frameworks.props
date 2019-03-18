@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworkNetDesktop>net45</TargetFrameworkNetDesktop>
     <TargetFrameworkNetStandard>netstandard1.3</TargetFrameworkNetStandard>
-    <TargetFrameworkNetCore>netcoreapp1.0</TargetFrameworkNetCore>
+    <TargetFrameworkNetCore>netcoreapp2.1</TargetFrameworkNetCore>
     <TargetFrameworkUap>uap10.0</TargetFrameworkUap>
     <TargetFrameworkIos>Xamarin.iOS10</TargetFrameworkIos>
     <TargetFrameworkMac>xamarinmac20</TargetFrameworkMac>

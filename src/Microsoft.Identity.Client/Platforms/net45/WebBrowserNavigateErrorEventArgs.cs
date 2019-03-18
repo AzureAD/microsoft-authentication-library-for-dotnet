@@ -25,15 +25,13 @@
 //
 //------------------------------------------------------------------------------
 
-using System;
 using System.ComponentModel;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     /// <summary>
     /// </summary>
-    [Obsolete("This type should not be used and will be made internal.")]
-    public class WebBrowserNavigateErrorEventArgs : CancelEventArgs
+    internal class WebBrowserNavigateErrorEventArgs : CancelEventArgs
     {
         private readonly int statusCode;
         // Fields
@@ -67,7 +65,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             get { return url; }
         }
-        
+
         /// <summary>
         /// </summary>
         public int StatusCode

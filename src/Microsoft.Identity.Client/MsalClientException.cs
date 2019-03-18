@@ -158,32 +158,6 @@ namespace Microsoft.Identity.Client
 #if ANDROID
 
         /// <summary>
-        /// Xamarin.Android specific. This error indicates that chrome, or a browser implementing chrome tabs, is not installed on the device. 
-        /// The library sdk uses chrome custom tab for authorize request if applicable or falls back to chrome browser.
-        /// <para>Mitigation</para>If you really need to use the System web browser (for instance to get SSO with the browser), notify the end 
-        /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. 
-        /// Otherwise you can also use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a required browser is available on the device
-        /// and require the library to use the embedded web view if it is not by setting the boolean to <c>true</c> in the following
-        /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
-        /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
-        /// </summary>
-        [Obsolete("Catch AndroidActivityNotFound instead (See https://aka.ms/msal-net-uses-web-browser)", true)]
-        public const string ChromeNotInstalledError = "chrome_not_installed";
-
-        /// <summary>
-        /// Xamarin.Android specific. This error indicates that chrome is installed on the device but disabled. The sdk uses chrome custom tab for
-        /// authorize request if applicable or falls back to chrome browser.
-        /// <para>Mitigation</para>If you really need to use the System web browser (for instance to get SSO with the browser), notify the end 
-        /// user that chrome or a browser implementing chrome custom tabs needs to be installed on the device. 
-        /// Otherwise you can also use <see cref="UIParent.IsSystemWebviewAvailable"/> to check if a required browser is available on the device
-        /// and require the library to use the embedded web view if it is not by setting the boolean to <c>true</c> in the following
-        /// constructor: <see cref="UIParent.UIParent(Android.App.Activity, bool)"/>
-        /// <para>For more details</para> See https://aka.ms/msal-net-uses-web-browser
-        /// </summary>
-        [Obsolete("Catch AndroidActivityNotFound instead (See https://aka.ms/msal-net-uses-web-browser)", true)]
-        public const string ChromeDisabledError = "chrome_disabled";
-
-        /// <summary>
         /// Xamarin.Android specific. This error indicates that a system browser was not installed on the user's device, and authentication
         /// using system browser could not be attempted because there was no available Android activity to handle the intent.
         /// <para>Mitigation</para>If you want to use the System web browser (for instance to get SSO with the browser), notify the end 

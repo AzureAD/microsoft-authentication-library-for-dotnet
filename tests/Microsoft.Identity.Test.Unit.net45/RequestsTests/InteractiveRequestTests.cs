@@ -239,7 +239,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             }
             catch (ArgumentException ae)
             {
-                Assert.IsTrue(ae.Message.Contains(CoreErrorMessages.RedirectUriContainsFragment));
+                Assert.IsTrue(ae.Message.Contains(MsalErrorMessage.RedirectUriContainsFragment));
             }
         }
 
@@ -256,7 +256,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                     Assert.AreEqual(429, serverEx.StatusCode);
                     Assert.AreEqual(MockHelpers.TooManyRequestsContent, serverEx.ResponseBody);
                     Assert.AreEqual(MockHelpers.TestRetryAfterDuration, serverEx.Headers.RetryAfter.Delta);
-                    Assert.AreEqual(CoreErrorCodes.NonParsableOAuthError, serverEx.ErrorCode);
+                    Assert.AreEqual(MsalError.NonParsableOAuthError, serverEx.ErrorCode);
                 });
         }
 

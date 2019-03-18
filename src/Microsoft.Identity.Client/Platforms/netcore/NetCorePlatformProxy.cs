@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Cache;
@@ -113,7 +114,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
         {
-            return Assembly.GetEntryAssembly()?.GetName()?.Name?.ToString();
+            return Assembly.GetEntryAssembly()?.GetName()?.Name?.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>

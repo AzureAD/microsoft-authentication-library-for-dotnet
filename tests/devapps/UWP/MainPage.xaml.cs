@@ -1,5 +1,4 @@
 ﻿using Microsoft.Identity.Client;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +19,6 @@ namespace UWP
     public sealed partial class MainPage : Page
     {
         private readonly IPublicClientApplication _pca;
-        private readonly AuthenticationContext _authenticationContext;
         private static readonly string ClientID = "9058d700-ccd7-4dd4-a029-aec31995add0";
         private static readonly string Authority = "https://login.microsoftonline.com/common/";
         private static readonly IEnumerable<string> Scopes = new[] { "https://graph.windows.net/.default" };
@@ -65,8 +63,6 @@ namespace UWP
                 }
             });
 
-            _authenticationContext = new AuthenticationContext(Authority);
-
 #if ARIA_TELEMETRY_ENABLED
             Telemetry.GetInstance().RegisterReceiver(
                 (new Microsoft.Identity.Client.AriaTelemetryProvider.ServerTelemetryHandler()).OnEvents);
@@ -96,11 +92,7 @@ namespace UWP
             string message =
                 $"There are {accounts.Count()} in the MSAL token cache. " +
                 Environment.NewLine +
-                string.Join(", ", accounts.Select(a => a.Username)) +
-                Environment.NewLine +
-                $"There are { _authenticationContext.TokenCache.Count} items in the ADAL token cache. "
-                + Environment.NewLine +
-                string.Join(", ", _authenticationContext.TokenCache.ReadItems().Select(i => i.DisplayableId));
+                string.Join(", ", accounts.Select(a => a.Username));
 
             await DisplayMessageAsync(message).ConfigureAwait(false); ;
 
@@ -122,34 +114,6 @@ namespace UWP
             {
                 await _pca.RemoveAsync(accounts.First()).ConfigureAwait(false);
             }
-        }
-
-        private async void ADALButton_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationResult result = await _authenticationContext.AcquireTokenAsync(
-                "https://graph.windows.net",
-                ClientID,
-                new Uri("urn:ietf:wg:oauth:2.0:oob"),
-                new PlatformParameters(PromptBehavior.SelectAccount, false))
-                .ConfigureAwait(false);
-
-            await DisplayMessageAsync("Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken)
-                .ConfigureAwait(false);
-
-        }
-
-        private async void ADALSilentButton_ClickAsync(object sender, RoutedEventArgs e)
-        {
-            Microsoft.IdentityModel.Clients.ActiveDirectory.AuthenticationResult result = await _authenticationContext.AcquireTokenSilentAsync(
-                Resource,
-                ClientID)
-                .ConfigureAwait(false);
-
-            await DisplayMessageAsync("Signed in User - " + result.UserInfo.DisplayableId + "\nAccessToken: \n" + result.AccessToken)
-                .ConfigureAwait(false);
-
-            await DisplayMessageAsync("Done " + i++).ConfigureAwait(false);
-
         }
 
         private static int i = 0;

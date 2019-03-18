@@ -87,7 +87,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS.EmbeddedWebview
             catch (Exception ex)
             {
                 throw MsalExceptionFactory.GetClientException(
-                    CoreErrorCodes.AuthenticationUiFailed, 
+                    MsalError.AuthenticationUiFailed, 
                     "See inner exception for details", 
                     ex);
             }
