@@ -301,21 +301,13 @@ namespace Microsoft.Identity.Client.AppConfig
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(Config.Instance) || !string.IsNullOrWhiteSpace(Config.TenantId))
-            {
-                string defaultAuthorityInstance = GetDefaultAuthorityInstance();
-                string defaultAuthorityAudience = GetDefaultAuthorityAudience();
+            string defaultAuthorityInstance = GetDefaultAuthorityInstance();
+            string defaultAuthorityAudience = GetDefaultAuthorityAudience();
 
-                Config.AuthorityInfo = new AuthorityInfo(
-                        AuthorityType.Aad,
-                        new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
-                        true);
-            }
-            else
-            {
-                // Add the default.
-                WithAuthority(AzureCloudInstance.AzurePublic, AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true);
-            }
+            Config.AuthorityInfo = new AuthorityInfo(
+                    AuthorityType.Aad,
+                    new Uri($"{defaultAuthorityInstance}/{defaultAuthorityAudience}").ToString(),
+                    true);
         }
 
         private string GetDefaultAuthorityAudience()
@@ -338,7 +330,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 return Config.TenantId;
             }
 
-            return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdMultipleOrgs, string.Empty);
+            return AuthorityInfo.GetAadAuthorityAudienceValue(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, string.Empty);
         }
 
         private string GetDefaultAuthorityInstance()
