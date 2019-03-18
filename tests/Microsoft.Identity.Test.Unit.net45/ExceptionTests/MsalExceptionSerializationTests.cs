@@ -49,8 +49,8 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             var exDeserialized = MsalException.FromJsonString(json);
 
             Assert.AreEqual(expectedType, exDeserialized.GetType());
-            Assert.AreEqual(SomeErrorCode, ex.ErrorCode);
-            Assert.AreEqual(SomeErrorMessage, ex.Message);
+            Assert.AreEqual(ex.ErrorCode, exDeserialized.ErrorCode);
+            Assert.AreEqual(ex.Message, exDeserialized.Message);
 
             if (isServiceExceptionDerived)
             {

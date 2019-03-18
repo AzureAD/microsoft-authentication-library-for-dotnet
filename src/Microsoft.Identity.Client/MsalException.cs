@@ -131,6 +131,8 @@ namespace Microsoft.Identity.Client
         internal virtual void PopulateJson(JObject jobj)
         {
             jobj[ExceptionTypeKey] = GetType().Name;
+            jobj[ErrorCodeKey] = ErrorCode;
+            jobj[ErrorDescriptionKey] = Message;
         }
 
         internal virtual void PopulateObjectFromJson(JObject jobj)
