@@ -33,7 +33,6 @@ using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.UI;
-using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -42,6 +41,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
+#if DESKTOP
     [TestClass]
     public class FociTests
     {
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.AreEqual(1, (await _appB.GetAccountsAsync().ConfigureAwait(false)).Count());
         }
 
-        
+
         private void AssertFRTExists()
         {
             Assert.IsTrue(_appA.UserTokenCacheInternal.Accessor.GetAllRefreshTokens()
@@ -312,9 +312,9 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             Assert.IsTrue(app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens()
                 .Any(rt => rt.ClientId == _appB.ClientId && string.IsNullOrEmpty(rt.FamilyId)),
                  "App B has a normal RT associated");
-           
+
         }
-
-
     }
+
+#endif
 }
