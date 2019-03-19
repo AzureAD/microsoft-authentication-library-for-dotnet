@@ -114,7 +114,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(ExCode, msalServiceException.ErrorCode);
             Assert.AreEqual(ExMessage, msalServiceException.Message);
             Assert.AreEqual("some_claims", msalServiceException.Claims);
-            Assert.AreEqual("suberror", msalServiceException.SubError);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
         }
 
@@ -148,7 +147,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             Assert.AreEqual(statusCode, msalServiceException.StatusCode);
 
             Assert.AreEqual("some_claims", msalServiceException.Claims);
-            Assert.AreEqual("suberror", msalServiceException.SubError);
             Assert.AreEqual("6347d33d-941a-4c35-9912-a9cf54fb1b3e", msalServiceException.CorrelationId);
 
             // Act
@@ -163,7 +161,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
                 piiMessage.Contains(typeof(NotImplementedException).Name),
                 "The pii message should have the inner exception type");
             Assert.IsTrue(piiMessage.Contains(ExCode));
-            Assert.IsTrue(piiMessage.Contains("suberror"));
             Assert.IsTrue(piiMessage.Contains("6347d33d-941a-4c35-9912-a9cf54fb1b3e")); // Correlation Id
 
             Assert.IsFalse(piiMessage.Contains(ExMessage));

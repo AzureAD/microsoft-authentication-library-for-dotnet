@@ -34,28 +34,11 @@ using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
 {
-    [DataContract]
     internal class MsalAccountCacheItem : MsalCacheItemBase
     {
         internal MsalAccountCacheItem()
         {
             AuthorityType = Cache.AuthorityType.MSSTS.ToString();
-        }
-
-        internal MsalAccountCacheItem(string environment, MsalTokenResponse response)
-            : this()
-        {
-            var idToken = IdToken.Parse(response.IdToken);
-
-            Init(
-                environment,
-                idToken?.ObjectId,
-                response.ClientInfo,
-                idToken.Name,
-                idToken.PreferredUsername,
-                idToken.TenantId,
-                idToken.GivenName,
-                idToken.FamilyName);
         }
 
         internal MsalAccountCacheItem(
@@ -78,7 +61,7 @@ namespace Microsoft.Identity.Client.Cache.Items
                 idToken.FamilyName);
         }
 
-        internal MsalAccountCacheItem(
+        internal /* for test */ MsalAccountCacheItem(
             string environment,
             string localAccountId,
             string rawClientInfo,
@@ -101,7 +84,7 @@ namespace Microsoft.Identity.Client.Cache.Items
         }
 
         internal string TenantId { get; set; }
-        public string PreferredUsername { get; internal set; }
+        internal string PreferredUsername { get; set; }
         internal string Name { get; set; }
         internal string GivenName { get; set; }
         internal string FamilyName { get; set; }
@@ -132,7 +115,7 @@ namespace Microsoft.Identity.Client.Cache.Items
 
         internal MsalAccountCacheKey GetKey()
         {
-            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername);
+            return new MsalAccountCacheKey(Environment, TenantId, HomeAccountId, PreferredUsername, AuthorityType);
         }
 
         internal static MsalAccountCacheItem FromJsonString(string json)

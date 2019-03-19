@@ -37,7 +37,7 @@ using Microsoft.Identity.Client.UI;
 namespace Microsoft.Identity.Client.Platforms.netstandard13
 {
     /// <summary>
-    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here. 
+    /// Platform / OS specific logic.  No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
     internal class Netstandard13PlatformProxy : AbstractPlatformProxy
     {
@@ -108,7 +108,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
@@ -117,7 +117,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
@@ -126,7 +126,7 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
         }
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override string InternalGetDeviceId()
@@ -171,5 +171,6 @@ namespace Microsoft.Identity.Client.Platforms.netstandard13
             // TODO(mats): need to detect operating system and switch on it to determine proper enum
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
+        protected override IFeatureFlags CreateFeatureFlags() => new NetStandardFeatureFlags();
     }
 }

@@ -34,12 +34,14 @@ using Microsoft.Identity.Client.Cache.Items;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Internal.Broker;
+using System;
 
 namespace Microsoft.Identity.Client.Internal.Requests
 {
     internal class SilentRequest : RequestBase
     {
         private readonly AcquireTokenSilentParameters _silentParameters;
+        private const string TheOnlyFamilyId = "1";
 
         public SilentRequest(
             IServiceBundle serviceBundle,
@@ -59,33 +61,84 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Token cache is set to null. Silent requests cannot be executed.");
             }
 
-            MsalAccessTokenCacheItem msalAccessTokenItem = null;
-
             // Look for access token
             if (!_silentParameters.ForceRefresh)
             {
-                msalAccessTokenItem =
+                MsalAccessTokenCacheItem msalAccessTokenItem =
                     await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+
+                if (msalAccessTokenItem != null)
+                {
+                    var msalIdTokenItem = CacheManager.GetIdTokenCacheItem(msalAccessTokenItem.GetIdTokenItemKey());
+                    return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
+                }
             }
 
-            if (msalAccessTokenItem != null)
+            // Try FOCI first
+            MsalTokenResponse msalTokenResponse = await TryGetTokenUsingFociAsync(cancellationToken)
+                .ConfigureAwait(false);
+
+            // Normal, non-FOCI flow 
+            if (msalTokenResponse == null)
             {
-                var msalIdTokenItem = CacheManager.GetIdTokenCacheItem(msalAccessTokenItem.GetIdTokenItemKey());
+                // Look for a refresh token
+                MsalRefreshTokenCacheItem appRefreshToken = await FindRefreshTokenOrFailAsync()
+                    .ConfigureAwait(false);
 
-                return new AuthenticationResult(msalAccessTokenItem, msalIdTokenItem);
+                msalTokenResponse = await RefreshAccessTokenAsync(appRefreshToken, cancellationToken)
+                    .ConfigureAwait(false);
             }
+            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+        }
 
-            var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
-
-            if (msalRefreshTokenItem == null)
+        private async Task<MsalTokenResponse> TryGetTokenUsingFociAsync(CancellationToken cancellationToken)
+        {
+            if (!ServiceBundle.PlatformProxy.GetFeatureFlags().IsFociEnabled)
             {
-                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
-
-                throw new MsalUiRequiredException(
-                    MsalUiRequiredException.NoTokensFoundError,
-                    "No Refresh Token found in the cache");
+                return null;
             }
 
+            var logger = AuthenticationRequestParameters.RequestContext.Logger;
+
+            // If the app was just added to the family, the app metadata will reflect this
+            // after the first RT exchanged. 
+            bool? isFamilyMember = await CacheManager.IsAppFociMemberAsync(TheOnlyFamilyId).ConfigureAwait(false);
+
+            if (isFamilyMember.HasValue && isFamilyMember.Value == false)
+            {                
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose(
+                    "[FOCI] App is not part of the family, skipping FOCI.");
+
+                return null;
+            }
+
+            logger.Verbose("[FOCI] App is part of the family or unkown, looking for FRT");
+            var familyRefreshToken = await CacheManager.FindFamilyRefreshTokenAsync(TheOnlyFamilyId).ConfigureAwait(false);
+            logger.Verbose("[FOCI] FRT found? " + (familyRefreshToken != null));
+
+            if (familyRefreshToken != null)
+            {
+                try
+                {
+                    MsalTokenResponse frtTokenResponse = await RefreshAccessTokenAsync(familyRefreshToken, cancellationToken)
+                        .ConfigureAwait(false);
+
+                    logger.Verbose("[FOCI] FRT exchanged succeeded");
+                    return frtTokenResponse;
+                }
+                catch (MsalServiceException)
+                {
+                    logger.Error("[FOCI] FRT exchanged failed " + (familyRefreshToken != null));
+                    return null;
+                }
+            }
+
+            return null;
+
+        }
+     
+        private async Task<MsalTokenResponse> RefreshAccessTokenAsync(MsalRefreshTokenCacheItem msalRefreshTokenItem, CancellationToken cancellationToken)
+        {
             AuthenticationRequestParameters.RequestContext.Logger.Verbose("Refreshing access token...");
             await ResolveAuthorityEndpointsAsync().ConfigureAwait(false);
 
@@ -99,7 +152,22 @@ namespace Microsoft.Identity.Client.Internal.Requests
                     "Refresh token was missing from the token refresh response, so the refresh token in the request is returned instead");
             }
 
-            return CacheTokenResponseAndCreateAuthenticationResult(msalTokenResponse);
+            return msalTokenResponse;
+        }
+
+        private async Task<MsalRefreshTokenCacheItem> FindRefreshTokenOrFailAsync()
+        {
+            var msalRefreshTokenItem = await CacheManager.FindRefreshTokenAsync().ConfigureAwait(false);
+            if (msalRefreshTokenItem == null)
+            {
+                AuthenticationRequestParameters.RequestContext.Logger.Verbose("No Refresh Token was found in the cache");
+
+                throw new MsalUiRequiredException(
+                    MsalUiRequiredException.NoTokensFoundError,
+                    "No Refresh Token found in the cache");
+            }
+
+            return msalRefreshTokenItem;
         }
 
         protected override void EnrichTelemetryApiEvent(ApiEvent apiEvent)

@@ -48,6 +48,7 @@ namespace Microsoft.Identity.Client.OAuth2
         public const string CreatedOn = "created_on";
         public const string ExtendedExpiresIn = "ext_expires_in";
         public const string Authority = "authority";
+        public const string FamilyId = "foci";
     }
 
     [DataContract]
@@ -95,6 +96,12 @@ namespace Microsoft.Identity.Client.OAuth2
                 AccessTokenExtendedExpiresOn = DateTime.UtcNow + TimeSpan.FromSeconds(_extendedExpiresIn);
             }
         }
+
+        /// <summary>
+        /// Optional field, FOCI support.
+        /// </summary>
+        [DataMember(Name=TokenResponseClaim.FamilyId, IsRequired = false)]
+        public string FamilyId { get; set; }
 
         public DateTimeOffset AccessTokenExpiresOn { get; private set; }
         public DateTimeOffset AccessTokenExtendedExpiresOn { get; private set; }

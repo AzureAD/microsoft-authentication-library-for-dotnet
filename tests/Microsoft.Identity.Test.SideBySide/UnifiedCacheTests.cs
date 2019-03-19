@@ -459,10 +459,10 @@ namespace Microsoft.Identity.Test.SideBySide
             Assert.IsNotNull(account.Environment);
 
             // validate that Adal writes only RT and Account cache entities in Msal format
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.AccessTokenCount);
-            Assert.AreEqual(1, ((ITokenCacheInternal)msalCache).Accessor.RefreshTokenCount);
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.IdTokenCount);
-            Assert.AreEqual(1, ((ITokenCacheInternal)msalCache).Accessor.AccountCount);
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(1, ((ITokenCacheInternal)msalCache).Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(1, ((ITokenCacheInternal)msalCache).Accessor.GetAllAccounts().Count());
 
             // make sure that adal v4 RT is usable by Msal
             msalAuthResult = await msalPublicClient.AcquireTokenSilentAsync(MsalScopes, account).ConfigureAwait(false);
@@ -528,10 +528,10 @@ namespace Microsoft.Identity.Test.SideBySide
                 TokenCache = msalCache
             });
 
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.AccessTokenCount);
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.RefreshTokenCount);
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.IdTokenCount);
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.AccountCount);
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllAccounts().Count());
         }
 
         private void AssertNoCredentialsInMsalCache()
@@ -541,9 +541,10 @@ namespace Microsoft.Identity.Test.SideBySide
                 TokenCache = msalCache
             });
 
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.AccessTokenCount);
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.RefreshTokenCount);
-            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.IdTokenCount);
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(0, ((ITokenCacheInternal)msalCache).Accessor.GetAllAccounts().Count());
         }
     }
 }

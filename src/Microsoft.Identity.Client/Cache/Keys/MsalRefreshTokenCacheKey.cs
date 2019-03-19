@@ -33,13 +33,25 @@ namespace Microsoft.Identity.Client.Cache.Keys
     /// An object representing the key of the token cache RT dictionary. The 
     /// format of the key is not important for this library, as long as it is unique.
     /// </summary>
-    internal class MsalRefreshTokenCacheKey
+    /// <remarks>
+    /// Normal RTs are scoped by env, account_id and clientID
+    /// FRTs are scoped by env, account_id and familyID (clientID exists, but is irrelevant)
+    /// </remarks>
+    internal class MsalRefreshTokenCacheKey : IiOSKey //TODO bogavril: add a base class with FRT key?
     {
         private readonly string _environment;
         private readonly string _homeAccountId;
         private readonly string _clientId;
+        private readonly string _familyId;
 
-        internal MsalRefreshTokenCacheKey(string environment, string clientId, string userIdentifier)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="environment"></param>
+        /// <param name="clientId"></param>
+        /// <param name="userIdentifier"></param>
+        /// <param name="familyId">Can be null or empty, denoting a normal RT. A value signifies an FRT.</param>
+        internal MsalRefreshTokenCacheKey(string environment, string clientId, string userIdentifier, string familyId)
         {
             if (string.IsNullOrEmpty(environment))
             {
@@ -54,35 +66,70 @@ namespace Microsoft.Identity.Client.Cache.Keys
             _environment = environment;
             _homeAccountId = userIdentifier;
             _clientId = clientId;
+            _familyId = familyId;
         }
 
         public override string ToString()
         {
+            // FRT
+            if (!String.IsNullOrWhiteSpace(_familyId))
+            {
+                string d = MsalCacheKeys.CacheKeyDelimiter;
+                return $"{_homeAccountId}{d}{_environment}{d}{StorageJsonValues.CredentialTypeRefreshToken}{d}{_familyId}{d}{d}".ToLowerInvariant();
+               
+            }
+
             return MsalCacheKeys.GetCredentialKey(
-                _homeAccountId,
-                _environment,
-                StorageJsonValues.CredentialTypeRefreshToken,
-                _clientId,
-                tenantId: null,
-                scopes: null);
+                   _homeAccountId,
+                   _environment,
+                   StorageJsonValues.CredentialTypeRefreshToken,
+                   _clientId,
+                   tenantId: null,
+                   scopes: null);
         }
 
         #region iOS
 
-        public string GetiOSAccountKey()
+        public string iOSAccount
         {
-            return MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
+            get
+            {
+                return MsalCacheKeys.GetiOSAccountKey(_homeAccountId, _environment);
+            }
         }
 
-        public string GetiOSServiceKey()
+        public string iOSGeneric
         {
-            return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null, scopes: null);
+            get
+            {
+                // FRT
+                if (!String.IsNullOrWhiteSpace(_familyId))
+                {
+                    return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{_familyId}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
+                }
+
+                return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null);
+
+            }
         }
 
-        public string GetiOSGenericKey()
+        public string iOSService
         {
-            return MsalCacheKeys.GetiOSGenericKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null);
+            get
+            {
+                // FRT
+                if (!String.IsNullOrWhiteSpace(_familyId))
+                {
+                    return $"{StorageJsonValues.CredentialTypeRefreshToken}{MsalCacheKeys.CacheKeyDelimiter}{_familyId}{MsalCacheKeys.CacheKeyDelimiter}{MsalCacheKeys.CacheKeyDelimiter}".ToLowerInvariant();
+                }
+
+                return MsalCacheKeys.GetiOSServiceKey(StorageJsonValues.CredentialTypeRefreshToken, _clientId, tenantId: null, scopes: null);
+            }
         }
+
+        public int iOSType => (int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken;
+
+
 
         #endregion
     }

@@ -39,6 +39,7 @@ using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.Identity.Test.Common.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
+using Microsoft.Identity.Test.Common.Core.Helpers;
 
 namespace Microsoft.Identity.Test.Unit.CacheTests
 {
@@ -151,12 +152,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
 
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.AccountCount);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccounts().Count());
                 Assert.AreEqual(1, app.GetAccountsAsync().Result.Count());
 
                 // login to app1 with same credentials
 
-                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId_1)
+                var app1 = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId2)
                                                          .WithHttpManager(httpManager)
                                                          .WithAuthority(
                                                              new Uri(ClientApplicationBase.DefaultAuthority),
@@ -182,12 +183,12 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 Assert.IsNotNull(result);
 
                 // make sure that only one account cache entity was created
-                Assert.AreEqual(1, app1.UserTokenCacheInternal.Accessor.AccountCount);
                 Assert.AreEqual(1, app1.GetAccountsAsync().Result.Count());
 
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.RefreshTokenCount);
-                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.IdTokenCount);
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
+                Assert.AreEqual(2, app1.UserTokenCacheInternal.Accessor.GetAllIdTokens().Count());
+                Assert.AreEqual(1, app1.UserTokenCacheInternal.Accessor.GetAllAccounts().Count());
 
                 // remove account from app
                 app.RemoveAsync(app.GetAccountsAsync().Result.First()).Wait();

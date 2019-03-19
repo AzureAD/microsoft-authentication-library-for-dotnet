@@ -25,10 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using Microsoft.Identity.Json;
 using Microsoft.Identity.Json.Linq;
 
 namespace Microsoft.Identity.Client.Cache.Items
@@ -41,9 +38,14 @@ namespace Microsoft.Identity.Client.Cache.Items
         public Dictionary<string, MsalRefreshTokenCacheItem> RefreshTokens { get; set; } =
             new Dictionary<string, MsalRefreshTokenCacheItem>();
 
-        public Dictionary<string, MsalIdTokenCacheItem> IdTokens { get; set; } = new Dictionary<string, MsalIdTokenCacheItem>();
+        public Dictionary<string, MsalIdTokenCacheItem> IdTokens { get; set; } =
+            new Dictionary<string, MsalIdTokenCacheItem>();
 
-        public Dictionary<string, MsalAccountCacheItem> Accounts { get; set; } = new Dictionary<string, MsalAccountCacheItem>();
+        public Dictionary<string, MsalAccountCacheItem> Accounts { get; set; } =
+            new Dictionary<string, MsalAccountCacheItem>();
+
+        public Dictionary<string, MsalAppMetadataCacheItem> AppMetadata { get; set; } =
+            new Dictionary<string, MsalAppMetadataCacheItem>();
 
         internal static CacheSerializationContract FromJsonString(string json)
         {
@@ -106,6 +108,20 @@ namespace Microsoft.Identity.Client.Cache.Items
                 }
             }
 
+            // App Metadata
+            if (root.ContainsKey(StorageJsonValues.AppMetadata))
+            {
+                foreach (var token in root[StorageJsonValues.AppMetadata]
+                    .Values())
+                {
+                    if (token is JObject j)
+                    {
+                        var item = MsalAppMetadataCacheItem.FromJObject(j);
+                        contract.AppMetadata[item.GetKey().ToString()] = item;
+                    }
+                }
+            }
+
             return contract;
         }
 
@@ -148,6 +164,16 @@ namespace Microsoft.Identity.Client.Cache.Items
             }
 
             root[StorageJsonValues.AccountRootKey] = accountsRoot;
+
+            // App Metadata
+            var appMetadataRoot = new JObject();
+            foreach (var kvp in AppMetadata)
+            {
+                appMetadataRoot[kvp.Key] = kvp.Value.ToJObject();
+            }
+
+            root[StorageJsonValues.AppMetadata] = appMetadataRoot;
+
 
             return root.ToString();
         }

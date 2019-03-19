@@ -25,17 +25,15 @@
 //
 //------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Text;
 
 namespace Microsoft.Identity.Client.Cache.Keys
 {
-    internal class MsalCacheKeys
+    internal partial class MsalCacheKeys
     {
         public const string CacheKeyDelimiter = "-";
 
-        //public const string IdToken = "IdToken";
-        //public const string AccessToken = "AccessToken";
-        //public const string RefreshToken = "RefreshToken";
 
         public static string GetCredentialKey(string homeAccountId, string environment, string keyDescriptor, string clientId, string tenantId, string scopes)
         {
@@ -106,5 +104,17 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
             return stringBuilder.ToString().ToLowerInvariant();
         }
+
+#region iOS
+
+        internal static readonly Dictionary<string, int> iOSAuthorityTypeToAttrType = new Dictionary<string, int>()
+        {
+            {AuthorityType.AAD.ToString(), 1001},
+            {AuthorityType.MSA.ToString(), 1002},
+            {AuthorityType.MSSTS.ToString(), 1003},
+            {AuthorityType.OTHER.ToString(), 1004},
+        };
+
+        #endregion
     }
 }

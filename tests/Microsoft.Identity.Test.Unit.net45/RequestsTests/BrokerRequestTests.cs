@@ -131,7 +131,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         }
 
 
-        private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, OAuthClientValidationHandler validationHandler)
+        private void ValidateBrokerResponse(MsalTokenResponse msalTokenResponse, Action<Exception> validationHandler)
         {
             try
             {

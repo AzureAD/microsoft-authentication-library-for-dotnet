@@ -68,6 +68,12 @@ namespace Microsoft.Identity.Client.Cache
                                 .ToString()] = accountItem;
             }
 
+            foreach (var appMetadata in _accessor.GetAllAppMetadata())
+            {
+                cache.AppMetadata[appMetadata.GetKey()
+                    .ToString()] = appMetadata;
+            }
+
             return cache.ToJsonString()
                         .ToByteArray();
         }
@@ -114,6 +120,14 @@ namespace Microsoft.Identity.Client.Cache
                 foreach (var account in cache.Accounts.Values)
                 {
                     _accessor.SaveAccount(account);
+                }
+            }
+
+            if (cache.AppMetadata != null)
+            {
+                foreach (var appMetadata in cache.AppMetadata.Values)
+                {
+                    _accessor.SaveAppMetadata(appMetadata);
                 }
             }
         }

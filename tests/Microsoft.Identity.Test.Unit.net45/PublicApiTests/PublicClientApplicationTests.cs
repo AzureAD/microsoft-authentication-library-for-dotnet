@@ -283,15 +283,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();
-
-                MockWebUI ui = new MockWebUI()
-                {
-                    MockResult = new AuthorizationResult(
-                        AuthorizationStatus.Success,
-                        MsalTestConstants.AuthorityHomeTenant + "?code=some-code")
-                };
-
+                                                                            .BuildConcrete();             
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
@@ -454,7 +446,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(1, users.Count());
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
 
@@ -511,7 +503,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
                 var users = app.GetAccountsAsync().Result;
                 Assert.AreEqual(2, users.Count());
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
             }
         }
 
@@ -578,7 +570,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 app.UserTokenCacheInternal.Accessor.SaveAccount(accountCacheItem);
 
-                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(2, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 users = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(users);
                 Assert.AreEqual(2, users.Count());
@@ -591,11 +583,59 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     MockHelpers.CreateClientInfo(MsalTestConstants.Uid + "more1", MsalTestConstants.Utid));
 
                 app.UserTokenCacheInternal.Accessor.SaveRefreshToken(rtItem);
-                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(3, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 users = app.GetAccountsAsync().Result;
                 Assert.IsNotNull(users);
                 Assert.AreEqual(2, users.Count());
             }
+        }
+
+        [TestMethod]
+        public async Task TestAccountAcrossMultipleClientIdsAsync()
+        {
+            // Arrange
+          
+            PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
+
+            // Populate with tokens tied to ClientId2
+            _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId2);
+
+            app.UserTokenCacheInternal.Accessor.AssertItemCount(
+                expectedAtCount: 2,
+                expectedRtCount: 1,
+                expectedAccountCount: 1,
+                expectedIdtCount: 1,
+                expectedAppMetadataCount: 1);
+
+            // Act
+            var accounts = await app.GetAccountsAsync().ConfigureAwait(false);
+
+            // Assert - an account is returned even if app is scoped to ClientId1
+            Assert.AreEqual(1, accounts.Count());
+
+            // Arrange
+
+            // Populate for clientid2
+            _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId);
+          
+            app.UserTokenCacheInternal.Accessor.AssertItemCount(
+                expectedAtCount: 4,
+                expectedRtCount: 2,
+                expectedAccountCount: 1, // still 1 account
+                expectedIdtCount: 2,
+                expectedAppMetadataCount: 2);
+
+            // Act
+            await app.RemoveAsync(accounts.Single()).ConfigureAwait(false);
+
+            // Assert
+            app.UserTokenCacheInternal.Accessor.AssertItemCount(
+               expectedAtCount: 0,
+               expectedRtCount: 0,
+               expectedAccountCount: 0, 
+               expectedIdtCount: 0,
+               expectedAppMetadataCount: 2); // app metadata is never deleted
+
         }
 
         [TestMethod]
@@ -610,8 +650,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 app.RemoveAsync(user).Wait();
             }
 
-            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
-            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
         }
 
 

@@ -251,12 +251,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 // make sure user token cache is empty
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 // check app token cache count to be 1
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.RefreshTokenCount); // no refresh tokens are returned
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 // call AcquireTokenForClientAsync again to get result back from the cache
                 result = await app.AcquireTokenForClientAsync(MsalTestConstants.Scope.ToArray()).ConfigureAwait(false);
@@ -265,12 +265,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 // make sure user token cache is empty
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 // check app token cache count to be 1
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.RefreshTokenCount); // no refresh tokens are returned
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
             }
         }
 
@@ -317,12 +317,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 Assert.AreEqual(MsalTestConstants.Scope.AsSingleString(), result.Scopes.AsSingleString());
 
                 // make sure user token cache is empty
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 // check app token cache count to be 1
-                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.RefreshTokenCount); // no refresh tokens are returned
+                Assert.AreEqual(1, app.AppTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(0, app.AppTokenCacheInternal.Accessor.GetAllRefreshTokens().Count()); // no RTs are returned
 
                 // assert client credential
                 Assert.IsNotNull(cc.Assertion);
@@ -671,8 +671,8 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 var result = await app.AcquireTokenByAuthorizationCodeAsync("some-code", MsalTestConstants.Scope)
                                       .ConfigureAwait(false);
                 Assert.IsNotNull(result);
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.AccessTokenCount);
-                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.RefreshTokenCount);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
 
                 app = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                           .WithAuthority(new Uri("https://" + MsalTestConstants.ProductionPrefNetworkEnvironment + "/tfp/home/policy"), true)
@@ -708,16 +708,16 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 var result = await (app as IByRefreshToken).AcquireTokenByRefreshTokenAsync(null, "SomeRefreshToken").ConfigureAwait(false);
 
-                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.RefreshTokenCount, 1);
-                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.AccessTokenCount, 1);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
 
                 app.UserTokenCacheInternal.Clear();
                 httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.AuthorityCommonTenant);
                 result = await ((IByRefreshToken)app).AcquireTokenByRefreshTokenAsync(MsalTestConstants.Scope, "SomeRefreshToken").ConfigureAwait(false);
-                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.RefreshTokenCount, 1);
-                Assert.AreEqual(app.UserTokenCacheInternal.Accessor.AccessTokenCount, 1);
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllAccessTokens().Count());
+                Assert.AreEqual(1, app.UserTokenCacheInternal.Accessor.GetAllRefreshTokens().Count());
                 Assert.IsNotNull(result.AccessToken);
                 Assert.AreEqual(result.AccessToken, "some-access-token");
             }

@@ -137,22 +137,22 @@ namespace Microsoft.Identity.Client.Platforms.Android
             editor.Apply();
         }
 
-        public ICollection<MsalAccessTokenCacheItem> GetAllAccessTokens()
+        public IEnumerable<MsalAccessTokenCacheItem> GetAllAccessTokens()
         {
             return _accessTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalAccessTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
+        public IEnumerable<MsalRefreshTokenCacheItem> GetAllRefreshTokens()
         {
             return _refreshTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalRefreshTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<MsalIdTokenCacheItem> GetAllIdTokens()
+        public IEnumerable<MsalIdTokenCacheItem> GetAllIdTokens()
         {
             return _idTokenSharedPreference.All.Values.Cast<string>().Select(x => MsalIdTokenCacheItem.FromJsonString(x)).ToList();
         }
 
-        public ICollection<MsalAccountCacheItem> GetAllAccounts()
+        public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
             return _accountSharedPreference.All.Values.Cast<string>().Select(x => MsalAccountCacheItem.FromJsonString(x)).ToList();
         }
@@ -185,28 +185,31 @@ namespace Microsoft.Identity.Client.Platforms.Android
             return MsalAccountCacheItem.FromJsonString(_accountSharedPreference.GetString(accountKey.ToString(), null));
         }
 
-        /// <inheritdoc />
-        public int RefreshTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int AccessTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int AccountCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public int IdTokenCount => throw new NotImplementedException();
-
-        /// <inheritdoc />
-        public void ClearRefreshTokens()
+        #region App Metadata - not used on Android
+        public MsalAppMetadataCacheItem ReadAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
         {
             throw new NotImplementedException();
         }
 
-        /// <inheritdoc />
-        public void ClearAccessTokens()
+        public void WriteAppMetadata(MsalAppMetadataCacheItem appMetadata)
         {
             throw new NotImplementedException();
         }
+
+        public void SaveAppMetadata(MsalAppMetadataCacheItem item)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<MsalAppMetadataCacheItem> GetAllAppMetadata()
+        {
+            throw new NotImplementedException();
+        }
+
+        public MsalAppMetadataCacheItem GetAppMetadata(MsalAppMetadataCacheKey appMetadataKey)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

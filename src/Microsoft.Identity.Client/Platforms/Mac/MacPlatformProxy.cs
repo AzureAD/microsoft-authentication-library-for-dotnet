@@ -46,7 +46,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
     {
         internal const string IosDefaultRedirectUriTemplate = "msal{0}://auth";
 
-        public MacPlatformProxy(ICoreLogger logger) 
+        public MacPlatformProxy(ICoreLogger logger)
             : base(logger)
         {
         }
@@ -113,7 +113,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
@@ -122,7 +122,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
@@ -136,7 +136,7 @@ namespace Microsoft.Identity.Client.Platforms.Mac
                                  .Select(nic => nic.GetPhysicalAddress()?.ToString()).FirstOrDefault());
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override string InternalGetDeviceId()
@@ -146,17 +146,17 @@ namespace Microsoft.Identity.Client.Platforms.Mac
 
         public override ILegacyCachePersistence CreateLegacyCachePersistence()
         {
-            // There is no ADAL for MAC 
+            // There is no ADAL for MAC
             return new NullLegacyCachePersistence();
         }
 
         /// <remarks>
-        /// Currently we do not store a token cache in the key chain for Mac. Instead, 
+        /// Currently we do not store a token cache in the key chain for Mac. Instead,
         /// we allow users provide custom token cache serialization.
         /// </remarks>
         public override ITokenCacheAccessor CreateTokenCacheAccessor()
         {
-            return new InMemoryTokenCacheAccessor(); 
+            return new InMemoryTokenCacheAccessor();
         }
 
         protected override IWebUIFactory CreateWebUiFactory() => new MacUIFactory();
@@ -184,5 +184,6 @@ namespace Microsoft.Identity.Client.Platforms.Mac
         {
             return MatsConverter.AsInt(OsPlatform.Mac);
         }
+        protected override IFeatureFlags CreateFeatureFlags() => new MacFeatureFlags();
     }
 }

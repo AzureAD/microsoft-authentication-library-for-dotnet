@@ -1,20 +1,20 @@
 ﻿// ------------------------------------------------------------------------------
-// 
+//
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
-// 
+//
 // This code is licensed under the MIT License.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files(the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions :
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.IN NO EVENT SHALL THE
@@ -22,7 +22,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
+//
 // ------------------------------------------------------------------------------
 
 using System;
@@ -78,8 +78,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <returns>Upn or throws</returns>
         public override Task<string> GetUserPrincipalNameAsync()
         {
-            // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and 
-            // the rest of the platforms - returns "" 
+            // TODO: there is discrepancy between the implementation of this method on net45 - throws if upn not found - and uap and
+            // the rest of the platforms - returns ""
 
             const int NameUserPrincipal = 8;
             uint userNameSize = 0;
@@ -233,16 +233,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
         }
 
         /// <inheritdoc />
-        protected override ICryptographyManager InternalGetCryptographyManager()
-        {
-            return new NetDesktopCryptographyManager();
-        }
-
-        /// <inheritdoc />
-        protected override IPlatformLogger InternalGetPlatformLogger()
-        {
-            return new EventSourcePlatformLogger();
-        }
+        protected override ICryptographyManager InternalGetCryptographyManager() => new NetDesktopCryptographyManager();
 
         public override string GetDeviceNetworkState()
         {
@@ -265,5 +256,8 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
+        protected override IPlatformLogger InternalGetPlatformLogger() => new EventSourcePlatformLogger();
+
+        protected override IFeatureFlags CreateFeatureFlags() => new NetDesktopFeatureFlags();
     }
 }

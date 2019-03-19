@@ -49,7 +49,7 @@ using Microsoft.Identity.Client.Mats.Internal;
 namespace Microsoft.Identity.Client.Platforms.uap
 {
     /// <summary>
-    /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here. 
+    /// Platform / OS specific logic. No library (ADAL / MSAL) specific code should go in here.
     /// </summary>
     internal class UapPlatformProxy : AbstractPlatformProxy
     {
@@ -62,7 +62,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         /// Get the user logged in to Windows or throws
         /// </summary>
         /// <remarks>
-        /// Win10 allows several identities to be logged in at once; 
+        /// Win10 allows several identities to be logged in at once;
         /// select the first principal name that can be used
         /// </remarks>
         /// <returns>The username or throws</returns>
@@ -147,7 +147,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         protected override string InternalGetOperatingSystem()
         {
-            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check 
+            // In WinRT, there is no way to reliably get OS version. All can be done reliably is to check
             // for existence of specific features which does not help in this case, so we do not emit OS in WinRT.
             return null;
         }
@@ -176,7 +176,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Name of the calling application</returns>
         protected override string InternalGetCallingApplicationName()
@@ -185,7 +185,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII, ensure that it is hashed. 
+        /// Considered PII, ensure that it is hashed.
         /// </summary>
         /// <returns>Version of the calling application</returns>
         protected override string InternalGetCallingApplicationVersion()
@@ -194,7 +194,7 @@ namespace Microsoft.Identity.Client.Platforms.uap
         }
 
         /// <summary>
-        /// Considered PII. Please ensure that it is hashed. 
+        /// Considered PII. Please ensure that it is hashed.
         /// </summary>
         /// <returns>Device identifier</returns>
         protected override string InternalGetDeviceId()
@@ -202,20 +202,11 @@ namespace Microsoft.Identity.Client.Platforms.uap
             return new EasClientDeviceInformation()?.Id.ToString();
         }
 
-        public override ILegacyCachePersistence CreateLegacyCachePersistence()
-        {
-            return new UapLegacyCachePersistence(Logger, CryptographyManager);
-        }
+        public override ILegacyCachePersistence CreateLegacyCachePersistence() => new UapLegacyCachePersistence(Logger, CryptographyManager);
 
-        public override ITokenCacheAccessor CreateTokenCacheAccessor()
-        {
-            return new InMemoryTokenCacheAccessor();
-        }
+        public override ITokenCacheAccessor CreateTokenCacheAccessor() => new InMemoryTokenCacheAccessor();
 
-        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage()
-        {
-            return new UapTokenCacheBlobStorage(CryptographyManager, Logger);
-        }
+        public override ITokenCacheBlobStorage CreateTokenCacheBlobStorage() => new UapTokenCacheBlobStorage(CryptographyManager, Logger);
 
         protected override IWebUIFactory CreateWebUiFactory() => new WebUIFactory();
         protected override ICryptographyManager InternalGetCryptographyManager() => new UapCryptographyManager();
@@ -223,13 +214,13 @@ namespace Microsoft.Identity.Client.Platforms.uap
 
         public override string GetDeviceNetworkState()
         {
-            // TODO(mats): 
+            // TODO(mats):
             return string.Empty;
         }
 
         public override string GetDpti()
         {
-            // TODO(mats):  
+            // TODO(mats):
             return string.Empty;
         }
 
@@ -242,5 +233,6 @@ namespace Microsoft.Identity.Client.Platforms.uap
         {
             return MatsConverter.AsInt(OsPlatform.Win32);
         }
+        protected override IFeatureFlags CreateFeatureFlags() => new UapFeatureFlags();
     }
 }

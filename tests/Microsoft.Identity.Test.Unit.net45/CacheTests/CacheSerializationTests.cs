@@ -25,6 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,6 +42,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
     [TestClass]
     public class CacheSerializationTests
     {
+        private static readonly IEnumerable<string> s_appMetadataKeys = new[] {
+            StorageJsonKeys.ClientId ,
+            StorageJsonKeys.Environment,
+            StorageJsonKeys.FamilyId};
+
         private MsalAccessTokenCacheItem CreateAccessTokenItem()
         {
             return new MsalAccessTokenCacheItem
@@ -115,29 +121,38 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             {
                 var item = CreateAccessTokenItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.AccessTokenCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveAccessToken(item);
             }
 
             for (int i = 1; i <= NumRefreshTokens; i++)
             {
                 var item = CreateRefreshTokenItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.RefreshTokenCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveRefreshToken(item);
             }
+
+            // Create an FRT
+            var frt = CreateRefreshTokenItem();
+            frt.FamilyId = "1";
+            accessor.SaveRefreshToken(frt);
 
             for (int i = 1; i <= NumIdTokens; i++)
             {
                 var item = CreateIdTokenItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.IdTokenCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveIdToken(item);
             }
 
             for (int i = 1; i <= NumAccounts; i++)
             {
                 var item = CreateAccountItem();
                 item.Environment = item.Environment + $"_{i}"; // ensure we get unique cache keys
-                accessor.AccountCacheDictionary[item.GetKey().ToString()] = item;
+                accessor.SaveAccount(item);
             }
+
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_1",  "1"));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env_2",  ""));
+            accessor.SaveAppMetadata(new MsalAppMetadataCacheItem(MsalTestConstants.ClientId2, "env_1", "another_family"));
 
             return accessor;
         }
@@ -198,6 +213,29 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             var item2 = MsalRefreshTokenCacheItem.FromJsonString(asJson);
 
             AssertRefreshTokenCacheItemsAreEqual(item, item2);
+        }
+
+        [TestMethod]
+        public void Test_FRT_SerializeDeserialize()
+        {
+            var item1 = CreateRefreshTokenItem();
+            item1.FamilyId = null;
+            var item2 = CreateRefreshTokenItem();
+            item2.FamilyId = "";
+            var item3 = CreateRefreshTokenItem();
+            item3.FamilyId = "1";
+
+            var json1 = item1.ToJsonString();
+            var json2 = item2.ToJsonString();
+            var json3 = item3.ToJsonString();
+
+            var reserialized1 = MsalRefreshTokenCacheItem.FromJsonString(json1);
+            var reserialized2 = MsalRefreshTokenCacheItem.FromJsonString(json2);
+            var reserialized3 = MsalRefreshTokenCacheItem.FromJsonString(json3);
+
+            AssertRefreshTokenCacheItemsAreEqual(item1, reserialized1);
+            AssertRefreshTokenCacheItemsAreEqual(item2, reserialized2);
+            AssertRefreshTokenCacheItemsAreEqual(item3, reserialized3);
         }
 
         [TestMethod]
@@ -326,6 +364,43 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
 
         #endregion // ACCOUNT TESTS
 
+        #region APP METADATA TESTS
+
+        [TestMethod]
+        public void TestAppMetadata_SerializeDeserialize()
+        {
+            var item = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env", "1");
+            string asJson = item.ToJsonString();
+            var item2 = MsalAppMetadataCacheItem.FromJsonString(asJson);
+
+            Assert.AreEqual(item, item2);
+        }
+
+        [TestMethod]
+        public void TestAppMetadata_Supports_AdditionalFields()
+        {
+            var item = new MsalAppMetadataCacheItem(MsalTestConstants.ClientId, "env", "1");
+
+            // Add an unknown field into the json
+            var asJObject = item.ToJObject();
+            AssertContainsKeys(asJObject, s_appMetadataKeys);
+
+            asJObject["unsupported_field_name"] = "this is a value";
+
+            // Ensure unknown field remains in the AdditionalFieldsJson block
+            var item2 = MsalAppMetadataCacheItem.FromJObject(asJObject);
+            Assert.AreEqual("{\r\n  \"unsupported_field_name\": \"this is a value\"\r\n}", item2.AdditionalFieldsJson);
+
+            // Ensure additional fields make the round trip into json
+            asJObject = item2.ToJObject();
+            AssertContainsKeys(asJObject, s_appMetadataKeys);
+            AssertContainsKeys(asJObject, new[] { "unsupported_field_name" });
+        }
+
+       
+        #endregion // APP METADATA TESTS
+      
+
         #region DICTIONARY SERIALIZATION TESTS
 
         [TestMethod]
@@ -351,20 +426,30 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         #region JSON SERIALIZATION TESTS
 
         [TestMethod]
+        [DeploymentItem(@"Resources\ExpectedTokenCache.json")]
         public void TestJsonSerialization()
         {
+            string expectedJson = File.ReadAllText(ResourceHelper.GetTestResourceRelativePath("ExpectedTokenCache.json"));
             var accessor = CreateTokenCacheAccessor();
 
             var s1 = new TokenCacheJsonSerializer(accessor);
             byte[] bytes = s1.Serialize();
-            string json = new UTF8Encoding().GetString(bytes);
+            string actualJson = new UTF8Encoding().GetString(bytes);
+
+            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson), JObject.Parse(expectedJson)));
 
             var otherAccessor = new InMemoryTokenCacheAccessor();
             var s2 = new TokenCacheJsonSerializer(otherAccessor);
             s2.Deserialize(bytes);
 
             AssertAccessorsAreEqual(accessor, otherAccessor);
+
+            // serialize again to detect errors that come from deserialization
+            byte[] bytes2 = s2.Serialize();
+            string actualJson2 = new UTF8Encoding().GetString(bytes2);
+            Assert.IsTrue(JToken.DeepEquals(JObject.Parse(actualJson2), JObject.Parse(expectedJson)));
         }
+
 
         #endregion // JSON SERIALIZATION TESTS
 
@@ -379,10 +464,10 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = File.ReadAllBytes(pythonBinFilePath);
             s.Deserialize(bytes);
 
-            Assert.AreEqual(0, accessor.AccessTokenCount, nameof(accessor.AccessTokenCount));
-            Assert.AreEqual(0, accessor.RefreshTokenCount, nameof(accessor.RefreshTokenCount));
-            Assert.AreEqual(0, accessor.IdTokenCount, nameof(accessor.IdTokenCount));
-            Assert.AreEqual(0, accessor.AccountCount, nameof(accessor.AccountCount));
+            Assert.AreEqual(0, accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(0, accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(0, accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(0, accessor.GetAllAccounts().Count());
         }
 
         [TestMethod]
@@ -395,10 +480,11 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
             byte[] bytes = File.ReadAllBytes(binFilePath);
             s.Deserialize(bytes);
 
-            Assert.AreEqual(1, accessor.AccessTokenCount, nameof(accessor.AccessTokenCount));
-            Assert.AreEqual(1, accessor.RefreshTokenCount, nameof(accessor.RefreshTokenCount));
-            Assert.AreEqual(1, accessor.IdTokenCount, nameof(accessor.IdTokenCount));
-            Assert.AreEqual(1, accessor.AccountCount, nameof(accessor.AccountCount));
+            Assert.AreEqual(1, accessor.GetAllAccessTokens().Count());
+            Assert.AreEqual(1, accessor.GetAllRefreshTokens().Count());
+            Assert.AreEqual(1, accessor.GetAllIdTokens().Count());
+            Assert.AreEqual(1, accessor.GetAllAccounts().Count());
+            Assert.AreEqual(0, accessor.GetAllAppMetadata().Count());
 
             var expectedAccessTokenItem = new MsalAccessTokenCacheItem
             {
@@ -414,7 +500,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 NormalizedScopes = "User.Read User.ReadBasic.All profile openid email",
                 UserAssertionHash = string.Empty
             };
-            AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.AccessTokenCacheDictionary.Values.First());
+            AssertAccessTokenCacheItemsAreEqual(expectedAccessTokenItem, accessor.GetAllAccessTokens().First());
 
             var expectedRefreshTokenItem = new MsalRefreshTokenCacheItem
             {
@@ -423,7 +509,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 RawClientInfo = string.Empty,
                 ClientId = "b945c513-3946-4ecd-b179-6499803a2167"
             };
-            AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.RefreshTokenCacheDictionary.Values.First());
+            AssertRefreshTokenCacheItemsAreEqual(expectedRefreshTokenItem, accessor.GetAllRefreshTokens().First());
 
             var expectedIdTokenItem = new MsalIdTokenCacheItem
             {
@@ -433,7 +519,7 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 ClientId = "b945c513-3946-4ecd-b179-6499803a2167",
                 TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
             };
-            AssertIdTokenCacheItemsAreEqual(expectedIdTokenItem, accessor.IdTokenCacheDictionary.Values.First());
+            AssertIdTokenCacheItemsAreEqual(expectedIdTokenItem, accessor.GetAllIdTokens().First());
 
             var expectedAccountItem = new MsalAccountCacheItem
             {
@@ -447,15 +533,15 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
                 LocalAccountId = "13dd2c19-84cd-416a-ae7d-49573e425619",
                 TenantId = "26039cce-489d-4002-8293-5b0c5134eacb"
             };
-            AssertAccountCacheItemsAreEqual(expectedAccountItem, accessor.AccountCacheDictionary.Values.First());
+            AssertAccountCacheItemsAreEqual(expectedAccountItem, accessor.GetAllAccounts().First());
         }
 
         private void AssertAccessorsAreEqual(ITokenCacheAccessor expected, ITokenCacheAccessor actual)
         {
-            Assert.AreEqual(expected.AccessTokenCount, actual.AccessTokenCount);
-            Assert.AreEqual(expected.RefreshTokenCount, actual.RefreshTokenCount);
-            Assert.AreEqual(expected.IdTokenCount, actual.IdTokenCount);
-            Assert.AreEqual(expected.AccountCount, actual.AccountCount);
+            Assert.AreEqual(expected.GetAllAccessTokens().Count(), actual.GetAllAccessTokens().Count());
+            Assert.AreEqual(expected.GetAllRefreshTokens().Count(), actual.GetAllRefreshTokens().Count());
+            Assert.AreEqual(expected.GetAllIdTokens().Count(), actual.GetAllIdTokens().Count());
+            Assert.AreEqual(expected.GetAllAccounts().Count(), actual.GetAllAccounts().Count());
         }
 
         private void AssertContainsKey(JObject j, string key)
@@ -582,6 +668,17 @@ namespace Microsoft.Identity.Test.Unit.CacheTests
         private void AssertRefreshTokenCacheItemsAreEqual(MsalRefreshTokenCacheItem expected, MsalRefreshTokenCacheItem actual)
         {
             AssertCredentialCacheItemBaseItemsAreEqual(expected, actual);
+
+            if (string.IsNullOrEmpty(expected.FamilyId))
+            {
+                Assert.IsTrue(string.IsNullOrEmpty(actual.FamilyId));
+            }
+            else
+            {
+                Assert.AreEqual(expected.FamilyId, actual.FamilyId);
+            }
+
+            
         }
 
         private void AssertIdTokenCacheItemsAreEqual(MsalIdTokenCacheItem expected, MsalIdTokenCacheItem actual)

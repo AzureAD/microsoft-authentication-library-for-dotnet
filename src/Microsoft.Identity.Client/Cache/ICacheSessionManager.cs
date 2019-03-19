@@ -38,8 +38,10 @@ namespace Microsoft.Identity.Client.Cache
         ITokenCacheInternal TokenCacheInternal { get; }
         bool HasCache { get; }
         Task<MsalAccessTokenCacheItem> FindAccessTokenAsync();
-        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse tokenResponse);
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(MsalTokenResponse tokenResponse);
         MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey);
         Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync();
+        Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId);
+        Task<bool?> IsAppFociMemberAsync(string familyId);
     }
 }

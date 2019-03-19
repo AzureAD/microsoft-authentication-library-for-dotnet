@@ -52,9 +52,9 @@ namespace Microsoft.Identity.Client.Cache
             return TokenCacheInternal.FindAccessTokenAsync(_requestParams);
         }
 
-        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveAccessAndRefreshToken(MsalTokenResponse tokenResponse)
+        public Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> SaveTokenResponse(MsalTokenResponse tokenResponse)
         {
-            return TokenCacheInternal.SaveAccessAndRefreshToken(_requestParams, tokenResponse);
+            return TokenCacheInternal.SaveTokenResponse(_requestParams, tokenResponse);
         }
 
         public MsalIdTokenCacheItem GetIdTokenCacheItem(MsalIdTokenCacheKey idTokenCacheKey)
@@ -62,9 +62,24 @@ namespace Microsoft.Identity.Client.Cache
             return TokenCacheInternal.GetIdTokenCacheItem(idTokenCacheKey, _requestParams.RequestContext);
         }
 
+        public Task<MsalRefreshTokenCacheItem> FindFamilyRefreshTokenAsync(string familyId)
+        {
+            if (String.IsNullOrEmpty(familyId))
+            {
+                throw new ArgumentNullException(nameof(familyId));
+            }
+
+            return TokenCacheInternal.FindRefreshTokenAsync(_requestParams, familyId);
+        }
+
         public Task<MsalRefreshTokenCacheItem> FindRefreshTokenAsync()
         {
             return TokenCacheInternal.FindRefreshTokenAsync(_requestParams);
+        }
+
+        public Task<bool?> IsAppFociMemberAsync(string familyId)
+        {
+            return TokenCacheInternal.IsFociMemberAsync(_requestParams, familyId);
         }
     }
 }

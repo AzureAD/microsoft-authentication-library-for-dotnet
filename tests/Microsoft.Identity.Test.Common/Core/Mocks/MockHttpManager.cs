@@ -68,6 +68,11 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
 
         protected override HttpClient GetHttpClient()
         {
+            if (_httpMessageHandlerQueue.Count == 0)
+            {
+                Assert.Fail("The MockHttpManager's queue is empty. Cannot serve another response");
+            }
+
             var messageHandler = _httpMessageHandlerQueue.Dequeue();
             var httpClient = new HttpClient(messageHandler)
             {

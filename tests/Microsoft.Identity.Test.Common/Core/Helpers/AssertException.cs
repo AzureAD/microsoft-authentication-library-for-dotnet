@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -115,6 +115,11 @@ namespace Microsoft.Identity.Test.Common.Core.Helpers
 
             if (exception is AggregateException aggEx)
             {
+                if (aggEx.InnerException.GetType() == typeof(AssertFailedException))
+                {
+                    throw aggEx.InnerException;
+                }
+
                 var exceptionsMatching = aggEx.InnerExceptions.OfType<T>().ToList();
 
                 if (!exceptionsMatching.Any())

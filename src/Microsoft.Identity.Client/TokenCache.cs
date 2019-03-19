@@ -63,6 +63,8 @@ namespace Microsoft.Identity.Client
         private ICoreLogger _logger => ServiceBundle.DefaultLogger;
 
         private readonly ITokenCacheBlobStorage _defaultTokenCacheBlobStorage;
+        private readonly IFeatureFlags _featureFlags;
+
         private TokenCacheCallback _userConfiguredBeforeAccess;
         private TokenCacheCallback _userConfiguredAfterAccess;
         private TokenCacheCallback _userConfiguredBeforeWrite;
@@ -83,18 +85,19 @@ namespace Microsoft.Identity.Client
         /// The recommended way to get a cache is by using <see cref="IClientApplicationBase.UserTokenCache"/>
         /// and <c>IConfidentialClientApplication.AppTokenCache</c> once the app is created.
         /// </summary>
-        public TokenCache()
+        public TokenCache() : this((IServiceBundle)null)
         {
-            ServiceBundle = null;
-            var proxy = PlatformProxyFactory.CreatePlatformProxy(null);
-            _accessor = proxy.CreateTokenCacheAccessor();
-            _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
-            LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
         }
 
-        internal TokenCache(IServiceBundle serviceBundle) : this()
+        internal TokenCache(IServiceBundle serviceBundle) 
         {
             SetServiceBundle(serviceBundle);
+
+            var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
+            _accessor = proxy.CreateTokenCacheAccessor();
+            _featureFlags = proxy.GetFeatureFlags();
+            _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
+            LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
         }
 
         internal void SetServiceBundle(IServiceBundle serviceBundle)
@@ -111,11 +114,11 @@ namespace Microsoft.Identity.Client
         /// <param name="serviceBundle"></param>
         /// <param name="legacyCachePersistenceForTest"></param>
         internal TokenCache(IServiceBundle serviceBundle, ILegacyCachePersistence legacyCachePersistenceForTest)
+            : this(serviceBundle)
         {
-            ServiceBundle = serviceBundle;
-            _accessor = ServiceBundle.PlatformProxy.CreateTokenCacheAccessor();
+            SetServiceBundle(serviceBundle);
+
             LegacyCachePersistence = legacyCachePersistenceForTest;
-            _defaultTokenCacheBlobStorage = ServiceBundle.PlatformProxy.CreateTokenCacheBlobStorage();
         }
 
         /// <summary>
@@ -134,6 +137,7 @@ namespace Microsoft.Identity.Client
 
         internal string ClientId => ServiceBundle.Config.ClientId;
 
+        #region Notifications
         /// <summary>
         /// Notification method called before any library method accesses the cache.
         /// </summary>
@@ -202,7 +206,9 @@ namespace Microsoft.Identity.Client
             BeforeWrite?.Invoke(args);
         }
 
-        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> ITokenCacheInternal.SaveAccessAndRefreshToken(
+        #endregion
+
+        Tuple<MsalAccessTokenCacheItem, MsalIdTokenCacheItem> ITokenCacheInternal.SaveTokenResponse(
             AuthenticationRequestParameters requestParams,
             MsalTokenResponse response)
         {
@@ -268,35 +274,40 @@ namespace Microsoft.Identity.Client
 
                         _accessor.SaveAccessToken(msalAccessTokenCacheItem);
 
-                        if (idToken != null)
+                    if (idToken != null)
+                    {
+                        _accessor.SaveIdToken(msalIdTokenCacheItem);
+                        var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
+                        _accessor.SaveAccount(msalAccountCacheItem);
+                    }
+
+                    // if server returns the refresh token back, save it in the cache.
+                    if (response.RefreshToken != null)
+                    {
+                        msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
+                        if (!_featureFlags.IsFociEnabled)
                         {
-                            _accessor.SaveIdToken(msalIdTokenCacheItem);
-
-                            var msalAccountCacheItem = new MsalAccountCacheItem(preferredEnvironmentHost, response, preferredUsername, tenantId);
-
-                            _accessor.SaveAccount(msalAccountCacheItem);
+                            msalRefreshTokenCacheItem.FamilyId = null;
                         }
 
-                        // if server returns the refresh token back, save it in the cache.
-                        if (response.RefreshToken != null)
-                        {
-                            msalRefreshTokenCacheItem = new MsalRefreshTokenCacheItem(preferredEnvironmentHost, requestParams.ClientId, response);
-                            requestParams.RequestContext.Logger.Info("Saving RT in cache...");
-                            _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
-                        }
+                        requestParams.RequestContext.Logger.Info("Saving RT in cache...");
+                        _accessor.SaveRefreshToken(msalRefreshTokenCacheItem);
+                    }
 
-                        // save RT in ADAL cache for public clients
-                        // do not save RT in ADAL cache for MSAL B2C scenarios
-                        if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
-                        {
-                            CacheFallbackOperations.WriteAdalRefreshToken(
-                                _logger,
-                                LegacyCachePersistence,
-                                msalRefreshTokenCacheItem,
-                                msalIdTokenCacheItem,
-                                Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
-                                msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
-                        }
+                    UpdateAppMetadata(requestParams.ClientId, preferredEnvironmentHost, response.FamilyId);
+
+                    // save RT in ADAL cache for public clients
+                    // do not save RT in ADAL cache for MSAL B2C scenarios
+                    if (!requestParams.IsClientCredentialRequest && !requestParams.AuthorityInfo.AuthorityType.Equals(AppConfig.AuthorityType.B2C))
+                    {
+                        CacheFallbackOperations.WriteAdalRefreshToken(
+                            _logger,
+                            LegacyCachePersistence,
+                            msalRefreshTokenCacheItem,
+                            msalIdTokenCacheItem,
+                            Authority.CreateAuthorityUriWithHost(requestParams.TenantUpdatedCanonicalAuthority, preferredEnvironmentHost),
+                            msalIdTokenCacheItem.IdToken.ObjectId, response.Scope);
+                    }
 
                     }
                     finally
@@ -312,6 +323,15 @@ namespace Microsoft.Identity.Client
                     HasStateChanged = false;
 #pragma warning restore CS0618 // Type or member is obsolete
                 }
+            }
+        }
+
+        private void UpdateAppMetadata(string clientId, string environment, string familyId)
+        {
+            if (_featureFlags.IsFociEnabled)
+            {
+                var metadataCacheItem = new MsalAppMetadataCacheItem(clientId, environment, familyId);
+                _accessor.SaveAppMetadata(metadataCacheItem);
             }
         }
 
@@ -543,7 +563,9 @@ namespace Microsoft.Identity.Client
                 msalAccessTokenCacheItem.ExtendedExpiresOn);
         }
 
-        async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(AuthenticationRequestParameters requestParams)
+        async Task<MsalRefreshTokenCacheItem> ITokenCacheInternal.FindRefreshTokenAsync(
+            AuthenticationRequestParameters requestParams,
+            string familyId)
         {
             using (ServiceBundle.TelemetryManager.CreateTelemetryHelper(requestParams.RequestContext.TelemetryRequestId, requestParams.RequestContext.ClientId,
                 new CacheEvent(CacheEvent.TokenCacheLookup) { TokenType = CacheEvent.TokenTypes.RT }))
@@ -573,30 +595,24 @@ namespace Microsoft.Identity.Client
                         Account = requestParams.Account
                     };
 
-                    MsalRefreshTokenCacheKey key = new MsalRefreshTokenCacheKey(
-                        preferredEnvironmentHost, requestParams.ClientId, requestParams.Account?.HomeAccountId?.Identifier);
+                    // make sure to check preferredEnvironmentHost first
+                    var allEnvAliases = new List<string>() { preferredEnvironmentHost };
+                    allEnvAliases.AddRange(environmentAliases);
+
+                    var keysAcrossEnvs = allEnvAliases.Select(ea => new MsalRefreshTokenCacheKey(
+                        ea,
+                        requestParams.ClientId,
+                        requestParams.Account?.HomeAccountId?.Identifier,
+                        familyId));
+
 
                     OnBeforeAccess(args);
                     try
                     {
-                        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = _accessor.GetRefreshToken(key);
-
-                        // trying to find rt by authority aliases
-                        if (msalRefreshTokenCacheItem == null)
-                        {
-                            var refreshTokens = _accessor.GetAllRefreshTokens();
-
-                            foreach (var refreshToken in refreshTokens)
-                            {
-                                if (refreshToken.ClientId.Equals(requestParams.ClientId, StringComparison.OrdinalIgnoreCase) &&
-                                    environmentAliases.Contains(refreshToken.Environment) &&
-                                    requestParams.Account?.HomeAccountId?.Identifier == refreshToken.HomeAccountId)
-                                {
-                                    msalRefreshTokenCacheItem = refreshToken;
-                                    continue;
-                                }
-                            }
-                        }
+                        // Try to load from all env aliases, but stop at the first valid one
+                        MsalRefreshTokenCacheItem msalRefreshTokenCacheItem = keysAcrossEnvs
+                            .Select(key => _accessor.GetRefreshToken(key))
+                            .FirstOrDefault(item => item != null);
 
                         requestParams.RequestContext.Logger.Info("Refresh token found in the cache? - " + (msalRefreshTokenCacheItem != null));
 
@@ -607,19 +623,22 @@ namespace Microsoft.Identity.Client
 
                         requestParams.RequestContext.Logger.Info("Checking ADAL cache for matching RT");
 
-                        if (requestParams.Account == null)
+                        // ADAL legacy cache does not store FRTs
+                        if (requestParams.Account != null && string.IsNullOrEmpty(familyId))
                         {
-                            return null;
+                            return CacheFallbackOperations.GetAdalEntryForMsal(
+                                _logger,
+                                LegacyCachePersistence,
+                                preferredEnvironmentHost,
+                                environmentAliases,
+                                requestParams.ClientId,
+                                requestParams.LoginHint,
+                                requestParams.Account.HomeAccountId?.Identifier,
+                                null);
                         }
-                        return CacheFallbackOperations.GetAdalEntryForMsal(
-                            _logger,
-                            LegacyCachePersistence,
-                            preferredEnvironmentHost,
-                            environmentAliases,
-                            requestParams.ClientId,
-                            requestParams.LoginHint,
-                            requestParams.Account.HomeAccountId?.Identifier,
-                            null);
+
+                        return null;
+
                     }
                     finally
                     {
@@ -628,6 +647,55 @@ namespace Microsoft.Identity.Client
                 }
             }
         }
+
+        async Task<bool?> ITokenCacheInternal.IsFociMemberAsync(AuthenticationRequestParameters requestParams, string familyId)
+        {
+            var logger = requestParams.RequestContext.Logger;
+            if (requestParams?.AuthorityInfo?.CanonicalAuthority == null)
+            {
+                logger.Warning("No authority details, can't check app metadta. Returning unkown");
+                return null;
+            }
+
+            var instanceDiscoveryMetadataEntry = await GetCachedOrDiscoverAuthorityMetaDataAsync(
+                   requestParams.AuthorityInfo.CanonicalAuthority,
+                   requestParams.RequestContext).ConfigureAwait(false);
+
+            var environmentAliases = GetEnvironmentAliases(
+                requestParams.AuthorityInfo.CanonicalAuthority,
+                instanceDiscoveryMetadataEntry);
+
+            TokenCacheNotificationArgs args = new TokenCacheNotificationArgs
+            {
+                TokenCache = this,
+                ClientId = ClientId,
+                Account = requestParams?.Account,
+                HasStateChanged = false
+            };
+
+            //TODO: bogavril - is the env ok here? Can I cache it or pass it in?
+            MsalAppMetadataCacheItem appMetadata;
+            lock (LockObject)
+            {
+                OnBeforeAccess(args);
+
+                appMetadata =
+                    environmentAliases
+                    .Select(env => _accessor.GetAppMetadata(new MsalAppMetadataCacheKey(ClientId, env)))
+                    .FirstOrDefault(item => item != null);
+
+                OnAfterAccess(args);
+            }
+
+            if (appMetadata == null)
+            {
+                logger.Warning("No app metadata found. Returning unkown");
+                return null;
+            }
+
+            return appMetadata.FamilyId == familyId;
+        }
+
 
         /// <inheritdoc />
         public void SetIosKeychainSecurityGroup(string securityGroup)
@@ -745,7 +813,7 @@ namespace Microsoft.Identity.Client
                 OnBeforeAccess(args);
                 try
                 {
-                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(true);
+                    tokenCacheItems = ((ITokenCacheInternal)this).GetAllRefreshTokens(false);
                     accountCacheItems = ((ITokenCacheInternal)this).GetAllAccounts();
                     adalUsersResult = CacheFallbackOperations.GetAllAdalUsersForMsal(_logger, LegacyCachePersistence, ClientId);
                 }
@@ -784,7 +852,7 @@ namespace Microsoft.Identity.Client
                 }
 
                 var accounts = new List<IAccount>(clientInfoToAccountMap.Values);
-                List<string> uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
+                var uniqueUserNames = clientInfoToAccountMap.Values.Select(o => o.Username).Distinct().ToList();
 
                 foreach (AdalUserInfo user in adalUsersWithoutClientInfo)
                 {
@@ -839,6 +907,8 @@ namespace Microsoft.Identity.Client
             }
         }
 
+
+        #region Removal methods
         void ITokenCacheInternal.RemoveAccount(IAccount account, RequestContext requestContext)
         {
             lock (LockObject)
@@ -884,7 +954,9 @@ namespace Microsoft.Identity.Client
                 // adalv3 account
                 return;
             }
-            var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(true)
+
+            // Delete ALL refresh tokens associated with this account
+            var allRefreshTokens = ((ITokenCacheInternal)this).GetAllRefreshTokens(false)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
@@ -894,7 +966,7 @@ namespace Microsoft.Identity.Client
             }
 
             requestContext.Logger.Info("Deleted refresh token count - " + allRefreshTokens.Count);
-            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokens(true)
+            IList<MsalAccessTokenCacheItem> allAccessTokens = ((ITokenCacheInternal)this).GetAllAccessTokens(false)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalAccessTokenCacheItem accessTokenCacheItem in allAccessTokens)
@@ -904,7 +976,7 @@ namespace Microsoft.Identity.Client
 
             requestContext.Logger.Info("Deleted access token count - " + allAccessTokens.Count);
 
-            var allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokens(true)
+            var allIdTokens = ((ITokenCacheInternal)this).GetAllIdTokens(false)
                 .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             foreach (MsalIdTokenCacheItem idTokenCacheItem in allIdTokens)
@@ -913,6 +985,13 @@ namespace Microsoft.Identity.Client
             }
 
             requestContext.Logger.Info("Deleted Id token count - " + allIdTokens.Count);
+
+            ((ITokenCacheInternal)this).GetAllAccounts()
+                .Where(item => item.HomeAccountId.Equals(account.HomeAccountId.Identifier, StringComparison.OrdinalIgnoreCase) &&
+                               item.PreferredUsername.Equals(account.Username, StringComparison.OrdinalIgnoreCase))
+                .ToList()
+                .ForEach(accItem => _accessor.DeleteAccount(accItem.GetKey()));
+           
         }
 
         internal void RemoveAdalUser(IAccount account)
@@ -967,6 +1046,10 @@ namespace Microsoft.Identity.Client
             _accessor.Clear();
         }
 
+        #endregion
+
+        #region Serialization
+
         private bool UserHasConfiguredBlobSerialization()
         {
             return _userConfiguredBeforeAccess != null ||
@@ -974,7 +1057,7 @@ namespace Microsoft.Identity.Client
                 _userConfiguredBeforeWrite != null;
         }
 
-#if !ANDROID_BUILDTIME && !iOS_BUILDTIME 
+#if !ANDROID_BUILDTIME && !iOS_BUILDTIME
 
         /// <summary>
         /// Sets a delegate to be notified before any library method accesses the cache. This gives an option to the
@@ -1242,7 +1325,9 @@ namespace Microsoft.Identity.Client
             "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
 #endif
         }
-#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME
 
+
+#endif // !ANDROID_BUILDTIME && !iOS_BUILDTIME
+        #endregion
     }
 }

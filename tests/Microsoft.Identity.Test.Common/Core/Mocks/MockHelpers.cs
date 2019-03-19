@@ -56,6 +56,15 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
             ":\"" + CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId) +
             "\",\"id_token_expires_in\":\"3600\"}";
 
+        public static readonly string FociTokenResponse =
+           "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":" +
+           "\"r1/scope1 r1/scope2\",\"access_token\":\"some-access-token\"" +
+           ",\"foci\":\"1\"" +
+           ",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"client_info\"" +
+           ":\"" + CreateClientInfo() + "\",\"id_token\"" +
+           ":\"" + CreateIdToken(MsalTestConstants.UniqueId, MsalTestConstants.DisplayableId) +
+           "\",\"id_token_expires_in\":\"3600\"}";
+
         public static string CreateClientInfo()
         {
             return CreateClientInfo(MsalTestConstants.Uid, MsalTestConstants.Utid);
@@ -125,9 +134,10 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 scopes, idToken, clientInfo));
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage()
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(bool foci = false)
         {
-            return CreateSuccessResponseMessage(DefaultTokenResponse);
+            return CreateSuccessResponseMessage(
+                foci ? FociTokenResponse : DefaultTokenResponse);
         }
 
         public static HttpResponseMessage CreateInvalidGrantTokenResponseMessage()
@@ -200,16 +210,17 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                 "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"access_token\":\"" + token + "\"}");
         }
 
-        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope)
+        public static HttpResponseMessage CreateSuccessTokenResponseMessage(string uniqueId, string displayableId, string[] scope, bool foci = false)
         {
             string idToken = CreateIdToken(uniqueId, displayableId, MsalTestConstants.Utid);
             HttpResponseMessage responseMessage = new HttpResponseMessage(HttpStatusCode.OK);
-            HttpContent content =
-                new StringContent("{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
+            string stringContent = "{\"token_type\":\"Bearer\",\"expires_in\":\"3599\",\"scope\":\"" +
                                   scope.AsSingleString() +
                                   "\",\"access_token\":\"some-access-token\",\"refresh_token\":\"OAAsomethingencryptedQwgAA\",\"id_token\":\"" +
                                   idToken +
-                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo() + "\"}");
+                                  (foci ? "\",\"foci\":\"1" : "") +
+                                  "\",\"id_token_expires_in\":\"3600\",\"client_info\":\"" + CreateClientInfo() + "\"}";
+            HttpContent content = new StringContent(stringContent);
             responseMessage.Content = content;
             return responseMessage;
         }
