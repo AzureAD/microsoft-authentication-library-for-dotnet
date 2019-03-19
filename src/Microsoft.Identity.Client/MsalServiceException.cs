@@ -244,7 +244,6 @@ namespace Microsoft.Identity.Client
 
         private const string ClaimsKey = "claims";
         private const string ResponseBodyKey = "response_body";
-        private const string SubErrorKey = "sub_error";
         private const string CorrelationIdKey = "correlation_id";
 
         internal override void PopulateJson(JObject jobj)
@@ -253,7 +252,6 @@ namespace Microsoft.Identity.Client
 
             jobj[ClaimsKey] = Claims;
             jobj[ResponseBodyKey] = ResponseBody;
-            jobj[SubErrorKey] = SubError;
             jobj[CorrelationIdKey] = CorrelationId;
         }
 
@@ -263,7 +261,6 @@ namespace Microsoft.Identity.Client
 
             Claims = JsonUtils.GetExistingOrEmptyString(jobj, ClaimsKey);
             ResponseBody = JsonUtils.GetExistingOrEmptyString(jobj, ResponseBodyKey);
-            SubError = JsonUtils.GetExistingOrEmptyString(jobj, SubErrorKey);
             CorrelationId = JsonUtils.GetExistingOrEmptyString(jobj, CorrelationIdKey);
         }
     }

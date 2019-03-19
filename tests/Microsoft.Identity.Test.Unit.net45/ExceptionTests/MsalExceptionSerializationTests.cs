@@ -39,7 +39,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
         private const string SomeClaims = "here are some claims";
         private const string SomeCorrelationId = "the correlation id";
-        private const string SomeSubError = "the_sub_error";
         private const string SomeResponseBody = "the response body";
 
         private void SerializeDeserializeAndValidate(MsalException ex, Type expectedType, bool isServiceExceptionDerived)
@@ -58,7 +57,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
 
                 Assert.AreEqual(SomeClaims, svcEx.Claims);
                 Assert.AreEqual(SomeResponseBody, svcEx.ResponseBody);
-                Assert.AreEqual(SomeSubError, svcEx.SubError);
                 Assert.AreEqual(SomeCorrelationId, svcEx.CorrelationId);
             }
         }
@@ -77,7 +75,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             {
                 Claims = SomeClaims,
                 CorrelationId = SomeCorrelationId,
-                SubError = SomeSubError,
                 ResponseBody = SomeResponseBody
             };
 
@@ -98,7 +95,6 @@ namespace Microsoft.Identity.Test.Unit.ExceptionTests
             {
                 Claims = SomeClaims,
                 CorrelationId = SomeCorrelationId,
-                SubError = SomeSubError,
                 ResponseBody = SomeResponseBody
             };
 
