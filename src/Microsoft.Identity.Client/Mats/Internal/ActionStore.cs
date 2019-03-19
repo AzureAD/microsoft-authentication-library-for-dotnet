@@ -65,7 +65,58 @@ namespace Microsoft.Identity.Client.Mats.Internal
         public void EndWamActionWithCancellation(WamAction action, string wamTelemetryBatch) => throw new NotImplementedException();
         public void EndWamActionWithFailure(WamAction action, ErrorSource errorSource, string error, string errorDescription, string accountId, string tenantId, string wamTelemetryBatch) => throw new NotImplementedException();
         public void EndWamActionWithSuccess(WamAction action, string accountId, string tenantId, string wamTelemetryBatch) => throw new NotImplementedException();
-        public IEnumerable<IPropertyBag> GetEventsForUpload() => throw new NotImplementedException();
+        public IEnumerable<IPropertyBag> GetEventsForUpload()
+        {
+            lock (_lockActionIdToPropertyBag)
+            {
+                var keysToRemove = new List<string>();
+                var retval = new List<PropertyBag>();
+
+                foreach (var kvp in _actionIdToPropertyBag)
+                {
+                    var propertyBag = kvp.Value;
+
+                    if (!propertyBag.ReadyForUpload)
+                    {
+                        var contents = propertyBag.GetContents();
+                        if (!contents.Int64Properties.TryGetValue(ActionPropertyNames.StartTimeConstStrKey, out long startTime))
+                        {
+                            _errorStore.ReportError("No start time on action", ErrorType.Action, ErrorSeverity.LibraryError);
+                            continue;
+                        }
+
+                        long currentTimeInMs = DateTimeUtils.GetMillisecondsSinceEpoch(DateTime.UtcNow);
+                        long durationInMs = currentTimeInMs - startTime;
+
+                        if (propertyBag.IsAggregable && durationInMs > _maxActionDurationMillis)
+                        {
+                            propertyBag.ReadyForUpload = true;
+                        }
+                        else if (durationInMs > _maxAggregationDurationMillis)  // todo: report bug in C++ code where they're doing microseconds around this value instead of milliseconds
+                        {
+                            propertyBag.Add(ActionPropertyNames.EndTimeConstStrKey, currentTimeInMs);
+                            propertyBag.Add(ActionPropertyNames.OutcomeConstStrKey, MatsConverter.AsString(AuthOutcome.Incomplete));
+                            propertyBag.ReadyForUpload = true;
+                        }
+
+                        if (!propertyBag.ReadyForUpload)
+                        {
+                            continue;
+                        }
+                    }
+
+                    retval.Add(kvp.Value);
+                    keysToRemove.Add(kvp.Key);
+                }
+
+                foreach (string key in keysToRemove)
+                {
+                    _actionIdToPropertyBag.Remove(key);
+                }
+
+                return retval;
+            }
+        }
 
         public void ProcessAdalTelemetryBlob(IDictionary<string, string> blob)
         {
@@ -213,7 +264,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             var startTimePoint = DateTime.UtcNow;
             propertyBag.Add(ActionPropertyNames.UploadIdConstStrKey, MatsId.Create());
             propertyBag.Add(ActionPropertyNames.ActionTypeConstStrKey, MatsConverter.AsString(actionType));
-            propertyBag.Add(ScenarioPropertyNames.IdConstStrKey, scenario.ScenarioId);
+            propertyBag.Add(ScenarioPropertyNames.IdConstStrKey, scenario?.ScenarioId);
             propertyBag.Add(ActionPropertyNames.CorrelationIdConstStrKey, corrIdTrim);
             propertyBag.Add(ActionPropertyNames.StartTimeConstStrKey, DateTimeUtils.GetMillisecondsSinceEpoch(startTimePoint));
 

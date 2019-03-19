@@ -39,8 +39,4 @@
   <ItemGroup>
     <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.6.3" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="MatsTests\" />
-  </ItemGroup>
 </Project>

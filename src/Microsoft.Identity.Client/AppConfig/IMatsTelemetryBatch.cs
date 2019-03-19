@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Collections.Generic;
+
 namespace Microsoft.Identity.Client.AppConfig
 {
     /// <summary>
@@ -16,81 +18,21 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        int GetStringRowCount();
+        IReadOnlyDictionary<string, bool> BoolValues { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        string GetStringKey(int index);
+        IReadOnlyDictionary<string, long> Int64Values { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        string GetStringValue(int index);
+        IReadOnlyDictionary<string, int> IntValues { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <returns></returns>
-        int GetIntRowCount();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        string GetIntKey(int index);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        int GetIntValue(int index);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        int GetInt64RowCount();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        string GetInt64Key(int index);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        long GetInt64Value(int index);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        int GetBoolRowCount();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        string GetBoolKey(int index);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="index"></param>
-        /// <returns></returns>
-        bool GetBoolValue(int index);
+        IReadOnlyDictionary<string, string> StringValues { get; }
     }
 }

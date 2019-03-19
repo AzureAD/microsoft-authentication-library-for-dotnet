@@ -10,6 +10,12 @@ namespace Microsoft.Identity.Client.Mats.Internal
 {
     internal class MatsTelemetryBatch : IMatsTelemetryBatch
     {
+        private readonly Dictionary<string, bool> _boolData = new Dictionary<string, bool>();
+        private readonly Dictionary<string, long> _int64Data = new Dictionary<string, long>();
+        private readonly Dictionary<string, int> _intData = new Dictionary<string, int>();
+        private readonly Dictionary<string, string> _stringData = new Dictionary<string, string>();
+
+
         public static IMatsTelemetryBatch Create(IMatsTelemetryData data)
         {
             var batch = new MatsTelemetryBatch(data.Name);
@@ -21,10 +27,41 @@ namespace Microsoft.Identity.Client.Mats.Internal
             return batch;
         }
 
-        private void SetBoolData(Dictionary<string, bool> data) => throw new NotImplementedException();
-        private void SetInt64Data(Dictionary<string, long> data) => throw new NotImplementedException();
-        private void SetIntData(Dictionary<string, int> data) => throw new NotImplementedException();
-        private void SetStringData(Dictionary<string, string> data) => throw new NotImplementedException();
+        private void SetBoolData(Dictionary<string, bool> data)
+        {
+            _boolData.Clear();
+            foreach (var kvp in data)
+            {
+                _boolData[kvp.Key] = kvp.Value;
+            }
+        }
+
+        private void SetInt64Data(Dictionary<string, long> data)
+        {
+            _int64Data.Clear();
+            foreach (var kvp in data)
+            {
+                _int64Data[kvp.Key] = kvp.Value;
+            }
+        }
+
+        private void SetIntData(Dictionary<string, int> data)
+        {
+            _intData.Clear();
+            foreach (var kvp in data)
+            {
+                _intData[kvp.Key] = kvp.Value;
+            }
+        }
+
+        private void SetStringData(Dictionary<string, string> data)
+        {
+            _stringData.Clear();
+            foreach (var kvp in data)
+            {
+                _stringData[kvp.Key] = kvp.Value;
+            }
+        }
 
         private readonly string _name;
 
@@ -33,18 +70,11 @@ namespace Microsoft.Identity.Client.Mats.Internal
             _name = name;
         }
 
-        public string GetBoolKey(int index) => throw new NotImplementedException();
-        public int GetBoolRowCount() => throw new NotImplementedException();
-        public bool GetBoolValue(int index) => throw new NotImplementedException();
-        public string GetInt64Key(int index) => throw new NotImplementedException();
-        public int GetInt64RowCount() => throw new NotImplementedException();
-        public long GetInt64Value(int index) => throw new NotImplementedException();
-        public string GetIntKey(int index) => throw new NotImplementedException();
-        public int GetIntRowCount() => throw new NotImplementedException();
-        public int GetIntValue(int index) => throw new NotImplementedException();
+        public IReadOnlyDictionary<string, bool> BoolValues => _boolData;
+        public IReadOnlyDictionary<string, long> Int64Values => _int64Data;
+        public IReadOnlyDictionary<string, int> IntValues => _intData;
+        public IReadOnlyDictionary<string, string> StringValues => _stringData;
+
         public string GetName() => _name;
-        public string GetStringKey(int index) => throw new NotImplementedException();
-        public int GetStringRowCount() => throw new NotImplementedException();
-        public string GetStringValue(int index) => throw new NotImplementedException();
     }
 }

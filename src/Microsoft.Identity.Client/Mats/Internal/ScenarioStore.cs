@@ -89,7 +89,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
         {
             lock (_lockScenarioIdToPropertyBag)
             {
-                if (_scenarioIdToPropertyBag.TryGetValue(scenarioId, out ScenarioHolder scenarioHolder))
+                if (!string.IsNullOrEmpty(scenarioId) && _scenarioIdToPropertyBag.TryGetValue(scenarioId, out ScenarioHolder scenarioHolder))
                 {
                     scenarioHolder.ShouldUpload = true;
                 }

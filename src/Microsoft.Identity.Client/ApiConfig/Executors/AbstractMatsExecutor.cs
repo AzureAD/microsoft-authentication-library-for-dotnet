@@ -22,7 +22,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenCommonParameters commonParameters,
             Func<Task<AuthenticationResult>> executorAction)
         {
-            var actionHandle = _mats.StartAction(null, commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
+            var actionHandle = _mats.StartAction(_mats.CreateScenario(), commonParameters.TelemetryCorrelationId.AsMatsCorrelationId());
 
             try
             {

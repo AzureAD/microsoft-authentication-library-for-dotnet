@@ -3,7 +3,7 @@
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
-    internal class AdalTelemetryBlobEventNames
+    internal static class AdalTelemetryBlobEventNames
     {
         public const string AdalCorrelationIdConstStrKey = "Microsoft.ADAL.correlation_id";
         public const string ApiIdConstStrKey = "Microsoft_ADAL_api_id";
