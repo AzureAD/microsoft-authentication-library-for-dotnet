@@ -13,7 +13,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// 
         /// </summary>
         /// <returns></returns>
-        string GetName();
+        string Name { get; }
 
         /// <summary>
         /// 

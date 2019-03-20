@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Mats;
 using Microsoft.Identity.Client.Mats.Internal;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Microsoft.Identity.Test.Unit.MatsTests

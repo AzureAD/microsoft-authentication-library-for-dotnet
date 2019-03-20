@@ -1,18 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Mats.Internal;
 
 namespace Microsoft.Identity.Test.Unit.MatsTests
 {
     internal class TestTelemetryDispatcher : ITelemetryDispatcher
     {
-        public void DispatchEvent(IMatsTelemetryData data)
+        public void DispatchEvent(IMatsTelemetryBatch batch)
         {
-            string eventName = data.Name.ToLowerInvariant();
+            string eventName = batch.Name.ToLowerInvariant();
             if (eventName.Contains("error"))
             {
                 ErrorEventCount++;

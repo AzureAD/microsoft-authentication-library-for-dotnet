@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Microsoft.Identity.Client.Mats.Internal.Constants;
 
 namespace Microsoft.Identity.Client.Mats.Internal
 {
@@ -54,17 +55,6 @@ namespace Microsoft.Identity.Client.Mats.Internal
             EndGenericAction(action.ActionId, MatsConverter.AsString(outcome), errorSource, error, errorDescription, string.Empty);
         }
 
-        public void EndCustomInteractiveActionWithCancellation(CustomInteractiveAction action) => throw new NotImplementedException();
-        public void EndCustomInteractiveActionWithFailure(CustomInteractiveAction action, ErrorSource errorSource, string error, string errorDescription) => throw new NotImplementedException();
-        public void EndCustomInteractiveActionWithSuccess(CustomInteractiveAction action) => throw new NotImplementedException();
-        public void EndInteractiveMsaActionWithCancellation(InteractiveMsaAction action, string accountCid) => throw new NotImplementedException();
-        public void EndInteractiveMsaActionWithFailure(InteractiveMsaAction action, ErrorSource errorSource, string error, string errorDescription, string accountCid) => throw new NotImplementedException();
-        public void EndInteractiveMsaActionWithSignin(InteractiveMsaAction action, string accountCid) => throw new NotImplementedException();
-        public void EndNonInteractiveMsaActionWithFailure(NonInteractiveMsaAction action, ErrorSource errorSource, string error, string errorDescription, string accountCid) => throw new NotImplementedException();
-        public void EndNonInteractiveMsaActionWithTokenRetrieval(NonInteractiveMsaAction action, string accountCid) => throw new NotImplementedException();
-        public void EndWamActionWithCancellation(WamAction action, string wamTelemetryBatch) => throw new NotImplementedException();
-        public void EndWamActionWithFailure(WamAction action, ErrorSource errorSource, string error, string errorDescription, string accountId, string tenantId, string wamTelemetryBatch) => throw new NotImplementedException();
-        public void EndWamActionWithSuccess(WamAction action, string accountId, string tenantId, string wamTelemetryBatch) => throw new NotImplementedException();
         public IEnumerable<IPropertyBag> GetEventsForUpload()
         {
             lock (_lockActionIdToPropertyBag)
@@ -245,11 +235,6 @@ namespace Microsoft.Identity.Client.Mats.Internal
                 propertyBag.Add(ActionPropertyNames.ResourceConstStrKey, "ResourceRedacted");
             }
         }
-
-        public CustomInteractiveAction StartCustomInteractiveAction(Scenario scenario, bool isBlockingUi, bool asksForCredentials, string correlationId, InteractiveAuthContainerType interactiveAuthContainerType, CustomIdentityService identityService) => throw new NotImplementedException();
-        public InteractiveMsaAction StartInteractiveMsaAction(Scenario scenario, bool isBlockingUi, bool asksForCredentials, string correlationId, InteractiveAuthContainerType interactiveAuthContainerType, string scope) => throw new NotImplementedException();
-        public NonInteractiveMsaAction StartNonInteractiveMsaAction(Scenario scenario, string correlationId, string scope) => throw new NotImplementedException();
-        public WamAction StartWamAction(Scenario scenario, string correlationId, bool forcePrompt, WamIdentityService identityService, WamApi wamApi, string scope, string resource) => throw new NotImplementedException();
 
         // todo: what other action types would we get here?  does this need to be a generic function?
         // private ActionArtifacts<T> CreateGenericAction<T>(Scenario scenario, string correlationId, ActionType actionType)

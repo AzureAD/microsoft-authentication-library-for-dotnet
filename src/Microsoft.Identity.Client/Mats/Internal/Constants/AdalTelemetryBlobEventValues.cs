@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-namespace Microsoft.Identity.Client.Mats.Internal
+namespace Microsoft.Identity.Client.Mats.Internal.Constants
 {
     internal static class AdalTelemetryBlobEventValues
     {

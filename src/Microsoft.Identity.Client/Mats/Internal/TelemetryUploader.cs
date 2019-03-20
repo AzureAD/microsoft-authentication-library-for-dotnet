@@ -31,8 +31,7 @@ namespace Microsoft.Identity.Client.Mats.Internal
             foreach (var uploadEvent in uploadEvents)
             {
                 string name = UploadEventUtils.GetUploadEventName(_platformProxy, uploadEvent.EventType, AppName);
-                var data = new MatsTelemetryData(name, uploadEvent);
-                _telemetryDispatcher.DispatchEvent(data);
+                _telemetryDispatcher.DispatchEvent(MatsTelemetryBatch.Create(name, uploadEvent));
             }
         }
     }

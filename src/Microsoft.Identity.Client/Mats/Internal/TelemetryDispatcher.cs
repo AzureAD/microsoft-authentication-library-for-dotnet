@@ -15,9 +15,8 @@ namespace Microsoft.Identity.Client.Mats.Internal
             _dispatchAction = dispatchAction;
         }
 
-        public void DispatchEvent(IMatsTelemetryData data)
+        public void DispatchEvent(IMatsTelemetryBatch batch)
         {
-            var batch = MatsTelemetryBatch.Create(data);
             _dispatchAction(batch);
         }
     }

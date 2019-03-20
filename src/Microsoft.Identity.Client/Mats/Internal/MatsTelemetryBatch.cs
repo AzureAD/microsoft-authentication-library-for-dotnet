@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Mats.Internal
@@ -15,14 +13,13 @@ namespace Microsoft.Identity.Client.Mats.Internal
         private readonly Dictionary<string, int> _intData = new Dictionary<string, int>();
         private readonly Dictionary<string, string> _stringData = new Dictionary<string, string>();
 
-
-        public static IMatsTelemetryBatch Create(IMatsTelemetryData data)
+        public static IMatsTelemetryBatch Create(string name, PropertyBagContents contents)
         {
-            var batch = new MatsTelemetryBatch(data.Name);
-            batch.SetStringData(data.GetStringMap());
-            batch.SetIntData(data.GetIntMap());
-            batch.SetInt64Data(data.GetInt64Map());
-            batch.SetBoolData(data.GetBoolMap());
+            var batch = new MatsTelemetryBatch(name);
+            batch.SetStringData(contents.StringProperties);
+            batch.SetIntData(contents.IntProperties);
+            batch.SetInt64Data(contents.Int64Properties);
+            batch.SetBoolData(contents.BoolProperties);
 
             return batch;
         }
@@ -63,11 +60,9 @@ namespace Microsoft.Identity.Client.Mats.Internal
             }
         }
 
-        private readonly string _name;
-
         private MatsTelemetryBatch(string name)
         {
-            _name = name;
+            Name = name;
         }
 
         public IReadOnlyDictionary<string, bool> BoolValues => _boolData;
@@ -75,6 +70,6 @@ namespace Microsoft.Identity.Client.Mats.Internal
         public IReadOnlyDictionary<string, int> IntValues => _intData;
         public IReadOnlyDictionary<string, string> StringValues => _stringData;
 
-        public string GetName() => _name;
+        public string Name { get; }
     }
 }

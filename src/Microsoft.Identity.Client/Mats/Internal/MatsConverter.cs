@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Mats.Internal
