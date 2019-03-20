@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
     /// </summary>
     [ComVisible(true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
-    internal class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
+    public class WindowsFormsWebAuthenticationDialog : WindowsFormsWebAuthenticationDialogBase
     {
         private int _statusCode;
         private bool _zoomed;
