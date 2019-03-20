@@ -51,6 +51,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
         private static readonly string[] _scopes = new[] { "user.read" };
+        private TokenCache cache;
 
         #region MSTest Hooks
         /// <summary>
@@ -216,7 +217,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             cache = new TokenCache();
 
             LabResponse labResponseDefault = LabUserHelper.GetDefaultUser();
-            var defaultAccountResult = await RunTestForUserInteractiveAsync(labResponseDefault).ConfigureAwait(false);
+            AuthenticationResult defaultAccountResult = await RunTestForUserAsync(labResponseDefault).ConfigureAwait(false);
 
             UserQuery FederatedUserquery = new UserQuery
             {
@@ -227,7 +228,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             };
 
             LabResponse labResponseFederated = LabUserHelper.GetLabUserData(FederatedUserquery);
-            var federatedAccountResult = await RunTestForUserInteractiveAsync(labResponseFederated, true).ConfigureAwait(false);
+            var federatedAccountResult = await RunTestForUserAsync(labResponseFederated, true).ConfigureAwait(false);
 
             UserQuery MSAUserquery = new UserQuery
             {
@@ -238,7 +239,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             LabResponse labResponseMsa = LabUserHelper.GetLabUserData(MSAUserquery);
             labResponseMsa.AppId = LabApiConstants.MSAOutlookAccountClientID;
-            var msaAccountResult = await RunTestForUserInteractiveAsync(labResponseMsa).ConfigureAwait(false);
+            var msaAccountResult = await RunTestForUserAsync(labResponseMsa).ConfigureAwait(false);
 
             PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponseDefault.AppId).BuildConcrete();
             pca.UserTokenCacheInternal = cache;
@@ -268,7 +269,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             cache = null;
         }
 
-        private async Task RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
+        private async Task<AuthenticationResult> RunTestForUserAsync(LabResponse labResponse, bool directToAdfs = false)
         {
             PublicClientApplication pca;
             if(directToAdfs)
@@ -309,6 +310,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             Trace.WriteLine("Part 4 - Acquire a token silently");
             result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
+            return result;
         }
 
         private static SeleniumWebUI CreateSeleniumCustomWebUI(LabUser user, bool withLoginHint)

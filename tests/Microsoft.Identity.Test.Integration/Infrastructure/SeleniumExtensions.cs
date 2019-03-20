@@ -151,12 +151,6 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
 
             Trace.WriteLine("Logging in ... Clicking next after password");
             driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordSignInButtonId)).Click();
-        }
-    }
-}
-=======
-            Trace.WriteLine("Logging in ... Clicking next after password");
-            driver.WaitForElementToBeVisibleAndEnabled(By.Id(fields.PasswordSignInButtonId)).Click();
 
             if (user.HomeUPN.Contains("outlook.com"))
             {
@@ -166,4 +160,3 @@ namespace Microsoft.Identity.Test.Integration.Infrastructure
         }
     }
 }
->>>>>>> 0042520d... Adding integration test for different account types
