@@ -176,8 +176,13 @@ namespace XForms
 
                 var authority = PassAuthoritySwitch.IsToggled ? App.Authority : null;
 
-                var res = await App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount())
-                    .WithAuthority(authority)
+                var builder = App.MsalPublicClient.AcquireTokenSilent(GetScopes(), GetSelectedAccount());
+                if (PassAuthoritySwitch.IsToggled)
+                {
+                    builder = builder.WithAuthority(App.Authority);
+                }
+
+                var res = await builder
                     .WithForceRefresh(ForceRefreshSwitch.IsToggled)
                     .ExecuteAsync()
                     .ConfigureAwait(true);
