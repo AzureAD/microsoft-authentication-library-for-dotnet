@@ -1,11 +1,6 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <Import Project="../CacheTest.props" />
-
   <ItemGroup>
     <PackageReference Include="Microsoft.Identity.Client" Version="2.7.1" />
   </ItemGroup>
-
-
 </Project>
-
