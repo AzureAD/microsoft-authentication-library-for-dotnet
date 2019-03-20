@@ -135,6 +135,10 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAuthority(string authorityUri, bool validateAuthority = true)
         {
+            if (string.IsNullOrWhiteSpace(authorityUri))
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAuthorityUri(authorityUri, validateAuthority);
             return (T)this;
         }
@@ -152,6 +156,10 @@ namespace Microsoft.Identity.Client.ApiConfig
             Guid tenantId,
             bool validateAuthority = true)
         {
+            if (string.IsNullOrWhiteSpace(cloudInstanceUri))
+            {
+                throw new ArgumentNullException(nameof(cloudInstanceUri));
+            }
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenantId, validateAuthority);
             return (T)this;
         }
@@ -176,6 +184,10 @@ namespace Microsoft.Identity.Client.ApiConfig
             string tenant,
             bool validateAuthority = true)
         {
+            if (string.IsNullOrWhiteSpace(cloudInstanceUri))
+            {
+                throw new ArgumentNullException(nameof(cloudInstanceUri));
+            }
             CommonParameters.AuthorityOverride = AuthorityInfo.FromAadAuthority(new Uri(cloudInstanceUri), tenant, validateAuthority);
             return (T)this;
         }
@@ -260,6 +272,10 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithAdfsAuthority(string authorityUri, bool validateAuthority = true)
         {
+            if (string.IsNullOrWhiteSpace(authorityUri))
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
             return (T)this;
         }
@@ -273,6 +289,10 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// <returns>The builder to chain the .With methods</returns>
         public T WithB2CAuthority(string authorityUri)
         {
+            if (string.IsNullOrWhiteSpace(authorityUri))
+            {
+                throw new ArgumentNullException(nameof(authorityUri));
+            }
             CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
             return (T)this;
         }
