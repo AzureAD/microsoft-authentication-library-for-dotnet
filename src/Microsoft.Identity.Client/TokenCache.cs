@@ -91,13 +91,14 @@ namespace Microsoft.Identity.Client
 
         internal TokenCache(IServiceBundle serviceBundle) 
         {
-            SetServiceBundle(serviceBundle);
-
             var proxy = serviceBundle?.PlatformProxy ?? PlatformProxyFactory.CreatePlatformProxy(null);
             _accessor = proxy.CreateTokenCacheAccessor();
             _featureFlags = proxy.GetFeatureFlags();
             _defaultTokenCacheBlobStorage = proxy.CreateTokenCacheBlobStorage();
             LegacyCachePersistence = proxy.CreateLegacyCachePersistence();
+
+            // Must happen last, this code can access things like _accessor and such above.
+            SetServiceBundle(serviceBundle);
         }
 
         internal void SetServiceBundle(IServiceBundle serviceBundle)
