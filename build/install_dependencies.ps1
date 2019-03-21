@@ -47,4 +47,5 @@ choco upgrade all -y --limit-output
 dotnet tool install -g dotnet-format
 
 # Install python modules
+python -m pip install --upgrade pip
 python -m pip install msal
