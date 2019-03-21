@@ -154,8 +154,6 @@ namespace CommonCache.Test.Unit
             await executor.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
         }
 
-        // This test is ignored and can be run manually.  Build server infra isn't yet configured for having python and msal python installed.
-        [Ignore]
         [DataTestMethod]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.MsalV3, CacheStorageType.MsalV3, DisplayName = "MsalPython->MsalV3 msal v3 cache")]
         [DataRow(CacheProgramType.MsalPython, CacheProgramType.AdalV5, CacheStorageType.MsalV3, DisplayName = "MsalPython->AdalV5 msal v3 cache")]
