@@ -205,9 +205,7 @@ namespace NetCoreTestApp
                 return null;
             }
 
-            //return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
-            return pca.AcquireTokenSilent(s_scopes, "bogavril@microsoft.com").ExecuteAsync();
-
+            return pca.AcquireTokenSilent(s_scopes, accounts.FirstOrDefault()).ExecuteAsync();
         }
 
         private static async Task FetchTokenAsync(IPublicClientApplication pca, Task<AuthenticationResult> authTask)
