@@ -27,6 +27,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -40,7 +41,7 @@ namespace Microsoft.Identity.Test.Unit
         public const string Authority = "";
         public const string ClientId = "";
         public const string RedirectUri = "http://localhost";
-        public string[] MsalScopes = { "https://graph.microsoft.com/.default" };
+        public string[] _msalScopes = { "https://graph.microsoft.com/.default" };
         private readonly string _password = "";
 
         static ApplicationGrantIntegrationTest()
@@ -58,7 +59,10 @@ namespace Microsoft.Identity.Test.Unit
                                      .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
                                      .WithClientSecret(_password).BuildConcrete();
 
-            var res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
+            var res = await confidentialClient
+                .AcquireTokenForClient(_msalScopes)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             ITokenCacheInternal userCache = confidentialClient.UserTokenCacheInternal;
             ITokenCacheInternal appCache = confidentialClient.AppTokenCacheInternal;
@@ -87,12 +91,19 @@ namespace Microsoft.Identity.Test.Unit
 
             // passing empty password to make sure that AT returned from cache
             confidentialClient = ConfidentialClientApplicationBuilder
-                                 .Create(ClientId).WithAuthority(new Uri(Authority), true).WithRedirectUri(RedirectUri)
-                                 .WithClientSecret("wrong_password").BuildConcrete();
+                .Create(ClientId)
+                .WithAuthority(new Uri(Authority), true)
+                .WithRedirectUri(RedirectUri)
+                .WithClientSecret("wrong_password")
+                .BuildConcrete();
+
             confidentialClient.AppTokenCacheInternal.DeserializeMsalV3(appCache.SerializeMsalV3());
             confidentialClient.UserTokenCacheInternal.DeserializeMsalV3(userCache.SerializeMsalV3());
 
-            res = await confidentialClient.AcquireTokenForClientAsync(MsalScopes).ConfigureAwait(false);
+            res = await confidentialClient
+                .AcquireTokenForClient(_msalScopes)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
 
             Assert.IsNotNull(res);
             Assert.IsNotNull(res.AccessToken);

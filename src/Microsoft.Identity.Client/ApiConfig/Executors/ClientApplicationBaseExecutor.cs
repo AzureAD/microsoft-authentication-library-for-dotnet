@@ -57,7 +57,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             {
                 commonParameters.Scopes = new SortedSet<string>
                 {
-                    _clientApplicationBase.ClientId + "/.default"
+                    _clientApplicationBase.AppConfig.ClientId + "/.default"
                 };
                 requestContext.Logger.Info(LogMessages.NoScopesProvidedForRefreshTokenRequest);
             }

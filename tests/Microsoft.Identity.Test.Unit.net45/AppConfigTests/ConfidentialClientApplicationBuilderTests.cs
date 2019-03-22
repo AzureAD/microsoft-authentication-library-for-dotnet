@@ -42,7 +42,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         public void TestConstructor()
         {
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).Build();
-            Assert.AreEqual(MsalTestConstants.ClientId, cca.ClientId);
+            Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNotNull(cca.UserTokenCache);
 
             // Validate Defaults
@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientId = "9340c42a-f5de-4a80-aea0-874adc2ca325";
             var cca = ConfidentialClientApplicationBuilder.Create(ClientId).Build();
-            Assert.AreEqual(ClientId, cca.ClientId);
+            Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
         [TestMethod]
@@ -72,7 +72,7 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
         {
             const string ClientId = "73cc145e-798f-430c-8d6d-618f1a5802e9";
             var cca = ConfidentialClientApplicationBuilder.Create(MsalTestConstants.ClientId).WithClientId(ClientId).Build();
-            Assert.AreEqual(ClientId, cca.ClientId);
+            Assert.AreEqual(ClientId, cca.AppConfig.ClientId);
         }
 
         [TestMethod]

@@ -39,7 +39,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
 
         protected RequestContext CreateRequestContext()
         {
-            return new RequestContext(_clientApplicationBase.ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
+            return new RequestContext(_clientApplicationBase.AppConfig.ClientId, MsalLogger.Create(Guid.NewGuid(), ServiceBundle.Config));
         }
     }
 }
