@@ -1,3 +1,26 @@
+3.0.1-preview
+=============
+New Features:
+- Added FOCI support
+- Device Code supports both verification_url and verification_uri
+- MsalError contains all the error messages
+- MsalException and its derived exception can now be serialized to JSon and deserialized
+- MSAL.NET for .NET Core moved to .NET Core 2.1.
+- At both the app creation and the token acquisition, you can now pass extra query parameters as a string (in addition to a Dictionary<string,string> introduced in MSAL 3.0.0
+- MSAL.NET symbols are now published on the Microsoft Symbol server, which is useful when you are debugging.
+
+Breaking Changes in 3.0.1-preview
+- AcquireTokenSilent has two overrides that require you to pass-in the account or the loginHint
+- SubError property removed from MsalServiceException
+- merge removed from ITokenCache's DeserializeXX methods
+- WithClaims removed from app creation. it is now available on the AcquireToken methods
+- ICustomWebUi.AcquireAuthorizationCodeAsync now takes a cancellation Token
+
+bug fixes:
+[When the client id entered is invalid, the error messages can be better](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/727)
+[PublicClientApplicationBuilder.CreateWithApplicationOptions does not respect the audience](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/969)
+[ASWebAuthenticationSession is skipped due to AppCenter build flags](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/919)
+
 3.0.0-preview
 =============
 
