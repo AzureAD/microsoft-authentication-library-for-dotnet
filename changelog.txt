@@ -1,13 +1,12 @@
 3.0.1-preview
 =============
 New Features:
-- Added FOCI support
 - Device Code supports both verification_url and verification_uri
 - MsalError contains all the error messages
 - MsalException and its derived exception can now be serialized to JSon and deserialized
 - MSAL.NET for .NET Core moved to .NET Core 2.1.
 - At both the app creation and the token acquisition, you can now pass extra query parameters as a string (in addition to a Dictionary<string,string> introduced in MSAL 3.0.0
-- MSAL.NET symbols are now published on the Microsoft Symbol server, which is useful when you are debugging.
+- MSAL.NET symbols are now published to enable SourceLink support 
 
 Breaking Changes in 3.0.1-preview
 - AcquireTokenSilent has two overrides that require you to pass-in the account or the loginHint
