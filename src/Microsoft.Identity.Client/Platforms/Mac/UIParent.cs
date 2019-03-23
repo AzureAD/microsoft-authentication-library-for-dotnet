@@ -26,9 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
-using AppKit;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -37,29 +35,14 @@ namespace Microsoft.Identity.Client
     /// </summary>     
     public sealed class UIParent
     {
-        internal CoreUIParent CoreUIParent { get; }
-
         /// <summary>
         /// Default constructor. Uses the NSApplication.SharedApplication.MainWindow to parent the web ui.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent()
         {
-            CoreUIParent = new CoreUIParent(NSApplication.SharedApplication.MainWindow);
-        }
-
-#pragma warning disable CS3001 // Argument type is not CLS-compliant
-                              /// <summary>
-                              /// Create a UIParent given an instance of NSWindow, which will be used to parent the web ui.
-                              /// </summary>
-        public UIParent(NSWindow callerWindow)
-#pragma warning restore CS3001 // Argument type is not CLS-compliant
-        {
-            if (callerWindow == null)
-            {
-                callerWindow = NSApplication.SharedApplication.MainWindow;
-            }
-
-            CoreUIParent = new CoreUIParent(callerWindow);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
 
@@ -70,10 +53,12 @@ namespace Microsoft.Identity.Client
         /// <remarks>This constructor is only avaiable at runtime, to provide support for NetStandard</remarks>
         /// <param name="parent">Expected to be a NSWindow instance. Passing null implies the MainWindow will be used</param>
         /// <param name="useEmbeddedWebview">Ignored, the embedded view is always used on Mac</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent(object parent, bool useEmbeddedWebview) :
             this(ValidateParentObject(parent))
         {
-            
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
 
@@ -85,24 +70,5 @@ namespace Microsoft.Identity.Client
         {
             return false;
         }
-
-        private static NSWindow ValidateParentObject(object parent)
-        {
-            if (parent == null)
-            {
-                return null;
-            }           
-
-            NSWindow parentActivity = parent as NSWindow;
-            if (parentActivity == null)
-            {
-                throw new ArgumentException(nameof(parent) +
-                                            " is expected to be of type NSWindow but is of type " +
-                                            parent.GetType());
-            }
-
-            return parentActivity;
-        }
-
     }
 }

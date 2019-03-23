@@ -27,13 +27,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client
 {
@@ -49,7 +49,8 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Default constructor. Should not be used on Android.
         /// </summary>
-        [Obsolete("This constructor should not be used because this object requires a parameters of type Activity. ")]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent() // do not delete this ctor because it exists on NetStandard
         {
             throw new MsalClientException(MsalError.ActivityRequired, MsalErrorMessage.ActivityRequired);
@@ -60,9 +61,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="activity">parent activity for the call. REQUIRED.</param>
         [CLSCompliant(false)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent(Activity activity)
         {
-            CoreUIParent = new CoreUIParent(activity);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -70,9 +73,11 @@ namespace Microsoft.Identity.Client
         /// to use the embedded webview instead of the system browser. See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         [CLSCompliant(false)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent(Activity activity, bool useEmbeddedWebview) : this(activity)
         {
-            CoreUIParent.UseEmbeddedWebview = useEmbeddedWebview;
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         #if ANDROID_RUNTIME
@@ -83,9 +88,12 @@ namespace Microsoft.Identity.Client
         /// <remarks>This constructor is only avaiable at runtime, to provide support for NetStandard</remarks>
         /// <param name="parent">Android Activity on which to parent the web UI. Cannot be null.</param>
         /// <param name="useEmbeddedWebview">Flag to determine between embedded vs system browser. See https://aka.ms/msal-net-uses-web-browser </param>
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent(object parent, bool useEmbeddedWebview)
-        : this(ValidateParentObject(parent), useEmbeddedWebview)
+            : this(ValidateParentObject(parent), useEmbeddedWebview)
         {
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         #endif
@@ -108,8 +116,6 @@ namespace Microsoft.Identity.Client
 
             return parentActivity;
         }
-
-        internal CoreUIParent CoreUIParent { get; }
 
         /// <summary>
         /// Checks Android device for chrome packages.

@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 
@@ -37,14 +38,13 @@ namespace Microsoft.Identity.Client
     /// </summary> 
     public sealed class UIParent
     {
-        internal CoreUIParent CoreUIParent { get; }
-        
         /// <summary>
         /// Platform agnostic default constructor.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent()
         {
-            CoreUIParent = new CoreUIParent();
         }
 
         /// <summary>
@@ -57,9 +57,11 @@ namespace Microsoft.Identity.Client
         /// On .net desktop, it is optional - you can either pass a System.Windows.Forms.IWin32Window or an System.IntPtr
         /// to a window handle or null. This is used to center the webview. </param>
         /// <param name="useEmbeddedWebview">Flag to determine between embedded vs system browser. Currently affects only iOS and Android. See https://aka.ms/msal-net-uses-web-browser </param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent(object parent, bool useEmbeddedWebview)
         {
-            ThrowPlatformNotSupported();
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>

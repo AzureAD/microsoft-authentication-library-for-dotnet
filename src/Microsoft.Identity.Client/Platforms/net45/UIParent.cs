@@ -25,8 +25,8 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
+using System;
+using System.ComponentModel;
 
 namespace Microsoft.Identity.Client
 {
@@ -36,14 +36,14 @@ namespace Microsoft.Identity.Client
     /// </summary> 
     public sealed class UIParent
     {
-        internal CoreUIParent CoreUIParent { get; }
-
         /// <summary>
         /// Creates a UIParent that will configure the underlying embedded webview to be centered on the screen
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent()
         {
-            CoreUIParent = new CoreUIParent();
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -51,10 +51,11 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="ownerWindow">Parent window object reference. OPTIONAL. The expected parent window
         /// are either of type <see cref="System.Windows.Forms.IWin32Window"/> or <see cref="System.IntPtr"/> (for window handle)</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent(object ownerWindow)
         {
-            CoreUIParent = new CoreUIParent(ownerWindow);
-            CoreUIParent.UseEmbeddedWebview = true;
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
 #if DESKTOP_RUNTIME
@@ -65,9 +66,12 @@ namespace Microsoft.Identity.Client
         /// <param name="parent">Parent window object reference. OPTIONAL. The expected parent window
         /// are either of type <see cref="System.Windows.Forms.IWin32Window"/> or <see cref="System.IntPtr"/> (for window handle)</param>
         /// <param name="useEmbeddedWebview">Ignored, on .net desktop an embedded webview is always used</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
         public UIParent(object parent, bool useEmbeddedWebview) :
             this(parent)
         {
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
         /// <summary>
@@ -78,15 +82,5 @@ namespace Microsoft.Identity.Client
         {
             return false;
         }
-
-        /// <summary>
-        /// Hidden webview can be used in both UWP and desktop applications.
-        /// </summary>
-        internal bool UseHiddenBrowser
-        {
-            get => CoreUIParent.UseHiddenBrowser;
-            set => CoreUIParent.UseHiddenBrowser = value;
-        }
-
     }
 }

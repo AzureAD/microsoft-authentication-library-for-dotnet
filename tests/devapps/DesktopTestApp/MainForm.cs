@@ -174,8 +174,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         SplitScopeString(scopes.Text),
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -314,7 +313,12 @@ namespace DesktopTestApp
 
             try
             {
-                AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveWithAuthorityAsync(SplitScopeString(scopes.Text), GetUIBehavior(), _publicClientHandler.ExtraQueryParams, new UIParent()).ConfigureAwait(true);
+                AuthenticationResult authenticationResult = await _publicClientHandler
+                    .AcquireTokenInteractiveWithAuthorityAsync(
+                        SplitScopeString(scopes.Text),
+                        GetUIBehavior(),
+                        _publicClientHandler.ExtraQueryParams,
+                        null).ConfigureAwait(true);
 
                 SetResultPageInfo(authenticationResult);
             }
@@ -541,8 +545,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         _b2CScopes,
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();
@@ -570,8 +573,7 @@ namespace DesktopTestApp
                     AuthenticationResult authenticationResult = await _publicClientHandler.AcquireTokenInteractiveAsync(
                         _b2CScopes,
                         GetUIBehavior(),
-                        _publicClientHandler.ExtraQueryParams,
-                        new UIParent()).ConfigureAwait(true);
+                        _publicClientHandler.ExtraQueryParams).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                     RefreshUserList();

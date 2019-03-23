@@ -23,7 +23,7 @@ namespace Microsoft.Identity.Client
     /// (a user has several accounts). See https://aka.ms/msal-net-2-released for more details.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    [Obsolete("Use IAccount instead (See https://aka.ms/msal-net-2-released)")]
+    [Obsolete("Use IAccount instead (See https://aka.ms/msal-net-2-released)", true)]
     public interface IUser
     {
         /// <summary>
@@ -163,7 +163,7 @@ namespace Microsoft.Identity.Client
         /// close to expiration (within 5 minute window), then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// See https://aka.ms/msal-net-acuiretokensilent for more details
         /// </remarks>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scopes,
             IAccount account);
@@ -188,7 +188,7 @@ namespace Microsoft.Identity.Client
         /// then the cached refresh token (if available) is used to acquire a new access token by making a silent network call.
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </remarks>
-        [Obsolete("Use AcquireTokenSilent instead. See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenSilent instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scopes,
             IAccount account,
@@ -199,7 +199,7 @@ namespace Microsoft.Identity.Client
         /// Gets the Client ID (also known as Application ID) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
         /// and as passed in the constructor of the application.
         /// </summary>
-        [Obsolete("Use AppConfig.ClientId instead. See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AppConfig.ClientId instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         string ClientId { get; }
 
         #endregion MSAL3X deprecations
@@ -292,7 +292,7 @@ namespace Microsoft.Identity.Client
         /// Gets the Client ID (also known as <i>Application ID</i>) of the application as registered in the application registration portal (https://aka.ms/msal-net-register-app)
         /// and as passed in the constructor of the application
         /// </summary>
-        [Obsolete("Use AppConfig.ClientId instead. See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AppConfig.ClientId instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
         public string ClientId => AppConfig.ClientId;
 
         /// <summary>
@@ -317,20 +317,13 @@ namespace Microsoft.Identity.Client
         ///
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </remarks>
-        [Obsolete("Use AcquireTokenSilent instead. See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(
+        [Obsolete("Use AcquireTokenSilent instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenSilentAsync(
             IEnumerable<string> scopes,
             IAccount account,
             string authority, bool forceRefresh)
         {
-            var builder = AcquireTokenSilent(scopes, account)
-                .WithForceRefresh(forceRefresh);
-            if (!string.IsNullOrWhiteSpace(authority))
-            {
-                builder.WithAuthority(authority);
-            }
-
-            return await builder.ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -348,12 +341,10 @@ namespace Microsoft.Identity.Client
         ///
         /// See https://aka.ms/msal-net-acquiretokensilent for more details
         /// </remarks>
-        [Obsolete("Use AcquireTokenSilent instead. See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
+        [Obsolete("Use AcquireTokenSilent instead. See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenSilentAsync(IEnumerable<string> scopes, IAccount account)
         {
-            return await AcquireTokenSilent(scopes, account)
-                         .ExecuteAsync(CancellationToken.None)
-                         .ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
         #endregion MSAL3X deprecations
     }
@@ -407,7 +398,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes);
 
         /// <summary>
@@ -417,7 +408,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint);
@@ -429,7 +420,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account);
@@ -444,7 +435,7 @@ namespace Microsoft.Identity.Client
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
@@ -461,7 +452,7 @@ namespace Microsoft.Identity.Client
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
@@ -482,7 +473,7 @@ namespace Microsoft.Identity.Client
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
@@ -504,7 +495,7 @@ namespace Microsoft.Identity.Client
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
@@ -524,7 +515,7 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent);
 
         /// <summary>
@@ -536,7 +527,7 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and login</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint, UIParent parent);
@@ -549,7 +540,7 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account, UIParent parent);
@@ -565,7 +556,7 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
@@ -583,7 +574,7 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
@@ -605,7 +596,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             string loginHint,
@@ -628,7 +619,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account,
@@ -648,7 +639,7 @@ namespace Microsoft.Identity.Client
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <param name="securePassword">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenByUsernamePassword instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenByUsernamePassword instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(
             IEnumerable<string> scopes,
             string username,
@@ -671,7 +662,7 @@ namespace Microsoft.Identity.Client
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
 
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback);
@@ -695,7 +686,7 @@ namespace Microsoft.Identity.Client
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
 
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             string extraQueryParameters,
@@ -717,7 +708,7 @@ namespace Microsoft.Identity.Client
         /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
@@ -742,7 +733,7 @@ namespace Microsoft.Identity.Client
         /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             string extraQueryParameters,
@@ -764,7 +755,7 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes);
 #endif // !NET_CORE_BUILDTIME
 
@@ -777,7 +768,7 @@ namespace Microsoft.Identity.Client
         /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
             IEnumerable<string> scopes,
             string username);
@@ -856,6 +847,7 @@ namespace Microsoft.Identity.Client
         [Obsolete("Use PublicClientApplicationBuilder instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         public PublicClientApplication(string clientId) : this(clientId, DefaultAuthority)
         {
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -882,6 +874,7 @@ namespace Microsoft.Identity.Client
                 .WithAuthority(new Uri(authority), true)
                 .BuildConfiguration())
         {
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         // netcoreapp does not support UI at the moment and all the Acquire* methods use UI;
@@ -898,13 +891,10 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -914,14 +904,10 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null).WithLoginHint(loginHint)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -931,16 +917,12 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null).WithAccount(account)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -953,18 +935,14 @@ namespace Microsoft.Identity.Client
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-            Prompt prompt, string extraQueryParameters)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            string loginHint,
+            Prompt prompt,
+            string extraQueryParameters)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null)
-                .WithLoginHint(loginHint)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -977,18 +955,14 @@ namespace Microsoft.Identity.Client
         /// This is expected to be a string of segments of the form <c>key=value</c> separated by an ampersand character.
         /// The parameter can be null.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-                                                                  Prompt prompt, string extraQueryParameters)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            IAccount account,
+            Prompt prompt,
+            string extraQueryParameters)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null)
-                .WithAccount(account)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1005,20 +979,16 @@ namespace Microsoft.Identity.Client
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            string loginHint,
+            Prompt prompt,
+            string extraQueryParameters,
+            IEnumerable<string> extraScopesToConsent,
+            string authority)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null)
-                .WithLoginHint(loginHint)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(authority)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1035,20 +1005,16 @@ namespace Microsoft.Identity.Client
         /// for which you want to acquire a security token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            IAccount account,
+            Prompt prompt,
+            string extraQueryParameters,
+            IEnumerable<string> extraScopesToConsent,
+            string authority)
         {
-            GuardNetCore();
-            GuardUIParentAndroid();
-
-            return await AcquireTokenInteractive(scopes, null)
-                .WithAccount(account)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(authority)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
 
@@ -1061,30 +1027,10 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <remarks>The user will be signed-in interactively if needed,
         /// and will consent to scopes and do multi-factor authentication if such a policy was enabled in the Azure AD tenant.</remarks>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
-        }
-
-        private static object GetParentObjectFromUiParent(UIParent parent)
-        {
-#if DESKTOP
-            return parent.CoreUIParent.OwnerWindow;
-#elif ANDROID
-            return parent.CoreUIParent.Activity;
-#elif MAC
-            return parent.CoreUIParent.CallerWindow;
-#elif iOS
-            return parent.CoreUIParent.CallerViewController;
-#else
-            return null;
-#endif
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1096,15 +1042,10 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally in UserPrincipalName (UPN) format, e.g. <c>john.doe@contoso.com</c></param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and login</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint, UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithLoginHint(loginHint)
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1115,17 +1056,12 @@ namespace Microsoft.Identity.Client
         /// <param name="account">Account to use for the interactive token acquisition. See <see cref="IAccount"/> for ways to get an account</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
             IEnumerable<string> scopes,
             IAccount account, UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithAccount(account)
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1139,18 +1075,15 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-                                                                  Prompt prompt, string extraQueryParameters, UIParent parent)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            string loginHint,
+            Prompt prompt,
+            string extraQueryParameters,
+            UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithLoginHint(loginHint)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1164,18 +1097,15 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-                                                                  Prompt prompt, string extraQueryParameters, UIParent parent)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            IAccount account,
+            Prompt prompt,
+            string extraQueryParameters,
+            UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithAccount(account)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1194,19 +1124,16 @@ namespace Microsoft.Identity.Client
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, string loginHint,
-                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            string loginHint,
+            Prompt prompt,
+            string extraQueryParameters,
+            IEnumerable<string> extraScopesToConsent,
+            string authority,
+            UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithLoginHint(loginHint)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(authority)
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1224,37 +1151,17 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <param name="parent">Object containing a reference to the parent window/activity. REQUIRED for Xamarin.Android only.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenAsync(IEnumerable<string> scopes, IAccount account,
-                                                                  Prompt prompt, string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority, UIParent parent)
+        [Obsolete("Use AcquireTokenInteractive instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenAsync(
+            IEnumerable<string> scopes,
+            IAccount account,
+            Prompt prompt,
+            string extraQueryParameters,
+            IEnumerable<string> extraScopesToConsent,
+            string authority,
+            UIParent parent)
         {
-            GuardNetCore();
-
-            return await AcquireTokenInteractive(scopes, GetParentObjectFromUiParent(parent))
-                .WithAccount(account)
-                .WithPrompt(prompt)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(authority)
-                .WithUseEmbeddedWebView(parent.CoreUIParent.UseEmbeddedWebview)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private void GuardNetCore()
-        {
-#if NET_CORE
-            throw new PlatformNotSupportedException("On .NET Core, interactive authentication is not supported. " + 
-                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa");
-#endif
-        }
-
-        private void GuardUIParentAndroid()
-        {
-#if ANDROID
-            throw new PlatformNotSupportedException("To enable interactive authentication on Android, please call an overload of AcquireTokenAsync that " +
-                "takes in an UIParent object, which you should initialize to an Activity. " +
-                "See https://aka.ms/msal-interactive-android for details.");
-#endif
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         // endif for !NET_CORE
@@ -1270,21 +1177,10 @@ namespace Microsoft.Identity.Client
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <param name="securePassword">User password.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
-        [Obsolete("Use AcquireTokenByUsernamePassword instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, SecureString securePassword)
+        [Obsolete("Use AcquireTokenByUsernamePassword instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenByUsernamePasswordAsync(IEnumerable<string> scopes, string username, SecureString securePassword)
         {
-            GuardMobilePlatforms();
-
-            return await AcquireTokenByUsernamePassword(scopes, username, securePassword)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private static void GuardMobilePlatforms()
-        {
-#if ANDROID || iOS || WINDOWS_APP || MAC
-            throw new PlatformNotSupportedException("The Username / Password flow is not supported on Xamarin.Android, Xamarin.iOS, Xamarin.Mac or UWP. " +
-               "For more details see https://aka.ms/msal-net-up");
-#endif
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
 
@@ -1303,12 +1199,12 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            return AcquireTokenWithDeviceCodeAsync(scopes, string.Empty, deviceCodeResultCallback);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1329,17 +1225,13 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <param name="deviceCodeResultCallback">Callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             string extraQueryParameters,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback)
         {
-            return await AcquireTokenWithDeviceCodeAsync(
-                scopes,
-                extraQueryParameters,
-                deviceCodeResultCallback,
-                CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1358,13 +1250,13 @@ namespace Microsoft.Identity.Client
         /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            return AcquireTokenWithDeviceCodeAsync(scopes, string.Empty, deviceCodeResultCallback, cancellationToken);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1386,15 +1278,14 @@ namespace Microsoft.Identity.Client
         /// <param name="deviceCodeResultCallback">The callback containing information to show the user about how to authenticate and enter the device code.</param>
         /// <param name="cancellationToken">A CancellationToken which can be triggered to cancel the operation in progress.</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the user who has authenticated on another device with the code</returns>
-        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
+        [Obsolete("Use AcquireTokenWithDeviceCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenWithDeviceCodeAsync(
             IEnumerable<string> scopes,
             string extraQueryParameters,
             Func<DeviceCodeResult, Task> deviceCodeResultCallback,
             CancellationToken cancellationToken)
         {
-            return await AcquireTokenWithDeviceCode(scopes, deviceCodeResultCallback)
-                .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(cancellationToken).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1407,15 +1298,10 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scope to request from the token endpoint.
         /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
         /// <param name="refreshToken">The refresh token (for example previously obtained from ADAL 2.x)</param>
-        [Obsolete("Use AcquireTokenByRefreshToken instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
+        [Obsolete("Use AcquireTokenByRefreshToken instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
-            if (string.IsNullOrWhiteSpace(refreshToken))
-            {
-                throw new ArgumentNullException(nameof(refreshToken), MsalErrorMessage.NoRefreshTokenProvided);
-            }
-
-            return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !MAC_BUILDTIME
@@ -1432,13 +1318,10 @@ namespace Microsoft.Identity.Client
         /// </remarks>
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
+        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(IEnumerable<string> scopes)
         {
-            GuardNonWindowsFrameworks();
-            GuardIWANetCore();
-
-            return await AcquireTokenByIntegratedWindowsAuth(scopes).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
 
@@ -1451,31 +1334,12 @@ namespace Microsoft.Identity.Client
         /// <param name="username">Identifier of the user account for which to acquire a token with Integrated Windows authentication. 
         /// Generally in UserPrincipalName (UPN) format, e.g. john.doe@contoso.com</param>
         /// <returns>Authentication result containing a token for the requested scopes and for the currently logged-in user in Windows</returns>
-        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
+        [Obsolete("Use AcquireTokenByIntegratedWindowsAuth instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenByIntegratedWindowsAuthAsync(
             IEnumerable<string> scopes,
             string username)
         {
-            GuardNonWindowsFrameworks();
-
-            return await AcquireTokenByIntegratedWindowsAuth(scopes).WithUsername(username).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
-        }
-
-        private static void GuardNonWindowsFrameworks()
-        {
-#if ANDROID || iOS
-            throw new PlatformNotSupportedException("Integrated Windows Authentication is not supported on this platform. " +
-                "For details about this authentication flow, please see https://aka.ms/msal-net-iwa");
-#endif
-        }
-
-        private static void GuardIWANetCore()
-        {
-#if NET_CORE
-            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not supported on .net core because " +
-                "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
-                "For more details see https://aka.ms/msal-net-iwa");
-#endif
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
 
@@ -1493,25 +1357,7 @@ namespace Microsoft.Identity.Client
                    .WithAuthority(new Uri(authority), true)
                    .BuildConfiguration())
         {
-            GuardOnMobilePlatforms();
-
-            if (userTokenCache == null)
-            {
-                userTokenCache = new TokenCache(ServiceBundle);
-            }
-
-            userTokenCache.SetServiceBundle(ServiceBundle);
-            UserTokenCacheInternal = userTokenCache;
-        }
-
-        private static void GuardOnMobilePlatforms()
-        {
-#if ANDROID || iOS
-        throw new PlatformNotSupportedException("You should not use this constructor that takes in a TokenCache object on mobile platforms. " +
-            "This constructor is meant to allow applications to define their own storage strategy on .net desktop and .net core. " +
-            "On mobile platforms, a secure and performant storage mechanism is implemeted by MSAL. " +
-            "For more details about custom token cache serialization, visit https://aka.ms/msal-net-serialization");
-#endif
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 #endif
 
@@ -1563,7 +1409,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(
             IEnumerable<string> scopes,
             UserAssertion userAssertion);
@@ -1575,7 +1421,7 @@ namespace Microsoft.Identity.Client
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(
             IEnumerable<string> scopes,
             UserAssertion userAssertion,
@@ -1588,7 +1434,7 @@ namespace Microsoft.Identity.Client
         /// <param name="authorizationCode">The authorization code received from service authorization endpoint.</param>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenByAuthorizationCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenByAuthorizationCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(
             string authorizationCode,
             IEnumerable<string> scopes);
@@ -1598,7 +1444,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenForClientAsync(
             IEnumerable<string> scopes);
 
@@ -1608,7 +1454,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenForClientAsync(
             IEnumerable<string> scopes,
             bool forceRefresh);
@@ -1620,7 +1466,7 @@ namespace Microsoft.Identity.Client
         /// <param name="loginHint">Identifier of the user. Generally a UPN.</param>
         /// <param name="extraQueryParameters">This parameter will be appended as is to the query string in the HTTP authentication request to the authority. The parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<Uri> GetAuthorizationRequestUrlAsync(
             IEnumerable<string> scopes,
             string loginHint,
@@ -1636,7 +1482,7 @@ namespace Microsoft.Identity.Client
         /// <param name="extraScopesToConsent">Array of scopes for which a developer can request consent upfront.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
-        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<Uri> GetAuthorizationRequestUrlAsync(
             IEnumerable<string> scopes,
             string redirectUri,
@@ -1666,7 +1512,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes);
 
         /// <summary>
@@ -1681,7 +1527,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes, bool forceRefresh);
 
         /// <summary>
@@ -1690,7 +1536,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Array of scopes requested for resource</param>
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion);
 
         /// <summary>
@@ -1700,7 +1546,7 @@ namespace Microsoft.Identity.Client
         /// <param name="userAssertion">Instance of UserAssertion containing user's token.</param>
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion, string authority);
     }
 #endif
@@ -1740,27 +1586,7 @@ namespace Microsoft.Identity.Client
                 .WithClientCredential(clientCredential)
                 .BuildConfiguration())
         {
-            GuardMobileFrameworks();
-
-            SetTokenCaches(userTokenCache, appTokenCache);
-        }
-
-        private void SetTokenCaches(TokenCache userTokenCache, TokenCache appTokenCache)
-        {
-            if (userTokenCache == null)
-            {
-                userTokenCache = new TokenCache(ServiceBundle);
-            }
-            userTokenCache.SetServiceBundle(ServiceBundle);
-            UserTokenCacheInternal = userTokenCache;
-
-            if (appTokenCache == null)
-            {
-                appTokenCache = new TokenCache(ServiceBundle);
-            }
-
-            appTokenCache.SetServiceBundle(ServiceBundle);
-            AppTokenCacheInternal = appTokenCache;
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1806,8 +1632,7 @@ namespace Microsoft.Identity.Client
                 .WithClientCredential(clientCredential)
                 .BuildConfiguration())
         {
-            GuardMobileFrameworks();
-            SetTokenCaches(userTokenCache, appTokenCache);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1822,12 +1647,10 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <seealso cref="AcquireTokenOnBehalfOfAsync(IEnumerable{string}, UserAssertion, string)"/> for the on-behalf-of flow when specifying the authority
         /// <seealso cref="AcquireTokenOnBehalfOf(IEnumerable{string}, UserAssertion)"/> which is the corresponding V3 API.
-        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
+        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1843,12 +1666,13 @@ namespace Microsoft.Identity.Client
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <seealso cref="AcquireTokenOnBehalfOfAsync(IEnumerable{string}, UserAssertion)"/> for the on-behalf-of flow without specifying the authority
         /// <seealso cref="AcquireTokenOnBehalfOf(IEnumerable{string}, UserAssertion)"/> which is the corresponding V3 API.
-        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
+        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenOnBehalfOfAsync(
+            IEnumerable<string> scopes,
+            UserAssertion userAssertion,
             string authority)
         {
-            GuardMobileFrameworks();
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(authority).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1863,12 +1687,10 @@ namespace Microsoft.Identity.Client
         /// the user on behalf of whom to get a token.</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <seealso cref="AcquireTokenOnBehalfOf(IEnumerable{string}, UserAssertion)"/> which is the corresponding V3 API
-        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
+        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1884,13 +1706,11 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>Authentication result containing a token for the requested scopes and account</returns>
         /// <seealso cref="AcquireTokenOnBehalfOf(IEnumerable{string}, UserAssertion)"/> which is the corresponding V3 API
-        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
+        [Obsolete("Use AcquireTokenOnBehalfOf instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenOnBehalfOfWithCertificateAsync(IEnumerable<string> scopes, UserAssertion userAssertion,
             string authority)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenOnBehalfOf(scopes, userAssertion).WithAuthority(authority).WithSendX5C(true).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1904,13 +1724,10 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         /// <seealso cref="AcquireTokenByAuthorizationCode(IEnumerable{string}, string)"/> which is the corresponding V2 API
-        [Obsolete("Use AcquireTokenByAuthorizationCode instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scopes)
+        [Obsolete("Use AcquireTokenByAuthorizationCode instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenByAuthorizationCodeAsync(string authorizationCode, IEnumerable<string> scopes)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenByAuthorizationCode(scopes, authorizationCode)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1922,13 +1739,10 @@ namespace Microsoft.Identity.Client
         /// Graph, <c>https://graph.microsoft.com/.default</c> as the requested scopes are really defined statically at application registration
         /// in the portal, and cannot be overriden in the application. See also </param>
         /// <returns>Authentication result containing the token of the user for the requested scopes</returns>
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes)
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenForClient(scopes)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1943,14 +1757,10 @@ namespace Microsoft.Identity.Client
         /// This override can be used in case the application knows that conditional access policies changed</param>
         /// <returns>Authentication result containing token of the user for the requested scopes</returns>
         /// <seealso cref="AcquireTokenForClient(IEnumerable{string})"/> which is the corresponding V3 API
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes, bool forceRefresh)
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<AuthenticationResult> AcquireTokenForClientAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenForClient(scopes)
-                .WithForceRefresh(forceRefresh)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1964,14 +1774,10 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scopes requested to access a protected API</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         /// <seealso cref="AcquireTokenForClient(IEnumerable{string})"/> which is the corresponding V3 API
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes)
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenForClient(scopes)
-                .WithSendX5C(true)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -1987,15 +1793,10 @@ namespace Microsoft.Identity.Client
         /// <param name="forceRefresh">If TRUE, API will ignore the access token in the cache and attempt to acquire new access token using client credentials</param>
         /// <returns>Authentication result containing application token for the requested scopes</returns>
         /// <seealso cref="AcquireTokenForClient(IEnumerable{string})"/> which is the corresponding V3 API
-        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        async Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes, bool forceRefresh)
+        [Obsolete("Use AcquireTokenForClient instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        Task<AuthenticationResult> IConfidentialClientApplicationWithCertificate.AcquireTokenForClientWithCertificateAsync(IEnumerable<string> scopes, bool forceRefresh)
         {
-            GuardMobileFrameworks();
-
-            return await AcquireTokenForClient(scopes)
-                .WithForceRefresh(forceRefresh)
-                .WithSendX5C(true)
-                .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -2008,17 +1809,10 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scope to request from the token endpoint.
         /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
         /// <param name="refreshToken">The refresh token (for example previously obtained from ADAL 2.x)</param>
-        [Obsolete("Use AcquireTokenByRefreshToken instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        async Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
+        [Obsolete("Use AcquireTokenByRefreshToken instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        Task<AuthenticationResult> IByRefreshToken.AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken)
         {
-            GuardMobileFrameworks();
-
-            if (string.IsNullOrWhiteSpace(refreshToken))
-            {
-                throw new ArgumentNullException(nameof(refreshToken), MsalErrorMessage.NoRefreshTokenProvided);
-            }
-
-            return await ((IByRefreshToken)this).AcquireTokenByRefreshToken(scopes, refreshToken).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -2033,13 +1827,13 @@ namespace Microsoft.Identity.Client
         /// The parameter can be null.</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         /// <seealso cref="GetAuthorizationRequestUrl(IEnumerable{string})"/> which is the corresponding V3 API
-        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string loginHint,
-                                                               string extraQueryParameters)
+        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<Uri> GetAuthorizationRequestUrlAsync(
+            IEnumerable<string> scopes,
+            string loginHint,
+            string extraQueryParameters)
         {
-            return await GetAuthorizationRequestUrl(scopes).WithLoginHint(loginHint)
-                                                           .WithExtraQueryParameters(extraQueryParameters).ExecuteAsync(CancellationToken.None)
-                                                           .ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
 
         /// <summary>
@@ -2059,18 +1853,16 @@ namespace Microsoft.Identity.Client
         /// <param name="authority">Specific authority for which the token is requested. Passing a different value than configured does not change the configured value</param>
         /// <returns>URL of the authorize endpoint including the query parameters.</returns>
         /// <seealso cref="GetAuthorizationRequestUrl(IEnumerable{string})"/> which is the corresponding V3 API
-        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes")]
-        public async Task<Uri> GetAuthorizationRequestUrlAsync(IEnumerable<string> scopes, string redirectUri, string loginHint,
-            string extraQueryParameters, IEnumerable<string> extraScopesToConsent, string authority)
+        [Obsolete("Use GetAuthorizationRequestUrl instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
+        public Task<Uri> GetAuthorizationRequestUrlAsync(
+            IEnumerable<string> scopes,
+            string redirectUri,
+            string loginHint,
+            string extraQueryParameters,
+            IEnumerable<string> extraScopesToConsent,
+            string authority)
         {
-            return await GetAuthorizationRequestUrl(scopes)
-                .WithRedirectUri(redirectUri)
-                .WithLoginHint(loginHint)
-                .WithExtraQueryParameters(extraQueryParameters)
-                .WithExtraScopesToConsent(extraScopesToConsent)
-                .WithAuthority(authority)
-                .ExecuteAsync(CancellationToken.None)
-                .ConfigureAwait(false);
+            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
         }
     }
 #endif
@@ -2087,7 +1879,7 @@ namespace Microsoft.Identity.Client
         /// <param name="scopes">Scope to request from the token endpoint.
         /// Setting this to null or empty will request an access token, refresh token and ID token with default scopes</param>
         /// <param name="refreshToken">The refresh token from ADAL 2.x</param>
-        [Obsolete("Use AcquireTokenByRefreshToken instead.  See https://aka.ms/msal-net-3-breaking-changes")]
+        [Obsolete("Use AcquireTokenByRefreshToken instead.  See https://aka.ms/msal-net-3-breaking-changes", true)]
         Task<AuthenticationResult> AcquireTokenByRefreshTokenAsync(IEnumerable<string> scopes, string refreshToken);
     }
 
