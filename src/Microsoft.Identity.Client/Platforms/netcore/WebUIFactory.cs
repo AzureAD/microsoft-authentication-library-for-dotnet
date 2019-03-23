@@ -35,7 +35,7 @@ namespace Microsoft.Identity.Client.Platforms.netcore
     {
         public IWebUI CreateAuthenticationDialog(CoreUIParent parent, RequestContext requestContext)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException();
         }
     }
 }

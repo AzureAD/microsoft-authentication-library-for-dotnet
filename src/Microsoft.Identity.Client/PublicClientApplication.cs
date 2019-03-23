@@ -87,10 +87,15 @@ namespace Microsoft.Identity.Client
             IEnumerable<string> scopes,
             object parent)
         {
+#if NET_CORE
+            throw new PlatformNotSupportedException("On .NET Core, interactive authentication is not supported. " + 
+                "Consider using Device Code Flow https://aka.ms/msal-net-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa");
+#else
             return AcquireTokenInteractiveParameterBuilder.Create(
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes,
                 parent);
+#endif
         }
 
         /// <summary>
@@ -158,9 +163,15 @@ namespace Microsoft.Identity.Client
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes)
         {
+#if NET_CORE
+            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not supported on .net core because " +
+                "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
+                "For more details see https://aka.ms/msal-net-iwa");
+#else
             return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
+#endif
         }
 
         /// <summary>

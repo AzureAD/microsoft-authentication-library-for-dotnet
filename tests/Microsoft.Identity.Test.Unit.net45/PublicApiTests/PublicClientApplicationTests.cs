@@ -146,7 +146,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             app = PublicClientApplicationBuilder
                 .Create(MsalTestConstants.ClientId)
-                .WithB2CAuthority("https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/B2C_1_B2C_Signup_Signin_Policy/oauth2/v2.0")
+                .WithAuthority(new Uri("https://login.microsoftonline.com/tfp/vibrob2c.onmicrosoft.com/B2C_1_B2C_Signup_Signin_Policy/oauth2/v2.0"))
                 .BuildConcrete();
 
             Assert.IsNotNull(app);

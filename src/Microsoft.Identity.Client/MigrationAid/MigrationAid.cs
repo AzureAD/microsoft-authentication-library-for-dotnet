@@ -1581,9 +1581,6 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(new Uri(DefaultAuthority), true)
-                .WithRedirectUri(redirectUri)
-                .WithClientCredential(clientCredential)
                 .BuildConfiguration())
         {
             throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
@@ -1627,9 +1624,6 @@ namespace Microsoft.Identity.Client
             ClientCredential clientCredential, TokenCache userTokenCache, TokenCache appTokenCache)
             : this(ConfidentialClientApplicationBuilder
                 .Create(clientId)
-                .WithAuthority(new Uri(authority), true)
-                .WithRedirectUri(redirectUri)
-                .WithClientCredential(clientCredential)
                 .BuildConfiguration())
         {
             throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");

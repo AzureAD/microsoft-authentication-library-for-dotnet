@@ -96,13 +96,6 @@ namespace Microsoft.Identity.Client.AppConfig
             return this;
         }
 
-        // This is for back-compat with oldstyle API.  Once we deprecate that, we can remove this.
-        internal ConfidentialClientApplicationBuilder WithClientCredential(ClientCredential clientCredential)
-        {
-            Config.ClientCredential = clientCredential;
-            return this;
-        }
-
         /// <inheritdoc />
         internal override void Validate()
         {
