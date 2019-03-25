@@ -1,3 +1,8 @@
+3.0.2-preview
+=============
+bug fixes:
+[UI can hang due to not having proper SynchronizationContext for UI interaction](https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/1009)
+
 3.0.1-preview
 =============
 New Features:
