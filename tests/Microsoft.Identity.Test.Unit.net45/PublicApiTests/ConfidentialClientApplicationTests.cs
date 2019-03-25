@@ -347,6 +347,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 await app
                       .AcquireTokenForClient(MsalTestConstants.Scope.ToArray())
                       .WithSendX5C(true)
+                      .WithForceRefresh(true)
                       .ExecuteAsync(CancellationToken.None)
                       .ConfigureAwait(false);
                 Assert.AreNotEqual(cachedAssertion, app.ClientCredential.Assertion);
