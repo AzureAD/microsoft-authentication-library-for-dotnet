@@ -74,8 +74,15 @@ namespace Microsoft.Identity.Client.ApiConfig
             object parent)
         {
             return new AcquireTokenInteractiveParameterBuilder(publicClientApplicationExecutor)
+                .WithCurrentSynchronizationContext()
                 .WithScopes(scopes)
                 .WithParent(parent);
+        }
+
+        internal AcquireTokenInteractiveParameterBuilder WithCurrentSynchronizationContext()
+        {
+            Parameters.UiParent.SynchronizationContext = SynchronizationContext.Current;
+            return this;
         }
 
         /// <summary>
@@ -154,7 +161,8 @@ namespace Microsoft.Identity.Client.ApiConfig
 #if ANDROID
             if (_ownerWindow is Activity activity)
             {
-                Parameters.UiParent.SetAndroidActivity(activity);
+                Parameters.UiParent.Activity = activity;
+                Parameters.UiParent.CallerActivity = activity;
             }
             else
             {
@@ -163,17 +171,17 @@ namespace Microsoft.Identity.Client.ApiConfig
 #elif iOS
             if(_ownerWindow is UIViewController uiViewController)
             {
-                Parameters.UiParent.SetUIViewController(uiViewController);
+                Parameters.UiParent.CallerViewController = uiViewController;
             }
 
 #elif DESKTOP
             if (_ownerWindow is IWin32Window win32Window)
             {
-                Parameters.UiParent.SetOwnerWindow(win32Window);
+                Parameters.UiParent.OwnerWindow = win32Window;
             }
             else if (_ownerWindow is IntPtr intPtrWindow)
             {
-                Parameters.UiParent.SetOwnerWindow(intPtrWindow);
+                Parameters.UiParent.OwnerWindow = intPtrWindow;
             }
             // It's ok on Windows Desktop to not have an owner window, the system will just center on the display
             // instead of a parent.

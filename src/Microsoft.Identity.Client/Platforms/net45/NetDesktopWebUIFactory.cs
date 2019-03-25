@@ -36,10 +36,10 @@ namespace Microsoft.Identity.Client.Platforms.net45
         {
             if (parent.UseHiddenBrowser)
             {
-                return new SilentWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
+                return new SilentWebUI(parent, requestContext);
             }
 
-            return new InteractiveWebUI {OwnerWindow = parent?.OwnerWindow, RequestContext = requestContext};
+            return new InteractiveWebUI(parent, requestContext);
         }
     }
 }

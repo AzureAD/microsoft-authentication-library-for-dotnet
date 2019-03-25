@@ -25,10 +25,9 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -40,7 +39,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
     /// </summary>
     internal class NullBroker : IBroker
     {
-        public bool CanInvokeBroker(OwnerUiParent uiParent)
+        public bool CanInvokeBroker(CoreUIParent uiParent)
         {
             return false;
         }

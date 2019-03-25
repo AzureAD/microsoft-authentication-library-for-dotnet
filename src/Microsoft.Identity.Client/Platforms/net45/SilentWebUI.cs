@@ -28,6 +28,7 @@
 using System;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.UI;
 
@@ -46,19 +47,19 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// </summary>
         private const int NavigationOverallTimeout = 10000;
 
-#pragma warning disable 618 // WindowsFormsWebAuthenticationDialog is marked obsolete
-        private SilentWindowsFormsAuthenticationDialog dialog;
-#pragma warning restore 618
+        private SilentWindowsFormsAuthenticationDialog _dialog;
+        private bool _disposed;
+        private WindowsFormsSynchronizationContext _formsSyncContext;
+        private AuthorizationResult _result;
+        private ManualResetEvent _threadInitializedEvent;
+        private Exception _uiException;
 
-        private bool disposed;
-        private WindowsFormsSynchronizationContext formsSyncContext;
-        private AuthorizationResult result;
-        private ManualResetEvent threadInitializedEvent;
-        private Exception uiException;
-
-        public SilentWebUI()
+        public SilentWebUI(CoreUIParent parent, RequestContext requestContext)
         {
-            threadInitializedEvent = new ManualResetEvent(false);
+            OwnerWindow = parent?.OwnerWindow;
+            SynchronizationContext = parent?.SynchronizationContext;
+            RequestContext = requestContext;
+            _threadInitializedEvent = new ManualResetEvent(false);
         }
 
         public void Dispose()
@@ -84,7 +85,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
             long navigationOverallTimeout = NavigationOverallTimeout;
             long navigationStartTime = DateTime.Now.Ticks;
 
-            bool initialized = threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
+            bool initialized = _threadInitializedEvent.WaitOne((int)navigationOverallTimeout);
             if (initialized)
             {
                 // Calculate time remaining after time spend on initialization.
@@ -99,7 +100,7 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
                     // The invisible dialog has failed to complete in the allotted time.
                     // Attempt a graceful shutdown.
-                    formsSyncContext.Post(state => dialog.CloseBrowser(), null);
+                    _formsSyncContext.Post(state => _dialog.CloseBrowser(), null);
                 }
             }
         }
@@ -113,32 +114,32 @@ namespace Microsoft.Identity.Client.Platforms.net45
                 {
                     try
                     {
-                        formsSyncContext = new WindowsFormsSynchronizationContext();
+                        _formsSyncContext = new WindowsFormsSynchronizationContext();
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
-                        dialog = new SilentWindowsFormsAuthenticationDialog(OwnerWindow)
+                        _dialog = new SilentWindowsFormsAuthenticationDialog(OwnerWindow)
                         {
                             NavigationWaitMiliSecs = NavigationWaitMiliSecs,
                             RequestContext = RequestContext
                         };
 #pragma warning restore 618
 
-                        dialog.Done += UIDoneHandler;
+                        _dialog.Done += UIDoneHandler;
 
-                        threadInitializedEvent.Set();
+                        _threadInitializedEvent.Set();
 
-                        dialog.AuthenticateAAD(RequestUri, CallbackUri);
+                        _dialog.AuthenticateAAD(RequestUri, CallbackUri);
 
                         // Start and turn control over to the message loop.
                         Application.Run();
 
-                        result = dialog.Result;
+                        _result = _dialog.Result;
                     }
                     catch (Exception e)
                     {
                         RequestContext.Logger.ErrorPii(e);
                         // Catch all exceptions to transfer them to the original calling thread.
-                        uiException = e;
+                        _uiException = e;
                     }
                 });
 
@@ -173,57 +174,57 @@ namespace Microsoft.Identity.Client.Platforms.net45
 
             ThrowIfTransferredException();
 
-            if (result == null)
+            if (_result == null)
             {
                 throw new MsalUiRequiredException(MsalUiRequiredException.NoPromptFailedError,
                     MsalErrorMessage.NoPromptFailedErrorMessage);
             }
 
-            return result;
+            return _result;
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
-                    if (threadInitializedEvent != null)
+                    if (_threadInitializedEvent != null)
                     {
-                        threadInitializedEvent.Dispose();
-                        threadInitializedEvent = null;
+                        _threadInitializedEvent.Dispose();
+                        _threadInitializedEvent = null;
                     }
 
-                    if (formsSyncContext != null)
+                    if (_formsSyncContext != null)
                     {
-                        formsSyncContext.Dispose();
-                        formsSyncContext = null;
+                        _formsSyncContext.Dispose();
+                        _formsSyncContext = null;
                     }
                 }
 
-                disposed = true;
+                _disposed = true;
             }
         }
 
         private void Cleanup()
         {
-            threadInitializedEvent.Dispose();
-            threadInitializedEvent = null;
+            _threadInitializedEvent.Dispose();
+            _threadInitializedEvent = null;
         }
 
         private void ThrowIfTransferredException()
         {
-            if (null != uiException)
+            if (null != _uiException)
             {
-                throw uiException;
+                throw _uiException;
             }
         }
 
         private void UIDoneHandler(object sender, SilentWebUIDoneEventArgs e)
         {
-            if (uiException == null)
+            if (_uiException == null)
             {
-                uiException = e.TransferedException;
+                _uiException = e.TransferedException;
             }
 
 #pragma warning disable 618 // SilentWindowsFormsAuthenticationDialog is marked obsolete
