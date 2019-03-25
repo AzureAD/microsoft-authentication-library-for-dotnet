@@ -100,7 +100,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
             }
 
-            var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
+            var coreUiParent = interactiveParameters.UiParent;
 
 #if ANDROID || iOS
             coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView;

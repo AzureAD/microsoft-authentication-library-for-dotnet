@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -25,27 +25,32 @@
 //
 //------------------------------------------------------------------------------
 
+using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.net45
 {
     internal class InteractiveWebUI : WebUI
     {
-#pragma warning disable 618 // WindowsFormsWebAuthenticationDialog is marked obsolete
+        private WindowsFormsWebAuthenticationDialog _dialog;
 
-        private WindowsFormsWebAuthenticationDialog dialog;
+        public InteractiveWebUI(CoreUIParent parent, RequestContext requestContext)
+        {
+            OwnerWindow = parent?.OwnerWindow;
+            SynchronizationContext = parent?.SynchronizationContext;
+            RequestContext = requestContext;
+        }
 
         protected override AuthorizationResult OnAuthenticate()
         {
             AuthorizationResult result;
 
-            using (dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) {RequestContext = RequestContext})
+            using (_dialog = new WindowsFormsWebAuthenticationDialog(OwnerWindow) {RequestContext = RequestContext})
             {
-                result = dialog.AuthenticateAAD(RequestUri, CallbackUri);
+                result = _dialog.AuthenticateAAD(RequestUri, CallbackUri);
             }
 
             return result;
         }
-#pragma warning restore 618
     }
 }

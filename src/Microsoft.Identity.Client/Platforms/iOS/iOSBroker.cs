@@ -36,7 +36,7 @@ using System;
 using CoreFoundation;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Internal.Broker;
-using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.Platforms.iOS
 {
@@ -55,7 +55,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             _serviceBundle = serviceBundle;
         }
 
-        public bool CanInvokeBroker(OwnerUiParent uiParent)
+        public bool CanInvokeBroker(CoreUIParent uiParent)
         {
             if (uiParent == null)
             {
@@ -63,7 +63,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
                 return false;
             }
 
-            if (uiParent.CoreUiParent.CallerViewController == null)
+            if (uiParent.CallerViewController == null)
             {
                 _serviceBundle.DefaultLogger.Error(iOSBrokerConstants.CallerViewControllerIsNullCannotInvokeBroker);
                 return false;
@@ -73,7 +73,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
             var result = false;
 
-            uiParent.CoreUiParent.CallerViewController.InvokeOnMainThread(() =>
+            uiParent.CallerViewController.InvokeOnMainThread(() =>
             {
                 result = UIApplication.SharedApplication.CanOpenUrl(new NSUrl(BrokerParameter.BrokerV2));
             });

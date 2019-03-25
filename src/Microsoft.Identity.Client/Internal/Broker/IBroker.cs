@@ -25,9 +25,8 @@
 // 
 // ------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.OAuth2;
+using Microsoft.Identity.Client.UI;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -35,7 +34,7 @@ namespace Microsoft.Identity.Client.Internal.Broker
 {
     internal interface IBroker
     {
-        bool CanInvokeBroker(OwnerUiParent uiParent);
+        bool CanInvokeBroker(CoreUIParent uiParent);
 
         Task<MsalTokenResponse> AcquireTokenUsingBrokerAsync(Dictionary<string, string> brokerPayload);
     }
