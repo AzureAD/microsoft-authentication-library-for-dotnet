@@ -163,15 +163,9 @@ namespace Microsoft.Identity.Client
         public AcquireTokenByIntegratedWindowsAuthParameterBuilder AcquireTokenByIntegratedWindowsAuth(
             IEnumerable<string> scopes)
         {
-#if NET_CORE
-            throw new PlatformNotSupportedException("This overload of AcquireTokenByIntegratedWindowsAuthAsync is not supported on .net core because " +
-                "MSAL cannot determine the username (UPN) of the currently logged in user. Please use the overload where you pass in a username (UPN). " +
-                "For more details see https://aka.ms/msal-net-iwa");
-#else
             return AcquireTokenByIntegratedWindowsAuthParameterBuilder.Create(
                 ClientExecutorFactory.CreatePublicClientExecutor(this),
                 scopes);
-#endif
         }
 
         /// <summary>
