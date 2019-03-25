@@ -28,13 +28,11 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
-using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME
 
@@ -46,14 +44,14 @@ namespace Microsoft.Identity.Client
     /// <seealso cref="ClientCredential"/> for the constructor of <seealso cref="ClientCredential"/> 
     /// with a certificate, and <seealso cref="ConfidentialClientApplication"/>
     /// <remarks>To understand the difference between public client applications and confidential client applications, see https://aka.ms/msal-net-client-applications</remarks>
-    public sealed class ClientAssertionCertificate
+    internal sealed class ClientAssertionCertificateWrapper
     {
         /// <summary>
         /// Constructor to create certificate information used in <see cref="ClientCredential"/>
         /// to instantiate a <see cref="ClientCredential"/> used in the constructors of <see cref="ConfidentialClientApplication"/>
         /// </summary>
         /// <param name="certificate">The X509 certificate used as credentials to prove the identity of the application to Azure AD.</param>
-        public ClientAssertionCertificate(X509Certificate2 certificate)
+        public ClientAssertionCertificateWrapper(X509Certificate2 certificate)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 
@@ -67,7 +65,6 @@ namespace Microsoft.Identity.Client
                         MinKeySizeInBits));
             }
 #endif
-
         }
 
         /// <summary>
@@ -80,7 +77,6 @@ namespace Microsoft.Identity.Client
         /// </summary>
         public X509Certificate2 Certificate { get; }
 
-
         internal byte[] Sign(ICryptographyManager cryptographyManager, string message)
         {
             return cryptographyManager.SignWithCertificate(message, Certificate);
@@ -90,5 +86,4 @@ namespace Microsoft.Identity.Client
         internal string Thumbprint => Base64UrlHelpers.Encode(Certificate.GetCertHash());
     }
 #endif
-
 }

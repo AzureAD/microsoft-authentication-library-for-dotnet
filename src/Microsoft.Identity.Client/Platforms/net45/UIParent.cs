@@ -27,6 +27,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -40,10 +41,10 @@ namespace Microsoft.Identity.Client
         /// Creates a UIParent that will configure the underlying embedded webview to be centered on the screen
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent()
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         /// <summary>
@@ -52,10 +53,10 @@ namespace Microsoft.Identity.Client
         /// <param name="ownerWindow">Parent window object reference. OPTIONAL. The expected parent window
         /// are either of type <see cref="System.Windows.Forms.IWin32Window"/> or <see cref="System.IntPtr"/> (for window handle)</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent(object ownerWindow)
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
 #if DESKTOP_RUNTIME
@@ -67,11 +68,11 @@ namespace Microsoft.Identity.Client
         /// are either of type <see cref="System.Windows.Forms.IWin32Window"/> or <see cref="System.IntPtr"/> (for window handle)</param>
         /// <param name="useEmbeddedWebview">Ignored, on .net desktop an embedded webview is always used</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent(object parent, bool useEmbeddedWebview) :
             this(parent)
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 #endif
         /// <summary>

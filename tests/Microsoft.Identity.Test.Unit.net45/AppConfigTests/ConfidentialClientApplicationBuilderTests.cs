@@ -47,7 +47,6 @@ namespace Microsoft.Identity.Test.Unit.AppConfigTests
 
             // Validate Defaults
             Assert.AreEqual(LogLevel.Info, cca.AppConfig.LogLevel);
-            Assert.IsNull(cca.AppConfig.ClientCredential);
             Assert.AreEqual(MsalTestConstants.ClientId, cca.AppConfig.ClientId);
             Assert.IsNull(cca.AppConfig.Component);
             Assert.AreEqual(false, cca.AppConfig.EnablePiiLogging);

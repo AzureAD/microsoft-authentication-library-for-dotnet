@@ -29,6 +29,7 @@ using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -125,12 +126,12 @@ namespace Microsoft.Identity.Client.AppConfig
 
             if (!string.IsNullOrWhiteSpace(Config.ClientSecret))
             {
-                Config.ClientCredential = new ClientCredential(Config.ClientSecret);
+                Config.ClientCredential = new ClientCredentialWrapper(Config.ClientSecret);
             }
 
             if (Config.Certificate != null)
             {
-                Config.ClientCredential = new ClientCredential(new ClientAssertionCertificate(Config.Certificate));
+                Config.ClientCredential = new ClientCredentialWrapper(new ClientAssertionCertificateWrapper(Config.Certificate));
             }
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))

@@ -27,6 +27,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -43,10 +44,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>Consider using Device Code Flow https://aka.ms/msal-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent()
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         /// <summary>
@@ -55,10 +56,10 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <remarks>Consider using Device Code Flow https://aka.ms/msal-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent(object parent, bool useEmbeddedWebview)
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         /// <summary>

@@ -27,6 +27,7 @@
 
 using System;
 using System.ComponentModel;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,10 +40,10 @@ namespace Microsoft.Identity.Client
         /// Default constructor. Uses the NSApplication.SharedApplication.MainWindow to parent the web ui.
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent()
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
 
@@ -54,11 +55,11 @@ namespace Microsoft.Identity.Client
         /// <param name="parent">Expected to be a NSWindow instance. Passing null implies the MainWindow will be used</param>
         /// <param name="useEmbeddedWebview">Ignored, the embedded view is always used on Mac</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent(object parent, bool useEmbeddedWebview) :
             this(ValidateParentObject(parent))
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 #endif
 

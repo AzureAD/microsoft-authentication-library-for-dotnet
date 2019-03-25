@@ -33,6 +33,7 @@ using Microsoft.Identity.Client.Internal.Requests;
 using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Test.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.Identity.Client.Internal;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {
@@ -58,7 +59,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
             string Audience1 = "Audience1";
             string Audience2 = "Audience2";
 
-            var credential = new ClientCredential(MsalTestConstants.ClientSecret)
+            var credential = new ClientCredentialWrapper(MsalTestConstants.ClientSecret)
             {
                 Audience = Audience1,
                 ContainsX5C = false,
@@ -99,7 +100,7 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
         [Description("Test for expired client assertion in Request Validator.")]
         public void ClientAssertionRequestValidatorExpirationTimeTest()
         {
-            var credential = new ClientCredential(MsalTestConstants.ClientSecret)
+            var credential = new ClientCredentialWrapper(MsalTestConstants.ClientSecret)
             {
                 Audience = "Audience1",
                 ContainsX5C = false,

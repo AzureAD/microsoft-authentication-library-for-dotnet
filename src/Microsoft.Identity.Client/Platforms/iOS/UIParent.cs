@@ -28,6 +28,7 @@
 using System;
 using System.ComponentModel;
 using Microsoft.Identity.Client.ApiConfig;
+using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.UI;
 using UIKit;
@@ -48,11 +49,11 @@ namespace Microsoft.Identity.Client
         /// <summary>
         /// Default constructor.
         /// </summary>
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent()
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
         
         /// <summary>
@@ -60,12 +61,12 @@ namespace Microsoft.Identity.Client
         /// system browser. See https://aka.ms/msal-net-uses-web-browser
         /// </summary>
         /// <remarks>This method is likely to be removed (replaced) before final release</remarks>
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent(bool useEmbeddedWebview)
             : this()
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
 #if iOS_RUNTIME
@@ -76,12 +77,12 @@ namespace Microsoft.Identity.Client
         /// <remarks>This constructor is only avaiable at runtime, to provide support for NetStandard</remarks>
         /// <param name="parent">Ignored on iOS</param>
         /// <param name="useEmbeddedWebview">Flag to determine between embedded vs system browser. See https://aka.ms/msal-net-uses-web-browser </param>
-        [Obsolete("See https://aka.ms/msal-net-3-breaking-changes", true)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         public UIParent(object parent, bool useEmbeddedWebview) :
             this(useEmbeddedWebview)
         {
-            throw new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 #endif
 
