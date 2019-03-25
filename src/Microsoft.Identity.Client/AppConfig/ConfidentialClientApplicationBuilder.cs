@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.AppConfig
         /// <returns></returns>
         public ConfidentialClientApplicationBuilder WithCertificate(X509Certificate2 certificate)
         {
-            Config.Certificate = certificate;
+            Config.ClientCredentialCertificate = certificate;
             return this;
         }
 
@@ -109,7 +109,7 @@ namespace Microsoft.Identity.Client.AppConfig
                 countOfCredentialTypesSpecified++;
             }
 
-            if (Config.Certificate != null)
+            if (Config.ClientCredentialCertificate != null)
             {
                 countOfCredentialTypesSpecified++;
             }
@@ -129,9 +129,9 @@ namespace Microsoft.Identity.Client.AppConfig
                 Config.ClientCredential = new ClientCredentialWrapper(Config.ClientSecret);
             }
 
-            if (Config.Certificate != null)
+            if (Config.ClientCredentialCertificate != null)
             {
-                Config.ClientCredential = new ClientCredentialWrapper(new ClientAssertionCertificateWrapper(Config.Certificate));
+                Config.ClientCredential = new ClientCredentialWrapper(new ClientAssertionCertificateWrapper(Config.ClientCredentialCertificate));
             }
 
             if (string.IsNullOrWhiteSpace(Config.RedirectUri))

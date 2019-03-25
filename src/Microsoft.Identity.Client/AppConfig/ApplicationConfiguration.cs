@@ -64,7 +64,7 @@ namespace Microsoft.Identity.Client.AppConfig
 
         public ClientCredentialWrapper ClientCredential { get; internal set; }
         public string ClientSecret { get; internal set; }
-        public X509Certificate2 Certificate { get; internal set; }
+        public X509Certificate2 ClientCredentialCertificate { get; internal set; }
 #endif 
 
         /// <summary>

@@ -26,6 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Microsoft.Identity.Client.AppConfig
 {
@@ -107,7 +108,11 @@ namespace Microsoft.Identity.Client.AppConfig
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
         /// <summary>
         /// </summary>
-        ClientCredential ClientCredential { get; }
+        string ClientSecret { get; }
+
+        /// <summary>
+        /// </summary>
+        X509Certificate2 ClientCredentialCertificate { get; }
 #endif
 
 #if WINDOWS_APP
