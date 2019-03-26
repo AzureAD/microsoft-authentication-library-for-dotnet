@@ -37,6 +37,7 @@ using Microsoft.Identity.Client.PlatformsCommon.Factories;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.TelemetryCore;
 using Microsoft.Identity.Client.Utils;
+using Microsoft.Identity.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -58,6 +59,7 @@ namespace Microsoft.Identity.Client
 #pragma warning restore CS1574 // XML comment has cref attribute that could not be resolved
     {
         internal const string NullPreferredUsernameDisplayLabel = "Missing from the token response";
+        private const int DefaultExpirationBufferInMinutes = 5;
         private const string MicrosoftLogin = "login.microsoftonline.com";
 
         private ICoreLogger _logger => ServiceBundle.DefaultLogger;
@@ -71,9 +73,11 @@ namespace Microsoft.Identity.Client
 
         internal IServiceBundle ServiceBundle { get; private set; }
 
-        private const int DefaultExpirationBufferInMinutes = 5;
-
         private readonly ITokenCacheAccessor _accessor;
+
+        // Unkown token cache data support for forwards compatibility.
+        IDictionary<string, JToken> _unkownNodes;
+
         internal ILegacyCachePersistence LegacyCachePersistence { get; private set; }
 
         ITokenCacheAccessor ITokenCacheInternal.Accessor => _accessor;
@@ -995,7 +999,7 @@ namespace Microsoft.Identity.Client
            
         }
 
-        internal void RemoveAdalUser(IAccount account)
+        private void RemoveAdalUser(IAccount account)
         {
             CacheFallbackOperations.RemoveAdalUser(
                 _logger,
@@ -1235,7 +1239,7 @@ namespace Microsoft.Identity.Client
             // reads the underlying in-memory dictionary and dumps out the content as a JSON
             lock (LockObject)
             {
-                return new TokenCacheDictionarySerializer(_accessor).Serialize();
+                return new TokenCacheDictionarySerializer(_accessor).Serialize(_unkownNodes);
             }
         }
 
@@ -1263,7 +1267,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
+                _unkownNodes = new TokenCacheDictionarySerializer(_accessor).Deserialize(msalV2State);
             }
         }
 
@@ -1283,7 +1287,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                return new TokenCacheJsonSerializer(_accessor).Serialize();
+                return new TokenCacheJsonSerializer(_accessor).Serialize(_unkownNodes);
             }
         }
 
@@ -1311,7 +1315,7 @@ namespace Microsoft.Identity.Client
 
             lock (LockObject)
             {
-                new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
+                _unkownNodes = new TokenCacheJsonSerializer(_accessor).Deserialize(msalV3State);
             }
         }
 
