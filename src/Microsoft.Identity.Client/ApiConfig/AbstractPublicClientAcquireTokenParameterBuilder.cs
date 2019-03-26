@@ -28,8 +28,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Base class for public client application token request builders

@@ -26,7 +26,7 @@
 // ------------------------------------------------------------------------------
 
 using System.Globalization;
-using Microsoft.Identity.Client.CacheV2.Schema;
+using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Utils;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
@@ -53,7 +53,7 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
         public const string Name = "Joe Charles Doe II";
         public const string AlternativeAccountId = "test_alternative_account_id";
         public const string Scopes = "scope1 scope2";
-        public const AuthorityType DefaultAuthorityType = AuthorityType.Adfs;
+        public const Client.CacheV2.Schema.CacheV2AuthorityType DefaultAuthorityType = Client.CacheV2.Schema.CacheV2AuthorityType.Adfs;
         public const long ExpiresIn = 3599;
         public const long ExtendedExpiresIn = 0;
         public const long CachedAt = (long)1 << 40;
@@ -68,9 +68,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return "test_uid.test_utid";
         }
 
-        public static Credential GetAccessToken()
+        public static Client.CacheV2.Schema.Credential GetAccessToken()
         {
-            return Credential.CreateAccessToken(
+            return Client.CacheV2.Schema.Credential.CreateAccessToken(
                 GetHomeAccountId(),
                 Environment,
                 Realm,
@@ -88,9 +88,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return "scope1 scope2";
         }
 
-        public static Credential GetRefreshToken()
+        public static Client.CacheV2.Schema.Credential GetRefreshToken()
         {
-            return Credential.CreateRefreshToken(
+            return Client.CacheV2.Schema.Credential.CreateRefreshToken(
                 GetHomeAccountId(),
                 Environment,
                 ClientId,
@@ -99,9 +99,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 AdditionalFieldsJson);
         }
 
-        public static Credential GetFamilyRefreshToken()
+        public static Client.CacheV2.Schema.Credential GetFamilyRefreshToken()
         {
-            return Credential.CreateFamilyRefreshToken(
+            return Client.CacheV2.Schema.Credential.CreateFamilyRefreshToken(
                 GetHomeAccountId(),
                 Environment,
                 ClientId,
@@ -111,9 +111,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
                 AdditionalFieldsJson);
         }
 
-        public static Credential GetIdToken()
+        public static Client.CacheV2.Schema.Credential GetIdToken()
         {
-            return Credential.CreateIdToken(
+            return Client.CacheV2.Schema.Credential.CreateIdToken(
                 GetHomeAccountId(),
                 Environment,
                 Realm,
@@ -133,9 +133,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return Base64UrlHelpers.Encode(input);
         }
 
-        public static Account GetAccount()
+        public static Client.CacheV2.Schema.Account GetAccount()
         {
-            return Account.Create(
+            return Client.CacheV2.Schema.Account.Create(
                 GetHomeAccountId(),
                 Environment,
                 Realm,
@@ -156,9 +156,9 @@ namespace Microsoft.Identity.Test.Unit.CacheV2Tests
             return Base64UrlEncodeUnpadded(ClientInfoJson);
         }
 
-        public static AppMetadata GetAppMetadata()
+        public static Client.CacheV2.Schema.AppMetadata GetAppMetadata()
         {
-            return new AppMetadata(Environment, ClientId, FamilyId);
+            return new Client.CacheV2.Schema.AppMetadata(Environment, ClientId, FamilyId);
         }
     }
 }

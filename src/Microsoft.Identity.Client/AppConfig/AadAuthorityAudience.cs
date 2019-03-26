@@ -25,7 +25,7 @@
 //
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Specifies which Microsoft accounts can be used for sign-in with a given application.

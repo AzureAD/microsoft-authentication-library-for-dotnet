@@ -27,7 +27,7 @@
 
 using System.Net.Http;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Http Client Factory

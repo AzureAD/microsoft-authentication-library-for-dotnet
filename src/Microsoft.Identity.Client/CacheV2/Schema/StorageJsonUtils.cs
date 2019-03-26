@@ -148,15 +148,15 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return json;
         }
 
-        private static string AuthorityTypeToString(AuthorityType authorityType)
+        private static string AuthorityTypeToString(CacheV2AuthorityType authorityType)
         {
             switch (authorityType)
             {
-            case AuthorityType.MsSts:
+            case CacheV2AuthorityType.MsSts:
                 return StorageJsonValues.AuthorityTypeMsSts;
-            case AuthorityType.Adfs:
+            case CacheV2AuthorityType.Adfs:
                 return StorageJsonValues.AuthorityTypeAdfs;
-            case AuthorityType.Msa:
+            case CacheV2AuthorityType.Msa:
                 return StorageJsonValues.AuthorityTypeMsa;
             default:
                 return StorageJsonValues.AuthorityTypeOther;
@@ -186,27 +186,27 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             return account;
         }
 
-        private static AuthorityType AuthorityTypeToEnum(string authorityTypeString)
+        private static CacheV2AuthorityType AuthorityTypeToEnum(string authorityTypeString)
         {
             if (string.Compare(
                     authorityTypeString,
                     StorageJsonValues.AuthorityTypeMsSts,
                     StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return AuthorityType.MsSts;
+                return CacheV2AuthorityType.MsSts;
             }
 
             if (string.Compare(authorityTypeString, StorageJsonValues.AuthorityTypeAdfs, StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return AuthorityType.Adfs;
+                return CacheV2AuthorityType.Adfs;
             }
 
             if (string.Compare(authorityTypeString, StorageJsonValues.AuthorityTypeMsa, StringComparison.OrdinalIgnoreCase) == 0)
             {
-                return AuthorityType.Msa;
+                return CacheV2AuthorityType.Msa;
             }
 
-            return AuthorityType.Other;
+            return CacheV2AuthorityType.Other;
         }
 
         public static JObject AppMetadataToJson(AppMetadata appMetadata)

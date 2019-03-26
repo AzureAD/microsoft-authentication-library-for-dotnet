@@ -28,8 +28,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 

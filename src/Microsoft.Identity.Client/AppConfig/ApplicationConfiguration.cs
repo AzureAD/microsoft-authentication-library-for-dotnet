@@ -33,7 +33,7 @@ using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Http;
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     internal sealed class ApplicationConfiguration : IApplicationConfiguration
     {

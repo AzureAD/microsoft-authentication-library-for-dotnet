@@ -38,7 +38,7 @@ namespace Microsoft.Identity.Client.Cache.Items
     {
         internal MsalAccountCacheItem()
         {
-            AuthorityType = Cache.AuthorityType.MSSTS.ToString();
+            AuthorityType = CacheAuthorityType.MSSTS.ToString();
         }
 
         internal MsalAccountCacheItem(
