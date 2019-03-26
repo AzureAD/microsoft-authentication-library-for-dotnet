@@ -26,6 +26,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.Core;
@@ -36,25 +37,31 @@ namespace Microsoft.Identity.Client.Instance
     {
         public const string Prefix = "tfp"; // The http path of B2C authority looks like "/tfp/<your_tenant_name>/..."
         public const string B2CCanonicalAuthorityTemplate = "https://{0}/{1}/{2}/{3}/";
-        private readonly string[] B2CTrustedHosts = { "b2clogin.com", "b2clogin.cn", "b2clogin.de", "b2clogin.us" };
+        private static List<string> B2CTrustedHosts { get; set; } = new List<string> { "b2clogin.com", "b2clogin.cn", "b2clogin.de", "b2clogin.us" };
 
         internal B2CAuthority(IServiceBundle serviceBundle, AuthorityInfo authorityInfo)
             : base(serviceBundle, authorityInfo)
         {
         }
 
+        #pragma warning disable 
         internal override async Task UpdateCanonicalAuthorityAsync(
             RequestContext requestContext)
         {
-            if (IsB2CLoginHost(new Uri(AuthorityInfo.CanonicalAuthority).Host))
+            string b2cAuthority = new Uri(AuthorityInfo.CanonicalAuthority).Host;
+
+            if (IsB2CLoginHost(b2cAuthority))
             {
                 return;
             }
-
-            await base.UpdateCanonicalAuthorityAsync(requestContext).ConfigureAwait(false);
+            else
+            {
+                B2CTrustedHosts.Add(b2cAuthority);
+                return;
+            }
         }
 
-        private bool IsB2CLoginHost(string host)
+        internal static bool IsB2CLoginHost(string host)
         {
             var isB2CLogin = false;
             foreach (var b2CTrustedHost in B2CTrustedHosts)

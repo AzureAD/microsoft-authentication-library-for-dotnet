@@ -266,7 +266,6 @@ namespace Microsoft.Identity.Client
             return (T)this;
         }
 
-
         internal virtual void Validate()
         {
             // Validate that we have a client id
