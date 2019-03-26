@@ -286,14 +286,17 @@ namespace Microsoft.Identity.Client.ApiConfig
         /// </summary>
         /// <param name="authorityUri">Azure AD B2C authority, including the B2C policy (for instance
         /// <c>"https://fabrikamb2c.b2clogin.com/tfp/{Tenant}/{policy}</c></param>)
+        /// <param name="validateAuthority">Whether the authority should be validated against the server metadata.
+        /// For B2C tenants using a custom domain, this should be false. Only B2C tenants using
+        /// login.microsoftonline.com should set validateAuthority to true. Default is set to false</param>
         /// <returns>The builder to chain the .With methods</returns>
-        public T WithB2CAuthority(string authorityUri)
+        public T WithB2CAuthority(string authorityUri, bool validateAuthority = false)
         {
             if (string.IsNullOrWhiteSpace(authorityUri))
             {
                 throw new ArgumentNullException(nameof(authorityUri));
             }
-            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+            CommonParameters.AuthorityOverride = new AuthorityInfo(AuthorityType.B2C, authorityUri, validateAuthority);
             return (T)this;
         }
 

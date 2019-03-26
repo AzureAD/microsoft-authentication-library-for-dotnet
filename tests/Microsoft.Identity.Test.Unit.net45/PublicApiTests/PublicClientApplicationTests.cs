@@ -46,6 +46,7 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -283,7 +284,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
                                                                             .WithAuthority(new Uri(ClientApplicationBase.DefaultAuthority), true)
                                                                             .WithHttpManager(harness.HttpManager)
-                                                                            .BuildConcrete();             
+                                                                            .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
@@ -594,7 +595,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         public async Task TestAccountAcrossMultipleClientIdsAsync()
         {
             // Arrange
-          
+
             PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId).BuildConcrete();
 
             // Populate with tokens tied to ClientId2
@@ -617,7 +618,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             // Populate for clientid2
             _tokenCacheHelper.PopulateCache(app.UserTokenCacheInternal.Accessor, clientId: MsalTestConstants.ClientId);
-          
+
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                 expectedAtCount: 4,
                 expectedRtCount: 2,
@@ -632,7 +633,7 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             app.UserTokenCacheInternal.Accessor.AssertItemCount(
                expectedAtCount: 0,
                expectedRtCount: 0,
-               expectedAccountCount: 0, 
+               expectedAccountCount: 0,
                expectedIdtCount: 0,
                expectedAppMetadataCount: 2); // app metadata is never deleted
 
@@ -983,15 +984,15 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 httpManager.AddInstanceDiscoveryMockHandler();
 
                 PublicClientApplication app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CRandomHost), true)
+                                                                            .WithAuthority(new Uri(MsalTestConstants.B2CCustomDomain), true)
                                                                             .WithHttpManager(httpManager)
                                                                             .BuildConcrete();
                 MsalMockHelpers.ConfigureMockWebUI(
                     app.ServiceBundle.PlatformProxy,
                     new AuthorizationResult(AuthorizationStatus.Success, app.AppConfig.RedirectUri + "?code=some-code"));
 
-                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CRandomHost);
-                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CRandomHost);
+                httpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CCustomDomain);
+                httpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CCustomDomain);
 
                 AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
                 Assert.IsNotNull(result);
@@ -1005,22 +1006,94 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
         {
             using (var harness = new MockHttpAndServiceBundle())
             {
-                harness.HttpManager.AddInstanceDiscoveryMockHandler();
-
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CAuthority);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityBlackforest);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityMoonCake);
-                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityUsGov);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthority, false);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityBlackforest, false);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityMoonCake, false);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CLoginAuthorityUsGov, false);
+                ValidateB2CLoginAuthority(harness, MsalTestConstants.B2CCustomDomain, false);
             }
         }
 
-        private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority)
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void B2CAcquireTokenWithMicrosoftLoginAuthorityTest()
         {
-            var app = PublicClientApplicationBuilder.Create(MsalTestConstants.ClientId)
-                                                    .WithB2CAuthority(authority)
-                                                    .WithHttpManager(harness.HttpManager)
-                                                    .BuildConcrete();
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddInstanceDiscoveryMockHandler();
+
+                var app = PublicClientApplicationBuilder
+                   .Create(MsalTestConstants.ClientId)
+                   .WithB2CAuthority(MsalTestConstants.B2CAuthority, true)
+                   .WithHttpManager(harness.HttpManager)
+                   .BuildConcrete();
+
+                var ui = new MockWebUI()
+                {
+                    MockResult = new AuthorizationResult(
+                        AuthorizationStatus.Success,
+                        MsalTestConstants.B2CAuthority + "?code=some-code")
+                };
+
+                MsalMockHelpers.ConfigureMockWebUI(app.ServiceBundle.PlatformProxy, ui);
+                harness.HttpManager.AddMockHandlerForTenantEndpointDiscovery(MsalTestConstants.B2CAuthority);
+                harness.HttpManager.AddSuccessTokenResponseMockHandlerForPost(MsalTestConstants.B2CAuthority);
+
+                var result = app
+                    .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                    .ExecuteAsync(CancellationToken.None)
+                    .Result;
+
+                Assert.IsNotNull(result);
+                Assert.IsNotNull(result.Account);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("PublicClientApplicationTests")]
+        public void B2CAcquireTokenWithValidateAuthorityFailTest()
+        {
+            using (var harness = new MockHttpAndServiceBundle())
+            {
+                harness.HttpManager.AddMockHandler(
+               new MockHttpMessageHandler()
+               {
+                   ExpectedMethod = HttpMethod.Get,
+                   ExpectedUrl = "https://login.microsoftonline.com/common/discovery/instance",
+                   ExpectedQueryParams = new Dictionary<string, string>
+                   {
+                       { "api-version", "1.1" },
+                       {
+                           "authorization_endpoint",
+                           "https%3A%2F%2Fcatsareamazing.com%2Ftfp%2Foauth2%2Fv2.0%2Fauthorize"
+                       },
+                   },
+                   ResponseMessage =
+                   MockHelpers.CreateInvalidInstanceResponseMessage()
+               });
+
+                var app = PublicClientApplicationBuilder
+                   .Create(MsalTestConstants.ClientId)
+                   .WithB2CAuthority(MsalTestConstants.B2CCustomDomain, true)
+                   .WithHttpManager(harness.HttpManager)
+                   .BuildConcrete();
+
+                var result = Assert.ThrowsExceptionAsync<MsalException>(async () => await app
+                .AcquireTokenInteractive(MsalTestConstants.Scope, null)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false));
+            }
+        }
+
+
+        private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority, bool validateAuthority)
+        {
+            var app = PublicClientApplicationBuilder
+                .Create(MsalTestConstants.ClientId)
+                .WithB2CAuthority(authority, validateAuthority)
+                .WithHttpManager(harness.HttpManager)
+                .BuildConcrete();
+
             var ui = new MockWebUI()
             {
                 MockResult = new AuthorizationResult(

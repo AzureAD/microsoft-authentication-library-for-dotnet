@@ -189,6 +189,18 @@ namespace Microsoft.Identity.Test.Common.Core.Mocks
                                         "\"f11508ab-067f-40d4-83cb-ccc67bf57e45\"}");
         }
 
+        public static HttpResponseMessage CreateInvalidInstanceResponseMessage()
+        {
+            return CreateFailureMessage(HttpStatusCode.BadRequest,
+                                         "{\"error\":\"invalid_instance\",\"error_description\":\"AADSTS50049: " +
+                                         "Unknown or invalid instance." +
+                                         "Trace ID: 104ea97d-3e48-4f59-9f92-2c59e1390c00Correlation ID: " +
+                                         "e553c03a-ec93-4d49-a12f-3e5d951f8eadTimestamp: 2019-03-26 00:24:00Z\"," +
+                                         "\"error_codes\":[50049],\"timestamp\":\"2019-03-26 00:24:00Z\"," +
+                                         "\"trace_id\":\"104ea97d-3e48-4f59-9f92-2c59e1390c00\"," +
+                                         "\"correlation_id\":\"e553c03a-ec93-4d49-a12f-3e5d951f8ead\"}");
+        }
+
         public static HttpResponseMessage CreateNullResponseMessage()
         {
             return CreateNullMessage(HttpStatusCode.BadRequest);

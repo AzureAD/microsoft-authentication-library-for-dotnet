@@ -94,12 +94,6 @@ namespace Microsoft.Identity.Client.AppConfig
 
             var authorityType = Instance.Authority.GetAuthorityType(canonicalUri);
 
-            // If the authority type is B2C, validateAuthority must be false.
-            if (authorityType == AuthorityType.B2C)
-            {
-                validateAuthority = false;
-            }
-
             return new AuthorityInfo(authorityType, canonicalUri, validateAuthority);
         }
 
@@ -169,9 +163,9 @@ namespace Microsoft.Identity.Client.AppConfig
             return new AuthorityInfo(AuthorityType.Adfs, authorityUri, validateAuthority);
         }
 
-        internal static AuthorityInfo FromB2CAuthority(string authorityUri)
+        internal static AuthorityInfo FromB2CAuthority(string authorityUri, bool validateAuthority)
         {
-            return new AuthorityInfo(AuthorityType.B2C, authorityUri, false);
+            return new AuthorityInfo(AuthorityType.B2C, authorityUri, validateAuthority);
         }
 
         internal static string GetCloudUrl(AzureCloudInstance azureCloudInstance)

@@ -31,16 +31,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.Cache;
 using Microsoft.Identity.Client.Cache.Items;
-using Microsoft.Identity.Client.Core;
-using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Test.LabInfrastructure;
 
 namespace DesktopTestApp
@@ -48,13 +44,16 @@ namespace DesktopTestApp
     public partial class MainForm : Form
     {
         private const string PublicClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
+        public const string B2CCustomDomainClientId = "64a88201-6bbd-49f5-ab46-9153798493fd ";
         private string _b2CClientId = null;
 
         private PublicClientHandler _publicClientHandler;
         private CancellationTokenSource _cancellationTokenSource;
         private readonly string[] _b2CScopes = { "https://msidlabb2c.onmicrosoft.com/msidlabb2capi/read" };
+        public static string[] B2cCustomDomainScopes = { "https://public.msidlabb2c/b2cwebapp/read" };
         private const string B2CAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_SISOPolicy/";
         private const string B2CEditProfileAuthority = "https://msidlabb2c.b2clogin.com/tfp/msidlabb2c.onmicrosoft.com/B2C_1_ProfileEditPolicy/";
+        public const string B2CCustomDomainAuthority = "https://public.msidlabb2c.com/tfp/public.msidlabb2c.com/B2C_1_signupsignin_userflow/";
 
         private bool IsForceRefreshEnabled => forceRefreshCheckBox.Checked;
 
@@ -75,8 +74,7 @@ namespace DesktopTestApp
             _publicClientHandler = new PublicClientHandler(PublicClientId, LogDelegate);
             LoadSettings();
         }
-
-
+        
         public void LogDelegate(LogLevel level, string message, bool containsPii)
         {
             Action action = null;
@@ -587,6 +585,33 @@ namespace DesktopTestApp
                 {
                     AuthenticationResult authenticationResult =
                         await _publicClientHandler.AcquireTokenSilentAsync(_b2CScopes, IsForceRefreshEnabled).ConfigureAwait(true);
+
+                    SetResultPageInfo(authenticationResult);
+                }
+                catch (Exception exc)
+                {
+                    CreateException(exc);
+                }
+            }
+        }
+        private async void B2cCustomDomain_Click(object sender, EventArgs e)
+        {
+            using (new UIProgressScope(this))
+            {
+                ClearResultPageInfo();
+
+                _publicClientHandler.InteractiveAuthority = B2CCustomDomainAuthority;
+                _publicClientHandler.ApplicationId = B2CCustomDomainClientId;
+
+                try
+                {
+                    AuthenticationResult authenticationResult =
+                        await _publicClientHandler.AcquireTokenInteractiveWithB2CAuthorityAsync(
+                            B2cCustomDomainScopes,
+                            Prompt.SelectAccount,
+                            null,
+                            null,
+                            B2CCustomDomainAuthority).ConfigureAwait(true);
 
                     SetResultPageInfo(authenticationResult);
                 }

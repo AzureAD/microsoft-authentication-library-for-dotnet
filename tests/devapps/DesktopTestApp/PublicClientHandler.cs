@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -135,6 +136,28 @@ namespace DesktopTestApp
                 CurrentUser,
                 AuthorityOverride,
                 forceRefresh).ConfigureAwait(false);
+        }
+
+        public async Task<AuthenticationResult> AcquireTokenInteractiveWithB2CAuthorityAsync(
+           IEnumerable<string> scopes,
+           Prompt uiBehavior,
+           string extraQueryParams,
+           UIParent uiParent,
+           string b2cAuthority)
+        {
+            CreateOrUpdatePublicClientApp(b2cAuthority, ApplicationId);
+            AuthenticationResult result;
+            result = await PublicClientApplication
+                   .AcquireTokenInteractive(scopes, uiParent)
+                   .WithAccount(CurrentUser)
+                   .WithPrompt(uiBehavior)
+                   .WithExtraQueryParameters(extraQueryParams)
+                   .WithB2CAuthority(b2cAuthority, true)
+                   .ExecuteAsync(CancellationToken.None)
+                   .ConfigureAwait(false);
+
+            CurrentUser = result.Account;
+            return result;
         }
 
         public void CreateOrUpdatePublicClientApp(string interactiveAuthority, string applicationId)
