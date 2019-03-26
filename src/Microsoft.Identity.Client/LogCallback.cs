@@ -27,7 +27,6 @@
 
 namespace Microsoft.Identity.Client
 {
-    using Microsoft.Identity.Client.AppConfig;
     /// <summary>
     /// Callback delegate that allows application developers to consume logs, and handle them in a custom manner. This
     /// callback is set using <see cref="AbstractApplicationBuilder{T}.WithLogging(LogCallback, LogLevel?, bool?, bool?)"/>.

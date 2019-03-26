@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Configuration options for a public client application (desktop/mobile app).

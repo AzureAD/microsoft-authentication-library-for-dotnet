@@ -33,7 +33,6 @@ using Microsoft.Identity.Client;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.AppConfig;
 using System.Threading;
 
 namespace MacCocoaApp

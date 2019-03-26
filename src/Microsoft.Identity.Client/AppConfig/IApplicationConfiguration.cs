@@ -27,7 +27,7 @@
 
 using Microsoft.Identity.Client.Internal;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     internal interface IApplicationConfiguration : IAppConfig
     {

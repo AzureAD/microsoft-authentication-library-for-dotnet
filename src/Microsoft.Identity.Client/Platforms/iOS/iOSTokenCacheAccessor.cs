@@ -172,7 +172,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
 
         public IEnumerable<MsalAccountCacheItem> GetAllAccounts()
         {
-            return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()])
+            return GetPayloadAsString(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()])
                 .Select(x => MsalAccountCacheItem.FromJsonString(x))
                 .ToList();
         }
@@ -299,7 +299,7 @@ namespace Microsoft.Identity.Client.Platforms.iOS
             RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.RefreshToken);
             RemoveByType((int)MsalCacheKeys.iOSCredentialAttrType.IdToken);
 
-            RemoveByType(MsalCacheKeys.iOSAuthorityTypeToAttrType[AuthorityType.MSSTS.ToString()]);
+            RemoveByType(MsalCacheKeys.iOSAuthorityTypeToAttrType[CacheAuthorityType.MSSTS.ToString()]);
         }
 
         public MsalAccessTokenCacheItem GetAccessToken(MsalAccessTokenCacheKey accessTokenKey)

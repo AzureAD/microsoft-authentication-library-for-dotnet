@@ -25,7 +25,7 @@
 //
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Base class for options objects with string values loadable from a configuration file

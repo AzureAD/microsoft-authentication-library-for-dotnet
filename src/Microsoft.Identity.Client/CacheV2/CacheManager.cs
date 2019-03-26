@@ -372,19 +372,19 @@ namespace Microsoft.Identity.Client.CacheV2
             return localAccountId;
         }
 
-        internal AuthorityType GetAuthorityType()
+        internal CacheV2AuthorityType GetAuthorityType()
         {
             var authority = new Uri(_authParameters.AuthorityInfo.CanonicalAuthority);
 
             string[] pathSegments = authority.GetPath().Split('/');
             if (pathSegments.Count() < 2)
             {
-                return AuthorityType.MsSts;
+                return CacheV2AuthorityType.MsSts;
             }
 
             return string.Compare(pathSegments[1], "adfs", StringComparison.OrdinalIgnoreCase) == 0
-                       ? AuthorityType.Adfs
-                       : AuthorityType.MsSts;
+                       ? CacheV2AuthorityType.Adfs
+                       : CacheV2AuthorityType.MsSts;
         }
 
         internal static string GetHomeAccountId(TokenResponse tokenResponse)

@@ -26,7 +26,6 @@
 // ------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 
 namespace Microsoft.Identity.Client.Instance

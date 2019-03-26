@@ -40,7 +40,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
         public string Environment { get; set; }
         public string Realm { get; set; }
         public string LocalAccountId { get; set; }
-        public AuthorityType AuthorityType { get; set; }
+        public CacheV2AuthorityType AuthorityType { get; set; }
         public string Username { get; set; }
         public string GivenName { get; set; }
         public string FamilyName { get; set; }
@@ -81,7 +81,7 @@ namespace Microsoft.Identity.Client.CacheV2.Schema
             string environment,
             string realm,
             string localAccountId,
-            AuthorityType authorityType,
+            CacheV2AuthorityType authorityType,
             string userName,
             string givenName,
             string familyName,

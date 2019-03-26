@@ -1,5 +1,4 @@
 ﻿using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using System;
 using System.Collections.Generic;
 using System.Linq;

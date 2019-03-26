@@ -109,10 +109,10 @@ namespace Microsoft.Identity.Client.Cache.Keys
 
         internal static readonly Dictionary<string, int> iOSAuthorityTypeToAttrType = new Dictionary<string, int>()
         {
-            {AuthorityType.AAD.ToString(), 1001},
-            {AuthorityType.MSA.ToString(), 1002},
-            {AuthorityType.MSSTS.ToString(), 1003},
-            {AuthorityType.OTHER.ToString(), 1004},
+            {CacheAuthorityType.AAD.ToString(), 1001},
+            {CacheAuthorityType.MSA.ToString(), 1002},
+            {CacheAuthorityType.MSSTS.ToString(), 1003},
+            {CacheAuthorityType.OTHER.ToString(), 1004},
         };
 
         #endregion

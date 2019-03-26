@@ -27,7 +27,7 @@
 
 namespace Microsoft.Identity.Client.CacheV2.Schema
 {
-    internal enum AuthorityType
+    internal enum CacheV2AuthorityType
     {
         MsSts,
         Adfs,

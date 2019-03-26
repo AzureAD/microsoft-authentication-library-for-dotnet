@@ -35,7 +35,6 @@ using System.Threading.Tasks;
 using msal::Microsoft.Identity.Client;
 using Microsoft.Identity.Test.LabInfrastructure;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using msal::Microsoft.Identity.Client.AppConfig;
 using System.Threading;
 
 namespace Microsoft.Identity.Test.SideBySide
