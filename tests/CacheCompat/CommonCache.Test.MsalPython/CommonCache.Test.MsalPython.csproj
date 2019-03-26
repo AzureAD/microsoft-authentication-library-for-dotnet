@@ -2,10 +2,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net461</TargetFramework>
-
-    <None Update="TestMsalPython.py">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,5 +21,11 @@
     <PackageReference Include="System.Resources.ResourceManager" version="4.0.1" />
     <PackageReference Include="System.Runtime" version="4.1.0" />
     <PackageReference Include="System.Runtime.Extensions" version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestMsalPython.py">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>
