@@ -1,4 +1,4 @@
-//----------------------------------------------------------------------
+﻿//----------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -260,7 +260,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
                 return;
             }
 
-            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AppConfig.AuthorityType.B2C &&
+            if (AuthenticationRequestParameters.AuthorityInfo.AuthorityType == AuthorityType.B2C &&
                 fromServer.UniqueTenantIdentifier.Equals(AuthenticationRequestParameters.Account.HomeAccountId.TenantId,
                     StringComparison.OrdinalIgnoreCase))
             {

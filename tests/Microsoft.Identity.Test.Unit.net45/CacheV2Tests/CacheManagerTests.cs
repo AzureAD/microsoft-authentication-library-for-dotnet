@@ -29,12 +29,9 @@ using Microsoft.Identity.Client.CacheV2;
 using Microsoft.Identity.Client.CacheV2.Impl;
 using Microsoft.Identity.Client.CacheV2.Impl.Utils;
 using Microsoft.Identity.Client.CacheV2.Schema;
-using Microsoft.Identity.Client.Internal.Requests;
-using Microsoft.Identity.Client.Instance;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Json.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AuthorityType = Microsoft.Identity.Client.CacheV2.Schema.AuthorityType;
 
 namespace Microsoft.Identity.Test.Unit.CacheV2Tests
 {

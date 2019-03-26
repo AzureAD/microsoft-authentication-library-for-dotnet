@@ -29,8 +29,6 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.ApiConfig.Executors;
 
 namespace Microsoft.Identity.Client

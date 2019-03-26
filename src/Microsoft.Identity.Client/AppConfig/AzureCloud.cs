@@ -25,7 +25,7 @@
 // 
 // ------------------------------------------------------------------------------
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// </summary>

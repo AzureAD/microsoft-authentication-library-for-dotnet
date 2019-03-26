@@ -33,6 +33,7 @@ using Microsoft.Identity.Client.ApiConfig.Parameters;
 using Microsoft.Identity.Client.Exceptions;
 using Microsoft.Identity.Client.Extensibility;
 using Microsoft.Identity.Client.TelemetryCore;
+using Microsoft.Identity.Client.ApiConfig.Executors;
 
 #if iOS
 using UIKit;
@@ -46,7 +47,7 @@ using Android.App;
 using System.Windows.Forms;
 #endif
 
-namespace Microsoft.Identity.Client.ApiConfig
+namespace Microsoft.Identity.Client
 {
     /// <summary>
     /// Builder for an Interactive token request. See https://aka.ms/msal-net-acquire-token-interactively

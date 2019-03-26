@@ -33,7 +33,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Cache.Keys;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.UI;

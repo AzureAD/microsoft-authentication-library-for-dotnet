@@ -32,7 +32,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace CommonCache.Test.MsalV2
 {

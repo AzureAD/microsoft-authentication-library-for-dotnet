@@ -29,7 +29,7 @@ using System;
 using System.Globalization;
 using Microsoft.Identity.Client.Exceptions;
 
-namespace Microsoft.Identity.Client.AppConfig
+namespace Microsoft.Identity.Client
 {
     internal class AuthorityInfo
     {

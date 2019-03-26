@@ -27,7 +27,6 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client.Http
 {

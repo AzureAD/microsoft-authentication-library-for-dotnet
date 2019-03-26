@@ -27,7 +27,7 @@
 
 namespace Microsoft.Identity.Client.Cache
 {
-    internal enum AuthorityType
+    internal enum CacheAuthorityType
     {
         AAD,
         MSA,

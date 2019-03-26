@@ -28,7 +28,6 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Identity.Client;
-using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Client.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 

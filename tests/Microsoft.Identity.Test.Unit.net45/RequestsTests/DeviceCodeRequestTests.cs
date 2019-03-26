@@ -45,7 +45,6 @@ using Microsoft.Identity.Test.Common.Core.Helpers;
 using Microsoft.Identity.Test.Common.Core.Mocks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Identity.Test.Common;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
 {

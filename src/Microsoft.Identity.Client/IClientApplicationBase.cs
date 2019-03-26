@@ -28,8 +28,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Identity.Client.ApiConfig;
-using Microsoft.Identity.Client.AppConfig;
 
 namespace Microsoft.Identity.Client
 {

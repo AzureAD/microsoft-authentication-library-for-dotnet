@@ -27,7 +27,7 @@
 
 using System;
 using System.Net.Http;
-using Microsoft.Identity.Client.AppConfig;
+using Microsoft.Identity.Client;
 
 namespace Microsoft.Identity.Test.Unit.AppConfigTests
 {
