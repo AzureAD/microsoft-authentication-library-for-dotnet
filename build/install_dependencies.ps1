@@ -34,7 +34,7 @@ if (-Not (Test-IsChocolateyInstalled)) {
   Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 }
 
-$ChocoPackages = 'chromedriver', 'vswhere'
+$ChocoPackages = 'chromedriver', 'vswhere', 'python3'
 
 ForEach ($PackageName in $ChocoPackages) {
   if (-Not (Test-ChocolateyPackageInstalled($PackageName))) {
@@ -45,3 +45,7 @@ ForEach ($PackageName in $ChocoPackages) {
 choco upgrade all -y --limit-output
 
 dotnet tool install -g dotnet-format
+
+# Install python modules
+python -m pip install --upgrade pip
+python -m pip install msal
