@@ -1085,7 +1085,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
             }
         }
 
-
         private static void ValidateB2CLoginAuthority(MockHttpAndServiceBundle harness, string authority, bool validateAuthority)
         {
             var app = PublicClientApplicationBuilder
