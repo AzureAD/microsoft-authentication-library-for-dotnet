@@ -37,14 +37,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
     {
 #if NET_CORE
         [TestMethod]
-        public void UIParent_ThrowsOnNetCore()
-        {
-            AssertException.Throws<PlatformNotSupportedException>(() => new UIParent());
-            AssertException.Throws<PlatformNotSupportedException>(() => new UIParent("parent", true));
-
-        }
-
-        [TestMethod]
         public void UIParent_IsSystemAvailable()
         {
              Assert.IsFalse(UIParent.IsSystemWebviewAvailable());
@@ -52,34 +44,6 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 #endif
 
 #if DESKTOP
-        [TestMethod]
-        public void UIParent_EmptyCtor()
-        {
-            UIParent uiParent = new UIParent();
-
-            Assert.IsFalse(uiParent.UseHiddenBrowser);
-            Assert.IsNotNull(uiParent.CoreUIParent);
-            Assert.IsNull(uiParent.CoreUIParent.OwnerWindow);
-            Assert.IsFalse(uiParent.CoreUIParent.UseHiddenBrowser);
-
-        }
-
-        [TestMethod]
-        public void UIParent_NetstandardCtor()
-        {
-            object parent = "parent";
-            UIParent uiParent = new UIParent(parent, true);
-
-            Assert.IsFalse(uiParent.UseHiddenBrowser);
-            Assert.IsFalse(uiParent.CoreUIParent.UseHiddenBrowser);
-
-            uiParent.UseHiddenBrowser = true;
-
-            Assert.IsTrue(uiParent.UseHiddenBrowser);
-            Assert.IsTrue(uiParent.CoreUIParent.UseHiddenBrowser);
-            Assert.AreSame(parent, uiParent.CoreUIParent.OwnerWindow);
-        }
-
         [TestMethod]
         public void IsSystemWebview()
         {

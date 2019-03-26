@@ -27,7 +27,7 @@
 
 using System;
 
-namespace Microsoft.Identity.Client
+namespace Microsoft.Identity.Client.Internal
 {
 #if !ANDROID_BUILDTIME && !iOS_BUILDTIME && !WINDOWS_APP_BUILDTIME && !MAC_BUILDTIME // Hide confidential client on mobile platforms
 
@@ -39,21 +39,20 @@ namespace Microsoft.Identity.Client
     /// This class has one constructor for each case.
     /// These credentials are added in the application registration portal (in the secret section).
     /// </summary>
-    public sealed class ClientCredential
+    internal sealed class ClientCredentialWrapper
     {
         /// <summary>
-        /// Constructor of client (application) credentials from a <see cref="ClientAssertionCertificate"/>
+        /// Constructor of client (application) credentials from a <see cref="ClientAssertionCertificateWrapper"/>
         /// </summary>
         /// <param name="certificate">contains information about the certificate previously shared with AAD at application
         /// registration to prove the identity of the application (the client) requesting the tokens.</param>
-        public ClientCredential(ClientAssertionCertificate certificate)
+        public ClientCredentialWrapper(ClientAssertionCertificateWrapper certificate)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
-
             Certificate = certificate;
         }
 
-        internal ClientAssertionCertificate Certificate { get; private set; }
+        internal ClientAssertionCertificateWrapper Certificate { get; private set; }
         internal string Assertion { get; set; }
         internal long ValidTo { get; set; }
         internal bool ContainsX5C { get; set; }
@@ -64,7 +63,7 @@ namespace Microsoft.Identity.Client
         /// </summary>
         /// <param name="secret">Secret string previously shared with AAD at application registration to prove the identity
         /// of the application (the client) requesting the tokens.</param>
-        public ClientCredential(string secret)
+        public ClientCredentialWrapper(string secret)
         {
             ConfidentialClientApplication.GuardMobileFrameworks();
 

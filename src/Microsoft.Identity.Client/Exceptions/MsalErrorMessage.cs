@@ -273,5 +273,7 @@ namespace Microsoft.Identity.Client.Exceptions
         public const string BrokerNotSupportedOnThisPlatform = "Broker is only supported on mobile platforms (Android and iOS). See https://aka.ms/msal-brokers for details";
 
         public const string MsalExceptionFailedToParse = "Attempted to deserialize an MsalException but the type was unknown.";
+
+        public const string AkaMsmsalnet3BreakingChanges = "See https://aka.ms/msal-net-3-breaking-changes";
     }
 }

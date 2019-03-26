@@ -28,6 +28,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonCache.Test.Common;
 using Microsoft.Identity.Client;
@@ -75,13 +76,23 @@ namespace CommonCache.Test.MsalV2
                 IEnumerable<IAccount> accounts = await app.GetAccountsAsync().ConfigureAwait(false);
                 try
                 {
-                    var result = await app.AcquireTokenSilentAsync(scopes, accounts.FirstOrDefault(), app.Authority, false).ConfigureAwait(false);
+                    var result = await app
+                        .AcquireTokenSilent(scopes, accounts.FirstOrDefault())
+                        .WithAuthority(app.Authority)
+                        .WithForceRefresh(false)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+
                     Console.WriteLine($"got token for '{result.Account.Username}' from the cache");
                     return new CacheExecutorResults(result.Account.Username, true);
                 }
                 catch (MsalUiRequiredException)
                 {
-                    var result = await app.AcquireTokenByUsernamePasswordAsync(scopes, options.Username, options.UserPassword.ToSecureString()).ConfigureAwait(false);
+                    var result = await app
+                        .AcquireTokenByUsernamePassword(scopes, options.Username, options.UserPassword.ToSecureString())
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
+
                     Console.WriteLine($"got token for '{result.Account.Username}' without the cache");
                     return new CacheExecutorResults(result.Account.Username, false);
                 }

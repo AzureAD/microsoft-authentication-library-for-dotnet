@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -104,7 +105,7 @@ namespace Microsoft.Identity.Test.Unit
                     ResponseMessage = MockHelpers.CreateSuccessTokenResponseMessage()
                 });
 
-                AuthenticationResult result = app.AcquireTokenAsync(MsalTestConstants.Scope).Result;
+                AuthenticationResult result = app.AcquireTokenInteractive(MsalTestConstants.Scope, null).ExecuteAsync(CancellationToken.None).Result;
 
                 // make sure that all cache entities are stored with "preferred_cache" environment
                 // (it is taken from metadata in instance discovery response)
@@ -113,10 +114,14 @@ namespace Microsoft.Identity.Test.Unit
                 // silent request targeting at, should return at from cache for any environment alias
                 foreach (var envAlias in MsalTestConstants.ProdEnvAliases)
                 {
-                    result = await app.AcquireTokenSilentAsync(MsalTestConstants.Scope,
-                        app.GetAccountsAsync().Result.First(),
-                        string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid),
-                        false).ConfigureAwait(false);
+                    result = await app
+                        .AcquireTokenSilent(
+                            MsalTestConstants.Scope,
+                            app.GetAccountsAsync().Result.First())
+                        .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
+                        .WithForceRefresh(false)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
 
                     Assert.IsNotNull(result);
                 }
@@ -150,15 +155,13 @@ namespace Microsoft.Identity.Test.Unit
 
                     try
                     {
-                        result = await app.AcquireTokenSilentAsync(
-                                     MsalTestConstants.ScopeForAnotherResource,
-                                     (await app.GetAccountsAsync().ConfigureAwait(false)).First(),
-                                     string.Format(
-                                         CultureInfo.InvariantCulture,
-                                         "https://{0}/{1}/",
-                                         envAlias,
-                                         MsalTestConstants.Utid),
-                                     false).ConfigureAwait(false);
+                        result = await app
+                            .AcquireTokenSilent(
+                                MsalTestConstants.ScopeForAnotherResource,
+                                (await app.GetAccountsAsync().ConfigureAwait(false)).First())
+                            .WithAuthority(string.Format(CultureInfo.InvariantCulture, "https://{0}/{1}/", envAlias, MsalTestConstants.Utid))
+                            .WithForceRefresh(false)
+                            .ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
                     }
                     catch (MsalUiRequiredException)
                     {

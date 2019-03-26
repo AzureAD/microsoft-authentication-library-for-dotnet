@@ -107,6 +107,11 @@ namespace Microsoft.Identity.Client.Exceptions
             return exception;
         }
 
+        public static NotImplementedException CreateMsalNet3BreakingChangesException()
+        {
+            return new NotImplementedException("See https://aka.ms/msal-net-3-breaking-changes");
+        }
+
         private static void UpdateException(HttpResponse httpResponse, OAuth2ResponseBase oAuth2Response, MsalServiceException exception)
         {
             exception.ResponseBody = httpResponse?.Body;

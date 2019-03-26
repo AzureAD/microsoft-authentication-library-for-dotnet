@@ -33,6 +33,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Exceptions;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.PlatformsCommon.Interfaces;
 using Microsoft.Identity.Client.Utils;
 
@@ -92,11 +93,11 @@ namespace Microsoft.Identity.Client.Platforms.net45
         /// <inheritdoc />
         public byte[] SignWithCertificate(string message, X509Certificate2 certificate)
         {
-            if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificate.MinKeySizeInBits)
+            if (certificate.PublicKey.Key.KeySize < ClientAssertionCertificateWrapper.MinKeySizeInBits)
             {
                 throw new ArgumentOutOfRangeException(nameof(certificate),
                     string.Format(CultureInfo.InvariantCulture, MsalErrorMessage.CertificateKeySizeTooSmallTemplate,
-                        ClientAssertionCertificate.MinKeySizeInBits));
+                        ClientAssertionCertificateWrapper.MinKeySizeInBits));
             }
 
             byte[] messageBytes = Encoding.UTF8.GetBytes(message);

@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+﻿//------------------------------------------------------------------------------
 //
 // Copyright (c) Microsoft Corporation.
 // All rights reserved.
@@ -27,8 +27,10 @@
 using System;
 using System.Diagnostics;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
+using Microsoft.Identity.Client.AppConfig;
 using Microsoft.Identity.Test.Common;
 using Microsoft.Identity.Test.Integration.Infrastructure;
 using Microsoft.Identity.Test.LabInfrastructure;
@@ -48,7 +50,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     [TestCategory(TestCategories.LabAccess)]
     public class DeviceCodeFlow
     {
-        private static readonly string[] Scopes = { "User.Read" };
+        private static readonly string[] s_scopes = { "User.Read" };
         private IWebDriver _seleniumDriver;
 
         #region MSTest Hooks
@@ -84,13 +86,13 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
             LabResponse labResponse = LabUserHelper.GetDefaultUser();
 
             Trace.WriteLine("Calling AcquireTokenWithDeviceCodeAsync");
-            PublicClientApplication pca = new PublicClientApplication(labResponse.AppId);
-            var result = await pca.AcquireTokenWithDeviceCodeAsync(Scopes, deviceCodeResult =>
+            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId).BuildConcrete();
+            var result = await pca.AcquireTokenWithDeviceCode(s_scopes, deviceCodeResult =>
             {
                 RunAutomatedDeviceCodeFlow(deviceCodeResult, labResponse.User);
 
                 return Task.FromResult(0);
-            }).ConfigureAwait(false);
+            }).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
             Trace.WriteLine("Running asserts");
 
