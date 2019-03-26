@@ -53,8 +53,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         {
             if (!_clientParameters.ForceRefresh && CacheManager.HasCache)
             {
-                var msalAccessTokenItem =
-                    await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
+                var msalAccessTokenItem = await CacheManager.FindAccessTokenAsync().ConfigureAwait(false);
                 if (msalAccessTokenItem != null)
                 {
                     return new AuthenticationResult(msalAccessTokenItem, null);

@@ -30,13 +30,14 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.Identity.Client.Core;
 using Microsoft.Identity.Client.Extensibility;
+using Microsoft.Identity.Client.UI;
 
 namespace Microsoft.Identity.Client.ApiConfig.Parameters
 {
     internal class AcquireTokenInteractiveParameters : IAcquireTokenParameters
     {
         public Prompt Prompt { get; set; } = Prompt.SelectAccount;
-        public OwnerUiParent UiParent { get; } = new OwnerUiParent();
+        public CoreUIParent UiParent { get; } = new CoreUIParent();
         public IEnumerable<string> ExtraScopesToConsent { get; set; } = new List<string>();
         public bool UseEmbeddedWebView { get; set; }
         public string LoginHint { get; set; }

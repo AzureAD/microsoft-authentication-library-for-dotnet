@@ -40,6 +40,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.RequestsTests
@@ -220,9 +221,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Act
                 var exception = AssertException.TaskThrows<MsalClientException>(
-                    async () => await app.AcquireTokenByIntegratedWindowsAuthAsync(
-                            MsalTestConstants.Scope,
-                            MsalTestConstants.User.Username)
+                    async () => await app
+                        .AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
+                        .WithUsername(MsalTestConstants.User.Username)
+                        .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false));
 
                 // Assert
@@ -260,9 +262,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Act
                 var exception = AssertException.TaskThrows<MsalClientException>(
-                    async () => await app.AcquireTokenByIntegratedWindowsAuthAsync(
-                            MsalTestConstants.Scope,
-                            MsalTestConstants.User.Username)
+                    async () => await app
+                        .AcquireTokenByIntegratedWindowsAuth(MsalTestConstants.Scope)
+                        .WithUsername(MsalTestConstants.User.Username)
+                        .ExecuteAsync(CancellationToken.None)
                         .ConfigureAwait(false));
 
                 // Assert
@@ -334,10 +337,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
-                var result = await app.AcquireTokenByUsernamePasswordAsync(
+                var result = await app.AcquireTokenByUsernamePassword(
                     MsalTestConstants.Scope,
                     MsalTestConstants.User.Username,
-                    _secureString).ConfigureAwait(false);
+                    _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
@@ -385,10 +388,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token, Mex parser fails
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check exception message
                 Assert.AreEqual("Parsing WS metadata exchange failed", result.Message);
@@ -422,10 +425,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token, endpoint not found
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check exception message
                 Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
@@ -456,10 +459,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual("Response status code does not indicate success: 404 (NotFound).", result.Message);
@@ -495,10 +498,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        str).ConfigureAwait(false));
+                        str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(MsalError.ParsingWsTrustResponseFailed, result.ErrorCode);
@@ -538,10 +541,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(MsalError.InvalidRequest, result.ErrorCode);
@@ -590,10 +593,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        _secureString).ConfigureAwait(false));
+                        _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check inner exception
                 Assert.AreEqual(MsalError.InvalidRequest, result.ErrorCode);
@@ -630,10 +633,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
                                                         .WithHttpManager(httpManager)
                                                         .BuildConcrete();
 
-                var result = await app.AcquireTokenByUsernamePasswordAsync(
+                var result = await app.AcquireTokenByUsernamePassword(
                     MsalTestConstants.Scope,
                     MsalTestConstants.User.Username,
-                    _secureString).ConfigureAwait(false);
+                    _secureString).ExecuteAsync(CancellationToken.None).ConfigureAwait(false);
 
                 Assert.IsNotNull(result);
                 Assert.AreEqual("some-access-token", result.AccessToken);
@@ -660,10 +663,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        str).ConfigureAwait(false));
+                        str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check error code
                 Assert.AreEqual(MsalError.PasswordRequiredForManagedUserError, result.ErrorCode);
@@ -706,10 +709,10 @@ namespace Microsoft.Identity.Test.Unit.RequestsTests
 
                 // Call acquire token
                 var result = AssertException.TaskThrows<MsalException>(
-                    async () => await app.AcquireTokenByUsernamePasswordAsync(
+                    async () => await app.AcquireTokenByUsernamePassword(
                         MsalTestConstants.Scope,
                         MsalTestConstants.User.Username,
-                        str).ConfigureAwait(false));
+                        str).ExecuteAsync(CancellationToken.None).ConfigureAwait(false));
 
                 // Check error code
                 Assert.AreEqual(MsalError.InvalidGrantError, result.ErrorCode);

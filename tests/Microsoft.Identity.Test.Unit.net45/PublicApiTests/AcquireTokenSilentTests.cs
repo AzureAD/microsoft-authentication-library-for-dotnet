@@ -38,6 +38,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.Identity.Test.Unit.PublicApiTests
@@ -62,14 +63,10 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                 .Create(MsalTestConstants.ClientId)
                 .Build();
 
-            var ex = AssertException.TaskThrows<MsalUiRequiredException>(
-                () => app.AcquireTokenSilentAsync(MsalTestConstants.Scope.ToArray(), null));
-            Assert.AreEqual(MsalUiRequiredException.UserNullError, ex.ErrorCode);
-
             AssertException.TaskThrows<ArgumentNullException>(
              () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (string)null).ExecuteAsync());
 
-            ex = AssertException.TaskThrows<MsalUiRequiredException>(
+            var ex = AssertException.TaskThrows<MsalUiRequiredException>(
               () => app.AcquireTokenSilent(MsalTestConstants.Scope.ToArray(), (IAccount)null).ExecuteAsync());
             Assert.AreEqual(MsalUiRequiredException.UserNullError, ex.ErrorCode);
         }
@@ -85,12 +82,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
             try
             {
-                AuthenticationResult result = await app.AcquireTokenSilentAsync(
-                                                  MsalTestConstants.Scope.ToArray(),
-                                                  new Account(
-                                                      MsalTestConstants.UserIdentifier,
-                                                      MsalTestConstants.DisplayableId,
-                                                      null)).ConfigureAwait(false);
+                AuthenticationResult result = await app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
             }
             catch (MsalUiRequiredException exc)
             {
@@ -130,9 +127,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                         MsalTestConstants.ClientId,
                         MsalTestConstants.ScopeForAnotherResourceStr));
 
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.ScopeForAnotherResource.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null));
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.ScopeForAnotherResource.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
@@ -163,9 +162,11 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null));
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
@@ -205,9 +206,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null));
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .ExecuteAsync(CancellationToken.None);
+
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
                 Assert.AreEqual(MsalTestConstants.DisplayableId, result.Account.Username);
@@ -237,11 +241,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 httpManager.AddInstanceDiscoveryMockHandler();
 
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    app.Authority,
-                    false);
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(app.Authority, false)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
@@ -357,11 +363,12 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    null,
-                    true);
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
@@ -401,11 +408,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // ForceRefresh=true, so skip cache lookup of Access Token
                 // Use refresh token to acquire a new Access Token
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityCommonTenant,
-                    true);
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
@@ -426,11 +435,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
-                Task<AuthenticationResult> task2 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityGuidTenant2,
-                    true);
+                Task<AuthenticationResult> task2 = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant2)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None);
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
@@ -456,11 +467,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
-                Task<AuthenticationResult> task3 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityGuidTenant,
-                    true);
+                Task<AuthenticationResult> task3 = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result3 = task3.Result;
                 Assert.IsNotNull(result3);
@@ -481,11 +494,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
-                Task<AuthenticationResult> task4 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityGuidTenant,
-                    true);
+                Task<AuthenticationResult> task4 = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
+                    .WithForceRefresh(true)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result4 = task4.Result;
                 Assert.IsNotNull(result4);
@@ -525,11 +540,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                             MsalTestConstants.Scope.ToArray())
                     });
 
-                Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityCommonTenant,
-                    false);
+                Task<AuthenticationResult> task = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityCommonTenant)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result = task.Result;
                 Assert.IsNotNull(result);
@@ -553,11 +570,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
-                Task<AuthenticationResult> task2 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityGuidTenant2,
-                    false);
+                Task<AuthenticationResult> task2 = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant2)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result2 = task2.Result;
                 Assert.IsNotNull(result2);
@@ -581,11 +600,13 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
 
                 // Same user, scopes, clientId, but different authority
                 // Should result in new AccessToken, but same refresh token
-                Task<AuthenticationResult> task3 = app.AcquireTokenSilentAsync(
-                    MsalTestConstants.Scope.ToArray(),
-                    new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                    MsalTestConstants.AuthorityGuidTenant,
-                    false);
+                Task<AuthenticationResult> task3 = app
+                    .AcquireTokenSilent(
+                        MsalTestConstants.Scope.ToArray(),
+                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                    .WithAuthority(MsalTestConstants.AuthorityGuidTenant)
+                    .WithForceRefresh(false)
+                    .ExecuteAsync(CancellationToken.None);
 
                 AuthenticationResult result3 = task3.Result;
                 Assert.IsNotNull(result3);
@@ -620,11 +641,14 @@ namespace Microsoft.Identity.Test.Unit.PublicApiTests
                     });
                 try
                 {
-                    Task<AuthenticationResult> task = app.AcquireTokenSilentAsync(
-                        MsalTestConstants.CacheMissScope,
-                        new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null),
-                        app.Authority,
-                        false);
+                    Task<AuthenticationResult> task = app
+                        .AcquireTokenSilent(
+                            MsalTestConstants.CacheMissScope,
+                            new Account(MsalTestConstants.UserIdentifier, MsalTestConstants.DisplayableId, null))
+                        .WithAuthority(app.Authority)
+                        .WithForceRefresh(false)
+                        .ExecuteAsync(CancellationToken.None);
+
                     AuthenticationResult result = task.Result;
                     Assert.Fail("MsalUiRequiredException was expected");
                 }

@@ -36,6 +36,8 @@ using UIKit;
 using AppKit;
 #endif
 
+using System.Threading;
+
 namespace Microsoft.Identity.Client.UI
 {
     internal class CoreUIParent //TODO bogavril: break this class up into platform specific classes or merge with UIParent (probably merge!)
@@ -45,6 +47,7 @@ namespace Microsoft.Identity.Client.UI
         }
 
         internal bool UseEmbeddedWebview { get; set; }
+        internal SynchronizationContext SynchronizationContext { get; set; }
 
 #if MAC
         /// <summary>

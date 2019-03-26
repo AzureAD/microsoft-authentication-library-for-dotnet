@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Cache;
+using Microsoft.Identity.Client.Internal;
 using Microsoft.Identity.Client.OAuth2;
 using Microsoft.Identity.Client.Utils;
 using Microsoft.Identity.Test.Common.Core.Mocks;
@@ -164,8 +165,8 @@ namespace Microsoft.Identity.Test.Unit
         public const string BrokerClaims = "testClaims";
 
 #if !ANDROID && !iOS && !WINDOWS_APP
-        public static readonly ClientCredential OnPremiseCredentialWithSecret = new ClientCredential(ClientSecret);
-        public static readonly ClientCredential CredentialWithSecret = new ClientCredential(ClientSecret);
+        public static readonly ClientCredentialWrapper OnPremiseCredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
+        public static readonly ClientCredentialWrapper CredentialWithSecret = new ClientCredentialWrapper(ClientSecret);
 #endif
     }
 }

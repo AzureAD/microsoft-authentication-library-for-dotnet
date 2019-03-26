@@ -27,6 +27,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.AppConfig;
@@ -80,10 +81,11 @@ namespace AutomationApp
 
             string[] scope = { "mail.read" };
 
-            AuthenticationResult result =
-                await
-                    _publicClientApplication.AcquireTokenAsync(scope)
-                        .ConfigureAwait(false);
+            AuthenticationResult result = await _publicClientApplication
+                .AcquireTokenInteractive(scope, null)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
             CurrentUser = result.Account;
             return result;
         }
@@ -94,8 +96,9 @@ namespace AutomationApp
 
             string[] scope = { "mail.read" };
 
-            AuthenticationResult result = await
-                _publicClientApplication.AcquireTokenSilentAsync(scope, CurrentUser)
+            AuthenticationResult result = await _publicClientApplication
+                .AcquireTokenSilent(scope, CurrentUser)
+                .ExecuteAsync(CancellationToken.None)
                 .ConfigureAwait(false);
 
             return result;

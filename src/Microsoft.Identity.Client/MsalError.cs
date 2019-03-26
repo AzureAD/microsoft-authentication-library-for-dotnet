@@ -191,6 +191,7 @@ namespace Microsoft.Identity.Client
         public const string IntegratedWindowsAuthNotSupportedForManagedUser = "integrated_windows_auth_not_supported_managed_user";
 
         /// <summary>
+        /// TODO: UPDATE DOCUMENTATION!
         /// On Android, the UIParent constructor with an Activiy parameter must be used. See https://aka.ms/msal-interactive-android
         /// </summary>
         public const string ActivityRequired = "activity_required";

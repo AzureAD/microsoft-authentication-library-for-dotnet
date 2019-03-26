@@ -26,8 +26,8 @@
 //------------------------------------------------------------------------------
 
 using System;
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
+using System.ComponentModel;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -39,15 +39,15 @@ namespace Microsoft.Identity.Client
     /// </summary>     
     public sealed class UIParent
     {
-        internal CoreUIParent CoreUIParent { get; }
-
         /// <summary>
         /// Default constructor. Will throw a PlatformNotSupported exception on .netcore because .netcore does not support Interactive Flows. 
         /// </summary>
         /// <remarks>Consider using Device Code Flow https://aka.ms/msal-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent()
         {
-            ThrowPlatformNotSupportedException();
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         /// <summary>
@@ -55,9 +55,11 @@ namespace Microsoft.Identity.Client
         /// Will throw a PlatformNotSupported exception on .netcore because .netcore does not support Interactive Flows. 
         /// </summary>
         /// <remarks>Consider using Device Code Flow https://aka.ms/msal-device-code-flow or Integrated Windows Auth https://aka.ms/msal-net-iwa </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent(object parent, bool useEmbeddedWebview)
         {
-            ThrowPlatformNotSupportedException();
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         /// <summary>
@@ -67,13 +69,6 @@ namespace Microsoft.Identity.Client
         public static bool IsSystemWebviewAvailable() // This is part of the NetStandard "interface" 
         {
             return false;
-        }
-
-        private static void ThrowPlatformNotSupportedException()
-        {
-            throw new PlatformNotSupportedException("Interactive Authentication flows are not supported on .net core. " +
-                                                    "Consider using Device Code Flow https://aka.ms/msal-device-code-flow or " +
-                                                    "Integrated Windows Auth https://aka.ms/msal-net-iwa");
         }
     }
 #endif

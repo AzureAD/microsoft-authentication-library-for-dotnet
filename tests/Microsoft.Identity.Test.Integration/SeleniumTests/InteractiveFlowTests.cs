@@ -45,7 +45,7 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
     public class InteractiveFlowTests
     {
         private readonly TimeSpan _interactiveAuthTimeout = TimeSpan.FromMinutes(1);
-        private static readonly string[] _scopes = new[] { "user.read" };
+        private static readonly string[] s_scopes = new[] { "user.read" };
 
         #region MSTest Hooks
         /// <summary>
@@ -158,16 +158,18 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
         private async Task RunTestForUserAsync(LabResponse labResponse)
         {
-            PublicClientApplication pca = PublicClientApplicationBuilder.Create(labResponse.AppId)
-                                                                        .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
-                                                                        .BuildConcrete();
+            var pca = PublicClientApplicationBuilder
+                .Create(labResponse.AppId)
+                .WithRedirectUri(SeleniumWebUI.FindFreeLocalhostRedirectUri())
+                .Build();
 
             Trace.WriteLine("Part 1 - Acquire a token interactively, no login hint");
             AuthenticationResult result = await pca
-                .AcquireTokenInteractive(_scopes, null)
+                .AcquireTokenInteractive(s_scopes, null)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, false))
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
+
             IAccount account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
             Trace.WriteLine("Part 2 - Clear the cache");
@@ -176,15 +178,20 @@ namespace Microsoft.Identity.Test.Integration.SeleniumTests
 
             Trace.WriteLine("Part 3 - Acquire a token interactively again, with login hint");
             result = await pca
-                .AcquireTokenInteractive(_scopes, null)
+                .AcquireTokenInteractive(s_scopes, null)
                 .WithCustomWebUi(CreateSeleniumCustomWebUI(labResponse.User, true))
                 .WithLoginHint(labResponse.User.HomeUPN)
                 .ExecuteAsync(new CancellationTokenSource(_interactiveAuthTimeout).Token)
                 .ConfigureAwait(false);
+
             account = await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
 
             Trace.WriteLine("Part 4 - Acquire a token silently");
-            result = await pca.AcquireTokenSilentAsync(_scopes, account).ConfigureAwait(false);
+            result = await pca
+                .AcquireTokenSilent(s_scopes, account)
+                .ExecuteAsync(CancellationToken.None)
+                .ConfigureAwait(false);
+
             await MsalAssert.AssertSingleAccountAsync(labResponse, pca, result).ConfigureAwait(false);
         }
 

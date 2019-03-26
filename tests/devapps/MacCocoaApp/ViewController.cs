@@ -34,6 +34,7 @@ using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.AppConfig;
+using System.Threading;
 
 namespace MacCocoaApp
 {
@@ -41,7 +42,7 @@ namespace MacCocoaApp
     {
         private const string ClientId = "0615b6ca-88d4-4884-8729-b178178f7c27";
         private const string Authority = "https://login.microsoftonline.com/common";
-        private readonly string[] Scopes = new[] { "User.Read" };
+        private readonly string[] _scopes = new[] { "User.Read" };
         // Consider having a single object for the entire app.
         private readonly IPublicClientApplication _pca;
 
@@ -107,7 +108,10 @@ namespace MacCocoaApp
                 {
                     try
                     {
-                        result = await _pca.AcquireTokenSilentAsync(Scopes, firstExistingAccount).ConfigureAwait(false);
+                        result = await _pca
+                            .AcquireTokenSilent(_scopes, firstExistingAccount)
+                            .ExecuteAsync(CancellationToken.None)
+                            .ConfigureAwait(false);
                     }
                     catch (MsalUiRequiredException)
                     {
@@ -117,7 +121,10 @@ namespace MacCocoaApp
 
                 if (result == null)
                 {
-                    result = await _pca.AcquireTokenAsync(Scopes).ConfigureAwait(false);
+                    result = await _pca
+                        .AcquireTokenInteractive(_scopes, null)
+                        .ExecuteAsync(CancellationToken.None)
+                        .ConfigureAwait(false);
                 }
 
                 UpdateStatus($"Access token acquired: {result.AccessToken}");
@@ -166,13 +173,16 @@ namespace MacCocoaApp
             try
             {
                 // Left out checking the token cache for clarity
-                var result = await _pca.AcquireTokenWithDeviceCodeAsync(
-                                   Scopes,
-                                   deviceCodeResult =>
-                                   {
-                                       UpdateStatus(deviceCodeResult.Message);
-                                       return Task.FromResult(0);
-                                   }).ConfigureAwait(false);
+                var result = await _pca
+                    .AcquireTokenWithDeviceCode(
+                        _scopes,
+                        deviceCodeResult =>
+                        {
+                            UpdateStatus(deviceCodeResult.Message);
+                            return Task.FromResult(0);
+                        })
+                    .ExecuteAsync(CancellationToken.None)
+                    .ConfigureAwait(false);
 
                 UpdateStatus($"Access token acquired: {result.AccessToken}");
             }

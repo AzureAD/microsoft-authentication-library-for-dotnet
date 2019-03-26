@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client.ApiConfig.Parameters;
@@ -63,6 +64,15 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
             AcquireTokenByIntegratedWindowsAuthParameters integratedWindowsAuthParameters,
             CancellationToken cancellationToken)
         {
+#if NET_CORE
+            if (string.IsNullOrWhiteSpace(integratedWindowsAuthParameters.Username))
+            {
+                throw new PlatformNotSupportedException("AcquireTokenByIntegratedWindowsAuth is not supported on .net core without adding .WithUsername() because " +
+                    "MSAL cannot determine the username (UPN) of the currently logged in user. Please use .WithUsername() before calling ExecuteAsync(). " +
+                    "For more details see https://aka.ms/msal-net-iwa");
+            }
+#endif
+
             LogVersionInfo();
 
             var requestParams = _publicClientApplication.CreateRequestParameters(commonParameters, _publicClientApplication.UserTokenCacheInternal);
@@ -100,7 +110,7 @@ namespace Microsoft.Identity.Client.ApiConfig.Executors
                 return new CustomWebUiHandler(interactiveParameters.CustomWebUi);
             }
 
-            var coreUiParent = interactiveParameters.UiParent.CoreUiParent;
+            var coreUiParent = interactiveParameters.UiParent;
 
 #if ANDROID || iOS
             coreUiParent.UseEmbeddedWebview = interactiveParameters.UseEmbeddedWebView;

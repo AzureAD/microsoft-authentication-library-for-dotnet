@@ -25,8 +25,9 @@
 //
 //------------------------------------------------------------------------------
 
-using Microsoft.Identity.Client.Internal;
-using Microsoft.Identity.Client.UI;
+using System;
+using System.ComponentModel;
+using Microsoft.Identity.Client.Exceptions;
 
 namespace Microsoft.Identity.Client
 {
@@ -36,15 +37,14 @@ namespace Microsoft.Identity.Client
     /// </summary> 
     public sealed class UIParent
     {
-        internal CoreUIParent CoreUIParent { get; }
-
         /// <summary>
         /// Default constructor.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent()
         {
-            CoreUIParent = new CoreUIParent();
-            CoreUIParent.UseEmbeddedWebview = true;
+            throw new NotImplementedException(MsalErrorMessage.AkaMsmsalnet3BreakingChanges);
         }
 
         #if WINDOWS_APP_RUNTIME
@@ -56,25 +56,13 @@ namespace Microsoft.Identity.Client
         /// <remarks>This constructor is only avaiable at runtime, to provide support for NetStandard</remarks>
         /// <param name="parent">Ignored on UWP</param>
         /// <param name="useEmbeddedWebview">UWP supports only embeddedWebview</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete(MsalErrorMessage.AkaMsmsalnet3BreakingChanges, true)]
         public UIParent(object parent, bool useEmbeddedWebview) 
             : this()
         {
         }
 
         #endif
-
-        // hidden webview can be used in both WinRT and desktop applications.
-        internal bool UseHiddenBrowser
-        {
-            get => CoreUIParent.UseHiddenBrowser;
-            set => CoreUIParent.UseHiddenBrowser = value;
-        }
-
-        internal bool UseCorporateNetwork
-        {
-            get => CoreUIParent.UseCorporateNetwork;
-            set => CoreUIParent.UseCorporateNetwork = value;
-        }
-      
     }
 }

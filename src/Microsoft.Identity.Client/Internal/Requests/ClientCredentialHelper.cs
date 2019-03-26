@@ -44,7 +44,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         ///     values against incoming request parameters.
         /// </summary>
         /// <returns>Returns true if the previously cached client assertion is valid</returns>
-        public static bool ValidateClientAssertion(ClientCredential clientCredential, AuthorityEndpoints endpoints, bool sendX5C)
+        public static bool ValidateClientAssertion(ClientCredentialWrapper clientCredential, AuthorityEndpoints endpoints, bool sendX5C)
         {
             if (clientCredential == null)
             {
@@ -70,7 +70,7 @@ namespace Microsoft.Identity.Client.Internal.Requests
         public static Dictionary<string, string> CreateClientCredentialBodyParameters(
             ICoreLogger logger, 
             ICryptographyManager cryptographyManager, 
-            ClientCredential clientCredential,
+            ClientCredentialWrapper clientCredential,
             string clientId,
             AuthorityEndpoints endpoints, 
             bool sendX5C)
